@@ -1,6 +1,6 @@
 # 2024 1月 报告
 
-爱丽丝计划[1.0.1](https://github.com/schombert/Project-Alice/releases/download/v1.0.1/1.0.1.zip)版已可用。
+爱丽丝计划[1.0.1](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.1/1.0.1.zip)版已可用。
 
 ## V2复刻？
 
@@ -16,7 +16,7 @@
 
 Leaf初期使些模型得到渲染。
 
-在几个月内，我个人想只贡献修复技术性错误。部分原因是我等社区对爱丽丝计划作决定，再大改变游戏。上月我提到，回顾[2023年12月报](https://github.com/schombert/Project-Alice/blob/main/docs/Devlogs/december/december_cn.md)社区改革。
+在几个月内，我个人想只贡献修复技术性错误。部分原因是我等社区对爱丽丝计划作决定，再大改变游戏。上月我提到，回顾[2023年12月报](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/december/december_cn.md)社区改革。
 
 若你在做mod，即使很小，但我们很乐意帮你托管，我们也欢迎更多V2 MODs兼容补丁，而一些MOD，比如GFM如此复杂，甚至还需要懂GFM的人帮忙做兼容补丁（我们认为GFM有点奇怪而不懂，所以不知道咋诊断它咋发生。），一般，做兼容补丁很简单。首先，你试图修复用mod创建场景的启动器错误报告。然后，当修好时，玩一下，看它好了？若你能确定它的原因与V2行为的不同，可将这些报告给我们，可能修好了，或给兼容补丁提供些新的变通方法。
 

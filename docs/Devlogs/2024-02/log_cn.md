@@ -4,7 +4,7 @@
 
 ## 1.0.9
 
-[1.0.9版本](https://github.com/schombert/Project-Alice/releases/download/v1.0.9/1.0.9.7z)可用！
+[1.0.9版本](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.9/1.0.9.7z)可用！
 
 ## mod扩展和经济
 

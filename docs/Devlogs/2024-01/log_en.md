@@ -4,7 +4,7 @@ On to bigger and better things
 
 ## 1.0 Has Arrived
 
-Version [1.0.1](https://github.com/schombert/Project-Alice/releases/download/v1.0.1/1.0.1.zip) of Project Alice is now available.
+Version [1.0.1](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.1/1.0.1.zip) of Project Alice is now available.
 
 ## A Victoria 2 Clone?
 

@@ -1,6 +1,6 @@
 # 截至2023年7月的进展
 
-本文姗姗来迟，为了准备公开[演示版本](https://github.com/schombert/Project-Alice/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip)，所以优先做这事了，但迟到好过没有。
+本文姗姗来迟，为了准备公开[演示版本](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip)，所以优先做这事了，但迟到好过没有。
 
 ## 大新闻
 

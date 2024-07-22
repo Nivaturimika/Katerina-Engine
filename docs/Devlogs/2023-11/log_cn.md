@@ -1,9 +1,9 @@
 # 2023 11 报告
 ## Public alpha
-[0.8.7 alpha](https://github.com/schombert/Project-Alice/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip)可用了。感谢大家反馈的bug使我们推向1.0。乐观地说，本月可能发布beta版。
+[0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip)可用了。感谢大家反馈的bug使我们推向1.0。乐观地说，本月可能发布beta版。
 
 ## 新地图
-本月修改了地图，即使无法加到现有地图，但[first of them](https://github.com/schombert/Project-Alice/blob/main/openv2%20map%20mod/OpenV2Map.zip)在测试，适于原版游戏，仍有零星问题，如像素点和小问题等。非洲一些地名要改、新历史、省区。
+本月修改了地图，即使无法加到现有地图，但[first of them](https://github.com/Nivaturimika/Katerina-Engine/blob/main/openv2%20map%20mod/OpenV2Map.zip)在测试，适于原版游戏，仍有零星问题，如像素点和小问题等。非洲一些地名要改、新历史、省区。
 
 ![地图](./images/globe.png)
 
@@ -48,7 +48,7 @@ Leaf仍努力完善多人游戏（还有不同步问题）和跟踪修复错误�
 ## 脚本扩展
 依mod作者们的要求而开始实现脚本扩展功能。没重构，但类似添加新效果的工作，好做。除非mod作者要用的时候，否则不会添加。我不会添加那些`可能用得到的东西`，以后再说。目前，加了其他pdx游戏脚本的新版本。
 
-[脚本扩展文档](https://github.com/schombert/Project-Alice/blob/main/docs/extensions.md)同步更新。
+[脚本扩展文档](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/extensions.md)同步更新。
 
 ## 结尾
 下月再见(或等不及就加入[discord](https://discord.gg/QUJExr4mRn))！

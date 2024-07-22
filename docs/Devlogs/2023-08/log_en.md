@@ -40,7 +40,7 @@ And Masterchef has been continuing work on adding polish to the military window.
 
 ## Updated demo
 
-This month's update also comes with an [updated demo](https://github.com/schombert/Project-Alice/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) where you can see for yourself the changes described above. Once again, *please* read the included text file for instructions on how to "install" the demo. Like last month's demo, we aren't yet at the point where public bug reports are particularly useful, but we may be getting there soon.
+This month's update also comes with an [updated demo](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) where you can see for yourself the changes described above. Once again, *please* read the included text file for instructions on how to "install" the demo. Like last month's demo, we aren't yet at the point where public bug reports are particularly useful, but we may be getting there soon.
 
 ## Next month
 

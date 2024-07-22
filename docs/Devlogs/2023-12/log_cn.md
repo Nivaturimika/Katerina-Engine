@@ -4,7 +4,7 @@
 
 ## 公测
 
-[0.9.3 beta](https://github.com/schombert/Project-Alice/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip)可用。
+[0.9.3 beta](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip)可用。
 
 ## 小细节
 

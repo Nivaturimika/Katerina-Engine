@@ -40,7 +40,7 @@ Y Masterchef ha estado trabajando continuamente en pulir la ventana militar.
 
 ## Demo actualizada
 
-La actualización de este mes también incluye una [demo actualizada](https://github.com/schombert/Project-Alice/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) donde puedes ver por ti mismo los cambios descritos anteriormente. Una vez más, *por favor*, lee el archivo de texto incluido para obtener instrucciones sobre cómo "instalar" la demo. Al igual que la demo del mes pasado, aún no hemos alcanzado el punto en el que los informes de errores públicos sean particularmente útiles, pero es posible que pronto lleguemos a ese punto.
+La actualización de este mes también incluye una [demo actualizada](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) donde puedes ver por ti mismo los cambios descritos anteriormente. Una vez más, *por favor*, lee el archivo de texto incluido para obtener instrucciones sobre cómo "instalar" la demo. Al igual que la demo del mes pasado, aún no hemos alcanzado el punto en el que los informes de errores públicos sean particularmente útiles, pero es posible que pronto lleguemos a ese punto.
 
 ## El próximo mes
 

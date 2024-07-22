@@ -4,7 +4,7 @@
 
 ## Alpha版
 
-[Alpha版](https://github.com/schombert/Project-Alice/releases/download/v0.8.1%CE%B1/0.8.1-ALPHA.zip)能用了。目前，游戏差不多完成，你自行忽略几个零碎bug。我在HPM模组的奥地利玩了一把，没多大问题。
+[Alpha版](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.1%CE%B1/0.8.1-ALPHA.zip)能用了。目前，游戏差不多完成，你自行忽略几个零碎bug。我在HPM模组的奥地利玩了一把，没多大问题。
 
 社区依然欢迎bug报告，也利于更快推进到1.0版。即使小问题，如工具提示缺少、其他与UI相关的故障等，也有用。
 

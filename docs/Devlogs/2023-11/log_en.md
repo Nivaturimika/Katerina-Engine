@@ -4,11 +4,11 @@ It's November.
 
 ## Public alpha
 
-The [0.8.7 alpha](https://github.com/schombert/Project-Alice/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) version of Project Alice is now available. Bug reports from the community remain very much appreciated and will help us reach 1.0 faster. I am optimistic that we will move on to beta releases at some point this month.
+The [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) version of Project Alice is now available. Bug reports from the community remain very much appreciated and will help us reach 1.0 faster. I am optimistic that we will move on to beta releases at some point this month.
 
 ## New Map
 
-This month we made some tweaks to allow full-globe maps. We can't automatically add new terrain to an existing map, but this allows us to make map mods that do cover the entire globe. The [first of them](https://github.com/schombert/Project-Alice/blob/main/openv2%20map%20mod/OpenV2Map.zip), for the vanilla game, can already be tested. As with most new map mods, there are still stray pixels and other little issues to work out. A number of the provinces in Africa will also need to be renamed / given new histories / rearranged into different states. This is because part of the map was drawn from an older rework that had made those adjustments to create better pre and post colonial borders in Africa. If you are interested in helping me make those fixes, please drop by the discord.
+This month we made some tweaks to allow full-globe maps. We can't automatically add new terrain to an existing map, but this allows us to make map mods that do cover the entire globe. The [first of them](https://github.com/Nivaturimika/Katerina-Engine/blob/main/openv2%20map%20mod/OpenV2Map.zip), for the vanilla game, can already be tested. As with most new map mods, there are still stray pixels and other little issues to work out. A number of the provinces in Africa will also need to be renamed / given new histories / rearranged into different states. This is because part of the map was drawn from an older rework that had made those adjustments to create better pre and post colonial borders in Africa. If you are interested in helping me make those fixes, please drop by the discord.
 
 ![globe](./images/globe.png)
 
@@ -61,7 +61,7 @@ The trade window is now color coded to show where you have shortages and surplus
 
 As we inch closer to a 1.0 release, I have begun implementing extensions to the game on request by modders. I'm not doing big system rewrites or anything like that (yet), but adding new effects, for example, easily doable. My rule of thumb here is that I only add something if a modder plans on using it when it is available. I don't want to add things that *might* be used because it would take too much focus away from getting to 1.0. The biggest thing we have added so far is a version of what are known as "scripted triggers" in some other paradox games.
 
-A list of what has already been added can be found [here](https://github.com/schombert/Project-Alice/blob/main/docs/extensions.md) which will be updated as we go.
+A list of what has already been added can be found [here](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/extensions.md) which will be updated as we go.
 
 ## The End
 

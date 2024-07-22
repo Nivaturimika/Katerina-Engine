@@ -1,6 +1,6 @@
 # 2023年9月进展报告
 
-欢迎观看油管视频的[九月更新](https://www.youtube.com/watch?v=nfLEc09tTjI)，可下载[最新演示版](https://github.com/schombert/Project-Alice/releases/download/v0.0.6-demo/2023-9-7-DEMO.zip)。
+欢迎观看油管视频的[九月更新](https://www.youtube.com/watch?v=nfLEc09tTjI)，可下载[最新演示版](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.6-demo/2023-9-7-DEMO.zip)。
 
 ## 小事
 

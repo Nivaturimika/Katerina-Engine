@@ -1,6 +1,6 @@
 # Progress as of July 2023
 
-Welcome to the slightly delayed update. I have been focused on getting the [public demo](https://github.com/schombert/Project-Alice/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip) ready, to the exclusion of all else. But, better late than never.
+Welcome to the slightly delayed update. I have been focused on getting the [public demo](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip) ready, to the exclusion of all else. But, better late than never.
 
 ## The Big News
 

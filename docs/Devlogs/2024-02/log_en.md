@@ -4,7 +4,7 @@ It's San Valentine's Day, and we'll bring love and compassion to the otherwise n
 
 ## 1.0.9
 
-Version [1.0.9](https://github.com/schombert/Project-Alice/releases/download/v1.0.9/1.0.9.7z) is available to download now!
+Version [1.0.9](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.9/1.0.9.7z) is available to download now!
 
 ## Modding extensions & the economy
 

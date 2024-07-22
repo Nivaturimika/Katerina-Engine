@@ -4,11 +4,11 @@
 
 ## Alpha pública
 
-A versão [0.8.7 alpha](https://github.com/schombert/Project-Alice/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) do Project Alice já está disponível. Relatórios de bugs da comunidade continuam sendo muito apreciados e nos ajudarão a chegar à versão 1.0 mais rapidamente. Estou optimista de que avançaremos para versões beta em algum momento deste mês.
+A versão [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) do Project Alice já está disponível. Relatórios de bugs da comunidade continuam sendo muito apreciados e nos ajudarão a chegar à versão 1.0 mais rapidamente. Estou optimista de que avançaremos para versões beta em algum momento deste mês.
 
 ## Novo Mapa
 
-Este mês fizemos algumas alterações para permitir mapas de globo completo. Não podemos adicionar automaticamente novos terrenos a um mapa existente, mas isso permite-nos criar mods de mapa que cubram todo o globo. O [primeiro deles](https://github.com/schombert/Project-Alice/blob/main/openv2%20map%20mod/OpenV2Map.zip), para o jogo padrão, já pode ser testado. Como na maioria dos novos mods de mapa, ainda há pixels soltos e outros pequenos problemas para resolver. Muitas das províncias na África também precisarão ser renomeadas / receber novas histórias / ser rearranjadas em estados diferentes. Isso ocorre porque parte do mapa foi desenhada a partir de uma reformulação mais antiga que fez esses ajustes para criar fronteiras pré e pós-coloniais melhores na África. Se você estiver interessado em me ajudar a fazer essas correções, por favor, entre no discord.
+Este mês fizemos algumas alterações para permitir mapas de globo completo. Não podemos adicionar automaticamente novos terrenos a um mapa existente, mas isso permite-nos criar mods de mapa que cubram todo o globo. O [primeiro deles](https://github.com/Nivaturimika/Katerina-Engine/blob/main/openv2%20map%20mod/OpenV2Map.zip), para o jogo padrão, já pode ser testado. Como na maioria dos novos mods de mapa, ainda há pixels soltos e outros pequenos problemas para resolver. Muitas das províncias na África também precisarão ser renomeadas / receber novas histórias / ser rearranjadas em estados diferentes. Isso ocorre porque parte do mapa foi desenhada a partir de uma reformulação mais antiga que fez esses ajustes para criar fronteiras pré e pós-coloniais melhores na África. Se você estiver interessado em me ajudar a fazer essas correções, por favor, entre no discord.
 
 ![globo](./images/globe.png)
 
@@ -61,7 +61,7 @@ A janela de comércio agora está codificada por cores para mostrar onde você t
 
 À medida que nos aproximamos do lançamento da versão 1.0, comecei a implementar extensões no jogo a pedido dos modders. Não estou fazendo grandes reescritas de sistemas ou algo assim (ainda), mas adicionar novos efeitos, por exemplo, é facilmente possível. Minha regra geral aqui é que só adiciono algo se um modder planeja usá-lo quando estiver disponível. Não quero adicionar coisas que *poderiam* ser usadas, porque isso tiraria muita energia, e atrasaria a versão 1.0. A maior coisa que adicionamos até agora é uma versão do que são conhecidos como "triggers scriptados" em alguns outros jogos da Paradox.
 
-Uma lista do que já foi adicionado pode ser encontrada [aqui](https://github.com/schombert/Project-Alice/blob/main/docs/extensions.md), que será atualizada à medida que avançarmos.
+Uma lista do que já foi adicionado pode ser encontrada [aqui](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/extensions.md), que será atualizada à medida que avançarmos.
 
 ## O Fim
 

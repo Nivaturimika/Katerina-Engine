@@ -40,7 +40,7 @@ E o Masterchef tem continuado a trabalhar para adicionar polimento à janela mil
 
 ## Demonstração atualizada
 
-A atualização deste mês também vem com uma [demonstração atualizada](https://github.com/schombert/Project-Alice/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) onde você pode ver por si mesmo as mudanças descritas acima. Mais uma vez, *por favor*, leia o arquivo de texto incluído para obter instruções sobre como "instalar" a demonstração. Como a demonstração do mês passado, ainda não estamos no ponto em que relatórios públicos de bugs não são particularmente úteis, mas espero chegar lá em breve.
+A atualização deste mês também vem com uma [demonstração atualizada](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip) onde você pode ver por si mesmo as mudanças descritas acima. Mais uma vez, *por favor*, leia o arquivo de texto incluído para obter instruções sobre como "instalar" a demonstração. Como a demonstração do mês passado, ainda não estamos no ponto em que relatórios públicos de bugs não são particularmente úteis, mas espero chegar lá em breve.
 
 ## Próximo mês
 

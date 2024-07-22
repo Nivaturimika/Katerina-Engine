@@ -1,6 +1,6 @@
 # Progress as of September 2023
 
-Welcome back to the [September](https://www.youtube.com/watch?v=nfLEc09tTjI) update. As usual, this update comes with an [updated demo](https://github.com/schombert/Project-Alice/releases/download/v0.0.6-demo/2023-9-7-DEMO.zip).
+Welcome back to the [September](https://www.youtube.com/watch?v=nfLEc09tTjI) update. As usual, this update comes with an [updated demo](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.6-demo/2023-9-7-DEMO.zip).
 
 ## The little things
 

@@ -55,7 +55,7 @@ Pessoas com monitores de alta resolução provavelmente vão querer ficar com as
 
 Em termos de fazer o jogo realmente *correr*, um importante primeiro passo foi dado neste mês, construímos uma descrição - em grande parte completa - das regras do jogo. Não apenas essa descrição é útil como alvo a programar, mas provavelmente é útil de forma independente para os jogadores do Victoria 2 que simplesmente querem saber como o jogo realmente funciona. Sinta-se à vontade para compartilhar correções ou preencher quaisquer omissões.
 
-[Documento de regras](https://github.com/schombert/Project-Alice/blob/main/docs/rules.md)
+[Documento de regras](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/rules.md)
 
 ## O Fim
 

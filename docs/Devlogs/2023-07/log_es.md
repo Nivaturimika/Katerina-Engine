@@ -1,6 +1,6 @@
 # Progreso hasta julio de 2023
 
-Bienvenido a la actualización ligeramente retrasada. Me he centrado en preparar la [demo pública](https://github.com/schombert/Project-Alice/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip), excluyendo todo lo demás. Pero más vale tarde que nunca.
+Bienvenido a la actualización ligeramente retrasada. Me he centrado en preparar la [demo pública](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.1-demo/2023-7-8-DEMO.zip), excluyendo todo lo demás. Pero más vale tarde que nunca.
 
 ## Las Grandes Noticias
 

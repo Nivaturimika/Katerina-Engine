@@ -55,7 +55,7 @@ Landau为决策卡填充了内容。
 
 在使游戏真正运行方面，本月迈出重大的第一步，通过收集较完善的游戏规则描述。这个不仅指导编程目标，也对想知道v2机制的玩家是有用的。欢迎随时提出更正或遗漏内容。
 
-[Rules document](https://github.com/schombert/Project-Alice/blob/main/docs/rules.md)
+[Rules document](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/rules.md)
 
 ## 结束语
 

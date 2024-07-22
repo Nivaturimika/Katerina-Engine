@@ -4,7 +4,7 @@ Será que o Pai Natal nos trará a versão 1.0 para o Natal?
 
 ## Beta pública
 
-A versão [0.9.3 beta](https://github.com/schombert/Project-Alice/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip) do Project Alice já está disponível.
+A versão [0.9.3 beta](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip) do Project Alice já está disponível.
 
 ## Pequenos Detalhes
 

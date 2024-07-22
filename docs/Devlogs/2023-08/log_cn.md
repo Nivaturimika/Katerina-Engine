@@ -40,7 +40,7 @@ Leaf为我们修复省份占领状态bug，终于能看到那些叛军占领了�
 
 ## 最新演示
 
-本月更新还附带了[最新演示](https://github.com/schombert/Project-Alice/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip)。您可在军事窗口上看到上述修改。务必阅读附带的文件，其中包含了安装说明。与上月演示版一致，我们还没到达公开报告错误的阶段，但可能很快到了。
+本月更新还附带了[最新演示](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.0.2-demo/2023-8-7-DEMO.zip)。您可在军事窗口上看到上述修改。务必阅读附带的文件，其中包含了安装说明。与上月演示版一致，我们还没到达公开报告错误的阶段，但可能很快到了。
 
 ## 下月
 
