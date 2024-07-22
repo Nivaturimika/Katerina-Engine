@@ -2454,7 +2454,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		}
 	}
 	// parse event_modifiers.txt
-	
+	{
 		if(auto em_file = open_file(common, NATIVE("event_modifiers.txt")); em_file) {
 			auto content = view_contents(*em_file);
 			err.file_name = "event_modifiers.txt";
