@@ -1,0 +1,56 @@
+save_and_exit;Opslaan en afsluiten
+save;Redden
+exit;Uitgang
+graphics_options;Grafische opties
+sound_options;Geluidsopties
+controls_options;Diversen Opties
+message_settings_options;Berichtinstellingen
+window_mode_label;Volledig scherm
+map_projection;Projectie
+map_projection_globe;Orthografisch
+map_projection_flat;Equirechthoekig
+map_projection_globe_perspective;Verticaal
+dm_popup_label;Diplomatiek bericht als pop-ups
+ui_scale;UI-schaal
+zoom_mode_label;Zoomstijl
+zoom_mode_panning;Pannen
+zoom_mode_inverted;Omgekeerd
+zoom_mode_centered;Gecentreerd
+zoom_mode_to_cursor;Naar cursor
+zoom_mode_away_from_cursor;Weg van de cursor
+zoom_speed_label;Zoomversnelling
+river_label;Rivieren
+mute_on_focus_lost_label;Dempen bij verlies van focus
+wasd_for_map_movement_label;WASD voor beweging
+vassal_color_label;Vazal kleuring
+vassal_color_inherit;Erven
+vassal_color_same;Dezelfde
+vassal_color_none;Geen
+black_map_font_label;Zwart kaartlettertype
+edge_scrolling_label;Rand scrollen
+color_blind_mode_label;Kleurenblind
+color_blind_mode_none;Geen
+color_blind_mode_deutan;Deutaan
+color_blind_mode_protan;Protan
+color_blind_mode_tritan;Tritan
+color_blind_mode_achroma;Achroma
+render_models_label;Geef modellen weer
+language_label;Taal
+fow_label;Mist van oorlog
+railroad_label;Spoorwegnetwerken
+master_volume_label;Meester volume
+music_volume_label;Muziekvolume
+interface_volume_label;Interfacevolume
+effect_volume_label;Geluidseffectvolume
+fonts_label;Klassieke lettertypen
+tooltip_mode_label;Zwevende tooltip
+music_player_label;Muziekspeler
+gaussianblur_label;Gaussiaanse vervaging
+gamma_label;Gamma
+map_label;Kaarttekst
+map_label_0;Geen
+map_label_1;Lineair
+map_label_2;Kwadratisch
+map_label_3;Kubiek
+antialiasing_label;Anti-aliasing
+spoilers_label;Spoilers

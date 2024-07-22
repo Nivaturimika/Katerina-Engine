@@ -1,0 +1,476 @@
+spriteTypes = {
+    textSpriteType = {
+		name = "GFX_goto_location_button"
+		texturefile = "gfx\\interface\\save_list_button.png"
+	}
+
+	spriteType = {
+		name = "GFX_alice_left_right"
+		texturefile = "gfx\\interface\\toggle_default.tga"
+		noOfFrames = 2
+	}
+
+	textSpriteType = {
+		name = "GFX_alice_odds"
+		texturefile = "assets\\odds_icon.dds"
+	}
+
+	# Solves quirk with eu3dialog.gui, line 16
+    textSpriteType = {
+		name = "GFX_icon_merchant"
+		texturefile = "gfx\\test\\factions.dds"
+	}
+	
+	spriteType = {
+		name = "GFX_alice_unit_frames"
+		texturefile = "assets\\unitframes.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_small_unit_frames"
+		texturefile = "assets\\small_uframes.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_unit_left_edge"
+		texturefile = "assets\\unitleftedges.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_unit_right_edge"
+		texturefile = "assets\\unitrightedge.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_dig_in"
+		texturefile = "assets\\diginpips.png"
+		noOfFrames = 7
+	}
+	progressbartype = {
+		name = "GFX_alice_org_bar"
+		textureFile1 = "assets\\orgbar_top.png"
+		textureFile2 = "assets\\orgbar_bottom.png"
+		size = { 51 4 }
+	}
+	spriteType = {
+		name = "GFX_alice_unit_status"
+		texturefile = "assets\\unitstatus.png"
+		noOfFrames = 8
+	}
+	spriteType = {
+		name = "GFX_unit_siege_frame"
+		texturefile = "assets\\siegeframe.png"
+		noOfFrames = 1
+	}
+	progressbartype = {
+		name = "GFX_unit_siege_bar"
+		textureFile1 = "assets\\siege_top.png"
+		textureFile2 = "assets\\siege_bottom.png"
+		size = { 64 11 }
+	}
+	spriteType = {
+		name = "GFX_alice_battle_caps"
+		texturefile = "assets\\battle_ends.png"
+		noOfFrames = 2
+	}
+	progressbartype = {
+		name = "GFX_alice_battle_bar"
+		textureFile1 = "assets\\battle_blue.png"
+		textureFile2 = "assets\\battle_red.png"
+		size = { 86 15 }
+	}
+	spriteType = {
+		name = "GFX_alice_expanded_port"
+		texturefile = "assets\\port_ex.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_small_port_expanded"
+		texturefile = "assets\\port_small.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_small_port_icon"
+		texturefile = "assets\\port_small_nc.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_port_levels"
+		texturefile = "assets\\port_bars.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_port"
+		texturefile = "assets\\port_empty.png"
+		noOfFrames = 5
+	}
+	corneredTileSpriteType = {
+		name = "GFX_alice_panel_bg"
+		size = { 32 32 }
+		texturefile = "assets\\new_panel_bg.png"
+		borderSize = { 8 8 }
+	}
+	maskedShieldType = {
+		name = "GFX_alice_unit_flag"
+		textureFile1 = "assets\\unit_flag_overlay.png"
+		textureFile2 = "assets\\unit_flag_mask.png"
+	}
+	spriteType = {
+		name = "GFX_alice_unit_select_leader"
+		texturefile = "assets\\leader_select_replacement.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_retreat"
+		texturefile = "assets\\retreat.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_naval_combat_bg"
+		texturefile = "assets\\naval_combat_bg_2.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_message_type"
+		texturefile = "assets\\message_disp_options.png"
+		noOfFrames = 5
+	}
+	spriteType = {
+		name = "GFX_alice_event_auto"
+		texturefile = "assets\\event_auto.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_election_event_auto"
+		texturefile = "assets\\election_event_auto.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_frontend_campaign_entry"
+		texturefile = "assets\\alice_save_entry.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_alice_map_fort"
+		texturefile = "assets\\small_fort.dds"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_rail"
+		texturefile = "assets\\small_rail.dds"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_bank"
+		texturefile = "assets\\small_bank.dds"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_university"
+		texturefile = "assets\\small_university.dds"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_rail_2"
+		texturefile = "assets\\sm_gold_train.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_fort_2"
+		texturefile = "assets\\sm_gold_cannon.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_map_dots"
+		texturefile = "assets\\gold_dot_strip.png"
+		noOfFrames = 6
+	}
+
+	spriteType = {
+		name = "GFX_legend_gradient"
+		texturefile = "assets\\gradient.dds"
+		noOfFrames = 4
+		size = { 180 30 }
+	}
+	spriteType = {
+		name = "GFX_alice_white_rectangle"
+		texturefile = "assets\\alice_ws.png"
+		noOfFrames = 1
+	}
+	spriteType = {
+		name = "GFX_alice_striped_rectangle"
+		texturefile = "assets\\alice_ds.png"
+		noOfFrames = 1
+	}
+
+	spriteType = {
+		name = "GFX_mapmode_religion"
+		texturefile = "assets\\mapmode_religion.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_fort"
+		texturefile = "assets\\mapmode_fort.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_ideology"
+		texturefile = "assets\\mapmode_ideology.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_income"
+		texturefile = "assets\\mapmode_income.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_con"
+		texturefile = "assets\\mapmode_con.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_militancy"
+		texturefile = "assets\\mapmode_militancy.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_literacy"
+		texturefile = "assets\\mapmode_literacy.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_employment"
+		texturefile = "assets\\mapmode_employment.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_factories"
+		texturefile = "assets\\mapmode_factory.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_issues"
+		texturefile = "assets\\mapmode_issues.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_growth"
+		texturefile = "assets\\mapmode_growth.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_players"
+		texturefile = "assets\\mapmode_players.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_lf"
+		texturefile = "assets\\mapmode_lf.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_ev"
+		texturefile = "assets\\mapmode_ev.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_lx"
+		texturefile = "assets\\mapmode_lx.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_officers"
+		texturefile = "assets\\mapmode_officers.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_ratio"
+		texturefile = "assets\\mapmode_ratio.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_life_rating"
+		texturefile = "assets\\mapmode_life_rating.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_crime"
+		texturefile = "assets\\mapmode_crime.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_rally"
+		texturefile = "assets\\mapmode_rally.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_workforce"
+		texturefile = "assets\\mapmode_workforce.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_mob"
+		texturefile = "assets\\mapmode_mob.png"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "new-minimap-bg"
+		texturefile = "assets\\sub-minimap.dds"
+		noOfFrames = 1
+  }
+	spriteType = {
+		name = "GFX_mapmode_naval.n"
+		texturefile = "assets\\mapmode_naval.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_crises.n"
+		texturefile = "assets\\mapmode_crises.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_terrain.n"
+		texturefile = "assets\\mapmode_terrain.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_civ_level.n"
+		texturefile = "assets\\mapmode_civ_level.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_migration.n"
+		texturefile = "assets\\mapmode_migration.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_political.n"
+		texturefile = "assets\\mapmode_political.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_revolt.n"
+		texturefile = "assets\\mapmode_revolt.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_diplomatic.n"
+		texturefile = "assets\\mapmode_diplomatic.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_region.n"
+		texturefile = "assets\\mapmode_region.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_infra.n"
+		texturefile = "assets\\mapmode_infra.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_admin.n"
+		texturefile = "assets\\mapmode_admin.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_colonial.n"
+		texturefile = "assets\\mapmode_colonial.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_recruit.n"
+		texturefile = "assets\\mapmode_recruit.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_natfocus.n"
+		texturefile = "assets\\mapmode_natfocus.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_nationality.n"
+		texturefile = "assets\\mapmode_nationality.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_popdensity.n"
+		texturefile = "assets\\mapmode_popdensity.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_rgooutput.n"
+		texturefile = "assets\\mapmode_rgooutput.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_soi.n"
+		texturefile = "assets\\mapmode_soi.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_supplylimit.n"
+		texturefile = "assets\\mapmode_supplylimit.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_partyloyalty.n"
+		texturefile = "assets\\mapmode_partyloyalty.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_rank.n"
+		texturefile = "assets\\mapmode_rank.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_mapmode_relation.n"
+		texturefile = "assets\\mapmode_relation.n.png"
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		noOfFrames = 2
+	}
+	spriteType = {
+		name = "GFX_new_minimap_bg"
+		texturefile = "assets\\new_minimap_bg.dds"
+	}
+	spriteType = {
+		name = "GFX_button_macro"
+		texturefile = "assets\\button_macro.dds"
+		noOfFrames = 1
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		transparencecheck = yes
+	}
+	spriteType = {
+		name = "GFX_button_console"
+		texturefile = "assets\\button_console.dds"
+		noOfFrames = 1
+		effectFile = "gfx\\FX\\buttonstate.fx"
+		transparencecheck = yes
+	}
+
+	spriteType = {
+		name = "GFX_move_capital"
+		texturefile = "assets\\move_cap.png"
+	}
+}
