@@ -50,7 +50,16 @@ void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
 												 WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 			RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
-			AdjustWindowRectExForDpi(&rectangle, win32Style, false, 0, GetDpiForWindow(game_state.win_ptr->hwnd));
+			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+				auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
+				if(pAdjustWindowRectExForDpi != NULL) {
+					auto pGetDpiForWindow = (decltype(&GetDpiForWindow))GetProcAddress(hUser32dll, "GetDpiForWindow");
+					pAdjustWindowRectExForDpi(&rectangle, win32Style, false, 0, pGetDpiForWindow(game_state.win_ptr->hwnd));
+				} else {
+					AdjustWindowRectEx(&rectangle, win32Style, false, 0); //w2000+
+				}
+				FreeLibrary(hUser32dll);
+			}
 			int32_t final_width = rectangle.right - rectangle.left;
 			int32_t final_height = rectangle.bottom - rectangle.top;
 
@@ -72,7 +81,16 @@ void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
 			DWORD win32Style = WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 			RECT rectangle = mi.rcMonitor;
-			AdjustWindowRectExForDpi(&rectangle, win32Style, false, WS_EX_TOPMOST, GetDpiForWindow(game_state.win_ptr->hwnd));
+			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+				auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
+				if(pAdjustWindowRectExForDpi != NULL) {
+					auto pGetDpiForWindow = (decltype(&GetDpiForWindow))GetProcAddress(hUser32dll, "GetDpiForWindow");
+					pAdjustWindowRectExForDpi(&rectangle, win32Style, false, WS_EX_TOPMOST, pGetDpiForWindow(game_state.win_ptr->hwnd));
+				} else {
+					AdjustWindowRectEx(&rectangle, win32Style, false, 0); //w2000+
+				}
+				FreeLibrary(hUser32dll);
+			}
 			int32_t win_width = (rectangle.right - rectangle.left);
 			int32_t win_height = (rectangle.bottom - rectangle.top);
 
@@ -286,6 +304,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		// this is the message that tells us there is a DirectShow event
 		sound::update_music_track(*state);
 		break;
+	case WM_NCCREATE:
+	{
+		if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+			auto pSetProcessDpiAwarenessContext = (decltype(&SetProcessDpiAwarenessContext))GetProcAddress(hUser32dll, "SetProcessDpiAwarenessContext");
+			if(pSetProcessDpiAwarenessContext == NULL) {
+				// not present, so have to call this
+				auto pEnableNonClientDpiScaling = (decltype(&EnableNonClientDpiScaling))GetProcAddress(hUser32dll, "EnableNonClientDpiScaling");
+				if(pEnableNonClientDpiScaling != NULL) {
+					pEnableNonClientDpiScaling(hwnd); //windows 10
+				}
+				FreeLibrary(hUser32dll);
+			}
+		}
+		break;
+	}
 	case WM_GETMINMAXINFO:
 		LPMINMAXINFO info = (LPMINMAXINFO)lParam;
 		info->ptMinTrackSize.x = 640;
@@ -342,7 +375,16 @@ void create_window(sys::state& game_state, creation_parameters const& params) {
 		int top = (mi.rcWork.bottom - mi.rcWork.top) / 2 - game_state.win_ptr->creation_y_size / 2;
 
 		RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
-		AdjustWindowRectExForDpi(&rectangle, win32Style, false, 0, GetDpiForWindow(game_state.win_ptr->hwnd));
+		if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+			auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
+			if(pAdjustWindowRectExForDpi != NULL) {
+				auto pGetDpiForWindow = (decltype(&GetDpiForWindow))GetProcAddress(hUser32dll, "GetDpiForWindow");
+				pAdjustWindowRectExForDpi(&rectangle, win32Style, false, 0, pGetDpiForWindow(game_state.win_ptr->hwnd));
+			} else {
+				AdjustWindowRectEx(&rectangle, win32Style, false, 0); //w2000+
+			}
+			FreeLibrary(hUser32dll);
+		}
 		int32_t final_width = rectangle.right - rectangle.left;
 		int32_t final_height = rectangle.bottom - rectangle.top;
 
@@ -365,7 +407,16 @@ void create_window(sys::state& game_state, creation_parameters const& params) {
 		GetMonitorInfoW(monitor_handle, &mi);
 
 		RECT rectangle = mi.rcMonitor;
-		AdjustWindowRectExForDpi(&rectangle, win32Style, false, WS_EX_TOPMOST, GetDpiForWindow(game_state.win_ptr->hwnd));
+		if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+			auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
+			if(pAdjustWindowRectExForDpi != NULL) {
+				auto pGetDpiForWindow = (decltype(&GetDpiForWindow))GetProcAddress(hUser32dll, "GetDpiForWindow");
+				pAdjustWindowRectExForDpi(&rectangle, win32Style, false, WS_EX_TOPMOST, pGetDpiForWindow(game_state.win_ptr->hwnd));
+			} else {
+				AdjustWindowRectEx(&rectangle, win32Style, false, 0); //w2000+
+			}
+			FreeLibrary(hUser32dll);
+		}
 		int32_t win_width = (rectangle.right - rectangle.left);
 		int32_t win_height = (rectangle.bottom - rectangle.top);
 
