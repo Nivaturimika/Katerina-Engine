@@ -1,6 +1,6 @@
 ## Extensiones de Modding
 
-Este documento aborda las extensiones de modding que se han agregado a Project Alice, además de lo que proporcionó Victoria 2. En general, estamos abiertos a agregar más extensiones de modding a solicitud, bajo la condición de que realmente planees usarlas. En términos generales, no estamos interesados en agregar extensiones de manera especulativa solo porque podrían ser útiles.
+Este documento aborda las extensiones de modding que se han agregado a Katerina Engine, además de lo que proporcionó Victoria 2. En general, estamos abiertos a agregar más extensiones de modding a solicitud, bajo la condición de que realmente planees usarlas. En términos generales, no estamos interesados en agregar extensiones de manera especulativa solo porque podrían ser útiles.
 
 ### Análisis de Condiciones de Activación
 

@@ -176,7 +176,7 @@ void port_forwarder::start_forwarding() {
 			IStaticPortMapping* opened_port = nullptr;
 
 			BSTR proto = SysAllocString(L"TCP");
-			BSTR desc = SysAllocString(L"Project Alice Host");
+			BSTR desc = SysAllocString(L"Katerina Engine Host");
 			auto tmpwstr = simple_fs::utf8_to_native(found_locals[0].address);
 			BSTR local_host = SysAllocString(tmpwstr.c_str());
 			VARIANT_BOOL enabled = VARIANT_TRUE;
@@ -964,9 +964,9 @@ void send_and_receive_commands(sys::state& state) {
 							"scenario file and it should work. Or you haven't clicked on 'Make scenario'!";
 						msg += "\n";
 						msg += "Host should give you the scenario from:\n"
-							"'My Documents\\Project Alice\\scenarios\\<Most recent scenario>'";
+							"'My Documents\\Katerina Engine\\scenarios\\<Most recent scenario>'";
 						msg += "And you place it on:\n"
-							"'My Documents\\Project Alice\\scenarios\\'\n";
+							"'My Documents\\Katerina Engine\\scenarios\\'\n";
 
 						window::emit_error_message(msg.c_str(), true);
 					}

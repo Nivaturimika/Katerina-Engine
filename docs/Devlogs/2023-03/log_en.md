@@ -2,15 +2,15 @@
 
 Hello! How are ya'll?
 
-For the first dev-blog about Project Alice, let's introduce the project and take a quick look at what the team has been working on for the last two months:
+For the first dev-blog about Katerina Engine, let's introduce the project and take a quick look at what the team has been working on for the last two months:
 
-## Why does Project Alice exist?
+## Why does Katerina Engine exist?
 
 Schombert commented:
 
 > I originally started Open V2 because I found some things in Victoria 2 really irritating, even though I generally was having fun with the game. Specifically, endless rebel spam was wearing on my nerves, and I was also getting tired of selecting the same responses to events over and over again. Since Victoria 2 isn't that complicated, I figured that I could recreate it with some fixes. As things progressed, I started finding more and more things that I could do differently, and perhaps better. That was fun, but at the same time it significantly slowed down development. Eventually, I got tired of working on it, and the community didn't seem too interested in it, so I let it drop.
 >
-> However, about a year and a half ago I ended up in the SOE (Symphony of Empires) discord, where I have been discussing their project and giving the occasional bit of advice based on my experience with Open V2. Being there helped revive my interest a little bit, and led to me eventually writing a tool (data container) that is the backbone of Project Alice. Eventually some of the people there, as well as some new friends I made along the way, offered to help me finish what I started, and here we are.
+> However, about a year and a half ago I ended up in the SOE (Symphony of Empires) discord, where I have been discussing their project and giving the occasional bit of advice based on my experience with Open V2. Being there helped revive my interest a little bit, and led to me eventually writing a tool (data container) that is the backbone of Katerina Engine. Eventually some of the people there, as well as some new friends I made along the way, offered to help me finish what I started, and here we are.
 
 ## Map
 

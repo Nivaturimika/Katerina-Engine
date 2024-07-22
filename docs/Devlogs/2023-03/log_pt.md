@@ -2,15 +2,15 @@
 
 Olá! Como estão todos?
 
-Para o primeiro post de desenvolvimento sobre o Project Alice, vamos apresentar o projeto e dar uma rápida olhada no que a equipa tem trabalhado nos últimos dois meses:
+Para o primeiro post de desenvolvimento sobre o Katerina Engine, vamos apresentar o projeto e dar uma rápida olhada no que a equipa tem trabalhado nos últimos dois meses:
 
-## Por que o Project Alice existe?
+## Por que o Katerina Engine existe?
 
 Schombert comentou:
 
 > Iniciei originalmente o Open V2 porque achei algumas coisas no Victoria 2 muito irritantes, apesar de geralmente diverti-me com o jogo. O spam infinito de rebeldes para mim era o pior, e também estava cansado de selecionar as mesmas respostas para eventos repetidamente. Como o Victoria 2 não é tão complicado, pensei que poderia recriá-lo com algumas correções. Conforme as coisas progrediam, comecei a encontrar cada vez mais coisas que poderia fazer de forma diferente e talvez melhor. Isso foi divertido, mas ao mesmo tempo diminuiu significativamente o ritmo de desenvolvimento. Eventualmente, fiquei cansado de trabalhar no projecto, e a comunidade não parecia estar muito interessada, então abandonei.
 >
-> A cerca de um ano e meio atrás, entrei no discord do SOE (Symphony of Empires), onde tenho estado a discutir o projeto e dando conselhos ocasionais com base em minha experiência com o Open V2. Estar lá ajudou a reviver um pouco o meu interesse e acabou por me levar a escrever uma ferramenta (data-container) que é a espinha dorsal do Project Alice. Eventualmente, algumas pessoas de lá, bem como alguns novos amigos que fiz ao longo do caminho, ofereceram ajuda para terminar o que comecei, e aqui estamos.
+> A cerca de um ano e meio atrás, entrei no discord do SOE (Symphony of Empires), onde tenho estado a discutir o projeto e dando conselhos ocasionais com base em minha experiência com o Open V2. Estar lá ajudou a reviver um pouco o meu interesse e acabou por me levar a escrever uma ferramenta (data-container) que é a espinha dorsal do Katerina Engine. Eventualmente, algumas pessoas de lá, bem como alguns novos amigos que fiz ao longo do caminho, ofereceram ajuda para terminar o que comecei, e aqui estamos.
 
 ## Mapa
 

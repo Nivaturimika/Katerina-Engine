@@ -11,4 +11,4 @@ mv ./out/html/md_about.html ./out/html/index.html
 sed -i "s/md_about/index/g" ./out/html/index.html
 
 # Fix broken nav tree name in "navtreedata.js"
-sed -i 's/\("[^"]*"\),\s*"index\.html"/"Project Alice", "index.html"/' ./out/html/navtreedata.js
+sed -i 's/\("[^"]*"\),\s*"index\.html"/"Katerina Engine", "index.html"/' ./out/html/navtreedata.js

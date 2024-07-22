@@ -1,6 +1,6 @@
 # Modding extensions
 
-This document covers modding extensions that have been added to Project Alice in addition to what Victoria 2 provided. We are generally open to adding more modding extensions by request, under the condition that you actually plan to use them. Generally, we are not interested in speculatively adding extensions just because they might be useful.
+This document covers modding extensions that have been added to Katerina Engine in addition to what Victoria 2 provided. We are generally open to adding more modding extensions by request, under the condition that you actually plan to use them. Generally, we are not interested in speculatively adding extensions just because they might be useful.
 
 ## Scripting
 
@@ -93,7 +93,7 @@ build_bank_in_capital = {
 - `any_country = { ... }`: tests whether any existent country satisfies the conditions given in `...`. This is essentially just mirroring how the existing `any_country` effect scope works but for trigger conditions.
 - `any_known_country = { ... }`: same as above, alias
 - `every_country = { ... }`: Like `any_country`, but applies to EVERY country.
-- `has_global_flag = project_alice`: true if playing on Project Alice, false if not
+- `has_global_flag = project_alice`: true if playing on Katerina Engine, false if not
 - `all_war_countries = { ... }`: All countries we're at war with MUST fullfill the condition, as opposed to `war_countries` were only one country has to fullfill the condition
 - `any_war_countries = { ... }`: Equivalent to `war_countries`
 - `all_state = { ... }`: All states must fulfill condition, similar to `any_state`

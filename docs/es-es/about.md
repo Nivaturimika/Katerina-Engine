@@ -1,4 +1,4 @@
-## Acerca de Project Alice
+## Acerca de Katerina Engine
 
 ### Para empezar
 Por Favor consulte docs/contributing.md para más información! Contiene información de como compilar el proyecto en Windows y Linux

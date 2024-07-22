@@ -32,11 +32,11 @@ Finally, to get a bug fixed a developer needs to know how to see it for themselv
 
 ## Launcher
 
-The most recent major addition to Project Alice is the new launcher.
+The most recent major addition to Katerina Engine is the new launcher.
 
 ![Launcher](./images/launcher.png)
 
-The launcher isn't just a place to select mods and start the game. Project Alice uses what we call "scenario files" to speed up loading the game. A scenario file is essentially an efficiently packaged version of the game data (as modified by a given set of mods). When running the game for the first time, or selecting a new combination of mods, you will first have to create a scenario file using the launcher (this will take more or less time depending on the speed of your computer, your hard drive, and the complexity of the mods). If you update a mod, you will need to recreate the scenario file for any changes in the mod to show up (and your old saves will not be available when using the new scenario file, so be warned). Scenario files are placed in `Your Documents\Project Alice\scenarios` while save files are located in `Your Documents\Project Alice\saves`.
+The launcher isn't just a place to select mods and start the game. Katerina Engine uses what we call "scenario files" to speed up loading the game. A scenario file is essentially an efficiently packaged version of the game data (as modified by a given set of mods). When running the game for the first time, or selecting a new combination of mods, you will first have to create a scenario file using the launcher (this will take more or less time depending on the speed of your computer, your hard drive, and the complexity of the mods). If you update a mod, you will need to recreate the scenario file for any changes in the mod to show up (and your old saves will not be available when using the new scenario file, so be warned). Scenario files are placed in `Your Documents\Katerina Engine\scenarios` while save files are located in `Your Documents\Katerina Engine\saves`.
 
 ## HPM Compatibility
 

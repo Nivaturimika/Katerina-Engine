@@ -68,10 +68,10 @@ Esto representa un archivo abierto que tiene sus contenidos cargados en la memor
 
 Actualmente existen tres funciones especiales de directorio, destinadas principalmente a ubicar el lugar correcto para guardar varios tipos de información.
 
-- `directory get_or_create_save_game_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Project Alice\saved games`. Aquí es donde guardaremos los juegos.
-- `directory get_or_create_scenario_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Project Alice\scenarios`. Aquí es donde almacenaremos los escenarios que creamos al agrupar los datos de una colección específica de modificaciones y archivos base.
-- `directory get_or_create_oos_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Project Alice\oos`. Aquí es donde agregaremos los volcados OOS.
-- `directory get_or_create_settings_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en el directorio de configuración de aplicaciones locales del usuario llamada `Project Alice`. Aquí almacenaremos la configuración global del programa. **No** escribas archivos grandes en este directorio. En particular, **no** escribas registros aquí. Si necesitamos un lugar para los registros, crearé una nueva función especial de directorio para ellos.
+- `directory get_or_create_save_game_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Katerina Engine\saved games`. Aquí es donde guardaremos los juegos.
+- `directory get_or_create_scenario_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Katerina Engine\scenarios`. Aquí es donde almacenaremos los escenarios que creamos al agrupar los datos de una colección específica de modificaciones y archivos base.
+- `directory get_or_create_oos_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en la carpeta de documentos del usuario llamada `Katerina Engine\oos`. Aquí es donde agregaremos los volcados OOS.
+- `directory get_or_create_settings_directory()` - En Windows, esto abre (creando si es necesario) una carpeta en el directorio de configuración de aplicaciones locales del usuario llamada `Katerina Engine`. Aquí almacenaremos la configuración global del programa. **No** escribas archivos grandes en este directorio. En particular, **no** escribas registros aquí. Si necesitamos un lugar para los registros, crearé una nueva función especial de directorio para ellos.
 
 ### Funciones de conversión de codificación
 

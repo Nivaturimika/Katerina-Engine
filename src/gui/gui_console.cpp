@@ -1829,7 +1829,7 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 			ptr_in = sys::serialize(ptr_in, state.font_collection.font_names);
 			return ptr_in;
 		});
-		log_to_console(state, parent, "Check \"My Documents\\Project Alice\\oos\" for the OOS dump");
+		log_to_console(state, parent, "Check \"My Documents\\Katerina Engine\\oos\" for the OOS dump");
 		window::change_cursor(state, window::cursor_type::normal);
 		break;
 	case command_info::type::win_wars:

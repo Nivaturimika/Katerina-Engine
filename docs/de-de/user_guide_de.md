@@ -1,6 +1,6 @@
 # Download
 
-Downloads gibt es [hier im Project Alice Repo](https://github.com/Nivaturimika/Katerina-Engine/releases)
+Downloads gibt es [hier im Katerina Engine Repo](https://github.com/Nivaturimika/Katerina-Engine/releases)
 
 Wählt einfach die Version aus die Ihr Euch herunterladen möchtet. Meistens wird das wohl die neueste Version ganz oben sein.
 

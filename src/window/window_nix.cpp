@@ -279,7 +279,7 @@ void create_window(sys::state& game_state, creation_parameters const& params) {
 	//glfwWindowHint(GLFW_SAMPLES, game_state.user_settings.antialias_level);
 
 	// Create window with graphics context
-	auto* window = glfwCreateWindow(params.size_x, params.size_y, "Project Alice", NULL, NULL);
+	auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
 	if(window == NULL)
 		emit_error_message("Failed to create window\n", true);
 	game_state.win_ptr->window = window;

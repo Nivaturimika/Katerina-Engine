@@ -1,6 +1,6 @@
 # Progresso até Maio de 2023
 
-Mais uma vez é hora de rever o que os preguiçosos do Project Alice têm feito.
+Mais uma vez é hora de rever o que os preguiçosos do Katerina Engine têm feito.
 
 ## Novos membros da equipe
 
@@ -10,9 +10,9 @@ Em março, adicionamos um novo programador à equipe, DeathByDarwin, que tem tra
 
 ## Perguntas e respostas da equipe
 
-Este mês, perguntamos a leaf, um dos membros fundadores do Project Alice e líder do projeto [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como foi trabalhar no Project Alice em comparação com o trabalho no SOE?"
+Este mês, perguntamos a leaf, um dos membros fundadores do Katerina Engine e líder do projeto [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como foi trabalhar no Katerina Engine em comparação com o trabalho no SOE?"
 
-> Bem, o Project Alice tem praticamente o mesmo "estilo de gestão" que o SoE (mas muito mais organizado e documentado). Acredito que o facto de ter sido devidamente documentado desde o início tornou possível um monte de pessoas cooperarem que de outra forma não seriam capazes de entender o seu funcionamento interno. Trabalhar no Alice é bastante direto, já que você apenas codifica - envia - aguarda revisão (PR - Pull Request) - corrige erros e, na maioria das vezes, é merged. Acho que essa é uma qualidade muito boa; no SoE, era apenas enviar e depois corrigir os erros, o que tendia a causar problemas, e então alguém tinha que corrigir esses problemas, então sim, de facto, trabalhar no Alice é uma experiência mais organizada e ainda directa. O facto de o Alice também usar Data-container tornou-o uma escolha interessante para trabalhar, já que no SoE tudo estava centrado em colocar os dados em algum lugar estruturado. O Data-container usa métodos para acessar dados, o que por si só é muito bom, pois você obtém automaticamente as propriedades dos seus objetos e suas relações, devidamente documentadas e interagindo - tudo ao mesmo tempo. No geral, eu diria que tem sido mais agradável trabalhar com o Alice.
+> Bem, o Katerina Engine tem praticamente o mesmo "estilo de gestão" que o SoE (mas muito mais organizado e documentado). Acredito que o facto de ter sido devidamente documentado desde o início tornou possível um monte de pessoas cooperarem que de outra forma não seriam capazes de entender o seu funcionamento interno. Trabalhar no Alice é bastante direto, já que você apenas codifica - envia - aguarda revisão (PR - Pull Request) - corrige erros e, na maioria das vezes, é merged. Acho que essa é uma qualidade muito boa; no SoE, era apenas enviar e depois corrigir os erros, o que tendia a causar problemas, e então alguém tinha que corrigir esses problemas, então sim, de facto, trabalhar no Alice é uma experiência mais organizada e ainda directa. O facto de o Alice também usar Data-container tornou-o uma escolha interessante para trabalhar, já que no SoE tudo estava centrado em colocar os dados em algum lugar estruturado. O Data-container usa métodos para acessar dados, o que por si só é muito bom, pois você obtém automaticamente as propriedades dos seus objetos e suas relações, devidamente documentadas e interagindo - tudo ao mesmo tempo. No geral, eu diria que tem sido mais agradável trabalhar com o Alice.
 
 ## Progresso da interface do usuário
 

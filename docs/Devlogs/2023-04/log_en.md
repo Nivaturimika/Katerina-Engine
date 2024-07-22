@@ -25,7 +25,7 @@ New programmers, artists, or people with other talents to contribute are always 
 
 ## Team Q&A
 
-For this month we asked Diana, the project coordinator and overall second in command "what are you interested in adding to Project Alice?"
+For this month we asked Diana, the project coordinator and overall second in command "what are you interested in adding to Katerina Engine?"
 
 > tbh, as of now I have little programming abilities. I wanted to help, but the only things I could do were advertising (the possibilities for which kinda shrunk) and managing people (but people here turned out to be quite good at managing themselves). I might try to fiddle more with the code later though. Once the project is closer to release, I want to bug mod creators to try to convince them to make mods compatible with it, and possibly help with that myself if modding compatibility is as preserved as I hope, as I can actually make mods for PDX games--I just avoid doing that due to lack of willpower. Apart from that, the project is kinda important to me; it's something I wished would happen for a long long time, especially because Victoria 2 is too slow for me.
 

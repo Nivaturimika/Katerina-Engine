@@ -10,7 +10,7 @@ Last dev log was about a version that was upcoming, as opposed to talking about 
 
 ### Automatic event chain graphs
 
-Generate graphs of your event chains with ease, using the `graph` console command. It will make a text file inside `My Documents\Project Alice\oos\graph.txt`. It's in graphviz format, use a viewer like [this one](https://dreampuf.github.io/GraphvizOnline) to view it. But I'd recommend installing the actual graphviz program, so you don't crash the page (only if your graph is very large).
+Generate graphs of your event chains with ease, using the `graph` console command. It will make a text file inside `My Documents\Katerina Engine\oos\graph.txt`. It's in graphviz format, use a viewer like [this one](https://dreampuf.github.io/GraphvizOnline) to view it. But I'd recommend installing the actual graphviz program, so you don't crash the page (only if your graph is very large).
 
 ![](./images/graph.png)
 ![](./images/graph2.png)
@@ -32,7 +32,7 @@ Use `help dmap`, or type `dmap` to see more map generation options!
 
 ![](./images/map.png)
 
-The saved map will be put in `My Documents\Project Alice\oos`
+The saved map will be put in `My Documents\Katerina Engine\oos`
 
 ### Mod compatibility
 

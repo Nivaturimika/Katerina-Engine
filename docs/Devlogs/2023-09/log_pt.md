@@ -32,11 +32,11 @@ Por fim, para corrigir um bug, um desenvolvedor precisa saber como vê-lo por si
 
 ## Launcher
 
-A adição mais recente ao Project Alice é o novo launcher.
+A adição mais recente ao Katerina Engine é o novo launcher.
 
 ![Launcher](./images/launcher.png)
 
-O launcher não é apenas um local para selecionar mods e iniciar o jogo. O Project Alice usa o que chamamos de "arquivos de cenário" para acelerar o carregamento do jogo. Um arquivo de cenário é essencialmente uma versão eficientemente empacotada dos dados do jogo (conforme modificado por um conjunto específico de mods). Ao executar o jogo pela primeira vez ou selecionar uma nova combinação de mods, você primeiro terá que criar um arquivo de cenário usando o launcher (isso levará mais ou menos tempo dependendo da velocidade do seu computador, do seu disco rígido e da complexidade dos mods). Se você atualizar um mod, precisará recriar o arquivo de cenário para que as alterações no mod apareçam (e seus salvamentos antigos não estarão disponíveis ao usar o novo arquivo de cenário, então esteja avisado). Os arquivos de cenário são colocados em `Documentos\Project Alice\cenários`, enquanto os arquivos de salvamento estão localizados em `Documentos\Project Alice\salvamentos`.
+O launcher não é apenas um local para selecionar mods e iniciar o jogo. O Katerina Engine usa o que chamamos de "arquivos de cenário" para acelerar o carregamento do jogo. Um arquivo de cenário é essencialmente uma versão eficientemente empacotada dos dados do jogo (conforme modificado por um conjunto específico de mods). Ao executar o jogo pela primeira vez ou selecionar uma nova combinação de mods, você primeiro terá que criar um arquivo de cenário usando o launcher (isso levará mais ou menos tempo dependendo da velocidade do seu computador, do seu disco rígido e da complexidade dos mods). Se você atualizar um mod, precisará recriar o arquivo de cenário para que as alterações no mod apareçam (e seus salvamentos antigos não estarão disponíveis ao usar o novo arquivo de cenário, então esteja avisado). Os arquivos de cenário são colocados em `Documentos\Katerina Engine\cenários`, enquanto os arquivos de salvamento estão localizados em `Documentos\Katerina Engine\salvamentos`.
 
 ## Compatibilidade com HPM
 

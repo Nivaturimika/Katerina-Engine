@@ -1,6 +1,6 @@
 # Descarga
 
-Para descargar la version precopilada de Alice Project, encuentre los "tags" de [Project Alice repository](https://github.com/Nivaturimika/Katerina-Engine).
+Para descargar la version precopilada de Alice Project, encuentre los "tags" de [Katerina Engine repository](https://github.com/Nivaturimika/Katerina-Engine).
 
 ![image](https://github.com/Nivaturimika/Katerina-Engine/assets/39974089/0d393492-0471-44b2-b222-4efe6ed57c92)
 

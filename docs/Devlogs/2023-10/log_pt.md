@@ -4,7 +4,7 @@ Bem-vindo de volta à atualização de outubro. Só mais alguns meses até eu po
 
 ## Alpha pública
 
-A versão [0.8.1 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.1%CE%B1/0.8.1-ALPHA.zip) do Project Alice já está disponível. É um jogo jogável tal como as coisas estão, se você estiver disposto a ignorar alguns bugs aqui e ali. Já joguei uma campanha completa como Áustria (em HPM) sem grandes problemas.
+A versão [0.8.1 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.1%CE%B1/0.8.1-ALPHA.zip) do Katerina Engine já está disponível. É um jogo jogável tal como as coisas estão, se você estiver disposto a ignorar alguns bugs aqui e ali. Já joguei uma campanha completa como Áustria (em HPM) sem grandes problemas.
 
 Relatórios de bugs da comunidade ainda são muito apreciados e nos ajudarão a chegar mais rápido à versão 1.0. Mesmo relatar pequenas coisas como dicas ausentes e outros problemas com a interface do usuário é útil.
 

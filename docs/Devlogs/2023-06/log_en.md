@@ -10,9 +10,9 @@ This month has been unusually productive, possibly because a number of our team 
 
 ## Team Q&A
 
-This month we asked Erik, one of the four founding members of Project Alice and a major contributor to [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "How has working on Project Alice been different from working on SOE?"
+This month we asked Erik, one of the four founding members of Katerina Engine and a major contributor to [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "How has working on Katerina Engine been different from working on SOE?"
 
-> Working on Alice has been significantly smoother, thanks both to having clearer goals and the experience gained from working on SoE. It has been incredibly helpful having worked on a map game before. Progress on Project Alice has also been much faster, which is largely thanks to the excellent work done by all contributors. Another factor is that feature creep is mostly non-existent here.
+> Working on Alice has been significantly smoother, thanks both to having clearer goals and the experience gained from working on SoE. It has been incredibly helpful having worked on a map game before. Progress on Katerina Engine has also been much faster, which is largely thanks to the excellent work done by all contributors. Another factor is that feature creep is mostly non-existent here.
 > 
 > There has been a greater interest in this project, which is to be expected given the large demand for an open source Victoria 2 (just look at the number of forks of Open V2). I'm looking forward to the huge modding potential once 1.0 is completed. Modding in Vic2 is rather limited, and that's something I would like to see improved.
 
@@ -57,7 +57,7 @@ A first draft of almost everything required for the game's daily update, outside
 
 ## International relations
 
-Project Alice has attracted some interest among the Chinese-speaking Victora 2 community. Due to the language barrier and other logistical issues, most of this community is not present on our discord. To help bridge the gap, we will be working with some members of that community to try to provide translations into Chinese of our monthly updates and other key pieces of the documentation. If you are in contact with other non-English-speaking communities that are interested in the project and are willing to do the translation work required, we would be happy to support other languages as well.
+Katerina Engine has attracted some interest among the Chinese-speaking Victora 2 community. Due to the language barrier and other logistical issues, most of this community is not present on our discord. To help bridge the gap, we will be working with some members of that community to try to provide translations into Chinese of our monthly updates and other key pieces of the documentation. If you are in contact with other non-English-speaking communities that are interested in the project and are willing to do the translation work required, we would be happy to support other languages as well.
 
 ## Next month
 

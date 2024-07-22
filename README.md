@@ -1,6 +1,6 @@
-# Project Alice
+# Katerina Engine
 
-Project Alice is a continuation / rewrite of the Open V2 codebase (an open source "retro clone" of Victoria 2).
+Katerina Engine is a continuation / rewrite of the Open V2 codebase (an open source "retro clone" of Victoria 2).
 
 Join us on [discord](https://discord.gg/3WNyk7SWvf).
 
@@ -31,7 +31,7 @@ Join us on [discord](https://discord.gg/3WNyk7SWvf).
 - [April 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_pt.md))
 - [March 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_pt.md))
 
-## About Project Alice (translated)
+## About Katerina Engine (translated)
 
 - [简中介绍](./docs/zh-cn/about.md)
 - [Versión en español](./docs/es-es/about.md)

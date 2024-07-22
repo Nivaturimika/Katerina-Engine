@@ -4,7 +4,7 @@
 
 ## Alpha pública
 
-A versão [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) do Project Alice já está disponível. Relatórios de bugs da comunidade continuam sendo muito apreciados e nos ajudarão a chegar à versão 1.0 mais rapidamente. Estou optimista de que avançaremos para versões beta em algum momento deste mês.
+A versão [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) do Katerina Engine já está disponível. Relatórios de bugs da comunidade continuam sendo muito apreciados e nos ajudarão a chegar à versão 1.0 mais rapidamente. Estou optimista de que avançaremos para versões beta em algum momento deste mês.
 
 ## Novo Mapa
 
