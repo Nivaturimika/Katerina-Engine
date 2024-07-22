@@ -2242,8 +2242,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 
 	// Read national tags from countries.txt
 	{
-		auto countries = open_file(common, NATIVE("countries.txt"));
-		if(countries) {
+		if(auto countries = open_file(common, NATIVE("countries.txt")); countries) {
 			auto content = view_contents(*countries);
 			err.file_name = "countries.txt";
 			parsers::token_generator gen(content.data, content.data + content.file_size);
@@ -2251,6 +2250,16 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		} else {
 			err.fatal = true;
 			err.accumulated_errors += "File common/countries.txt could not be opened\n";
+		}
+		auto countries_dir = open_directory(common, NATIVE("extra_countries"));
+		for(auto countries : simple_fs::list_files(countries_dir, NATIVE(".txt"))) {
+			auto opened_file = open_file(countries);
+			if(opened_file) {
+				auto content = view_contents(*countries);
+				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				parsers::token_generator gen(content.data, content.data + content.file_size);
+				parsers::parse_national_identity_file(gen, err, context);
+			}
 		}
 	}
 	// read religions from religion.txt
@@ -2445,9 +2454,8 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		}
 	}
 	// parse event_modifiers.txt
-	{
-		auto em_file = open_file(common, NATIVE("event_modifiers.txt"));
-		if(em_file) {
+	
+		if(auto em_file = open_file(common, NATIVE("event_modifiers.txt")); em_file) {
 			auto content = view_contents(*em_file);
 			err.file_name = "event_modifiers.txt";
 			parsers::token_generator gen(content.data, content.data + content.file_size);
@@ -2455,6 +2463,16 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		} else {
 			err.fatal = true;
 			err.accumulated_errors += "File common/event_modifiers.txt could not be opened\n";
+		}
+		auto event_modifiers = open_directory(common, NATIVE("event_modifiers"));
+		for(auto em_file : simple_fs::list_files(event_modifiers, NATIVE(".txt"))) {
+			auto opened_file = open_file(em_file);
+			if(opened_file) {
+				auto content = view_contents(*em_file);
+				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				parsers::token_generator gen(content.data, content.data + content.file_size);
+				parsers::parse_event_modifiers_file(gen, err, context);
+			}
 		}
 	}
 	// read *.lua, not being able to read the defines isn't fatal per se

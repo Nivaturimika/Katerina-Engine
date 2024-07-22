@@ -622,3 +622,10 @@ rgo_distribution = {
 	}
 }
 ```
+
+### Modular common
+
+You can now define modular definitions, as if you "modified" the main file:
+
+- `common/event_modifiers`: Appends to `event_modifiers.txt`
+- `common/extra_countries`: Appends to `countries.txt`
