@@ -34,13 +34,13 @@ jobs:
       run: |
         cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -B build
 
-    - name: Build Project Alice
+    - name: Build Katerina Engine
       run: |
-        cmake --build build --parallel --target Alice
+        cmake --build build --parallel --target KatEngine
 
-    - name: Build Project Alice Incremental
+    - name: Build Katerina Engine Incremental
       run: |
-        cmake --build build --parallel --target AliceIncremental
+        cmake --build build --parallel --target KatEngineIncremental
 
   windows-build:
     strategy:
@@ -57,13 +57,13 @@ jobs:
       run: |
         cmake -G "Visual Studio 17 2022" --preset=x64-${{ matrix.config }} -B build
 
-    - name: Build Project Alice
+    - name: Build Katerina Engine
       run: |
-        cmake --build build --parallel --target Alice
+        cmake --build build --parallel --target KatEngine
 
-    - name: Build Project Alice Incremental
+    - name: Build Katerina Engine Incremental
       run: |
-        cmake --build build --parallel --target AliceIncremental
+        cmake --build build --parallel --target KatEngineIncremental
 
   build-check:
     needs: [windows-build, linux-build]

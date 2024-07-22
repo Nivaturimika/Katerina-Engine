@@ -342,7 +342,7 @@ guiTypes = {
 			quadTextureSprite = "GFX_mapmode_naval.n"
 			Orientation = "LOWER_RIGHT"
 		}
-		# New Alice mapmodes!
+		# New mapmodes!
 		guiButtonType = {
 			name = "mapmode_23"
 			tooltipText = "mapmode_23"
@@ -420,7 +420,7 @@ guiTypes = {
 			quadTextureSprite = "GFX_mapmode_growth"
 			Orientation = "LOWER_RIGHT"
 		}
-		# Even newer Alice mapmodes!
+		# Even newer mapmodes!
 		guiButtonType = {
 			name = "mapmode_34"
 			tooltipText = "mapmode_34"
