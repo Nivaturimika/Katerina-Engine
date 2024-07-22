@@ -92,7 +92,7 @@ Some users reported being unable to access the console via (~ or \), so we just 
 
 ### Validator
 
-New features added to Alice's internal validator, now it also validates `news` and `tutorial` folders!
+New features added to KatEngine's internal validator, now it also validates `news` and `tutorial` folders!
 
 ### Miscellaneous
 

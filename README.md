@@ -6,14 +6,14 @@ Join us on [discord](https://discord.gg/3WNyk7SWvf).
 
 ## How to install and play
 - [Download the latest release here](https://github.com/Nivaturimika/Katerina-Engine/releases)
-- Extract the archive and move the executable files and the assets folder into your main Victoria 2 directory. In other words, **Alice.exe should end up in the same folder as v2game.exe**.
+- Extract the archive and move the executable files and the assets folder into your main Victoria 2 directory. In other words, **KatEngine.exe should end up in the same folder as v2game.exe**.
 - IF YOU INSTALLED A PREVIOUS DEMO OR RELEASE: I suggest that you delete it and the old assets folder before copying over the new one, as an extra precaution.
-- Start the game by running launch_alice.exe.
+- Start the game by running KatEngine_Launcher.exe.
 - Mods may or may not run with more or less problems (see the October update and the compatibility patches channel in the discord for more information about particular mods).
 - Read up the [User and multiplayer guide](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/user_guide.md) for further information and troubleshooting
 
 ## Contributing
-- Please, [visit this page](https://schombert.github.io/Project-Alice/md_contributing.html) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/zh-cn/contributing.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/es-es/contributing.md), [Deutsch](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/de-de/contributing.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/pt/contributing.md))
+- Please, [visit this page](https://schombert.github.io/Project-KatEngine/md_contributing.html) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/zh-cn/contributing.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/es-es/contributing.md), [Deutsch](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/de-de/contributing.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/pt/contributing.md))
 
 ## Updates
 

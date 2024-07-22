@@ -8,7 +8,7 @@ This document covers modding extensions that have been added to Katerina Engine 
 
 In Victoria 2, a trigger condition such as as `prestige = 5` will trigger when the nation's prestige is greater than or equal to 5. If you want to test whether the value is less than 5, you would have to bury it inside a `NOT` scope. And testing for exact equality would be even more complicated. To simplify things, we support replacing the `=` with one of the following tokens: `==`, `!=`, `<`, `>`, `<=`, `>=`. `==` tests for exact equality, `!=` for inequality, and the rest have their ordinary meanings. We also support replacing `=` with `!=` in most situations. For example, `tag != USA` is the same as `NOT = { tag = USA }`.
 
-Additionally, any effect scope can have a limit, in the original, `THIS`, `TAG`, `FROM`, `overlord`, `capital_scope` and `any_greater_power` couldn't reliably have a `limit = { ... }` defined within them. However Alice supports defining limits for any of them.
+Additionally, any effect scope can have a limit, in the original, `THIS`, `TAG`, `FROM`, `overlord`, `capital_scope` and `any_greater_power` couldn't reliably have a `limit = { ... }` defined within them. However KatEngine supports defining limits for any of them.
 
 Also, province scopes will not crash the game, take for example:
 
@@ -423,7 +423,7 @@ However, the following new extensions will make GUI editing way less painful:
 
 ### New defines
 
-Alice adds a handful of new defines:
+KatEngine adds a handful of new defines:
 
 - `factories_per_state`: Factories allowed per state, default 8
 - `alice_speed_1`: Speed 1 in miliseconds
@@ -510,7 +510,7 @@ province-id;size;culture;religion;pop-type;rebel-faction(optional)
 
 This allows for higher volume of data, while keeping it readable, editable and most importantly: able to be edited on your favourite office spreadsheet program.
 
-Using this in your mod is simple, create a file ending with `.csv`, like, `Africa.csv`, Alice will load it *alongside* other files, even `.txt` files, if you want to mix them you absolutely can, just bear in mind that every file in the `history/pops/yyyy.mm.dd` is loaded, so be aware of that.
+Using this in your mod is simple, create a file ending with `.csv`, like, `Africa.csv`, KatEngine will load it *alongside* other files, even `.txt` files, if you want to mix them you absolutely can, just bear in mind that every file in the `history/pops/yyyy.mm.dd` is loaded, so be aware of that.
 
 ### Dense CSV province history
 

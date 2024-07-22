@@ -132,7 +132,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 	}
 
 	auto pid = get_parent_pid();
-	wprintf(L"Only Alice can run this!\n");
+	wprintf(L"Only KatEngine can run this!\n");
 	HANDLE hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, FALSE, pid);
 	if(hProcess) {
 		minidump_generate(hProcess);

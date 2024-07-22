@@ -15,9 +15,9 @@ add_executable(save_editor "${PROJECT_SOURCE_DIR}/SaveEditor/save_editor_main.cp
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp")
 endif()
 
-target_link_libraries(save_editor PRIVATE AliceCommon)
+target_link_libraries(save_editor PRIVATE KatEngineCommon)
 
 add_dependencies(save_editor GENERATE_PARSERS)
 add_dependencies(save_editor GENERATE_CONTAINER ParserGenerator)
 
-target_precompile_headers(save_editor REUSE_FROM Alice)
+target_precompile_headers(save_editor REUSE_FROM KatEngine)

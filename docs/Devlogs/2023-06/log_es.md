@@ -10,11 +10,11 @@ este me a sido inusualmente productivo, posiblemente por que mucho de los miembr
 
 ## P&R del equipo
 
-Este mes le preguntamos a Erik, uno de los cuatros fundadores del projecto y un gran contruibidor de [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como hasido trbajar en el Protecto Alice comparado con SOE"
+Este mes le preguntamos a Erik, uno de los cuatros fundadores del projecto y un gran contruibidor de [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como hasido trbajar en el Protecto KatEngine comparado con SOE"
 
-> Trabajar en el Proyecto Alice a sido más facil, gracias a la experiencia de SOE y los objetivos más claros. Haver trbajado en un mapa antes fue de gran ayuda. El progreso en el Proyecto Alice hasido rapido gracias al exelenta trabajo hecho por los contribuidores. Otro factor es que en el Proyecto Alice se intenta prevenir el Síndrome del lavadero.
+> Trabajar en el Proyecto KatEngine a sido más facil, gracias a la experiencia de SOE y los objetivos más claros. Haver trbajado en un mapa antes fue de gran ayuda. El progreso en el Proyecto KatEngine hasido rapido gracias al exelenta trabajo hecho por los contribuidores. Otro factor es que en el Proyecto KatEngine se intenta prevenir el Síndrome del lavadero.
 > 
-> Debido a la demanda por una version de codigo abierto de victoria 2 (solo miren la cantidad de forks de Open V2) el interes en el Proyecto Alice a incrementado. Tengo altas espectativas para la capacidad de modificaciones que va tener el Proyecto Alice cuando slaga la version 1.0. Lo que podemos modificar en victoria 2 es muy limitado, y quiero ver como podemos mejorarlo.
+> Debido a la demanda por una version de codigo abierto de victoria 2 (solo miren la cantidad de forks de Open V2) el interes en el Proyecto KatEngine a incrementado. Tengo altas espectativas para la capacidad de modificaciones que va tener el Proyecto KatEngine cuando slaga la version 1.0. Lo que podemos modificar en victoria 2 es muy limitado, y quiero ver como podemos mejorarlo.
 
 ## progreso en la interface de usuario
 
@@ -57,7 +57,7 @@ Un primer bosquejo de casi todo lo requerido para la actualización interna cont
 
 ## Relaciones internacionales:
 
-El proyecto Alice ha atraído algún en la comunidad China de Victoria 2. Dado principalmente a la barrera del lenguaje y a otros problemas logísticos, la mayoría de la comunidad no se encuentra presente en nuestro Discord. Para ayudar a reducir la brecha, trabajaremos con algunos miembros de la comunidad para proveer traducciones al Chino en nuestras actualizaciones mensuales y otros documentos clave. Si estás en contacto con algún miembro de alguna comunidad que no es de habla inglesa, estás interesado en el proyecto y estás dispuesto a hacer las traducciones necesarias, estaríamos felices de incluir otros lenguajes.
+El proyecto KatEngine ha atraído algún en la comunidad China de Victoria 2. Dado principalmente a la barrera del lenguaje y a otros problemas logísticos, la mayoría de la comunidad no se encuentra presente en nuestro Discord. Para ayudar a reducir la brecha, trabajaremos con algunos miembros de la comunidad para proveer traducciones al Chino en nuestras actualizaciones mensuales y otros documentos clave. Si estás en contacto con algún miembro de alguna comunidad que no es de habla inglesa, estás interesado en el proyecto y estás dispuesto a hacer las traducciones necesarias, estaríamos felices de incluir otros lenguajes.
 
 ## Para el próximo mes
 

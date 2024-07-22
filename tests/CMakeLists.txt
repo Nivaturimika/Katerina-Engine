@@ -16,7 +16,7 @@ add_executable(tests_project "${PROJECT_SOURCE_DIR}/tests/test_main.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp")
 endif()
-target_link_libraries(tests_project PRIVATE AliceCommon)
+target_link_libraries(tests_project PRIVATE KatEngineCommon)
 
 FetchContent_MakeAvailable(Catch2)
 
@@ -42,7 +42,7 @@ add_dependencies(tests_project GENERATE_TEST_PARSERS)
 add_dependencies(tests_project GENERATE_PARSERS)
 add_dependencies(tests_project GENERATE_CONTAINER ParserGenerator)
 
-target_precompile_headers(tests_project REUSE_FROM Alice)
+target_precompile_headers(tests_project REUSE_FROM KatEngine)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/contrib)
 list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)

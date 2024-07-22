@@ -90,7 +90,7 @@ inline constexpr command_info possible_commands[] = {
 		command_info{"none", command_info::type::none, "Dummy command",
 				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
 						command_info::argument_info{}}},
-		command_info{"reload", command_info::type::reload, "Reloads Alice",
+		command_info{"reload", command_info::type::reload, "Reloads KatEngine",
 				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
 						command_info::argument_info{}}},
 		command_info{"abort", command_info::type::abort, "Abnormally terminates execution",

@@ -22,21 +22,21 @@ Drag and drop all of those files into your Victoria 2 directory, it should then 
 
 ![image](https://github.com/Nivaturimika/Katerina-Engine/assets/39974089/3dd79391-999b-410e-8bd1-020437d34b89)
 
-Then simply click on the `launch_alice` executable.
+Then simply click on the `KatEngine_Launcher` executable.
 
-- `Alice`: The main game executable, do not open it directly.
-- `launch_alice`: The game launcher, you need to create/recreate scenarios for each change you do to the mods.
+- `KatEngine`: The main game executable, do not open it directly.
+- `KatEngine_Launcher`: The game launcher, you need to create/recreate scenarios for each change you do to the mods.
 - `dbg_alice`: A small debug utility to help track down errors, optional and it's fine if you don't have it.
 - `readme OR ELSE.txt`: Contains relevant information, again, optional and it's fine if you don't have it.
-- `assets`: Folder NEEDED for Alice to work properly.
+- `assets`: Folder NEEDED for KatEngine to work properly.
 
 ## Ubuntu/PopOS
 
-To install the game on Ubuntu/PopOS, follow the same steps for installation and download as for Windows until the point of launching `launch_alice`. At that point, download [Lutris](https://lutris.net).
+To install the game on Ubuntu/PopOS, follow the same steps for installation and download as for Windows until the point of launching `KatEngine_Launcher`. At that point, download [Lutris](https://lutris.net).
 
 Start Lutris and click on the Wine icon in the sidebar. An icon with an arrow pointing downwards will show up, click that. You should have an installed version already but if you do not, pick one. ge versions are said to be a great base for many games. 
 
-Now click on the + “Manually add a game” icon in the main menu's top left corner. Afterwards, select the last option to "Add a locally installed game". In the first window “Game Info” give the game a name (can be anything). Choose “Wine” as a runner from the pull down. In the second tab “Game options” locate your `launch_alice.exe` file and select it as your “Executable”. Ignore arguments and working directory. “Wine Prefix” I choose ~/Games/Project-Alice for example, and select 64bit for prefix architecture. Under “Runner options” you can choose different wine versions, if you have them. Ignore “System options” you can come in here later if you need to. “Save” and it will exit. if you don’t see you game in the list in Lutris, restart the app. There was a minor bug that won’t show launch banners until you have at least “one game” installed. It is unclear if this bug still exists.
+Now click on the + “Manually add a game” icon in the main menu's top left corner. Afterwards, select the last option to "Add a locally installed game". In the first window “Game Info” give the game a name (can be anything). Choose “Wine” as a runner from the pull down. In the second tab “Game options” locate your `KatEngine_Launcher.exe` file and select it as your “Executable”. Ignore arguments and working directory. “Wine Prefix” I choose ~/Games/Project-KatEngine for example, and select 64bit for prefix architecture. Under “Runner options” you can choose different wine versions, if you have them. Ignore “System options” you can come in here later if you need to. “Save” and it will exit. if you don’t see you game in the list in Lutris, restart the app. There was a minor bug that won’t show launch banners until you have at least “one game” installed. It is unclear if this bug still exists.
 
 Now, the game should be ready to play from the Lutris main menu.
 
@@ -123,7 +123,7 @@ For clients:
 - Ensure you're connecting using IPv4 or IPv6 - accordingly, hosts will not accept a client with a different IPv
 - If using IPv6, check that your router even supports it
 - If using IPv4, do not input semicolons (i.e, `127.0.0.1:1283`), as this will be interpreted as a IPv6 address
-- Check that your firewall is not blocking Alice
+- Check that your firewall is not blocking KatEngine
 - Check your internet connection (maybe even ping the host)
 - If using a VPN tunneling app, check that you're connected to the peer
 - Ensure you all have the same game version
@@ -136,6 +136,6 @@ For hosts:
 - Check your player name is not a) empty, or b) improper
 - If using IPv6, check that your router even supports it
 - If using IPv4, do not input semicolons (i.e, `:1283`), as this will be interpreted as a IPv6 address
-- Check that your firewall is not blocking Alice
+- Check that your firewall is not blocking KatEngine
 - Check your internet connection
 - Check that the port `1984`, is properly forwarded on your machine (you may use an open port checker to analyze this)

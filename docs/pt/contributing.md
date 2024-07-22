@@ -61,7 +61,7 @@ GLFW3
 X11 (deve haver suporte para Wayland mas não há garantias.)
 
 Daqui, compilar é bem direto
-1. `cd Project-Alice`
+1. `cd Project-KatEngine`
 2. `cmake -E make_directory build`
 3. `cmake -E chdir build cmake ..`
 4. `touch src/local_user_settings.hpp`
@@ -92,4 +92,4 @@ Esse arquivo deve conter as seguintes quatro linhas (a última é linha vazia):
 exceto substituindo aquele diretório com o teu diretório de jogo.
 Note que no Windows precisas digitar `\\` ao invés de `\` para cada separador. (O Linux não tem esse problema e podes escrever simplesmente `/`)
 Segunda Nota: no Windows, o BrickPi fez uma mudança tal que, se tiveres o Victoria 2 instalado, poderás ignorar a criação do `local_user_settings.hpp` completamente. Podes querer tentar isso primeiro.
-Enfim, apenas faças build no launch target do Alice, e deves ver o jogo aparecer na tua tela.
+Enfim, apenas faças build no launch target do KatEngine, e deves ver o jogo aparecer na tua tela.

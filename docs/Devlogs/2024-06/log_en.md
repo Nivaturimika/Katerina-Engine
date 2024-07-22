@@ -2,7 +2,7 @@
 
 Oh dear it's been so long since we haven't met each other (it's been 1 month).
 
-It's now pride month, and it's interesting how far we've come in regards to our first release, v1.0 looked radically different than Alice does now.
+It's now pride month, and it's interesting how far we've come in regards to our first release, v1.0 looked radically different than KatEngine does now.
 
 So we want to thank all of you who have continued to support us through our 1.5 years of existence.
 
@@ -18,11 +18,11 @@ Most notably dismantlement got fixed, allowing you to use the complex web of eve
 
 Other issues such as declaring to become independent as Wallachia instantly got fixed too, fixing also other issues with mods such as TOL with a similar casus belli.
 
-Mods such as IGoR_PuIR would report tier_1_focus was not a valid focus category, but that's no longer the case, now Alice made accomodations for the new categories of national foci.
+Mods such as IGoR_PuIR would report tier_1_focus was not a valid focus category, but that's no longer the case, now KatEngine made accomodations for the new categories of national foci.
 
 Renaming issues also got fixed, so now renaming doesn't give provinces the name of "Farmlands".
 
-And it's a good time to say that Alice allows you to tweak AI behaviour or parser behaviour via defines, consult the docs/extensions.md file for more information, but you can tweak the GP limit for AI, the behaviour of `any_country`, and other quirks.
+And it's a good time to say that KatEngine allows you to tweak AI behaviour or parser behaviour via defines, consult the docs/extensions.md file for more information, but you can tweak the GP limit for AI, the behaviour of `any_country`, and other quirks.
 
 ![](./images/gfm.png)
 

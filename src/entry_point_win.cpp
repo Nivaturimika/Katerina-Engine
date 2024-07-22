@@ -131,7 +131,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 
 		if(num_params < 2) {
 #ifdef NDEBUG
-			auto msg = std::string("Start Alice.exe using the launcher");
+			auto msg = std::string("Start KatEngine.exe using the launcher");
 			window::emit_error_message(msg, true);
 			return 0;
 #else

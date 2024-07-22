@@ -2,15 +2,15 @@
 
 ¡Hola! ¿Cómo están todos?
 
-Para el primer blog de desarrollo sobre el Proyecto Alice, vamos a presentar el proyecto y echar un vistazo rápido a lo que el equipo ha estado trabajando en los últimos dos meses:
+Para el primer blog de desarrollo sobre el Proyecto KatEngine, vamos a presentar el proyecto y echar un vistazo rápido a lo que el equipo ha estado trabajando en los últimos dos meses:
 
-## ¿Por qué existe el Proyecto Alice?
+## ¿Por qué existe el Proyecto KatEngine?
 
 Schombert comentó:
 
 > Inicialmente comencé Open V2 porque encontré algunas cosas en Victoria 2 realmente molestas, a pesar de que en general me divertía con el juego. Específicamente, la constante aparición de rebeldes me estaba sacando de quicio, y también me estaba cansando de seleccionar las mismas respuestas a eventos una y otra vez. Dado que Victoria 2 no es tan complicado, pensé que podría recrearlo con algunas correcciones. A medida que las cosas avanzaban, empecé a encontrar más y más cosas que podía hacer de manera diferente, y quizás mejor. Fue divertido, pero al mismo tiempo ralentizó significativamente el desarrollo. Eventualmente, me cansé de trabajar en ello, y la comunidad no parecía muy interesada, así que lo dejé.
 >
-> Sin embargo, hace aproximadamente año y medio, terminé en el discord del SOE (Symphony of Empires), donde estuve discutiendo su proyecto y dando ocasionalmente algunos consejos basados en mi experiencia con Open V2. Estar allí ayudó a revivir un poco mi interés y eventualmente me llevó a escribir una herramienta (contenedor de datos) que es la columna vertebral del Proyecto Alice. Eventualmente, algunas personas allí, así como algunos nuevos amigos que hice en el camino, se ofrecieron a ayudarme a terminar lo que empecé, y aquí estamos.
+> Sin embargo, hace aproximadamente año y medio, terminé en el discord del SOE (Symphony of Empires), donde estuve discutiendo su proyecto y dando ocasionalmente algunos consejos basados en mi experiencia con Open V2. Estar allí ayudó a revivir un poco mi interés y eventualmente me llevó a escribir una herramienta (contenedor de datos) que es la columna vertebral del Proyecto KatEngine. Eventualmente, algunas personas allí, así como algunos nuevos amigos que hice en el camino, se ofrecieron a ayudarme a terminar lo que empecé, y aquí estamos.
 
 ## Mapa
 

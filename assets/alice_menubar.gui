@@ -342,7 +342,7 @@ guiTypes = {
 			quadTextureSprite = "GFX_mapmode_naval.n"
 			Orientation = "LOWER_RIGHT"
 		}
-		# New Alice mapmodes!
+		# New KatEngine mapmodes!
 		guiButtonType = {
 			name = "mapmode_23"
 			tooltipText = "mapmode_23"

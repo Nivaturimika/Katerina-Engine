@@ -4,7 +4,7 @@ Es noviembre.
 
 # Alpha pública
 
-La versión [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) del Proyecto Alice ya está disponible.Los informes de errores de la comunidad siguen siendo muy apreciados y nos ayudarán a llegar más rápido a la versión 1.0. Soy optimista de que avanzaremos a versiones beta en algún momento de este mes.
+La versión [0.8.7 alpha](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.8.7%CE%B1/0.8.7-ALPHA.zip) del Proyecto KatEngine ya está disponible.Los informes de errores de la comunidad siguen siendo muy apreciados y nos ayudarán a llegar más rápido a la versión 1.0. Soy optimista de que avanzaremos a versiones beta en algún momento de este mes.
 
 ## Nuevo Mapa
 

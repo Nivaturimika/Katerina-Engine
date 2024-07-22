@@ -13,7 +13,7 @@ foreach(file ${TESTING})
 					${CMAKE_CURRENT_BINARY_DIR}/${file})
 endforeach()
 
-add_executable(launch_alice WIN32
+add_executable(KatEngine_Launcher WIN32
 	"${PROJECT_SOURCE_DIR}/src/launcher/launcher_main.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
@@ -23,13 +23,13 @@ add_executable(launch_alice WIN32
 	"${PROJECT_SOURCE_DIR}/src/alice.rc"
 	${LAUNCHER_ASSET_FILES})
 
-target_compile_definitions(launch_alice PUBLIC ALICE_NO_ENTRY_POINT)
+target_compile_definitions(KatEngine_Launcher PUBLIC ALICE_NO_ENTRY_POINT)
 
-target_link_libraries(launch_alice PRIVATE AliceCommon)
-target_link_libraries(launch_alice PRIVATE dbghelp)
-target_link_libraries(launch_alice INTERFACE libglew_static)
-target_link_libraries(launch_alice INTERFACE stb_image)
-target_link_libraries(launch_alice INTERFACE freetype)
-target_link_libraries(launch_alice INTERFACE harfbuzz)
+target_link_libraries(KatEngine_Launcher PRIVATE KatEngineCommon)
+target_link_libraries(KatEngine_Launcher PRIVATE dbghelp)
+target_link_libraries(KatEngine_Launcher INTERFACE libglew_static)
+target_link_libraries(KatEngine_Launcher INTERFACE stb_image)
+target_link_libraries(KatEngine_Launcher INTERFACE freetype)
+target_link_libraries(KatEngine_Launcher INTERFACE harfbuzz)
 
-target_precompile_headers(launch_alice REUSE_FROM Alice)
+target_precompile_headers(KatEngine_Launcher REUSE_FROM KatEngine)

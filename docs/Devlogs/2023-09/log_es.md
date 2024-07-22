@@ -32,11 +32,11 @@ Finalmente, para corregir un error, un desarrollador necesita saber cómo verlo 
 
 ## Launcher
 
-La adición más reciente y significativa al Proyecto Alice es el nuevo launcher.
+La adición más reciente y significativa al Proyecto KatEngine es el nuevo launcher.
 
 ![Launcher](./images/launcher.png)
 
-El launcher no es solo un lugar para seleccionar mods y comenzar el juego. El Proyecto Alice utiliza lo que llamamos "archivos de escenario" para acelerar la carga del juego. Un archivo de escenario es esencialmente una versión eficientemente empaquetada de los datos del juego (modificados por un conjunto dado de mods). Cuando ejecutas el juego por primera vez o seleccionas una nueva combinación de mods, primero debes crear un archivo de escenario utilizando el launcher (esto tomará más o menos tiempo dependiendo de la velocidad de tu computadora, tu disco duro y la complejidad de los mods). Si actualizas un mod, necesitarás recrear el archivo de escenario para que aparezcan los cambios en el mod (y tus antiguas partidas guardadas no estarán disponibles al usar el nuevo archivo de escenario, así que ten cuidado). Los archivos de escenario se colocan en `Your Documents\Katerina Engine\scenarios`, mientras que los archivos de guardado se encuentran en `Your Documents\Katerina Engine\saves`.
+El launcher no es solo un lugar para seleccionar mods y comenzar el juego. El Proyecto KatEngine utiliza lo que llamamos "archivos de escenario" para acelerar la carga del juego. Un archivo de escenario es esencialmente una versión eficientemente empaquetada de los datos del juego (modificados por un conjunto dado de mods). Cuando ejecutas el juego por primera vez o seleccionas una nueva combinación de mods, primero debes crear un archivo de escenario utilizando el launcher (esto tomará más o menos tiempo dependiendo de la velocidad de tu computadora, tu disco duro y la complejidad de los mods). Si actualizas un mod, necesitarás recrear el archivo de escenario para que aparezcan los cambios en el mod (y tus antiguas partidas guardadas no estarán disponibles al usar el nuevo archivo de escenario, así que ten cuidado). Los archivos de escenario se colocan en `Your Documents\Katerina Engine\scenarios`, mientras que los archivos de guardado se encuentran en `Your Documents\Katerina Engine\saves`.
 
 ## Compatibilidad con HPM
 

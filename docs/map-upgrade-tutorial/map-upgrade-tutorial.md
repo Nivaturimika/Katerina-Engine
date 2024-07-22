@@ -76,8 +76,8 @@ Finally, you will need to create a `.mod` file for your map upgrade mod. You sho
 ```
 name = "HPM Globe Map"
 path = "mod/HPMGlobe"
-dependencies = { "HPM Alice Patch" "Open V2 Globe Map" }
+dependencies = { "HPM KatEngine Patch" "Open V2 Globe Map" }
 replace_path = "mod/OpenV2Map/history/provinces/other"
 ```
 
-Change the name to be the name of your upgrade mod and change the path to the folder that your mod is in. In the dependencies, change `HPM Alice Patch` to the name of the mod that you are upgrading (or its compatibility patch--if it needs one--as the compatibility patch will in turn pull in the base mod). Leave the dependency on `Open V2 Globe Map` as is: this allows you to reuse some of the textures already made for that mod, which can significantly reduce the size of your mod. Also leave `replace_path` as it is (this will prevent the province history files added for the open v2 globe from conflicting with things).
+Change the name to be the name of your upgrade mod and change the path to the folder that your mod is in. In the dependencies, change `HPM KatEngine Patch` to the name of the mod that you are upgrading (or its compatibility patch--if it needs one--as the compatibility patch will in turn pull in the base mod). Leave the dependency on `Open V2 Globe Map` as is: this allows you to reuse some of the textures already made for that mod, which can significantly reduce the size of your mod. Also leave `replace_path` as it is (this will prevent the province history files added for the open v2 globe from conflicting with things).

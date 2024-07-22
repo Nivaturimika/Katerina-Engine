@@ -18,10 +18,10 @@ Platziert all diese Dateien in Euer Victoria 2 Verzeichnis. Das sollte dann so a
 
 ![image](https://github.com/Nivaturimika/Katerina-Engine/assets/39974089/3dd79391-999b-410e-8bd1-020437d34b89)
 
-Dann einfach `launch_alice` ausführen.
+Dann einfach `KatEngine_Launcher` ausführen.
 
-- `Alice`: Das Spiel. Nicht direkt ausführen.
-- `launch_alice`: Der Launcher. Immer (re)create scenario drücken wenn Ihr was an den Mods ändert.
+- `KatEngine`: Das Spiel. Nicht direkt ausführen.
+- `KatEngine_Launcher`: Der Launcher. Immer (re)create scenario drücken wenn Ihr was an den Mods ändert.
 - `dbg_alice`: Hilft beim Debuggen. Ist optional und wird nicht zum Spielen des Spiels benötigt.
 - `readme OR ELSE.txt`: Das Readme. Ist optional und wird nicht zum Spielen des Spiels benötigt.
-- `assets`: Wird gebraucht um Alice korrekt auszuführen.
+- `assets`: Wird gebraucht um KatEngine korrekt auszuführen.

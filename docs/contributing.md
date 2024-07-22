@@ -57,7 +57,7 @@ GLFW3
 X11 (support *should* exist for wayland but there is not guarantee.)
 
 From here compiling is straightforward
-1. `cd Project-Alice`
+1. `cd Project-KatEngine`
 2. do something to make the debugger launch the program in your V2 directory so that it can find the game files (I don't know how this is done on linux)
 4. `cmake -B build . -DCMAKE_BUILD_TYPE=Debug`
 5. `cmake --build build -j$(nproc)`
@@ -67,7 +67,7 @@ From here compiling is straightforward
 
 Because the project in its current state needs to use the existing game files (as a source of graphics, for starters), everyone needs to tell the compiler where their copy of the game is installed and to put the new files in that directory as well.
 
-Copy the assets folder to your V2 directory. **Note: when the asset files are updated by you or someone else you will need to copy any changed files to your V2 directory and rebuild any scenarios. Not doing so will probably result in crashes**. Then, you will need to configure your debugger to launch Alice and the Launcher *as if* they were located in your V2 directory. For visual studio and visual studio code you can do that by creating a launch configuration file. (See [here for Visual Studio](https://learn.microsoft.com/en-us/visualstudio/ide/customize-build-and-debug-tasks-in-visual-studio?view=vs-2022) and [here for VS code](https://code.visualstudio.com/docs/cpp/launch-json-reference)). The contents of that file will look something like mine (copied below) except with the directory location changed to point to your V2 directory.
+Copy the assets folder to your V2 directory. **Note: when the asset files are updated by you or someone else you will need to copy any changed files to your V2 directory and rebuild any scenarios. Not doing so will probably result in crashes**. Then, you will need to configure your debugger to launch KatEngine and the Launcher *as if* they were located in your V2 directory. For visual studio and visual studio code you can do that by creating a launch configuration file. (See [here for Visual Studio](https://learn.microsoft.com/en-us/visualstudio/ide/customize-build-and-debug-tasks-in-visual-studio?view=vs-2022) and [here for VS code](https://code.visualstudio.com/docs/cpp/launch-json-reference)). The contents of that file will look something like mine (copied below) except with the directory location changed to point to your V2 directory.
 
 ```
 {
@@ -77,15 +77,15 @@ Copy the assets folder to your V2 directory. **Note: when the asset files are up
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "launch_alice.exe (Launcher\\launch_alice.exe)",
-      "name": "launch_alice.exe (Launcher\\launch_alice.exe)",
+      "projectTarget": "KatEngine_Launcher.exe (Launcher\\KatEngine_Launcher.exe)",
+      "name": "KatEngine_Launcher.exe (Launcher\\KatEngine_Launcher.exe)",
       "currentDir": "C:\\programs\\V2"
     },
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "Alice.exe",
-      "name": "Alice.exe",
+      "projectTarget": "KatEngine.exe",
+      "name": "KatEngine.exe",
       "currentDir": "C:\\programs\\V2",
       "args": [
         ""
@@ -99,4 +99,4 @@ Note that `args` contains the command line parameters to launch the program with
 
 ### Incremental Build
 
-The `Alice` build target combines nearly all of the game's source files into one large translation unit which means that changing a single line of source code almost always requires recompiling the entire game. This can take up to 10 minutes depending on build configuration and system specifications even if you change a single line. Therefore it's recommended that any contributors use the `AliceIncremental` build target as this breaks the game into smaller translation units that can be compiled in parallel and also greatly reduces the amount of time required to recompile any changes. Github CI builds the `Alice` target so it will catch any changes that do not compile under the `Alice` target.
+The `KatEngine` build target combines nearly all of the game's source files into one large translation unit which means that changing a single line of source code almost always requires recompiling the entire game. This can take up to 10 minutes depending on build configuration and system specifications even if you change a single line. Therefore it's recommended that any contributors use the `KatEngineIncremental` build target as this breaks the game into smaller translation units that can be compiled in parallel and also greatly reduces the amount of time required to recompile any changes. Github CI builds the `KatEngine` target so it will catch any changes that do not compile under the `KatEngine` target.

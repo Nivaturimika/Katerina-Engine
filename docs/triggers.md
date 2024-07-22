@@ -798,7 +798,7 @@ Not an exhaustive list of triggers, be wary the trigger codes **may** have flags
 
 ### Optimizations
 
-Alice performs various optimizations and simplifications upon the trigger code right after it's parsed:
+KatEngine performs various optimizations and simplifications upon the trigger code right after it's parsed:
 
 - For scopes:
     - If the scope is empty (has nothing to evaluate)

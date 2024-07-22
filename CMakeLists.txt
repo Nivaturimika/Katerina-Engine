@@ -4,7 +4,7 @@
 
 cmake_minimum_required (VERSION 3.15)
 
-project (ProjectAlice LANGUAGES CXX C)
+project (ProjectKatEngine LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -78,24 +78,24 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 )
 
 if(WIN32)
-add_executable(Alice WIN32
+add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}
 	"src/alice.rc"
 	${ASSET_FILES})
-add_executable(AliceIncremental WIN32
+add_executable(KatEngineIncremental WIN32
 	${ALICE_INCREMENTAL_SOURCES_LIST}
 	"src/alice.rc"
 	${ASSET_FILES})
 else()
-add_executable(Alice WIN32
+add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}
 	${ASSET_FILES})
-add_executable(AliceIncremental WIN32
+add_executable(KatEngineIncremental WIN32
 	${ALICE_INCREMENTAL_SOURCES_LIST}
 	${ASSET_FILES})
 endif()
 
-target_compile_definitions(AliceIncremental PRIVATE INCREMENTAL=1)
+target_compile_definitions(KatEngineIncremental PRIVATE INCREMENTAL=1)
 
 if(NOT WIN32)
 	add_compile_definitions(PREFER_ONE_TBB)
@@ -105,8 +105,8 @@ endif()
 add_subdirectory(dependencies)
 add_subdirectory(ParserGenerator)
 
-add_library(AliceCommon INTERFACE)
-target_compile_definitions(AliceCommon INTERFACE "PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\"")
+add_library(KatEngineCommon INTERFACE)
+target_compile_definitions(KatEngineCommon INTERFACE "PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\"")
 if(WIN32)
 	# string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 	# string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -124,44 +124,44 @@ if(WIN32)
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		if(OPTIMIZE_MODE STREQUAL "On")
 			message(STATUS "Optimizing with PGO data")
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 				/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /GR- /W4 /permissive- /WX /d2archSSE42 /GF /w34388 /w34389 -Wno-unused-macros -Wno-zero-length-array -Wno-switch-default -Wno-reserved-identifier -Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field /Z7 -Wno-invalid-offsetof -Wno-deprecated-volatile -Wno-missing-prototypes -Wno-reserved-identifier -Wno-implicit-int-float-conversion -Wno-unsafe-buffer-usage -Wno-float-equal -Wno-shadow-field-in-constructor -Wno-gnu-anonymous-struct -Wno-nested-anon-types -Wno-double-promotion -Wno-shadow-uncaptured-local -Wno-nonportable-system-include-path -Wno-format-nonliteral -Wno-shorten-64-to-32 -Wno-ctad-maybe-unsupported -Wno-implicit-int-conversion -Wno-disabled-macro-expansion -Wno-comma -Wno-cast-function-type-strict -Wno-cast-function-type /DNDEBUG /wd4530 /MT /O2 /Oi /sdl- /GS- /Gy /Gw /Zc:inline -Wno-profile-instr-missing -Wno-profile-instr-out-of-date -fprofile-instr-use=code.profdata)
-			target_link_options(AliceCommon INTERFACE /OPT:REF /OPT:ICF /LTCG -fprofile-instr-use=code.profdata)
+			target_link_options(KatEngineCommon INTERFACE /OPT:REF /OPT:ICF /LTCG -fprofile-instr-use=code.profdata)
 		elseif(PROFILE_MODE STREQUAL "On")
 			message(STATUS "Compiling for PGO instrumentation")
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 				/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /GR- /W4 /permissive- /WX /d2archSSE42 /GF /w34388 /w34389 -Wno-unused-macros -Wno-zero-length-array -Wno-switch-default -Wno-reserved-identifier -Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field /Z7 -Wno-invalid-offsetof -Wno-deprecated-volatile -Wno-missing-prototypes -Wno-reserved-identifier -Wno-implicit-int-float-conversion -Wno-unsafe-buffer-usage -Wno-float-equal -Wno-shadow-field-in-constructor -Wno-gnu-anonymous-struct -Wno-nested-anon-types -Wno-double-promotion -Wno-shadow-uncaptured-local -Wno-nonportable-system-include-path -Wno-format-nonliteral -Wno-shorten-64-to-32 -Wno-ctad-maybe-unsupported -Wno-implicit-int-conversion -Wno-disabled-macro-expansion -Wno-comma -Wno-cast-function-type-strict -Wno-cast-function-type /DNDEBUG /wd4530 /MT /O2 /Oi /sdl- /GS- /Gy /Gw /Zc:inline -fprofile-instr-generate)
-			target_link_options(AliceCommon INTERFACE /DEBUG:FULL /OPT:REF /OPT:ICF /LTCG -fprofile-instr-generate)
+			target_link_options(KatEngineCommon INTERFACE /DEBUG:FULL /OPT:REF /OPT:ICF /LTCG -fprofile-instr-generate)
 		else()
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 											/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /GR- /W4 /permissive- /WX /d2archSSE42 /GF /w34388 /w34389 -Wno-unused-macros -Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field /Z7 -Wno-invalid-offsetof -Wno-deprecated-volatile -Wno-missing-prototypes -Wno-reserved-identifier -Wno-implicit-int-float-conversion -Wno-unsafe-buffer-usage -Wno-float-equal -Wno-shadow-field-in-constructor -Wno-gnu-anonymous-struct -Wno-nested-anon-types -Wno-double-promotion -Wno-shadow-uncaptured-local -Wno-nonportable-system-include-path -Wno-format-nonliteral -Wno-shorten-64-to-32 -Wno-ctad-maybe-unsupported -Wno-implicit-int-conversion -Wno-disabled-macro-expansion -Wno-comma -Wno-cast-function-type-strict -Wno-cast-function-type
 				$<$<CONFIG:Debug>:			/RTC1 /EHsc /MTd /Od>
 				$<$<NOT:$<CONFIG:Debug>>: 	/DNDEBUG /wd4530 /MT /O2 /Oi /sdl- /GS- /Gy /Gw /Zc:inline>)
-			target_link_options(AliceCommon INTERFACE
+			target_link_options(KatEngineCommon INTERFACE
 				$<$<CONFIG:Debug>: 			/DEBUG:FULL >
 				$<$<NOT:$<CONFIG:Debug>>: 	/OPT:REF /OPT:ICF /LTCG>)
 		endif()
 	else()
-		set_target_properties(AliceCommon PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR})
+		set_target_properties(KatEngineCommon PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR})
 
 		if(OPTIMIZE_MODE STREQUAL "On")
 			message(STATUS "Optimizing with PGO data")
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 				/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /wd4723 /GR- /W4 /permissive- /Zc:preprocessor /WX /d2archSSE42 /GF /w34388 /w34389 /DNDEBUG /wd4530 /MT /O2 /Oi /GL /sdl- /GS- /Gy /Gw /Zc:preprocessor /Zc:inline)
-			target_link_options(AliceCommon INTERFACE /OPT:REF /OPT:ICF /LTCG /USEPROFILE)
+			target_link_options(KatEngineCommon INTERFACE /OPT:REF /OPT:ICF /LTCG /USEPROFILE)
 		elseif(PROFILE_MODE STREQUAL "On")
 			message(STATUS "Compiling for PGO instrumentation")
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 				/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /wd4723 /GR- /W4 /permissive- /Zc:preprocessor /WX /d2archSSE42 /GF /w34388 /w34389 /Z7 /DNDEBUG /wd4530 /MT /O2 /Oi /GL /sdl- /GS- /Gy /Gw /Zc:preprocessor /Zc:inline)
-			target_link_options(AliceCommon INTERFACE /DEBUG:FULL /OPT:REF /OPT:ICF /LTCG /GENPROFILE)
+			target_link_options(KatEngineCommon INTERFACE /DEBUG:FULL /OPT:REF /OPT:ICF /LTCG /GENPROFILE)
 		else()
 			message(STATUS "Normal, not PGO, build")
-			target_compile_options(AliceCommon INTERFACE
+			target_compile_options(KatEngineCommon INTERFACE
 				/bigobj /wd4100 /wd4189 /wd4065 /wd4201 /wd4324 /GR- /W4 /permissive- /Zc:preprocessor /WX /d2archSSE42 /GF /w34388 /w34389 /Z7
 				  $<$<CONFIG:Debug>: /EHsc /MTd /RTC1 /Od>
 # for faster debug builds, replace /RTC1 /Od with /O1 -- should be able to use /Ox, but for some reason that crashes ZSTD
 				  $<$<NOT:$<CONFIG:Debug>>: 	/DNDEBUG /wd4530 /MT /O2 /Oi /GL /sdl- /GS- /Gy /Gw /Zc:preprocessor /Zc:inline>)
-			target_link_options(AliceCommon INTERFACE
+			target_link_options(KatEngineCommon INTERFACE
 				$<$<CONFIG:Debug>: 			/DEBUG:FULL >
 				$<$<NOT:$<CONFIG:Debug>>: 	/DEBUG:FULL /OPT:REF /OPT:ICF /LTCG>)
 		endif()
@@ -169,33 +169,33 @@ if(WIN32)
 else() # GCC or CLANG
 	# See for FMA support: https://stackoverflow.com/questions/21001388/fma3-in-gcc-how-to-enable
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		target_compile_options(AliceCommon INTERFACE
+		target_compile_options(KatEngineCommon INTERFACE
 			-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wdangling-else -Wno-unused-private-field -std=c++20
 			$<$<CONFIG:Debug>:			-mfpmath=sse -mavx2 -mfma -g -pipe>
 			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
 	else()
-		target_compile_options(AliceCommon INTERFACE
+		target_compile_options(KatEngineCommon INTERFACE
 										# -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field -Wno-unused-but-set-variable -Wno-parentheses
 			$<$<CONFIG:Debug>:			-mfpmath=sse -mavx2 -mfma -g -pipe>
 			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
 	endif()
 endif()
-target_link_libraries(AliceCommon INTERFACE dependency_DataContainer)
-target_link_libraries(AliceCommon INTERFACE libglew_static)
-target_link_libraries(AliceCommon INTERFACE stb_image)
-target_link_libraries(AliceCommon INTERFACE freetype)
-target_link_libraries(AliceCommon INTERFACE harfbuzz)
-target_link_libraries(AliceCommon INTERFACE glm)
+target_link_libraries(KatEngineCommon INTERFACE dependency_DataContainer)
+target_link_libraries(KatEngineCommon INTERFACE libglew_static)
+target_link_libraries(KatEngineCommon INTERFACE stb_image)
+target_link_libraries(KatEngineCommon INTERFACE freetype)
+target_link_libraries(KatEngineCommon INTERFACE harfbuzz)
+target_link_libraries(KatEngineCommon INTERFACE glm)
 if (WIN32)
-	target_link_libraries(AliceCommon INTERFACE ws2_32)
-	target_link_libraries(AliceCommon INTERFACE wsock32)
+	target_link_libraries(KatEngineCommon INTERFACE ws2_32)
+	target_link_libraries(KatEngineCommon INTERFACE wsock32)
 else()
-	target_link_libraries(AliceCommon INTERFACE dependency_tbb)
-	target_link_libraries(AliceCommon INTERFACE glfw)
-	target_link_libraries(AliceCommon INTERFACE miniaudio)
-	target_link_libraries(AliceCommon INTERFACE dependency_icu)
+	target_link_libraries(KatEngineCommon INTERFACE dependency_tbb)
+	target_link_libraries(KatEngineCommon INTERFACE glfw)
+	target_link_libraries(KatEngineCommon INTERFACE miniaudio)
+	target_link_libraries(KatEngineCommon INTERFACE dependency_icu)
 endif()
-target_include_directories(AliceCommon INTERFACE
+target_include_directories(KatEngineCommon INTERFACE
 	${PROJECT_SOURCE_DIR}/src
 	${PROJECT_SOURCE_DIR}/src/ai
 	${PROJECT_SOURCE_DIR}/src/common_types
@@ -224,11 +224,11 @@ target_include_directories(AliceCommon INTERFACE
 	"${glew_SOURCE_DIR}/include/GL"
 	"ankerl")
 
-target_link_libraries(Alice PRIVATE AliceCommon)
-target_link_libraries(AliceIncremental PRIVATE AliceCommon)
+target_link_libraries(KatEngine PRIVATE KatEngineCommon)
+target_link_libraries(KatEngineIncremental PRIVATE KatEngineCommon)
 
 # System headers
-target_precompile_headers(Alice
+target_precompile_headers(KatEngine
 	PRIVATE <stddef.h>
 	PRIVATE <stdint.h>
 	PRIVATE <assert.h>
@@ -238,7 +238,7 @@ target_precompile_headers(Alice
 	PRIVATE <signal.h>
 	PRIVATE <ctype.h>
 )
-target_precompile_headers(AliceIncremental
+target_precompile_headers(KatEngineIncremental
 	PRIVATE <stddef.h>
 	PRIVATE <stdint.h>
 	PRIVATE <assert.h>
@@ -249,7 +249,7 @@ target_precompile_headers(AliceIncremental
 	PRIVATE <ctype.h>
 )
 # Standard C++ library headers
-target_precompile_headers(Alice
+target_precompile_headers(KatEngine
 	PRIVATE <vector>
 	PRIVATE <array>
 	PRIVATE <optional>
@@ -269,7 +269,7 @@ target_precompile_headers(Alice
 	PRIVATE <limits>
 	PRIVATE <iterator>
 )
-target_precompile_headers(AliceIncremental
+target_precompile_headers(KatEngineIncremental
 	PRIVATE <vector>
 	PRIVATE <array>
 	PRIVATE <optional>
@@ -290,7 +290,7 @@ target_precompile_headers(AliceIncremental
 	PRIVATE <iterator>
 )
 # Aliases for C library
-target_precompile_headers(Alice
+target_precompile_headers(KatEngine
 	PRIVATE <cstdlib>
 	PRIVATE <cstddef>
 	PRIVATE <cstdint>
@@ -298,7 +298,7 @@ target_precompile_headers(Alice
 	PRIVATE <cstdarg>
 	PRIVATE <cmath>
 )
-target_precompile_headers(AliceIncremental
+target_precompile_headers(KatEngineIncremental
 	PRIVATE <cstdlib>
 	PRIVATE <cstddef>
 	PRIVATE <cstdint>
@@ -306,8 +306,8 @@ target_precompile_headers(AliceIncremental
 	PRIVATE <cstdarg>
 	PRIVATE <cmath>
 )
-# Alice provided headers
-target_precompile_headers(Alice
+# KatEngine provided headers
+target_precompile_headers(KatEngine
 	PRIVATE [["simple_fs.hpp"]]
 	PRIVATE [["constants.hpp"]]
 	PRIVATE [["unordered_dense.h"]]
@@ -318,7 +318,7 @@ target_precompile_headers(Alice
 	PRIVATE [["date_interface.hpp"]]
 	PRIVATE [["stb_image.h"]]
 )
-target_precompile_headers(AliceIncremental
+target_precompile_headers(KatEngineIncremental
 	PRIVATE [["simple_fs.hpp"]]
 	PRIVATE [["constants.hpp"]]
 	PRIVATE [["unordered_dense.h"]]
@@ -330,15 +330,15 @@ target_precompile_headers(AliceIncremental
 	PRIVATE [["stb_image.h"]]
 )
 
-target_precompile_headers(AliceIncremental
+target_precompile_headers(KatEngineIncremental
 	PRIVATE [["system_state.hpp"]]
 	)
 
 if(WIN32)
 else()
-	target_precompile_headers(Alice
+	target_precompile_headers(KatEngine
 		PRIVATE [["miniaudio.h"]])
-	target_precompile_headers(AliceIncremental
+	target_precompile_headers(KatEngineIncremental
 		PRIVATE [["miniaudio.h"]])
 endif()
 
@@ -354,8 +354,8 @@ add_custom_command(
 
 # Sets a dependency on the generated file
 add_custom_target(GENERATE_CONTAINER DEPENDS ${CONTAINER_PATH}.hpp)
-add_dependencies(Alice GENERATE_CONTAINER ParserGenerator)
-add_dependencies(AliceIncremental GENERATE_CONTAINER ParserGenerator)
+add_dependencies(KatEngine GENERATE_CONTAINER ParserGenerator)
+add_dependencies(KatEngineIncremental GENERATE_CONTAINER ParserGenerator)
 
 # The command to build the generated parsers file
 add_custom_command(
@@ -423,8 +423,8 @@ add_custom_target(GENERATE_PARSERS DEPENDS
 	${PROJECT_SOURCE_DIR}/src/parsing/trigger_parser_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/text/bmfont_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/text/font_defs_generated.hpp)
-add_dependencies(Alice GENERATE_PARSERS)
-add_dependencies(AliceIncremental GENERATE_PARSERS)
+add_dependencies(KatEngine GENERATE_PARSERS)
+add_dependencies(KatEngineIncremental GENERATE_PARSERS)
 
 if (BUILD_TESTING)
     enable_testing()
@@ -433,7 +433,7 @@ endif()
 
 add_subdirectory(SaveEditor)
 if(WIN32)
-	add_subdirectory(DbgAlice)
+	add_subdirectory(DbgKatEngine)
 	add_subdirectory(Launcher)
 endif()
 

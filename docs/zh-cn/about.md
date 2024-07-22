@@ -7,7 +7,7 @@
 ### 从 OpenV2 结束的地方接手
 
 
-Katerina Engine 是以 [Alice Roosevelt Longworth](https://en.wikipedia.org/wiki/Alice_Roosevelt_Longworth) 的名字命名的。它的目标是建立一个全新的 [Open V2](https://github.com/schombert/Open-V2) 版本，而我最初的想法是克隆一个 V2 ，并在此基础上开发一个完整的游戏。这意味着在早期的开发中，基本上就是复制 V2 的机制，在 1.0 版本发布之后，才会开始考虑新增特性。
+Katerina Engine 是以 [KatEngine Roosevelt Longworth](https://en.wikipedia.org/wiki/KatEngine_Roosevelt_Longworth) 的名字命名的。它的目标是建立一个全新的 [Open V2](https://github.com/schombert/Open-V2) 版本，而我最初的想法是克隆一个 V2 ，并在此基础上开发一个完整的游戏。这意味着在早期的开发中，基本上就是复制 V2 的机制，在 1.0 版本发布之后，才会开始考虑新增特性。
 
 目前，我们在重构 OpenV2 方面进展不错，但是我们仍然没有赶上 OpenV2 的进度。不过相比于之前，我们的进展要快得多了。这主要是因为现在有其他人共同贡献他们的才华（Openv2 只有一个人开发），同时我也不会再犯之前的错误。
 

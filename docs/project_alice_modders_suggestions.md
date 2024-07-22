@@ -4,7 +4,7 @@ Some issues are solved by Katerina Engine already, some aren't, feel free to add
 
 - No first-hand support for dynamic localisation (without using change_region_name)
 - Trade window only supports N number of goods before it overflows
-- Undocumented (Alice lists all of them by the way) and inconsistent modifiers (some that can only be used on technologies and inventions)
+- Undocumented (KatEngine lists all of them by the way) and inconsistent modifiers (some that can only be used on technologies and inventions)
 - Have to add 1 technology for each folder so the UI doesn't break
 - Selecting which wars to call an ally into
 

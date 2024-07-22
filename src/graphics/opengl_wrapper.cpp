@@ -945,7 +945,7 @@ void render_classic_text(sys::state& state, text::stored_glyphs const& txt, floa
 	// The color variables are unused currently.
 	//
 	// Spacing, kearning, etc. are already applied.
-	// Scaling (unintentionally) is also applied (by whatever part of Alice scales the normal fonts).
+	// Scaling (unintentionally) is also applied (by whatever part of KatEngine scales the normal fonts).
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, font.ftexid);

@@ -10,7 +10,7 @@ Version [1.0.9](https://github.com/Nivaturimika/Katerina-Engine/releases/downloa
 
 This month was mainly dedicated to reworking the economy. Thanks to one of our developers, Peter, we had at least two iterations from the original economic model, while I'm not certain how it works in detail, it supposedly has more dynamic behaviour to it, removes price caps, and is overall more "realistic".
 
-Another particular change throughout the month was supporting non-AVX2 CPUs. While this may seem like a rather small change, a tiny portion of our user base wasn't able to play Alice properly on older computers. However, our vectorization engine, Data Container, did, in fact, support SSE4.2, SSE3 and AVX2, but it required some tweaks to make it properly work on real computers.
+Another particular change throughout the month was supporting non-AVX2 CPUs. While this may seem like a rather small change, a tiny portion of our user base wasn't able to play KatEngine properly on older computers. However, our vectorization engine, Data Container, did, in fact, support SSE4.2, SSE3 and AVX2, but it required some tweaks to make it properly work on real computers.
 
 Since images are worth a thousand words, and I don't feel like writing an essay, here is a summary of the new additions:
 
@@ -40,6 +40,6 @@ Since images are worth a thousand words, and I don't feel like writing an essay,
 
 ## AHMP
 
-One of our developers, Naveah, forked HPM and started doing some changes to it, to retrofit it for the new Alice engine. Some gameplay changes came with it too, such as being able to research any technology at start date (provided you research the ones from the columns first). New substate mechanics and a general orientation towards catering to the multiplayer crowd. While realizing that Alice differs from the original game.
+One of our developers, Naveah, forked HPM and started doing some changes to it, to retrofit it for the new KatEngine engine. Some gameplay changes came with it too, such as being able to research any technology at start date (provided you research the ones from the columns first). New substate mechanics and a general orientation towards catering to the multiplayer crowd. While realizing that KatEngine differs from the original game.
 
 You can obtain AHMP here: [GitHub Repository](https://github.com/nivaturimika/ahmp)

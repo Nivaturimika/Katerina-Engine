@@ -36,7 +36,7 @@ Implementation note: I go back and forth a bit on whether to store the size of t
 
 ## Language system
 
-By default, Alice will define the following languages, corresponding to the default languages used on Victoria 2:
+By default, KatEngine will define the following languages, corresponding to the default languages used on Victoria 2:
 * en-US: English US
 * fr-FR: French
 * de-DE: German

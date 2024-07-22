@@ -1,6 +1,6 @@
 # Progreso hasta abril de 2023
 
-¡Hola Alices! A medida que comienza abril, nosotros seguimos aquí, trabajando arduamente.
+¡Hola KatEngines! A medida que comienza abril, nosotros seguimos aquí, trabajando arduamente.
 
 ## Nuevos miembros en el equipo
 
@@ -25,7 +25,7 @@ Nuevos programadores, artistas o personas con otros talentos para contribuir son
 
 ## Preguntas y respuestas del equipo
 
-Para este mes le preguntamos a Diana, la coordinadora del proyecto y segunda al mando en general, "¿en qué estás interesada en agregar al Proyecto Alice?"
+Para este mes le preguntamos a Diana, la coordinadora del proyecto y segunda al mando en general, "¿en qué estás interesada en agregar al Proyecto KatEngine?"
 
 > Para ser honesta, hasta ahora tengo habilidades de programación limitadas. Quería ayudar, pero las únicas cosas que podía hacer eran publicidad (cuyas posibilidades se redujeron un poco) y administrar personas (pero resulta que la gente aquí es bastante buena administrándose a sí misma). Tal vez intente trastear más con el código más adelante. Una vez que el proyecto esté más cerca de su lanzamiento, quiero molestar a los creadores de mods para tratar de convencerlos de hacer mods compatibles con él, y posiblemente ayudar con eso yo misma si la compatibilidad con mods se conserva tanto como espero, ya que realmente puedo hacer mods para los juegos de PDX, solo evito hacerlo debido a la falta de fuerza de voluntad. Además de eso, el proyecto es importante para mí; es algo que deseé que sucediera durante mucho, mucho tiempo, especialmente porque Victoria 2 es demasiado lento para mí.
 

@@ -459,42 +459,42 @@ void make_directories(native_string const& path) {
 }
 
 directory get_or_create_settings_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/settings/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/settings/";
 	make_directories(path);
 
 	return directory(nullptr, path);
 }
 
 directory get_or_create_save_game_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/saves/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/saves/";
 	make_directories(path);
 
 	return directory(nullptr, path);
 }
 
 directory get_or_create_templates_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/templates/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/templates/";
 	make_directories(path);
 
 	return directory(nullptr, path);
 }
 
 directory get_or_create_oos_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/oos/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/oos/";
 	make_directories(path);
 
 	return directory(nullptr, path);
 }
 
 directory get_or_create_data_dumps_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/data_dumps/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/data_dumps/";
 	make_directories(path);
 
 	return directory(nullptr, path);
 }
 
 directory get_or_create_scenario_directory() {
-	native_string path = native_string(getenv("HOME")) + "/.local/share/Alice/scenarios/";
+	native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/scenarios/";
 	make_directories(path);
 
 	return directory(nullptr, path);

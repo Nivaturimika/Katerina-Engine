@@ -4,7 +4,7 @@
 
 ## Beta pública
 
-La versión [0.9.3 beta](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip) del Proyecto Alice ya está disponible.
+La versión [0.9.3 beta](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v0.9.3%CE%B2/0.9.3-BETA.zip) del Proyecto KatEngine ya está disponible.
 
 ## Pequeños Detalles
 

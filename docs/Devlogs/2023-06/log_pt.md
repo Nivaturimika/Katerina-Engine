@@ -10,9 +10,9 @@ Este mês tem sido excepcionalmente productivo, possivelmente porque alguns dos 
 
 ## Equipe P&R
 
-Este mês perguntamos a Erik, um dos quatro membros fundadores do Projeto Alice e um grande colaborador do [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como foi trabalhar no Projeto Alice em comparação com o trabalho no SOE?"
+Este mês perguntamos a Erik, um dos quatro membros fundadores do Projeto KatEngine e um grande colaborador do [SOE](https://github.com/symphony-of-empires/symphony-of-empires): "Como foi trabalhar no Projeto KatEngine em comparação com o trabalho no SOE?"
 
-> Trabalhar no Alice foi significativamente mais tranquilo, graças a ter metas mais claras e à experiência adquirida ao trabalhar no SOE. Foi incrivelmente útil ter trabalhado em um jogo de mapas antes. O progresso no Projeto Alice também tem sido muito mais rápido, o que se deve em grande parte ao excelente trabalho feito por todos os colaboradores. Outro fator é que a expansão de recursos é praticamente inexistente aqui.
+> Trabalhar no KatEngine foi significativamente mais tranquilo, graças a ter metas mais claras e à experiência adquirida ao trabalhar no SOE. Foi incrivelmente útil ter trabalhado em um jogo de mapas antes. O progresso no Projeto KatEngine também tem sido muito mais rápido, o que se deve em grande parte ao excelente trabalho feito por todos os colaboradores. Outro fator é que a expansão de recursos é praticamente inexistente aqui.
 > 
 > Houve um maior interesse neste projeto, o que é esperado devido à grande demanda por um Victoria 2 de código aberto (basta olhar para o número de forks do Open V2). Estou ansioso pelo enorme potencial de modding assim que o 1.0 estiver concluído. Modding no Vic2 é bastante limitado, e isso é algo que gostaria de ver melhorado.
 
@@ -57,7 +57,7 @@ Um primeiro rascunho de quase tudo o que é necessário para a atualização di�
 
 ## Relações internacionais
 
-O Projeto Alice atraiu algum interesse entre a comunidade de falantes de chinês do Victoria 2. Devido à barreira do idioma e a outros problemas logísticos, a maioria desta comunidade não está presente em nosso Discord. Para ajudar a preencher essa lacuna, trabalharemos com alguns membros dessa comunidade para tentar fornecer traduções para o chinês de nossas atualizações mensais e outras peças-chave da documentação. Se você estiver em contato com outras comunidades que não falam inglês e que estejam interessadas no projeto, e dispostas a fazer o trabalho de tradução necessário, ficaríamos felizes em apoiar outros idiomas também.
+O Projeto KatEngine atraiu algum interesse entre a comunidade de falantes de chinês do Victoria 2. Devido à barreira do idioma e a outros problemas logísticos, a maioria desta comunidade não está presente em nosso Discord. Para ajudar a preencher essa lacuna, trabalharemos com alguns membros dessa comunidade para tentar fornecer traduções para o chinês de nossas atualizações mensais e outras peças-chave da documentação. Se você estiver em contato com outras comunidades que não falam inglês e que estejam interessadas no projeto, e dispostas a fazer o trabalho de tradução necessário, ficaríamos felizes em apoiar outros idiomas também.
 
 ## Próximo mês
 

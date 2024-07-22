@@ -1,6 +1,6 @@
 # Descarga
 
-Para descargar la version precopilada de Alice Project, encuentre los "tags" de [Katerina Engine repository](https://github.com/Nivaturimika/Katerina-Engine).
+Para descargar la version precopilada de KatEngine Project, encuentre los "tags" de [Katerina Engine repository](https://github.com/Nivaturimika/Katerina-Engine).
 
 ![image](https://github.com/Nivaturimika/Katerina-Engine/assets/39974089/0d393492-0471-44b2-b222-4efe6ed57c92)
 
@@ -22,13 +22,13 @@ Mueve todos los archivos a la carpeta en la que tienes Victoria 2, asi se deberi
 
 ![image](https://github.com/Nivaturimika/Katerina-Engine/assets/39974089/3dd79391-999b-410e-8bd1-020437d34b89)
 
-Ahora simplemente ejecuta el archivo `launch_alice`
+Ahora simplemente ejecuta el archivo `KatEngine_Launcher`
 
-- `Alice`: Es el juego base, no lo abras.
-- 'launch_alice`: Es el launcher, lo necesitas para crear los escenarios.
+- `KatEngine`: Es el juego base, no lo abras.
+- 'KatEngine_Launcher`: Es el launcher, lo necesitas para crear los escenarios.
 - `dbg_alice`: Una pequeña herramienta para encontrar bugs, es opcional y no tienes porque tenerlo.
 - `readme OR ELSE.txt`: Contiene informacion util, es opcional y no tienes porque tenerlo tampoco.
-- `assets`: carpeta NECESARIA para el funcionamiente de Alice.
+- `assets`: carpeta NECESARIA para el funcionamiente de KatEngine.
 
 #traducido por Condor1817
 
@@ -76,7 +76,7 @@ Para Clientes:
 - Asegúrate de estar conectando utilizando IPv4 o IPv6, ya que los anfitriones no aceptarán un cliente con una IP diferente.
 - Si usas IPv6, verifica que tu enrutador incluso lo admita.
 - Si usas IPv4, no ingreses puntos y comas (es decir, `127.0.0.1:1283`), ya que se interpretará como una dirección IPv6.
-- Verifica que tu firewall no esté bloqueando a Alice.
+- Verifica que tu firewall no esté bloqueando a KatEngine.
 - Verifica tu conexión a Internet (quizás incluso haz un ping al anfitrión).
 - Si estás utilizando una aplicación de túneles VPN, asegúrate de estar conectado al par.
 - Asegúrate de que todos tengan la misma versión del juego.
@@ -89,7 +89,7 @@ Para Anfitriones:
 - Asegúrate de que tu nombre de jugador no esté a) vacío, o b) incorrecto.
 - Si usas IPv6, verifica que tu enrutador incluso lo admita.
 - Si usas IPv4, no ingreses puntos y comas (es decir, `:1283`), ya que se interpretará como una dirección IPv6.
-- Verifica que tu firewall no esté bloqueando a Alice.
+- Verifica que tu firewall no esté bloqueando a KatEngine.
 - Verifica tu conexión a Internet.
 - Verifica que el puerto `1984` esté correctamente reenviado en tu máquina (puedes usar una herramienta de verificación de puertos abiertos para analizar esto).
 

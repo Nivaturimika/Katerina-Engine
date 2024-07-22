@@ -4,7 +4,7 @@ Hacia cosas más grandes y mejores
 
 ## Ha llegado la versión 1.0
 
-La versión [1.0.1](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.1/1.0.1.zip) del Proyecto Alice ya está disponible.
+La versión [1.0.1](https://github.com/Nivaturimika/Katerina-Engine/releases/download/v1.0.1/1.0.1.zip) del Proyecto KatEngine ya está disponible.
 
 ## ¿Un clon de Victoria 2?
 
