@@ -2255,7 +2255,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		for(auto countries : simple_fs::list_files(countries_dir, NATIVE(".txt"))) {
 			auto opened_file = open_file(countries);
 			if(opened_file) {
-				auto content = view_contents(*countries);
+				auto content = view_contents(*opened_file);
 				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_national_identity_file(gen, err, context);
@@ -2468,7 +2468,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		for(auto em_file : simple_fs::list_files(event_modifiers, NATIVE(".txt"))) {
 			auto opened_file = open_file(em_file);
 			if(opened_file) {
-				auto content = view_contents(*em_file);
+				auto content = view_contents(*opened_file);
 				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_event_modifiers_file(gen, err, context);
