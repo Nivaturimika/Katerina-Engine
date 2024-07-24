@@ -3150,14 +3150,14 @@ bool can_partial_retreat_from(sys::state& state, dcon::land_battle_id b) {
 		return true;
 	if(!military::can_retreat_from_battle(state, b))
 		return false;
-	return state.network_mode != sys::network_mode_type::single_player;
+	return true;
 }
 bool can_partial_retreat_from(sys::state& state, dcon::naval_battle_id b) {
 	if(!b)
 		return true;
 	if(!military::can_retreat_from_battle(state, b))
 		return false;
-	return state.network_mode != sys::network_mode_type::single_player;
+	return true;
 }
 
 std::vector<dcon::province_id> can_move_army(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::province_id dest) {
