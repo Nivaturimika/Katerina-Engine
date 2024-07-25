@@ -159,15 +159,10 @@ class province_pop_button : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
 		dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
-		if(state.ui_state.population_subwindow != nullptr) {
+		state.open_population();
+		if(state.ui_state.population_subwindow) {
 			Cyto::Any fl_payload = pop_list_filter(province_id);
 			state.ui_state.population_subwindow->impl_set(state, fl_payload);
-			if(state.ui_state.topbar_subwindow != nullptr)
-				state.ui_state.topbar_subwindow->set_visible(state, false);
-			state.ui_state.topbar_subwindow = state.ui_state.population_subwindow;
-			state.ui_state.population_subwindow->set_visible(state, true);
-			state.ui_state.root->move_child_to_front(state.ui_state.population_subwindow);
-			// ui_state.population_subwindow->impl_get(*this, fl_payload);
 		}
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {

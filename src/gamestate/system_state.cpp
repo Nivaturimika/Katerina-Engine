@@ -2061,6 +2061,21 @@ void list_pop_types(sys::state& state, parsers::scenario_building_context& conte
 	}
 }
 
+void state::open_population() {
+	if(!ui_state.population_subwindow) {
+		auto tab = ui::make_element_by_type<ui::population_window>(*this, "country_pop");
+		ui_state.population_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.population_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.population_subwindow;
+		ui_state.population_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.population_subwindow);
+	}
+}
+
 void state::open_diplomacy(dcon::nation_id target) {
 	if(!ui_state.diplomacy_subwindow) {
 		auto tab = ui::make_element_by_type<ui::diplomacy_window>(*this, "country_diplomacy");

@@ -750,6 +750,7 @@ struct alignas(64) state {
 
 	void console_log(std::string_view message);
 
+	void open_population();
 	void open_diplomacy(dcon::nation_id target); // Open the diplomacy window with target selected
 
 	bool is_selected(dcon::army_id a) {

@@ -827,12 +827,6 @@ public:
 		return sound::get_tab_military_sound(state);
 	}
 };
-class topbar_population_tab_button : public topbar_tab_button {
-public:
-	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
-		return sound::get_tab_population_sound(state);
-	}
-};
 class topbar_production_tab_button : public topbar_tab_button {
 public:
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
@@ -851,29 +845,13 @@ public:
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_population_sound(state);
 	}
-
 	void button_action(sys::state& state) noexcept override {
-		auto const override_and_show_tab = [&]() {
-			topbar_subwindow->set_visible(state, true);
-			topbar_subwindow->impl_on_update(state);
-
-			Cyto::Any payload = pop_list_filter(state.local_player_nation);
-			topbar_subwindow->impl_set(state, payload);
-
-			state.ui_state.root->move_child_to_front(topbar_subwindow);
-			state.ui_state.topbar_subwindow = topbar_subwindow;
-		};
-
-		if(state.ui_state.topbar_subwindow->is_visible()) {
-			state.ui_state.topbar_subwindow->set_visible(state, false);
-			if(state.ui_state.topbar_subwindow != topbar_subwindow) {
-				override_and_show_tab();
-			}
-		} else {
-			override_and_show_tab();
+		if(state.ui_state.population_subwindow && state.ui_state.population_subwindow->is_visible()) {
+			state.ui_state.population_subwindow->set_visible(state, false);
+			return;
 		}
+		state.open_population();
 	}
-
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
@@ -1951,13 +1929,7 @@ public:
 			state.ui_state.root->add_child_to_back(std::move(tab));
 			return btn;
 		} else if(name == "topbarbutton_pops") {
-			auto btn = make_element_by_type<topbar_population_view_button>(state, id);
-			auto tab = make_element_by_type<population_window>(state, "country_pop");
-			btn->topbar_subwindow = tab.get();
-
-			state.ui_state.population_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_population_view_button>(state, id);
 		} else if(name == "topbarbutton_trade") {
 			auto btn = make_element_by_type<topbar_trade_tab_button>(state, id);
 
@@ -1968,8 +1940,7 @@ public:
 			state.ui_state.root->add_child_to_back(std::move(tab));
 			return btn;
 		} else if(name == "topbarbutton_diplomacy") {
-			auto btn = make_element_by_type<topbar_diplomacy_tab_button>(state, id);
-			return btn;
+			return make_element_by_type<topbar_diplomacy_tab_button>(state, id);
 		} else if(name == "topbarbutton_military") {
 			auto btn = make_element_by_type<topbar_military_tab_button>(state, id);
 
