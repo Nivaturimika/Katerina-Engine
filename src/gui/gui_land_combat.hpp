@@ -1434,13 +1434,8 @@ class lc_win_lose : public color_text_element {
 class lc_warscore : public color_text_element {
 	void on_update(sys::state& state) noexcept override {
 		military::land_battle_report* report = retrieve< military::land_battle_report*>(state, parent);
-		if(report->player_on_winning_side) {
-			set_text(state, std::string("+") + text::format_float(report->warscore_effect, 1));
-			color = text::text_color::green;
-		} else {
-			set_text(state, text::format_float(report->warscore_effect, 1));
-			color = text::text_color::red;
-		}
+		set_text(state, text::format_float(report->warscore_effect, 1));
+		color = (report->player_on_winning_side) ? text::text_color::green : text::text_color::red;
 	}
 };
 
