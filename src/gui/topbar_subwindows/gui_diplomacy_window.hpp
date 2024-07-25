@@ -1966,8 +1966,10 @@ public:
 		row_contents.clear();
 		state.world.for_each_war([&](dcon::war_id id) { row_contents.push_back(id); });
 		std::sort(row_contents.begin(), row_contents.end(), [&](dcon::war_id a, dcon::war_id b) {
-			auto in_a = military::get_role(state, a, state.local_player_nation) != military::war_role::none;
-			auto in_b = military::get_role(state, b, state.local_player_nation) != military::war_role::none;
+			auto in_a = military::get_role(state, a, state.local_player_nation) != military::war_role::none
+				|| state.world.war_get_is_crisis_war(a) || state.world.war_get_is_great(a);
+			auto in_b = military::get_role(state, b, state.local_player_nation) != military::war_role::none
+				|| state.world.war_get_is_crisis_war(a) || state.world.war_get_is_great(a);
 			if(in_a != in_b) {
 				return in_a;
 			} else {
