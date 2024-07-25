@@ -735,9 +735,6 @@ void render_ui_selection_screen(sys::state& state) {
 }
 
 void render_ui_ingame(sys::state& state) {
-	if(state.ui_state.tl_chat_list) {
-		state.ui_state.root->move_child_to_front(state.ui_state.tl_chat_list);
-	}
 	if(state.map_state.get_zoom() > map::zoom_close) {
 		if(!state.ui_state.ctrl_held_down) {
 			if(state.ui_state.rgos_root
