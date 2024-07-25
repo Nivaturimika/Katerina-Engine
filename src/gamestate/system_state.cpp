@@ -38,6 +38,15 @@
 #include "gui_unit_grid_box.hpp"
 #include "blake2.h"
 
+#include "gui_production_window.hpp"
+#include "gui_diplomacy_window.hpp"
+#include "gui_technology_window.hpp"
+#include "gui_politics_window.hpp"
+#include "gui_budget_window.hpp"
+#include "gui_trade_window.hpp"
+#include "gui_population_window.hpp"
+#include "gui_military_window.hpp"
+
 namespace ui {
 
 void create_in_game_windows(sys::state& state) {
@@ -2053,14 +2062,20 @@ void list_pop_types(sys::state& state, parsers::scenario_building_context& conte
 }
 
 void state::open_diplomacy(dcon::nation_id target) {
-	if(ui_state.diplomacy_subwindow != nullptr) {
-		if(ui_state.topbar_subwindow != nullptr) {
+	if(!ui_state.diplomacy_subwindow) {
+		auto tab = ui::make_element_by_type<ui::diplomacy_window>(*this, "country_diplomacy");
+		ui_state.diplomacy_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.diplomacy_subwindow) {
+		if(ui_state.topbar_subwindow) {
 			ui_state.topbar_subwindow->set_visible(*this, false);
 		}
 		ui_state.topbar_subwindow = ui_state.diplomacy_subwindow;
 		ui_state.diplomacy_subwindow->set_visible(*this, true);
 		ui_state.root->move_child_to_front(ui_state.diplomacy_subwindow);
-		send(*this, ui_state.diplomacy_subwindow, ui::element_selection_wrapper<dcon::nation_id>{ target });
+		if(target)
+			send(*this, ui_state.diplomacy_subwindow, ui::element_selection_wrapper<dcon::nation_id>{ target });
 	}
 }
 

@@ -799,8 +799,24 @@ public:
 		return sound::get_tab_politics_sound(state);
 	}
 };
-class topbar_diplomacy_tab_button : public topbar_tab_button {
+class topbar_diplomacy_tab_button : public checkbox_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
+			state.ui_state.diplomacy_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_diplomacy(dcon::nation_id{ });
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.diplomacy_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_diplomacy_sound(state);
 	}
@@ -1953,10 +1969,6 @@ public:
 			return btn;
 		} else if(name == "topbarbutton_diplomacy") {
 			auto btn = make_element_by_type<topbar_diplomacy_tab_button>(state, id);
-
-			auto tab = make_element_by_type<diplomacy_window>(state, "country_diplomacy");
-			btn->topbar_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
 			return btn;
 		} else if(name == "topbarbutton_military") {
 			auto btn = make_element_by_type<topbar_military_tab_button>(state, id);

@@ -2082,7 +2082,6 @@ private:
 public:
 	void on_create(sys::state& state) noexcept override {
 		generic_tabbed_window::on_create(state);
-		state.ui_state.diplomacy_subwindow = this;
 
 		xy_pair base_gp_info_offset =
 				state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("diplomacy_greatpower_pos"))->second.definition].position;
