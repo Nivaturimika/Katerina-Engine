@@ -1715,6 +1715,11 @@ public:
 class topbar_sphere_icon : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
+			state.ui_state.diplomacy_subwindow->set_visible(state, false);
+			return;
+		}
+
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		dcon::nation_id target{};
 		if(nations::is_great_power(state, n)) {
