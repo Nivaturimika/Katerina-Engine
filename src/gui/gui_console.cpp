@@ -2215,7 +2215,11 @@ void ui::console_edit::edit_box_back_slash(sys::state& state) noexcept {
 }
 
 void ui::console_window::show_toggle(sys::state& state) {
-	assert(state.ui_state.console_window);
+	if(!state.ui_state.console_window) {
+		auto win = ui::make_element_by_type<ui::console_window>(state, "alice_console_window");
+		state.ui_state.console_window = win.get();
+		state.ui_state.root->add_child_to_front(std::move(win));
+	}
 	if(state.ui_state.console_window->is_visible()) { //close
 		sound::play_interface_sound(state, sound::get_console_close_sound(state), state.user_settings.master_volume * state.user_settings.interface_volume);
 	} else { //open

@@ -578,7 +578,7 @@ void military_screen_hotkeys(sys::state& state, sys::virtual_key keycode, sys::k
 }
 
 void handle_escape_basic(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
-	if(state.ui_state.console_window->is_visible()) {
+	if(state.ui_state.console_window && state.ui_state.console_window->is_visible()) {
 		ui::console_window::show_toggle(state);
 	} else if(!state.selected_armies.empty() || !state.selected_navies.empty()) {
 		deselect_units(state);
@@ -690,7 +690,7 @@ void on_key_down(sys::state& state, sys::virtual_key keycode, sys::key_modifiers
 }
 
 void console_log_pick_nation(sys::state& state, std::string_view message) {
-	if(state.ui_state.console_window_r != nullptr) {
+	if(state.ui_state.console_window_r) {
 		Cyto::Any payload = std::string(message);
 		state.ui_state.console_window_r->impl_get(state, payload);
 		if(true && !(state.ui_state.console_window_r->is_visible())) {
@@ -701,7 +701,7 @@ void console_log_pick_nation(sys::state& state, std::string_view message) {
 }
 
 void console_log_other(sys::state& state, std::string_view message) {
-	if(state.ui_state.console_window != nullptr) {
+	if(state.ui_state.console_window) {
 		Cyto::Any payload = std::string(message);
 		state.ui_state.console_window->impl_get(state, payload);
 		if(true && !(state.ui_state.console_window->is_visible())) {

@@ -71,7 +71,6 @@ void create_in_game_windows(sys::state& state) {
 			static_cast<ui::army_group_counter_window*>(ptr.get())->prov = id;
 			state.ui_state.military_root->add_child_to_front(std::move(ptr));
 		});
-
 		{
 			auto new_elm_army_group = ui::make_element_by_type<ui::army_group_details_window_sea>(state, "alice_army_group_panel");
 			state.ui_state.army_group_window_sea = static_cast<ui::army_group_details_window_sea*>(new_elm_army_group.get());
@@ -105,11 +104,6 @@ void create_in_game_windows(sys::state& state) {
 	{
 		auto ewin = ui::make_element_by_type<ui::end_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("back_end"))->second.definition);
 		state.ui_state.end_screen->add_child_to_front(std::move(ewin));
-	}
-	{
-		auto window = ui::make_element_by_type<ui::console_window>(state, "alice_console_window");
-		state.ui_state.console_window = window.get();
-		state.ui_state.root->add_child_to_front(std::move(window));
 	}
 	state.world.for_each_province([&](dcon::province_id id) {
 		if(state.world.province_get_port_to(id)) {
@@ -222,59 +216,9 @@ void create_in_game_windows(sys::state& state) {
 		state.ui_state.root->add_child_to_front(std::move(new_elm));
 	}
 	{
-		auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "alice_naval_combat");
-		new_elm->set_visible(state, false);
-		state.ui_state.root->add_child_to_front(std::move(new_elm));
-	}
-	{
-		auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
-		new_elm->set_visible(state, false);
-		state.ui_state.root->add_child_to_front(std::move(new_elm));
-	}
-	{
 		auto new_elm = ui::make_element_by_type<ui::topbar_window>(state, "topbar");
 		new_elm->impl_on_update(state);
 		state.ui_state.root->add_child_to_front(std::move(new_elm));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_gradient>(state, "alice_map_legend_gradient_window");
-		state.ui_state.map_gradient_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_civ_level>(state, "alice_map_legend_civ_level");
-		state.ui_state.map_civ_level_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_col>(state, "alice_map_legend_colonial");
-		state.ui_state.map_col_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_dip>(state, "alice_map_legend_diplomatic");
-		state.ui_state.map_dip_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_rr>(state, "alice_map_legend_infrastructure");
-		state.ui_state.map_rr_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_nav>(state, "alice_map_legend_naval");
-		state.ui_state.map_nav_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_rank>(state, "alice_map_legend_rank");
-		state.ui_state.map_rank_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
-	}
-	{
-		auto legend_win = ui::make_element_by_type<ui::map_legend_rec>(state, "alice_map_legend_rec");
-		state.ui_state.map_rec_legend = legend_win.get();
-		state.ui_state.root->add_child_to_front(std::move(legend_win));
 	}
 	{ // And the other on the normal in game UI
 		auto new_elm = ui::make_element_by_type<ui::chat_window>(state, "ingame_lobby_window");

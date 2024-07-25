@@ -375,11 +375,18 @@ public:
 		for(auto b : state.world.province_get_land_battle_location(prov)) {
 			auto w = b.get_battle().get_war_from_land_battle_in_war();
 			if(!w) {
-				land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-				win->battle = b.get_battle();
-				if(state.ui_state.army_combat_window->is_visible()) {
+				if(state.ui_state.army_combat_window && state.ui_state.army_combat_window->is_visible()) {
+					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.army_combat_window->impl_on_update(state);
 				} else {
+					if(!state.ui_state.army_combat_window) {
+						auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
+						state.ui_state.army_combat_window = new_elm.get();
+						state.ui_state.root->add_child_to_front(std::move(new_elm));
+					}
+					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.army_combat_window->set_visible(state, true);
 					if(state.ui_state.province_window) {
 						state.ui_state.province_window->set_visible(state, false);
@@ -391,11 +398,18 @@ public:
 				}
 				return message_result::consumed;
 			} else if(military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
-				land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-				win->battle = b.get_battle();
-				if(state.ui_state.army_combat_window->is_visible()) {
+				if(state.ui_state.army_combat_window && state.ui_state.army_combat_window->is_visible()) {
+					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.army_combat_window->impl_on_update(state);
 				} else {
+					if(!state.ui_state.army_combat_window) {
+						auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
+						state.ui_state.army_combat_window = new_elm.get();
+						state.ui_state.root->add_child_to_front(std::move(new_elm));
+					}
+					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.army_combat_window->set_visible(state, true);
 					if(state.ui_state.province_window) {
 						state.ui_state.province_window->set_visible(state, false);
@@ -412,11 +426,18 @@ public:
 			auto w = b.get_battle().get_war_from_naval_battle_in_war();
 
 			 if(military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
-				naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
-				win->battle = b.get_battle();
-				if(state.ui_state.naval_combat_window->is_visible()) {
+				if(state.ui_state.naval_combat_window && state.ui_state.naval_combat_window->is_visible()) {
+					naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.naval_combat_window->impl_on_update(state);
 				} else {
+					if(!state.ui_state.naval_combat_window) {
+						auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "alice_naval_combat");
+						state.ui_state.naval_combat_window = new_elm.get();
+						state.ui_state.root->add_child_to_front(std::move(new_elm));
+					}
+					naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
+					win->battle = b.get_battle();
 					state.ui_state.naval_combat_window->set_visible(state, true);
 					if(state.ui_state.province_window) {
 						state.ui_state.province_window->set_visible(state, false);
