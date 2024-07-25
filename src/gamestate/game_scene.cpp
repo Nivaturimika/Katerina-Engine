@@ -437,6 +437,7 @@ void handle_drag_stop(sys::state& state, int32_t x, int32_t y, sys::key_modifier
 		&& std::abs(y - state.y_drag_start) <= int32_t(std::ceil(state.x_size * 0.0025));
 
 	state.ui_state.scrollbar_timer = 0;
+	window::change_cursor(state, window::cursor_type::normal);
 	if((insignificant_movement && state.ui_state.under_mouse != nullptr) || !state.drag_selecting) {
 		state.drag_selecting = false;
 	} else if(insignificant_movement) {
@@ -454,7 +455,6 @@ void handle_drag_stop(sys::state& state, int32_t x, int32_t y, sys::key_modifier
 			std::swap(y, state.y_drag_start);
 		state.current_scene.drag_selection(state, x, y, mod);
 	}
-	window::change_cursor(state, window::cursor_type::normal);
 }
 
 void on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod) {
