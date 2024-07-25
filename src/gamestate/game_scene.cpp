@@ -437,27 +437,24 @@ void handle_drag_stop(sys::state& state, int32_t x, int32_t y, sys::key_modifier
 		&& std::abs(y - state.y_drag_start) <= int32_t(std::ceil(state.x_size * 0.0025));
 
 	state.ui_state.scrollbar_timer = 0;
-	if(state.ui_state.under_mouse != nullptr || !state.drag_selecting) {
+	if((insignificant_movement && state.ui_state.under_mouse != nullptr) || !state.drag_selecting) {
 		state.drag_selecting = false;
-		window::change_cursor(state, window::cursor_type::normal);
 	} else if(insignificant_movement) {
 		// we assume that user wanted to click
 		state.drag_selecting = false;
-		window::change_cursor(state, window::cursor_type::normal);
 		send_selected_province_to_province_window(state);
 		deselect_units(state);
 		state.game_state_updated.store(true, std::memory_order_release);
 	} else {
 		// stop dragging and select units
 		state.drag_selecting = false;
-		window::change_cursor(state, window::cursor_type::normal);
 		if(x < state.x_drag_start)
 			std::swap(x, state.x_drag_start);
 		if(y < state.y_drag_start)
 			std::swap(y, state.y_drag_start);
-
 		state.current_scene.drag_selection(state, x, y, mod);
 	}
+	window::change_cursor(state, window::cursor_type::normal);
 }
 
 void on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod) {

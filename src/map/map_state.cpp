@@ -1332,8 +1332,7 @@ void map_state::on_lbutton_down(sys::state& state, int32_t x, int32_t y, int32_t
 	last_unit_box_drag_pos = glm::vec2(x, y);
 }
 
-void map_state::on_lbutton_up(sys::state& state, int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y,
-		sys::key_modifiers mod) {
+void map_state::on_lbutton_up(sys::state& state, int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y, sys::key_modifiers mod) {
 	left_mouse_down = false;
 	map_data.set_drag_box(false, {}, {}, {});
 	auto mouse_pos = glm::vec2(x, y);
