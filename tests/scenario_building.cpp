@@ -911,6 +911,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		REQUIRE(state->world.modifier_get_province_values(mod_id).offsets[0] == sys::provincial_mod_offsets::boost_strongest_party);
 		REQUIRE(state->world.modifier_get_province_values(mod_id).values[0] == 5.0f);
 	}
+	state->world.issue_option_resize_support_modifiers(world.issue_option_size());
 	// pending issue/ reform options
 	{
 		err.file_name = "issues.txt";
