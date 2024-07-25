@@ -1969,7 +1969,7 @@ public:
 			auto in_a = military::get_role(state, a, state.local_player_nation) != military::war_role::none
 				|| state.world.war_get_is_crisis_war(a) || state.world.war_get_is_great(a);
 			auto in_b = military::get_role(state, b, state.local_player_nation) != military::war_role::none
-				|| state.world.war_get_is_crisis_war(a) || state.world.war_get_is_great(a);
+				|| state.world.war_get_is_crisis_war(b) || state.world.war_get_is_great(b);
 			if(in_a != in_b) {
 				return in_a;
 			} else {
