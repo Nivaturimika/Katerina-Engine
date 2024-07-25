@@ -1714,6 +1714,29 @@ public:
 
 class topbar_sphere_icon : public standard_nation_icon {
 public:
+	void button_action(sys::state& state) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		dcon::nation_id target{};
+		if(nations::is_great_power(state, n)) {
+			for(auto it : state.world.nation_get_gp_relationship_as_great_power(n)) {
+				if((it.get_status() & nations::influence::is_banned) == 0) {
+					if(it.get_influence() >= state.defines.increaseopinion_influence_cost
+						&& (nations::influence::level_mask & it.get_status()) != nations::influence::level_in_sphere
+						&& (nations::influence::level_mask & it.get_status()) != nations::influence::level_friendly) {
+						target = it.get_influence_target();
+					} else if(!(it.get_influence_target().get_in_sphere_of()) && it.get_influence() >= state.defines.addtosphere_influence_cost) {
+						target = it.get_influence_target();
+					} else if(it.get_influence_target().get_in_sphere_of()
+						&& (nations::influence::level_mask & it.get_status()) == nations::influence::level_friendly
+						&& it.get_influence() >= state.defines.removefromsphere_influence_cost) {
+						target = it.get_influence_target();
+					}
+				}
+			}
+		}
+		state.open_diplomacy(target);
+	}
+
 	int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		if(nations::sphereing_progress_is_possible(state, nation_id)) {
 			return 0;
@@ -1730,7 +1753,6 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
-
 		if(!nations::is_great_power(state, n)) {
 			text::add_line(state, contents, std::string_view("countryalert_no_gpstatus"));
 		} else {
@@ -1741,20 +1763,18 @@ public:
 					if(it.get_influence() >= state.defines.increaseopinion_influence_cost
 						&& (nations::influence::level_mask & it.get_status()) != nations::influence::level_in_sphere
 						&& (nations::influence::level_mask & it.get_status()) != nations::influence::level_friendly) {
-
 						if(!added_increase_header)
 							text::add_line(state, contents, std::string_view("countryalert_canincreaseopinion"));
 						added_increase_header = true;
 						text::nation_name_and_flag(state, it.get_influence_target(), contents, 15);
-					} else if(!(it.get_influence_target().get_in_sphere_of()) &&
-										it.get_influence() >= state.defines.addtosphere_influence_cost) {
+					} else if(!(it.get_influence_target().get_in_sphere_of()) && it.get_influence() >= state.defines.addtosphere_influence_cost) {
 						if(!added_increase_header)
 							text::add_line(state, contents, std::string_view("countryalert_canincreaseopinion"));
 						added_increase_header = true;
 						text::nation_name_and_flag(state, it.get_influence_target(), contents, 15);
 					} else if(it.get_influence_target().get_in_sphere_of()
-						&& (nations::influence::level_mask & it.get_status()) == nations::influence::level_friendly &&
-										it.get_influence() >= state.defines.removefromsphere_influence_cost) {
+						&& (nations::influence::level_mask & it.get_status()) == nations::influence::level_friendly
+						&& it.get_influence() >= state.defines.removefromsphere_influence_cost) {
 						if(!added_increase_header)
 							text::add_line(state, contents, std::string_view("countryalert_canincreaseopinion"));
 						added_increase_header = true;
@@ -1775,7 +1795,7 @@ public:
 								return;
 							}
 						}
-						}();
+					}();
 				}
 			}
 
