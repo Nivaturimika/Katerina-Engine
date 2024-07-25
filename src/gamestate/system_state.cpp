@@ -4175,11 +4175,9 @@ void state::single_game_tick() {
 		ai::update_ai_colonial_investment(*this);
 	}
 
-	if(defines.alice_eval_ai_mil_everyday != 0.0f) {
-		ai::make_defense(*this);
-		ai::make_attacks(*this);
-		ai::update_ships(*this);
-	}
+	ai::make_defense(*this);
+	ai::make_attacks(*this);
+	ai::update_ships(*this);
 
 	// Once per month updates, spread out over the month
 	switch(ymd_date.day) {
@@ -4197,9 +4195,6 @@ void state::single_game_tick() {
 			break;
 		case 4:
 			military::reinforce_regiments(*this);
-			if(!bool(defines.alice_eval_ai_mil_everyday)) {
-				ai::make_defense(*this);
-			}
 			break;
 		case 5:
 			rebel::update_movements(*this);
@@ -4207,9 +4202,6 @@ void state::single_game_tick() {
 			break;
 		case 6:
 			ai::form_alliances(*this);
-			if(!bool(defines.alice_eval_ai_mil_everyday)) {
-				ai::make_attacks(*this);
-			}
 			break;
 		case 7:
 			ai::update_ai_general_status(*this);
@@ -4255,9 +4247,6 @@ void state::single_game_tick() {
 			break;
 		case 20:
 			nations::monthly_flashpoint_update(*this);
-			if(!bool(defines.alice_eval_ai_mil_everyday)) {
-				ai::make_defense(*this);
-			}
 			break;
 		case 21:
 			ai::update_ai_colony_starting(*this);
@@ -4271,9 +4260,6 @@ void state::single_game_tick() {
 			break;
 		case 24:
 			rebel::execute_rebel_victories(*this);
-			if(!bool(defines.alice_eval_ai_mil_everyday)) {
-				ai::make_attacks(*this);
-			}
 			rebel::update_armies(*this);
 			rebel::rebel_hunting_check(*this);
 			break;
@@ -4293,9 +4279,6 @@ void state::single_game_tick() {
 			ai::update_war_intervention(*this);
 			break;
 		case 30:
-			if(!bool(defines.alice_eval_ai_mil_everyday)) {
-				ai::update_ships(*this);
-			}
 			rebel::update_armies(*this);
 			rebel::rebel_hunting_check(*this);
 			break;
