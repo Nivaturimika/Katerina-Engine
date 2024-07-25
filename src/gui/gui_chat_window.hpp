@@ -229,12 +229,15 @@ public:
 			});
 		}
 
-		char body[max_chat_message_len + 1];
-		size_t len = s.length() >= max_chat_message_len ? max_chat_message_len : s.length();
-		memcpy(body, s.data(), len);
-		body[len] = '\0';
-
-		command::chat_message(state, state.local_player_nation, body, target);
+		size_t sent_len = 0;
+		while(sent_len < s.length()) {
+			char body[max_chat_message_len + 1];
+			size_t len = s.length() >= max_chat_message_len ? max_chat_message_len : s.length();
+			memcpy(body, s.data() + sent_len, len);
+			body[len] = '\0';
+			command::chat_message(state, state.local_player_nation, body, target);
+			sent_len += len;
+		}
 
 		Cyto::Any payload = this;
 		impl_get(state, payload);

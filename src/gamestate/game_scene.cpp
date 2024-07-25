@@ -146,12 +146,7 @@ void selected_units_control(
 	}
 }
 
-void open_diplomacy(
-	sys::state& state,
-	dcon::nation_id nation,
-	dcon::province_id target,
-	sys::key_modifiers mod
-) {
+void open_diplomacy(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod) {
 	auto owner = state.world.province_get_nation_from_province_ownership(target);
 	if(owner) {
 		state.open_diplomacy(owner);
