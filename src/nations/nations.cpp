@@ -16,6 +16,49 @@
 
 namespace nations {
 
+bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id focus) {
+	if(!focus) {
+		return true;
+	}
+
+	auto num_focuses_total = nations::max_national_focuses(state, source);
+	if(num_focuses_total == 0)
+		return false;
+
+	auto state_owner = state.world.state_instance_get_nation_from_state_ownership(target_state);
+	if(state_owner == source) {
+		if(focus == state.national_definitions.flashpoint_focus)
+			return false;
+		if(auto ideo = state.world.national_focus_get_ideology(focus); ideo) {
+			if(state.world.ideology_get_enabled(ideo) == false ||
+					(state.world.ideology_get_is_civilized_only(ideo) && !state.world.nation_get_is_civilized(source))) {
+				return false;
+			}
+		}
+		auto prov = state.world.state_instance_get_capital(target_state);
+		auto k = state.world.national_focus_get_limit(focus);
+		if(k && !trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(state_owner), -1))
+			return false;
+		return bool(state.world.state_instance_get_owner_focus(target_state));
+	} else {
+		auto pc = state.world.nation_get_primary_culture(source);
+		if(nations::nation_accepts_culture(state, state_owner, pc))
+			return false;
+
+		auto ident = state.world.nation_get_identity_from_identity_holder(source);
+		if(state.world.national_identity_get_is_not_releasable(ident))
+			return false;
+
+		bool state_contains_core = false;
+		province::for_each_province_in_state_instance(state, target_state, [&](dcon::province_id p) {
+			state_contains_core = state_contains_core || bool(state.world.get_core_by_prov_tag_key(p, ident));
+		});
+		bool rank_high = state.world.nation_get_rank(source) > uint16_t(state.defines.colonial_rank);
+		bool is_tension_focus = focus == state.national_definitions.flashpoint_focus;
+		return state_contains_core && rank_high && is_tension_focus && bool(state.world.nation_get_state_from_flashpoint_focus(source)) && bool(state.world.state_instance_get_nation_from_flashpoint_focus(target_state)) == false;
+	}
+}
+
 namespace influence {
 
 int32_t get_level(sys::state& state, dcon::nation_id gp, dcon::nation_id target) {

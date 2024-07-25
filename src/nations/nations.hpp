@@ -4,6 +4,9 @@
 #include "military.hpp"
 
 namespace nations {
+
+bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id focus);
+
 inline uint32_t tag_to_int(char first, char second, char third) {
 	return (uint32_t(first) << 16) | (uint32_t(second) << 8) | (uint32_t(third) << 0);
 }
