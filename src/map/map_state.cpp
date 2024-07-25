@@ -344,11 +344,12 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				connected_to_capital = true;
 			}
 		}
+		auto state_name = text::get_short_state_name(state, p.get_state_membership());
 		text::substitution_map sub{};
 		text::add_to_substitution_map(sub, text::variable_type::adj, text::get_adjective(state, n));
 		text::add_to_substitution_map(sub, text::variable_type::country, std::string_view(nation_name));
 		text::add_to_substitution_map(sub, text::variable_type::province, p);
-		text::add_to_substitution_map(sub, text::variable_type::state, p.get_state_membership());
+		text::add_to_substitution_map(sub, text::variable_type::state, std::string_view(state_name));
 		text::add_to_substitution_map(sub, text::variable_type::continentname, p.get_continent().get_name());
 		if(!connected_to_capital) {
 			// Adjective + " " + Continent
@@ -357,13 +358,14 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			// then it gets named after that identity
 			ankerl::unordered_dense::map<int32_t, uint32_t> map;
 			uint32_t total_provinces = 0;
+			uint32_t total_same_state = 0;
 			dcon::province_id last_province;
-			bool in_same_state = true;
 			for(auto visited_region : group_of_regions) {
 				for(auto candidate : state.world.in_province) {
 					if(candidate.get_connected_region_id() == visited_region) {
-						if(candidate.get_state_membership() != p.get_state_membership())
-							in_same_state = false;
+						if(candidate.get_state_membership() == p.get_state_membership()) {
+							++total_same_state;
+						}
 						++total_provinces;
 						for(const auto core : candidate.get_core_as_province()) {
 							uint32_t v = 1;
@@ -378,7 +380,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			if(total_provinces <= 2) {
 				// Adjective + Province name
 				name = text::resolve_string_substitution(state, "map_label_adj_province", sub);
-			} else if(in_same_state == true) {
+			} else if(float(total_same_state) / float(total_provinces) >= 0.5f) {
 				name = text::resolve_string_substitution(state, "map_label_adj_state", sub);
 			} else {
 				for(const auto& e : map) {
