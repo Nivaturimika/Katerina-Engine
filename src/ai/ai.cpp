@@ -3093,6 +3093,24 @@ void make_war_decs(sys::state& state) {
 			}
 		}
 	}
+
+	for(auto n : state.world.in_nation) {
+		if(!n.get_is_player_controlled()) {
+			if(n.get_ai_is_threatened()) {
+				n.set_is_mobilized(n.get_is_at_war());
+				if(!n.get_is_at_war()) {
+					for(auto other : state.world.in_nation) {
+						if(other.get_is_mobilized() && military::can_use_cb_against(state, other, n)) {
+							n.set_is_mobilized(true);
+							break;
+						}
+					}
+				}
+			} else {
+				n.set_is_mobilized(false);
+			}
+		}
+	}
 }
 
 void update_budget(sys::state& state) {
