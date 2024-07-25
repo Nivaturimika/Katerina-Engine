@@ -1981,6 +1981,16 @@ public:
 	}
 };
 
+class national_focus_overwrite_header : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto nfid = retrieve<national_focus_overwrite_target>(state, parent).nfid;
+		text::substitution_map sub{};
+		text::add_to_substitution_map(sub, text::variable_type::nf, state.world.national_focus_get_name(nfid));
+		set_text(state, text::resolve_string_substitution(state, "nf_overwrite_header", sub));
+	}
+};
+
 class national_focus_overwrite_window : public window_element_base {
 public:
 	national_focus_overwrite_target target;
@@ -1989,6 +1999,8 @@ public:
 			return make_element_by_type<generic_close_button>(state, id);
 		} else if(name == "nf_listbox") {
 			return make_element_by_type<national_focus_overwrite_listbox>(state, id);
+		} else if(name == "header") {
+			return make_element_by_type<national_focus_overwrite_header>(state, id);
 		} else {
 			return nullptr;
 		}
