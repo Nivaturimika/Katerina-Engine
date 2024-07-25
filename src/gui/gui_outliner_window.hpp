@@ -22,6 +22,8 @@ enum class outliner_filter : uint8_t {
 	gp_influence,
 	national_focus,
 	rally_points,
+	stockpile,
+	unused_2,
 	count
 };
 
@@ -41,7 +43,7 @@ struct outliner_rally_point {
 using outliner_data = std::variant< outliner_filter, dcon::army_id, dcon::navy_id, dcon::gp_relationship_id,
 	dcon::state_building_construction_id, dcon::province_building_construction_id, dcon::province_land_construction_id,
 	dcon::province_naval_construction_id, dcon::state_instance_id, outliner_rebel_occupation, outliner_hostile_siege, outliner_my_siege,
-	dcon::land_battle_id, dcon::naval_battle_id, outliner_rally_point>;
+	dcon::land_battle_id, dcon::naval_battle_id, outliner_rally_point, dcon::commodity_id>;
 
 class outliner_element_button : public button_element_base {
 public:
@@ -141,6 +143,8 @@ public:
 			auto p = std::get<outliner_rally_point>(content).p;
 			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
 			state.map_state.center_map_on_province(state, p);
+		} else if(std::holds_alternative<dcon::commodity_id>(content)) {
+			
 		}
 	}
 	void button_shift_action(sys::state& state) noexcept override {
@@ -305,6 +309,9 @@ public:
 				break;
 			case outliner_filter::rally_points:
 				set_text(state, text::produce_simple_string(state, "ol_view_rallypoints_header"));
+				break;
+			case outliner_filter::stockpile:
+				set_text(state, text::produce_simple_string(state, "ol_view_stockpile_header"));
 				break;
 			default:
 				set_text(state,  "???");
@@ -503,6 +510,19 @@ public:
 
 			auto full_str = text::produce_simple_string(state, state.world.province_get_name(p));
 			color = text::text_color::white;
+			set_text(state, full_str);
+		} else if(std::holds_alternative<dcon::commodity_id>(content)) {
+			auto c = std::get<dcon::commodity_id>(content);
+			auto full_str = text::prettify(int32_t(state.world.nation_get_stockpiles(state.local_player_nation, c)));
+			full_str += "/";
+			full_str += text::prettify(int32_t(state.world.nation_get_stockpile_targets(state.local_player_nation, c)));
+			full_str += " ";
+			full_str += text::produce_simple_string(state, state.world.commodity_get_name(c));
+			if(state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, c)) {
+				color = text::text_color::white;
+			} else {
+				color = text::text_color::green;
+			}
 			set_text(state, full_str);
 		}
 	}
@@ -732,6 +752,19 @@ public:
 			if(old_size == row_contents.size())
 				row_contents.pop_back();
 		}
+		if(get_filter(state, outliner_filter::stockpile) || true) {
+			row_contents.push_back(outliner_filter::stockpile);
+			auto old_size = row_contents.size();
+
+			for(const auto c : state.world.in_commodity) {
+				auto t = state.world.nation_get_stockpile_targets(state.local_player_nation, c);
+				if(t != 0.f) {
+					row_contents.push_back(c);
+				}
+			}
+			if(old_size == row_contents.size())
+				row_contents.pop_back();
+		}
 
 		auto rsz = row_windows[0]->base_data.size.y + row_windows[0]->base_data.position.y;
 		auto max_size = int32_t(rsz * row_contents.size());
@@ -790,6 +823,8 @@ class outliner_filter_checkbox : public checkbox_button {
 			return "ol_view_natfocus";
 		case outliner_filter::rally_points:
 			return "ol_view_rallypoints";
+		case outliner_filter::stockpile:
+			return "ol_view_stockpile";
 		default:
 			return "???";
 		}
@@ -893,6 +928,8 @@ public:
 			return make_element_by_type<outliner_filter_checkbox<outliner_filter::national_focus>>(state, id);
 		} else if(name == "outliner_view_rallypoints") {
 			return make_element_by_type<outliner_filter_checkbox<outliner_filter::rally_points>>(state, id);
+		} else if(name == "outliner_view_stockpile") {
+			return make_element_by_type<outliner_filter_checkbox<outliner_filter::stockpile>>(state, id);
 		} else {
 			return nullptr;
 		}
