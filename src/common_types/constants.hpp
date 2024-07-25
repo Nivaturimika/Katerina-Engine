@@ -535,7 +535,7 @@ enum class color_blind_mode {
 	achroma, //black and white
 };
 
-constexpr int32_t max_event_options = 8;
+constexpr int32_t max_event_options = 12;
 constexpr uint32_t max_languages = 64;
 
 enum save_type : uint8_t {
@@ -547,7 +547,7 @@ enum save_type : uint8_t {
 } // namespace sys
 
 namespace culture {
-inline constexpr int32_t max_issue_options = 6;
+inline constexpr int32_t max_issue_options = 8;
 }
 
 namespace economy {

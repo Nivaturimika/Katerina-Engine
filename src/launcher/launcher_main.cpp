@@ -1113,7 +1113,7 @@ void mouse_click() {
 		return;
 	case ui_obj_play_game:
 		if(file_is_ready.load(std::memory_order::memory_order_acquire) && !selected_scenario_file.empty()) {
-			native_string temp_command_line = native_string(NATIVE("KatEngine.exe ")) + selected_scenario_file;
+			native_string temp_command_line = native_string(NATIVE("KatEngine.exe -scenario ")) + selected_scenario_file;
 			STARTUPINFO si;
 			ZeroMemory(&si, sizeof(si));
 			si.cb = sizeof(si);
@@ -1140,7 +1140,7 @@ void mouse_click() {
 	case ui_obj_host_game:
 	case ui_obj_join_game:
 		if(file_is_ready.load(std::memory_order::memory_order_acquire) && !selected_scenario_file.empty()) {
-			native_string temp_command_line = native_string(NATIVE("KatEngine.exe ")) + selected_scenario_file;
+			native_string temp_command_line = native_string(NATIVE("KatEngine.exe -scenario ")) + selected_scenario_file;
 			if(obj_under_mouse == ui_obj_host_game) {
 				temp_command_line += NATIVE(" -host");
 				temp_command_line += NATIVE(" -name ");
