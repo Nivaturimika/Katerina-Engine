@@ -1740,9 +1740,9 @@ public:
 	void on_update(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		frame = 1;
-		if(nations::sphereing_progress_is_possible(state, nation_id)) {
+		if(nations::sphereing_progress_is_possible(state, n)) {
 			frame = 0;
-		} else if(rebel::sphere_member_has_ongoing_revolt(state, nation_id)) {
+		} else if(rebel::sphere_member_has_ongoing_revolt(state, n)) {
 			frame = 2;
 		}
 	}
