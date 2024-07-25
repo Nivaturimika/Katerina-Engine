@@ -252,7 +252,7 @@ default: break;
 void main() {
 	vec4 terrain = get_land();
 	vec4 water = get_water();
-	frag_color.rgb = mix(water.rgb, terrain.rgb, floor(terrain.a));
+	frag_color.rgb = mix(water.rgb, terrain.rgb, terrain.a);
 	frag_color.a = 1.f;
 	frag_color = gamma_correct(frag_color);
 }
