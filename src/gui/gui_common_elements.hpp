@@ -1889,13 +1889,128 @@ public:
 // National focuses
 
 struct close_focus_window_notification { };
+struct national_focus_overwrite_close { };
+struct national_focus_overwrite_target {
+	dcon::state_instance_id sid;
+	dcon::national_focus_id nfid;
+};
+
+class national_focus_overwrite_icon : public image_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto sid = retrieve<dcon::state_instance_id>(state, parent);
+		if(state.world.state_instance_get_nation_from_state_ownership(sid) == state.local_player_nation) {
+			auto nfid = state.world.state_instance_get_owner_focus(sid);
+			frame = state.world.national_focus_get_icon(nfid) - 1;
+		} else {
+			auto nfid = state.national_definitions.flashpoint_focus;
+			frame = state.world.national_focus_get_icon(nfid) - 1;
+		}
+	}
+};
+
+class national_focus_overwrite_button : public button_element_base {
+public:
+	void button_action(sys::state& state) noexcept override {
+		auto sid = retrieve<dcon::state_instance_id>(state, parent);
+		auto target = retrieve<national_focus_overwrite_target>(state, parent).sid;
+		auto nfid = retrieve<national_focus_overwrite_target>(state, parent).nfid;
+		command::set_national_focus(state, state.local_player_nation, sid, dcon::national_focus_id{});
+		command::set_national_focus(state, state.local_player_nation, target, nfid);
+		send<national_focus_overwrite_close>(state, parent, national_focus_overwrite_close{});
+	}
+};
+
+class national_focus_overwrite_name : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto sid = retrieve<dcon::state_instance_id>(state, parent);
+		dcon::national_focus_id nfid{};
+		if(state.world.state_instance_get_nation_from_state_ownership(sid) == state.local_player_nation) {
+			nfid = state.world.state_instance_get_owner_focus(sid);
+		} else {
+			nfid = state.national_definitions.flashpoint_focus;
+		}
+		text::substitution_map sub{};
+		text::add_to_substitution_map(sub, text::variable_type::nf, state.world.national_focus_get_name(nfid));
+		text::add_to_substitution_map(sub, text::variable_type::state, sid);
+		if(state.world.national_focus_get_promotion_type(nfid)) {
+			std::string full_str = nations::national_focus_is_unoptimal(state, state.local_player_nation, sid, nfid) ? "?R" : "";
+			full_str += text::format_percentage(state.world.state_instance_get_demographics(sid, demographics::to_key(state, state.world.national_focus_get_promotion_type(nfid))) / state.world.state_instance_get_demographics(sid, demographics::total)) + " " + text::produce_simple_string(state, state.world.national_focus_get_name(nfid)) + " (" + text::get_dynamic_state_name(state, sid) + ")";
+			set_text(state, full_str);
+		} else {
+			auto full_str = text::produce_simple_string(state, state.world.national_focus_get_name(nfid)) + " (" + text::get_dynamic_state_name(state, sid) + ")";
+			set_text(state, full_str);
+		}
+	}
+};
+
+class national_focus_overwrite_entry : public listbox_row_element_base<dcon::state_instance_id> {
+public:
+	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+		if(name == "nf_icon") {
+			return make_element_by_type<national_focus_overwrite_icon>(state, id);
+		} else if(name == "background") {
+			return make_element_by_type<national_focus_overwrite_button>(state, id);
+		} else if(name == "nf_name") {
+			return make_element_by_type<national_focus_overwrite_name>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
+};
+
+class national_focus_overwrite_listbox : public listbox_element_base<national_focus_overwrite_entry, dcon::state_instance_id> {
+public:
+	std::string_view get_row_element_name() override {
+		return "nf_overwrite_entry";
+	}
+	void on_update(sys::state& state) noexcept override {
+		row_contents.clear();
+		for(auto so : state.world.nation_get_state_ownership_as_nation(state.local_player_nation)) {
+			if(so.get_state().get_owner_focus()) {
+				row_contents.push_back(so.get_state());
+			}
+		}
+		for(auto fp : state.world.in_flashpoint_focus) {
+			if(fp.get_nation() == state.local_player_nation && fp.get_state()) {
+				row_contents.push_back(fp.get_state());
+			}
+		}
+		update(state);
+	}
+};
+
+class national_focus_overwrite_window : public window_element_base {
+public:
+	national_focus_overwrite_target target;
+	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+		if(name == "close_button") {
+			return make_element_by_type<generic_close_button>(state, id);
+		} else if(name == "nf_listbox") {
+			return make_element_by_type<national_focus_overwrite_listbox>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept  override {
+		if(payload.holds_type<national_focus_overwrite_target>()) {
+			payload.emplace<national_focus_overwrite_target>(target);
+			return message_result::consumed;
+		} else if(payload.holds_type<national_focus_overwrite_close>()) {
+			set_visible(state, false);
+			return message_result::consumed;
+		}
+		return window_element_base::get(state, payload);
+	}
+};
 
 class national_focus_icon : public button_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
 		auto nfid = retrieve<dcon::national_focus_id>(state, parent);
 		auto sid = retrieve<dcon::state_instance_id>(state, parent);
-		disabled = !command::can_set_national_focus(state, state.local_player_nation, sid, nfid);
+		disabled = !nations::can_overwrite_national_focus(state, state.local_player_nation, sid, nfid);
 		frame = state.world.national_focus_get_icon(nfid) - 1;
 	}
 
@@ -1942,8 +2057,24 @@ public:
 	void button_action(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::state_instance_id>(state, parent);
 		auto nat_focus = retrieve<dcon::national_focus_id>(state, parent);
-		command::set_national_focus(state, state.local_player_nation, content, nat_focus);
-		send(state, parent, close_focus_window_notification{});
+
+		if(!command::can_set_national_focus(state, state.local_player_nation, content, nat_focus)) {
+			if(!state.ui_state.national_focus_overwrite_window) {
+				auto win = make_element_by_type<national_focus_overwrite_window>(state, "nf_overwrite_window");
+				state.ui_state.national_focus_overwrite_window = win.get();
+				state.ui_state.root->add_child_to_front(std::move(win));
+			} else {
+				state.ui_state.national_focus_overwrite_window->set_visible(state, true);
+				state.ui_state.root->move_child_to_front(state.ui_state.national_focus_overwrite_window);
+			}
+			if(state.ui_state.national_focus_overwrite_window) {
+				static_cast<national_focus_overwrite_window*>(state.ui_state.national_focus_overwrite_window)->target = national_focus_overwrite_target{ content, nat_focus };
+				state.ui_state.national_focus_overwrite_window->impl_on_update(state);
+			}
+		} else {
+			command::set_national_focus(state, state.local_player_nation, content, nat_focus);
+			send(state, parent, close_focus_window_notification{});
+		}
 	}
 };
 

@@ -864,7 +864,7 @@ public:
 		auto content = retrieve<dcon::state_instance_id>(state, parent);
 		disabled = true;
 		state.world.for_each_national_focus([&](dcon::national_focus_id nfid) {
-			disabled = command::can_set_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
+			disabled = !nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
 		});
 		frame = get_icon_frame(state);
 	}

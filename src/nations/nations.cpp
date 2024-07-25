@@ -16,14 +16,30 @@
 
 namespace nations {
 
+bool national_focus_is_unoptimal(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id nfid) {
+	//Is the NF not optimal? Recolor it
+	auto total = state.world.state_instance_get_demographics(target_state, demographics::total);
+	auto amount = state.world.state_instance_get_demographics(target_state, demographics::to_key(state, state.world.national_focus_get_promotion_type(nfid)));
+	if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.clergy) {
+		if((amount / total) > state.defines.max_clergy_for_literacy) {
+			return true;
+		}
+	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.soldiers) {
+		if((amount / total) > state.defines.soldier_fraction) {
+			return true;
+		}
+	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.bureaucrat) {
+		if(province::state_admin_efficiency(state, target_state) >= 1.f) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id focus) {
 	if(!focus) {
 		return true;
 	}
-
-	auto num_focuses_total = nations::max_national_focuses(state, source);
-	if(num_focuses_total == 0)
-		return false;
 
 	auto state_owner = state.world.state_instance_get_nation_from_state_ownership(target_state);
 	if(state_owner == source) {
@@ -39,7 +55,7 @@ bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dco
 		auto k = state.world.national_focus_get_limit(focus);
 		if(k && !trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(state_owner), -1))
 			return false;
-		return bool(state.world.state_instance_get_owner_focus(target_state));
+		return true;
 	} else {
 		auto pc = state.world.nation_get_primary_culture(source);
 		if(nations::nation_accepts_culture(state, state_owner, pc))
@@ -55,7 +71,7 @@ bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dco
 		});
 		bool rank_high = state.world.nation_get_rank(source) > uint16_t(state.defines.colonial_rank);
 		bool is_tension_focus = focus == state.national_definitions.flashpoint_focus;
-		return state_contains_core && rank_high && is_tension_focus && bool(state.world.nation_get_state_from_flashpoint_focus(source)) && bool(state.world.state_instance_get_nation_from_flashpoint_focus(target_state)) == false;
+		return state_contains_core && rank_high && is_tension_focus && bool(state.world.state_instance_get_nation_from_flashpoint_focus(target_state)) == false;
 	}
 }
 

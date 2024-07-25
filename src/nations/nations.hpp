@@ -5,6 +5,7 @@
 
 namespace nations {
 
+bool national_focus_is_unoptimal(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id nfid);
 bool can_overwrite_national_focus(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id focus);
 
 inline uint32_t tag_to_int(char first, char second, char third) {

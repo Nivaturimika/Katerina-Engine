@@ -23,19 +23,8 @@ void on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers m
 
 void switch_scene(sys::state& state, scene_id ui_scene);
 
-void selected_units_control(
-	sys::state& state,
-	dcon::nation_id nation,
-	dcon::province_id target,
-	sys::key_modifiers mod
-);
-
-void open_diplomacy(
-	sys::state& state,
-	dcon::nation_id nation,
-	dcon::province_id target,
-	sys::key_modifiers mod
-);
+void selected_units_control(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod);
+void open_diplomacy(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod);
 
 void select_player_nation_from_selected_province(sys::state& state);
 void select_wargoal_state_from_selected_province(sys::state& state);

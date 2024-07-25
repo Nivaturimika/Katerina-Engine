@@ -1376,7 +1376,7 @@ public:
 		dcon::nation_id n = retrieve<dcon::nation_id>(state, parent);
 		disabled = true;
 		for(auto nfid : state.world.in_national_focus) {
-			disabled = command::can_set_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
+			disabled = !nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
 		}
 		frame = get_icon_frame(state);
 	}
