@@ -1902,21 +1902,10 @@ void state::save_user_settings() const {
 	US_SAVE(bind_tooltip_mouse);
 	US_SAVE(use_classic_fonts);
 	US_SAVE(outliner_views);
-	constexpr size_t lower_half_count = 98;
-	std::memcpy(ptr, user_settings.self_message_settings, lower_half_count);
-	ptr += 98;
-	std::memcpy(ptr, user_settings.interesting_message_settings, lower_half_count);
-	ptr += 98;
-	std::memcpy(ptr, user_settings.other_message_settings, lower_half_count);
-	ptr += 98;
+	US_SAVE(self_message_settings);
+	US_SAVE(interesting_message_settings);
+	US_SAVE(other_message_settings);
 	US_SAVE(fow_enabled);
-	constexpr size_t upper_half_count = 128 - 98;
-	std::memcpy(ptr, &user_settings.self_message_settings[98], upper_half_count);
-	ptr += upper_half_count;
-	std::memcpy(ptr, &user_settings.interesting_message_settings[98], upper_half_count);
-	ptr += upper_half_count;
-	std::memcpy(ptr, &user_settings.other_message_settings[98], upper_half_count);
-	ptr += upper_half_count;
 	US_SAVE(map_label);
 	US_SAVE(antialias_level);
 	US_SAVE(gaussianblur_level);
@@ -1966,25 +1955,10 @@ void state::load_user_settings() {
 			US_LOAD(bind_tooltip_mouse);
 			US_LOAD(use_classic_fonts);
 			US_LOAD(outliner_views);
-			constexpr size_t lower_half_count = 98;
-
-			std::memcpy(&user_settings.self_message_settings, ptr, std::min(lower_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += 98;
-
-			std::memcpy(&user_settings.interesting_message_settings, ptr, std::min(lower_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += 98;
-
-			std::memcpy(&user_settings.other_message_settings, ptr, std::min(lower_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += 98;
-
+			US_LOAD(self_message_settings);
+			US_LOAD(interesting_message_settings);
+			US_LOAD(other_message_settings);
 			US_LOAD(fow_enabled);
-			constexpr size_t upper_half_count = 128 - 98;
-			std::memcpy(&user_settings.self_message_settings[98], ptr, std::min(upper_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += upper_half_count;
-			std::memcpy(&user_settings.interesting_message_settings[98], ptr, std::min(upper_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += upper_half_count;
-			std::memcpy(&user_settings.other_message_settings[98], ptr, std::min(upper_half_count, size_t(std::max(ptrdiff_t(0), (content.data + content.file_size) - ptr))));
-			ptr += upper_half_count;
 			US_LOAD(map_label);
 			US_LOAD(antialias_level);
 			US_LOAD(gaussianblur_level);
