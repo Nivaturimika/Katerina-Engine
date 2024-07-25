@@ -722,7 +722,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 	}
 	// coasts
-	{
+	if(zoom <= map::zoom_close) {
 		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0004f); // width
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_coastal_border]);
