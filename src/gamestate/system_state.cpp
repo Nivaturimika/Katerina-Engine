@@ -124,7 +124,7 @@ void create_in_game_windows(sys::state& state) {
 		static_cast<ui::unit_counter_window*>(ptr.get())->prov = id;
 		state.ui_state.units_root->add_child_to_front(std::move(ptr));
 	});	
-	state.world.for_each_province([&](dcon::province_id id) {
+	province::for_each_land_province(state, [&](dcon::province_id id) {
 		auto ptr = ui::make_element_by_type<ui::rgo_icon>(state, "alice_rgo_mapicon");
 		static_cast<ui::rgo_icon*>(ptr.get())->content = id;
 		state.ui_state.rgos_root->add_child_to_front(std::move(ptr));
