@@ -10,6 +10,7 @@
 #include "parsers_declarations.hpp"
 #include "gui_graphics.hpp"
 #include "gui_element_base.hpp"
+#include "province_templates.hpp"
 
 #include <set>
 
@@ -360,8 +361,9 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			uint32_t total_provinces = 0;
 			uint32_t total_same_state = 0;
 			dcon::province_id last_province;
-			for(auto visited_region : group_of_regions) {
-				for(auto candidate : state.world.in_province) {
+			province::for_each_land_province(state, [&](dcon::province_id candidate_id) {
+				auto candidate = dcon::fatten(state.world, candidate_id);
+				for(auto visited_region : group_of_regions) {
 					if(candidate.get_connected_region_id() == visited_region) {
 						if(candidate.get_state_membership() == p.get_state_membership()) {
 							++total_same_state;
@@ -376,7 +378,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 						}
 					}
 				}
-			}
+			});
 			if(total_provinces <= 2) {
 				// Adjective + Province name
 				name = text::resolve_string_substitution(state, "map_label_adj_province", sub);
