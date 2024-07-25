@@ -1395,9 +1395,10 @@ struct get_stockpile_target {
 };
 
 class trade_slider : public scrollbar {
+	float n_10th_root_of_2k = 2.13846919998f / 2000.f;
 public:
 	void on_value_change(sys::state& state, int32_t v) noexcept final {
-		float a = float(v);
+		float a = std::pow(10.0f, float(v) * n_10th_root_of_2k) - 1.0f;
 		send(state, parent, stockpile_target_change{a});
 		if(state.ui_state.drag_target != slider)
 			commit_changes(state);
@@ -1412,7 +1413,10 @@ public:
 			
 		} else {
 			auto value = state.world.nation_get_stockpile_targets(state.local_player_nation, com);
-			update_raw_value(state, int32_t(value));
+			auto a = std::log10(value + 1.0f);
+			auto b = a * n_10th_root_of_2k;
+			update_raw_value(state, int32_t(b));
+
 			send(state, parent, stockpile_target_change{value});
 		}
 	}
@@ -1425,7 +1429,7 @@ public:
 	}
 	void commit_changes(sys::state& state) noexcept {
 		auto com = retrieve<dcon::commodity_id>(state, parent);
-		float v = float(raw_value());
+		float v = std::pow(10.0f, float(raw_value()) * n_10th_root_of_2k) - 1.0f;
 		command::change_stockpile_settings(state, state.local_player_nation, com, v, state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com));
 	}
 };
