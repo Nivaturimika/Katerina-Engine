@@ -1211,3 +1211,4 @@ alice_reform_support_header;Political support for this reform (a total of 50% or
 alice_no_current_support;Currently there is no political support for this reform
 ol_view_stockpile_header;Stockpiles
 ol_view_stockpile;Stockpiles
+nf_overwrite_header;Remove an existing national focus first
