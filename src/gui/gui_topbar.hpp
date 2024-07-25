@@ -788,13 +788,44 @@ public:
 };
 class topbar_trade_tab_button : public topbar_tab_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.trade_subwindow && state.ui_state.trade_subwindow->is_visible()) {
+			state.ui_state.trade_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_trade();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.trade_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
-		// for now we reuse the budget tab sound
-		return sound::get_tab_budget_sound(state);
+		return sound::get_tab_budget_sound(state); // for now we reuse the budget tab sound
 	}
 };
 class topbar_politics_tab_button : public topbar_tab_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
+			state.ui_state.politics_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_politics();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.politics_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_politics_sound(state);
 	}
@@ -1331,26 +1362,15 @@ public:
 	}
 
 	void button_action(sys::state& state) noexcept override {
-		auto const override_and_show_tab = [&]() {
-			state.ui_state.politics_subwindow->set_visible(state, true);
-			state.ui_state.politics_subwindow->impl_on_update(state);
-
-			Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::reforms);
-			state.ui_state.politics_subwindow->impl_get(state, defs);
-
-			state.ui_state.root->move_child_to_front(state.ui_state.politics_subwindow);
-			state.ui_state.topbar_subwindow = state.ui_state.politics_subwindow;
-		};
-
-		if(state.ui_state.topbar_subwindow->is_visible()) {
-			state.ui_state.topbar_subwindow->set_visible(state, false);
-			if(state.ui_state.topbar_subwindow != state.ui_state.politics_subwindow)
-				override_and_show_tab();
-		} else {
-			override_and_show_tab();
+		if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
+			state.ui_state.politics_subwindow->set_visible(state, false);
+			return;
 		}
-	}
+		state.open_politics();
 
+		Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::reforms);
+		state.ui_state.politics_subwindow->impl_get(state, defs);
+	}
 };
 
 class topbar_available_decisions_icon : public standard_nation_button {
@@ -1391,26 +1411,15 @@ public:
 	}
 
 	void button_action(sys::state& state) noexcept override {
-		auto const override_and_show_tab = [&]() {
-			state.ui_state.politics_subwindow->set_visible(state, true);
-			state.ui_state.politics_subwindow->impl_on_update(state);
-
-			Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::decisions);
-			state.ui_state.politics_subwindow->impl_get(state, defs);
-
-			state.ui_state.root->move_child_to_front(state.ui_state.politics_subwindow);
-			state.ui_state.topbar_subwindow = state.ui_state.politics_subwindow;
-		};
-
-		if(state.ui_state.topbar_subwindow->is_visible()) {
-			state.ui_state.topbar_subwindow->set_visible(state, false);
-			if(state.ui_state.topbar_subwindow != state.ui_state.politics_subwindow)
-				override_and_show_tab();
-		} else {
-			override_and_show_tab();
+		if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
+			state.ui_state.politics_subwindow->set_visible(state, false);
+			return;
 		}
-	}
+		state.open_politics();
 
+		Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::decisions);
+		state.ui_state.politics_subwindow->impl_get(state, defs);
+	}
 };
 
 class topbar_ongoing_election_icon : public standard_nation_icon {
@@ -1482,26 +1491,15 @@ public:
 	}
 
 	void button_action(sys::state& state) noexcept override {
-		auto const override_and_show_tab = [&]() {
-			state.ui_state.politics_subwindow->set_visible(state, true);
-			state.ui_state.politics_subwindow->impl_on_update(state);
-
-			Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::movements);
-			state.ui_state.politics_subwindow->impl_get(state, defs);
-
-			state.ui_state.root->move_child_to_front(state.ui_state.politics_subwindow);
-			state.ui_state.topbar_subwindow = state.ui_state.politics_subwindow;
-		};
-
-		if(state.ui_state.topbar_subwindow->is_visible()) {
-			state.ui_state.topbar_subwindow->set_visible(state, false);
-			if(state.ui_state.topbar_subwindow != state.ui_state.politics_subwindow)
-				override_and_show_tab();
-		} else {
-			override_and_show_tab();
+		if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
+			state.ui_state.politics_subwindow->set_visible(state, false);
+			return;
 		}
-	}
+		state.open_politics();
 
+		Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::movements);
+		state.ui_state.politics_subwindow->impl_get(state, defs);
+	}
 };
 
 class topbar_colony_icon : public standard_nation_button {
@@ -1921,24 +1919,11 @@ public:
 			state.ui_state.root->add_child_to_back(std::move(tab));
 			return btn;
 		} else if(name == "topbarbutton_politics") {
-			auto btn = make_element_by_type<topbar_politics_tab_button>(state, id);
-			auto tab = make_element_by_type<politics_window>(state, "country_politics");
-			btn->topbar_subwindow = tab.get();
-
-			state.ui_state.politics_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_politics_tab_button>(state, id);
 		} else if(name == "topbarbutton_pops") {
 			return make_element_by_type<topbar_population_view_button>(state, id);
 		} else if(name == "topbarbutton_trade") {
-			auto btn = make_element_by_type<topbar_trade_tab_button>(state, id);
-
-			auto tab = make_element_by_type<trade_window>(state, "country_trade");
-			btn->topbar_subwindow = tab.get();
-
-			state.ui_state.trade_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_trade_tab_button>(state, id);
 		} else if(name == "topbarbutton_diplomacy") {
 			return make_element_by_type<topbar_diplomacy_tab_button>(state, id);
 		} else if(name == "topbarbutton_military") {

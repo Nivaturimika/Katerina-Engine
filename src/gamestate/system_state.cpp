@@ -2061,6 +2061,36 @@ void list_pop_types(sys::state& state, parsers::scenario_building_context& conte
 	}
 }
 
+void state::open_politics() {
+	if(!ui_state.politics_subwindow) {
+		auto tab = ui::make_element_by_type<ui::politics_window>(*this, "country_politics");
+		ui_state.politics_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.politics_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.politics_subwindow;
+		ui_state.politics_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.politics_subwindow);
+	}
+}
+
+void state::open_trade() {
+	if(!ui_state.trade_subwindow) {
+		auto tab = ui::make_element_by_type<ui::trade_window>(*this, "country_trade");
+		ui_state.trade_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.trade_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.trade_subwindow;
+		ui_state.trade_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.trade_subwindow);
+	}
+}
+
 void state::open_population() {
 	if(!ui_state.population_subwindow) {
 		auto tab = ui::make_element_by_type<ui::population_window>(*this, "country_pop");
