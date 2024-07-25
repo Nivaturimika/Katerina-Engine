@@ -375,12 +375,11 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 					}
 				}
 			}
-			if(in_same_state == true) {
-				name = text::resolve_string_substitution(state, "map_label_adj_state", sub);
-			}
 			if(total_provinces <= 2) {
 				// Adjective + Province name
 				name = text::resolve_string_substitution(state, "map_label_adj_province", sub);
+			} else if(in_same_state == true) {
+				name = text::resolve_string_substitution(state, "map_label_adj_state", sub);
 			} else {
 				for(const auto& e : map) {
 					if(float(e.second) / float(total_provinces) >= 0.75f) {
