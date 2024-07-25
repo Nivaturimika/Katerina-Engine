@@ -1712,7 +1712,7 @@ public:
 	}
 };
 
-class topbar_sphere_icon : public standard_nation_icon {
+class topbar_sphere_icon : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
@@ -1737,13 +1737,13 @@ public:
 		state.open_diplomacy(target);
 	}
 
-	int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
+	void on_update(sys::state& state) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		frame = 1;
 		if(nations::sphereing_progress_is_possible(state, nation_id)) {
-			return 0;
+			frame = 0;
 		} else if(rebel::sphere_member_has_ongoing_revolt(state, nation_id)) {
-			return 2;
-		} else {
-			return 1;
+			frame = 2;
 		}
 	}
 
