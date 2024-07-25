@@ -345,14 +345,15 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				connected_to_capital = true;
 			}
 		}
-		auto state_name = text::get_short_state_name(state, p.get_state_membership());
-		text::substitution_map sub{};
-		text::add_to_substitution_map(sub, text::variable_type::adj, text::get_adjective(state, n));
-		text::add_to_substitution_map(sub, text::variable_type::country, std::string_view(nation_name));
-		text::add_to_substitution_map(sub, text::variable_type::province, p);
-		text::add_to_substitution_map(sub, text::variable_type::state, std::string_view(state_name));
-		text::add_to_substitution_map(sub, text::variable_type::continentname, p.get_continent().get_name());
 		if(!connected_to_capital) {
+			auto state_name = text::get_short_state_name(state, p.get_state_membership());
+			text::substitution_map sub{};
+			text::add_to_substitution_map(sub, text::variable_type::adj, text::get_adjective(state, n));
+			text::add_to_substitution_map(sub, text::variable_type::country, std::string_view(nation_name));
+			text::add_to_substitution_map(sub, text::variable_type::province, p);
+			text::add_to_substitution_map(sub, text::variable_type::state, std::string_view(state_name));
+			text::add_to_substitution_map(sub, text::variable_type::continentname, p.get_continent().get_name());
+
 			// Adjective + " " + Continent
 			name = text::resolve_string_substitution(state, "map_label_adj_continent", sub);
 			// 66% of the provinces correspond to a single national identity
@@ -382,9 +383,8 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			if(total_provinces <= 2) {
 				// Adjective + Province name
 				name = text::resolve_string_substitution(state, "map_label_adj_province", sub);
-			} else if(float(total_same_state) / float(total_provinces) >= 0.5f) {
-				name = text::resolve_string_substitution(state, "map_label_adj_state", sub);
 			} else {
+				bool has_tag = false;
 				for(const auto& e : map) {
 					if(float(e.second) / float(total_provinces) >= 0.75f) {
 						// Adjective + " " + National identity
@@ -421,8 +421,12 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 								text::add_to_substitution_map(sub, text::variable_type::tag, state.world.national_identity_get_name(nid));
 								name = text::resolve_string_substitution(state, "map_label_adj_tag", sub);
 							}
+							has_tag = true;
 						}
 					}
+				}
+				if(!has_tag && float(total_same_state) / float(total_provinces) >= 0.5f) {
+					name = text::resolve_string_substitution(state, "map_label_adj_state", sub);
 				}
 			}
 		}
