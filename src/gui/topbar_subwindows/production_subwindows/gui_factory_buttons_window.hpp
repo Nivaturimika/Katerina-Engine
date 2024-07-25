@@ -209,9 +209,7 @@ public:
 	}
 
 	void on_update(sys::state& state) noexcept override {
-		set_button_text(state,
-					text::produce_simple_string(state, retrieve<bool>(state, parent) ? "production_hide_empty_states" : "production_show_empty_states"));
-		
+		set_button_text(state, text::produce_simple_string(state, retrieve<bool>(state, parent) ? "production_hide_empty_states" : "production_show_empty_states"));
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
@@ -223,28 +221,25 @@ public:
 
 class factory_name_sort : public button_element_base {
 	void button_action(sys::state& state) noexcept override {
-		if(parent) {
-			Cyto::Any payload = production_sort_order::name;
-			parent->impl_get(state, payload);
-		}
+		send(state, parent, production_sort_order::name);
 	}
 };
 
 class factory_infrastructure_sort : public button_element_base {
 	void button_action(sys::state& state) noexcept override {
-		if(parent) {
-			Cyto::Any payload = production_sort_order::infrastructure;
-			parent->impl_get(state, payload);
-		}
+		send(state, parent, production_sort_order::infrastructure);
 	}
 };
 
 class factory_count_sort : public button_element_base {
 	void button_action(sys::state& state) noexcept override {
-		if(parent) {
-			Cyto::Any payload = production_sort_order::factories;
-			parent->impl_get(state, payload);
-		}
+		send(state, parent, production_sort_order::factories);
+	}
+};
+
+class factory_focus_sort : public button_element_base {
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, production_sort_order::focus);
 	}
 };
 
@@ -253,37 +248,28 @@ public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "prod_subsidize_all") {
 			return make_element_by_type<factory_prod_subsidise_all_button>(state, id);
-
 		} else if(name == "prod_unsubsidize_all") {
 			return make_element_by_type<factory_prod_unsubsidise_all_button>(state, id);
-
 		} else if(name == "prod_open_all_factories") {
 			return make_element_by_type<factory_prod_open_all_button>(state, id);
-
 		} else if(name == "prod_close_all_factories") {
 			return make_element_by_type<factory_prod_close_all_button>(state, id);
-
 		} else if(name == "select_all") {
 			return make_element_by_type<factory_select_all_button>(state, id);
-
 		} else if(name == "deselect_all") {
 			return make_element_by_type<factory_deselect_all_button>(state, id);
-
 		} else if(name == "show_empty_states") {
 			return make_element_by_type<factory_show_empty_states_button>(state, id);
-
 		} else if(name == "sort_by_name") {
 			return make_element_by_type<factory_name_sort>(state, id);
-
 		} else if(name == "sort_by_factories") {
 			return make_element_by_type<factory_count_sort>(state, id);
-
 		} else if(name == "sort_by_infra") {
 			return make_element_by_type<factory_infrastructure_sort>(state, id);
-
+		} else if(name == "sort_by_focus") {
+			return make_element_by_type<factory_focus_sort>(state, id);
 		} else if(name == "filter_bounds") {
 			return make_element_by_type<commodity_filters_window>(state, id);
-
 		} else {
 			return nullptr;
 		}

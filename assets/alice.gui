@@ -4543,7 +4543,7 @@ guiTypes = {
         guiButtonType = {
             name = "alice_armygroup_defend_button"
             position = { 0 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_defend_order"
             buttonFont = "vic_22_black"
         }
@@ -4553,7 +4553,7 @@ guiTypes = {
         guiButtonType = {
             name = "alice_armygroup_naval_travel_origin_button"
             position = { 250 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_travel_origin_order"
             buttonFont = "vic_22_black"
         }
@@ -4561,7 +4561,7 @@ guiTypes = {
         guiButtonType = {
             name = "alice_armygroup_new_button"
             position = { 250 75 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_new_army_group"
             buttonFont = "vic_22_black"
         }
@@ -4569,7 +4569,7 @@ guiTypes = {
         guiButtonType = {
             name = "alice_armygroup_naval_travel_destination_button"
             position = { 500 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_travel_destination_order"
             buttonFont = "vic_22_black"
         }
@@ -4577,7 +4577,7 @@ guiTypes = {
         guiButtonType = {
             name = "alice_armygroup_go_to_selection"
             position = { 960 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_armygroup_go_to_selection"
             buttonFont = "vic_22_black"
         }
@@ -4593,16 +4593,23 @@ guiTypes = {
         guiButtonType = {
             name = "alice_battleplanner_add_selected"
             position = { 250 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_add_selected"
             buttonFont = "vic_22_black"
         }
         guiButtonType = {
             name = "alice_battleplanner_remove_selected"
             position = { 500 0 }
-            quadTextureSprite ="GFX_frontend_button_236"
+            quadTextureSprite = "GFX_frontend_button_236"
             buttonText = "alice_battleplanner_remove_selected"
             buttonFont = "vic_22_black"
         }
     }
+
+	guiButtonType = {
+		name = "sort_by_focus"
+		position = { 33 116 }
+		quadTextureSprite = "GFX_sort_prestige_rank"
+		extends = "factory_buttons"
+	}
 }

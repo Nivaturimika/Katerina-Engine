@@ -1530,8 +1530,7 @@ public:
 			* (((int16_t(state.defines.factories_per_state) + num_cols - 1) / num_cols) - 1);
 		// (8 + 7 - 1) - 1 = (8 + 6) - 1 = (14 / 8) - 1 ~= 1.75 rundown 1 - 1 = 0, ok
 
-		xy_pair base_sort_template_offset =
-				state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("sort_by_pop_template_offset"))->second.definition].position;
+		xy_pair base_sort_template_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("sort_by_pop_template_offset"))->second.definition].position;
 
 		{
 			auto text_elm = std::make_unique< per_state_primary_worker_amount>();
@@ -1577,7 +1576,6 @@ public:
 		if(parent) {
 			auto show_empty = retrieve<bool>(state, parent);
 			dcon::nation_id n = retrieve<production_foreign_invest_target>(state, parent).n;
-
 			populate_production_states_list(state, row_contents, n, show_empty, sort_order);
 		}
 		update(state);

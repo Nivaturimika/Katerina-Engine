@@ -27,18 +27,14 @@ void populate_production_states_list(sys::state& state, std::vector<dcon::state_
 				auto content = any_cast<commodity_filter_query_data>(payload);
 				count += content.filter ? 1 : 0;
 			}
-
-
 			if(count > 0)
 				row_contents.push_back(fat_id.get_state());
 		}
 	}
 
 	auto sort_by_name = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-		auto a_name =
-				text::produce_simple_string(state, state.world.state_definition_get_name(state.world.state_instance_get_definition(a)));
-		auto b_name =
-				text::produce_simple_string(state, state.world.state_definition_get_name(state.world.state_instance_get_definition(b)));
+		auto a_name = text::produce_simple_string(state, state.world.state_definition_get_name(state.world.state_instance_get_definition(a)));
+		auto b_name = text::produce_simple_string(state, state.world.state_definition_get_name(state.world.state_instance_get_definition(b)));
 		return a_name < b_name;
 	};
 	auto sort_by_factories = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
@@ -81,6 +77,11 @@ void populate_production_states_list(sys::state& state, std::vector<dcon::state_
 		});
 		return atotal / ap_total > btotal / bp_total;
 	};
+	auto sort_by_focus = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+		auto a_focus = state.world.state_instance_get_owner_focus(a);
+		auto b_focus = state.world.state_instance_get_owner_focus(b);
+		return a_focus.id.value > b_focus.id.value;
+	};
 
 	switch(sort_order) {
 	case production_sort_order::name:
@@ -100,6 +101,9 @@ void populate_production_states_list(sys::state& state, std::vector<dcon::state_
 		break;
 	case production_sort_order::infrastructure:
 		std::sort(row_contents.begin(), row_contents.end(), sort_by_infrastructure);
+		break;
+	case production_sort_order::focus:
+		std::sort(row_contents.begin(), row_contents.end(), sort_by_focus);
 		break;
 	}
 }
