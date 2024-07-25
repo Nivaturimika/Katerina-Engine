@@ -1200,18 +1200,17 @@ void life_rating_map_tt_box(sys::state& state, text::columnar_layout& contents, 
 	}
 }
 void crime_map_tt_box(sys::state& state, text::columnar_layout& contents, dcon::province_id prov) {
-	auto fat = dcon::fatten(state.world, prov);
 	country_name_box(state, contents, prov);
 	if(prov.value < state.province_definitions.first_sea_province.value && state.world.province_get_crime(prov)) {
 		auto box = text::open_layout_box(contents);
 		text::substitution_map sub;
 		text::add_to_substitution_map(sub, text::variable_type::x, state.culture_definitions.crimes[state.world.province_get_crime(prov)].name);
 		text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_41"), sub);
+		ui::modifier_description(state, contents, state.culture_definitions.crimes[state.world.province_get_crime(prov)].modifier);
 		text::close_layout_box(contents, box);
 	}
 }
 void rally_map_tt_box(sys::state& state, text::columnar_layout& contents, dcon::province_id prov) {
-	auto fat = dcon::fatten(state.world, prov);
 	country_name_box(state, contents, prov);
 	if(prov.value < state.province_definitions.first_sea_province.value) {
 		text::add_line_with_condition(state, contents, "mapmode_tooltip_42_1", state.world.province_get_land_rally_point(prov));
