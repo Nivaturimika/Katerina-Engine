@@ -746,41 +746,7 @@ public:
 		}
 	}
 };
-
-class topbar_tab_button : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override {
-		auto const override_and_show_tab = [&]() {
-			topbar_subwindow->set_visible(state, true);
-			state.ui_state.root->move_child_to_front(topbar_subwindow);
-			state.ui_state.topbar_subwindow = topbar_subwindow;
-		};
-
-		if(state.ui_state.topbar_subwindow->is_visible()) {
-			state.ui_state.topbar_subwindow->set_visible(state, false);
-			if(state.ui_state.topbar_subwindow != topbar_subwindow) {
-				override_and_show_tab();
-			}
-		} else {
-			override_and_show_tab();
-		}
-	}
-
-	bool is_active(sys::state& state) noexcept override {
-		return state.ui_state.topbar_subwindow == topbar_subwindow && state.ui_state.topbar_subwindow->is_visible();
-	}
-
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::tooltip;
-	}
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		text::add_line(state, contents, "alice_topbar_tab_1");
-	}
-
-	element_base* topbar_subwindow = nullptr;
-};
-
-class topbar_budget_tab_button : public topbar_tab_button {
+class topbar_budget_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.budget_subwindow && state.ui_state.budget_subwindow->is_visible()) {
@@ -790,6 +756,8 @@ public:
 		state.open_budget();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.budget_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -802,7 +770,7 @@ public:
 		return sound::get_tab_budget_sound(state);
 	}
 };
-class topbar_trade_tab_button : public topbar_tab_button {
+class topbar_trade_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.trade_subwindow && state.ui_state.trade_subwindow->is_visible()) {
@@ -812,6 +780,8 @@ public:
 		state.open_trade();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.trade_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -824,7 +794,7 @@ public:
 		return sound::get_tab_budget_sound(state); // for now we reuse the budget tab sound
 	}
 };
-class topbar_politics_tab_button : public topbar_tab_button {
+class topbar_politics_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
@@ -834,6 +804,8 @@ public:
 		state.open_politics();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.politics_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -856,6 +828,8 @@ public:
 		state.open_diplomacy(dcon::nation_id{ });
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.diplomacy_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -868,7 +842,7 @@ public:
 		return sound::get_tab_diplomacy_sound(state);
 	}
 };
-class topbar_military_tab_button : public topbar_tab_button {
+class topbar_military_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.military_subwindow && state.ui_state.military_subwindow->is_visible()) {
@@ -878,6 +852,8 @@ public:
 		state.open_military();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.military_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -890,7 +866,7 @@ public:
 		return sound::get_tab_military_sound(state);
 	}
 };
-class topbar_production_tab_button : public topbar_tab_button {
+class topbar_production_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.production_subwindow && state.ui_state.production_subwindow->is_visible()) {
@@ -900,6 +876,8 @@ public:
 		state.open_production();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.production_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -912,7 +890,7 @@ public:
 		return sound::get_tab_production_sound(state);
 	}
 };
-class topbar_technology_tab_button : public topbar_tab_button {
+class topbar_technology_tab_button : public checkbox_button {
 public:
 	void button_action(sys::state& state) noexcept override {
 		if(state.ui_state.technology_subwindow && state.ui_state.technology_subwindow->is_visible()) {
@@ -922,6 +900,8 @@ public:
 		state.open_technology();
 	}
 	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
 		return state.ui_state.topbar_subwindow == state.ui_state.technology_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -935,7 +915,7 @@ public:
 	}
 };
 
-class topbar_population_view_button : public topbar_tab_button {
+class topbar_population_view_button : public checkbox_button {
 public:
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_population_sound(state);
@@ -946,6 +926,11 @@ public:
 			return;
 		}
 		state.open_population();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		if(!state.ui_state.topbar_subwindow)
+			return false;
+		return state.ui_state.topbar_subwindow == state.ui_state.population_subwindow && state.ui_state.topbar_subwindow->is_visible();
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
@@ -2234,8 +2219,6 @@ public:
 
 private:
 	element_base* background_pic = nullptr;
-
-	friend class topbar_tab_button;
 };
 
 } // namespace ui
