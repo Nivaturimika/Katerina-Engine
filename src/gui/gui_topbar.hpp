@@ -782,6 +782,22 @@ public:
 
 class topbar_budget_tab_button : public topbar_tab_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.budget_subwindow && state.ui_state.budget_subwindow->is_visible()) {
+			state.ui_state.budget_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_budget();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.budget_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_budget_sound(state);
 	}
@@ -854,12 +870,44 @@ public:
 };
 class topbar_military_tab_button : public topbar_tab_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.military_subwindow && state.ui_state.military_subwindow->is_visible()) {
+			state.ui_state.military_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_military();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.military_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_military_sound(state);
 	}
 };
 class topbar_production_tab_button : public topbar_tab_button {
 public:
+	void button_action(sys::state& state) noexcept override {
+		if(state.ui_state.production_subwindow && state.ui_state.production_subwindow->is_visible()) {
+			state.ui_state.production_subwindow->set_visible(state, false);
+			return;
+		}
+		state.open_production();
+	}
+	bool is_active(sys::state& state) noexcept override {
+		return state.ui_state.topbar_subwindow == state.ui_state.production_subwindow && state.ui_state.topbar_subwindow->is_visible();
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "alice_topbar_tab_1");
+	}
 	sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 		return sound::get_tab_production_sound(state);
 	}
@@ -1921,19 +1969,9 @@ public:
 		} else if(name == "topbar_paper") {
 			return partially_transparent_image::make_element_by_type_alias(state, id);
 		} else if(name == "topbarbutton_production") {
-			auto btn = make_element_by_type<topbar_production_tab_button>(state, id);
-
-			auto tab = make_element_by_type<production_window>(state, "country_production");
-			state.ui_state.production_subwindow = state.ui_state.topbar_subwindow = btn->topbar_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_production_tab_button>(state, id);
 		} else if(name == "topbarbutton_budget") {
-			auto btn = make_element_by_type<topbar_budget_tab_button>(state, id);
-
-			auto tab = make_element_by_type<budget_window>(state, "country_budget");
-			btn->topbar_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_budget_tab_button>(state, id);
 		} else if(name == "topbarbutton_tech") {
 			auto btn = make_element_by_type<topbar_technology_tab_button>(state, id);
 
@@ -1952,12 +1990,7 @@ public:
 		} else if(name == "topbarbutton_diplomacy") {
 			return make_element_by_type<topbar_diplomacy_tab_button>(state, id);
 		} else if(name == "topbarbutton_military") {
-			auto btn = make_element_by_type<topbar_military_tab_button>(state, id);
-
-			auto tab = make_element_by_type<military_window>(state, "country_military");
-			btn->topbar_subwindow = tab.get();
-			state.ui_state.root->add_child_to_back(std::move(tab));
-			return btn;
+			return make_element_by_type<topbar_military_tab_button>(state, id);
 		} else if(name == "button_speedup") {
 			return make_element_by_type<topbar_speedup_button>(state, id);
 		} else if(name == "button_speeddown") {

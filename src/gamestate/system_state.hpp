@@ -750,6 +750,9 @@ struct alignas(64) state {
 
 	void console_log(std::string_view message);
 
+	void open_budget();
+	void open_production();
+	void open_military();
 	void open_politics();
 	void open_trade();
 	void open_population();

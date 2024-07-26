@@ -2060,6 +2060,51 @@ void list_pop_types(sys::state& state, parsers::scenario_building_context& conte
 		context.map_of_poptypes.insert_or_assign(std::string(utf8typename), type_id);
 	}
 }
+]
+void state::open_budget() {
+	if(!ui_state.budget_subwindow) {
+		auto tab = ui::make_element_by_type<ui::budget_window>(*this, "country_budget");
+		ui_state.budget_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.budget_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.budget_subwindow;
+		ui_state.budget_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.budget_subwindow);
+	}
+}
+
+void state::open_production() {
+	if(!ui_state.production_subwindow) {
+		auto tab = ui::make_element_by_type<ui::production_window>(*this, "country_production");
+		ui_state.production_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.production_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.production_subwindow;
+		ui_state.production_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.production_subwindow);
+	}
+}
+
+void state::open_military() {
+	if(!ui_state.military_subwindow) {
+		auto tab = ui::make_element_by_type<ui::military_window>(*this, "country_military");
+		ui_state.military_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.military_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.military_subwindow;
+		ui_state.military_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.military_subwindow);
+	}
+}
 
 void state::open_politics() {
 	if(!ui_state.politics_subwindow) {

@@ -447,11 +447,14 @@ struct state {
 	element_base* search_window = nullptr;
 	element_base* ledger_window = nullptr;
 	element_base* r_ledger_window = nullptr; // end screen ledger window
+
 	element_base* diplomacy_subwindow = nullptr;
 	element_base* politics_subwindow = nullptr;
 	element_base* population_subwindow = nullptr;
 	element_base* production_subwindow = nullptr;
 	element_base* trade_subwindow = nullptr;
+	element_base* budget_subwindow = nullptr;
+
 	element_base* unit_window_army = nullptr;
 	element_base* unit_window_navy = nullptr;
 	element_base* build_unit_window = nullptr;
