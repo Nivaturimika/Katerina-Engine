@@ -454,14 +454,14 @@ struct state {
 	element_base* production_subwindow = nullptr;
 	element_base* trade_subwindow = nullptr;
 	element_base* budget_subwindow = nullptr;
+	element_base* technology_subwindow = nullptr;
+	element_base* military_subwindow = nullptr;
 
 	element_base* unit_window_army = nullptr;
 	element_base* unit_window_navy = nullptr;
 	element_base* build_unit_window = nullptr;
 	element_base* msg_filters_window = nullptr;
 	element_base* outliner_window = nullptr;
-	element_base* technology_subwindow = nullptr;
-	element_base* military_subwindow = nullptr;
 	element_base* request_window = nullptr;
 	unit_details_window<dcon::army_id>* army_status_window = nullptr;
 	unit_details_window<dcon::navy_id>* navy_status_window = nullptr;
