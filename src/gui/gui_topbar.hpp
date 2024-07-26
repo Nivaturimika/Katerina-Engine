@@ -2215,7 +2215,7 @@ public:
 	}
 
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-		if(state.ui_state.topbar_subwindow->is_visible()) {
+		if(state.ui_state.topbar_subwindow && state.ui_state.topbar_subwindow->is_visible()) {
 			background_pic->set_visible(state, true);
 		} else {
 			background_pic->set_visible(state, false);
