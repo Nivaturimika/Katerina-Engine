@@ -2060,7 +2060,22 @@ void list_pop_types(sys::state& state, parsers::scenario_building_context& conte
 		context.map_of_poptypes.insert_or_assign(std::string(utf8typename), type_id);
 	}
 }
-]
+
+void state::open_technology() {
+	if(!ui_state.technology_subwindow) {
+		auto tab = ui::make_element_by_type<ui::technology_window>(*this, "country_technology");
+		ui_state.technology_subwindow = tab.get();
+		ui_state.root->add_child_to_back(std::move(tab));
+	}
+	if(ui_state.technology_subwindow) {
+		if(ui_state.topbar_subwindow)
+			ui_state.topbar_subwindow->set_visible(*this, false);
+		ui_state.topbar_subwindow = ui_state.technology_subwindow;
+		ui_state.technology_subwindow->set_visible(*this, true);
+		ui_state.root->move_child_to_front(ui_state.technology_subwindow);
+	}
+}
+
 void state::open_budget() {
 	if(!ui_state.budget_subwindow) {
 		auto tab = ui::make_element_by_type<ui::budget_window>(*this, "country_budget");
