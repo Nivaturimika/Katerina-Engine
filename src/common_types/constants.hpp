@@ -535,7 +535,7 @@ enum class color_blind_mode {
 	achroma, //black and white
 };
 
-constexpr int32_t max_event_options = 12;
+constexpr int32_t max_event_options = 18;
 constexpr uint32_t max_factory_bonuses = 8;
 constexpr uint32_t max_languages = 64;
 
