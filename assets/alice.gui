@@ -2311,7 +2311,7 @@ guiTypes = {
 
 		guiButtonType = {
 			name ="combat_retreat"
-			spriteType = "GFX_alice_retreat"
+			spriteType = "GFX_retreat_from_battle"
 			position = {  13 21 }
 			Orientation = "UPPER_LEFT"
 		}
@@ -2596,7 +2596,7 @@ guiTypes = {
 
 		guiButtonType = {
 			name ="combat_retreat"
-			spriteType = "GFX_alice_retreat"
+			spriteType = "GFX_retreat_from_battle"
 			position = {  13 -44 }
 			Orientation = "UPPER_LEFT"
 		}

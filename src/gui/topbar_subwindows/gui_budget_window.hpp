@@ -1824,8 +1824,8 @@ class domestic_investment_slider : public budget_slider<budget_slider_target::do
 		text::add_line_break_to_layout_box(state, contents, box);
 		text::close_layout_box(contents, box);
 
-		text::add_line(state, contents, "alice_domestic_investment_pops", text::variable_type::x, text::pretty_integer{ int32_t(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists)) + state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))) });
-		text::add_line(state, contents, "alice_domestic_investment_needs", text::variable_type::x, text::fp_currency{ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists) });
+		text::add_line(state, contents, "domestic_investment_pops", text::variable_type::x, text::pretty_integer{ int32_t(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists)) + state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))) });
+		text::add_line(state, contents, "domestic_investment_needs", text::variable_type::x, text::fp_currency{ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists) });
 	}
 };
 class domestic_investment_estimated_text : public simple_text_element_base {

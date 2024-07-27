@@ -887,10 +887,10 @@ uv_sort_e;Spd
 uv_sort_f;Rec
 uv_sort_g;Rel
 uv_sort_h;Exp
-alice_condition_diplo_points;Has atleast $x$ diplomatic points
-alice_retreat;Retreat from battle
-alice_retreat_1;It has been at least $x$ days since the battle started
-alice_retreat_2;You are the lead attacker or defender
+condition_diplo_points;Has atleast $x$ diplomatic points
+retreat_from_battle;Retreat from battle
+retreat_from_battle_1;It has been at least $x$ days since the battle started
+retreat_from_battle_2;You are the lead attacker or defender
 on;ON
 off;OFF
 province_selector;Selector
@@ -913,7 +913,7 @@ chat_player_ban;$playername$ was banned
 chat_player_kick;$playername$ was kicked
 chat_player_switch;$playername$ has choosen $country$
 chat_player_oos;$playername$ has OOSed!
-alice_status_stream;Save progress $value$
+save_progress;Save progress $value$
 alice_play_pending_client;$playername$ is not ready yet
 alice_stockpile_button_0_0;National stockpiles function as a condiment to your usual economic-business activities, where people see ?Ggreen?W lines go up, and ?Rred?W lines go down, as per usual I'm ?Ynot?W a line graph so I mostly go unnoticed :)
 alice_stockpile_button_1_0;If you click me 10 times you will receive nothing in return, just trust me, don't click me... ?ROR ELSE?W
@@ -924,24 +924,22 @@ alice_stockpile_button_3_0;Playing with friends aren't we? ?RWELL GOOD LUCK YOU 
 a_alert_reb;У одного или нескольких участников нашей сферы есть активные повстанцы:
 event_auto;Автоматически выбирать эту опцию до конца сеанса.
 event_taken_auto;Эта опция будет автоматически применена ?Y$date$?!.
-alice_load_unload_1;Пришвартованный здесь флот имеет достаточную вместимость
-alice_load_unload_2;Армия перевозится
-alice_load_unload_3;Транспортный флот пристыкован
-alice_load_unload_4;Перевозится одна или несколько армий
-alice_load_unload_5;Флот пристыкован
-alice_unload_fleet;Выгрузить все армии, перевезенные флотом
+unit_load_or_unload_1;Пришвартованный здесь флот имеет достаточную вместимость
+unit_load_or_unload_2;Армия перевозится
+unit_load_or_unload_3;Транспортный флот пристыкован
+unit_load_or_unload_4;Перевозится одна или несколько армий
+unit_load_or_unload_5;Флот пристыкован
+unload_all_armies_of_fleet;Выгрузить все армии, перевезенные флотом
 monthly_emigration_lab;Ежемесячная эмиграция в (топ-10)
 monthly_immigration_lab;Ежемесячная иммиграция из (топ-10)
 im_em_header;Прогнозируемая иммиграция/эмиграция для
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?! истощение
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?! истощение
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;a member of a disarmed nation
 cancel_fac_construction;Cancel factory construction
 cancel_fac_upgrade;Cancel factory upgrade
-kierkegaard_1;Either
-kierkegaard_2;Or
 open_and_sub;Субсидировать и вновь открыть завод
 o_set_national_flag;Установить национальный флаг $text$ для владельца
 o_add_modifier_until;Владелец провинции получает $text$ до $date$
@@ -953,8 +951,8 @@ w_artisan_prod;Глобальное ремесленное производст�
 w_artisan_profit;Прибыль национального ремесленника: $x$
 w_artisan_distribution;Национальное распространение ремесленников: $x$
 w_fac_prod;Общее заводское производство: $x$
-alice_lose_gp;Мы теряем ?YВеликую Державу?! положение дел!
-alice_state_select_title;Выбрать штат
+we_are_losing_gp_status;Мы теряем ?YВеликую Державу?! положение дел!
+state_select_title;Выбрать штат
 press_esc_to_cancel;Нажмите ?YESC?! отменить
 fort_build_tt_1;Провинция под вашим контролем
 fort_build_tt_2;Провинция не находится в осаде
@@ -965,8 +963,8 @@ rr_build_tt_1;Наша правящая партия разрешает прав
 tech_ol_tt;?G$x$?! от твоего повелителя, обладающего этой технологией
 tech_year_tt;?G$x$?! с текущего года
 disband_all;Распустить все выбранные отряды
-alice_play_checksum_host;Несовпадение контрольной суммы с хостом, убедитесь, что у вас одинаковые моды и файлы сохранения.
-alice_play_save_stream;Хост передает вам сохранение, подождите, пока оно завершится
+checksum_mismatch_with_host;Несовпадение контрольной суммы с хостом, убедитесь, что у вас одинаковые моды и файлы сохранения.
+host_is_streaming_save;Хост передает вам сохранение, подождите, пока оно завершится
 ai_will_accept_po;Они примут это предложение
 ai_will_not_accept_po;Они НЕ примут это предложение
 close_and_del;Закрыть и удалить фабрику
@@ -1037,9 +1035,9 @@ alice_con_decay_description;Естественный распад ?R-$x$
 x_from_y;$x$ от $y$
 reinforce_rate;Этот полк может пополнять до $x$ солдат в месяц.
 reinforce_rate_none;Этот полк в настоящее время не может быть усилен.
-alice_domestic_investment_button;Инвестирование в отдельные проекты ?Rустарело?W, вместо этого используйте ползунок ?Yвнутренние инвестиции?W на экране бюджета
-alice_domestic_investment_pops;У нас есть $x$ капиталистов, которым мы можем косвенно сделать щедрые пожертвования
-alice_domestic_investment_needs;Им требуется $x$ каждый день, чтобы удовлетворить свой роскошный образ жизни
+domestic_investment_button;Инвестирование в отдельные проекты ?Rустарело?W, вместо этого используйте ползунок ?Yвнутренние инвестиции?W на экране бюджета
+domestic_investment_pops;У нас есть $x$ капиталистов, которым мы можем косвенно сделать щедрые пожертвования
+domestic_investment_needs;Им требуется $x$ каждый день, чтобы удовлетворить свой роскошный образ жизни
 alice_budget_scaled_inc;Доход: ?G$value$
 alice_budget_scaled_1;Плохой налог: ?G$value$
 alice_budget_scaled_2;Средний налог: ?G$value$
@@ -1110,8 +1108,8 @@ unit_control_group_tooltip;Нажмите от ?YCTRL-1?W до ?YCTRL-9?W, чт�
 console_button_tooltip;Открыть командную консоль
 demobilize;Demobilize
 mobilize;Mobilize
-alice_cb_creation_detail_none;Please select a casus belli to start fabricating against $country$.
-alice_cb_creation_detail;We can fabricate a casus belli against $country$ with the reason of ?Y$type$?W. This process may take roughly about ?Y$days$?W, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
+cb_creation_detail_none;Please select a casus belli to start fabricating against $country$.
+cb_creation_detail;We can fabricate a casus belli against $country$ with the reason of ?Y$type$?W. This process may take roughly about ?Y$days$?W, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
 alice_mob_controls;?YRight-click?W to remobilize
 alice_mw_create_1;Add general
 alice_mw_create_2;Add admiral
@@ -1155,9 +1153,9 @@ alice_tt_wg_infamy_limit;?RЭта цель войны превысит лими�
 alice_wg_usage_trigger;Можно использовать только в том случае, если выполнен следующий триггер:
 province_id;Идентификатор провинции
 nation_tag;Тег нации
-alice_rgo_trade_prod_1;РГО Сельскохозяйственное производство: $x$ ($y$)
-alice_rgo_trade_prod_2;РГО Горное производство: $x$ ($y$)
-alice_rgo_trade_prod_3;РГО Добыча монет: $x$ ($y$)
+rgo_trade_prod_1;РГО Сельскохозяйственное производство: $x$ ($y$)
+rgo_trade_prod_2;РГО Горное производство: $x$ ($y$)
+rgo_trade_prod_3;РГО Добыча монет: $x$ ($y$)
 alice_artisan_trade_prod;Ремесленное производство: $x$ ($y$)
 alice_factory_trade_prod;Заводское производство: $x$ ($y$)
 alice_all_trade_prod;Общий объем производства: $x$

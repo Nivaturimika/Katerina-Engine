@@ -134,11 +134,11 @@ public:
 			text::add_to_substitution_map(sub, text::variable_type::type, fat_cb.get_name());
 			text::add_to_substitution_map(sub, text::variable_type::days, int64_t(fab_time));
 			text::add_to_substitution_map(sub, text::variable_type::badboy, text::fp_one_place{military::cb_infamy(state, fat_cb)});
-			text::localised_format_box(state, contents, box, std::string_view("alice_cb_creation_detail"), sub);
+			text::localised_format_box(state, contents, box, std::string_view("cb_creation_detail"), sub);
 		} else {
 			text::substitution_map sub{};
 			text::add_to_substitution_map(sub, text::variable_type::country, target_nation);
-			text::localised_format_box(state, contents, box, std::string_view("alice_cb_creation_detail_none"), sub);
+			text::localised_format_box(state, contents, box, std::string_view("cb_creation_detail_none"), sub);
 		}
 		text::close_layout_box(contents, box);
 	}

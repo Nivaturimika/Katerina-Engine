@@ -887,14 +887,14 @@ uv_sort_e;Spd
 uv_sort_f;Rec
 uv_sort_g;Rel
 uv_sort_h;Exp
-alice_condition_diplo_points;Has atleast $x$ diplomatic points
-alice_retreat;Retreat from battle
-alice_retreat_1;It has been at least $x$ days since the battle started
-alice_retreat_2;You are the lead attacker or defender
-alice_province_select;Selects province
-alice_province_deselect;Deselects province
-alice_province_selector_on;ON
-alice_province_selector_off;OFF
+condition_diplo_points;Has atleast $x$ diplomatic points
+retreat_from_battle;Retreat from battle
+retreat_from_battle_1;It has been at least $x$ days since the battle started
+retreat_from_battle_2;You are the lead attacker or defender
+province_select;Selects province
+province_deselect;Deselects province
+province_selector_on;ON
+province_selector_off;OFF
 province_selector;Selector
 province_immigrator;Immigrator
 tt_a_bank;a bank
@@ -915,7 +915,7 @@ chat_player_ban;$playername$ was banned
 chat_player_kick;$playername$ was kicked
 chat_player_switch;$playername$ has choosen $country$
 chat_player_oos;$playername$ has OOSed!
-alice_status_stream;Save progress $value$
+save_progress;Save progress $value$
 alice_play_pending_client;$playername$ is not ready yet
 alice_stockpile_button_0_0;National stockpiles function as a condiment to your usual economic-business activities, where people see ?Ggreen?W lines go up, and ?Rred?W lines go down, as per usual I'm ?Ynot?W a line graph so I mostly go unnoticed :)
 alice_stockpile_button_1_0;If you click me 10 times you will receive nothing in return, just trust me, don't click me... ?ROR ELSE?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;Playing with friends aren't we? ?RWELL GOOD LUCK YOU 
 a_alert_reb;One or more of our sphere members has active rebels:
 event_auto;Automatically choose this option for the remainder of the session.
 event_taken_auto;This option will automatically be taken on ?Y$date$?W.
-alice_load_unload_1;A navy docked here has sufficient capacity
-alice_load_unload_2;The army is being transported
-alice_load_unload_3;The transporting fleet is docked
-alice_load_unload_4;One or more armies is being transported
-alice_load_unload_5;The fleet is docked
-alice_unload_fleet;Unload all armies transported by the fleet
+unit_load_or_unload_1;A navy docked here has sufficient capacity
+unit_load_or_unload_2;The army is being transported
+unit_load_or_unload_3;The transporting fleet is docked
+unit_load_or_unload_4;One or more armies is being transported
+unit_load_or_unload_5;The fleet is docked
+unload_all_armies_of_fleet;Unload all armies transported by the fleet
 auto_save_lb;Auto-save frequency
 auto_save_1;Daily
 auto_save_2;Monthly
@@ -940,15 +940,13 @@ auto_save_0;None
 monthly_emigration_lab;Monthly emigration to (top 10)
 monthly_immigration_lab;Monthly immigration from (top 10)
 im_em_header;Predicted immigration/emigration for 
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W attrition
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W attrition
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;a member of a disarmed nation
 cancel_fac_construction;Cancel factory construction
 cancel_fac_upgrade;Cancel factory upgrade
-kierkegaard_1;Either
-kierkegaard_2;Or
 open_and_sub;Subsidize & Reopen Factory
 o_set_national_flag;Set national flag $text$ for the owner
 o_add_modifier_until;Owner of the province gets $text$ until $date$
@@ -960,8 +958,8 @@ w_artisan_prod;Global artisan production: $x$
 w_artisan_profit;National artisan profit: $x$
 w_artisan_distribution;National artisan distribution: $x$
 w_fac_prod;Global factory production: $x$
-alice_lose_gp;We are losing ?YGreat Power?! status!
-alice_state_select_title;Select state
+we_are_losing_gp_status;We are losing ?YGreat Power?! status!
+state_select_title;Select state
 press_esc_to_cancel;Press ?YESC?! to cancel
 fort_build_tt_1;The province is under your control
 fort_build_tt_2;The province is not under siege
@@ -972,8 +970,8 @@ rr_build_tt_1;Our ruling party allows the government to construct rail roads
 tech_ol_tt;?G$x$?! from your overlord having this technology
 tech_year_tt;?G$x$?! from the current year
 disband_all;Disband all selected units
-alice_play_checksum_host;Checksum mismatch with host, ensure you have the same mods and savefiles
-alice_play_save_stream;Host is streaming a save to you, wait until it completes
+checksum_mismatch_with_host;Checksum mismatch with host, ensure you have the same mods and savefiles
+host_is_streaming_save;Host is streaming a save to you, wait until it completes
 ai_will_accept_po;They will accept this offer
 ai_will_not_accept_po;They will NOT accept this offer
 close_and_del;Close & Delete Factory
@@ -1045,9 +1043,9 @@ alice_con_decay_description;Natural decay ?R-$x$
 x_from_y;$x$ from $y$
 reinforce_rate;This regiment can reinforce up to $x$ soldiers per month.
 reinforce_rate_none;This regiment can't currently be reinforced.
-alice_domestic_investment_button;Investing in individual projects is ?Rdeprecated?W, use the ?Ydomestic investment?W slider on the budget screen instead
-alice_domestic_investment_pops;We have $x$ capitalists we can indirectly give generous donations to
-alice_domestic_investment_needs;They require $x$ each day to satisfy their luxurious lifestyle
+domestic_investment_button;Investing in individual projects is ?Rdeprecated?W, use the ?Ydomestic investment?W slider on the budget screen instead
+domestic_investment_pops;We have $x$ capitalists we can indirectly give generous donations to
+domestic_investment_needs;They require $x$ each day to satisfy their luxurious lifestyle
 alice_budget_scaled_inc;Income: ?G$value$
 alice_budget_scaled_1;Poor tax: ?G$value$
 alice_budget_scaled_2;Middle tax: ?G$value$
@@ -1097,7 +1095,7 @@ colonial_points_from_technology;From technologies:
 colonial_points_from_naval_bases;From naval bases:
 colonial_points_from_ships;From ships:
 used_colonial_maintenance;Maintaining existing colonies:
-topbar_pause_speed;Pauses the game, click again to unpause
+topbar_pause_speed;Pauses the game, press again to unpause
 att_call_will_accept;$x$ will join your war
 att_call_will_decline;$x$ will not join your war
 att_call_is_human;$x$ may join your war
@@ -1119,8 +1117,8 @@ unit_control_group_tooltip;Press ?YCTRL-1?W thru ?YCTRL-9?W to assign/unassign t
 console_button_tooltip;Open the command console
 demobilize;Demobilize
 mobilize;Mobilize
-alice_cb_creation_detail_none;Please select a casus belli to start fabricating against $country$.
-alice_cb_creation_detail;We can fabricate a casus belli against $country$ with the reason of ?Y$type$?W. This process may take roughly about ?Y$days$?W, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
+cb_creation_detail_none;Please select a casus belli to start fabricating against $country$.
+cb_creation_detail;We can fabricate a casus belli against $country$ with the reason of ?Y$type$?W. This process may take roughly about ?Y$days$?W, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
 alice_mob_controls;?YRight-click?! to remobilize
 alice_mw_create_1;Add general
 alice_mw_create_2;Add admiral
@@ -1164,9 +1162,9 @@ alice_tt_wg_infamy_limit;?RThis wargoal will exceed the infamy limit?W
 alice_wg_usage_trigger;Can only use if the following trigger is satisfied:
 province_id;Province Id
 nation_tag;Nation tag
-alice_rgo_trade_prod_1;RGO Farming Production: $x$ ($y$)
-alice_rgo_trade_prod_2;RGO Mining Production: $x$ ($y$)
-alice_rgo_trade_prod_3;RGO Minting Production: $x$ ($y$)
+rgo_trade_prod_1;RGO Farming Production: $x$ ($y$)
+rgo_trade_prod_2;RGO Mining Production: $x$ ($y$)
+rgo_trade_prod_3;RGO Minting Production: $x$ ($y$)
 alice_artisan_trade_prod;Artisan Production: $x$ ($y$)
 alice_factory_trade_prod;Factory Production: $x$ ($y$)
 alice_all_trade_prod;Total Production: $x$
@@ -1207,8 +1205,8 @@ alice_exit_battleplanner;Exit battle planner
 alice_battleplanner_add_selected;Add selected
 alice_battleplanner_remove_selected;Remove selected
 fab_explain_8;Doesn't have a truce
-alice_reform_support_header;Political support for this reform (a total of 50% or greater is required to choose the reform)
-alice_no_current_support;Currently there is no political support for this reform
+political_support_for_reform_header;Political support for this reform (a total of 50% or greater is required to choose the reform)
+no_political_support_for_reform;Currently there is no political support for this reform
 ol_view_stockpile_header;Stockpiles
 ol_view_stockpile;Stockpiles
 nf_overwrite_header;Remove an existing national focus first

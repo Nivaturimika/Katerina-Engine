@@ -887,14 +887,14 @@ uv_sort_e;SPD
 uv_sort_f;Empf
 uv_sort_g;Rel
 uv_sort_h;Exp
-alice_condition_diplo_points;Hat mindestens $x$ diplomatische Punkte
-alice_retreat;Rückzug aus der Schlacht
-alice_retreat_1;Es sind mindestens $x$ Tage vergangen, seit der Kampf begann
-alice_retreat_2;Sie sind der führende Angreifer oder Verteidiger
-alice_province_select;Wählt die Provinz aus
-alice_province_deselect;Deaktiviert die Provinz
-alice_province_selector_on;AN
-alice_province_selector_off;AUS
+condition_diplo_points;Hat mindestens $x$ diplomatische Punkte
+retreat_from_battle;Rückzug aus der Schlacht
+retreat_from_battle_1;Es sind mindestens $x$ Tage vergangen, seit der Kampf begann
+retreat_from_battle_2;Sie sind der führende Angreifer oder Verteidiger
+province_select;Wählt die Provinz aus
+province_deselect;Deaktiviert die Provinz
+province_selector_on;AN
+province_selector_off;AUS
 province_selector;Wähler
 province_immigrator;Einwanderer
 tt_a_bank;eine Bank
@@ -915,7 +915,7 @@ chat_player_ban;$playername$ wurde gesperrt
 chat_player_kick;$playername$ wurde gekickt
 chat_player_switch;$playername$ hat $country$ ausgewählt
 chat_player_oos;$playername$ hat OOSed!
-alice_status_stream;Speichern Sie den Fortschritt $value$
+save_progress;Speichern Sie den Fortschritt $value$
 alice_play_pending_client;$playername$ ist noch nicht fertig
 alice_stockpile_button_0_0;Nationale Vorräte fungieren als Gewürz für Ihre üblichen Wirtschafts- und Geschäftsaktivitäten, bei denen die Leute sehen, dass die „Ggrünen“ W-Linien nach oben und die „RRoten“ W-Linien nach unten gehen. Wie üblich bin ich kein Liniendiagramm, also meistens unbemerkt bleiben :)
 alice_stockpile_button_1_0;Wenn Sie 10 Mal auf mich klicken, erhalten Sie nichts zurück, vertrauen Sie mir einfach, klicken Sie nicht auf mich... ?ROR ELSE?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;Wir spielen mit Freunden, nicht wahr? ?WIEL VIEL GLÜ
 a_alert_reb;Eines oder mehrere unserer Sphärenmitglieder haben aktive Rebellen:
 event_auto;Wählen Sie diese Option automatisch für den Rest der Sitzung.
 event_taken_auto;Diese Option wird am ?Y$date$?W automatisch übernommen.
-alice_load_unload_1;Eine hier angedockte Marine verfügt über ausreichend Kapazität
-alice_load_unload_2;Die Armee wird transportiert
-alice_load_unload_3;Die Transportflotte ist angedockt
-alice_load_unload_4;Eine oder mehrere Armeen werden transportiert
-alice_load_unload_5;Die Flotte ist angedockt
-alice_unload_fleet;Entladen Sie alle von der Flotte transportierten Armeen
+unit_load_or_unload_1;Eine hier angedockte Marine verfügt über ausreichend Kapazität
+unit_load_or_unload_2;Die Armee wird transportiert
+unit_load_or_unload_3;Die Transportflotte ist angedockt
+unit_load_or_unload_4;Eine oder mehrere Armeen werden transportiert
+unit_load_or_unload_5;Die Flotte ist angedockt
+unload_all_armies_of_fleet;Entladen Sie alle von der Flotte transportierten Armeen
 auto_save_lb;Frequenz automatisch speichern
 auto_save_1;Täglich
 auto_save_2;Monatlich
@@ -940,15 +940,13 @@ auto_save_0;Keiner
 monthly_emigration_lab;Monatliche Auswanderung nach (Top 10)
 monthly_immigration_lab;Monatliche Einwanderung aus (Top 10)
 im_em_header;Voraussichtliche Einwanderung/Auswanderung für
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W Abnutzung
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W Abnutzung
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;ein Mitglied einer entwaffneten Nation
 cancel_fac_construction;Fabrikbau abbrechen
 cancel_fac_upgrade;Werks-Upgrade abbrechen
-kierkegaard_1;Entweder
-kierkegaard_2;Oder
 open_and_sub;Fabrik subventionieren und wieder eröffnen
 o_set_national_flag;Setzen Sie die Nationalflagge $text$ für den Eigentümer
 o_add_modifier_until;Der Eigentümer der Provinz erhält $text$ bis $date$
@@ -960,8 +958,8 @@ w_artisan_prod;Globale handwerkliche Produktion: $x$
 w_artisan_profit;Nationaler Gewinn der Handwerker: $x$
 w_artisan_distribution;Nationale Kunsthandwerkerverteilung: $x$
 w_fac_prod;Globale Fabrikproduktion: $x$
-alice_lose_gp;Wir verlieren „Großmacht“! Status!
-alice_state_select_title;Staat wählen
+we_are_losing_gp_status;Wir verlieren „Großmacht“! Status!
+state_select_title;Staat wählen
 press_esc_to_cancel;Drücken Sie ?JA?! abbrechen
 fort_build_tt_1;Die Provinz steht unter Ihrer Kontrolle
 fort_build_tt_2;Die Provinz steht nicht unter Belagerung
@@ -972,8 +970,8 @@ rr_build_tt_1;Unsere Regierungspartei erlaubt der Regierung den Bau von Eisenbah
 tech_ol_tt;?G$x$?! von Ihrem Oberherrn, der über diese Technologie verfügt
 tech_year_tt;?G$x$?! aus dem aktuellen Jahr
 disband_all;Alle ausgewählten Einheiten auflösen
-alice_play_checksum_host;Prüfsumme stimmt nicht mit Host überein. Stellen Sie sicher, dass Sie über dieselben Mods und Sicherungsdateien verfügen
-alice_play_save_stream;Der Host streamt einen Speichervorgang an Sie. Warten Sie, bis er abgeschlossen ist
+checksum_mismatch_with_host;Prüfsumme stimmt nicht mit Host überein. Stellen Sie sicher, dass Sie über dieselben Mods und Sicherungsdateien verfügen
+host_is_streaming_save;Der Host streamt einen Speichervorgang an Sie. Warten Sie, bis er abgeschlossen ist
 ai_will_accept_po;Sie werden dieses Angebot annehmen
 ai_will_not_accept_po;Sie werden dieses Angebot NICHT annehmen
 close_and_del;Fabrik schließen und löschen
@@ -1045,9 +1043,9 @@ alice_con_decay_description;Natürlicher Verfall ?R-$x$
 x_from_y;$x$ von $y$
 reinforce_rate;Dieses Regiment kann bis zu $x$ Soldaten pro Monat verstärken.
 reinforce_rate_none;Dieses Regiment kann derzeit nicht verstärkt werden.
-alice_domestic_investment_button;Investitionen in einzelne Projekte sind veraltet. Verwenden Sie stattdessen den Schieberegler „Inländische Investitionen“ auf dem Budgetbildschirm
-alice_domestic_investment_pops;Wir haben $x$-Kapitalisten, denen wir indirekt großzügige Spenden geben können
-alice_domestic_investment_needs;Sie benötigen jeden Tag x$, um ihren luxuriösen Lebensstil zu befriedigen
+domestic_investment_button;Investitionen in einzelne Projekte sind veraltet. Verwenden Sie stattdessen den Schieberegler „Inländische Investitionen“ auf dem Budgetbildschirm
+domestic_investment_pops;Wir haben $x$-Kapitalisten, denen wir indirekt großzügige Spenden geben können
+domestic_investment_needs;Sie benötigen jeden Tag x$, um ihren luxuriösen Lebensstil zu befriedigen
 alice_budget_scaled_inc;Einkommen: ?G$Wert$
 alice_budget_scaled_1;Armensteuer: ?G$Wert$
 alice_budget_scaled_2;Mittlere Steuer: ?G$Wert$
@@ -1119,8 +1117,8 @@ unit_control_group_tooltip;Drücken Sie ?YCTRL-1?W bis ?YCTRL-9?W, um dieses Ger
 console_button_tooltip;Öffnen Sie die Befehlskonsole
 demobilize;Demobilisieren
 mobilize;Mobilisieren
-alice_cb_creation_detail_none;Bitte wählen Sie einen Grund aus, um mit der Fälschung gegen $country$ zu beginnen.
-alice_cb_creation_detail;Wir können einen Casus Belli gegen $country$ mit dem Grund von ?Y$type$?W konstruieren. Dieser Prozess kann ungefähr ?Y$Tage$?W dauern, und die potenziellen Kosten, die durch die Entdeckung entstehen, werden uns in Verruf bringen.
+cb_creation_detail_none;Bitte wählen Sie einen Grund aus, um mit der Fälschung gegen $country$ zu beginnen.
+cb_creation_detail;Wir können einen Casus Belli gegen $country$ mit dem Grund von ?Y$type$?W konstruieren. Dieser Prozess kann ungefähr ?Y$Tage$?W dauern, und die potenziellen Kosten, die durch die Entdeckung entstehen, werden uns in Verruf bringen.
 alice_mob_controls;?YRechtsklick?W zum Remobilisieren
 alice_mw_create_1;Allgemein hinzufügen
 alice_mw_create_2;Admiral hinzufügen
@@ -1164,9 +1162,9 @@ alice_tt_wg_infamy_limit;?RDieses Kriegsziel wird die Schandegrenze überschreit
 alice_wg_usage_trigger;Kann nur verwendet werden, wenn der folgende Auslöser erfüllt ist:
 province_id;Provinz-ID
 nation_tag;Nation-Tag
-alice_rgo_trade_prod_1;RGO-Landwirtschaftsproduktion: $x$ ($y$)
-alice_rgo_trade_prod_2;RGO-Mining-Produktion: $x$ ($y$)
-alice_rgo_trade_prod_3;RGO-Minting-Produktion: $x$ ($y$)
+rgo_trade_prod_1;RGO-Landwirtschaftsproduktion: $x$ ($y$)
+rgo_trade_prod_2;RGO-Mining-Produktion: $x$ ($y$)
+rgo_trade_prod_3;RGO-Minting-Produktion: $x$ ($y$)
 alice_artisan_trade_prod;Handwerkliche Produktion: $x$ ($y$)
 alice_factory_trade_prod;Fabrikproduktion: $x$ ($y$)
 alice_all_trade_prod;Gesamtproduktion: $x$

@@ -92,7 +92,7 @@ void country_name_box(sys::state& state, text::columnar_layout& contents, dcon::
 			text::add_to_substitution_map(sub, text::variable_type::x, int64_t(amounts.type2));
 			text::add_to_substitution_map(sub, text::variable_type::y, int64_t(amounts.type3));
 			text::add_to_substitution_map(sub, text::variable_type::val, text::fp_two_places{ selected_relative_attrition_amount(state, state.local_player_nation, state.selected_armies, prov) });
-			auto resolved = text::resolve_string_substitution(state, "alice_unit_relative_attrition", sub);
+			auto resolved = text::resolve_string_substitution(state, "unit_relative_attrition", sub);
 			box = text::open_layout_box(contents);
 			text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
 			text::close_layout_box(contents, box);

@@ -643,9 +643,9 @@ public:
 		if(state.network_mode == sys::network_mode_type::client) {
 			auto box = text::open_layout_box(contents, 0);
 			if(state.network_state.save_stream) {
-				text::localised_format_box(state, contents, box, std::string_view("alice_play_save_stream"));
+				text::localised_format_box(state, contents, box, std::string_view("host_is_streaming_save"));
 			} else if(!state.session_host_checksum.is_equal(state.get_save_checksum())) {
-				text::localised_format_box(state, contents, box, std::string_view("alice_play_checksum_host"));
+				text::localised_format_box(state, contents, box, std::string_view("checksum_mismatch_with_host"));
 			}
 			for(auto const& client : state.network_state.clients) {
 				if(client.is_active()) {
@@ -692,7 +692,7 @@ public:
 							if(progress < 1.f) {
 								text::substitution_map sub{};
 								text::add_to_substitution_map(sub, text::variable_type::value, text::fp_percentage_one_place{ progress });
-								set_text(state, text::produce_simple_string(state, text::resolve_string_substitution(state, "alice_status_stream", sub)));
+								set_text(state, text::produce_simple_string(state, text::resolve_string_substitution(state, "save_progress", sub)));
 							}
 						}
 						break;

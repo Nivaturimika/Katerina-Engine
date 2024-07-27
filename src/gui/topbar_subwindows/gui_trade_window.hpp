@@ -646,15 +646,15 @@ public:
 			float total = r_total + a_total + f_total;
 			if(r_total > 0.f) {
 				if(com == economy::money) {
-					text::add_line(state, contents, "alice_rgo_trade_prod_3",
+					text::add_line(state, contents, "rgo_trade_prod_3",
 						text::variable_type::x, text::fp_one_place{ r_total },
 						text::variable_type::y, text::fp_percentage{ r_total / total });
 				} else if(state.world.commodity_get_is_mine(com)) {
-					text::add_line(state, contents, "alice_rgo_trade_prod_2",
+					text::add_line(state, contents, "rgo_trade_prod_2",
 						text::variable_type::x, text::fp_one_place{ r_total },
 						text::variable_type::y, text::fp_percentage{ r_total / total });
 				} else {
-					text::add_line(state, contents, "alice_rgo_trade_prod_1",
+					text::add_line(state, contents, "rgo_trade_prod_1",
 						text::variable_type::x, text::fp_one_place{ r_total },
 						text::variable_type::y, text::fp_percentage{ r_total / total });
 				}

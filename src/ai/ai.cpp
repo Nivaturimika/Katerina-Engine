@@ -320,19 +320,12 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 }
 
 void explain_ai_alliance_reasons(sys::state& state, dcon::nation_id target, text::layout_base& contents, int32_t indent) {
-
 	text::add_line_with_condition(state, contents, "ai_alliance_1", state.world.nation_get_ai_is_threatened(target), indent);
-
-	text::add_line(state, contents, "kierkegaard_1", indent);
-
+	text::add_line(state, contents, "any_of_the_following", indent);
 	text::add_line_with_condition(state, contents, "ai_alliance_5", ai_has_mutual_enemy(state, state.local_player_nation, target), indent + 15);
-
-	text::add_line(state, contents, "kierkegaard_2", indent);
-
+	text::add_line(state, contents, "any_of_the_following", indent);
 	text::add_line_with_condition(state, contents, "ai_alliance_2", ai_is_close_enough(state, target, state.local_player_nation), indent + 15);
-
 	text::add_line_with_condition(state, contents, "ai_alliance_3", state.world.nation_get_ai_rival(target) != state.local_player_nation && state.world.nation_get_ai_rival(state.local_player_nation) != target, indent + 15);
-
 	auto target_score = estimate_strength(state, target);
 	auto source_score = estimate_strength(state, state.local_player_nation);
 	text::add_line_with_condition(state, contents, "ai_alliance_4", std::max<float>(source_score, 1.f) * ally_overestimate >= target_score, indent + 15);

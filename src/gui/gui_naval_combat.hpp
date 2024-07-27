@@ -619,11 +619,11 @@ public:
 	}
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto b = retrieve<dcon::naval_battle_id>(state, parent);
-		text::add_line(state, contents, "alice_retreat");
-		text::add_line_with_condition(state, contents, "alice_retreat_1",
+		text::add_line(state, contents, "retreat_from_battle");
+		text::add_line_with_condition(state, contents, "retreat_from_battle_1",
 			state.world.naval_battle_get_start_date(b) + military::days_before_retreat < state.current_date,
 			text::variable_type::x, military::days_before_retreat);
-		text::add_line_with_condition(state, contents, "alice_retreat_2",
+		text::add_line_with_condition(state, contents, "retreat_from_battle_2",
 			state.local_player_nation == military::get_naval_battle_lead_attacker(state, b)
 			|| state.local_player_nation == military::get_naval_battle_lead_defender(state, b));
 	}

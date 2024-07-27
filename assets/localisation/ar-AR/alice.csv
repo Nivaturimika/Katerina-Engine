@@ -887,14 +887,14 @@ uv_sort_e;Spd
 uv_sort_f;تفصيل
 uv_sort_g;Rel
 uv_sort_h;إكسب
-alice_condition_diplo_points;لديه على الأقل $x$ نقاط دبلوماسية
-alice_retreat;التراجع عن المعركة
-alice_retreat_1;لقد مرت أيام $x$ على الأقل منذ بدء المعركة
-alice_retreat_2;أنت المهاجم الرئيسي أو المدافع
-alice_province_select;يختار المحافظة
-alice_province_deselect;يقوم بإلغاء تحديد المقاطعة
-alice_province_selector_on;على
-alice_province_selector_off;عن
+condition_diplo_points;لديه على الأقل $x$ نقاط دبلوماسية
+retreat_from_battle;التراجع عن المعركة
+retreat_from_battle_1;لقد مرت أيام $x$ على الأقل منذ بدء المعركة
+retreat_from_battle_2;أنت المهاجم الرئيسي أو المدافع
+province_select;يختار المحافظة
+province_deselect;يقوم بإلغاء تحديد المقاطعة
+province_selector_on;على
+province_selector_off;عن
 province_selector;محدد
 province_immigrator;مهاجر
 tt_a_bank;بنك
@@ -915,7 +915,7 @@ chat_player_ban;تم حظر $playername$
 chat_player_kick;تم طرد $playername$
 chat_player_switch;$playername$ اختار $country$
 chat_player_oos;تم تسجيل $playername$!
-alice_status_stream;حفظ التقدم $value$
+save_progress;حفظ التقدم $value$
 alice_play_pending_client;$playername$ ليس جاهزًا بعد
 alice_stockpile_button_0_0;"تعمل المخزونات الوطنية بمثابة بهار للأنشطة الاقتصادية والتجارية المعتادة، حيث يرى الناس خطوط ""Ggreen""W ترتفع، و""Rred""W خطوط تنخفض، كما هو معتاد أنا ""Ynot؟""W رسم بياني خطي لذلك أنا في الغالب تمر مرور الكرام :)"
 alice_stockpile_button_1_0;إذا قمت بالنقر فوقي 10 مرات فلن تحصل على أي شيء في المقابل، فقط ثق بي، لا تنقر فوقي... ?ROR ELSE?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;اللعب مع الأصدقاء أليس كذلك؟ 
 a_alert_reb;واحد أو أكثر من أعضاء مجالنا لديه متمردين نشطين:
 event_auto;اختر هذا الخيار تلقائيًا لبقية الجلسة.
 event_taken_auto;سيتم اتخاذ هذا الخيار تلقائيًا في ?Y$date$?W.
-alice_load_unload_1;البحرية الراسية هنا لديها القدرة الكافية
-alice_load_unload_2;ويجري نقل الجيش
-alice_load_unload_3;يرسو أسطول النقل
-alice_load_unload_4;يتم نقل جيش واحد أو أكثر
-alice_load_unload_5;رست الأسطول
-alice_unload_fleet;تفريغ جميع الجيوش التي ينقلها الأسطول
+unit_load_or_unload_1;البحرية الراسية هنا لديها القدرة الكافية
+unit_load_or_unload_2;ويجري نقل الجيش
+unit_load_or_unload_3;يرسو أسطول النقل
+unit_load_or_unload_4;يتم نقل جيش واحد أو أكثر
+unit_load_or_unload_5;رست الأسطول
+unload_all_armies_of_fleet;تفريغ جميع الجيوش التي ينقلها الأسطول
 auto_save_lb;تردد الحفظ التلقائي
 auto_save_1;يوميًا
 auto_save_2;شهريا
@@ -940,15 +940,13 @@ auto_save_0;لا أحد
 monthly_emigration_lab;الهجرة الشهرية إلى (أعلى 10)
 monthly_immigration_lab;الهجرة الشهرية من (أعلى 10)
 im_em_header;الهجرة المتوقعة/الهجرة لـ
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W الاستنزاف
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W الاستنزاف
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;عضو في أمة منزوعة السلاح
 cancel_fac_construction;إلغاء بناء المصنع
 cancel_fac_upgrade;إلغاء ترقية المصنع
-kierkegaard_1;أيضاً
-kierkegaard_2;أو
 open_and_sub;دعم وإعادة فتح المصنع
 o_set_national_flag;قم بتعيين العلم الوطني $text$ للمالك
 o_add_modifier_until;يحصل مالك المقاطعة على $text$ حتى $date$
@@ -960,8 +958,8 @@ w_artisan_prod;الإنتاج الحرفي العالمي: $x$
 w_artisan_profit;الربح الحرفي الوطني: $x$
 w_artisan_distribution;التوزيع الحرفي الوطني: $x$
 w_fac_prod;إنتاج المصنع العالمي: $x$
-alice_lose_gp;نحن نخسر؟ القوة العظمى?! حالة!
-alice_state_select_title;اختر ولايه
+we_are_losing_gp_status;نحن نخسر؟ القوة العظمى?! حالة!
+state_select_title;اختر ولايه
 press_esc_to_cancel;اضغط نعم?! لالغاء
 fort_build_tt_1;المحافظة تحت سيطرتكم
 fort_build_tt_2;المحافظة ليست تحت الحصار
@@ -972,8 +970,8 @@ rr_build_tt_1;يسمح حزبنا الحاكم للحكومة ببناء طرق 
 tech_ol_tt;?G$x$?! من أفرلورد الخاص بك وجود هذه التكنولوجيا
 tech_year_tt;?G$x$?! من العام الحالي
 disband_all;حل كافة الوحدات المحددة
-alice_play_checksum_host;عدم تطابق المجموع الاختباري مع المضيف، تأكد من أن لديك نفس التعديلات وملفات الحفظ
-alice_play_save_stream;يقوم المضيف ببث ملف محفوظ إليك، انتظر حتى يكتمل
+checksum_mismatch_with_host;عدم تطابق المجموع الاختباري مع المضيف، تأكد من أن لديك نفس التعديلات وملفات الحفظ
+host_is_streaming_save;يقوم المضيف ببث ملف محفوظ إليك، انتظر حتى يكتمل
 ai_will_accept_po;وسوف يقبلون هذا العرض
 ai_will_not_accept_po;لن يقبلوا هذا العرض
 close_and_del;إغلاق وحذف المصنع
@@ -1044,9 +1042,9 @@ alice_con_decay_description;الاضمحلال الطبيعي؟R-$x$
 x_from_y;$x$ من $y$
 reinforce_rate;يمكن لهذا الفوج تعزيز ما يصل إلى $x$ من الجنود شهريًا.
 reinforce_rate_none;لا يمكن تعزيز هذا الفوج حاليًا.
-alice_domestic_investment_button;"الاستثمار في المشاريع الفردية أمر مهمل، استخدم شريط التمرير ""الاستثمار المحلي"" على شاشة الميزانية بدلاً من ذلك"
-alice_domestic_investment_pops;لدينا رأسماليون $x$ يمكننا تقديم تبرعات سخية لهم بشكل غير مباشر
-alice_domestic_investment_needs;إنهم يحتاجون إلى $ x $ كل يوم لإرضاء أسلوب حياتهم الفاخر
+domestic_investment_button;"الاستثمار في المشاريع الفردية أمر مهمل، استخدم شريط التمرير ""الاستثمار المحلي"" على شاشة الميزانية بدلاً من ذلك"
+domestic_investment_pops;لدينا رأسماليون $x$ يمكننا تقديم تبرعات سخية لهم بشكل غير مباشر
+domestic_investment_needs;إنهم يحتاجون إلى $ x $ كل يوم لإرضاء أسلوب حياتهم الفاخر
 alice_budget_scaled_inc;الدخل: ؟G$value$
 alice_budget_scaled_1;ضريبة الفقراء: ؟G$value$
 alice_budget_scaled_2;الضريبة المتوسطة: ؟G$value$
@@ -1118,8 +1116,8 @@ unit_control_group_tooltip;اضغط على YCTRL-1?W حتى YCTRL-9?W لتعيي
 console_button_tooltip;افتح وحدة التحكم بالأوامر
 demobilize;تسريح
 mobilize;تعبئة
-alice_cb_creation_detail_none;الرجاء تحديد سبب للحرب لبدء التصنيع ضد $country$.
-alice_cb_creation_detail;يمكننا اختلاق سبب للحرب ضد $country$ بسبب ?Y$type$?W. قد تستغرق هذه العملية تقريبًا حوالي ?Y$days$?W، والتكاليف المحتملة الناتجة عن اكتشافها ستمنحنا العار.R$badboy$?W.
+cb_creation_detail_none;الرجاء تحديد سبب للحرب لبدء التصنيع ضد $country$.
+cb_creation_detail;يمكننا اختلاق سبب للحرب ضد $country$ بسبب ?Y$type$?W. قد تستغرق هذه العملية تقريبًا حوالي ?Y$days$?W، والتكاليف المحتملة الناتجة عن اكتشافها ستمنحنا العار.R$badboy$?W.
 alice_mob_controls;?Yانقر بزر الماوس الأيمن?W لإعادة التعبئة
 alice_mw_create_1;أضف عام
 alice_mw_create_2;أضف الأدميرال
@@ -1163,9 +1161,9 @@ alice_tt_wg_infamy_limit;هل سيتجاوز هذا الهدف الحربي حد
 alice_wg_usage_trigger;لا يمكن استخدامه إلا في حالة استيفاء المشغل التالي:
 province_id;معرف المقاطعة
 nation_tag;علامة الأمة
-alice_rgo_trade_prod_1;الإنتاج الزراعي RGO: $x$ ($y$)
-alice_rgo_trade_prod_2;إنتاج التعدين RGO: $x$ ($y$)
-alice_rgo_trade_prod_3;إنتاج شركة RGO لسك العملة: $x$ ($y$)
+rgo_trade_prod_1;الإنتاج الزراعي RGO: $x$ ($y$)
+rgo_trade_prod_2;إنتاج التعدين RGO: $x$ ($y$)
+rgo_trade_prod_3;إنتاج شركة RGO لسك العملة: $x$ ($y$)
 alice_artisan_trade_prod;الإنتاج الحرفي: $x$ ($y$)
 alice_factory_trade_prod;إنتاج المصنع: $x$ ($y$)
 alice_all_trade_prod;إجمالي الإنتاج: $x$

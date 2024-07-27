@@ -887,14 +887,14 @@ uv_sort_e;Snelheid
 uv_sort_f;Aanvr
 uv_sort_g;Rel
 uv_sort_h;Uitv
-alice_condition_diplo_points;Heeft minimaal $x$ diplomatieke punten
-alice_retreat;Trek je terug uit de strijd
-alice_retreat_1;Het is minstens $x$ dagen geleden dat de strijd begon
-alice_retreat_2;Jij bent de hoofdaanvaller of verdediger
-alice_province_select;Selecteert provincie
-alice_province_deselect;Deselecteert provincie
-alice_province_selector_on;OP
-alice_province_selector_off;UIT
+condition_diplo_points;Heeft minimaal $x$ diplomatieke punten
+retreat_from_battle;Trek je terug uit de strijd
+retreat_from_battle_1;Het is minstens $x$ dagen geleden dat de strijd begon
+retreat_from_battle_2;Jij bent de hoofdaanvaller of verdediger
+province_select;Selecteert provincie
+province_deselect;Deselecteert provincie
+province_selector_on;OP
+province_selector_off;UIT
 province_selector;Selector
 province_immigrator;Immigrator
 tt_a_bank;een bank
@@ -915,7 +915,7 @@ chat_player_ban;$spelernaam$ is verbannen
 chat_player_kick;$spelernaam$ is geschopt
 chat_player_switch;$playername$ heeft $country$ gekozen
 chat_player_oos;$playername$ heeft OOSed!
-alice_status_stream;Bewaar voortgang $value$
+save_progress;Bewaar voortgang $value$
 alice_play_pending_client;$playername$ is nog niet klaar
 alice_stockpile_button_0_0;Nationale voorraden fungeren als aanvulling op uw gebruikelijke economisch-zakelijke activiteiten, waar mensen 'Ggroene' W-lijnen omhoog zien gaan en 'Rred' W-lijnen omlaag gaan, zoals gewoonlijk ben ik 'Ynot'W een lijngrafiek, dus ik ben meestal onopgemerkt gaan :)
 alice_stockpile_button_1_0;Als je 10 keer op mij klikt, ontvang je niets terug, vertrouw me gewoon, klik niet op mij... ?ROR ANDERS?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;Spelen met vrienden, nietwaar? ?RWELL VEEL GELUK DAT 
 a_alert_reb;Een of meer van onze sfeerleden hebben actieve rebellen:
 event_auto;Kies deze optie automatisch voor de rest van de sessie.
 event_taken_auto;Deze optie wordt automatisch gebruikt op ?Y$date$?W.
-alice_load_unload_1;Een hier aangemeerde marine heeft voldoende capaciteit
-alice_load_unload_2;Het leger wordt vervoerd
-alice_load_unload_3;De transportvloot is aangemeerd
-alice_load_unload_4;Eén of meer legers worden vervoerd
-alice_load_unload_5;De vloot is aangemeerd
-alice_unload_fleet;Ontlaad alle legers die door de vloot worden vervoerd
+unit_load_or_unload_1;Een hier aangemeerde marine heeft voldoende capaciteit
+unit_load_or_unload_2;Het leger wordt vervoerd
+unit_load_or_unload_3;De transportvloot is aangemeerd
+unit_load_or_unload_4;Eén of meer legers worden vervoerd
+unit_load_or_unload_5;De vloot is aangemeerd
+unload_all_armies_of_fleet;Ontlaad alle legers die door de vloot worden vervoerd
 auto_save_lb;Frequentie voor automatisch opslaan
 auto_save_1;Dagelijks
 auto_save_2;Maandelijks
@@ -940,15 +940,13 @@ auto_save_0;Geen
 monthly_emigration_lab;Maandelijkse emigratie naar (top 10)
 monthly_immigration_lab;Maandelijkse immigratie uit (top 10)
 im_em_header;Voorspelde immigratie/emigratie voor
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W slijtage
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W slijtage
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;lid van een ontwapende natie
 cancel_fac_construction;Fabrieksbouw annuleren
 cancel_fac_upgrade;Fabrieksupgrade annuleren
-kierkegaard_1;Of
-kierkegaard_2;Of
 open_and_sub;Subsidiëren en heropenen fabriek
 o_set_national_flag;Stel de nationale vlag $text$ in voor de eigenaar
 o_add_modifier_until;Eigenaar van de provincie krijgt $text$ tot $date$
@@ -960,8 +958,8 @@ w_artisan_prod;Mondiale ambachtelijke productie: $x$
 w_artisan_profit;Nationale ambachtelijke winst: $x$
 w_artisan_distribution;Nationale ambachtelijke distributie: $x$
 w_fac_prod;Mondiale fabrieksproductie: $x$
-alice_lose_gp;We verliezen ?YGrote Macht?! toestand!
-alice_state_select_title;Selecteer staat
+we_are_losing_gp_status;We verliezen ?YGrote Macht?! toestand!
+state_select_title;Selecteer staat
 press_esc_to_cancel;Druk op ?JASC?! annuleren
 fort_build_tt_1;De provincie staat onder jouw controle
 fort_build_tt_2;De provincie wordt niet belegerd
@@ -972,8 +970,8 @@ rr_build_tt_1;Onze regerende partij staat de regering toe spoorwegen aan te legg
 tech_ol_tt;?G$x$?! van jouw opperheer die deze technologie heeft
 tech_year_tt;?G$x$?! van het lopende jaar
 disband_all;Ontbind alle geselecteerde eenheden
-alice_play_checksum_host;Checksum komt niet overeen met host, zorg ervoor dat u over dezelfde mods en opslagbestanden beschikt
-alice_play_save_stream;De host streamt een opslag naar u. Wacht tot deze is voltooid
+checksum_mismatch_with_host;Checksum komt niet overeen met host, zorg ervoor dat u over dezelfde mods en opslagbestanden beschikt
+host_is_streaming_save;De host streamt een opslag naar u. Wacht tot deze is voltooid
 ai_will_accept_po;Zij zullen dit aanbod accepteren
 ai_will_not_accept_po;Zij zullen dit aanbod NIET accepteren
 close_and_del;Fabriek sluiten en verwijderen
@@ -1045,9 +1043,9 @@ alice_con_decay_description;Natuurlijk verval ?R-$x$
 x_from_y;$x$ van $y$
 reinforce_rate;Dit regiment kan tot $x$ soldaten per maand versterken.
 reinforce_rate_none;Dit regiment kan momenteel niet worden versterkt.
-alice_domestic_investment_button;Investeren in individuele projecten is niet meer mogelijk. Gebruik in plaats daarvan de schuifregelaar 'Binnenlandse investeringen' op het budgetscherm
-alice_domestic_investment_pops;We hebben $x$ kapitalisten aan wie we indirect genereuze donaties kunnen geven
-alice_domestic_investment_needs;Ze hebben elke dag $x$ nodig om aan hun luxueuze levensstijl te voldoen
+domestic_investment_button;Investeren in individuele projecten is niet meer mogelijk. Gebruik in plaats daarvan de schuifregelaar 'Binnenlandse investeringen' op het budgetscherm
+domestic_investment_pops;We hebben $x$ kapitalisten aan wie we indirect genereuze donaties kunnen geven
+domestic_investment_needs;Ze hebben elke dag $x$ nodig om aan hun luxueuze levensstijl te voldoen
 alice_budget_scaled_inc;Inkomen: ?G$waarde$
 alice_budget_scaled_1;Slechte belasting: ?G$value$
 alice_budget_scaled_2;Middenbelasting: ?G$waarde$
@@ -1119,8 +1117,8 @@ unit_control_group_tooltip;Druk op ?YCTRL-1?W tot en met ?YCTRL-9?W om dit appar
 console_button_tooltip;Open de opdrachtconsole
 demobilize;Demobiliseren
 mobilize;Mobiliseren
-alice_cb_creation_detail_none;Selecteer een casus belli om te beginnen met het fabriceren van $country$.
-alice_cb_creation_detail;We kunnen een casus belli tegen $country$ verzinnen met als reden ?Y$type$?W. Dit proces kan ongeveer ?Y$days$?W duren, en de potentiële kosten van ontdekking zullen ons ?R$badboy$?W schande bezorgen.
+cb_creation_detail_none;Selecteer een casus belli om te beginnen met het fabriceren van $country$.
+cb_creation_detail;We kunnen een casus belli tegen $country$ verzinnen met als reden ?Y$type$?W. Dit proces kan ongeveer ?Y$days$?W duren, en de potentiële kosten van ontdekking zullen ons ?R$badboy$?W schande bezorgen.
 alice_mob_controls;?YKlik met de rechtermuisknop?W om opnieuw te mobiliseren
 alice_mw_create_1;Algemeen toevoegen
 alice_mw_create_2;Admiraal toevoegen
@@ -1164,9 +1162,9 @@ alice_tt_wg_infamy_limit;?RDit oorlogsdoel overschrijdt de schandelimiet?W
 alice_wg_usage_trigger;Kan alleen worden gebruikt als aan de volgende trigger is voldaan:
 province_id;Provincie-id
 nation_tag;Natie-tag
-alice_rgo_trade_prod_1;RGO-landbouwproductie: $x$ ($y$)
-alice_rgo_trade_prod_2;RGO-mijnbouwproductie: $x$ ($y$)
-alice_rgo_trade_prod_3;RGO Minting-productie: $x$ ($y$)
+rgo_trade_prod_1;RGO-landbouwproductie: $x$ ($y$)
+rgo_trade_prod_2;RGO-mijnbouwproductie: $x$ ($y$)
+rgo_trade_prod_3;RGO Minting-productie: $x$ ($y$)
 alice_artisan_trade_prod;Ambachtelijke productie: $x$ ($y$)
 alice_factory_trade_prod;Fabrieksproductie: $x$ ($y$)
 alice_all_trade_prod;Totale productie: $x$

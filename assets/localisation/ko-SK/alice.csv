@@ -887,14 +887,14 @@ uv_sort_e;속도
 uv_sort_f;녹음
 uv_sort_g;상대
 uv_sort_h;경험치
-alice_condition_diplo_points;$x$ 이상의 외교 포인트를 보유하고 있습니다.
-alice_retreat;전투에서 후퇴
-alice_retreat_1;전투가 시작된 지 최소 $x$일이 지났습니다.
-alice_retreat_2;당신은 주요 공격자 또는 수비수입니다
-alice_province_select;지방을 선택합니다
-alice_province_deselect;지방 선택 해제
-alice_province_selector_on;에
-alice_province_selector_off;끄다
+condition_diplo_points;$x$ 이상의 외교 포인트를 보유하고 있습니다.
+retreat_from_battle;전투에서 후퇴
+retreat_from_battle_1;전투가 시작된 지 최소 $x$일이 지났습니다.
+retreat_from_battle_2;당신은 주요 공격자 또는 수비수입니다
+province_select;지방을 선택합니다
+province_deselect;지방 선택 해제
+province_selector_on;에
+province_selector_off;끄다
 province_selector;선택자
 province_immigrator;이민자
 tt_a_bank;은행
@@ -915,7 +915,7 @@ chat_player_ban;$playername$이(가) 차단되었습니다
 chat_player_kick;$playername$이(가) 추방되었습니다
 chat_player_switch;$playername$님이 $country$을 선택했습니다.
 chat_player_oos;$playername$이 OOS를 받았습니다!
-alice_status_stream;진행 상황 $value$ 저장
+save_progress;진행 상황 $value$ 저장
 alice_play_pending_client;$playername$은(는) 아직 준비되지 않았습니다.
 alice_stockpile_button_0_0;국가 비축량은 일반적인 경제-비즈니스 활동에 대한 조미료 역할을 합니다. 사람들은 ?Ggreen?W 선이 올라가고 ?Rred?W 선이 내려가는 것을 봅니다. 평소와 같이 나는 ?Ynot?W 선 그래프이므로 대부분 눈에 띄지 않게 가세요 :)
 alice_stockpile_button_1_0;저를 10번 클릭하시면 아무런 보상도 받지 못할 것입니다. 저를 믿으세요. 저를 클릭하지 마세요... ?ROR ELSE?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;우리는 친구들과 놀고 있지 않나요? ?RW�
 a_alert_reb;우리 영역 구성원 중 한 명 이상이 활동적인 반군을 가지고 있습니다.
 event_auto;세션의 나머지 부분에 대해 이 옵션을 자동으로 선택합니다.
 event_taken_auto;이 옵션은 ?Y$date$?W에 자동으로 선택됩니다.
-alice_load_unload_1;여기에 정박한 해군은 충분한 능력을 가지고 있습니다
-alice_load_unload_2;군대가 수송되고 있다
-alice_load_unload_3;수송선단이 정박해 있다
-alice_load_unload_4;하나 이상의 군대가 수송 중입니다.
-alice_load_unload_5;함대가 도킹되었습니다
-alice_unload_fleet;함대에 의해 수송된 모든 군대를 하역시키십시오
+unit_load_or_unload_1;여기에 정박한 해군은 충분한 능력을 가지고 있습니다
+unit_load_or_unload_2;군대가 수송되고 있다
+unit_load_or_unload_3;수송선단이 정박해 있다
+unit_load_or_unload_4;하나 이상의 군대가 수송 중입니다.
+unit_load_or_unload_5;함대가 도킹되었습니다
+unload_all_armies_of_fleet;함대에 의해 수송된 모든 군대를 하역시키십시오
 auto_save_lb;자동 저장 빈도
 auto_save_1;일일
 auto_save_2;월간 간행물
@@ -940,15 +940,13 @@ auto_save_0;없음
 monthly_emigration_lab;월별 이주(상위 10위)
 monthly_immigration_lab;월간 이민 (상위 10위)
 im_em_header;예상 이민/이주 대상:
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W 감소
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W 감소
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$비용$?W ($attunit$/$defunit$)
 disarmed_pop;무장해제된 국가의 일원
 cancel_fac_construction;공장 건설 취소
 cancel_fac_upgrade;공장 업그레이드 취소
-kierkegaard_1;어느 하나
-kierkegaard_2;또는
 open_and_sub;보조금 지급 및 공장 재개장
 o_set_national_flag;소유자에게 국기 $text$ 설정
 o_add_modifier_until;해당 지역의 소유자는 $date$까지 $text$를 받습니다.
@@ -960,8 +958,8 @@ w_artisan_prod;글로벌 장인 생산: $x$
 w_artisan_profit;국내 장인 이익: $x$
 w_artisan_distribution;국내 장인 유통: $x$
 w_fac_prod;글로벌 공장 생산량: $x$
-alice_lose_gp;우리는 ?Y위대한 힘을 잃고 있다?! 상태!
-alice_state_select_title;상태 선택
+we_are_losing_gp_status;우리는 ?Y위대한 힘을 잃고 있다?! 상태!
+state_select_title;상태 선택
 press_esc_to_cancel;?YESC를 누르세요?! 취소하다
 fort_build_tt_1;해당 지역은 귀하의 통제하에 있습니다
 fort_build_tt_2;해당 지역은 포위되지 않았습니다.
@@ -972,8 +970,8 @@ rr_build_tt_1;우리 여당은 정부에 철도 건설을 허용했다.
 tech_ol_tt;?G$x$?! 이 기술을 가지고 있는 당신의 대군주로부터
 tech_year_tt;?G$x$?! 올해부터
 disband_all;선택한 유닛 모두 해산
-alice_play_checksum_host;호스트와 체크섬이 일치하지 않습니다. 모드와 저장 파일이 동일한지 확인하세요.
-alice_play_save_stream;호스트가 저장 내용을 스트리밍 중입니다. 완료될 때까지 기다리세요.
+checksum_mismatch_with_host;호스트와 체크섬이 일치하지 않습니다. 모드와 저장 파일이 동일한지 확인하세요.
+host_is_streaming_save;호스트가 저장 내용을 스트리밍 중입니다. 완료될 때까지 기다리세요.
 ai_will_accept_po;그들은 이 제안을 받아들일 것이다
 ai_will_not_accept_po;그들은 이 제안을 받아들이지 않을 것입니다
 close_and_del;공장 폐쇄 및 삭제
@@ -1045,9 +1043,9 @@ alice_con_decay_description;자연 부패 ?R-$x$
 x_from_y;$y$에서 $x$
 reinforce_rate;이 연대는 매달 최대 $x$의 병사를 증원할 수 있습니다.
 reinforce_rate_none;이 연대는 현재 강화될 수 없습니다.
-alice_domestic_investment_button;"개별 프로젝트에 대한 투자는 ""Rdeprecated""W입니다. 대신 예산 화면의 ""Y국내 투자""W 슬라이더를 사용하세요."
-alice_domestic_investment_pops;우리는 간접적으로 관대 한 기부를 할 수 있는 $x$ 자본가를 보유하고 있습니다.
-alice_domestic_investment_needs;호화로운 생활 방식을 만족하려면 매일 $x$가 필요합니다.
+domestic_investment_button;"개별 프로젝트에 대한 투자는 ""Rdeprecated""W입니다. 대신 예산 화면의 ""Y국내 투자""W 슬라이더를 사용하세요."
+domestic_investment_pops;우리는 간접적으로 관대 한 기부를 할 수 있는 $x$ 자본가를 보유하고 있습니다.
+domestic_investment_needs;호화로운 생활 방식을 만족하려면 매일 $x$가 필요합니다.
 alice_budget_scaled_inc;소득: ?G$value$
 alice_budget_scaled_1;열악한 세금: ?G$value$
 alice_budget_scaled_2;중간세: ?G$value$
@@ -1119,8 +1117,8 @@ unit_control_group_tooltip;?YCTRL-1?W ~ ?YCTRL-9?W를 눌러 이 장치를 제�
 console_button_tooltip;명령 콘솔 열기
 demobilize;동원 해제
 mobilize;동원하다
-alice_cb_creation_detail_none;$country$에 대한 조작을 시작하려면 범인을 선택하세요.
-alice_cb_creation_detail;?Y$type$?W라는 이유로 $country$에 대한 카수스 벨리를 조작할 수 있습니다. 이 과정은 대략 ?Y$days$?W 정도 소요될 수 있으며, 발견 시 발생할 수 있는 잠재적 비용은 ?R$badboy$?W의 악명을 안겨줄 것입니다.
+cb_creation_detail_none;$country$에 대한 조작을 시작하려면 범인을 선택하세요.
+cb_creation_detail;?Y$type$?W라는 이유로 $country$에 대한 카수스 벨리를 조작할 수 있습니다. 이 과정은 대략 ?Y$days$?W 정도 소요될 수 있으며, 발견 시 발생할 수 있는 잠재적 비용은 ?R$badboy$?W의 악명을 안겨줄 것입니다.
 alice_mob_controls;?Y오른쪽 클릭?W를 다시 동원하려면
 alice_mw_create_1;일반 추가
 alice_mw_create_2;제독 추가
@@ -1164,9 +1162,9 @@ alice_tt_wg_infamy_limit;?R이 전쟁 목표는 악명 한도를 초과합니까
 alice_wg_usage_trigger;다음 트리거가 충족되는 경우에만 사용할 수 있습니다.
 province_id;지방 ID
 nation_tag;국가 태그
-alice_rgo_trade_prod_1;RGO 농업 생산: $x$ ($y$)
-alice_rgo_trade_prod_2;RGO 채굴 생산량: $x$ ($y$)
-alice_rgo_trade_prod_3;RGO 주조 생산: $x$ ($y$)
+rgo_trade_prod_1;RGO 농업 생산: $x$ ($y$)
+rgo_trade_prod_2;RGO 채굴 생산량: $x$ ($y$)
+rgo_trade_prod_3;RGO 주조 생산: $x$ ($y$)
 alice_artisan_trade_prod;장인 생산: $x$ ($y$)
 alice_factory_trade_prod;공장 생산: $x$ ($y$)
 alice_all_trade_prod;총 생산량: $x$

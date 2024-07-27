@@ -887,14 +887,14 @@ uv_sort_e;速度
 uv_sort_f;侦察
 uv_sort_g;宗教
 uv_sort_h;经验
-alice_condition_diplo_points;他至少$x$外交点
-alice_retreat;撤退来自战斗
-alice_retreat_1;战斗开始后已过去$x$天
-alice_retreat_2;你是攻击方或防御方的领袖
-alice_province_select;选择省
-alice_province_deselect;取消选择省
-alice_province_selector_on;打开
-alice_province_selector_off;关闭
+condition_diplo_points;他至少$x$外交点
+retreat_from_battle;撤退来自战斗
+retreat_from_battle_1;战斗开始后已过去$x$天
+retreat_from_battle_2;你是攻击方或防御方的领袖
+province_select;选择省
+province_deselect;取消选择省
+province_selector_on;打开
+province_selector_off;关闭
 province_selector;选择器
 province_immigrator;移民
 tt_a_bank;银行
@@ -915,7 +915,7 @@ chat_player_ban;$playername$被封禁
 chat_player_kick;$playername$被踢除
 chat_player_switch;$playername$选择了$country$
 chat_player_oos;$playername$已断开连接！
-alice_status_stream;存档处理进度：$value$
+save_progress;存档处理进度：$value$
 alice_play_pending_client;$playername$未准备好
 alice_stockpile_button_0_0;国家仓储可以作为您日常经济商业活动的调节物，在?G绿色?W 线看到价格上涨, and ?Rred?W 红线下降, 像往常一样 我 ?Y不是?W 一个折线图所以不总是被注意到: )
 alice_stockpile_button_1_0;如果你点了我十次你什么都得不到，相信我，别再点我了，?R否则?W……
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;和朋友玩不是嘛? ?Remmm,祝你好运,你会需�
 a_alert_reb;叛军已经起而反抗我们的势力范围成员：
 event_auto;在事件的剩余时间内自动选择这个选项
 event_taken_auto;此选项将会在?Y$date$?W自动选择。
-alice_load_unload_1;停靠在此地的海军有足够的容量
-alice_load_unload_2;军队运输中
-alice_load_unload_3;运输舰队停靠
-alice_load_unload_4;军队运输中
-alice_load_unload_5;舰队停靠
-alice_unload_fleet;卸载所有此舰队运输的部队
+unit_load_or_unload_1;停靠在此地的海军有足够的容量
+unit_load_or_unload_2;军队运输中
+unit_load_or_unload_3;运输舰队停靠
+unit_load_or_unload_4;军队运输中
+unit_load_or_unload_5;舰队停靠
+unload_all_armies_of_fleet;卸载所有此舰队运输的部队
 auto_save_lb;自动保存频率
 auto_save_1;每日
 auto_save_2;每月
@@ -940,15 +940,13 @@ auto_save_0;不自动保存
 monthly_emigration_lab;每月移民到（前十名）
 monthly_immigration_lab;每月移民来自（前十名）
 im_em_header;省份属于：
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W 损耗
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W 损耗
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($date$) - ?R$cost$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$cost$?W ($attunit$/$defunit$)
 disarmed_pop;一个被裁军的成员国
 cancel_fac_construction;取消工厂建设
 cancel_fac_upgrade;取消工厂升级
-kierkegaard_1;同不
-kierkegaard_2;或
 open_and_sub;资助并重开工厂
 o_set_national_flag;对拥有者设置国家变量$text$
 o_add_modifier_until;省份拥有者获得$text$直到$date$
@@ -960,8 +958,8 @@ w_artisan_prod;全球手工业者生产：$x$
 w_artisan_profit;国内手工业者利润：$x$
 w_artisan_distribution;国内手工业者分布：$x$
 w_fac_prod;全球工厂生产：$x$
-alice_lose_gp;我们正失去?Y列强?!地位！
-alice_state_select_title;选择地区
+we_are_losing_gp_status;我们正失去?Y列强?!地位！
+state_select_title;选择地区
 press_esc_to_cancel;按下?YESC?!以取消
 fort_build_tt_1;此省正处于你控制下
 fort_build_tt_2;此省未遭受围攻
@@ -972,8 +970,8 @@ rr_build_tt_1;我国执政党允许政府建设铁路
 tech_ol_tt;?G$x$?! 来自于你的宗主国所拥有的这个科技
 tech_year_tt;?G$x$?!来自当前年份
 disband_all;解散所有已选单位
-alice_play_checksum_host;校验和与主机不匹配，确保你有相同的模组和存档
-alice_play_save_stream;主机正在向你传输存档，等待其完成
+checksum_mismatch_with_host;校验和与主机不匹配，确保你有相同的模组和存档
+host_is_streaming_save;主机正在向你传输存档，等待其完成
 ai_will_accept_po;他们将接受这个提议
 ai_will_not_accept_po;他们不会接受这个提议
 close_and_del;关闭并移除工厂
@@ -1044,9 +1042,9 @@ alice_con_decay_description;自然衰减?R-$x$
 x_from_y;$x$来自$y$
 reinforce_rate;这支军队每月能支援$x$名士兵
 reinforce_rate_none;无法增援部队
-alice_domestic_investment_button;不推荐投资单个项目，请改用预算屏幕上的国内投资滑块
-alice_domestic_investment_pops;我们有$x$名资本家以让我们间接的慷慨解囊
-alice_domestic_investment_needs;他们每天需要$x$去满足奢侈的生活方式
+domestic_investment_button;不推荐投资单个项目，请改用预算屏幕上的国内投资滑块
+domestic_investment_pops;我们有$x$名资本家以让我们间接的慷慨解囊
+domestic_investment_needs;他们每天需要$x$去满足奢侈的生活方式
 alice_budget_scaled_inc;收入：?G$value$
 alice_budget_scaled_1;贫困阶层税：?G$value$
 alice_budget_scaled_2;中产阶层税：?G$value$
@@ -1118,8 +1116,8 @@ unit_control_group_tooltip;按下 ?YCTRL+1?W 到 ?YCTRL+9?W 将此单位指定/�
 console_button_tooltip;打开控制台
 demobilize;遣散
 mobilize;动员
-alice_cb_creation_detail_none;请选择一项以开始伪造对$country$的宣战理由。
-alice_cb_creation_detail;我们可以以?Y$type$?W为依据，伪造对抗$country$的宣战理由。这一过程将需要大约?Y$days$?W天，若被发现则会给予我们?R$badboy$?W恶名。
+cb_creation_detail_none;请选择一项以开始伪造对$country$的宣战理由。
+cb_creation_detail;我们可以以?Y$type$?W为依据，伪造对抗$country$的宣战理由。这一过程将需要大约?Y$days$?W天，若被发现则会给予我们?R$badboy$?W恶名。
 alice_mob_controls;?Y右击?W以再动员
 alice_mw_create_1;提拔陆军将领
 alice_mw_create_2;提拔海军将领
@@ -1163,9 +1161,9 @@ alice_tt_wg_infamy_limit;?R此战争目标将会超过恶名限制?W
 alice_wg_usage_trigger;满足以下触发条件时才能使用：
 province_id;省份ID
 nation_tag;国家tag
-alice_rgo_trade_prod_1;原料产地农业产出：$x$（$y$）
-alice_rgo_trade_prod_2;原料产地矿业产出：$x$（$y$）
-alice_rgo_trade_prod_3;原料产地铸造产出：$x$（$y$）
+rgo_trade_prod_1;原料产地农业产出：$x$（$y$）
+rgo_trade_prod_2;原料产地矿业产出：$x$（$y$）
+rgo_trade_prod_3;原料产地铸造产出：$x$（$y$）
 alice_artisan_trade_prod;手工业者产出：$x$（$y$）
 alice_factory_trade_prod;工厂产出：$x$（$y$）
 alice_all_trade_prod;总生产量：$x$
@@ -1208,5 +1206,5 @@ alice_exit_battleplanner;退出战斗计划
 alice_battleplanner_add_selected;添加选中
 alice_battleplanner_remove_selected;删除选中
 fab_explain_8;没有休战
-alice_reform_support_header;该改革的政治支持率（总支持率达到或超过 50% 才能进行改革）
-alice_no_current_support;目前这项改革尚未得到政治支持
+political_support_for_reform_header;该改革的政治支持率（总支持率达到或超过 50% 才能进行改革）
+no_political_support_for_reform;目前这项改革尚未得到政治支持

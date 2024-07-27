@@ -887,14 +887,14 @@ uv_sort_e;Spd
 uv_sort_f;Rekomendacja
 uv_sort_g;Względ
 uv_sort_h;Do potęgi
-alice_condition_diplo_points;Posiada co najmniej $x$ punktów dyplomatycznych
-alice_retreat;Wycofaj się z bitwy
-alice_retreat_1;Od rozpoczęcia bitwy minęło co najmniej $x$ dni
-alice_retreat_2;Jesteś głównym atakującym lub obrońcą
-alice_province_select;Wybiera prowincję
-alice_province_deselect;Odznacza prowincję
-alice_province_selector_on;NA
-alice_province_selector_off;WYŁĄCZONY
+condition_diplo_points;Posiada co najmniej $x$ punktów dyplomatycznych
+retreat_from_battle;Wycofaj się z bitwy
+retreat_from_battle_1;Od rozpoczęcia bitwy minęło co najmniej $x$ dni
+retreat_from_battle_2;Jesteś głównym atakującym lub obrońcą
+province_select;Wybiera prowincję
+province_deselect;Odznacza prowincję
+province_selector_on;NA
+province_selector_off;WYŁĄCZONY
 province_selector;Selektor
 province_immigrator;Imigrator
 tt_a_bank;Brzeg rzeki
@@ -915,7 +915,7 @@ chat_player_ban;$playername$ został zbanowany
 chat_player_kick;$playername$ został wyrzucony
 chat_player_switch;$playername$ wybrał $country$
 chat_player_oos;$playername$ przeszedł OOS!
-alice_status_stream;Zapisz postęp $wartość$
+save_progress;Zapisz postęp $wartość$
 alice_play_pending_client;$playername$ nie jest jeszcze gotowy
 alice_stockpile_button_0_0;Krajowe zapasy stanowią dodatek do zwykłej działalności gospodarczo-biznesowej, gdzie ludzie widzą, jak linie „Ggreen” W rosną, a linie „Rred” W maleją, jak zwykle „Jestem” „Ynot” to wykres liniowy, więc głównie pozostać niezauważonym :)
 alice_stockpile_button_1_0;Jeśli klikniesz mnie 10 razy, nie otrzymasz nic w zamian, po prostu zaufaj mi, nie klikaj mnie... ?ROR ELSE?W
@@ -926,12 +926,12 @@ alice_stockpile_button_3_0;Bawimy się z przyjaciółmi, prawda? – ŻYCZYSZ MI
 a_alert_reb;Jeden lub więcej członków naszej sfery ma aktywnych rebeliantów:
 event_auto;Automatycznie wybierz tę opcję do końca sesji.
 event_taken_auto;Ta opcja zostanie automatycznie wybrana w dniu ?Y$date$?W.
-alice_load_unload_1;Zacumowana tu marynarka wojenna ma wystarczającą pojemność
-alice_load_unload_2;Wojsko jest transportowane
-alice_load_unload_3;Flota transportowa jest zadokowana
-alice_load_unload_4;Transportowana jest jedna lub więcej armii
-alice_load_unload_5;Flota jest zadokowana
-alice_unload_fleet;Wyładuj wszystkie armie transportowane przez flotę
+unit_load_or_unload_1;Zacumowana tu marynarka wojenna ma wystarczającą pojemność
+unit_load_or_unload_2;Wojsko jest transportowane
+unit_load_or_unload_3;Flota transportowa jest zadokowana
+unit_load_or_unload_4;Transportowana jest jedna lub więcej armii
+unit_load_or_unload_5;Flota jest zadokowana
+unload_all_armies_of_fleet;Wyładuj wszystkie armie transportowane przez flotę
 auto_save_lb;Częstotliwość automatycznego zapisywania
 auto_save_1;Codziennie
 auto_save_2;Miesięczny
@@ -940,15 +940,13 @@ auto_save_0;Nic
 monthly_emigration_lab;Miesięczna emigracja do (top 10)
 monthly_immigration_lab;Miesięczna imigracja z (top 10)
 im_em_header;Przewidywana imigracja/emigracja dla
-alice_unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W ścieranie
+unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W ścieranie
 ol_unit_standing_text;$m$ $n$/$x$/$y$
 unit_moving_text;$m$ $n$/$x$/$y$ -> $prov$ ($data$) - ?R$koszt$?W ($attunit$/$defunit$)
 unit_standing_text;$m$ $n$/$x$/$y$ - ?R$koszt$?W ($attunit$/$defunit$)
 disarmed_pop;członkiem rozbrojonego narodu
 cancel_fac_construction;Anuluj budowę fabryki
 cancel_fac_upgrade;Anuluj aktualizację fabryczną
-kierkegaard_1;Albo
-kierkegaard_2;Lub
 open_and_sub;Dotuj i ponownie otwórz fabrykę
 o_set_national_flag;Ustaw flagę narodową $text$ dla właściciela
 o_add_modifier_until;Właściciel prowincji otrzymuje $text$ do $date$
@@ -960,8 +958,8 @@ w_artisan_prod;Globalna produkcja rzemieślnicza: $x$
 w_artisan_profit;Krajowy zysk rzemieślnika: $x$
 w_artisan_distribution;Krajowa dystrybucja rzemieślników: $x$
 w_fac_prod;Globalna produkcja fabryczna: $x$
-alice_lose_gp;Tracimy ?Wielką Moc?! status!
-alice_state_select_title;Wybierz stan
+we_are_losing_gp_status;Tracimy ?Wielką Moc?! status!
+state_select_title;Wybierz stan
 press_esc_to_cancel;Naciśnij ?TAK?! anulować
 fort_build_tt_1;Prowincja jest pod twoją kontrolą
 fort_build_tt_2;Prowincja nie jest oblężona
@@ -972,8 +970,8 @@ rr_build_tt_1;Nasza partia rządząca pozwala rządowi na budowę dróg kolejowy
 tech_ol_tt;?G$x$?! od twojego mrocznego władcy posiadającego tę technologię
 tech_year_tt;?G$x$?! z bieżącego roku
 disband_all;Rozwiąż wszystkie wybrane jednostki
-alice_play_checksum_host;Niezgodność sumy kontrolnej z hostem, upewnij się, że masz te same modyfikacje i pliki zapisu
-alice_play_save_stream;Host przesyła do Ciebie zapis, poczekaj, aż się zakończy
+checksum_mismatch_with_host;Niezgodność sumy kontrolnej z hostem, upewnij się, że masz te same modyfikacje i pliki zapisu
+host_is_streaming_save;Host przesyła do Ciebie zapis, poczekaj, aż się zakończy
 ai_will_accept_po;Przyjmą tę ofertę
 ai_will_not_accept_po;NIE przyjmą tej oferty
 close_and_del;Zamknij i usuń fabrykę
@@ -1045,9 +1043,9 @@ alice_con_decay_description;Naturalny rozkład ?R-$x$
 x_from_y;$x$ z $y$
 reinforce_rate;Pułk ten może wzmocnić do x $ żołnierzy miesięcznie.
 reinforce_rate_none;Pułk ten nie może być obecnie wzmocniony.
-alice_domestic_investment_button;Inwestowanie w indywidualne projekty jest „przestarzałe”. Zamiast tego użyj suwaka „Inwestycje krajowe” na ekranie budżetu
-alice_domestic_investment_pops;Mamy kapitalistów o wartości x $, którym możemy pośrednio przekazywać hojne datki
-alice_domestic_investment_needs;Każdego dnia potrzebują x $, aby zaspokoić swój luksusowy styl życia
+domestic_investment_button;Inwestowanie w indywidualne projekty jest „przestarzałe”. Zamiast tego użyj suwaka „Inwestycje krajowe” na ekranie budżetu
+domestic_investment_pops;Mamy kapitalistów o wartości x $, którym możemy pośrednio przekazywać hojne datki
+domestic_investment_needs;Każdego dnia potrzebują x $, aby zaspokoić swój luksusowy styl życia
 alice_budget_scaled_inc;Dochód: ?Wartość G$
 alice_budget_scaled_1;Słaby podatek: ?G$wartość$
 alice_budget_scaled_2;Podatek środkowy: ?G$wartość$
@@ -1119,8 +1117,8 @@ unit_control_group_tooltip;Naciśnij ?YCTRL-1?W do ?YCTRL-9?W, aby przypisać/co
 console_button_tooltip;Otwórz konsolę poleceń
 demobilize;Demobilizować
 mobilize;Zmobilizować
-alice_cb_creation_detail_none;Wybierz casus belli, aby rozpocząć produkcję przeciwko $country$.
-alice_cb_creation_detail;"Możemy sfabrykować casus belli przeciwko $country$ z powodu „Y$type$?W. Proces ten może zająć mniej więcej około Y$dni$?W, a potencjalne koszty wykrycia przysporzą nam ""R$badboy$?W niesławy."
+cb_creation_detail_none;Wybierz casus belli, aby rozpocząć produkcję przeciwko $country$.
+cb_creation_detail;"Możemy sfabrykować casus belli przeciwko $country$ z powodu „Y$type$?W. Proces ten może zająć mniej więcej około Y$dni$?W, a potencjalne koszty wykrycia przysporzą nam ""R$badboy$?W niesławy."
 alice_mob_controls;?YKliknij prawym przyciskiem myszy?W, aby ponownie się zmobilizować
 alice_mw_create_1;Dodaj ogólne
 alice_mw_create_2;Dodaj admirała
@@ -1164,9 +1162,9 @@ alice_tt_wg_infamy_limit;„Ten cel wojenny przekroczy limit niesławy?” W
 alice_wg_usage_trigger;Można użyć tylko wtedy, gdy spełniony jest następujący wyzwalacz:
 province_id;Identyfikator prowincji
 nation_tag;Etykieta narodu
-alice_rgo_trade_prod_1;Produkcja rolnicza RGO: $x$ ($y$)
-alice_rgo_trade_prod_2;Produkcja górnicza RGO: $x$ ($y$)
-alice_rgo_trade_prod_3;Produkcja mięty RGO: $x$ ($y$)
+rgo_trade_prod_1;Produkcja rolnicza RGO: $x$ ($y$)
+rgo_trade_prod_2;Produkcja górnicza RGO: $x$ ($y$)
+rgo_trade_prod_3;Produkcja mięty RGO: $x$ ($y$)
 alice_artisan_trade_prod;Produkcja rzemieślnicza: $x$ ($y$)
 alice_factory_trade_prod;Produkcja fabryczna: $x$ ($y$)
 alice_all_trade_prod;Całkowita produkcja: $x$

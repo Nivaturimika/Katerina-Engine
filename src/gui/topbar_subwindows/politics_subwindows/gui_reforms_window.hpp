@@ -165,7 +165,7 @@ void reform_description(sys::state& state, text::columnar_layout& contents, dcon
 		return;
 
 	bool some_support_shown = false;
-	text::add_line(state, contents, "alice_reform_support_header");
+	text::add_line(state, contents, "political_support_for_reform_header");
 	auto tag = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
 	auto start = state.world.national_identity_get_political_party_first(tag).id.index();
 	auto end = start + state.world.national_identity_get_political_party_count(tag);
@@ -228,7 +228,7 @@ void reform_description(sys::state& state, text::columnar_layout& contents, dcon
 	}
 
 	if(!some_support_shown) {
-		text::add_line(state, contents, "alice_no_current_support");
+		text::add_line(state, contents, "no_political_support_for_reform");
 	}
 }
 

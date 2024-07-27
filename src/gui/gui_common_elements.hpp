@@ -1054,9 +1054,8 @@ public:
 		if(nations::has_social_reform_available(state, nation_id)) {
 			// yes, the original localisation says "refroms"
 			return text::produce_simple_string(state, "politics_can_do_social_refroms");
-		} else {
-			return text::produce_simple_string(state, "politics_can_not_do_social_refroms");
 		}
+		return text::produce_simple_string(state, "politics_can_not_do_social_refroms");
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1083,9 +1082,8 @@ public:
 		if(nations::has_political_reform_available(state, nation_id)) {
 			// yes, the original localisation says "refroms"
 			return text::produce_simple_string(state, "politics_can_do_political_refroms");
-		} else {
-			return text::produce_simple_string(state, "politics_can_not_do_political_refroms");
 		}
+		return text::produce_simple_string(state, "politics_can_not_do_political_refroms");
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {

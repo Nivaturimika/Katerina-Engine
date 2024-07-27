@@ -1123,7 +1123,7 @@ public:
 		if(!nations::is_great_power(state, state.local_player_nation)) {
 			text::add_line(state, contents, "countryalert_no_gpstatus");
 		} else if(state.world.nation_get_rank(state.local_player_nation) > uint16_t(state.defines.great_nations_count)) {
-			text::add_line(state, contents, "alice_lose_gp");
+			text::add_line(state, contents, "we_are_losing_gp_status");
 			auto box = text::open_layout_box(contents);
 			text::substitution_map sub{};
 			text::add_to_substitution_map(sub, text::variable_type::x, int32_t(state.defines.great_nations_count));

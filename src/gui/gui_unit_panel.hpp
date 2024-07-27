@@ -1003,7 +1003,7 @@ public:
 		auto loc = state.world.army_get_location_from_army_location(n);
 
 		text::add_line(state, contents, "uw_load_is_valid");
-		text::add_line_with_condition(state, contents, "alice_load_unload_1", military::can_embark_onto_sea_tile(state, state.local_player_nation, loc, n));
+		text::add_line_with_condition(state, contents, "unit_load_or_unload_1", military::can_embark_onto_sea_tile(state, state.local_player_nation, loc, n));
 	}
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		if(visible)
@@ -1046,8 +1046,8 @@ public:
 		auto loc = state.world.army_get_location_from_army_location(n);
 
 		text::add_line(state, contents, "uw_unload_valid");
-		text::add_line_with_condition(state, contents, "alice_load_unload_2", bool(tprted));
-		text::add_line_with_condition(state, contents, "alice_load_unload_3", loc.index() < state.province_definitions.first_sea_province.index());
+		text::add_line_with_condition(state, contents, "unit_load_or_unload_2", bool(tprted));
+		text::add_line_with_condition(state, contents, "unit_load_or_unload_3", loc.index() < state.province_definitions.first_sea_province.index());
 	}
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		if(visible)
@@ -1092,9 +1092,9 @@ public:
 		auto tprted = state.world.navy_get_army_transport(n);
 		auto loc = state.world.navy_get_location_from_navy_location(n);
 
-		text::add_line(state, contents, "alice_unload_fleet");
-		text::add_line_with_condition(state, contents, "alice_load_unload_4", tprted.begin() != tprted.end());
-		text::add_line_with_condition(state, contents, "alice_load_unload_5", loc.index() < state.province_definitions.first_sea_province.index());
+		text::add_line(state, contents, "unload_all_armies_of_fleet");
+		text::add_line_with_condition(state, contents, "unit_load_or_unload_4", tprted.begin() != tprted.end());
+		text::add_line_with_condition(state, contents, "unit_load_or_unload_5", loc.index() < state.province_definitions.first_sea_province.index());
 	}
 };
 
