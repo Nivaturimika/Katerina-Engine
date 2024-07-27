@@ -856,6 +856,12 @@ void make_focus_group(std::string_view name, token_generator& gen, error_handler
 		t = nations::focus_type::military_goods_focus;
 	else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "immigration_colonization_focus"))
 		t = nations::focus_type::immigration_colonization_focus;
+	else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "small_promotion_focus"))
+		t = nations::focus_type::small_promotion_focus;
+	else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "large_promotion_focus"))
+		t = nations::focus_type::large_promotion_focus;
+	else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "massive_promotion_focus"))
+		t = nations::focus_type::massive_promotion_focus;
 	else
 		err.accumulated_errors += "Unknown national focus group name " + std::string(name) + " (" + err.file_name + ")\n";
 

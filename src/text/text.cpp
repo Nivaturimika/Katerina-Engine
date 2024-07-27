@@ -950,6 +950,12 @@ std::string get_focus_category_name(sys::state const& state, nations::focus_type
 		return text::produce_simple_string(state, "military_goods_focus");
 	case nations::focus_type::immigration_colonization_focus:
 		return text::produce_simple_string(state, "immigration_colonization_focus");
+	case nations::focus_type::small_promotion_focus:
+		return text::produce_simple_string(state, "small_promotion_focus");
+	case nations::focus_type::large_promotion_focus:
+		return text::produce_simple_string(state, "large_promotion_focus");
+	case nations::focus_type::massive_promotion_focus:
+		return text::produce_simple_string(state, "massive_promotion_focus");
 	default:
 		return text::produce_simple_string(state, "category");
 	}
