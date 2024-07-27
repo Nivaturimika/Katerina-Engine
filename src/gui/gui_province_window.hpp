@@ -625,18 +625,18 @@ public:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto id = retrieve<dcon::province_id>(state, parent);
 
+		if(state.world.province_get_nation_from_province_ownership(id) == state.local_player_nation) {
+			text::add_line_with_condition(state, contents, "fort_build_tt_1", state.world.province_get_nation_from_province_control(id) == state.local_player_nation);
+		}
+		text::add_line_with_condition(state, contents, "fort_build_tt_2", !military::province_is_under_siege(state, id));
+
 		int32_t current_lvl = state.world.province_get_building_level(id, Value);
 		int32_t max_local_lvl = state.world.nation_get_max_building_level(state.local_player_nation, Value);
 		if constexpr(Value == economy::province_building_type::fort) {
-			text::add_line_with_condition(state, contents, "fort_build_tt_1", state.world.province_get_nation_from_province_control(id) == state.local_player_nation);
-			text::add_line_with_condition(state, contents, "fort_build_tt_2", !military::province_is_under_siege(state, id));
-
 			int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_fort));
 			text::add_line_with_condition(state, contents, "fort_build_tt_3", (max_local_lvl - current_lvl - min_build > 0), text::variable_type::x, int64_t(current_lvl), text::variable_type::n, int64_t(min_build), text::variable_type::y, int64_t(max_local_lvl));
 
 		} else if constexpr(Value == economy::province_building_type::naval_base) {
-			text::add_line_with_condition(state, contents, "fort_build_tt_1", state.world.province_get_nation_from_province_control(id) == state.local_player_nation);
-			text::add_line_with_condition(state, contents, "fort_build_tt_2", !military::province_is_under_siege(state, id));
 			text::add_line_with_condition(state, contents, "nb_build_tt_1", state.world.province_get_is_coast(id));
 
 			int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_naval_base));
@@ -647,9 +647,6 @@ public:
 			text::add_line_with_condition(state, contents, "fort_build_tt_3", (max_local_lvl - current_lvl - min_build > 0), text::variable_type::x, int64_t(current_lvl), text::variable_type::n, int64_t(min_build), text::variable_type::y, int64_t(max_local_lvl));
 
 		} else {
-			text::add_line_with_condition(state, contents, "fort_build_tt_1", state.world.province_get_nation_from_province_control(id) == state.local_player_nation);
-			text::add_line_with_condition(state, contents, "fort_build_tt_2", !military::province_is_under_siege(state, id));
-
 			auto rules = state.world.nation_get_combined_issue_rules(state.local_player_nation);
 			text::add_line_with_condition(state, contents, "rr_build_tt_1", (rules & issue_rule::build_railway) != 0);
 
@@ -946,35 +943,6 @@ public:
 	}
 };
 
-class province_invest_railroad_button : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override {
-		auto content = retrieve<dcon::province_id>(state, parent);
-		command::begin_province_building_construction(state, state.local_player_nation, content, economy::province_building_type::railroad);
-	}
-	virtual void button_shift_action(sys::state& state) noexcept override {
-		auto pid = retrieve<dcon::province_id>(state, parent);
-		auto si = state.world.province_get_state_membership(pid);
-		if(si) {
-			province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-				command::begin_province_building_construction(state, state.local_player_nation, p, economy::province_building_type::railroad);
-			});
-		}
-	}
-	virtual void button_shift_right_action(sys::state& state) noexcept override {
-		auto pid = retrieve<dcon::province_id>(state, parent);
-		auto n = state.world.province_get_nation_from_province_ownership(pid);
-		for(auto p : state.world.nation_get_province_ownership(n)) {
-			command::begin_province_building_construction(state, state.local_player_nation, p.get_province(), economy::province_building_type::railroad);
-		}
-	}
-	void on_update(sys::state& state) noexcept override {
-		auto content = retrieve<dcon::province_id>(state, parent);
-		disabled = !command::can_begin_province_building_construction(state, state.local_player_nation, content,
-				economy::province_building_type::railroad);
-	}
-};
-
 class province_country_flag_button : public flag_button {
 public:
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1020,16 +988,13 @@ public:
 		if(content) {
 			open_build_foreign_factory(state, state.world.province_get_state_membership(content));
 		}
-
 	}
 
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::province_id>(state, parent);
 		disabled = true;
-
 		if(!content)
 			return;
-
 		for(auto ft : state.world.in_factory_type) {
 			if(command::can_begin_factory_building_construction(state, state.local_player_nation,
 				state.world.province_get_state_membership(content), ft, false)) {
@@ -1157,7 +1122,7 @@ public:
 		} else if(name == "infra_progress_win") {
 			return make_element_by_type<rr_invest_inwdow>(state, id);
 		} else if(name == "invest_build_infra") {
-			return make_element_by_type<province_invest_railroad_button>(state, id);
+			return make_element_by_type<province_building_expand_button<economy::province_building_type::railroad>>(state, id);
 		} else if(name == "invest_factory_button") {
 			return make_element_by_type<province_invest_factory_button>(state, id);
 		} else if(name == "sphere_targets") {
