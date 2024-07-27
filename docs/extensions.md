@@ -36,6 +36,9 @@ Another new feature is allowing usage of uniform `yes/no` inside triggers, in th
 
 Additionally, triggers such as technology triggers no longer suffer from having to be specified like: `nationalism_n_imperialism = 1`, they can alternatively be specified as `nationalism_n_imperialism = yes`. For ease of reading and uniformity.
 
+### New modifiers
+- `unit_start_experience`: Is an invalid modifier on vanilla on some contexts, supported here (applies to both land and naval).
+
 ### New effects
 
 - `increment_variable = ...`: Shorthand to increment by 1
