@@ -635,12 +635,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			}
 		}
 	}
-	if(state.map_state.selected_province || (state.local_player_nation && state.current_scene.borders == game_scene::borders_granularity::nation)) {
+	if(state.map_state.selected_province || state.current_scene.borders == game_scene::borders_granularity::nation) {
 		glUniform1f(shader_uniforms[shader_borders][uniform_width], zoom > map::zoom_close ? 0.0004f : 0.00085f); // width
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 		if(state.current_scene.borders == game_scene::borders_granularity::nation) {
 			auto n = state.world.province_get_nation_from_province_ownership(state.map_state.selected_province);
+			if(!n)
+				n = state.local_player_nation;
 			for(auto b : borders) {
 				auto p0 = state.world.province_adjacency_get_connected_provinces(b.adj, 0);
 				auto p1 = state.world.province_adjacency_get_connected_provinces(b.adj, 1);
