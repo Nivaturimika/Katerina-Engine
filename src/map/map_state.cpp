@@ -418,7 +418,18 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 									break;
 								}
 							} else {
-								text::add_to_substitution_map(sub, text::variable_type::tag, state.world.national_identity_get_name(nid));
+								std::string tag_name = text::produce_simple_string(state, state.world.national_identity_get_name(nid));
+								auto prefix_remove = text::produce_simple_string(state, "map_remove_prefix");
+								if(tag_name.starts_with(prefix_remove)) {
+									tag_name.erase(0, prefix_remove.size());
+								}
+								auto acronym_expand = text::produce_simple_string(state, "map_expand_acronym");
+								if(acronym_expand.size() > 0 && tag_name.starts_with(acronym_expand)) {
+									tag_name.erase(0, acronym_expand.size());
+									auto acronym_expand_to = text::produce_simple_string(state, "map_expand_acronym_to");
+									tag_name.insert(0, acronym_expand_to.data(), acronym_expand_to.size());
+								}
+								text::add_to_substitution_map(sub, text::variable_type::tag, std::string_view(tag_name));
 								name = text::resolve_string_substitution(state, "map_label_adj_tag", sub);
 							}
 							has_tag = true;
