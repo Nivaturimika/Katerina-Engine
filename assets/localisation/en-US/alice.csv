@@ -1212,3 +1212,4 @@ alice_no_current_support;Currently there is no political support for this reform
 ol_view_stockpile_header;Stockpiles
 ol_view_stockpile;Stockpiles
 nf_overwrite_header;Remove an existing national focus first
+percent_wants_to_enact_reform;$x$ wants to enact a new reform

@@ -1058,6 +1058,23 @@ public:
 			return text::produce_simple_string(state, "politics_can_not_do_social_refroms");
 		}
 	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		auto total = state.world.nation_get_demographics(n, demographics::total);
+		auto amount = 0.f;
+		for(const auto iopt : state.world.in_issue_option) {
+			if(politics::issue_is_selected(state, n, iopt)
+			&& iopt.get_parent_issue().get_issue_type() == uint8_t(culture::issue_type::social)) {
+				amount = std::max(amount, state.world.nation_get_demographics(n, demographics::to_key(state, iopt)));
+			}
+		}
+		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ 1.f - (amount / total) });
+	}
 };
 
 class nation_can_do_political_reform_text : public standard_nation_text {
@@ -1069,6 +1086,23 @@ public:
 		} else {
 			return text::produce_simple_string(state, "politics_can_not_do_political_refroms");
 		}
+	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		auto total = state.world.nation_get_demographics(n, demographics::total);
+		auto amount = 0.f;
+		for(const auto iopt : state.world.in_issue_option) {
+			if(politics::issue_is_selected(state, n, iopt)
+			&& iopt.get_parent_issue().get_issue_type() == uint8_t(culture::issue_type::political)) {
+				amount = std::max(amount, state.world.nation_get_demographics(n, demographics::to_key(state, iopt)));
+			}
+		}
+		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ 1.f - (amount / total) });
 	}
 };
 
