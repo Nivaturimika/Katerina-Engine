@@ -2200,7 +2200,17 @@ public:
 		auto step = make_element_by_type<window_element_base>(state, "focuscategory_step");
 		auto step_y = step->base_data.position.y;
 
-		for(uint8_t i = 1; i <= uint8_t(nations::focus_type::party_loyalty_focus); i++) {
+		for(uint8_t i = 1; i <= uint8_t(nations::focus_type::massive_promotion_focus); i++) {
+			bool is_unused = true;
+			for(const auto nf : state.world.in_national_focus) {
+				if(nf.get_type() == i) {
+					is_unused = false;
+					break;
+				}
+			}
+			if(is_unused)
+				continue;
+
 			auto ptr = make_element_by_type<national_focus_category>(state, "focus_category");
 			ptr->base_data.position = current_pos;
 			current_pos = xy_pair{current_pos.x, int16_t(current_pos.y + step_y)};
