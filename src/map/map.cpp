@@ -645,7 +645,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p0 = state.world.province_adjacency_get_connected_provinces(b.adj, 0);
 				auto p1 = state.world.province_adjacency_get_connected_provinces(b.adj, 1);
 				if((state.world.province_get_nation_from_province_ownership(p0) == n
-					|| state.world.province_get_nation_from_province_ownership(p1) == n
+					|| state.world.province_get_nation_from_province_ownership(p1) == n)
 				&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit)) != 0) {
 					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 				}
