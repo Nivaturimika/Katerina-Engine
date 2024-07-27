@@ -184,15 +184,28 @@ void make_state_definition(std::string_view name, token_generator& gen, error_ha
 				err.accumulated_warnings += "Province " + std::to_string(context.prov_id_to_original_id_map[prov].id) + " on state " + std::string(name) + " is already assigned to a state (" + err.file_name + ")\n";
 			}
 		}
-	}
-	if(is_region) {
+
+		//mixed - state and region
+		auto sdef = context.state.world.create_state_definition();
+		context.map_of_state_names.insert_or_assign(std::string(name), sdef);
+		auto rdef = context.state.world.create_region();
+		context.map_of_region_names.insert_or_assign(std::string(name), rdef);
+		for(const auto prov : new_context.provinces) {
+			context.state.world.force_create_region_membership(prov, rdef); //include first, regions take priority over states!
+			if(!context.state.world.province_get_state_from_abstract_state_membership(prov)) {
+				context.state.world.force_create_abstract_state_membership(prov, sdef); //new assignment
+			}
+		}
+		context.state.world.state_definition_set_name(sdef, name_id);
+		context.state.world.region_set_name(rdef, name_id);
+	} else if(is_region) {
 		auto rdef = context.state.world.create_region();
 		context.map_of_region_names.insert_or_assign(std::string(name), rdef);
 		for(const auto prov : new_context.provinces) {
 			context.state.world.force_create_region_membership(prov, rdef);
 		}
 		context.state.world.region_set_name(rdef, name_id);
-	} else {
+	} else if(is_state) {
 		auto sdef = context.state.world.create_state_definition();
 		context.map_of_state_names.insert_or_assign(std::string(name), sdef);
 		for(const auto prov : new_context.provinces) {
@@ -314,10 +327,6 @@ void province_history_file::owner(association_type, uint32_t value, error_handle
 		province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
 		auto holder = prov_parse_force_tag_owner(it->second, context.outer_context.state.world);
-		if(!context.outer_context.state.world.province_get_state_membership(context.id)) {
-			err.accumulated_errors += "Referencing a province " + std::to_string(context.outer_context.prov_id_to_original_id_map[context.id]) + " without an assigned state (" + err.file_name + " line " + std::to_string(line) + ")\n";
-			return;
-		}
 		context.outer_context.state.world.force_create_province_ownership(context.id, holder);
 	} else {
 		err.accumulated_errors += "Invalid tag " + nations::int_to_tag(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
@@ -327,10 +336,6 @@ void province_history_file::controller(association_type, uint32_t value, error_h
 		province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
 		auto holder = prov_parse_force_tag_owner(it->second, context.outer_context.state.world);
-		if(!context.outer_context.state.world.province_get_state_membership(context.id)) {
-			err.accumulated_errors += "Referencing a province " + std::to_string(context.outer_context.prov_id_to_original_id_map[context.id]) + " without an assigned state (" + err.file_name + " line " + std::to_string(line) + ")\n";
-			return;
-		}
 		context.outer_context.state.world.force_create_province_control(context.id, holder);
 	} else {
 		err.accumulated_errors += "Invalid tag " + nations::int_to_tag(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
@@ -350,10 +355,6 @@ void province_history_file::terrain(association_type, std::string_view text, err
 void province_history_file::add_core(association_type, uint32_t value, error_handler& err, int32_t line,
 		province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
-		if(!context.outer_context.state.world.province_get_state_membership(context.id)) {
-			err.accumulated_errors += "Referencing a province " + std::to_string(context.outer_context.prov_id_to_original_id_map[context.id]) + " without an assigned state (" + err.file_name + " line " + std::to_string(line) + ")\n";
-			return;
-		}
 		context.outer_context.state.world.try_create_core(context.id, it->second);
 	} else {
 		err.accumulated_errors += "Invalid tag " + nations::int_to_tag(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
@@ -364,10 +365,6 @@ void province_history_file::remove_core(association_type, uint32_t value, error_
 		province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
 		auto core = context.outer_context.state.world.get_core_by_prov_tag_key(context.id, it->second);
-		if(!context.outer_context.state.world.province_get_state_membership(context.id)) {
-			err.accumulated_errors += "Referencing a province " + std::to_string(context.outer_context.prov_id_to_original_id_map[context.id]) + " without an assigned state (" + err.file_name + " line " + std::to_string(line) + ")\n";
-			return;
-		}
 		context.outer_context.state.world.delete_core(core);
 	} else {
 		err.accumulated_errors += "Invalid tag " + nations::int_to_tag(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";

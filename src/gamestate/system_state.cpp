@@ -3612,6 +3612,17 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		}
 	}
 
+	for(auto p : world.in_province) {
+		if(!p.get_state_membership()
+		&& (p.get_nation_from_province_ownership() || p.get_nation_from_province_control())) {
+			err.accumulated_errors += "Ownership of a province " + std::to_string(context.prov_id_to_original_id_map[p].id) + " without an assigned state\n";
+			world.delete_province_ownership(p.get_province_ownership());
+			if(p.get_province_control()) {
+				world.delete_province_control(p.get_province_control());
+			}
+		}
+	}
+
 	// run pending triggers and effects
 	for(auto pending_decision : pending_decisions) {
 		dcon::nation_id n = pending_decision.first;
