@@ -170,6 +170,8 @@ inline scene_properties nation_picker() {
 
 .get_root = root_pick_nation,
 
+.borders = borders_granularity::nation,
+
 .starting_scene = true,
 .enforced_pause = true,
 .overwrite_map_tooltip = true,
