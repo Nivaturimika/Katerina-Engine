@@ -231,20 +231,11 @@ void make_production_type(std::string_view name, token_generator& gen, error_han
 			factory_handle.set_output_amount(pt.value);
 			factory_handle.set_is_coastal(pt.is_coastal);
 			factory_handle.set_base_workforce(pt.workforce);
-
-			if(pt.bonuses.size() >= 1) {
-				factory_handle.set_bonus_1_amount(pt.bonuses[0].value);
-				factory_handle.set_bonus_1_trigger(pt.bonuses[0].trigger);
+			for(uint32_t i = 0; i < uint32_t(pt.bonuses.size()) && i < sys::max_factory_bonuses; i++) {
+				factory_handle.get_bonus_amount()[i] = pt.bonuses[i].value;
+				factory_handle.get_bonus_trigger()[i] = pt.bonuses[i].trigger;
 			}
-			if(pt.bonuses.size() >= 2) {
-				factory_handle.set_bonus_2_amount(pt.bonuses[1].value);
-				factory_handle.set_bonus_2_trigger(pt.bonuses[1].trigger);
-			}
-			if(pt.bonuses.size() >= 3) {
-				factory_handle.set_bonus_3_amount(pt.bonuses[2].value);
-				factory_handle.set_bonus_3_trigger(pt.bonuses[2].trigger);
-			}
-			if(pt.bonuses.size() >= 4) {
+			if(pt.bonuses.size() >= sys::max_factory_bonuses) {
 				err.accumulated_errors += "Too many factory bonuses (" + std::to_string(pt.bonuses.size()) + ") for " + std::string(name) + " (" + err.file_name + ")\n";
 			}
 		} else {

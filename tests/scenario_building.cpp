@@ -1062,8 +1062,8 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		auto fac = fatten(state->world, it->second);
 		REQUIRE(fac.get_base_workforce() == 10000);
 		REQUIRE(fac.get_output_amount() == Approx(0.91f));
-		REQUIRE(fac.get_bonus_2_amount() == Approx(0.25f));
-		REQUIRE(fac.get_bonus_3_amount() == 0.0f);
+		REQUIRE(fac.get_bonus_amount()[2] == Approx(0.25f));
+		REQUIRE(fac.get_bonus_amount()[3] == 0.0f);
 		REQUIRE(state->economy_definitions.craftsmen_fraction == Approx(0.8f));
 	}
 	// read pending rebel types
