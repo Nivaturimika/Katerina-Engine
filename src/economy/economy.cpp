@@ -865,24 +865,18 @@ float subsistence_size(sys::state const& state, dcon::province_id p) {
 
 float rgo_effective_size(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 	bool is_mine = state.world.commodity_get_is_mine(c);
-
-	float base = 0.f;
 	auto rgo = state.world.province_get_rgo(p);
-	if(rgo == c) {
-		// set main rgo size to a fixed number for now: allow modders to replace it later per province basis...
-		base = state.defines.alice_base_rgo_employment_bonus / state.defines.alice_rgo_per_size_employment;
-	}
-
+	float base = (rgo == c) ? state.defines.alice_base_rgo_employment_bonus / state.defines.alice_rgo_per_size_employment : 0.f;
 	// - We calculate its effective size which is its base size x (technology-bonus-to-specific-rgo-good-size +
 	// technology-general-farm-or-mine-size-bonus + provincial-mine-or-farm-size-modifier + 1)
 	auto rgo_ownership = state.world.province_get_landowners_share(p) + state.world.province_get_capitalists_share(p);
 	auto sz = state.world.province_get_rgo_max_size_per_good(p, c) * rgo_ownership + base;
+	assert(sz >= 0.f && std::isfinite(sz));
 	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_size : sys::provincial_mod_offsets::farm_rgo_size);
 	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_size : sys::national_mod_offsets::farm_rgo_size);
 	auto specific_pmod = state.world.nation_get_rgo_size(n, c);
-	auto bonus = pmod + nmod + specific_pmod + 1.0f;
-
-	return std::max(sz * bonus, 0.00f);
+	auto bonus = std::max(0.f, pmod + nmod + specific_pmod + 1.0f);
+	return sz * bonus;
 }
 
 float rgo_total_effective_size(sys::state & state, dcon::nation_id n, dcon::province_id p) {
@@ -906,7 +900,9 @@ float rgo_total_employment(sys::state & state, dcon::nation_id n, dcon::province
 }
 
 float rgo_max_employment(sys::state & state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
-	return state.defines.alice_rgo_per_size_employment * rgo_effective_size(state, n, p, c);
+	auto emp = state.defines.alice_rgo_per_size_employment * rgo_effective_size(state, n, p, c);
+	assert(emp >= 0.f && std::isfinite(emp));
+	return emp;
 }
 
 float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p) {
@@ -966,6 +962,9 @@ bool factory_is_profitable(sys::state const& state, dcon::factory_id f) {
 void update_rgo_employment(sys::state& state) {
 	province::for_each_land_province(state, [&](dcon::province_id p) {
 		auto owner = state.world.province_get_nation_from_province_ownership(p);
+		if(!owner)
+			return; //why bother? - pops are frozen
+
 		auto current_employment = 0.f;
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
 			current_employment += state.world.province_get_rgo_employment_per_good(p, c);
@@ -991,9 +990,9 @@ void update_rgo_employment(sys::state& state) {
 		ordered_rgo_goods.clear();
 
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			if (rgo_max_employment(state, owner, p, c) > 0.f)
+			if(rgo_max_employment(state, owner, p, c) > 0.f) {
 				ordered_rgo_goods.push_back(c);
-			else {
+			} else {
 				state.world.province_set_rgo_employment_per_good(p, c, 0.f);
 			}
 		});
@@ -1043,8 +1042,13 @@ void update_rgo_employment(sys::state& state) {
 		}
 		state.world.province_set_rgo_employment(p, employment_ratio);		
 		
-		auto slave_fraction = (slave_pool > current_employment) ? current_employment / slave_pool : 1.0f;
-		auto free_fraction = std::max(0.0f, (worker_pool > current_employment - slave_pool) ? (current_employment - slave_pool) / std::max(worker_pool, 0.01f) : 1.0f);
+		auto slave_fraction = (slave_pool > current_employment) ? current_employment / slave_pool : 0.0f;
+		auto free_fraction = std::max(0.0f, (worker_pool > current_employment - slave_pool) ? (current_employment - slave_pool) / std::max(worker_pool, 0.01f) : 0.0f);
+
+		assert(slave_fraction >= 0.f && slave_fraction <= 1.f);
+		assert(free_fraction >= 0.f && free_fraction <= 1.f);
+
+		assert(slave_fraction + free_fraction <= 1.f);
 
 		for(auto pop : state.world.province_get_pop_location(p)) {
 			auto pt = pop.get_pop().get_poptype();
@@ -1169,6 +1173,11 @@ void update_factory_employment(sys::state& state) {
 		float prim_employment = 1.0f - (primary_pool > 0 ? primary_pool_copy / primary_pool : 0.0f);
 		float sec_employment = 1.0f - (secondary_pool > 0 ? secondary_pool_copy / secondary_pool : 0.0f);
 
+		assert(prim_employment >= 0.f && prim_employment <= 1.f);
+		assert(sec_employment >= 0.f && sec_employment <= 1.f);
+
+		assert(prim_employment + sec_employment <= 2.f);
+
 		province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 			for(auto pop : state.world.province_get_pop_location(p)) {
 				if(pop.get_pop().get_poptype() == state.culture_definitions.primary_factory_worker) {
@@ -1234,44 +1243,25 @@ float factory_full_production_quantity(sys::state const& state, dcon::factory_id
 	return throughput_multiplier * output_multiplier * max_production_scale;
 }
 
-float rgo_efficiency(sys::state & state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
+float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 	bool is_mine = state.world.commodity_get_is_mine(c);
-
-	float main_rgo = 1.f;
 	auto rgo = state.world.province_get_rgo(p);
-	if(rgo == c) {
-		main_rgo = state.defines.alice_base_rgo_efficiency_bonus;
-	}
-
+	float main_rgo = (rgo == c) ? 1.f : state.defines.alice_base_rgo_efficiency_bonus;
 	float base_amount = state.world.commodity_get_rgo_amount(c);
-	float throughput =
-		1.0f
+	float throughput = std::max(0.f, 1.0f
 		+ state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_rgo_throughput)
 		+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rgo_throughput)
-		+ state.world.province_get_modifier_values(p,
-			is_mine ?
-			sys::provincial_mod_offsets::mine_rgo_eff
-			:
-			sys::provincial_mod_offsets::farm_rgo_eff)
-		+ state.world.nation_get_modifier_values(n,
-			is_mine ?
-			sys::national_mod_offsets::mine_rgo_eff
-			:
-			sys::national_mod_offsets::farm_rgo_eff);
-
-	float saturation = state.world.province_get_rgo_employment_per_good(p, c)
-		/ (rgo_max_employment(state, n, p, c) + 1.f);
-
-	float result = base_amount
-		* main_rgo
+		+ state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_eff : sys::provincial_mod_offsets::farm_rgo_eff)
+		+ state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff));
+	float saturation = state.world.province_get_rgo_employment_per_good(p, c) / (rgo_max_employment(state, n, p, c) + 1.f);
+	float result = base_amount * main_rgo
 		* (1.f + 1.0f * (1.f - saturation))
 		* std::max(0.5f, throughput)
 		* state.defines.alice_rgo_boost
-		* std::max(0.5f, (1.0f + state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_rgo_output) +
-			state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rgo_output) +
-			state.world.nation_get_rgo_goods_output(n, c)));
-
-	assert(std::isfinite(result));
+		* std::max(0.5f, (1.0f + state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_rgo_output) + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rgo_output) + state.world.nation_get_rgo_goods_output(n, c)));
+	// TODO: Saturation is doing some funny business, specifically, rgo_employment_per_good
+	result = std::max(0.f, result);
+	assert(result >= 0.f && std::isfinite(result));
 	return result;
 }
 
@@ -2196,7 +2186,9 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 	auto const e_spending = float(state.world.nation_get_education_spending(n)) * float(state.world.nation_get_education_spending(n)) / 100.0f / 100.0f;
 	auto const m_spending = float(state.world.nation_get_military_spending(n)) * float(state.world.nation_get_military_spending(n)) / 100.0f / 100.f;
 	auto const p_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::pension_level);
+	assert(p_level >= 0.f);
 	auto const unemp_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::unemployment_benefit);
+	assert(unemp_level >= 0.f);
 	auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) * float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f / 100.0f;
 
 	total += state.defines.alice_domestic_investment_multiplier * di_spending *
@@ -2207,7 +2199,7 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 		/ state.defines.alice_needs_scaling_factor;
 
 	state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
-		auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt)) / state.defines.alice_needs_scaling_factor;
+		auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 
 		if(adj_pop_of_type <= 0)
 			return;
@@ -2222,7 +2214,10 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 		} else { // unemployment, pensions
 			total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
 			if(state.world.pop_type_get_has_unemployment(pt)) {
-				auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt)) / state.defines.alice_needs_scaling_factor;
+				auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
+				//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
+				//after the employment one?
+				emp = std::min(emp, adj_pop_of_type);
 				total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
 			}
 		}
@@ -2245,11 +2240,10 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 			total += m_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 
+		total /= state.defines.alice_needs_scaling_factor;
 		assert(std::isfinite(total) && total >= 0.0f);
 	});
-
 	assert(std::isfinite(total) && total >= 0.0f);
-
 	return total;
 }
 

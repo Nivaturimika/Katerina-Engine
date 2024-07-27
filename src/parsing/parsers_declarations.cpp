@@ -477,9 +477,29 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 	if(auto it = context.outer_context.map_of_poptypes.find(std::string(type)); it != context.outer_context.map_of_poptypes.end()) {
 		ptype = it->second;
 	} else {
-		err.accumulated_errors +=
-				"Invalid pop type " + std::string(type) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += "Invalid pop type " + std::string(type) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
+
+	if(float(def.size) == 0.f) {
+		err.accumulated_warnings += "Pop with zero size (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	} else if(!(std::isfinite(float(def.size)) || float(def.size) >= 0.f)) {
+		err.accumulated_errors += "Pop with invalid size " + std::to_string(float(def.size)) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+	if(!def.cul_id) {
+		err.accumulated_errors += "Pop with no culture (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+	if(!def.rel_id) {
+		err.accumulated_errors += "Pop with no religion (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+	if(def.militancy < 0.f || def.militancy > 10.f) {
+		err.accumulated_errors += "Pop with too much militancy " + std::to_string(def.militancy) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+
 	for(auto pops_by_location : context.outer_context.state.world.province_get_pop_location(context.id)) {
 		auto pop_id = pops_by_location.get_pop();
 		if(pop_id.get_culture() == def.cul_id && pop_id.get_poptype() == ptype && pop_id.get_religion() == def.rel_id) {

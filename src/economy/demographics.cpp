@@ -1240,15 +1240,14 @@ void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 
 		auto base_life_rating = ve::to_float(state.world.province_get_life_rating(loc));
 		auto mod_life_rating = ve::min(
-				base_life_rating * (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::life_rating) + 1.0f),
-				40.0f);
-		auto lr_factor =
-				ve::max((mod_life_rating - state.defines.min_life_rating_for_growth) * state.defines.life_rating_growth_bonus, 0.0f);
+			base_life_rating * (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::life_rating) + 1.0f),
+			40.0f);
+		auto lr_factor = ve::max((mod_life_rating - state.defines.min_life_rating_for_growth) * state.defines.life_rating_growth_bonus, 0.0f);
 		auto province_factor = lr_factor + state.defines.base_popgrowth;
 
 		auto ln_factor = state.world.pop_get_life_needs_satisfaction(ids) - state.defines.life_need_starvation_limit;
 		auto mod_sum = state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::population_growth) +
-									 state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth);
+			state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth);
 
 		auto total_factor = ln_factor * province_factor * 4.0f + mod_sum * 0.1f;
 		auto old_size = state.world.pop_get_size(ids);
@@ -1256,8 +1255,7 @@ void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 
 		auto type = state.world.pop_get_poptype(ids);
 
-		state.world.pop_set_size(ids,
-				ve::select((owner != dcon::nation_id{}) && (type != state.culture_definitions.slaves), new_size, old_size));
+		state.world.pop_set_size(ids, ve::select((owner != dcon::nation_id{}) && (type != state.culture_definitions.slaves), new_size, old_size));
 	});
 }
 
@@ -2390,8 +2388,10 @@ float get_estimated_emigration(sys::state& state, dcon::pop_id ids) {
 }
 
 namespace impl {
-dcon::pop_id find_or_make_pop(sys::state& state, dcon::province_id loc, dcon::culture_id cid, dcon::religion_id rid,
-		dcon::pop_type_id ptid, float l) {
+dcon::pop_id find_or_make_pop(sys::state& state, dcon::province_id loc, dcon::culture_id cid, dcon::religion_id rid, dcon::pop_type_id ptid, float l) {
+	assert(std::isfinite(l));
+	assert(l >= 0.f);
+
 	bool is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(loc));
 	if(is_mine && ptid == state.culture_definitions.farmers) {
 		ptid = state.culture_definitions.laborers;

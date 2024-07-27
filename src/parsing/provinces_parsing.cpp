@@ -365,6 +365,10 @@ void province_history_file::remove_core(association_type, uint32_t value, error_
 		province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
 		auto core = context.outer_context.state.world.get_core_by_prov_tag_key(context.id, it->second);
+		if(!core) {
+			err.accumulated_warnings += "Removing a core of " + nations::int_to_tag(value) + " that wasn't even there in the first place (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			return;
+		}
 		context.outer_context.state.world.delete_core(core);
 	} else {
 		err.accumulated_errors += "Invalid tag " + nations::int_to_tag(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
