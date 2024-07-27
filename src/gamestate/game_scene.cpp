@@ -662,7 +662,7 @@ void in_game_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modif
 			}
 		}
 
-		if(!state.ui_state.topbar_subwindow->is_visible()) {
+		if(state.ui_state.topbar_subwindow && !state.ui_state.topbar_subwindow->is_visible()) {
 			state.map_state.on_key_down(keycode, mod);
 		}
 
