@@ -228,6 +228,21 @@ dcon::nation_id get_top_overlord(sys::state& state, dcon::nation_id n) {
 	return ol_temp;
 }
 
+std::string nation_name_prettify_for_map(sys::state& state, std::string_view sv) {
+	std::string s(sv);
+	auto prefix_remove = text::produce_simple_string(state, "map_remove_prefix");
+	if(s.starts_with(prefix_remove)) {
+		s.erase(0, prefix_remove.size());
+	}
+	auto acronym_expand = text::produce_simple_string(state, "map_expand_acronym");
+	if(acronym_expand.size() > 0 && s.starts_with(acronym_expand)) {
+		s.erase(0, acronym_expand.size());
+		auto acronym_expand_to = text::produce_simple_string(state, "map_expand_acronym_to");
+		s.insert(0, acronym_expand_to.data(), acronym_expand_to.size());
+	}
+	return s;
+}
+
 void update_text_lines(sys::state& state, display_data& map_data) {
 	auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
 
@@ -327,16 +342,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			continue;
 
 		auto nation_name = text::produce_simple_string(state, text::get_name(state, n));
-		auto prefix_remove = text::produce_simple_string(state, "map_remove_prefix");
-		if(nation_name.starts_with(prefix_remove)) {
-			nation_name.erase(0, prefix_remove.size());
-		}
-		auto acronym_expand = text::produce_simple_string(state, "map_expand_acronym");
-		if(acronym_expand.size() > 0 && nation_name.starts_with(acronym_expand)) {
-			nation_name.erase(0, acronym_expand.size());
-			auto acronym_expand_to = text::produce_simple_string(state, "map_expand_acronym_to");
-			nation_name.insert(0, acronym_expand_to.data(), acronym_expand_to.size());
-		}
+		nation_name = nation_name_prettify_for_map(state, nation_name);
 
 		std::string name = nation_name;
 		bool connected_to_capital = false;
@@ -419,16 +425,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 								}
 							} else {
 								std::string tag_name = text::produce_simple_string(state, state.world.national_identity_get_name(nid));
-								auto prefix_remove = text::produce_simple_string(state, "map_remove_prefix");
-								if(tag_name.starts_with(prefix_remove)) {
-									tag_name.erase(0, prefix_remove.size());
-								}
-								auto acronym_expand = text::produce_simple_string(state, "map_expand_acronym");
-								if(acronym_expand.size() > 0 && tag_name.starts_with(acronym_expand)) {
-									tag_name.erase(0, acronym_expand.size());
-									auto acronym_expand_to = text::produce_simple_string(state, "map_expand_acronym_to");
-									tag_name.insert(0, acronym_expand_to.data(), acronym_expand_to.size());
-								}
+								tag_name = nation_name_prettify_for_map(state, tag_name);
 								text::add_to_substitution_map(sub, text::variable_type::tag, std::string_view(tag_name));
 								name = text::resolve_string_substitution(state, "map_label_adj_tag", sub);
 							}
