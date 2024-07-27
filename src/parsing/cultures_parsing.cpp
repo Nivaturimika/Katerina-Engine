@@ -183,7 +183,7 @@ void register_option(std::string_view name, token_generator& gen, error_handler&
 		}
 	}
 	if(!assigned) {
-		err.accumulated_errors += "Option " + std::string(name) + " in file " + err.file_name + " was the 7th or later option\n";
+		err.accumulated_errors += "Option " + std::string(name) + " in file " + err.file_name + " was the " + std::to_string(existing_options.size() - 1) + "th or later option\n";
 	}
 
 	gen.discard_group();
@@ -206,7 +206,7 @@ void register_option(std::string_view name, token_generator& gen, error_handler&
 		}
 	}
 	if(!assigned) {
-		err.accumulated_errors += "Option " + std::string(name) + " in file " + err.file_name + " was the 7th or later option\n";
+		err.accumulated_errors += "Option " + std::string(name) + " in file " + err.file_name + " was the " + std::to_string(existing_options.size() - 1) + "th or later option\n";
 	}
 
 	gen.discard_group();

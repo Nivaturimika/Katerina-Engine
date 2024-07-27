@@ -548,7 +548,7 @@ enum save_type : uint8_t {
 } // namespace sys
 
 namespace culture {
-inline constexpr int32_t max_issue_options = 10;
+inline constexpr int32_t max_issue_options = 11;
 }
 
 namespace economy {
