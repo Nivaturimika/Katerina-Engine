@@ -462,9 +462,8 @@ void on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers m
 
 	// if we were holding some "button" and this scene doesn't allow drag selection, then we can safely return
 	if(state.user_settings.left_mouse_click_hold_and_release
-		&& state.ui_state.left_mouse_hold_target
-		&& !state.current_scene.allow_drag_selection
-	) {
+	&& state.ui_state.left_mouse_hold_target
+	&& !state.current_scene.allow_drag_selection) {
 		return;
 	}
 
@@ -662,7 +661,7 @@ void in_game_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modif
 			}
 		}
 
-		if(state.ui_state.topbar_subwindow && !state.ui_state.topbar_subwindow->is_visible()) {
+		if(state.ui_state.topbar_subwindow == nullptr || (state.ui_state.topbar_subwindow && !state.ui_state.topbar_subwindow->is_visible())) {
 			state.map_state.on_key_down(keycode, mod);
 		}
 
