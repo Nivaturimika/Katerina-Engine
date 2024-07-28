@@ -226,7 +226,7 @@ public:
 			ptr->offset = uint8_t(std::stoi(std::string{name.substr(10)}));
 			return ptr;
 		} else if(name == "sort_by_my_invest") {
-			return make_element_by_type<country_sort_by_player_investment>(state, id);
+			return make_element_by_type<country_sort_button<country_list_sort::player_investment>>(state, id);
 		} else {
 			return nullptr;
 		}

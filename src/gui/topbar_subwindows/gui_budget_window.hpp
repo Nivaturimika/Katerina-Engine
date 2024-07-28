@@ -717,7 +717,7 @@ class budget_poor_tax_slider : public budget_slider<budget_slider_target::poor_t
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_poor_tax(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::tax_efficiency, true);
@@ -736,7 +736,7 @@ class budget_middle_tax_slider : public budget_slider<budget_slider_target::midd
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_middle_tax(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::tax_efficiency, true);
@@ -755,7 +755,7 @@ class budget_rich_tax_slider : public budget_slider<budget_slider_target::rich_t
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_rich_tax(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::tax_efficiency, true);
@@ -775,7 +775,7 @@ class budget_army_stockpile_slider : public budget_slider<budget_slider_target::
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		{
 			auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_land_spending(n) });
+			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 			text::close_layout_box(contents, box);
 		}
 		uint32_t total_commodities = state.world.commodity_size();
@@ -808,7 +808,7 @@ class budget_navy_stockpile_slider : public budget_slider<budget_slider_target::
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		{
 			auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_naval_spending(n) });
+			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 			text::close_layout_box(contents, box);
 		}
 		uint32_t total_commodities = state.world.commodity_size();
@@ -841,7 +841,7 @@ class budget_construction_stockpile_slider : public budget_slider<budget_slider_
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		{
 			auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_construction_spending(n) });
+			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 			text::close_layout_box(contents, box);
 		}
 		std::vector<float> total;
@@ -1001,7 +1001,7 @@ class budget_education_slider : public budget_slider<budget_slider_target::educa
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_education_spending(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 	}
 };
@@ -1016,7 +1016,7 @@ class budget_administration_slider : public budget_slider<budget_slider_target::
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_administrative_spending(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 	}
 };
@@ -1031,7 +1031,7 @@ class budget_social_spending_slider : public budget_slider<budget_slider_target:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_social_spending(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::min_social_spending, true);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::max_social_spending, true);
@@ -1048,7 +1048,7 @@ class budget_military_spending_slider : public budget_slider<budget_slider_targe
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_military_spending(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::min_military_spending, true);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::max_military_spending, true);
@@ -1065,7 +1065,7 @@ class budget_tariff_slider : public budget_slider<budget_slider_target::tariffs,
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_tariffs(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::close_layout_box(contents, box);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::tariff_efficiency_modifier, true);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::min_tariff, true);
@@ -1820,7 +1820,7 @@ class domestic_investment_slider : public budget_slider<budget_slider_target::do
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ state.world.nation_get_domestic_investment_spending(n) });
+		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 		text::add_line_break_to_layout_box(state, contents, box);
 		text::close_layout_box(contents, box);
 

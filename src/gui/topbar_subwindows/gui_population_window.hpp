@@ -893,15 +893,8 @@ public:
 			text::add_line_break_to_layout_box(state, contents, box);
 			auto color = text::text_color::white;
 			if(fat_nf.get_promotion_type()) {
-				//Is the NF not optimal? Recolor it
-				if(fat_nf.get_promotion_type() == state.culture_definitions.clergy) {
-					if((fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total)) > state.defines.max_clergy_for_literacy) {
-						color = text::text_color::red;
-					}
-				} else if(fat_nf.get_promotion_type() == state.culture_definitions.bureaucrat) {
-					if(province::state_admin_efficiency(state, fat_si.id) > state.defines.max_bureaucracy_percentage) {
-						color = text::text_color::red;
-					}
+				if(nations::national_focus_is_unoptimal(state, state.local_player_nation, fat_si, fat_nf)) {
+					color = text::text_color::red;
 				}
 				auto full_str = text::format_percentage(fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total));
 				text::add_to_layout_box(state, contents, box, std::string_view(full_str), color);
@@ -2314,51 +2307,61 @@ public:
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		// if(Sort == pop_list_sort::size || Sort == pop_list_sort::type || Sort == pop_list_sort::nationality || Sort ==
-		// pop_list_sort::religion || Sort == pop_list_sort::location) { return; }
-		auto box = text::open_layout_box(contents, 0);
 		switch(Sort) {
 		case pop_list_sort::literacy:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_lit"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_literacy");
 			break;
 		case pop_list_sort::change:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_change"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_growth");
 			break;
 		case pop_list_sort::revoltrisk:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_rr"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_faction");
 			break;
 		case pop_list_sort::luxury_needs:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_luxury"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_luxury_needs");
 			break;
 		case pop_list_sort::everyday_needs:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_every"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_everyday_needs");
 			break;
 		case pop_list_sort::life_needs:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_life"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_life_needs");
 			break;
 		case pop_list_sort::cash:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_cash"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_savings");
 			break;
 		case pop_list_sort::unemployment:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_unemployment"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_unemployment");
 			break;
 		case pop_list_sort::issues:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_iss"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_issues");
 			break;
 		case pop_list_sort::ideology:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_ide"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_ideology");
 			break;
 		case pop_list_sort::mil:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_mil"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_militancy");
 			break;
 		case pop_list_sort::con:
-			text::localised_format_box(state, contents, box, std::string_view("popv_sort_by_con"), text::substitution_map{});
+			text::add_line(state, contents, "sort_by_conciousness");
+			break;
+		case pop_list_sort::location:
+			text::add_line(state, contents, "sort_by_location");
+			break;
+		case pop_list_sort::religion:
+			text::add_line(state, contents, "sort_by_religion");
+			break;
+		case pop_list_sort::nationality:
+			text::add_line(state, contents, "sort_by_culture");
+			break;
+		case pop_list_sort::type:
+			text::add_line(state, contents, "sort_by_type");
+			break;
+		case pop_list_sort::size:
+			text::add_line(state, contents, "sort_by_size");
 			break;
 		default:
-			// text::add_to_layout_box(state, contents, box, std::string_view("Not sure how you got here but have a UwU"));
 			break;
 		}
-		text::close_layout_box(contents, box);
 	}
 };
 
@@ -2678,23 +2681,17 @@ public:
 			country_pop_listbox = ptr.get();
 			return ptr;
 		} else if(name == "external_scroll_slider") {
-			auto ptr = make_element_by_type<opaque_element_base>(state, id);
-			return ptr;
+			return make_element_by_type<opaque_element_base>(state, id);
 		} else if(name == "sortby_size_button") {
-			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::size>>(state, id);
-			return ptr;
+			return make_element_by_type<pop_sort_button<pop_list_sort::size>>(state, id);
 		} else if(name == "sortby_type_button") {
-			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::type>>(state, id);
-			return ptr;
+			return make_element_by_type<pop_sort_button<pop_list_sort::type>>(state, id);
 		} else if(name == "sortby_nationality_button") {
-			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::nationality>>(state, id);
-			return ptr;
+			return make_element_by_type<pop_sort_button<pop_list_sort::nationality>>(state, id);
 		} else if(name == "sortby_religion_button") {
-			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::religion>>(state, id);
-			return ptr;
+			return make_element_by_type<pop_sort_button<pop_list_sort::religion>>(state, id);
 		} else if(name == "sortby_location_button") {
-			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::location>>(state, id);
-			return ptr;
+			return make_element_by_type<pop_sort_button<pop_list_sort::location>>(state, id);
 		} else if(name == "sortby_mil_button") {
 			auto ptr = make_element_by_type<pop_sort_button<pop_list_sort::mil>>(state, id);
 			ptr->set_button_text(state, ""); // Nudge clear
