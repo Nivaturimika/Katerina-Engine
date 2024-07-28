@@ -749,14 +749,16 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
-		auto box = text::open_layout_box(contents);
-		text::substitution_map sub{};
-		text::add_to_substitution_map(sub, text::variable_type::country, n);
-		text::add_to_substitution_map(sub, text::variable_type::country_adj, text::get_adjective(state, n));
-		text::add_to_substitution_map(sub, text::variable_type::capital, state.world.nation_get_capital(n));
-		text::add_to_substitution_map(sub, text::variable_type::continentname, state.world.modifier_get_name(state.world.province_get_continent(state.world.nation_get_capital(n))));
-		text::add_to_layout_box(state, contents, box, state.world.government_type_get_desc(state.world.nation_get_government_type(n)), sub);
-		text::close_layout_box(contents, box);
+		if(auto desc = state.world.government_type_get_desc(state.world.nation_get_government_type(n)); state.key_is_localized(desc)) {
+			auto box = text::open_layout_box(contents);
+			text::substitution_map sub{};
+			text::add_to_substitution_map(sub, text::variable_type::country, n);
+			text::add_to_substitution_map(sub, text::variable_type::country_adj, text::get_adjective(state, n));
+			text::add_to_substitution_map(sub, text::variable_type::capital, state.world.nation_get_capital(n));
+			text::add_to_substitution_map(sub, text::variable_type::continentname, state.world.modifier_get_name(state.world.province_get_continent(state.world.nation_get_capital(n))));
+			text::add_to_layout_box(state, contents, box, desc, sub);
+			text::close_layout_box(contents, box);
+		}
 	}
 };
 
@@ -1110,6 +1112,29 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto fat_id = dcon::fatten(state.world, nation_id);
 		return text::produce_simple_string(state, fat_id.get_national_value().get_name());
+	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto n = state.local_player_nation;
+		auto mod_id = state.world.nation_get_national_value(retrieve<dcon::nation_id>(state, parent));
+		if(bool(mod_id)) {
+			auto box = text::open_layout_box(contents, 0);
+			text::add_to_layout_box(state, contents, box, state.world.modifier_get_name(mod_id), text::text_color::yellow);
+			if(auto desc = state.world.modifier_get_desc(mod_id); state.key_is_localized(desc)) {
+				text::substitution_map sub{};
+				text::add_to_substitution_map(sub, text::variable_type::country, n);
+				text::add_to_substitution_map(sub, text::variable_type::country_adj, text::get_adjective(state, n));
+				text::add_to_substitution_map(sub, text::variable_type::capital, state.world.nation_get_capital(n));
+				text::add_to_substitution_map(sub, text::variable_type::continentname, state.world.modifier_get_name(state.world.province_get_continent(state.world.nation_get_capital(n))));
+				text::add_to_layout_box(state, contents, box, state.world.modifier_get_desc(mod_id), sub);
+			}
+			text::close_layout_box(contents, box);
+			modifier_description(state, contents, mod_id);
+		}
 	}
 };
 
