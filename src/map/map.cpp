@@ -312,10 +312,8 @@ display_data::~display_data() {
 		glDeleteTextures(texture_count, textures);
 	if(texture_arrays[0])
 		glDeleteTextures(texture_count, texture_arrays);
-#if 0
 	if(static_mesh_textures[0])
 		glDeleteTextures(max_static_meshes, static_mesh_textures);
-#endif
 	if(vao_array[0])
 		glDeleteVertexArrays(vo_count, vao_array);
 	if(vbo_array[0])
@@ -821,7 +819,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 	}*/
 
-#if 0
 	if(zoom > map::zoom_very_close && state.user_settings.render_models) {
 		constexpr float dist_step = 1.77777f;
 		// Render standing objects
@@ -981,102 +978,99 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			}
 		}
 		// Render armies
-		auto render_regiment = [&](uint32_t index, military::unit_type type, float space) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
-			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-				auto units = state.world.province_get_army_location_as_location(p);
-				if(state.map_state.visible_provinces[province::to_map_id(p)]
-				&& units.begin() != units.end()) {
-					auto p1 = state.world.province_get_mid_point(p);
-					auto p2 = p1;
-					bool has_unit = false;
-					for(const auto unit : units) {
-						for(const auto sm : unit.get_army().get_army_membership()) {
-							auto& t = state.military_definitions.unit_base_definitions[sm.get_regiment().get_type()];
-							if(t.type == type) {
-								has_unit = true;
-								break;
-							}
+		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
+			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
+			auto units = state.world.province_get_army_location_as_location(p);
+			if(state.map_state.visible_provinces[province::to_map_id(p)]
+			&& units.begin() != units.end()) {
+				auto p1 = state.world.province_get_mid_point(p);
+				auto p2 = p1;
+				uint32_t index = 0;
+				for(const auto unit : units) {
+					if(auto path = unit.get_army().get_path(); path.size() > 0) {
+						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
+					}
+					for(const auto sm : unit.get_army().get_army_membership()) {
+						auto& t = state.military_definitions.unit_base_definitions[sm.get_regiment().get_type()];
+						if(t.type == military::unit_type::infantry) {
+							index = 11;
+						} else if(t.type == military::unit_type::cavalry) {
+							index = 15;
+						} else if(t.type == military::unit_type::support) {
+							index = 18;
 						}
-						if(has_unit) {
-							if(auto path = unit.get_army().get_path(); path.size() > 0) {
-								p2 = state.world.province_get_mid_point(path[path.size() - 1]);
-								break;
-							}
+						if(index != 0) {
+							break;
 						}
 					}
-					if(has_unit) {
-						glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + space + dist_step);
-						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-						glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-						glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-						glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+					if(index != 0) {
+						break;
 					}
 				}
+				if(index != 0) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
+					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + dist_step);
+					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
+					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
+					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+				}
 			}
-		};
-		render_regiment(17, military::unit_type::infantry, dist_step); //shadow
-		render_regiment(17, military::unit_type::cavalry, 0.f); //shadow
-		render_regiment(17, military::unit_type::support, -dist_step); //shadow
-		render_regiment(11, military::unit_type::infantry, dist_step); //infantry
-		render_regiment(15, military::unit_type::cavalry, 0.f); //horse
-		render_regiment(18, military::unit_type::support, -dist_step); //artillery
+		}
 		// Render navies
-		auto render_ship = [&](uint32_t index, military::unit_type type, int32_t min_port, float space) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
-			for(uint32_t i = uint32_t(state.province_definitions.first_sea_province.index()); i < state.world.province_size(); i++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-				auto units = state.world.province_get_navy_location_as_location(p);
-				if(state.map_state.visible_provinces[province::to_map_id(p)]
-				&& units.begin() != units.end()) {
-					auto p1 = duplicates::get_navy_location(state, p);
-					auto p2 = p1;
-					bool has_unit = false;
-					for(const auto unit : units) {
-						for(const auto sm : unit.get_navy().get_navy_membership()) {
-							auto& t = state.military_definitions.unit_base_definitions[sm.get_ship().get_type()];
-							if(t.type == type && t.min_port_level <= min_port) {
-								has_unit = true;
-								break;
-							}
+		for(uint32_t i = uint32_t(state.province_definitions.first_sea_province.index()); i < state.world.province_size(); i++) {
+			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
+			auto units = state.world.province_get_navy_location_as_location(p);
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = p1;
+				uint32_t index = 0;
+				for(const auto unit : units) {
+					for(const auto sm : unit.get_navy().get_navy_membership()) {
+						auto& t = state.military_definitions.unit_base_definitions[sm.get_ship().get_type()];
+						if(t.type == military::unit_type::transport && t.min_port_level <= -1) {
+							index = 14; //transport
+						} else if(t.type == military::unit_type::big_ship && t.min_port_level <= -1) {
+							index = 13; //manowar
+						} else if(t.type == military::unit_type::light_ship && t.min_port_level <= -1) {
+							index = 12; //frigate
+						} else if(t.type == military::unit_type::big_ship && t.min_port_level <= 2) {
+							index = 37; //raider
+						} else if(t.type == military::unit_type::light_ship && t.min_port_level <= 3) {
+							index = 35; //cruiser
+						} else if(t.type == military::unit_type::big_ship && t.min_port_level <= 3) {
+							index = 36; //battleship
+						} else if(t.type == military::unit_type::big_ship && t.min_port_level <= 4) {
+							index = 34; //ironclad
 						}
-						if(has_unit) {
+						if(index != 0) {
 							if(auto path = unit.get_navy().get_path(); path.size() > 0) {
 								p2 = duplicates::get_navy_location(state, path[path.size() - 1]);
-								break;
 							}
+							break;
 						}
 					}
-					if(has_unit) {
-						glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + space + dist_step);
-						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-						glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-						glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-						glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+					if(index != 0) {
+						break;
 					}
 				}
+				if(index != 0) {
+					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + dist_step);
+					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
+					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
+					//ship
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
+					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+					//wake
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[16]);
+					glDrawArrays(GL_TRIANGLES, static_mesh_starts[16], static_mesh_counts[16]);
+				}
 			}
-		};
-
-		//ship wakes
-		render_ship(16, military::unit_type::big_ship, 2, 3.f * dist_step); //raider
-		render_ship(16, military::unit_type::transport, -1, 2.f * dist_step); //transport
-		render_ship(16, military::unit_type::big_ship, -1, dist_step); //manowar
-		render_ship(16, military::unit_type::light_ship, -1, 0.f); //frigate
-		render_ship(16, military::unit_type::big_ship, 4, -dist_step); //battleship
-		render_ship(16, military::unit_type::light_ship, 3, -2.f * dist_step); //cruiser
-		render_ship(16, military::unit_type::big_ship, 3, -3.f * dist_step); //ironclad
-		//ship themselves
-		render_ship(37, military::unit_type::big_ship, 2, 3.f * dist_step); //raider
-		render_ship(14, military::unit_type::transport, -1, 2.f * dist_step); //transport
-		render_ship(13, military::unit_type::big_ship, -1, dist_step); //manowar
-		render_ship(12, military::unit_type::light_ship, -1, 0.f); //frigate
-		render_ship(34, military::unit_type::big_ship, 4, -dist_step); //battleship
-		render_ship(35, military::unit_type::light_ship, 3, -2.f * dist_step); //cruiser
-		render_ship(36, military::unit_type::big_ship, 3, -3.f * dist_step); //ironclad
+		}
 
 		// Floating flags
 		glActiveTexture(GL_TEXTURE0);
@@ -1139,7 +1133,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 		glDisable(GL_DEPTH_TEST);
 	}
-#endif
 
 	glBindVertexArray(0);
 	glDisable(GL_CULL_FACE);
@@ -2036,7 +2029,6 @@ emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material 
 }
 
 void load_static_meshes(sys::state& state) {
-#if 0
 	struct static_mesh_vertex {
 		glm::vec3 position_;
 		glm::vec2 normal_;
@@ -2301,7 +2293,6 @@ void load_static_meshes(sys::state& state) {
 	glVertexAttribBinding(1, 0);
 	glVertexAttribBinding(2, 0);
 	glBindVertexArray(0);
-#endif
 }
 
 void display_data::load_map(sys::state& state) {
