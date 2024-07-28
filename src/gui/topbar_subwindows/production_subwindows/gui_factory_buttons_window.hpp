@@ -94,47 +94,6 @@ public:
 	}
 };
 
-class factory_prod_open_all_button : public button_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		set_visible(state, false);
-	}
-	void button_action(sys::state& state) noexcept override {
-		
-	}
-
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::tooltip;
-	}
-
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("open_all_tooltip"));
-		text::close_layout_box(contents, box);
-	}
-};
-
-class factory_prod_close_all_button : public button_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		set_visible(state, false);
-	}
-	void button_action(sys::state& state) noexcept override {
-	}
-
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::tooltip;
-	}
-
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("close_all_tooltip"));
-		text::close_layout_box(contents, box);
-	}
-};
-
 class factory_select_all_button : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
@@ -251,9 +210,9 @@ public:
 		} else if(name == "prod_unsubsidize_all") {
 			return make_element_by_type<factory_prod_unsubsidise_all_button>(state, id);
 		} else if(name == "prod_open_all_factories") {
-			return make_element_by_type<factory_prod_open_all_button>(state, id);
+			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "prod_close_all_factories") {
-			return make_element_by_type<factory_prod_close_all_button>(state, id);
+			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "select_all") {
 			return make_element_by_type<factory_select_all_button>(state, id);
 		} else if(name == "deselect_all") {
