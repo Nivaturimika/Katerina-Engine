@@ -1036,6 +1036,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(0.f, 0.f);
 				render_model(38, p1, -theta, -0.75f);
+				render_model(39, p1, -theta, -0.75f);
 			}
 		}
 		for(uint32_t i = 0; i < state.world.province_size(); i++) {
@@ -1951,6 +1952,9 @@ GLuint load_dds_texture(simple_fs::directory const& dir, native_string_view file
 
 emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material const& mat) {
 	for(const auto& layer : mat.layers) {
+		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec") {
+			continue;
+		}
 		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse) {
 			return layer;
 		}
@@ -2053,54 +2057,9 @@ void load_static_meshes(sys::state& state) {
 		1.0f, //40
 		1.0f, //41
 	};
-	constexpr float no_elim = 9999.f + 0.1f;
-	constexpr float quad_elim = 9999.f + 0.2f;
-	static const std::array<float, display_data::max_static_meshes> elim_factor = {
-		-0.1f, //0
-		no_elim, //1
-		no_elim, //2
-		no_elim, //3
-		-0.1f, //4
-		quad_elim, //5
-		-0.1f, //6
-		-0.1f, //7
-		-0.1f, //8
-		quad_elim, //9
-		-0.1f, //10
-		-0.1f, //11
-		-0.1f, //12
-		-0.1f, //13
-		-0.1f, //14
-		no_elim, //15
-		-0.1f, //16
-		-0.1f, //17
-		-0.1f, //18 -- housing
-		-0.1f, //19
-		-0.1f, //20
-		-0.1f, //21
-		-0.1f, //22
-		-0.1f, //23
-		-0.1f, //24
-		-0.1f, //25
-		-0.1f, //26
-		-0.1f, //27
-		-0.1f, //28
-		-0.1f, //29
-		-0.1f, //30
-		-0.1f, //31
-		-0.1f, //32
-		-0.1f, //33
-		-0.1f, //34
-		-0.1f, //35
-		no_elim, //36
-		-0.1f, //37
-		-0.1f, //38
-		-0.1f, //39
-		-0.1f, //40
-		-0.1f, //41
-	};
 	auto root = simple_fs::get_root(state.common_fs);
-	auto gfx_anims = simple_fs::open_directory(root, NATIVE("gfx/anims"));
+	auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
+	auto gfx_anims = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
 
 	state.map_state.map_data.static_mesh_counts.resize(display_data::max_static_meshes);
 	state.map_state.map_data.static_mesh_starts.resize(display_data::max_static_meshes);
@@ -2120,7 +2079,7 @@ void load_static_meshes(sys::state& state) {
 				int32_t mesh_index = 0;
 				for(auto const& mesh : node.meshes) {
 					bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
-					bool is_visual = node.visual_mesh == mesh_index;
+					//bool is_visual = node.visual_mesh == mesh_index;
 
 					uint32_t vertex_offset = 0;
 					for(auto const& sub : mesh.submeshes) {
@@ -2144,7 +2103,7 @@ void load_static_meshes(sys::state& state) {
 							}
 							// Clip standing planes (some models have flat planes
 							// beneath them)
-							if(is_visual) {
+							if(!is_collision) {
 								for(const auto& smv : triangle_vertices) {
 									static_mesh_vertex tmp = smv;
 									tmp.position_ *= scaling_factor[k];
