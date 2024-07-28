@@ -1073,7 +1073,7 @@ public:
 				amount = std::max(amount, state.world.nation_get_demographics(n, demographics::to_key(state, iopt)));
 			}
 		}
-		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ 1.f - (amount / total) });
+		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ (amount / total) });
 	}
 };
 
@@ -1101,7 +1101,7 @@ public:
 				amount = std::max(amount, state.world.nation_get_demographics(n, demographics::to_key(state, iopt)));
 			}
 		}
-		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ 1.f - (amount / total) });
+		text::add_line(state, contents, "percent_wants_to_enact_reform", text::variable_type::x, text::fp_percentage_one_place{ (amount / total) });
 	}
 };
 
