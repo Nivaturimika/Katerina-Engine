@@ -1762,17 +1762,14 @@ class factory_profit_text : public multiline_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::factory_id>(state, parent);
-
 		auto profit = state.world.factory_get_full_profit(content);
-		bool is_positive = profit >= 0.f;
-		auto text = (is_positive ? "+" : "") + text::format_float(profit, 2);
+		auto text = text::prettify_currency(profit);
 		// Create colour
 		auto contents = text::create_endless_layout(state, internal_layout,
-				text::layout_parameters{0, 0, static_cast<int16_t>(base_data.size.x), static_cast<int16_t>(base_data.size.y),
-						base_data.data.text.font_handle, 0, text::alignment::left, text::text_color::black, true});
+			text::layout_parameters{0, 0, static_cast<int16_t>(base_data.size.x), static_cast<int16_t>(base_data.size.y),
+			base_data.data.text.font_handle, 0, text::alignment::left, text::text_color::black, true});
 		auto box = text::open_layout_box(contents);
-		text::add_to_layout_box(state, contents, box, text,
-				is_positive ? text::text_color::dark_green : text::text_color::dark_red);
+		text::add_to_layout_box(state, contents, box, text, profit > 0.f ? text::text_color::dark_green : text::text_color::dark_red);
 		text::close_layout_box(contents, box);
 	}
 };
