@@ -1020,7 +1020,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(index != 0) {
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 					//wake
-					render_model(16, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
+					//render_model(16, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 					//ship
 					render_model(index, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 				}
@@ -2114,9 +2114,12 @@ void load_static_meshes(sys::state& state) {
 			emfx::finish(context);
 
 			for(auto const& node : context.nodes) {
+				if(node.name == "polySurface95")
+					continue;
+
 				int32_t mesh_index = 0;
 				for(auto const& mesh : node.meshes) {
-					bool is_collision = node.collision_mesh == mesh_index;
+					bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
 					bool is_visual = node.visual_mesh == mesh_index;
 
 					uint32_t vertex_offset = 0;
@@ -2141,34 +2144,11 @@ void load_static_meshes(sys::state& state) {
 							}
 							// Clip standing planes (some models have flat planes
 							// beneath them)
-							bool keep = is_visual;
-							if(elim_factor[k] == no_elim) {
-								if(is_visual) {
-									for(const auto& smv : triangle_vertices) {
-										static_mesh_vertex tmp = smv;
-										tmp.position_ *= scaling_factor[k];
-										static_mesh_vertices.push_back(tmp);
-									}
-								}
-							} else if(elim_factor[k] == quad_elim) {
-								if(triangle_vertices[0].position_.y <= -0.1f
-									|| triangle_vertices[1].position_.y <= -0.1f
-									|| triangle_vertices[2].position_.y <= -0.1f) {
-									for(const auto& smv : triangle_vertices) {
-										static_mesh_vertex tmp = smv;
-										tmp.position_ *= scaling_factor[k];
-										static_mesh_vertices.push_back(tmp);
-									}
-								}
-							} else {
-								if(triangle_vertices[0].position_.y <= elim_factor[k]
-									&& triangle_vertices[1].position_.y <= elim_factor[k]
-									&& triangle_vertices[2].position_.y <= elim_factor[k]) {
-									for(const auto& smv : triangle_vertices) {
-										static_mesh_vertex tmp = smv;
-										tmp.position_ *= scaling_factor[k];
-										static_mesh_vertices.push_back(tmp);
-									}
+							if(is_visual) {
+								for(const auto& smv : triangle_vertices) {
+									static_mesh_vertex tmp = smv;
+									tmp.position_ *= scaling_factor[k];
+									static_mesh_vertices.push_back(tmp);
 								}
 							}
 						}
@@ -2179,20 +2159,11 @@ void load_static_meshes(sys::state& state) {
 						auto const& mat = context.materials[sub.material_id];
 						auto const& layer = get_diffuse_layer(mat);
 						if(!layer.texture.empty()) {
-							texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
+							texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
 							if(!texid) {
-								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
+								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
 								if(!texid) {
 									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
-								}
-							}
-						}
-						if(!texid) {
-							texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("Diffuse.dds"), 0);
-							if(!texid) {
-								texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("_Diffuse.dds"), 0);
-								if(!texid) {
-									texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE(".dds"), 0);
 								}
 							}
 						}
