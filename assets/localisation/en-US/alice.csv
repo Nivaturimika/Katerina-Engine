@@ -937,8 +937,8 @@ auto_save_1;Daily
 auto_save_2;Monthly
 auto_save_3;Yearly
 auto_save_0;None
-monthly_emigration_lab;Monthly emigration to (top 10)
-monthly_immigration_lab;Monthly immigration from (top 10)
+monthly_emigration_lab;Monthly emigration to (top ?Y$y$?!), total of $x$
+monthly_immigration_lab;Monthly immigration from (top ?Y$y$?!), total of $x$
 im_em_header;Predicted immigration/emigration for 
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W attrition
 ol_unit_standing_text;$m$ $n$/$x$/$y$

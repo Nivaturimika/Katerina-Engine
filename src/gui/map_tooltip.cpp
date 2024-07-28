@@ -598,7 +598,14 @@ void migration_map_tt_box(sys::state& state, text::columnar_layout& contents, dc
 			bool has_pos_migration = migration_values[0].v > 0.f;
 			if(has_pos_migration) {
 				text::add_line_break_to_layout(state, contents);
-				text::add_line(state, contents, "monthly_immigration_lab");
+				{
+					text::substitution_map sub{};
+					text::add_to_substitution_map(sub, text::variable_type::x, int32_t(total_pos));
+					text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
+					auto box = text::open_layout_box(contents);
+					text::localised_format_box(state, contents, box, "monthly_immigration_lab", sub);
+					text::close_layout_box(contents, box);
+				}
 				for(uint32_t i = 0; i < migration_values.size(); ++i) {
 					if(migration_values[i].v < 0.f) {
 						start_neg_index = i;
@@ -626,7 +633,14 @@ void migration_map_tt_box(sys::state& state, text::columnar_layout& contents, dc
 			}
 			if(has_neg_migration) {
 				text::add_line_break_to_layout(state, contents);
-				text::add_line(state, contents, "monthly_emigration_lab");
+				{
+					text::substitution_map sub{};
+					text::add_to_substitution_map(sub, text::variable_type::x, int32_t(-total_neg));
+					text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
+					auto box = text::open_layout_box(contents);
+					text::localised_format_box(state, contents, box, "monthly_emigration_lab", sub);
+					text::close_layout_box(contents, box);
+				}
 				total_accounted_for = 0.0f;
 				uint32_t count = 0;
 				for(uint32_t i = start_neg_index; i < migration_values.size() && count < 10; ++i) {

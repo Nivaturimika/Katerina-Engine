@@ -930,8 +930,8 @@ unit_load_or_unload_3;Транспортный флот пристыкован
 unit_load_or_unload_4;Перевозится одна или несколько армий
 unit_load_or_unload_5;Флот пристыкован
 unload_all_armies_of_fleet;Выгрузить все армии, перевезенные флотом
-monthly_emigration_lab;Ежемесячная эмиграция в (топ-10)
-monthly_immigration_lab;Ежемесячная иммиграция из (топ-10)
+monthly_emigration_lab;Ежемесячная эмиграция в (топ-?Y$y$?!), total $x$
+monthly_immigration_lab;Ежемесячная иммиграция из (топ-?Y$y$?!), total $x$
 im_em_header;Прогнозируемая иммиграция/эмиграция для
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?! истощение
 ol_unit_standing_text;$m$ $n$/$x$/$y$

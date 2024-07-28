@@ -937,8 +937,8 @@ auto_save_1;Napi
 auto_save_2;Havi
 auto_save_3;Évi
 auto_save_0;Egyik sem
-monthly_emigration_lab;Havi kivándorlás ide (első 10)
-monthly_immigration_lab;Havi bevándorlás innen: (10 legjobb)
+monthly_emigration_lab;Havi kivándorlás ide (első ?Y$y$?!), total $x$
+monthly_immigration_lab;Havi bevándorlás innen: (?Y$y$?! legjobb), total $x$
 im_em_header;Előre jelzett bevándorlás/kivándorlás a számára
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W kopás
 ol_unit_standing_text;$m$ $n$/$x$/$y$

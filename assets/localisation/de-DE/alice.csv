@@ -937,8 +937,8 @@ auto_save_1;Täglich
 auto_save_2;Monatlich
 auto_save_3;Jährlich
 auto_save_0;Keiner
-monthly_emigration_lab;Monatliche Auswanderung nach (Top 10)
-monthly_immigration_lab;Monatliche Einwanderung aus (Top 10)
+monthly_emigration_lab;Monatliche Auswanderung nach (Top ?Y$y$?!), total $x$
+monthly_immigration_lab;Monatliche Einwanderung aus (Top ?Y$y$?!), total $x$
 im_em_header;Voraussichtliche Einwanderung/Auswanderung für
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W Abnutzung
 ol_unit_standing_text;$m$ $n$/$x$/$y$

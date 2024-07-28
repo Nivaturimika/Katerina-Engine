@@ -937,8 +937,8 @@ auto_save_1;Quotidiano
 auto_save_2;Mensile
 auto_save_3;Annuale
 auto_save_0;Nessuno
-monthly_emigration_lab;Emigrazione mensile verso (top 10)
-monthly_immigration_lab;Immigrazione mensile da (top 10)
+monthly_emigration_lab;Emigrazione mensile verso (top ?Y$y$?!), total $x$
+monthly_immigration_lab;Immigrazione mensile da (top ?Y$y$?!), total $x$
 im_em_header;Immigrazione/emigrazione prevista per
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W attrito
 ol_unit_standing_text;$m$ $n$/$x$/$y$

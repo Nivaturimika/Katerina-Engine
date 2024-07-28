@@ -937,8 +937,8 @@ auto_save_1;يوميًا
 auto_save_2;شهريا
 auto_save_3;سنوي
 auto_save_0;لا أحد
-monthly_emigration_lab;الهجرة الشهرية إلى (أعلى 10)
-monthly_immigration_lab;الهجرة الشهرية من (أعلى 10)
+monthly_emigration_lab;الهجرة الشهرية إلى (أعلى ?Y$y$?! $x$
+monthly_immigration_lab;الهجرة الشهرية من (أعلى ?Y$y$?! $x$
 im_em_header;الهجرة المتوقعة/الهجرة لـ
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W الاستنزاف
 ol_unit_standing_text;$m$ $n$/$x$/$y$

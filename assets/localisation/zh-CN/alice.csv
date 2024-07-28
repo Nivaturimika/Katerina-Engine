@@ -937,8 +937,8 @@ auto_save_1;每日
 auto_save_2;每月
 auto_save_3;每年
 auto_save_0;不自动保存
-monthly_emigration_lab;每月移民到（前十名）
-monthly_immigration_lab;每月移民来自（前十名）
+monthly_emigration_lab;每月移民到（前十名）$x$
+monthly_immigration_lab;每月移民来自（前十名）$x$
 im_em_header;省份属于：
 unit_relative_attrition;$m$ $n$/$x$/$y$ = ?R$val$?W 损耗
 ol_unit_standing_text;$m$ $n$/$x$/$y$
