@@ -845,6 +845,14 @@ public:
 	message_result on_lbutton_down(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept final;
 	void on_drag(sys::state& state, int32_t oldx, int32_t oldy, int32_t x, int32_t y, sys::key_modifiers mods) noexcept final;
 	void on_drag_finish(sys::state& state) noexcept final;
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::position_sensitive_tooltip; //force redraw when cursor changes
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		if(parent) {
+			parent->update_tooltip(state, x, y, contents);
+		}
+	}
 };
 
 struct mutable_scrollbar_settings {
