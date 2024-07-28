@@ -1303,6 +1303,8 @@ sfx_file
 	new_land_unit			group	sfx_definition		discard
 	new_naval_unit			group	sfx_definition		discard
 	news_printed			group	sfx_definition		discard
+	start_game				group	sfx_definition		discard
+	close_window			group	sfx_definition		discard
 
 bookmark_definition
 	date				value	date					member_fn
