@@ -668,8 +668,6 @@ void change_province_owner(sys::state& state, dcon::province_id id, dcon::nation
 	auto old_si = state.world.province_get_state_membership(id);
 	auto old_owner = state.world.province_get_nation_from_province_ownership(id);
 
-	assert(old_si);
-
 	if(new_owner == old_owner)
 		return;
 
