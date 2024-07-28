@@ -2298,6 +2298,7 @@ void estimate_directed_immigration(sys::state& state, dcon::nation_id n, std::ve
 	auto next_month_start = ymd_date.month != 12 ? sys::year_month_day{ ymd_date.year, uint16_t(ymd_date.month + 1), uint16_t(1) } : sys::year_month_day{ ymd_date.year + 1, uint16_t(1), uint16_t(1) };
 	auto const days_in_month = uint32_t(sys::days_difference(month_start, next_month_start));
 
+	//this is unsafe, but it's fine since it's for UI only
 	concurrency::parallel_for(uint32_t(0), uint32_t(state.world.nation_size()), [&](uint32_t index) {
 		dcon::nation_id o{ dcon::nation_id::value_base_t(index) };
 		for(const auto po : state.world.nation_get_province_ownership(o)) {
