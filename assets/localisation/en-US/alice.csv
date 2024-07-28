@@ -1211,3 +1211,5 @@ ol_view_stockpile_header;Stockpiles
 ol_view_stockpile;Stockpiles
 nf_overwrite_header;Remove an existing national focus first
 percent_wants_to_enact_reform;$x$ wants to enact a new reform
+modifier_mine_rgo_size;Mine RGO size
+modifier_farm_rgo_size;Farm RGO size
