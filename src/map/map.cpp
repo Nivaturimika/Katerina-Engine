@@ -1,7 +1,3 @@
-#include "map.hpp"
-#include "glm/fwd.hpp"
-#include "texture.hpp"
-#include "province.hpp"
 #include <cmath>
 #include <numbers>
 #include <glm/glm.hpp>
@@ -19,6 +15,11 @@
 #include "math_fns.hpp"
 #include "prng.hpp"
 #include "demographics.hpp"
+#include "map.hpp"
+#include "glm/fwd.hpp"
+#include "texture.hpp"
+#include "province.hpp"
+#include "province_templates.hpp"
 
 #include "xac.hpp"
 namespace duplicates {
@@ -842,75 +843,95 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
 		// Train stations
-		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
+		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, dist_step); //top right (from center)
-				render_model(5, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f);
+				render_model(23, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f);
 			}
-		}
-		struct model_tier {
-			uint32_t index;
-			uint8_t min;
-			uint8_t max;
-		};
+		});
 		// Naval base (empty)
-		static const model_tier nbe_tiers[] = {
-			{ 30, 1, 2 }, //early
-			{ 32, 3, 4 }, //mid
-			{ 6, 5, 6 } //late
-		};
-		for(const auto& tier : nbe_tiers) {
-			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-				auto units = state.world.province_get_navy_location_as_location(p);
-				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-				if(level >= tier.min && level <= tier.max && units.begin() == units.end()) {
-					auto p1 = duplicates::get_navy_location(state, p);
-					auto p2 = state.world.province_get_mid_point(p);
-					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(tier.index, p1, -theta, -0.75f);
-				}
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto units = state.world.province_get_navy_location_as_location(p);
+			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
+			if(units.begin() == units.end()) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = state.world.province_get_mid_point(p);
+				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(1 + level, p1, -theta, -0.75f);
 			}
-		}
+		});
 		// Naval base (full)
-		static const model_tier nbf_tiers[] = {
-			{ 31, 1, 2 }, //early
-			{ 33, 3, 4 }, //mid
-			{ 7, 5, 6 } //late
-		};
-		for(const auto& tier : nbf_tiers) {
-			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-				auto units = state.world.province_get_navy_location_as_location(p);
-				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-				if(level >= tier.min && level <= tier.max && units.begin() != units.end()) {
-					auto p1 = duplicates::get_navy_location(state, p);
-					auto p2 = state.world.province_get_mid_point(p);
-					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(tier.index, p1, -theta, -0.75f);
-				}
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
+			if(auto units = state.world.province_get_navy_location_as_location(p); units.begin() != units.end()) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = state.world.province_get_mid_point(p);
+				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(8 + level, p1, -theta, -0.75f);
 			}
-		}
+		});
 		// Fort
-		static const model_tier fort_tiers[] = {
-			{ 8, 1, 2 }, //early
-			{ 28, 3, 4 }, //mid
-			{ 29, 5, 6 } //late
-		};
-		for(const auto& tier : fort_tiers) {
-			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-				auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
-				if(level >= tier.min && level <= tier.max) {
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
+			if(level > 0) {
+				auto center = state.world.province_get_mid_point(p);
+				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
+				render_model(16 + level, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+			}
+		});
+		// Factory
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto factories = state.world.province_get_factory_location_as_province(p);
+			if(factories.begin() != factories.end()) {
+				auto center = state.world.province_get_mid_point(p);
+				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+				render_model(9, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+			}
+		});
+		// Construction
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto lc = state.world.province_get_province_building_construction(p);
+			if(lc.begin() != lc.end()) {
+				auto center = state.world.province_get_mid_point(p);
+				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+				render_model(24, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+			}
+		});
+		// Construction [naval]
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto lc = state.world.province_get_province_naval_construction(p);
+			if(lc.begin() != lc.end()) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = state.world.province_get_mid_point(p);
+				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(25, p1, -theta, -0.75f);
+			}
+		});
+		// Construction [military]
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			for(const auto pl : state.world.province_get_pop_location(p)) {
+				auto lc = pl.get_pop().get_province_land_construction();
+				if(lc.begin() != lc.end()) {
 					auto center = state.world.province_get_mid_point(p);
-					auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
-					render_model(tier.index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+					auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+					render_model(26, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+					break;
 				}
 			}
-		}
+		});
+		// Blockaded
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			if(military::province_is_blockaded(state, p)) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = state.world.province_get_mid_point(p);
+				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(0, p1, -theta, -0.75f);
+			}
+		});
+
+		/*
 		auto render_canal = [&](uint32_t index, uint32_t canal_id, float theta) {
 			if(canal_id >= uint32_t(state.province_definitions.canals.size())
 			&& canal_id >= uint32_t(state.province_definitions.canal_provinces.size()))
@@ -924,26 +945,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		render_canal(3, 0, 0.f); //Kiel
 		render_canal(4, 1, glm::pi<float>() / 2.f), //Suez
 		render_canal(2, 2, 0.f); //Panama
-		// Factory
-		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-			auto factories = state.world.province_get_factory_location_as_province(p);
-			if(factories.begin() != factories.end()) {
-				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-				render_model(9, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
-			}
-		}
-		// Blockaded
-		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
-			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-			if(military::province_is_blockaded(state, p)) {
-				auto p1 = duplicates::get_navy_location(state, p);
-				auto p2 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(10, p1, -theta, -0.75f);
-			}
-		}
 		// Render armies
 		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
@@ -1069,6 +1070,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				}
 			}
 		}
+		*/
 		glDisable(GL_DEPTH_TEST);
 	}
 
@@ -1971,92 +1973,40 @@ void load_static_meshes(sys::state& state) {
 		glm::vec2 texture_coord_;
 	};
 	std::vector<static_mesh_vertex> static_mesh_vertices;
-	static const std::array<native_string_view, display_data::max_static_meshes> xac_model_names = {
-		NATIVE("capital_bigben"), //0
-		NATIVE("capital_eiffeltower"), //1
-		NATIVE("Panama_Canel"), //2
-		NATIVE("Kiel_Canal"), //3
-		NATIVE("Suez_Canal"), //4
-		NATIVE("trainstation"), //5 -- railroad present
-		NATIVE("Navalbase_Late_Empty"), //6 -- naval base with no ships
-		NATIVE("Navalbase_Late_Full"), //7 -- naval base with a docked ship
-		NATIVE("Fort_Early"), //8 -- fort
-		NATIVE("factory"), //9 -- factory
-		NATIVE("Blockade"), //10 -- blockade
-		NATIVE("generic_euro_infantry"), //11 -- infantry
-		NATIVE("Generic_Frigate"), //12 -- frigate
-		NATIVE("Generic_Manowar"), //13 -- manowar
-		NATIVE("Generic_Transport_Ship"), //14 -- transport ship
-		NATIVE("Horse"), // 15 -- horse
-		NATIVE("wake"), // 16 -- ship wake
-		NATIVE("Infantry_shadowblob"), // 17 -- shadow blob
-		NATIVE("Generic_Euro_Infantry2"), // 18 -- artillery
-		NATIVE("buildings_01_1"), // 19 -- housing
-		NATIVE("buildings_01_2"), // 20
-		NATIVE("buildings_01_3"), // 21
-		NATIVE("buildings_02_1"), // 22
-		NATIVE("buildings_02_2"), // 23
-		NATIVE("buildings_02_3"), // 24
-		NATIVE("buildings_03_1"), // 25
-		NATIVE("buildings_03_2"), // 26
-		NATIVE("buildings_03_3"), // 27
-		NATIVE("Fort_Mid2"), //28 -- fort
-		NATIVE("Fort_Late"), //29 -- fort
-		NATIVE("Navalbase_Early_Empty"), //30 -- naval base with no ships
-		NATIVE("Navalbase_Early_Full"), //31 -- naval base with a docked ship
-		NATIVE("Navalbase_Mid_Empty"), //32 -- naval base with no ships
-		NATIVE("Navalbase_Mid_Full"), //33 -- naval base with a docked ship
-		NATIVE("Generic_Battleship"), //34 -- battleship
-		NATIVE("Generic_Cruiser"), //35 -- cruiser
-		NATIVE("Generic_Ironclad"), //36 -- ironclad
-		NATIVE("Generic_Raider"), //37 -- raider
-		NATIVE("floating_flag"), //38 -- floating flag
-		NATIVE("flag"), //39 -- flag
+	static const std::array<std::string_view, display_data::max_static_meshes> xac_model_names = {
+		("port_blockade"), //0 -- blockade
+		("building_naval_base"), //1
+		("building_naval_base1"), //2
+		("building_naval_base2"), //3
+		("building_naval_base3"), //4
+		("building_naval_base4"), //5
+		("building_naval_base5"), //6
+		("building_naval_base6"), //7
+		("building_naval_base_ships"), //8
+		("building_naval_base1_ships"), //9
+		("building_naval_base2_ships"), //10
+		("building_naval_base3_ships"), //11
+		("building_naval_base4_ships"), //12
+		("building_naval_base5_ships"), //13
+		("building_naval_base6_ships"), //14
+		("building_factory"), //15
+		("building_fort"), //16
+		("building_fort1"), //17
+		("building_fort2"), //18
+		("building_fort3"), //19
+		("building_fort4"), //20
+		("building_fort5"), //21
+		("building_fort6"), //22
+		("building_trainstation"), //23
+		("construction"), //24
+		("construction_naval"), //25
+		("construction_military"), //26
+		//Dynamic canals?
+		("Panama_Canal"), //27
+		("Kiel_Canal"), //28
+		("Suez_Canal"), //29
 	};
-	static const std::array<float, display_data::max_static_meshes> scaling_factor = {
-		1.f, //0
-		1.f, //1
-		1.f, //2
-		1.f, //3
-		1.f, //4
-		1.f, //5
-		1.f, //6
-		1.f, //7
-		1.f, //8
-		0.75f, //9
-		1.5f, //10
-		1.4f, //11
-		2.4f, //12
-		0.8f, //13
-		1.5f, //14
-		1.5f, //15
-		1.f, //16
-		1.f, //17
-		0.7f, //18 -- housing
-		0.7f, //19
-		0.7f, //20
-		0.68f, //21
-		0.68f, //22
-		0.68f, //23
-		0.66f, //24
-		0.66f, //25
-		0.66f, //26
-		1.0f, //27
-		1.0f, //28
-		1.0f, //29
-		1.0f, //30
-		1.0f, //31
-		1.0f, //32
-		1.0f, //33
-		1.0f, //34
-		1.0f, //35
-		1.0f, //36
-		1.0f, //37
-		1.0f, //38
-		1.0f, //39
-		1.0f, //40
-		1.0f, //41
-	};
+
 	auto root = simple_fs::get_root(state.common_fs);
 	auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
 	auto gfx_anims = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
@@ -2064,8 +2014,15 @@ void load_static_meshes(sys::state& state) {
 	state.map_state.map_data.static_mesh_counts.resize(display_data::max_static_meshes);
 	state.map_state.map_data.static_mesh_starts.resize(display_data::max_static_meshes);
 	for(uint32_t k = 0; k < display_data::max_static_meshes; k++) {
-		auto f = simple_fs::open_file(gfx_anims, native_string(xac_model_names[k]) + NATIVE(".xac"));
-		if(f) {
+		ui::emfx_object emfx_obj{};
+		for(const auto& emfx : state.ui_defs.emfx) {
+			if(state.to_string_view(emfx.name) == xac_model_names[k]) {
+				emfx_obj = emfx;
+				break;
+			}
+		}
+		auto actorfile = state.to_string_view(emfx_obj.actorfile);
+		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(actorfile)); f) {
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
 			auto contents = simple_fs::view_contents(*f);
 			emfx::xac_context context{};
@@ -2106,7 +2063,7 @@ void load_static_meshes(sys::state& state) {
 							if(!is_collision) {
 								for(const auto& smv : triangle_vertices) {
 									static_mesh_vertex tmp = smv;
-									tmp.position_ *= scaling_factor[k];
+									tmp.position_ *= emfx_obj.scale;
 									static_mesh_vertices.push_back(tmp);
 								}
 							}
@@ -2114,19 +2071,18 @@ void load_static_meshes(sys::state& state) {
 						vertex_offset += sub.num_vertices;
 
 						// This is how most models fallback to find their textures...
-						GLuint texid = 0;
 						auto const& mat = context.materials[sub.material_id];
 						auto const& layer = get_diffuse_layer(mat);
 						if(!layer.texture.empty()) {
-							texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
+							GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
 							if(!texid) {
 								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
 								if(!texid) {
 									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
 								}
 							}
+							state.map_state.map_data.static_mesh_textures[k][state.map_state.map_data.static_mesh_starts[k].size()] = texid;
 						}
-						state.map_state.map_data.static_mesh_textures[k][state.map_state.map_data.static_mesh_starts[k].size()] = texid;
 						state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
 						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 					}

@@ -66,6 +66,16 @@ struct gfx_object {
 };
 static_assert(sizeof(gfx_object) == 10);
 
+struct emfx_object {
+	dcon::text_key attack; //0
+	dcon::text_key idle; //4
+	dcon::text_key move; //8
+	dcon::text_key actorfile; //12
+	dcon::text_key name; //16
+	float scale = 0.f; //20
+};
+static_assert(sizeof(emfx_object) == 24);
+
 enum class element_type : uint8_t { // 3 bits
 	button = 0x01,
 	text = 0x02,
@@ -338,6 +348,7 @@ public:
 	tagged_vector<gfx_object, dcon::gfx_object_id> gfx;
 	tagged_vector<dcon::text_key, dcon::texture_id> textures;
 	tagged_vector<element_data, dcon::gui_def_id> gui;
+	tagged_vector<emfx_object, dcon::emfx_object_id> emfx;
 	std::vector<window_extension> extensions;
 
 };
@@ -433,6 +444,7 @@ struct state {
 
 	std::unique_ptr<tool_tip> tooltip;
 	std::unique_ptr<grid_box> unit_details_box;
+
 	ankerl::unordered_dense::map<dcon::text_key, element_target, hash_text_key> defs_by_name;
 
 	// elements we are keeping track of

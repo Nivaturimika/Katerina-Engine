@@ -35,6 +35,7 @@ struct building_gfx_context {
 	ui::definitions& ui_defs;
 	std::vector<simple_fs::file> gui_files;
 	ankerl::unordered_dense::map<std::string, dcon::gfx_object_id> map_of_names;
+	ankerl::unordered_dense::map<std::string, dcon::emfx_object_id> map_of_model_names;
 	ankerl::unordered_dense::map<std::string, dcon::texture_id> map_of_texture_names;
 	std::vector<pending_button_script> province_buttons_allow;
 	std::vector<pending_button_script> nation_buttons_allow;
@@ -102,9 +103,25 @@ struct gfx_object_outer {
 	void finish(building_gfx_context const& context) { }
 };
 
+struct gfx_emfx_actor_type {
+	std::string name;
+	std::string actorfile;
+	std::string idle;
+	std::string attack;
+	std::string move;
+	float scale = 0.f;
+	void finish(building_gfx_context& context) { }
+};
+
 void gfx_add_obj(parsers::token_generator& gen, parsers::error_handler& err, building_gfx_context& context);
 
+struct gfx_object_types {
+	void emfxactortype(gfx_emfx_actor_type const& obj, parsers::error_handler& err, int32_t line, building_gfx_context& context);
+	void finish(building_gfx_context& context) { }
+};
+
 struct gfx_files {
+	void objecttypes(gfx_object_types const& obj, parsers::error_handler& err, int32_t line, building_gfx_context& context) { }
 	void finish(building_gfx_context& context) { }
 };
 

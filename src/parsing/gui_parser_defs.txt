@@ -39,9 +39,23 @@ gfx_object_outer
 	piecharttype            group     gfx_object   member_fn
 	linecharttype           group     gfx_object   member_fn
 
+gfx_emfx_actor_type
+	name				value		text		member
+	actorfile			value		text		member
+	idle				value		text		member
+	attack				value		text		member
+	move				value		text		member
+	scale				value		float		member
+	attach				group		none		discard
+
+gfx_object_types
+	emfxactortype	group		gfx_emfx_actor_type	member_fn
+	#any			group		none				discard
+
 gfx_files
-	spritetypes  extern     gfx_add_obj  discard
-	#any         group      none         discard
+	spritetypes  extern     gfx_add_obj			discard
+	objecttypes	 group		gfx_object_types	member_fn
+	#any         group      none				discard
 
 gui_element_common
 	position			group		gfx_xy_pair		member_fn

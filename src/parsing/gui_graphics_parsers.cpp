@@ -957,4 +957,18 @@ void guitypes::nationscriptbuttontype(nation_script_button const& v, error_handl
 	}
 }
 
+void gfx_object_types::emfxactortype(gfx_emfx_actor_type const& obj, parsers::error_handler& err, int32_t line, building_gfx_context& context) {
+	auto index = context.ui_defs.emfx.size();
+	context.ui_defs.emfx.emplace_back();
+	ui::emfx_object& new_obj = context.ui_defs.emfx.back();
+	context.map_of_model_names.insert_or_assign(std::string(obj.name), dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(index)));
+
+	new_obj.name = context.full_state.add_key_win1252(obj.name);
+	new_obj.actorfile = context.full_state.add_key_win1252(obj.actorfile);
+	new_obj.attack = context.full_state.add_key_win1252(obj.attack);
+	new_obj.idle = context.full_state.add_key_win1252(obj.idle);
+	new_obj.move = context.full_state.add_key_win1252(obj.move);
+	new_obj.scale = obj.scale;
+}
+
 } // namespace parsers
