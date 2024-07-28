@@ -178,27 +178,38 @@ public:
 	}
 };
 
-class factory_name_sort : public button_element_base {
+template<production_sort_order Sort>
+class factory_production_sort : public button_element_base {
 	void button_action(sys::state& state) noexcept override {
-		send(state, parent, production_sort_order::name);
+		send(state, parent, Sort);
 	}
-};
-
-class factory_infrastructure_sort : public button_element_base {
-	void button_action(sys::state& state) noexcept override {
-		send(state, parent, production_sort_order::infrastructure);
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
 	}
-};
-
-class factory_count_sort : public button_element_base {
-	void button_action(sys::state& state) noexcept override {
-		send(state, parent, production_sort_order::factories);
-	}
-};
-
-class factory_focus_sort : public button_element_base {
-	void button_action(sys::state& state) noexcept override {
-		send(state, parent, production_sort_order::focus);
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		switch(Sort) {
+		case production_sort_order::name:
+			text::add_line(state, contents, "sort_by_name");
+			break;
+		case production_sort_order::factories:
+			text::add_line(state, contents, "sort_by_factories");
+			break;
+		case production_sort_order::infrastructure:
+			text::add_line(state, contents, "sort_by_infrastructure");
+			break;
+		case production_sort_order::focus:
+			text::add_line(state, contents, "sort_by_focus");
+			break;
+		case production_sort_order::owners:
+			text::add_line(state, contents, "sort_by_capitalists");
+			break;
+		case production_sort_order::primary_workers:
+		case production_sort_order::secondary_workers:
+			text::add_line(state, contents, "sort_by_unemployed_workers");
+			break;
+		default:
+			break;
+		}
 	}
 };
 
@@ -220,13 +231,13 @@ public:
 		} else if(name == "show_empty_states") {
 			return make_element_by_type<factory_show_empty_states_button>(state, id);
 		} else if(name == "sort_by_name") {
-			return make_element_by_type<factory_name_sort>(state, id);
+			return make_element_by_type<factory_production_sort<production_sort_order::name>>(state, id);
 		} else if(name == "sort_by_factories") {
-			return make_element_by_type<factory_count_sort>(state, id);
+			return make_element_by_type<factory_production_sort<production_sort_order::factories>>(state, id);
 		} else if(name == "sort_by_infra") {
-			return make_element_by_type<factory_infrastructure_sort>(state, id);
+			return make_element_by_type<factory_production_sort<production_sort_order::infrastructure>>(state, id);
 		} else if(name == "sort_by_focus") {
-			return make_element_by_type<factory_focus_sort>(state, id);
+			return make_element_by_type<factory_production_sort<production_sort_order::focus>>(state, id);
 		} else if(name == "filter_bounds") {
 			return make_element_by_type<commodity_filters_window>(state, id);
 		} else {
