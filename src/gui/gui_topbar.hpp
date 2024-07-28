@@ -1766,11 +1766,6 @@ public:
 	uint32_t index = 0;
 
 	void button_action(sys::state& state) noexcept override {
-		if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
-			state.ui_state.diplomacy_subwindow->set_visible(state, false);
-			return;
-		}
-
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		std::vector<dcon::nation_id> targets;
 		if(nations::is_great_power(state, n)) {
@@ -1790,8 +1785,17 @@ public:
 				}
 			}
 		}
-		if(!targets.empty()) {
+		if(targets.empty()) {
+			if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
+				state.ui_state.diplomacy_subwindow->set_visible(state, false);
+				return;
+			}
+		} else {
 			if(index >= uint32_t(targets.size())) {
+				if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
+					state.ui_state.diplomacy_subwindow->set_visible(state, false);
+					return;
+				}
 				index = 0;
 			}
 			state.open_diplomacy(targets[index]);
