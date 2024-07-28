@@ -312,8 +312,8 @@ display_data::~display_data() {
 		glDeleteTextures(texture_count, textures);
 	if(texture_arrays[0])
 		glDeleteTextures(texture_count, texture_arrays);
-	if(static_mesh_textures[0])
-		glDeleteTextures(max_static_meshes, static_mesh_textures);
+	for(const auto submesh_textures : static_mesh_textures)
+		glDeleteTextures(max_static_submeshes, submesh_textures);
 	if(vao_array[0])
 		glDeleteVertexArrays(vo_count, vao_array);
 	if(vbo_array[0])
@@ -407,6 +407,17 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shader_uniforms[i][uniform_target_facing] = glGetUniformLocation(shaders[i], "target_facing");
 		shader_uniforms[i][uniform_target_topview_fixup] = glGetUniformLocation(shaders[i], "target_topview_fixup");
 		shader_uniforms[i][uniform_width] = glGetUniformLocation(shaders[i], "width");
+	}
+}
+
+void display_data::render_model(uint32_t index, glm::vec2 pos, float facing, float topview_fixup) {
+	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
+		glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
+		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], facing);
+		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
+		glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 	}
 }
 
@@ -829,29 +840,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		load_shader(shader_map_standing_object);
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
-		
-		//for(uint32_t i = 0; i < uint32_t(static_mesh_starts.size()); i++) {
-		//	glActiveTexture(GL_TEXTURE0);
-		//	glBindTexture(GL_TEXTURE_2D, static_mesh_textures[i]);
-		//	glUniform2f(12, 0.f, float(i * 8));
-		//	glUniform1f(13, 0.f);
-		//	glUniform1f(14, -0.75f);
-		//	glDrawArrays(GL_TRIANGLES, static_mesh_starts[i], static_mesh_counts[i]);
-		//}
 
 		// Train stations
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[5]);
 		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, dist_step); //top right (from center)
-				glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f));
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[5], static_mesh_counts[5]);
+				render_model(5, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f);
 			}
 		}
 		struct model_tier {
@@ -866,8 +863,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			{ 6, 5, 6 } //late
 		};
 		for(const auto& tier : nbe_tiers) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[tier.index]);
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 				auto units = state.world.province_get_navy_location_as_location(p);
@@ -875,11 +870,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(level >= tier.min && level <= tier.max && units.begin() == units.end()) {
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[tier.index], static_mesh_counts[tier.index]);
+					render_model(tier.index, p1, -theta, -0.75f);
 				}
 			}
 		}
@@ -890,8 +882,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			{ 7, 5, 6 } //late
 		};
 		for(const auto& tier : nbf_tiers) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[tier.index]);
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 				auto units = state.world.province_get_navy_location_as_location(p);
@@ -899,11 +889,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(level >= tier.min && level <= tier.max && units.begin() != units.end()) {
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[tier.index], static_mesh_counts[tier.index]);
+					render_model(tier.index, p1, -theta, -0.75f);
 				}
 			}
 		}
@@ -914,18 +901,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			{ 29, 5, 6 } //late
 		};
 		for(const auto& tier : fort_tiers) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[tier.index]);
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 				auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
 				if(level >= tier.min && level <= tier.max) {
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f));
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[tier.index], static_mesh_counts[tier.index]);
+					render_model(tier.index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
 				}
 			}
 		}
@@ -936,45 +918,30 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto const adj = state.province_definitions.canals[canal_id];
 			if((state.world.province_adjacency_get_type(adj) & province::border::impassible_bit) != 0)
 				return;
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
 			glm::vec2 pos = state.world.province_get_mid_point(state.province_definitions.canal_provinces[canal_id]);
-			glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-			glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], theta);
-			glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], 0.f);
-			glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+			render_model(index, pos, theta, 0.f);
 		};
 		render_canal(3, 0, 0.f); //Kiel
 		render_canal(4, 1, glm::pi<float>() / 2.f), //Suez
 		render_canal(2, 2, 0.f); //Panama
 		// Factory
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[9]);
 		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 			auto factories = state.world.province_get_factory_location_as_province(p);
 			if(factories.begin() != factories.end()) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-				glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f));
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[9], static_mesh_counts[9]);
+				render_model(9, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
 			}
 		}
 		// Blockaded
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[10]);
 		for(uint32_t i = 0; i < uint32_t(state.province_definitions.first_sea_province.index()); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 			if(military::province_is_blockaded(state, p)) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
-				glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[10], static_mesh_counts[10]);
+				render_model(10, p1, -theta, -0.75f);
 			}
 		}
 		// Render armies
@@ -1008,13 +975,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				if(index != 0) {
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + dist_step);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+					render_model(index, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 				}
 			}
 		}
@@ -1056,58 +1018,39 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				if(index != 0) {
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.y + dist_step);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					//ship
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
 					//wake
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[16]);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[16], static_mesh_counts[16]);
+					render_model(16, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
+					//ship
+					render_model(index, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 				}
 			}
 		}
 
 		// Floating flags
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[38]);
 		for(uint32_t i = 0; i < state.world.province_size(); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 			auto units = state.world.province_get_navy_location_as_location(p);
 			if(state.map_state.visible_provinces[province::to_map_id(p)]
 			&& units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
-				glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.x);
 				auto theta = glm::atan(0.f, 0.f);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[38], static_mesh_counts[38]);
+				render_model(38, p1, -theta, -0.75f);
 			}
 		}
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[39]);
 		for(uint32_t i = 0; i < state.world.province_size(); i++) {
 			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
 			auto units = state.world.province_get_navy_location_as_location(p);
 			if(state.map_state.visible_provinces[province::to_map_id(p)]
 			&& units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
-				glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], p1.x, p1.x);
 				auto theta = glm::atan(0.f, 0.f);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], -theta);
-				glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[39], static_mesh_counts[39]);
+				render_model(39, p1, -theta, -0.75f);
 			}
 		}
 
 		for(uint32_t i = 0; i < 3 * 3; i++) {
 			auto index = 19 + i;
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index]);
 			for(uint32_t j = 0; j < uint32_t(state.province_definitions.first_sea_province.index()); j++) {
 				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(j));
 				if(state.world.province_get_demographics(p, demographics::total) >= float(i * 100000.f)) {
@@ -1120,14 +1063,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					pos.y += i == 0 ? 0.f : float(i / 3) * 2.5f;
 					pos.x -= 2.5f;
 					pos.y -= 2.5f;
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j + i, 1000)) / 1000.f));
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
-					glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j * i, 1000)) / 1000.f));
-					glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], -0.75f);
-					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index], static_mesh_counts[index]);
+					render_model(index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j + i, 1000)) / 1000.f), -0.75f);
+					render_model(index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j * i, 1000)) / 1000.f), -0.75f);
 				}
 			}
 		}
@@ -2018,11 +1955,6 @@ emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material 
 			return layer;
 		}
 	}
-	for(const auto& layer : mat.layers) {
-		if(strstr(layer.texture.c_str(), "spec") == NULL) {
-			return layer;
-		}
-	}
 	return mat.layers.empty()
 		? emfx::xac_pp_actor_material_layer{}
 		: mat.layers[0];
@@ -2173,7 +2105,6 @@ void load_static_meshes(sys::state& state) {
 	state.map_state.map_data.static_mesh_counts.resize(display_data::max_static_meshes);
 	state.map_state.map_data.static_mesh_starts.resize(display_data::max_static_meshes);
 	for(uint32_t k = 0; k < display_data::max_static_meshes; k++) {
-		auto old_size = static_mesh_vertices.size();
 		auto f = simple_fs::open_file(gfx_anims, native_string(xac_model_names[k]) + NATIVE(".xac"));
 		if(f) {
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
@@ -2182,7 +2113,6 @@ void load_static_meshes(sys::state& state) {
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
 			emfx::finish(context);
 
-			auto& texid = state.map_state.map_data.static_mesh_textures[k];
 			for(auto const& node : context.nodes) {
 				int32_t mesh_index = 0;
 				for(auto const& mesh : node.meshes) {
@@ -2191,6 +2121,7 @@ void load_static_meshes(sys::state& state) {
 
 					uint32_t vertex_offset = 0;
 					for(auto const& sub : mesh.submeshes) {
+						auto old_size = static_mesh_vertices.size();
 						for(uint32_t i = 0; i < uint32_t(sub.indices.size()); i += 3) {
 							static_mesh_vertex triangle_vertices[3];
 							for(uint32_t j = 0; j < 3; j++) {
@@ -2242,38 +2173,36 @@ void load_static_meshes(sys::state& state) {
 							}
 						}
 						vertex_offset += sub.num_vertices;
+
 						// This is how most models fallback to find their textures...
-						if(!texid) {
-							auto const& mat = context.materials[sub.material_id];
-							auto const& layer = get_diffuse_layer(mat);
-							if(layer.texture.empty()) {
-								texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("Diffuse.dds"), 0);
+						GLuint texid = 0;
+						auto const& mat = context.materials[sub.material_id];
+						auto const& layer = get_diffuse_layer(mat);
+						if(!layer.texture.empty()) {
+							texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
+							if(!texid) {
+								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
 								if(!texid) {
-									texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("_Diffuse.dds"), 0);
-									if(!texid) {
-										texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE(".dds"), 0);
-									}
-								}
-							} else {
-								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
-								if(!texid) {
-									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
-									if(!texid) {
-										texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
-									}
+									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
 								}
 							}
 						}
+						if(!texid) {
+							texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("Diffuse.dds"), 0);
+							if(!texid) {
+								texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE("_Diffuse.dds"), 0);
+								if(!texid) {
+									texid = load_dds_texture(gfx_anims, native_string(xac_model_names[k]) + NATIVE(".dds"), 0);
+								}
+							}
+						}
+						state.map_state.map_data.static_mesh_textures[k][state.map_state.map_data.static_mesh_starts[k].size()] = texid;
+						state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
+						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 					}
 					mesh_index++;
 				}
 			}
-
-			state.map_state.map_data.static_mesh_starts[k] = GLint(old_size);
-			state.map_state.map_data.static_mesh_counts[k] = GLsizei(static_mesh_vertices.size() - old_size);
-		} else {
-			state.map_state.map_data.static_mesh_starts[k] = GLint(old_size);
-			state.map_state.map_data.static_mesh_counts[k] = GLsizei(0);
 		}
 	}
 

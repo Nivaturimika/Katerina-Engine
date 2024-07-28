@@ -114,8 +114,8 @@ public:
 	std::vector<textured_line_vertex_b> coastal_vertices;
 	std::vector<GLint> coastal_starts;
 	std::vector<GLsizei> coastal_counts;
-	std::vector<GLint> static_mesh_starts;
-	std::vector<GLsizei> static_mesh_counts;
+	std::vector<std::vector<GLint>> static_mesh_starts;
+	std::vector<std::vector<GLsizei>> static_mesh_counts;
 	//
 	std::vector<curved_line_vertex> unit_arrow_vertices;
 	std::vector<GLint> unit_arrow_starts;
@@ -261,7 +261,8 @@ public:
 
 	// models: Textures for static meshes
 	static constexpr uint32_t max_static_meshes = 42;
-	GLuint static_mesh_textures[max_static_meshes] = { 0 };
+	static constexpr uint32_t max_static_submeshes = 16;
+	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { 0 };
 
 	void load_border_data(parsers::scenario_building_context& context);
 	void create_border_ogl_objects();
@@ -274,6 +275,7 @@ public:
 	void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 	void make_borders(sys::state& state, std::vector<bool>& visited);
 
+	void render_model(uint32_t index, glm::vec2 pos, float facing, float topview_fixup);
 	void load_shaders(simple_fs::directory& root);
 	void create_meshes();
 	void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);
