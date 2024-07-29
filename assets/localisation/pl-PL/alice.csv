@@ -980,7 +980,7 @@ as_a_vassal;jako wasal
 change_state_name_to;zmień nazwę stanu na $text$
 alice_join_crisis_offer;$ACTOR$ zapewni nam następujące korzyści, jeśli dołączymy do ich strony w obecnym kryzysie:
 alice_unit_disable_rebel_hunt;Przestań polować na rebeliantów
-alice_regiment_battle_info;$m$ $nazwa$ ?Y$typ$?!\nOrganizacja: ?Y$organizacja$?W\nSiła: ?Y$siła$?W
+alice_regiment_battle_info;$nazwa$ ?Y$typ$?!\nOrganizacja: ?Y$organizacja$?W\nSiła: ?Y$siła$?W
 understaffed_regiment;„Ten pułk ma za mało personelu i będzie miał tylko żołnierzy o wartości $!” W
 tech_queue_explain;Naciśnij ?YSHIFT?W, aby dodać do kolejki, ?Ykliknij prawym przyciskiem?W, aby usunąć
 alice_province_building_build;„YSHIFT?W, aby budować na całym „Gstanie” W.\n?YSHIFT, kliknij prawym przyciskiem myszy? W, aby budować na całym „Gkraju” W.

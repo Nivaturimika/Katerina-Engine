@@ -980,7 +980,7 @@ as_a_vassal;باعتباره تابعا
 change_state_name_to;تغيير اسم الحالة إلى $text$
 alice_join_crisis_offer;سيقدم لنا $ACTOR$ ما يلي إذا انضممنا إلى جانبهم في الأزمة الحالية:
 alice_unit_disable_rebel_hunt;توقفوا عن مطاردة المتمردين
-alice_regiment_battle_info;$m$ $name$ ?Y$type$?!\nالمؤسسة: ?Y$organization$?W\nالقوة: ?Y$strength$?W
+alice_regiment_battle_info;$name$ ?Y$type$?!\nالمؤسسة: ?Y$organization$?W\nالقوة: ?Y$strength$?W
 understaffed_regiment;?Rهذا الفوج يعاني من نقص في عدد الموظفين ولن يكون به سوى جنود بقيمة $$!?W
 tech_queue_explain;اضغط على YSHIFT?W للإضافة إلى قائمة الانتظار، ثم انقر بزر الماوس الأيمن فوق Y للإزالة
 alice_province_building_build;?YSHIFT?W للبناء على ?Gstate?W.\n?YSHIFT-انقر بزر الماوس الأيمن?W للبناء على ?Gcountry?W بالكامل.

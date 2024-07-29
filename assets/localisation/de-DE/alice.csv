@@ -980,7 +980,7 @@ as_a_vassal;als Vasall
 change_state_name_to;Ändern Sie den Statusnamen in $text$
 alice_join_crisis_offer;$ACTOR$ wird uns Folgendes bescheren, wenn wir uns in der aktuellen Krise auf ihre Seite stellen:
 alice_unit_disable_rebel_hunt;Hören Sie auf, Rebellen zu jagen
-alice_regiment_battle_info;$m$ $name$ ?Y$type$?!\nOrganisation: ?Y$organisation$?W\nStärke: ?Y$strength$?W
+alice_regiment_battle_info;$name$ ?Y$type$?!\nOrganisation: ?Y$organisation$?W\nStärke: ?Y$strength$?W
 understaffed_regiment;?RDieses Regiment ist personell unterbesetzt und wird nur $value$-Soldaten haben!?W
 tech_queue_explain;Drücken Sie ?YSHIFT?W, um es zur Warteschlange hinzuzufügen, und ?YRechtsklick?W, um es zu entfernen
 alice_province_building_build;?YSHIFT?W, um auf dem gesamten ?Gstate?W aufzubauen.\n?YSHIFT-Rechtsklick?W, um auf dem gesamten ?Gcountry?W aufzubauen.

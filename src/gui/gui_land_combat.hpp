@@ -898,19 +898,14 @@ public:
 			auto n = state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg));
 			std::string tag_str = "";
 			if(bool(n)) {
-				tag_str = std::string("@") + nations::int_to_tag(dcon::fatten(state.world, n).get_identity_from_identity_holder().get_identifying_int());
-				tag_str += " " + text::produce_simple_string(state, text::get_name(state, n));
-				text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ tag_str });
+				text::add_to_layout_box(state, contents, box, text::embedded_flag{ dcon::fatten(state.world, n).get_identity_from_identity_holder() })
 			} else {
+				text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.national_definitions.rebel_id });
 				auto rf = state.world.army_get_controller_from_army_rebel_control(state.world.regiment_get_army_from_army_membership(reg));
-				if(bool(rf)) {
-					n = state.world.rebellion_within_get_ruler(state.world.rebel_faction_get_rebellion_within(rf));
-					if(!bool(n))
-						n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+				if(rf) {
+					auto reb_name = rebel::rebel_name(state, rf);
+					text::add_to_layout_box(state, contents, box, std::string_view(reb_name));
 				}
-				tag_str = std::string("@") + nations::int_to_tag(dcon::fatten(state.world, n).get_identity_from_identity_holder().get_identifying_int());
-				tag_str += " " + rebel::rebel_name(state, rf);
-				text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ tag_str });
 			}
 			text::add_to_substitution_map(sub, text::variable_type::name, state.to_string_view(state.world.regiment_get_name(reg)));
 			text::add_to_substitution_map(sub, text::variable_type::type, state.military_definitions.unit_base_definitions[utid].name);

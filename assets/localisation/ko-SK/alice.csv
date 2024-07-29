@@ -980,7 +980,7 @@ as_a_vassal;가신으로서
 change_state_name_to;상태 이름을 $text$로 변경
 alice_join_crisis_offer;$ACTOR$은 현재 위기 상황에서 우리가 그들의 편에 합류하면 다음을 제공할 것입니다.
 alice_unit_disable_rebel_hunt;반란군 사냥을 중단하세요
-alice_regiment_battle_info;$m$ $name$ ?Y$type$?!\n조직: ?Y$organisation$?W\n강도: ?Y$strength$?W
+alice_regiment_battle_info;$name$ ?Y$type$?!\n조직: ?Y$organisation$?W\n강도: ?Y$strength$?W
 understaffed_regiment;?R이 연대는 인력이 부족하여 $value$의 병사만 보유하게 됩니다!?W
 tech_queue_explain;대기열에 추가하려면 ?YSHIFT?W를 누르고, 제거하려면 ?Y오른쪽 클릭?W를 누르세요.
 alice_province_building_build;?YSHIFT?W는 전체 ?Gstate?W에 구축됩니다.\n?YSHIFT-오른쪽 클릭?W는 전체 ?Gcountry?W에 구축됩니다.

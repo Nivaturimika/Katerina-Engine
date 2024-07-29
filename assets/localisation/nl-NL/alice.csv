@@ -980,7 +980,7 @@ as_a_vassal;als vazal
 change_state_name_to;verander de statusnaam in $text$
 alice_join_crisis_offer;$ACTOR$ zal ons het volgende geven als we ons in de huidige crisis bij hen aansluiten:
 alice_unit_disable_rebel_hunt;Stop met jagen op rebellen
-alice_regiment_battle_info;$m$ $naam$ ?Y$type$?!\nOrganisatie: ?Y$organisatie$?W\nKracht: ?Y$sterkte$?W
+alice_regiment_battle_info;$naam$ ?Y$type$?!\nOrganisatie: ?Y$organisatie$?W\nKracht: ?Y$sterkte$?W
 understaffed_regiment;?RDit regiment is onderbezet en zal alleen maar $value$ soldaten hebben!?W
 tech_queue_explain;Druk op ?YSHIFT?W om aan de wachtrij toe te voegen, ?YKlik met de rechtermuisknop?W om te verwijderen
 alice_province_building_build;?YSHIFT?W om op het hele ?Gstate?W te bouwen.\n?YSHIFT-klik met de rechtermuisknop?W om op het hele ?Gcountry?W te bouwen.

@@ -980,7 +980,7 @@ as_a_vassal;作为附庸
 change_state_name_to;地区名将变为$text$
 alice_join_crisis_offer;$ACTOR$将会给予我们如下好处如果我们在本场危机中加入他们
 alice_unit_disable_rebel_hunt;停止围剿叛军
-alice_regiment_battle_info;$m$ $name$ ?Y$type$?!\n组织度： ?Y$organisation$?W\n兵力： ?Y$strength$?W
+alice_regiment_battle_info;$name$ ?Y$type$?!\n组织度： ?Y$organisation$?W\n兵力： ?Y$strength$?W
 understaffed_regiment;?RT这个团人手不足并且只有 $value$ 名士兵!?W
 tech_queue_explain;按?YSHIFT?W 加入队列, ?Y右键?W 移除
 alice_province_building_build;?YSHIFT?W 建造在整个 ?G地区?W.\n?YSHIFT-右键?W 建造在整个 ?G国家?W.

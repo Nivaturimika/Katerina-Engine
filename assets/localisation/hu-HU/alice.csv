@@ -980,7 +980,7 @@ as_a_vassal;vazallusként
 change_state_name_to;módosítsa az állam nevét $text$-ra
 alice_join_crisis_offer;$ACTOR$ a következőket adja nekünk, ha csatlakozunk az ő oldalukhoz a jelenlegi válságban:
 alice_unit_disable_rebel_hunt;Hagyd abba a lázadókra való vadászatot
-alice_regiment_battle_info;$m$ $név$ ?Y$típus$?!\nSzervezet: ?Y$szervezet$?W\nErősség: ?Y$erő$?W
+alice_regiment_battle_info;$név$ ?Y$típus$?!\nSzervezet: ?Y$szervezet$?W\nErősség: ?Y$erő$?W
 understaffed_regiment;?REz az ezred létszámhiányos és csak $value$ katonái lesznek!?W
 tech_queue_explain;Nyomja meg az ?YSHIFT?W billentyűt a sorhoz való hozzáadáshoz, a ?Yjobb gombbal kattintson a?W-re az eltávolításhoz
 alice_province_building_build;?YSHIFT?W a teljes ?Gstate?W-ra építeni.\n?YSHIFT-Kattintson jobb gombbal?W a teljes ?Gcountry?W-re építeni.

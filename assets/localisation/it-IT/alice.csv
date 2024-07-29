@@ -980,7 +980,7 @@ as_a_vassal;come vassallo
 change_state_name_to;cambia il nome dello stato in $text$
 alice_join_crisis_offer;$ACTOR$ ci darà quanto segue se ci uniamo a loro nella crisi attuale:
 alice_unit_disable_rebel_hunt;Smettetela di dare la caccia ai ribelli
-alice_regiment_battle_info;$m$ $nome$ ?Y$tipo$?!\nOrganizzazione: ?Y$organizzazione$?W\nForza: ?Y$forza$?W
+alice_regiment_battle_info;$nome$ ?Y$tipo$?!\nOrganizzazione: ?Y$organizzazione$?W\nForza: ?Y$forza$?W
 understaffed_regiment;?RQuesto reggimento è a corto di personale e avrà solo soldati di valore$!?W
 tech_queue_explain;Premere ?YSHIFT?W per aggiungere alla coda, ?Yfare clic con il pulsante destro del mouse?W per rimuovere
 alice_province_building_build;?YSHIFT?W per costruire sull'intero ?Gstate?W.\n?YSHIFT-Click destro?W per costruire sull'intero ?Gcountry?W.
