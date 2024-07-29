@@ -1,3 +1,11 @@
+objectTypes = {
+	EMFXActorType = {
+		name = "wake"
+		actorfile = "gfx\anims\wake.xac"
+		scale = 0.8
+	}
+}
+
 spriteTypes = {
     textSpriteType = {
 		name = "GFX_goto_location_button"
