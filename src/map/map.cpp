@@ -411,7 +411,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	}
 }
 
-void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup) {
+void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time) {
 	if(!emfx)
 		return;
 	auto index = emfx.index();
@@ -421,6 +421,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
 		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], facing);
 		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
+		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_time], time);
 		glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 	}
 }
@@ -950,6 +951,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		render_canal(2, 2, 0.f); //Panama
 		*/
 		// Render armies
+		/*
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_army_location_as_location(p);
 			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
@@ -976,6 +978,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 			}
 		});
+		*/
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
@@ -1000,7 +1003,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
+				render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 			}
 		});
@@ -1966,7 +1969,7 @@ void load_static_meshes(sys::state& state) {
 		ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
 
 		auto name = state.to_string_view(emfx_obj.name);
-		if(name == "model_wake") {
+		if(name == "wake") {
 			state.map_state.map_data.model_wake = edef;
 		} else if(name == "port_blockade") {
 			state.map_state.map_data.model_blockaded = edef;
