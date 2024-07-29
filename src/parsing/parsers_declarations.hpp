@@ -1459,6 +1459,7 @@ struct unit_definition : public military::unit_definition {
 			err.accumulated_errors += std::string(value) + " is not a valid land/naval type (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
+	void sprite(association_type, std::string_view value, error_handler& err, int32_t line, scenario_building_context& context);
 	void finish(scenario_building_context&);
 };
 
@@ -1503,6 +1504,7 @@ struct unit_names_collection {
 struct country_file {
 	unit_names_collection unit_names;
 	void color(color_from_3i cvalue, error_handler& err, int32_t line, country_file_context& context);
+	void graphical_culture(association_type, std::string_view value, error_handler& err, int32_t line, country_file_context& context);
 	void template_(association_type, std::string_view value, error_handler& err, int32_t line, country_file_context& context);
 	void any_group(std::string_view name, color_from_3i, error_handler& err, int32_t line, country_file_context& context);
 	void finish(country_file_context&) { }

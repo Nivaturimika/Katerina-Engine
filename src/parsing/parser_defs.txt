@@ -493,7 +493,7 @@ commodity_set
 unit_definition
 	icon           value      int              member
 	type           value      text             member_fn   (type_text)
-	sprite         value      none             discard
+	sprite         value      text             member_fn
 	unit_type      value      text             member_fn   (unit_type_text)
 	active         value      bool             member
 	default_organisation  value   int          member
@@ -554,7 +554,7 @@ party
 
 country_file
 	color          group      color_from_3i             member_fn
-	graphical_culture   value     none                  discard
+	graphical_culture   value     text                  member_fn
 	party          extern     make_party                discard
 	unit_names     group      unit_names_collection     member
 	template       value      text                      member_fn (template_)

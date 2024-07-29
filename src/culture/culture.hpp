@@ -45,6 +45,34 @@ constexpr inline uint32_t build_university = 0x80000000; // independent
 
 namespace culture {
 
+enum class graphical_culture_type : uint8_t {
+	generic = 0,
+	//vanilla
+	russian,
+	british,
+	french,
+	us,
+	austria_hungary,
+	prussian,
+	italian,
+	ottoman,
+	japanese,
+	chinese,
+	confederate,
+	swedish,
+	spanish,
+	european,
+	middle_eastern,
+	south_american,
+	zulu,
+	indian,
+	asian,
+	african,
+	morocco,
+	//non-vanilla
+	count,
+};
+
 enum class flag_type : uint8_t {
 	default_flag = 0,
 	republic,

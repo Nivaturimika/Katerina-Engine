@@ -364,6 +364,10 @@ void commodity_set::any_value(std::string_view name, association_type, float val
 	}
 }
 
+void unit_definition::sprite(association_type, std::string_view value, error_handler& err, int32_t line, scenario_building_context& context) {
+	sprite_type = context.state.add_key_win1252(value);
+}
+
 void unit_definition::finish(scenario_building_context&) {
 	// minimum discipline for land units
 	if(is_land) {
@@ -2988,6 +2992,58 @@ void country_file::color(color_from_3i cvalue, error_handler& err, int32_t line,
 	for(auto g : context.outer_context.state.world.in_government_type) {
 		context.outer_context.state.world.national_identity_set_government_color(context.id, g, cvalue.value);
 	}
+}
+
+void country_file::graphical_culture(association_type, std::string_view value, error_handler& err, int32_t line, country_file_context& context) {
+	::culture::graphical_culture_type t = ::culture::graphical_culture_type::generic;
+	if(is_fixed_token_ci(value.data(), value.data() + value.length(), "africangc")) {
+		t = ::culture::graphical_culture_type::african;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "asiangc")) {
+		t = ::culture::graphical_culture_type::asian;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "austriahungarygc")) {
+		t = ::culture::graphical_culture_type::austria_hungary;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "britishgc")) {
+		t = ::culture::graphical_culture_type::british;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "chinesegc")) {
+		t = ::culture::graphical_culture_type::chinese;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "confederategc")) {
+		t = ::culture::graphical_culture_type::confederate;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "europeangc")) {
+		t = ::culture::graphical_culture_type::european;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "frenchgc")) {
+		t = ::culture::graphical_culture_type::french;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "indiangc")) {
+		t = ::culture::graphical_culture_type::indian;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "italiangc")) {
+		t = ::culture::graphical_culture_type::italian;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "japanesegc")) {
+		t = ::culture::graphical_culture_type::japanese;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "middleeasterngc")) {
+		t = ::culture::graphical_culture_type::middle_eastern;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "moroccogc")) {
+		t = ::culture::graphical_culture_type::morocco;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "ottomangc")) {
+		t = ::culture::graphical_culture_type::ottoman;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "prussiangc")) {
+		t = ::culture::graphical_culture_type::prussian;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "russiangc")) {
+		t = ::culture::graphical_culture_type::russian;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "southamericangc")) {
+		t = ::culture::graphical_culture_type::south_american;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "spanishgc")) {
+		t = ::culture::graphical_culture_type::spanish;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "swedishgc")) {
+		t = ::culture::graphical_culture_type::swedish;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "usgc")) {
+		t = ::culture::graphical_culture_type::us;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "zulugc")) {
+		t = ::culture::graphical_culture_type::zulu;
+	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "generic")) {
+		t = ::culture::graphical_culture_type::generic;
+	} else {
+		err.accumulated_errors += "Unknown graphical culture " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+	}
+	context.outer_context.state.world.national_identity_set_graphical_culture(context.id, uint8_t(t));
 }
 
 void country_file::template_(association_type, std::string_view value, error_handler& err, int32_t line, country_file_context& context) {

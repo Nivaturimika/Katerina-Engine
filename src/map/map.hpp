@@ -260,9 +260,21 @@ public:
 	GLuint shader_uniforms[shader_count][uniform_count] = { };
 
 	// models: Textures for static meshes
-	static constexpr uint32_t max_static_meshes = 42;
+	static constexpr uint32_t max_static_meshes = 256;
 	static constexpr uint32_t max_static_submeshes = 16;
 	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { 0 };
+
+	dcon::emfx_object_id model_blockaded;
+	dcon::emfx_object_id model_naval_base[7];
+	dcon::emfx_object_id model_naval_base_ships[7];
+	dcon::emfx_object_id model_fort[7];
+	dcon::emfx_object_id model_factory;
+	dcon::emfx_object_id model_train_station;
+	dcon::emfx_object_id model_construction;
+	dcon::emfx_object_id model_construction_naval;
+	dcon::emfx_object_id model_construction_military;
+	dcon::emfx_object_id model_siege;
+	std::vector<dcon::emfx_object_id> model_gc_unit[uint8_t(culture::graphical_culture_type::count)];
 
 	void load_border_data(parsers::scenario_building_context& context);
 	void create_border_ogl_objects();
@@ -275,7 +287,7 @@ public:
 	void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 	void make_borders(sys::state& state, std::vector<bool>& visited);
 
-	void render_model(uint32_t index, glm::vec2 pos, float facing, float topview_fixup);
+	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup);
 	void load_shaders(simple_fs::directory& root);
 	void create_meshes();
 	void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);

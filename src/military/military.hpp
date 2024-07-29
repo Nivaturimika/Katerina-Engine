@@ -105,6 +105,7 @@ struct unit_definition : public sys::unit_variable_stats {
 	int32_t naval_icon = 0;
 
 	dcon::text_key name;
+	dcon::text_key sprite_type;
 
 	bool is_land = true;
 	bool capital = false;
@@ -128,6 +129,7 @@ static_assert(sizeof(unit_definition) ==
 	+ sizeof(unit_definition::icon)
 	+ sizeof(unit_definition::naval_icon)
 	+ sizeof(unit_definition::name)
+	+ sizeof(unit_definition::sprite_type)
 	+ sizeof(unit_definition::is_land)
 	+ sizeof(unit_definition::capital)
 	+ sizeof(unit_definition::can_build_overseas)
