@@ -622,7 +622,7 @@ public:
 				text::close_layout_box(contents, box);
 			}
 		}
-		float total_invest = nations::get_foreign_investment(state, n);
+		float total_invest = nations::get_foreign_investment_as_gp(state, n);
 		if(total_invest > 0.f) {
 			text::add_line(state, contents, "industry_score_explain_2", text::variable_type::x, text::fp_four_places{ iweight });
 			for(auto ur : state.world.nation_get_unilateral_relationship_as_source(n)) {
