@@ -461,15 +461,17 @@ enum class crisis_type : uint32_t { none = 0, claim = 1, liberation = 2, colonia
 enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_defender = 2, heating_up = 3 };
 
 struct great_nation {
-	sys::date last_greatness = sys::date(0);
-	dcon::nation_id nation;
+	sys::date last_greatness = sys::date(0); //0
+	dcon::nation_id nation; //4
+	uint16_t padding = 0;
 
 	great_nation(sys::date last_greatness, dcon::nation_id nation) : last_greatness(last_greatness), nation(nation) { }
 	great_nation() = default;
 };
 static_assert(sizeof(great_nation) ==
 	sizeof(great_nation::last_greatness)
-	+ sizeof(great_nation::nation));
+	+ sizeof(great_nation::nation)
+	+ sizeof(great_nation::padding));
 
 // used by state selector visually
 struct state_selection_data {
