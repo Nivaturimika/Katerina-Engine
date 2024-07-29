@@ -4783,6 +4783,47 @@ void state::smart_select_army_group(army_group* selected_group) {
 	select_army_group(selected_group);
 }
 
+bool state::is_selected(dcon::army_id a) {
+	return std::find(selected_armies.begin(), selected_armies.end(), a) != selected_armies.end();
+}
+bool state::is_selected(dcon::navy_id a) {
+	return std::find(selected_navies.begin(), selected_navies.end(), a) != selected_navies.end();
+}
+void state::select(dcon::army_id a) {
+	if(!is_selected(a)) {
+		selected_armies.push_back(a);
+		game_state_updated.store(true, std::memory_order_release);
+		sound::play_effect(*this, sound::get_army_select_sound(*this), user_settings.master_volume * user_settings.effects_volume);
+	}
+}
+void state::select(dcon::navy_id a) {
+	if(!is_selected(a)) {
+		selected_navies.push_back(a);
+		game_state_updated.store(true, std::memory_order_release);
+		sound::play_effect(*this, sound::get_navy_select_sound(*this), user_settings.master_volume * user_settings.effects_volume);
+	}
+}
+void state::deselect(dcon::army_id a) {
+	for(size_t i = selected_armies.size(); i-- > 0;) {
+		if(selected_armies[i] == a) {
+			selected_armies[i] = selected_armies.back();
+			selected_armies.pop_back();
+			game_state_updated.store(true, std::memory_order_release);
+			return;
+		}
+	}
+}
+void state::deselect(dcon::navy_id a) {
+	for(size_t i = selected_navies.size(); i-- > 0;) {
+		if(selected_navies[i] == a) {
+			selected_navies[i] = selected_navies.back();
+			selected_navies.pop_back();
+			game_state_updated.store(true, std::memory_order_release);
+			return;
+		}
+	}
+}
+
 void state::select_army_group(army_group* selected_group) {
 	selected_army_group = selected_group;
 

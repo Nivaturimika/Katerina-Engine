@@ -759,44 +759,12 @@ struct alignas(64) state {
 	void open_population();
 	void open_diplomacy(dcon::nation_id target); // Open the diplomacy window with target selected
 
-	bool is_selected(dcon::army_id a) {
-		return std::find(selected_armies.begin(), selected_armies.end(), a) != selected_armies.end();
-	}
-	bool is_selected(dcon::navy_id a) {
-		return std::find(selected_navies.begin(), selected_navies.end(), a) != selected_navies.end();
-	}
-	void select(dcon::army_id a) {
-		if(!is_selected(a)) {
-			selected_armies.push_back(a);
-			game_state_updated.store(true, std::memory_order_release);
-		}
-	}
-	void select(dcon::navy_id a) {
-		if(!is_selected(a)) {
-			selected_navies.push_back(a);
-			game_state_updated.store(true, std::memory_order_release);
-		}
-	}
-	void deselect(dcon::army_id a) {
-		for(size_t i = selected_armies.size(); i-- > 0;) {
-			if(selected_armies[i] == a) {
-				selected_armies[i] = selected_armies.back();
-				selected_armies.pop_back();
-				game_state_updated.store(true, std::memory_order_release);
-				return;
-			}
-		}
-	}
-	void deselect(dcon::navy_id a) {
-		for(size_t i = selected_navies.size(); i-- > 0;) {
-			if(selected_navies[i] == a) {
-				selected_navies[i] = selected_navies.back();
-				selected_navies.pop_back();
-				game_state_updated.store(true, std::memory_order_release);
-				return;
-			}
-		}
-	}
+	bool is_selected(dcon::army_id a);
+	bool is_selected(dcon::navy_id a);
+	void select(dcon::army_id a);
+	void select(dcon::navy_id a);
+	void deselect(dcon::army_id a);
+	void deselect(dcon::navy_id a);
 
 	void new_army_group(dcon::province_id hq);
 	void toggle_ferry_origin_position(army_group* group, dcon::province_id position);

@@ -419,12 +419,6 @@ void select_units(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mo
 			state.ui_state.province_window->set_visible(state, false);
 			state.map_state.set_selected_province(dcon::province_id{}); //ensure we deselect from map too
 		}
-		// Play selection sound effect
-		if(!state.selected_armies.empty()) {
-			sound::play_effect(state, sound::get_army_select_sound(state), get_effects_volume(state));
-		} else {
-			sound::play_effect(state, sound::get_navy_select_sound(state), get_effects_volume(state));
-		}
 	}
 	state.game_state_updated.store(true, std::memory_order_release);
 }
