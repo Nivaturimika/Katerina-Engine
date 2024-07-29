@@ -1373,10 +1373,12 @@ public:
 					float str = 0.0f;
 					for(auto m : state.world.army_get_army_membership(ar.get_army())) {
 						auto icon = state.military_definitions.unit_base_definitions[m.get_regiment().get_type()].icon - 1;
-						if(uint32_t(icon) >= by_icon_count.size()) {
-							by_icon_count.resize(icon + 1, 0);
+						if(icon >= 0) {
+							if(uint32_t(icon) >= by_icon_count.size()) {
+								by_icon_count.resize(icon + 1, 0);
+							}
+							++(by_icon_count[icon]);
 						}
-						++(by_icon_count[icon]);
 						++total_count;
 
 						str += m.get_regiment().get_strength();
@@ -1478,10 +1480,12 @@ public:
 					float str = 0.0f;
 					for(auto m : state.world.navy_get_navy_membership(ar.get_navy())) {
 						auto icon = state.military_definitions.unit_base_definitions[m.get_ship().get_type()].icon - 1;
-						if(uint32_t(icon) >= by_icon_count.size()) {
-							by_icon_count.resize(icon + 1, 0);
+						if(icon >= 0) {
+							if(uint32_t(icon) >= by_icon_count.size()) {
+								by_icon_count.resize(icon + 1, 0);
+							}
+							++(by_icon_count[icon]);
 						}
-						++(by_icon_count[icon]);
 						++total_count;
 
 						str += m.get_ship().get_strength();
