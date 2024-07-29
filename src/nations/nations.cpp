@@ -18,6 +18,9 @@ namespace nations {
 
 bool national_focus_is_unoptimal(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id nfid) {
 	//Is the NF not optimal? Recolor it
+	auto ideal_pwfrac = state.economy_definitions.craftsmen_fraction;
+	auto ideal_swfrac = (1.f - state.economy_definitions.craftsmen_fraction);
+
 	auto total = state.world.state_instance_get_demographics(target_state, demographics::total);
 	auto amount = state.world.state_instance_get_demographics(target_state, demographics::to_key(state, state.world.national_focus_get_promotion_type(nfid)));
 	if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.clergy) {
@@ -25,7 +28,15 @@ bool national_focus_is_unoptimal(sys::state& state, dcon::nation_id source, dcon
 			return true;
 		}
 	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.soldiers) {
-		if((amount / total) > state.defines.soldier_fraction) {
+		if((amount / total) > 0.05f) {
+			return true;
+		}
+	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.primary_factory_worker) {
+		if((amount / total) > ideal_pwfrac) {
+			return true;
+		}
+	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.secondary_factory_worker) {
+		if((amount / total) > ideal_swfrac) {
 			return true;
 		}
 	} else if(state.world.national_focus_get_promotion_type(nfid) == state.culture_definitions.bureaucrat) {
