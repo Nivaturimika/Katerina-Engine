@@ -890,7 +890,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto factories = state.world.province_get_factory_location_as_province(p);
 			if(factories.begin() != factories.end()) {
 				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+				auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 				render_model(model_factory, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
@@ -899,7 +899,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto lc = state.world.province_get_province_building_construction(p);
 			if(lc.begin() != lc.end()) {
 				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+				auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
 				render_model(model_construction, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
@@ -937,10 +937,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(military::province_is_under_siege(state, p)) {
-				auto p1 = duplicates::get_navy_location(state, p);
-				auto p2 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_siege, p1, -theta, -0.75f, time_counter);
+				auto center = state.world.province_get_mid_point(p);
+				render_model(model_siege, center, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 
