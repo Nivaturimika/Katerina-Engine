@@ -372,85 +372,78 @@ public:
 		sound::play_interface_sound(state, sound::get_click_sound(state), state.user_settings.interface_volume * state.user_settings.master_volume);
 
 		auto prov = retrieve<dcon::province_id>(state, parent);
+
+		dcon::land_battle_id lbattle;
 		for(auto b : state.world.province_get_land_battle_location(prov)) {
 			auto w = b.get_battle().get_war_from_land_battle_in_war();
-			if(!w) {
-				if(state.ui_state.army_combat_window && state.ui_state.army_combat_window->is_visible()) {
-					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.army_combat_window->impl_on_update(state);
-				} else {
-					if(!state.ui_state.army_combat_window) {
-						auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
-						state.ui_state.army_combat_window = new_elm.get();
-						state.ui_state.root->add_child_to_front(std::move(new_elm));
-					}
-					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.army_combat_window->set_visible(state, true);
-					if(state.ui_state.province_window) {
-						state.ui_state.province_window->set_visible(state, false);
-						state.map_state.set_selected_province(dcon::province_id{});
-					}
-					if(state.ui_state.naval_combat_window) {
-						state.ui_state.naval_combat_window->set_visible(state, false);
-					}
-				}
-				return message_result::consumed;
-			} else if(military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
-				if(state.ui_state.army_combat_window && state.ui_state.army_combat_window->is_visible()) {
-					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.army_combat_window->impl_on_update(state);
-				} else {
-					if(!state.ui_state.army_combat_window) {
-						auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
-						state.ui_state.army_combat_window = new_elm.get();
-						state.ui_state.root->add_child_to_front(std::move(new_elm));
-					}
-					land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.army_combat_window->set_visible(state, true);
-					if(state.ui_state.province_window) {
-						state.ui_state.province_window->set_visible(state, false);
-						state.map_state.set_selected_province(dcon::province_id{});
-					}
-					if(state.ui_state.naval_combat_window) {
-						state.ui_state.naval_combat_window->set_visible(state, false);
-					}
-				}
-				return message_result::consumed;
+			if(!w || military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
+				lbattle = b.get_battle();
+				break;
 			}
 		}
+		if(!lbattle) {
+			auto lb = state.world.province_get_land_battle_location(prov);
+			if(lb.begin() != lb.end()) {
+				lbattle = (*lb.begin()).get_battle();
+			}
+		}
+		if(lbattle) {
+			if(!state.ui_state.army_combat_window) {
+				auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
+				state.ui_state.army_combat_window = new_elm.get();
+				state.ui_state.root->add_child_to_front(std::move(new_elm));
+			}
+			land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
+			win->battle = lbattle;
+			if(state.ui_state.army_combat_window->is_visible()) {
+				state.ui_state.army_combat_window->impl_on_update(state);
+			} else {
+				state.ui_state.army_combat_window->set_visible(state, true);
+				if(state.ui_state.province_window) {
+					state.ui_state.province_window->set_visible(state, false);
+					state.map_state.set_selected_province(dcon::province_id{});
+				}
+				if(state.ui_state.naval_combat_window) {
+					state.ui_state.naval_combat_window->set_visible(state, false);
+				}
+			}
+			return message_result::consumed;
+		}
+		dcon::naval_battle_id nbattle;
 		for(auto b : state.world.province_get_naval_battle_location(prov)) {
 			auto w = b.get_battle().get_war_from_naval_battle_in_war();
-
-			 if(military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
-				if(state.ui_state.naval_combat_window && state.ui_state.naval_combat_window->is_visible()) {
-					naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.naval_combat_window->impl_on_update(state);
-				} else {
-					if(!state.ui_state.naval_combat_window) {
-						auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "alice_naval_combat");
-						state.ui_state.naval_combat_window = new_elm.get();
-						state.ui_state.root->add_child_to_front(std::move(new_elm));
-					}
-					naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
-					win->battle = b.get_battle();
-					state.ui_state.naval_combat_window->set_visible(state, true);
-					if(state.ui_state.province_window) {
-						state.ui_state.province_window->set_visible(state, false);
-						state.map_state.set_selected_province(dcon::province_id{});
-					}
-					if(state.ui_state.army_combat_window) {
-						state.ui_state.army_combat_window->set_visible(state, false);
-					}
-				}
-				return message_result::consumed;
+			if(military::get_role(state, w, state.local_player_nation) != military::war_role::none) {
+				nbattle = b.get_battle();
+				break;
 			}
 		}
-		
+		if(!nbattle) {
+			auto lb = state.world.province_get_naval_battle_location(prov);
+			if(lb.begin() != lb.end()) {
+				nbattle = (*lb.begin()).get_battle();
+			}
+		}
+		if(nbattle) {
+			if(!state.ui_state.naval_combat_window) {
+				auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "alice_naval_combat");
+				state.ui_state.naval_combat_window = new_elm.get();
+				state.ui_state.root->add_child_to_front(std::move(new_elm));
+			}
+			naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
+			win->battle = nbattle;
+			if(state.ui_state.naval_combat_window->is_visible()) {
+				state.ui_state.naval_combat_window->impl_on_update(state);
+			} else {
+				state.ui_state.naval_combat_window->set_visible(state, true);
+				if(state.ui_state.province_window) {
+					state.ui_state.province_window->set_visible(state, false);
+					state.map_state.set_selected_province(dcon::province_id{});
+				}
+				if(state.ui_state.army_combat_window) {
+					state.ui_state.army_combat_window->set_visible(state, false);
+				}
+			}
+		}
 		return message_result::consumed;
 	}
 };
@@ -1264,6 +1257,21 @@ public:
 					break;
 				}
 			}
+			// BATTLES OF OTHER PEOPLE!?
+			auto lb = state.world.province_get_land_battle_location(prov);
+			if(lb.begin() != lb.end()) {
+				player_involved_battle = true;
+				display.player_involved_battle = true;
+				lbattle = (*lb.begin()).get_battle();
+			}
+			if(!player_involved_battle) {
+				auto nb = state.world.province_get_naval_battle_location(prov);
+				if(nb.begin() != nb.end()) {
+					player_involved_battle = true;
+					display.player_involved_battle = true;
+					nbattle = (*nb.begin()).get_battle();
+				}
+			}
 		}
 
 		display.colors_used = 0;
@@ -1278,7 +1286,12 @@ public:
 		}
 		if(!player_involved_battle) {
 			if(found_enemy) {
+				//somewhat relevant, there is an enemy
 				display.colors[display.colors_used] = outline_color::red;
+				++display.colors_used;
+			} else {
+				//not relevant but we still can see it hehe
+				display.colors[display.colors_used] = outline_color::gray;
 				++display.colors_used;
 			}
 		}
@@ -1294,7 +1307,6 @@ public:
 		static std::vector<int32_t> by_icon_count;
 		for(auto& i : by_icon_count)
 			i = 0;
-
 
 		display.top_left_status = -1;
 		display.top_dig_in = -1;
@@ -1438,8 +1450,7 @@ public:
 			top_right_icon->set_visible(state, true);
 			small_top_icon->base_data.position.x = -78;
 			small_top_right_icon->set_visible(state, true);
-		}
-		else if(nbattle) {
+		} else if(nbattle) {
 			float max_str = 0.0f;
 			float max_opp_str = 0.0f;
 			int32_t total_count = 0;
