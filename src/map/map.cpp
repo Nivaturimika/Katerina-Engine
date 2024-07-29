@@ -408,6 +408,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shader_uniforms[i][uniform_target_facing] = glGetUniformLocation(shaders[i], "target_facing");
 		shader_uniforms[i][uniform_target_topview_fixup] = glGetUniformLocation(shaders[i], "target_topview_fixup");
 		shader_uniforms[i][uniform_width] = glGetUniformLocation(shaders[i], "width");
+		shader_uniforms[i][uniform_counter_factor] = glGetUniformLocation(shaders[i], "counter_factor");
 	}
 }
 
@@ -429,6 +430,8 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, map_view map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
+	glDepthRangef(0.f, 1.f);
 
 	if(ogl::msaa_enabled(state)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, state.open_gl.msaa_framebuffer);
@@ -473,15 +476,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
 		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
-		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
 		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
 		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
+		glUniform1f(shader_uniforms[program][uniform_counter_factor], zoom > map::zoom_close ? (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close) * 1.f : 0.f);
+		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
 	};
 
 	glEnable(GL_PRIMITIVE_RESTART);
-	//glDisable(GL_CULL_FACE);
 	glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
-
 	load_shader(shader_terrain);
 	glUniform1i(shader_uniforms[shader_terrain][uniform_provinces_texture_sampler], 0);
 	glUniform1i(shader_uniforms[shader_terrain][uniform_terrain_texture_sampler], 1);
@@ -512,10 +514,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	}
 	glBindVertexArray(vao_array[vo_land]);
 	glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
-
-	//glDrawArrays(GL_TRIANGLES, 0, land_vertex_count);
 	glDisable(GL_PRIMITIVE_RESTART);
-	//glEnable(GL_CULL_FACE);
+
 	// Draw the rivers
 	if(state.user_settings.rivers_enabled) {
 		glActiveTexture(GL_TEXTURE0);
@@ -559,24 +559,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// NORMAL BORDERS
 	load_shader(shader_borders);
-	glUniform1i(shader_uniforms[shader_borders][uniform_provinces_texture_sampler], 0);
-	glUniform1i(shader_uniforms[shader_borders][uniform_province_fow], 1);
-	glUniform1i(shader_uniforms[shader_borders][uniform_line_texture], 2);
-
+	glUniform1f(shader_uniforms[shader_borders][uniform_time], 0.f); //no scrolling
 	glBindVertexArray(vao_array[vo_border]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
-
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
-
 	// impassible borders
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
 	if(zoom > map::zoom_close) {
 		if(zoom > map::zoom_very_close) { // Render province borders
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0001f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_prov_border]);
 
 			for(auto b : borders) {
@@ -587,7 +578,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 		{ // Render state borders
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0002f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
@@ -597,7 +588,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 		{
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.00085f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_imp_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit)) == province::border::impassible_bit) {
@@ -608,7 +599,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// national borders
 		{
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_national_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::impassible_bit)) == province::border::national_bit) {
@@ -619,7 +610,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	} else {
 		if(zoom > map::zoom_very_close) { // Render province borders
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0001f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_prov_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == 0) {
@@ -629,7 +620,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 		if(zoom > map::zoom_close) { // Render state borders
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0002f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
@@ -640,7 +631,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// national borders
 		{
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 			for(auto b : borders) {
 				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit)) == province::border::national_bit) {
@@ -651,7 +642,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	}
 	if(state.map_state.selected_province || state.current_scene.borders == game_scene::borders_granularity::nation) {
 		glUniform1f(shader_uniforms[shader_borders][uniform_width], zoom > map::zoom_close ? 0.0004f : 0.00085f); // width
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 		if(state.current_scene.borders == game_scene::borders_granularity::nation) {
 			auto n = state.world.province_get_nation_from_province_ownership(state.map_state.selected_province);
@@ -702,7 +693,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto fat_id = dcon::fatten(state.world, province::from_map_id(state.map_state.map_data.province_id_map[idx]));
 			prov = province::from_map_id(state.map_state.map_data.province_id_map[idx]);
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], zoom > map::zoom_close ? 0.0004f : 0.00085f); // width
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_hover_border]);
 			auto owner = state.world.province_get_nation_from_province_ownership(prov);
 			if(owner && state.current_scene.borders == game_scene::borders_granularity::nation) {
@@ -743,8 +734,16 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	// coasts
 	if(zoom <= map::zoom_close) {
 		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0004f); // width
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_coastal_border]);
+		glBindVertexArray(vao_array[vo_coastal]);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_coastal]);
+		glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
+	} else {
+		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0004f); // width
+		glUniform1f(shader_uniforms[shader_borders][uniform_time], time_counter);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_shoreline]);
 		glBindVertexArray(vao_array[vo_coastal]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_coastal]);
 		glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
@@ -840,8 +839,10 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// Render standing objects
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glClearDepth(-1.f);
-		glDepthFunc(GL_GREATER);
+		glClearDepth(1.f);
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
+
 		load_shader(shader_map_standing_object);
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
@@ -852,7 +853,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
-				render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
+				render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
 			}
 		});
 		// Naval base (empty)
@@ -863,7 +864,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base[level], p1, -theta, -0.75f, time_counter);
+				render_model(model_naval_base[level], p1, -theta, 0.f, time_counter);
 			}
 		});
 		// Naval base (full)
@@ -873,7 +874,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base_ships[level], p1, -theta, -0.75f, time_counter);
+				render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter);
 			}
 		});
 		// Fort
@@ -883,7 +884,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
 				auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
-				render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
+				render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
 			}
 		});
 		// Factory
@@ -893,7 +894,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-				render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
+				render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
 			}
 		});
 		// Construction
@@ -903,7 +904,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
 				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-				render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
+				render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
 			}
 		});
 		// Construction [naval]
@@ -913,7 +914,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_construction_naval, p1, -theta, -0.75f, time_counter);
+				render_model(model_construction_naval, p1, -theta, 0.f, time_counter);
 			}
 		});
 		// Construction [military]
@@ -924,7 +925,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
 					auto seed_r = pl.get_pop().id.index();
-					render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
+					render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
 					break;
 				}
 			}
@@ -935,14 +936,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_blockaded, p1, -theta, -0.75f, time_counter);
+				render_model(model_blockaded, p1, -theta, 0.f, time_counter);
 			}
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
-				render_model(model_siege, center, 0.f, -0.75f, time_counter);
+				render_model(model_siege, center, 0.f, 0.f, time_counter);
 			}
 		});
 
@@ -984,7 +985,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
 		// Render navies
@@ -1010,54 +1011,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
-
-		/*
-		// Floating flags
-		for(uint32_t i = 0; i < state.world.province_size(); i++) {
-			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-			auto units = state.world.province_get_navy_location_as_location(p);
-			if(state.map_state.visible_provinces[province::to_map_id(p)]
-			&& units.begin() != units.end()) {
-				auto p1 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(0.f, 0.f);
-				render_model(38, p1, -theta, -0.75f);
-				render_model(39, p1, -theta, -0.75f);
-			}
-		}
-		for(uint32_t i = 0; i < state.world.province_size(); i++) {
-			dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(i));
-			auto units = state.world.province_get_navy_location_as_location(p);
-			if(state.map_state.visible_provinces[province::to_map_id(p)]
-			&& units.begin() != units.end()) {
-				auto p1 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(0.f, 0.f);
-				render_model(39, p1, -theta, -0.75f);
-			}
-		}
-
-		for(uint32_t i = 0; i < 3 * 3; i++) {
-			auto index = 19 + i;
-			for(uint32_t j = 0; j < uint32_t(state.province_definitions.first_sea_province.index()); j++) {
-				dcon::province_id p = dcon::province_id(dcon::province_id::value_base_t(j));
-				if(state.world.province_get_demographics(p, demographics::total) >= float(i * 100000.f)) {
-					// 1 2 3 -- 1
-					// 1 2 3 -- 2
-					// 1 2 3 -- 3
-					auto center = state.world.province_get_mid_point(p);
-					auto pos = center;
-					pos.x += i == 0 ? 0.f : float(i % 3) * 2.5f;
-					pos.y += i == 0 ? 0.f : float(i / 3) * 2.5f;
-					pos.x -= 2.5f;
-					pos.y -= 2.5f;
-					render_model(index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j + i, 1000)) / 1000.f), -0.75f);
-					render_model(index, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() + j * i, 1000)) / 1000.f), -0.75f);
-				}
-			}
-		}
-		*/
 		glDisable(GL_DEPTH_TEST);
 	}
 
@@ -2174,12 +2130,20 @@ void load_static_meshes(sys::state& state) {
 	//fill missing models with any
 	for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
 		for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
-			auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(j));
-			if(!state.map_state.map_data.model_gc_unit[i][utid.index()]) {
+			if(!state.map_state.map_data.model_gc_unit[i][j]) {
 				for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
-					state.map_state.map_data.model_gc_unit[i][utid.index()] = state.map_state.map_data.model_gc_unit[k][utid.index()];
-					if(state.map_state.map_data.model_gc_unit[i][utid.index()])
+					state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][j];
+					if(state.map_state.map_data.model_gc_unit[i][j])
 						break;
+				}
+				if(!state.map_state.map_data.model_gc_unit[i][j]) {
+					for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
+						for(uint32_t l = 0; l < uint32_t(state.military_definitions.unit_base_definitions.size()); l++) {
+							state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][l];
+							if(state.map_state.map_data.model_gc_unit[i][j])
+								break;
+						}
+					}
 				}
 			}
 		}
@@ -2242,7 +2206,10 @@ void display_data::load_map(sys::state& state) {
 	textures[texture_colormap_political] = load_dds_texture(map_terrain_dir, NATIVE("colormap_political.dds"));
 	textures[texture_overlay] = load_dds_texture(map_terrain_dir, NATIVE("map_overlay_tile.dds"));
 	textures[texture_stripes] = load_dds_texture(map_terrain_dir, NATIVE("stripes.dds"));
-	
+
+	textures[texture_shoreline] = ogl::make_gl_texture(assets_dir, NATIVE("shoreline.dds"));
+	ogl::set_gltex_parameters(textures[texture_shoreline], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+
 	textures[texture_river_body] = load_dds_texture(assets_dir, NATIVE("river.dds"));
 	ogl::set_gltex_parameters(textures[texture_river_body], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 

@@ -11,6 +11,7 @@ uniform float zoom;
 uniform vec2 map_size;
 uniform mat3 rotation;
 uniform uint subroutines_index;
+uniform float counter_factor;
 
 vec4 globe_coords() {
 	vec3 new_world_pos;
@@ -35,15 +36,21 @@ vec4 globe_coords() {
 		1.0);
 }
 
+// Skew so the player can see half of the model
+vec3 rotate_skew(vec3 v, float w) {
+	vec3 k = vec3(1.f, 0.f, 0.f);
+	float cos_theta = cos(w);
+	float sin_theta = sin(w);
+	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+}
 vec4 flat_coords() {
 	vec2 world_pos = vertex_position + vec2(-offset.x, offset.y);
 	world_pos.x = mod(world_pos.x, 1.0f);
-
-	return vec4(
+	vec3 v = vec3(
 		(2. * world_pos.x - 1.f) * zoom / aspect_ratio * map_size.x / map_size.y,
 		(2. * world_pos.y - 1.f) * zoom,
-		abs(world_pos.x - 0.5) * 2.1f,
-		1.0);
+		abs(world_pos.x - 0.5) * 2.1f);
+	return vec4(rotate_skew(v, counter_factor), 1.f);
 }
 
 vec4 perspective_coords() {

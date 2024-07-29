@@ -1,6 +1,7 @@
 in vec2 tex_coord;
 out vec4 frag_color;
 
+uniform float time;
 uniform float gamma;
 
 uniform sampler2D diffuse_texture;

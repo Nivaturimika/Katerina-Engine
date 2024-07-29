@@ -1319,6 +1319,17 @@ bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_v
 
 		screen_pos /= zoom;
 		screen_pos += pos;
+		/*if(zoom > 5.f) {
+			auto const rotate_skew = [&](glm::vec3 v, float w) -> glm::vec3 {
+				glm::vec3 k = glm::vec3(1.f, 0.f, 0.f);
+				float cos_theta = cos(w);
+				float sin_theta = sin(w);
+				return (v * cos_theta) + (glm::cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+			};
+			glm::vec3 v = rotate_skew(glm::vec3(screen_pos, 1.f), (zoom - 5.f) * 0.0175f);
+			screen_pos.x = v.x;
+			screen_pos.y = v.y;
+		}*/
 		map_pos = screen_pos;
 		return (map_pos.x >= 0 && map_pos.y >= 0 && map_pos.x <= map_data.size_x && map_pos.y <= map_data.size_y);
 	}

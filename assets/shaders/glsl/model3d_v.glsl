@@ -15,6 +15,7 @@ uniform vec2 model_offset;
 uniform float target_facing;
 uniform float target_topview_fixup;
 uniform uint subroutines_index;
+uniform float counter_factor;
 
 vec4 globe_coords(vec3 world_pos) {
     vec3 new_world_pos;
@@ -38,15 +39,22 @@ vec4 globe_coords(vec3 world_pos) {
         (2.f * new_world_pos.y - 1.f), 1.0);
 }
 
+// Skew so the player can see half of the model
+vec3 rotate_skew(vec3 v, float w) {
+	vec3 k = vec3(1.f, 0.f, 0.f);
+	float cos_theta = cos(w);
+	float sin_theta = sin(w);
+	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+}
 vec4 flat_coords(vec3 world_pos) {
 	world_pos -= vec3(offset.x, 0.f, -offset.y);
 	world_pos.x = mod(world_pos.x, 1.0f);
-	return vec4(
+	vec3 v = vec3(
 		(+2.f * world_pos.x - 1.f) * zoom / aspect_ratio * map_size.x / map_size.y,
 		(+2.f * world_pos.z - 1.f) * zoom,
-		(-2.f * world_pos.y),
-		1.0f
+		world_pos.y * zoom//(-2.f * world_pos.y)
 	);
+	return vec4(rotate_skew(v, counter_factor), 1.f);
 }
 
 vec4 calc_gl_position(vec3 world_pos) {
@@ -66,20 +74,12 @@ vec3 rotate_target(vec3 v) {
 	float sin_theta = sin(target_facing - M_PI / 2.f);
 	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
 }
-// Skew so the player can see half of the model
-vec3 rotate_skew(vec3 v) {
-	vec3 k = vec3(1.f, 0.f, 0.f);
-	float cos_theta = cos(target_topview_fixup);
-	float sin_theta = sin(target_topview_fixup);
-	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
-}
 
 void main() {
-	float vertical_factor = ((map_size.x + map_size.y) / 3.f);
-	float height_scale = map_size.x / 2.f;
+	float vertical_factor = (map_size.x + map_size.y) / 4.f;
 	vec3 world_pos = vec3(vertex_position.x, vertex_position.y, vertex_position.z);
-	world_pos = rotate_skew(rotate_target(world_pos));
-	world_pos /= vec3(map_size.x, height_scale, vertical_factor);
+	world_pos = rotate_target(world_pos);
+	world_pos /= vec3(map_size.x, vertical_factor, map_size.y);
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
 	gl_Position = calc_gl_position(world_pos);
 	tex_coord = texture_coord;
