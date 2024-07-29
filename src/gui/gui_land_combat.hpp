@@ -1411,7 +1411,7 @@ class lc_goto_location_button : public button_element_base {
 		auto prov = report->location;
 		if(prov && prov.value < state.province_definitions.first_sea_province.value) {
 			state.map_state.set_selected_province(prov);
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, prov);
+			game_scene::open_province_window(state, prov);
 			if(state.map_state.get_zoom() < map::zoom_very_close)
 				state.map_state.zoom = map::zoom_very_close;
 			state.map_state.center_map_on_province(state, prov);

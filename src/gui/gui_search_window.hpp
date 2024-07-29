@@ -23,7 +23,7 @@ public:
 		auto map_prov_id = content;
 		if(map_prov_id && map_prov_id.value < state.province_definitions.first_sea_province.value) {
 			state.map_state.set_selected_province(map_prov_id);
-			static_cast<province_view_window*>(state.ui_state.province_window)->set_active_province(state, map_prov_id);
+			game_scene::open_province_window(state, map_prov_id);
 			state.map_state.center_map_on_province(state, map_prov_id);
 		}
 	}

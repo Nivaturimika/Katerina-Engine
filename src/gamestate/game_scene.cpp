@@ -185,9 +185,27 @@ void select_wargoal_state_from_selected_province(sys::state& state) {
 	state.state_select(sdef);
 }
 
-void send_selected_province_to_province_window(sys::state& state) {
+void open_province_window(sys::state& state, dcon::province_id p) {
 	if(state.ui_state.province_window) {
-		static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, state.map_state.selected_province);
+		static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+		if(p) {
+			game_scene::deselect_units(state);
+			if(state.ui_state.army_combat_window) {
+				state.ui_state.army_combat_window->set_visible(state, false);
+			}
+			if(state.ui_state.naval_combat_window) {
+				state.ui_state.naval_combat_window->set_visible(state, false);
+			}
+			if(state.ui_state.army_status_window) {
+				state.ui_state.army_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.navy_status_window) {
+				state.ui_state.navy_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.multi_unit_selection_window) {
+				state.ui_state.multi_unit_selection_window->set_visible(state, false);
+			}
+		}
 	}
 }
 
@@ -435,7 +453,7 @@ void handle_drag_stop(sys::state& state, int32_t x, int32_t y, sys::key_modifier
 	} else if(insignificant_movement) {
 		// we assume that user wanted to click
 		state.drag_selecting = false;
-		send_selected_province_to_province_window(state);
+		open_province_window(state, state.map_state.selected_province);
 		deselect_units(state);
 		state.game_state_updated.store(true, std::memory_order_release);
 	} else {
@@ -975,7 +993,18 @@ void update_basic_game_scene(sys::state& state) {
 			state.ui_state.army_combat_window->set_visible(state, false);
 		}
 	}
+	if(state.ui_state.naval_combat_window && state.ui_state.naval_combat_window->is_visible()) {
+		ui::naval_combat_window* win = static_cast<ui::naval_combat_window*>(state.ui_state.naval_combat_window);
+		if(win->battle && !state.world.naval_battle_is_valid(win->battle)) {
+			state.ui_state.naval_combat_window->set_visible(state, false);
+		}
+	}
 	update_unit_selection_ui(state);
+	if((state.ui_state.army_status_window && state.ui_state.army_status_window->is_visible())
+	|| (state.ui_state.navy_status_window && state.ui_state.navy_status_window->is_visible())
+	|| (state.ui_state.multi_unit_selection_window && state.ui_state.multi_unit_selection_window->is_visible())) {
+		game_scene::open_province_window(state, dcon::province_id{});
+	}
 	state.map_state.map_data.update_borders(state);
 }
 

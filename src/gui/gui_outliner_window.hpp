@@ -92,56 +92,65 @@ public:
 		} else if(std::holds_alternative<dcon::state_building_construction_id>(content)) {
 			auto st_con = fatten(state.world, std::get<dcon::state_building_construction_id>(content));
 			auto p = st_con.get_state().get_capital().id;
-
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::province_building_construction_id>(content)) {
 			auto pbcid = std::get<dcon::province_building_construction_id>(content);
 			auto p = state.world.province_building_construction_get_province(pbcid);
-
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::province_land_construction_id>(content)) {
 			auto plcid = std::get<dcon::province_land_construction_id>(content);
 			auto p = state.world.pop_get_province_from_pop_location(state.world.province_land_construction_get_pop(plcid));
-			//static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
-			//state.map_state.center_map_on_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
+			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::province_naval_construction_id>(content)) {
 			auto pncid = std::get<dcon::province_naval_construction_id>(content);
 			auto p = state.world.province_naval_construction_get_province(pncid);
-			//static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
-			//state.map_state.center_map_on_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
+			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::state_instance_id>(content)) {
 			auto siid = std::get<dcon::state_instance_id>(content);
 			auto fat_si = dcon::fatten(state.world, siid);
 			auto p = fat_si.get_capital().id;
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<outliner_rebel_occupation>(content)) {
 			auto p = std::get<outliner_rebel_occupation>(content).p;
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<outliner_hostile_siege>(content)) {
 			auto p = std::get<outliner_hostile_siege>(content).p;
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<outliner_my_siege>(content)) {
 			auto p = std::get<outliner_my_siege>(content).p;
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::land_battle_id>(content)) {
 			auto b = std::get<dcon::land_battle_id>(content);
 			auto p = state.world.land_battle_get_location_from_land_battle_location(b);
-			//static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::naval_battle_id>(content)) {
 			auto b = std::get<dcon::naval_battle_id>(content);
 			auto p = state.world.naval_battle_get_location_from_naval_battle_location(b);
-			//static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<outliner_rally_point>(content)) {
 			auto p = std::get<outliner_rally_point>(content).p;
-			static_cast<ui::province_view_window*>(state.ui_state.province_window)->set_active_province(state, p);
+			state.map_state.set_selected_province(p);
+			game_scene::open_province_window(state, p);
 			state.map_state.center_map_on_province(state, p);
 		} else if(std::holds_alternative<dcon::commodity_id>(content)) {
 			

@@ -29,7 +29,10 @@ void open_diplomacy(sys::state& state, dcon::nation_id nation, dcon::province_id
 void select_player_nation_from_selected_province(sys::state& state);
 void select_wargoal_state_from_selected_province(sys::state& state);
 
+void open_province_window(sys::state& state, dcon::province_id p);
+
 void select_units(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod);
+void deselect_units(sys::state& state);
 
 void start_dragging(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod);
 
