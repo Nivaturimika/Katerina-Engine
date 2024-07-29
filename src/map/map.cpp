@@ -852,7 +852,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, dist_step); //top right (from center)
-				render_model(model_blockaded, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f, time_counter);
+				render_model(model_train_station, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 		// Naval base (empty)
@@ -932,6 +932,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 				render_model(model_blockaded, p1, -theta, -0.75f, time_counter);
+			}
+		});
+		// Siege
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			if(military::province_is_under_siege(state, p)) {
+				auto p1 = duplicates::get_navy_location(state, p);
+				auto p2 = state.world.province_get_mid_point(p);
+				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(model_siege, p1, -theta, -0.75f, time_counter);
 			}
 		});
 
