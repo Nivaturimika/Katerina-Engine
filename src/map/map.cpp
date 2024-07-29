@@ -86,8 +86,10 @@ void display_data::update_fog_of_war(sys::state& state) {
 
 	// update fog of war too
 	std::vector<uint32_t> province_fows(state.world.province_size() + 1, 0xFFFFFFFF);
-	if(state.user_settings.fow_enabled || state.network_mode != sys::network_mode_type::single_player) {
-		state.map_state.visible_provinces.clear();
+	state.map_state.visible_provinces.clear();
+	if(state.local_player_nation != state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id)
+	&& (state.user_settings.fow_enabled || state.network_mode != sys::network_mode_type::single_player)
+	&& !state.current_scene.is_lobby) {
 		state.map_state.visible_provinces.resize(state.world.province_size() + 1, false);
 		for(auto p : direct_provinces) {
 			if(bool(p)) {
@@ -102,12 +104,10 @@ void display_data::update_fog_of_war(sys::state& state) {
 		}
 		for(auto p : state.world.in_province)
 			province_fows[province::to_map_id(p)] = uint32_t(state.map_state.visible_provinces[province::to_map_id(p)] ? 0xFFFFFFFF : 0x7B7B7B7B);
-		gen_prov_color_texture(textures[texture_province_fow], province_fows);
 	} else {
-		state.map_state.visible_provinces.clear();
 		state.map_state.visible_provinces.resize(state.world.province_size() + 1, true);
-		gen_prov_color_texture(textures[texture_province_fow], province_fows);
 	}
+	gen_prov_color_texture(textures[texture_province_fow], province_fows);
 }
 
 void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& data) {
