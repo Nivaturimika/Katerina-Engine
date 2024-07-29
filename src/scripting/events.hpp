@@ -15,11 +15,12 @@ struct pending_human_n_event {
 	uint32_t r_hi = 0; //4,4
 	int32_t primary_slot; //8,4
 	int32_t from_slot; //12,4
-	sys::date date; //20,2
-	dcon::national_event_id e; //16,2
-	dcon::nation_id n; //18,2
-	slot_type pt; //20,1
-	slot_type ft; //21,1
+	sys::date date; //16,4
+	dcon::national_event_id e; //20,2
+	dcon::nation_id n; //22,2
+	slot_type pt; //24,1
+	slot_type ft; //25,1
+	uint16_t padding = 0;
 };
 static_assert(sizeof(pending_human_n_event) ==
 	sizeof(pending_human_n_event::r_lo)
@@ -30,31 +31,30 @@ static_assert(sizeof(pending_human_n_event) ==
 	+ sizeof(pending_human_n_event::e)
 	+ sizeof(pending_human_n_event::n)
 	+ sizeof(pending_human_n_event::pt)
-	+ sizeof(pending_human_n_event::ft));
+	+ sizeof(pending_human_n_event::ft)
+	+ sizeof(pending_human_n_event::padding));
 struct pending_human_f_n_event {
 	uint32_t r_lo = 0; //0,4
 	uint32_t r_hi = 0; //4,4
-	sys::date date; //8,2
-	dcon::free_national_event_id e; //10,2
-	dcon::nation_id n; //12,2
-	uint16_t padding = 0;
+	sys::date date; //8,4
+	dcon::free_national_event_id e; //12,2
+	dcon::nation_id n; //14,2
 };
 static_assert(sizeof(pending_human_f_n_event) ==
 	sizeof(pending_human_f_n_event::r_lo)
 	+ sizeof(pending_human_f_n_event::r_hi)
 	+ sizeof(pending_human_f_n_event::date)
 	+ sizeof(pending_human_f_n_event::e)
-	+ sizeof(pending_human_f_n_event::n)
-	+ sizeof(pending_human_f_n_event::padding));
+	+ sizeof(pending_human_f_n_event::n));
 struct pending_human_p_event {
-	uint32_t r_lo = 0; //4
-	uint32_t r_hi = 0; //4
-	int32_t from_slot; //4
-	sys::date date; //2
-	dcon::provincial_event_id e; //2
-	dcon::province_id p; //2
-	slot_type ft; //1
-	uint8_t padding = 0;
+	uint32_t r_lo = 0; //0,4
+	uint32_t r_hi = 0; //4,4
+	int32_t from_slot; //8,4
+	sys::date date; //12,4
+	dcon::provincial_event_id e; //16,2
+	dcon::province_id p; //18,2
+	slot_type ft; //20,1
+	uint8_t padding[3] = { 0, 0, 0 };
 };
 static_assert(sizeof(pending_human_p_event) ==
 	sizeof(pending_human_p_event::r_lo)
@@ -68,18 +68,16 @@ static_assert(sizeof(pending_human_p_event) ==
 struct pending_human_f_p_event {
 	uint32_t r_lo = 0; //0,4
 	uint32_t r_hi = 0; //4,4
-	sys::date date; //8,2
-	dcon::free_provincial_event_id e; //10,2
-	dcon::province_id p; //12,2
-	uint16_t padding = 0;
+	sys::date date; //8,4
+	dcon::free_provincial_event_id e; //12,2
+	dcon::province_id p; //14,2
 };
 static_assert(sizeof(pending_human_f_p_event) ==
 	sizeof(pending_human_f_p_event::r_lo)
 	+ sizeof(pending_human_f_p_event::r_hi)
 	+ sizeof(pending_human_f_p_event::date)
 	+ sizeof(pending_human_f_p_event::e)
-	+ sizeof(pending_human_f_p_event::p)
-	+ sizeof(pending_human_f_p_event::padding));
+	+ sizeof(pending_human_f_p_event::p));
 
 bool is_valid_option(sys::event_option const& opt);
 

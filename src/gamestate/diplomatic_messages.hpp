@@ -29,12 +29,13 @@ struct message {
 		dtype() {
 			memset(this, 0, sizeof(*this));
 		}
-	} data; //10
-	sys::date when; //2
-	dcon::nation_id from; //2
-	dcon::nation_id to; //2
-	type_t type = diplomatic_message::type_t::none; //1
-	uint8_t padding = 0; //1
+	} data; //0,10
+	uint8_t padding_1[2] = { 0, 0 }; //10,2
+	sys::date when; //12,4
+	dcon::nation_id from; //16,2
+	dcon::nation_id to; //18,2
+	type_t type = diplomatic_message::type_t::none; //20,1
+	uint8_t padding[3] = { 0, 0, 0 }; //21,1
 
 	message() : type(diplomatic_message::type_t::none) { }
 };
@@ -44,7 +45,8 @@ static_assert(sizeof(message) ==
 	+ sizeof(message::when)
 	+ sizeof(message::data)
 	+ sizeof(message::type)
-	+ sizeof(message::padding));
+	+ sizeof(message::padding)
+	+ sizeof(message::padding_1));
 
 using type = type_t;
 
