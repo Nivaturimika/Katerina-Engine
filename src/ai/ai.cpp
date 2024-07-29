@@ -5288,7 +5288,7 @@ float estimate_rebel_strength(sys::state& state, dcon::province_id p) {
 
 // Easy way to inflate our industrial score
 void perform_foreign_investments(sys::state& state) {
-	//Ensure we're atleast x5 of the total cost, aka. we have A LOT OF MONEY lying around for us to spend
+	//Ensure we're atleast x3 of the total cost, aka. we have A LOT OF MONEY lying around for us to spend
 	constexpr float invest_safety_factor = 5.f;
 	// Spam railroads whenever possible
 	for(auto gprl : state.world.in_gp_relationship) {
@@ -5300,24 +5300,53 @@ void perform_foreign_investments(sys::state& state) {
 				continue;
 			if(!gprl.get_influence_target().get_is_civilized())
 				continue;
-			float amount = 0.0f;
-			auto& base_cost = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].cost;
-			for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
-				if(base_cost.commodity_type[j]) {
-					amount += base_cost.commodity_amounts[j] * state.world.commodity_get_current_price(base_cost.commodity_type[j]);
-				} else {
-					break;
+			{ //spam railroads!
+				float amount = 0.0f;
+				auto& base_cost = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].cost;
+				for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
+					if(base_cost.commodity_type[j]) {
+						amount += base_cost.commodity_amounts[j] * state.world.commodity_get_current_price(base_cost.commodity_type[j]);
+					} else {
+						break;
+					}
+				}
+				int32_t max_rails_lvl = gprl.get_great_power().get_max_building_level(economy::province_building_type::railroad);
+				for(const auto p : gprl.get_influence_target().get_province_ownership()) {
+					int32_t current_rails_lvl = p.get_province().get_building_level(economy::province_building_type::railroad);
+					int32_t min_build_railroad = int32_t(p.get_province().get_modifier_values(sys::provincial_mod_offsets::min_build_railroad));
+					if((max_rails_lvl - current_rails_lvl - min_build_railroad > 0) && !province::has_railroads_being_built(state, p.get_province())) {
+						auto money = nations::get_treasury(state, gprl.get_great_power());
+						if(money >= amount * invest_safety_factor) {
+							if(command::can_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad)) {
+								command::execute_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad);
+							}
+						}
+					}
 				}
 			}
-			int32_t max_rails_lvl = gprl.get_great_power().get_max_building_level(economy::province_building_type::railroad);
-			for(const auto p : gprl.get_influence_target().get_province_ownership()) {
-				int32_t current_rails_lvl = p.get_province().get_building_level(economy::province_building_type::railroad);
-				int32_t min_build_railroad = int32_t(p.get_province().get_modifier_values(sys::provincial_mod_offsets::min_build_railroad));
-				if((max_rails_lvl - current_rails_lvl - min_build_railroad > 0) && !province::has_railroads_being_built(state, p.get_province())) {
-					auto money = gprl.get_great_power().get_stockpiles(economy::money);
+			// get factory types our target may want
+			std::vector<dcon::factory_type_id> desired_types;
+			get_desired_factory_types(state, gprl.get_influence_target(), desired_types);
+			for(const auto ft : desired_types) {
+				if(!state.world.factory_type_get_is_available_from_start(ft)
+				&& !state.world.nation_get_active_building(gprl.get_great_power(), ft))
+					continue;
+				float amount = 0.0f;
+				auto& base_cost = state.world.factory_type_get_construction_costs(ft);
+				for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
+					if(base_cost.commodity_type[j]) {
+						amount += base_cost.commodity_amounts[j] * state.world.commodity_get_current_price(base_cost.commodity_type[j]);
+					} else {
+						break;
+					}
+				}
+				for(const auto s : gprl.get_influence_target().get_state_ownership()) {
+					auto money = nations::get_treasury(state, gprl.get_great_power());
 					if(money >= amount * invest_safety_factor) {
-						if(command::can_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad)) {
-							command::execute_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad);
+						if(command::can_begin_factory_building_construction(state, gprl.get_great_power(), s.get_state(), ft, true)) {
+							command::execute_begin_factory_building_construction(state, gprl.get_great_power(), s.get_state(), ft, true);
+						} else if(command::can_begin_factory_building_construction(state, gprl.get_great_power(), s.get_state(), ft, false)) {
+							command::execute_begin_factory_building_construction(state, gprl.get_great_power(), s.get_state(), ft, false);
 						}
 					}
 				}
