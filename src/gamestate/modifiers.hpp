@@ -318,12 +318,14 @@ static_assert(sizeof(rebel_org_modifier) ==
 	+ sizeof(rebel_org_modifier::padding));
 
 struct dated_modifier {
-	sys::date expiration;
-	dcon::modifier_id mod_id;
+	sys::date expiration; //0,4
+	dcon::modifier_id mod_id; //4,2
+	uint16_t padding = 0;
 };
 static_assert(sizeof(dated_modifier) ==
 	sizeof(dated_modifier::expiration)
-	+ sizeof(dated_modifier::mod_id));
+	+ sizeof(dated_modifier::mod_id)
+	+ sizeof(dated_modifier::padding));
 
 // restores values after loading a save
 void repopulate_modifier_effects(sys::state& state);

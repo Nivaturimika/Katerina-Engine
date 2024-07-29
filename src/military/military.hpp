@@ -62,12 +62,14 @@ static_assert(sizeof(ship_in_battle) ==
 	+ sizeof(ship_in_battle::flags));
 
 struct mobilization_order {
-	sys::date when; //2
-	dcon::province_id where; //2
+	sys::date when; //0
+	dcon::province_id where; //4
+	uint16_t padding = 0; //6
 };
 static_assert(sizeof(mobilization_order) ==
 	sizeof(mobilization_order::where)
-	+ sizeof(mobilization_order::when));
+	+ sizeof(mobilization_order::when)
+	+ sizeof(mobilization_order::padding));
 
 struct reserve_regiment {
 	static constexpr uint16_t is_attacking = 0x0001;
