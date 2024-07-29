@@ -113,7 +113,8 @@ void selected_units_control(
 	dcon::province_id target,
 	sys::key_modifiers mod
 ) {
-	bool fail = false;
+	bool army_moved = false;
+	bool navy_moved = false;
 	bool army_play = false;
 	//as opposed to queueing
 	bool reset_orders = (uint8_t(mod) & uint8_t(sys::key_modifiers::modifiers_shift)) == 0;
@@ -121,21 +122,23 @@ void selected_units_control(
 
 	for(auto a : state.selected_armies) {
 		if(command::can_move_army(state, nation, a, target).empty()) {
-			fail = true;
+
 		} else {
 			command::move_army(state, nation, a, target, reset_orders);
+			army_moved = true;
 			army_play = true;
 		}
 	}
 	for(auto a : state.selected_navies) {
 		if(command::can_move_navy(state, nation, a, target).empty()) {
-			fail = true;
+
 		} else {
 			command::move_navy(state, nation, a, target, reset_orders);
+			navy_moved = true;
 		}
 	}
 
-	if(!fail) {
+	if(army_moved || navy_moved) {
 		if(army_play) {
 			sound::play_effect(state, sound::get_army_move_sound(state), volume);
 		} else {
