@@ -50,20 +50,13 @@ gfx_emfx_actor_type
 	animation			group		none		discard
 
 gfx_object_types
-	emfxactortype		group		gfx_emfx_actor_type	member_fn
-	flagtype			group		none				discard
-	meshtype			group		none				discard
-	animatedmaptext		group		none				discard
-	provincetype		group		none				discard
-	provincewatertype	group		none				discard
-	maptexttype			group		none				discard
-
-gfx_files
-	spritetypes				extern	gfx_add_obj			discard
-	objecttypes				group	gfx_object_types	member_fn
-	fonts					group	none				discard
-	bitmapfonts				group	none				discard
-	lighttypes				group	none				discard
+	emfxactortype			group	gfx_emfx_actor_type	member_fn
+	flagtype				group	none				discard
+	meshtype				group	none				discard
+	animatedmaptext			group	none				discard
+	provincetype			group	none				discard
+	provincewatertype		group	none				discard
+	maptexttype				group	none				discard
 	battlearrow				group	none				discard
 	arrowtype				group	none				discard
 	mapinfo					group	none				discard
@@ -71,6 +64,13 @@ gfx_files
 	unitstatsbillboardtype	group	none				discard
 	progressbar3dtype		group	none				discard
 	projectiontype			group	none				discard
+
+gfx_files
+	spritetypes				extern	gfx_add_obj			discard
+	objecttypes				group	gfx_object_types	member_fn
+	fonts					group	none				discard
+	bitmapfonts				group	none				discard
+	lighttypes				group	none				discard
 
 gui_element_common
 	position			group		gfx_xy_pair		member_fn
