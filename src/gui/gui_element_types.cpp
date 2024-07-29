@@ -2535,8 +2535,7 @@ void unit_frame_bg::update_tooltip(sys::state& state, int32_t x, int32_t y, text
 	else if(std::holds_alternative<dcon::navy_id>(display_unit))
 		single_unit_tooltip(state, contents, std::get<dcon::navy_id>(display_unit));
 	text::add_line(state, contents, "unit_controls_tooltip_1");
-	if(state.network_mode != sys::network_mode_type::single_player)
-		text::add_line(state, contents, "unit_controls_tooltip_2");
+	text::add_line(state, contents, "unit_controls_tooltip_2");
 	text::add_line(state, contents, "unit_control_group_tooltip");
 }
 
