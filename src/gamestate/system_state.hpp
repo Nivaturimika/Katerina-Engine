@@ -378,12 +378,12 @@ struct user_settings_s {
 	bool rivers_enabled = true;
 	map_zoom_mode zoom_mode = map_zoom_mode::panning;
 	map_vassal_color_mode vassal_color = map_vassal_color_mode::inherit;
-	bool render_models = false;
+	bool render_models = true;
 	bool mouse_edge_scrolling = true;
 	bool black_map_font = true;
-	bool spoilers = true;
+	bool spoilers = false;
 	float zoom_speed = 20.f;
-	bool mute_on_focus_lost = true;
+	bool mute_on_focus_lost = false;
 	bool diplomatic_message_popup = false;
 	bool wasd_for_map_movement = false;
 	bool notify_rebels_defeat = true;
