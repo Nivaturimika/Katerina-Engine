@@ -262,8 +262,8 @@ public:
 	// models: Textures for static meshes
 	static constexpr uint32_t max_static_meshes = 0x140;
 	static constexpr uint32_t max_static_submeshes = 16;
-	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { { 0 } };
-	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { { 0.f } };
+	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { };
+	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
 
 	dcon::emfx_object_id model_wake;
 	dcon::emfx_object_id model_blockaded;
