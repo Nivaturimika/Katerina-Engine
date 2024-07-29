@@ -59,11 +59,18 @@ gfx_object_types
 	maptexttype			group		none				discard
 
 gfx_files
-	spritetypes  extern     gfx_add_obj			discard
-	objecttypes	 group		gfx_object_types	member_fn
-	fonts			group	none				discard
-	bitmapfonts		group	none				discard
-	lighttypes		group	none				discard
+	spritetypes				extern	gfx_add_obj			discard
+	objecttypes				group	gfx_object_types	member_fn
+	fonts					group	none				discard
+	bitmapfonts				group	none				discard
+	lighttypes				group	none				discard
+	battlearrow				group	none				discard
+	arrowtype				group	none				discard
+	mapinfo					group	none				discard
+	billboardtype			group	none				discard
+	unitstatsbillboardtype	group	none				discard
+	progressbar3dtype		group	none				discard
+	projectiontype			group	none				discard
 
 gui_element_common
 	position			group		gfx_xy_pair		member_fn

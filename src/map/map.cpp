@@ -963,9 +963,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_army().get_army_membership()) {
 						auto utid = sm.get_regiment().get_type();
-						auto candidate_model = state.map_state.map_data.model_gc_unit[uint8_t(gc)][utid.index()];
+						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
 						if(!candidate_model) {
-							candidate_model = state.map_state.map_data.model_gc_unit[0][utid.index()];
+							candidate_model = model_gc_unit[0][utid.index()];
 						}
 						if(candidate_model) {
 							unit_model = candidate_model;
@@ -990,9 +990,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto gc = unit.get_navy().get_controller_from_navy_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_navy().get_navy_membership()) {
 						auto utid = sm.get_ship().get_type();
-						auto candidate_model = state.map_state.map_data.model_gc_unit[uint8_t(gc)][utid.index()];
+						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
 						if(!candidate_model) {
-							candidate_model = state.map_state.map_data.model_gc_unit[0][utid.index()];
+							candidate_model = model_gc_unit[0][utid.index()];
 						}
 						if(candidate_model) {
 							unit_model = candidate_model;
@@ -1000,6 +1000,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
 			}
 		});
@@ -1965,7 +1966,9 @@ void load_static_meshes(sys::state& state) {
 		ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
 
 		auto name = state.to_string_view(emfx_obj.name);
-		if(name == "port_blockade") {
+		if(name == "model_wake") {
+			state.map_state.map_data.model_wake = edef;
+		} else if(name == "port_blockade") {
 			state.map_state.map_data.model_blockaded = edef;
 		} else if(name == "building_factory") {
 			state.map_state.map_data.model_factory = edef;
@@ -2121,7 +2124,7 @@ void load_static_meshes(sys::state& state) {
 							if(!is_collision) {
 								for(const auto& smv : triangle_vertices) {
 									static_mesh_vertex tmp = smv;
-									tmp.position_ *= emfx_obj.scale * emfx_obj.scale;
+									tmp.position_ *= emfx_obj.scale;
 									static_mesh_vertices.push_back(tmp);
 								}
 							}
