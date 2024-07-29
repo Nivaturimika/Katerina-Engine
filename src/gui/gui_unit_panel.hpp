@@ -474,20 +474,18 @@ public:
 	window_element_base* combat_window = nullptr;
 
 	void on_create(sys::state& state) noexcept override {
-		{
-			if constexpr(std::is_same_v<T, dcon::army_id>) {
-				auto win2 = make_element_by_type<unit_reorg_window<T, dcon::regiment_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
-				win2->base_data.position.y = base_data.position.y - 29;
-				win2->set_visible(state, false);
-				reorg_window = win2.get();
-				add_child_to_front(std::move(win2));
-			} else {
-				auto win2 = make_element_by_type<unit_reorg_window<T, dcon::ship_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
-				win2->base_data.position.y = base_data.position.y - 29;
-				win2->set_visible(state, false);
-				reorg_window = win2.get();
-				add_child_to_front(std::move(win2));
-			}
+		if constexpr(std::is_same_v<T, dcon::army_id>) {
+			auto win2 = make_element_by_type<unit_reorg_window<T, dcon::regiment_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+			win2->base_data.position.y = base_data.position.y - 29;
+			win2->set_visible(state, false);
+			reorg_window = win2.get();
+			add_child_to_front(std::move(win2));
+		} else {
+			auto win2 = make_element_by_type<unit_reorg_window<T, dcon::ship_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+			win2->base_data.position.y = base_data.position.y - 29;
+			win2->set_visible(state, false);
+			reorg_window = win2.get();
+			add_child_to_front(std::move(win2));
 		}
 		window_element_base::on_create(state);
 		if(disband_too_small_btn && disband_gfx) {
