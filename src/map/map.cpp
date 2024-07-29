@@ -411,7 +411,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	}
 }
 
-void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time) {
+void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter) {
 	if(!emfx)
 		return;
 	auto index = emfx.index();
@@ -421,7 +421,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
 		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], facing);
 		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
-		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_time], time);
+		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
 		glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 	}
 }
@@ -754,7 +754,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		if(!unit_arrow_vertices.empty() || !attack_unit_arrow_vertices.empty() || !retreat_unit_arrow_vertices.empty()
 		|| !strategy_unit_arrow_vertices.empty() || !objective_unit_arrow_vertices.empty() || !other_objective_unit_arrow_vertices.empty()) {
 			load_shader(shader_line_unit_arrow);
-			glUniform1f(shader_uniforms[shader_line_unit_arrow][uniform_border_width], 0.005f); //width
+			glUniform1f(shader_uniforms[shader_line_unit_arrow][uniform_border_width], 0.0035f); //width
 			glUniform1i(shader_uniforms[shader_line_unit_arrow][uniform_unit_arrow], 0);
 		}
 		if(!unit_arrow_vertices.empty()) {
@@ -852,7 +852,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, dist_step); //top right (from center)
-				render_model(model_blockaded, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f);
+				render_model(model_blockaded, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 		// Naval base (empty)
@@ -863,7 +863,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base[level], p1, -theta, -0.75f);
+				render_model(model_naval_base[level], p1, -theta, -0.75f, time_counter);
 			}
 		});
 		// Naval base (full)
@@ -873,7 +873,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base_ships[level], p1, -theta, -0.75f);
+				render_model(model_naval_base_ships[level], p1, -theta, -0.75f, time_counter);
 			}
 		});
 		// Fort
@@ -882,7 +882,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
-				render_model(model_fort[level], pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+				render_model(model_fort[level], pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 		// Factory
@@ -891,7 +891,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(factories.begin() != factories.end()) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-				render_model(model_factory, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+				render_model(model_factory, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 		// Construction
@@ -900,7 +900,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(lc.begin() != lc.end()) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-				render_model(model_construction, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+				render_model(model_construction, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 			}
 		});
 		// Construction [naval]
@@ -910,7 +910,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_construction_naval, p1, -theta, -0.75f);
+				render_model(model_construction_naval, p1, -theta, -0.75f, time_counter);
 			}
 		});
 		// Construction [military]
@@ -920,7 +920,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(lc.begin() != lc.end()) {
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-					render_model(model_construction_military, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f);
+					render_model(model_construction_military, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
 					break;
 				}
 			}
@@ -931,7 +931,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_blockaded, p1, -theta, -0.75f);
+				render_model(model_blockaded, p1, -theta, -0.75f, time_counter);
 			}
 		});
 
@@ -1003,8 +1003,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
+				//render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
 			}
 		});
 
@@ -1964,13 +1964,16 @@ void load_static_meshes(sys::state& state) {
 	}
 	state.map_state.map_data.static_mesh_counts.resize(display_data::max_static_meshes);
 	state.map_state.map_data.static_mesh_starts.resize(display_data::max_static_meshes);
-	for(int32_t k = 0; k < display_data::max_static_meshes && k < int32_t(state.ui_defs.emfx.size()); k++) {
+	for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
 		auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
 		ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
 
 		auto name = state.to_string_view(emfx_obj.name);
 		if(name == "wake") {
 			state.map_state.map_data.model_wake = edef;
+			for(uint32_t l = 0; l < display_data::max_static_submeshes; l++) {
+				state.map_state.map_data.static_mesh_scrolling_factor[k][l] = 0.5f;
+			}
 		} else if(name == "port_blockade") {
 			state.map_state.map_data.model_blockaded = edef;
 		} else if(name == "building_factory") {
@@ -2134,6 +2137,7 @@ void load_static_meshes(sys::state& state) {
 						}
 						vertex_offset += sub.num_vertices;
 
+						auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
 						// This is how most models fallback to find their textures...
 						auto const& mat = context.materials[sub.material_id];
 						auto const& layer = get_diffuse_layer(mat);
@@ -2145,7 +2149,12 @@ void load_static_meshes(sys::state& state) {
 									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
 								}
 							}
-							state.map_state.map_data.static_mesh_textures[k][state.map_state.map_data.static_mesh_starts[k].size()] = texid;
+							if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
+								state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+							} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
+								state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+							}
+							state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 						}
 						state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
 						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
