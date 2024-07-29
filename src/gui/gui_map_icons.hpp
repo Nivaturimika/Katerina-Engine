@@ -1286,12 +1286,7 @@ public:
 		}
 		if(!player_involved_battle) {
 			if(found_enemy) {
-				//somewhat relevant, there is an enemy
 				display.colors[display.colors_used] = outline_color::red;
-				++display.colors_used;
-			} else {
-				//not relevant but we still can see it hehe
-				display.colors[display.colors_used] = outline_color::gray;
 				++display.colors_used;
 			}
 		}
@@ -1300,6 +1295,12 @@ public:
 			++display.colors_used;
 		}
 		if(found_other) {
+			display.colors[display.colors_used] = outline_color::gray;
+			++display.colors_used;
+		}
+
+		if(player_involved_battle && !found_enemy) {
+			//not relevant but we still can see it hehe
 			display.colors[display.colors_used] = outline_color::gray;
 			++display.colors_used;
 		}

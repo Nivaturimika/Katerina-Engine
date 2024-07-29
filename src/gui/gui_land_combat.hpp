@@ -762,6 +762,12 @@ public:
 			else
 				return sys::pack_color(128, 128, 128);
 		};
+		auto color_from_strength = [&](uint32_t c, float v) {
+			auto r = sys::red_from_int(c) * v;
+			auto g = sys::green_from_int(c) * v;
+			auto b = sys::blue_from_int(c) * v;
+			return sys::pack_color(r, g, b);
+		};
 
 		auto b = retrieve<dcon::land_battle_id>(state, parent);
 		switch(rank) {
@@ -786,6 +792,7 @@ public:
 						}
 					}
 					color = color_from_nation(state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg)));
+					color = color_from_strength(color, state.world.regiment_get_strength(reg));
 				}
 			}
 				break;
@@ -810,6 +817,7 @@ public:
 						}
 					}
 					color = color_from_nation(state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg)));
+					color = color_from_strength(color, state.world.regiment_get_strength(reg));
 				}
 			}
 				break;
@@ -834,6 +842,7 @@ public:
 						}
 					}
 					color = color_from_nation(state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg)));
+					color = color_from_strength(color, state.world.regiment_get_strength(reg));
 				}
 			}
 				break;
@@ -858,6 +867,7 @@ public:
 						}
 					}
 					color = color_from_nation(state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg)));
+					color = color_from_strength(color, state.world.regiment_get_strength(reg));
 				}
 			}
 				break;
