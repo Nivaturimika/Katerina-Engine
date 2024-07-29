@@ -851,8 +851,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(-dist_step, dist_step); //top right (from center)
-				render_model(model_train_station, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index() * level, 1000)) / 1000.f), -0.75f, time_counter);
+				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
+				render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
 			}
 		});
 		// Naval base (empty)
@@ -882,7 +882,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(level > 0) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
-				render_model(model_fort[level], pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
+				auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
+				render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
 			}
 		});
 		// Factory
@@ -891,7 +892,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(factories.begin() != factories.end()) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
-				render_model(model_factory, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
+				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
+				render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
 			}
 		});
 		// Construction
@@ -900,7 +902,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			if(lc.begin() != lc.end()) {
 				auto center = state.world.province_get_mid_point(p);
 				auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
-				render_model(model_construction, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
+				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
+				render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
 			}
 		});
 		// Construction [naval]
@@ -920,7 +923,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(lc.begin() != lc.end()) {
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-					render_model(model_construction_military, pos, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
+					auto seed_r = pl.get_pop().id.index();
+					render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), -0.75f, time_counter);
 					break;
 				}
 			}
@@ -938,7 +942,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
-				render_model(model_siege, center, 2.f * glm::pi<float>() * (float(rng::reduce(p.index(), 1000)) / 1000.f), -0.75f, time_counter);
+				render_model(model_siege, center, 0.f, -0.75f, time_counter);
 			}
 		});
 
@@ -958,13 +962,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		render_canal(2, 2, 0.f); //Panama
 		*/
 		// Render armies
-		/*
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_army_location_as_location(p);
 			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
+				dcon::unit_type_id unit_type;
 				for(const auto unit : units) {
 					if(auto path = unit.get_army().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
@@ -973,26 +977,24 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					for(const auto sm : unit.get_army().get_army_membership()) {
 						auto utid = sm.get_regiment().get_type();
 						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
-						if(!candidate_model) {
-							candidate_model = model_gc_unit[0][utid.index()];
-						}
-						if(candidate_model) {
+						if(candidate_model && utid.index() >= unit_type.index()) {
+							unit_type = utid;
 							unit_model = candidate_model;
 						}
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f);
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
 			}
 		});
-		*/
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
-			if(units.begin() != units.end()) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
+				dcon::unit_type_id unit_type;
 				for(const auto unit : units) {
 					if(auto path = unit.get_navy().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
@@ -1001,16 +1003,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					for(const auto sm : unit.get_navy().get_navy_membership()) {
 						auto utid = sm.get_ship().get_type();
 						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
-						if(!candidate_model) {
-							candidate_model = model_gc_unit[0][utid.index()];
-						}
-						if(candidate_model) {
+						if(candidate_model && utid.index() >= unit_type.index()) {
+							unit_type = utid;
 							unit_model = candidate_model;
 						}
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				//render_model(model_wake, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, -0.75f, time_counter);
 			}
 		});
@@ -2167,6 +2166,20 @@ void load_static_meshes(sys::state& state) {
 						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 					}
 					mesh_index++;
+				}
+			}
+		}
+	}
+
+	//fill missing models with any
+	for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
+		for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
+			auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(j));
+			if(!state.map_state.map_data.model_gc_unit[i][utid.index()]) {
+				for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
+					state.map_state.map_data.model_gc_unit[i][utid.index()] = state.map_state.map_data.model_gc_unit[k][utid.index()];
+					if(state.map_state.map_data.model_gc_unit[i][utid.index()])
+						break;
 				}
 			}
 		}
