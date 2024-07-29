@@ -10,6 +10,6 @@ vec4 gamma_correct(vec4 colour) {
 }
 
 void main() {
-	vec4 out_color = texture(diffuse_texture, tex_coord + vec2(0.f, time));
+	vec4 out_color = texture(diffuse_texture, vec2(tex_coord.x, mod(tex_coord.y + time, 1.f)));
 	frag_color = gamma_correct(out_color);
 }
