@@ -55,7 +55,7 @@ public:
 
 class date {
 public:
-	using value_base_t = uint16_t;
+	using value_base_t = uint32_t;
 	using zero_is_null_t = std::true_type;
 
 	value_base_t value = 0;
