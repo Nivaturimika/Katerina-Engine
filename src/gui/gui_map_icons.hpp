@@ -295,10 +295,9 @@ public:
 	}
 
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-		if(visible && populated)
+		if(visible)
 			return window_element_base::impl_probe_mouse(state, x, y, type);
-		else
-			return mouse_probe{ nullptr, ui::xy_pair{} };
+		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
 };
 
