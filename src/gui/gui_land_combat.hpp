@@ -898,7 +898,7 @@ public:
 			auto n = state.world.army_get_controller_from_army_control(state.world.regiment_get_army_from_army_membership(reg));
 			std::string tag_str = "";
 			if(bool(n)) {
-				text::add_to_layout_box(state, contents, box, text::embedded_flag{ dcon::fatten(state.world, n).get_identity_from_identity_holder() })
+				text::add_to_layout_box(state, contents, box, text::embedded_flag{ dcon::fatten(state.world, n).get_identity_from_identity_holder() });
 			} else {
 				text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.national_definitions.rebel_id });
 				auto rf = state.world.army_get_controller_from_army_rebel_control(state.world.regiment_get_army_from_army_membership(reg));
