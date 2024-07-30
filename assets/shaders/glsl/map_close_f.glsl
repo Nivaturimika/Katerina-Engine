@@ -20,10 +20,7 @@ uniform uint subroutines_index_2;
 // location 2 : screen_size
 uniform vec2 map_size;
 uniform float time;
-uniform float gamma;
-vec4 gamma_correct(vec4 colour) {
-	return vec4(pow(colour.rgb, vec3(1.f / gamma)), colour.a);
-}
+vec4 gamma_correct(in vec4 colour);
 
 // sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
 // so each column has 8 tiles, and each row has 8 tiles too

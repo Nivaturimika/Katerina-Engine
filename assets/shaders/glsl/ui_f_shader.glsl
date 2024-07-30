@@ -5,15 +5,10 @@ uniform vec4 d_rect;
 uniform float border_size;
 uniform vec3 inner_color;
 uniform vec4 subrect;
-uniform float gamma;
 uniform uvec2 subroutines_index;
-
 uniform sampler2D texture_sampler;
 uniform sampler2D secondary_texture_sampler;
-
-vec4 gamma_correct(vec4 colour) {
-	return vec4(pow(colour.rgb, vec3(1.f / gamma)), colour.a);
-}
+vec4 gamma_correct(in vec4 colour);
 
 //layout(index = 0) subroutine(font_function_class)
 vec4 border_filter(vec2 tc) {

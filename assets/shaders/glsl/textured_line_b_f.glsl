@@ -5,11 +5,7 @@ out vec4 frag_color;
 
 uniform sampler2D line_texture;
 uniform float time;
-
-uniform float gamma;
-vec4 gamma_correct(vec4 colour) {
-	return vec4(pow(colour.rgb, vec3(1.f / gamma)), colour.a);
-}
+vec4 gamma_correct(in vec4 colour);
 
 void main() {
 	float v_factor = 0.5f - sqrt(map_coord.x * map_coord.y);
