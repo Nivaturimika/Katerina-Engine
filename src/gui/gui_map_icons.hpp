@@ -392,12 +392,24 @@ public:
 			}
 			land_combat_window* win = static_cast<land_combat_window*>(state.ui_state.army_combat_window);
 			win->battle = lbattle;
+			//
+			game_scene::deselect_units(state);
+			state.map_state.set_selected_province(dcon::province_id{});
+			game_scene::open_province_window(state, dcon::province_id{});
+			if(state.ui_state.army_status_window) {
+				state.ui_state.army_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.navy_status_window) {
+				state.ui_state.navy_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.multi_unit_selection_window) {
+				state.ui_state.multi_unit_selection_window->set_visible(state, false);
+			}
+			//
 			if(state.ui_state.army_combat_window->is_visible()) {
 				state.ui_state.army_combat_window->impl_on_update(state);
 			} else {
 				state.ui_state.army_combat_window->set_visible(state, true);
-				state.map_state.set_selected_province(dcon::province_id{});
-				game_scene::open_province_window(state, dcon::province_id{});
 				if(state.ui_state.naval_combat_window) {
 					state.ui_state.naval_combat_window->set_visible(state, false);
 				}
@@ -426,12 +438,24 @@ public:
 			}
 			naval_combat_window* win = static_cast<naval_combat_window*>(state.ui_state.naval_combat_window);
 			win->battle = nbattle;
+			//
+			game_scene::deselect_units(state);
+			state.map_state.set_selected_province(dcon::province_id{});
+			game_scene::open_province_window(state, dcon::province_id{});
+			if(state.ui_state.army_status_window) {
+				state.ui_state.army_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.navy_status_window) {
+				state.ui_state.navy_status_window->set_visible(state, false);
+			}
+			if(state.ui_state.multi_unit_selection_window) {
+				state.ui_state.multi_unit_selection_window->set_visible(state, false);
+			}
+			//
 			if(state.ui_state.naval_combat_window->is_visible()) {
 				state.ui_state.naval_combat_window->impl_on_update(state);
 			} else {
 				state.ui_state.naval_combat_window->set_visible(state, true);
-				state.map_state.set_selected_province(dcon::province_id{});
-				game_scene::open_province_window(state, dcon::province_id{});
 				if(state.ui_state.army_combat_window) {
 					state.ui_state.army_combat_window->set_visible(state, false);
 				}

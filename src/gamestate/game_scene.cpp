@@ -987,23 +987,25 @@ void update_ui_state_basic(sys::state& state) {
 }
 
 void update_basic_game_scene(sys::state& state) {
+	update_unit_selection_ui(state);
+	bool hide_bl_window = false;
+	if((state.ui_state.army_status_window && state.ui_state.army_status_window->is_visible())
+	|| (state.ui_state.navy_status_window && state.ui_state.navy_status_window->is_visible())
+	|| (state.ui_state.multi_unit_selection_window && state.ui_state.multi_unit_selection_window->is_visible())) {
+		game_scene::open_province_window(state, dcon::province_id{});
+		hide_bl_window = true;
+	}
 	if(state.ui_state.army_combat_window && state.ui_state.army_combat_window->is_visible()) {
 		ui::land_combat_window* win = static_cast<ui::land_combat_window*>(state.ui_state.army_combat_window);
-		if(win->battle && !state.world.land_battle_is_valid(win->battle)) {
+		if(hide_bl_window || (win->battle && !state.world.land_battle_is_valid(win->battle))) {
 			state.ui_state.army_combat_window->set_visible(state, false);
 		}
 	}
 	if(state.ui_state.naval_combat_window && state.ui_state.naval_combat_window->is_visible()) {
 		ui::naval_combat_window* win = static_cast<ui::naval_combat_window*>(state.ui_state.naval_combat_window);
-		if(win->battle && !state.world.naval_battle_is_valid(win->battle)) {
+		if(hide_bl_window || (win->battle && !state.world.naval_battle_is_valid(win->battle))) {
 			state.ui_state.naval_combat_window->set_visible(state, false);
 		}
-	}
-	update_unit_selection_ui(state);
-	if((state.ui_state.army_status_window && state.ui_state.army_status_window->is_visible())
-	|| (state.ui_state.navy_status_window && state.ui_state.navy_status_window->is_visible())
-	|| (state.ui_state.multi_unit_selection_window && state.ui_state.multi_unit_selection_window->is_visible())) {
-		game_scene::open_province_window(state, dcon::province_id{});
 	}
 	state.map_state.map_data.update_borders(state);
 }
