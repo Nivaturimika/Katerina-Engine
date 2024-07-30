@@ -46,15 +46,15 @@ GLint compile_shader(std::string_view source, GLenum type) {
 
 	std::string s_source(source);
 	GLchar const* texts[] = {
-		"#version 140\r\n",
-		"#extension GL_ARB_explicit_uniform_location : enable\r\n",
-		"#extension GL_ARB_explicit_attrib_location : enable\r\n",
-		"#extension GL_ARB_shader_subroutine : enable\r\n",
-		"#define M_PI 3.1415926535897932384626433832795\r\n",
+		"#version 140\r\n"
+		"#extension GL_ARB_explicit_uniform_location : enable\r\n"
+		"#extension GL_ARB_explicit_attrib_location : enable\r\n"
+		"#extension GL_ARB_shader_subroutine : enable\r\n"
+		"#define M_PI 3.1415926535897932384626433832795\r\n"
 		"#define PI 3.1415926535897932384626433832795\r\n",
 		s_source.c_str()
 	};
-	glShaderSource(return_value, 7, texts, nullptr);
+	glShaderSource(return_value, std::extent_v<decltype(texts)>, texts, nullptr);
 	glCompileShader(return_value);
 
 	GLint result;
@@ -80,8 +80,172 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 	auto v_shader = compile_shader(vertex_shader, GL_VERTEX_SHADER);
 	auto f_shader = compile_shader(fragment_shader, GL_FRAGMENT_SHADER);
 
+/*
+// Skew so the player can see half of the model
+vec3 rotate_skew(vec3 v, float w) {
+	vec3 k = vec3(1.f, 0.f, 0.f);
+	float cos_theta = cos(w);
+	float sin_theta = sin(w);
+	vec3 s = (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+	return vec3(s.x, s.y, clamp(s.z, -1.f, 1.f));
+}
+//Globe coords
+vec4 globe_coords(vec3 world_pos) {
+	vec3 new_world_pos;
+	float angle_x = 2 * world_pos.x * PI;
+	new_world_pos.x = cos(angle_x);
+	new_world_pos.y = sin(angle_x);
+	float angle_y = world_pos.z * PI;
+	new_world_pos.x *= sin(angle_y);
+	new_world_pos.y *= sin(angle_y);
+	new_world_pos.z = cos(angle_y);
+	new_world_pos = rotation * new_world_pos;
+	new_world_pos /= PI;         // Will make the zoom be the same for the globe and flat map
+	new_world_pos *= (1 + world_pos.y);
+	new_world_pos.y *= 0.02;     // Sqeeze the z coords. Needs to be between -1 and 1
+	new_world_pos.xz *= -1;     // Invert the globe
+	new_world_pos.xyz += 0.5;     // Move the globe to the center
+	return vec4(
+		(2.f * new_world_pos.x - 1.f) / aspect_ratio * zoom,
+		(2.f * new_world_pos.z - 1.f) * zoom,
+		(2.f * new_world_pos.y - 1.f), 1.0f);
+}
+//Flat coords
+vec4 flat_coords(vec3 world_pos) {
+	world_pos -= vec3(offset.x, 0.f, -offset.y);
+	world_pos.x = mod(world_pos.x, 1.0f);
+	vec3 v = vec3(
+		(+2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
+		(+2.f * world_pos.z - 1.f) * zoom,
+		world_pos.y * zoom);
+	return vec4(rotate_skew(v, counter_factor), 1.f);
+}
+//Perspective coords
+vec4 perspective_coords(vec3 world_pos) {
+	vec3 new_world_pos;
+	float angle_x = 2 * world_pos.x * PI;
+	new_world_pos.x = cos(angle_x);
+	new_world_pos.y = sin(angle_x);
+	float angle_y = world_pos.y * PI;
+	new_world_pos.x *= sin(angle_y);
+	new_world_pos.y *= sin(angle_y);
+	new_world_pos.z = cos(angle_y);
+	new_world_pos = rotation * new_world_pos;
+	new_world_pos /= PI; // Will make the zoom be the same for the globe and flat map
+	new_world_pos.xz *= -1;
+	new_world_pos.zy = new_world_pos.yz;
+	new_world_pos.x /= aspect_ratio;
+	new_world_pos.z -= 1.2;
+	float near = 0.1;
+	float tangent_length_square = 1.2f * 1.2f - 1 / PI / PI;
+	float far = tangent_length_square / 1.2f;
+	float right = near * tan(PI / 6) / zoom;
+	float top = near * tan(PI / 6) / zoom;
+	new_world_pos.x *= near / right;
+	new_world_pos.y *= near / top;
+	float w = -new_world_pos.z;
+	new_world_pos.z = -(far + near) / (far - near) * new_world_pos.z - 2 * far * near / (far - near);
+	return vec4(new_world_pos, w);
+}
+vec4 calc_gl_position(in vec3 world_pos) {
+	switch(int(subroutines_index)) {
+case 0: return globe_coords(world_pos);
+case 1: return perspective_coords(world_pos);
+case 2: return flat_coords(world_pos);
+default: break;
+	}
+	return vec4(0.f);
+}
+*/
+
+	auto lib_shader = compile_shader(
+		"uniform vec2 offset;\n"
+		"uniform float aspect_ratio;\n"
+		"uniform float zoom;\n"
+		"uniform vec2 map_size;\n"
+		"uniform float width;\n"
+		"uniform mat3 rotation;\n"
+		"uniform float time;\n"
+		"uniform float counter_factor;\n"
+		"uniform uint subroutines_index;\n"
+		"// Skew so the player can see half of the model\r\n"
+		"vec3 rotate_skew(vec3 v, float w) {\r\n"
+		"\t\tvec3 k = vec3(1.f, 0.f, 0.f);\r\n"
+		"\t\tfloat cos_theta = cos(w);\r\n"
+		"\t\tfloat sin_theta = sin(w);\r\n"
+		"\t\tvec3 s = (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);\r\n"
+		"\t\treturn vec3(s.x, s.y, clamp(s.z, -1.f, 1.f));\r\n"
+		"}\r\n"
+		"//Globe coords\n"
+		"vec4 globe_coords(vec3 world_pos) {\n"
+		"\t\tvec3 new_world_pos;\n"
+		"\t\tfloat angle_x = 2 * world_pos.x * PI;\n"
+		"\t\tnew_world_pos.x = cos(angle_x);\n"
+		"\t\tnew_world_pos.y = sin(angle_x);\n"
+		"\t\tfloat angle_y = world_pos.z * PI;\n"
+		"\t\tnew_world_pos.x *= sin(angle_y);\n"
+		"\t\tnew_world_pos.y *= sin(angle_y);\n"
+		"\t\tnew_world_pos.z = cos(angle_y);\n"
+		"\t\tnew_world_pos = rotation * new_world_pos;\n"
+		"\t\tnew_world_pos /= PI;         // Will make the zoom be the same for the globe and flat map\n"
+		"\t\tnew_world_pos *= (1 + world_pos.y);\n"
+		"\t\tnew_world_pos.y *= 0.02;     // Sqeeze the z coords. Needs to be between -1 and 1\n"
+		"\t\tnew_world_pos.xz *= -1;     // Invert the globe\n"
+		"\t\tnew_world_pos.xyz += 0.5;     // Move the globe to the center\n"
+		"\t\treturn vec4(\n"
+		"\t\t(2.f * new_world_pos.x - 1.f) / aspect_ratio * zoom,\n"
+		"\t\t(2.f * new_world_pos.z - 1.f) * zoom,\n"
+		"\t\t(2.f * new_world_pos.y - 1.f), 1.0f);\n"
+		"}\n"
+		"//Flat coords\n"
+		"vec4 flat_coords(vec3 world_pos) {\n"
+		"\tworld_pos -= vec3(offset.x, 0.f, -offset.y);\n"
+		"\tworld_pos.x = mod(world_pos.x, 1.0f);\n"
+		"\tvec3 v = vec3(\n"
+		"\t\t(+2.f * world_pos.x - 1.f) * zoom * aspect_ratio,\n"
+		"\t\t(+2.f * world_pos.z - 1.f) * zoom,\n"
+		"\t\tworld_pos.y * zoom);\n"
+		"\treturn vec4(rotate_skew(v, counter_factor), 1.f);\n"
+		"}\n"
+		"//Perspective coords\n"
+		"vec4 perspective_coords(vec3 world_pos) {\n"
+		"\tvec3 new_world_pos;\n"
+		"\tfloat angle_x = 2 * world_pos.x * PI;\n"
+		"\tnew_world_pos.x = cos(angle_x);\n"
+		"\tnew_world_pos.y = sin(angle_x);\n"
+		"\tfloat angle_y = world_pos.y * PI;\n"
+		"\tnew_world_pos.x *= sin(angle_y);\n"
+		"\tnew_world_pos.y *= sin(angle_y);\n"
+		"\tnew_world_pos.z = cos(angle_y);\n"
+		"\tnew_world_pos = rotation * new_world_pos;\n"
+		"\tnew_world_pos /= PI; // Will make the zoom be the same for the globe and flat map\n"
+		"\tnew_world_pos.xz *= -1;\n"
+		"\tnew_world_pos.zy = new_world_pos.yz;\n"
+		"\tnew_world_pos.x /= aspect_ratio;\n"
+		"\tnew_world_pos.z -= 1.2;\n"
+		"\tfloat near = 0.1;\n"
+		"\tfloat tangent_length_square = 1.2f * 1.2f - 1 / PI / PI;\n"
+		"\tfloat far = tangent_length_square / 1.2f;\n"
+		"\tfloat right = near * tan(PI / 6) / zoom;\n"
+		"\tfloat top = near * tan(PI / 6) / zoom;\n"
+		"\tnew_world_pos.x *= near / right;\n"
+		"\tnew_world_pos.y *= near / top;\n"
+		"\tfloat w = -new_world_pos.z;\n"
+		"\tnew_world_pos.z = -(far + near) / (far - near) * new_world_pos.z - 2 * far * near / (far - near);\n"
+		"\treturn vec4(new_world_pos, w);\n"
+		"}\n"
+		"vec4 calc_gl_position(in vec3 world_pos) {\n"
+		"\tswitch(int(subroutines_index)) {\n"
+		"\t\tcase 0: return globe_coords(world_pos);\n"
+		"\t\tcase 1: return perspective_coords(world_pos);\n"
+		"\t\tcase 2: return flat_coords(world_pos);\n"
+		"\t}\n"
+		"\treturn vec4(0.f);\n"
+		"}\n", GL_VERTEX_SHADER);
+
 	glAttachShader(return_value, v_shader);
 	glAttachShader(return_value, f_shader);
+	glAttachShader(return_value, lib_shader);
 	glLinkProgram(return_value);
 
 	GLint result;

@@ -472,7 +472,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	auto load_shader = [&](GLuint program) {
 		glUseProgram(shaders[program]);
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
-		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], screen_size.x / screen_size.y);
+		if(map_view_mode == map_view::flat) {
+			glUniform1f(shader_uniforms[program][uniform_aspect_ratio], 1.f / (screen_size.x / screen_size.y) * float(size_x) / float(size_y));
+		} else {
+			glUniform1f(shader_uniforms[program][uniform_aspect_ratio], screen_size.x / screen_size.y);
+		}
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
 		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
@@ -559,7 +563,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// NORMAL BORDERS
 	load_shader(shader_borders);
-	//glUniform1f(shader_uniforms[shader_borders][uniform_time], 0.f); //no scrolling
+	glUniform1f(shader_uniforms[shader_borders][uniform_time], 0.f); //no scrolling
 	glBindVertexArray(vao_array[vo_border]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
