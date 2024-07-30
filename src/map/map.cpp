@@ -559,7 +559,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// NORMAL BORDERS
 	load_shader(shader_borders);
-	glUniform1f(shader_uniforms[shader_borders][uniform_time], 0.f); //no scrolling
+	//glUniform1f(shader_uniforms[shader_borders][uniform_time], 0.f); //no scrolling
 	glBindVertexArray(vao_array[vo_border]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
