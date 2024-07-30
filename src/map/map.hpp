@@ -212,16 +212,17 @@ public:
 	static constexpr uint32_t texture_array_count = 2;
 	GLuint texture_arrays[texture_array_count] = { 0 };
 	// Shaders
-	static constexpr uint32_t shader_terrain = 0;
-	static constexpr uint32_t shader_line_border = 1;
-	static constexpr uint32_t shader_textured_line = 2;
-	static constexpr uint32_t shader_line_unit_arrow = 3;
-	static constexpr uint32_t shader_text_line = 4;
-	static constexpr uint32_t shader_drag_box = 5;
-	static constexpr uint32_t shader_borders = 6;
-	static constexpr uint32_t shader_railroad_line = 7;
-	static constexpr uint32_t shader_map_standing_object = 8;
-	static constexpr uint32_t shader_count = 9;
+	static constexpr uint32_t shader_far_terrain = 0;
+	static constexpr uint32_t shader_close_terrain = 1;
+	static constexpr uint32_t shader_line_border = 2;
+	static constexpr uint32_t shader_textured_line = 3;
+	static constexpr uint32_t shader_line_unit_arrow = 4;
+	static constexpr uint32_t shader_text_line = 5;
+	static constexpr uint32_t shader_drag_box = 6;
+	static constexpr uint32_t shader_borders = 7;
+	static constexpr uint32_t shader_railroad_line = 8;
+	static constexpr uint32_t shader_map_standing_object = 9;
+	static constexpr uint32_t shader_count = 10;
 	GLuint shaders[shader_count] = { 0 };
 
 	static constexpr uint32_t uniform_offset = 0;

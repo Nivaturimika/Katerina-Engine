@@ -345,7 +345,8 @@ GLuint create_program(simple_fs::file& vshader_file, simple_fs::file& fshader_fi
 void display_data::load_shaders(simple_fs::directory& root) {
 	// Map shaders
 	auto map_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_v.glsl"));
-	auto map_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_f.glsl"));
+	auto map_far_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_far_f.glsl"));
+	auto map_close_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_close_f.glsl"));
 	auto screen_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/screen_v.glsl"));
 	auto white_color_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/white_color_f.glsl"));
 
@@ -365,7 +366,8 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	auto model3d_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/model3d_v.glsl"));
 	auto model3d_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/model3d_f.glsl"));
 
-	shaders[shader_terrain] = create_program(*map_vshader, *map_fshader);
+	shaders[shader_far_terrain] = create_program(*map_vshader, *map_far_fshader);
+	shaders[shader_close_terrain] = create_program(*map_vshader, *map_close_fshader);
 	shaders[shader_textured_line] = create_program(*tline_vshader, *tline_fshader);
 	shaders[shader_railroad_line] = create_program(*tline_vshader, *tlineb_fshader);
 	shaders[shader_borders] = create_program(*tlineb_vshader, *tlineb_fshader);
@@ -439,35 +441,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_terrain]);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_terrainsheet]);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_water_normal]);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_water]);
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_terrain]);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_overlay]);
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_province_color]);
-	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_political]);
-	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
-	glActiveTexture(GL_TEXTURE11);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_stripes]);
-	glActiveTexture(GL_TEXTURE13);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
-	glActiveTexture(GL_TEXTURE14);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_river_body]);
-	glActiveTexture(GL_TEXTURE15);
-	glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
-
 	// Load general shader stuff, used by both land and borders
 	auto load_shader = [&](GLuint program) {
 		glUseProgram(shaders[program]);
@@ -488,36 +461,90 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
-	load_shader(shader_terrain);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_provinces_texture_sampler], 0);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_terrain_texture_sampler], 1);
-	//glUniform1i(shader_uniforms[shader_terrain][uniform_unused_texture_2], 2);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_terrainsheet_texture_sampler], 3);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_water_normal], 4);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_colormap_water], 5);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_colormap_terrain], 6);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_overlay], 7);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_province_color], 8);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_colormap_political], 9);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_province_highlight], 10);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_stripes_texture], 11);
-	//glUniform1i(shader_uniforms[shader_terrain][uniform_unused_texture_12], 12);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_province_fow], 13);
-	//glUniform1i(shader_uniforms[shader_terrain][uniform_unused_texture_14], 14);
-	glUniform1i(shader_uniforms[shader_terrain][uniform_diag_border_identifier], 15);
-	{ // Land specific shader uniform
-		// get_land()
-		GLuint fragment_subroutines = 0;
-		if(active_map_mode == map_mode::mode::terrain)
-			fragment_subroutines = 0; // get_land_terrain/get_water_terrain()
-		else if(zoom > map::zoom_close)
-			fragment_subroutines = 1; // get_land_political_close/get_water_terrain()
-		else
-			fragment_subroutines = 2; // get_land_political_far/get_water_political()
-		glUniform1ui(shader_uniforms[shader_terrain][uniform_subroutines_index_2], fragment_subroutines);
+	if(active_map_mode == map_mode::mode::terrain || zoom > map::zoom_close) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_terrain]);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_terrainsheet]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_water_normal]);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_water]);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_terrain]);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_overlay]);
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_province_color]);
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_political]);
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
+		glActiveTexture(GL_TEXTURE11);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_stripes]);
+		glActiveTexture(GL_TEXTURE13);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
+		glActiveTexture(GL_TEXTURE15);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
+		load_shader(shader_close_terrain);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_provinces_texture_sampler], 0);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_terrain_texture_sampler], 1);
+		//glUniform1i(shader_uniforms[shader_close_terrain][uniform_unused_texture_2], 2);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_terrainsheet_texture_sampler], 3);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_water_normal], 4);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_colormap_water], 5);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_colormap_terrain], 6);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_overlay], 7);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_province_color], 8);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_colormap_political], 9);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_province_highlight], 10);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_stripes_texture], 11);
+		//glUniform1i(shader_uniforms[shader_close_terrain][uniform_unused_texture_12], 12);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_province_fow], 13);
+		//glUniform1i(shader_uniforms[shader_close_terrain][uniform_unused_texture_14], 14);
+		glUniform1i(shader_uniforms[shader_close_terrain][uniform_diag_border_identifier], 15);
+		{ // Land specific shader uniform
+			// get_land()
+			GLuint fragment_subroutines = 0;
+			if(active_map_mode == map_mode::mode::terrain)
+				fragment_subroutines = 0; // get_land_terrain/get_water_terrain()
+			else if(zoom > map::zoom_close)
+				fragment_subroutines = 1; // get_land_political_close/get_water_terrain()
+			glUniform1ui(shader_uniforms[shader_close_terrain][uniform_subroutines_index_2], fragment_subroutines);
+		}
+		glBindVertexArray(vao_array[vo_land]);
+		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
+	} else {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_terrain]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_terrainsheet]);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_overlay]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_province_color]);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_political]);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_stripes]);
+		load_shader(shader_far_terrain);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_provinces_texture_sampler], 0);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_terrain_texture_sampler], 1);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_terrainsheet_texture_sampler], 2);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_overlay], 3);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_province_color], 4);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_colormap_political], 5);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_province_highlight], 6);
+		glUniform1i(shader_uniforms[shader_far_terrain][uniform_stripes_texture], 7);
+		glBindVertexArray(vao_array[vo_land]);
+		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
 	}
-	glBindVertexArray(vao_array[vo_land]);
-	glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
 	glDisable(GL_PRIMITIVE_RESTART);
 
 	// Draw the rivers
