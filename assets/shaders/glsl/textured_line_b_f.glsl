@@ -12,6 +12,7 @@ vec4 gamma_correct(vec4 colour) {
 }
 
 void main() {
-	vec4 out_color = texture(line_texture, vec2(o_dist, tex_coord - time + map_coord.y * 0.05f));
+	float v_factor = 0.5f - sqrt(map_coord.x * map_coord.y);
+	vec4 out_color = texture(line_texture, vec2(o_dist, tex_coord - time * v_factor));
 	frag_color = gamma_correct(out_color);
 }
