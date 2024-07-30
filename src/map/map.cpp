@@ -741,7 +741,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
 	} else {
 		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0004f); // width
-		glUniform1f(shader_uniforms[shader_borders][uniform_time], time_counter);
+		glUniform1f(shader_uniforms[shader_borders][uniform_time], time_counter * 0.25f);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_shoreline]);
 		glBindVertexArray(vao_array[vo_coastal]);
@@ -2207,7 +2207,7 @@ void display_data::load_map(sys::state& state) {
 	textures[texture_overlay] = load_dds_texture(map_terrain_dir, NATIVE("map_overlay_tile.dds"));
 	textures[texture_stripes] = load_dds_texture(map_terrain_dir, NATIVE("stripes.dds"));
 
-	textures[texture_shoreline] = ogl::make_gl_texture(assets_dir, NATIVE("shoreline.dds"));
+	textures[texture_shoreline] = load_dds_texture(assets_dir, NATIVE("shoreline.dds"));
 	ogl::set_gltex_parameters(textures[texture_shoreline], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
 	textures[texture_river_body] = load_dds_texture(assets_dir, NATIVE("river.dds"));
