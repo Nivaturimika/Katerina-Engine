@@ -41,7 +41,8 @@ vec3 rotate_skew(vec3 v, float w) {
 	vec3 k = vec3(1.f, 0.f, 0.f);
 	float cos_theta = cos(w);
 	float sin_theta = sin(w);
-	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+	vec3 s = (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
+	return vec3(s.x, s.y, clamp(s.z, -1.f, 1.f));
 }
 vec4 flat_coords() {
 	vec2 world_pos = vertex_position + vec2(-offset.x, offset.y);
