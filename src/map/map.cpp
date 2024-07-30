@@ -1457,11 +1457,14 @@ bool get_provinces_part_of_rr_path(sys::state& state, std::vector<bool>& visited
 	for(const auto adj : state.world.province_get_province_adjacency_as_connected_provinces(p)) {
 		auto const pa = adj.get_connected_provinces(adj.get_connected_provinces(0) == p ? 1 : 0);
 		if(pa.get_building_level(economy::province_building_type::railroad) == 0
-			|| visited_prov[pa.id.index()])
+		|| visited_prov[pa.id.index()])
 			continue;
 		// Do not display railroads if it's a strait OR an impassable land border!
 		if((adj.get_type() & province::border::impassible_bit) != 0
-			|| (adj.get_type() & province::border::non_adjacent_bit) != 0)
+		|| (adj.get_type() & province::border::non_adjacent_bit) != 0)
+			continue;
+		// Don't make earth-wide railroads
+		if(std::abs(state.world.province_get_mid_point(p).x - pa.get_mid_point().x) > state.map_state.map_data.size_x / 8.f)
 			continue;
 		valid_adj.push_back(adj.id);
 	}
@@ -1516,6 +1519,13 @@ void display_data::update_railroad_paths(sys::state& state) {
 					break;
 				auto p2 = adj.get_connected_provinces(adj.get_connected_provinces(0) == p1.id ? 1 : 0);
 				if(p2.get_building_level(economy::province_building_type::railroad) == 0)
+					continue;
+				// Do not display railroads if it's a strait OR an impassable land border!
+				if((adj.get_type() & province::border::impassible_bit) != 0
+				|| (adj.get_type() & province::border::non_adjacent_bit) != 0)
+					continue;
+				// Don't make earth-wide railroads
+				if(std::abs(p1.get_mid_point().x - p2.get_mid_point().x) > state.map_state.map_data.size_x / 8.f)
 					continue;
 				max_adj--;
 				if(visited_adj[adj.id.index()])
