@@ -267,6 +267,9 @@ public:
 	static constexpr uint32_t uniform_count = 37;
 	GLuint shader_uniforms[shader_count][uniform_count] = { };
 
+	static constexpr uint32_t max_bone_matrices = 100;
+	GLuint bone_matrices_uniform_array = 0;
+
 	// models: Textures for static meshes
 	static constexpr uint32_t max_static_meshes = 0x140;
 	static constexpr uint32_t max_static_submeshes = 16;
@@ -274,10 +277,8 @@ public:
 	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
 	uint32_t static_mesh_submesh_node_index[max_static_meshes][max_static_submeshes] = { };
 
-	static constexpr uint32_t max_static_nodes = 128;
-	uint32_t static_mesh_idle_animation_index[max_static_meshes][max_static_nodes] = { };
-	uint32_t static_mesh_attack_animation_index[max_static_meshes][max_static_nodes] = { };
-	uint32_t static_mesh_move_animation_index[max_static_meshes][max_static_nodes] = { };
+	uint32_t static_mesh_idle_animation_start[max_static_meshes] = { };
+	uint32_t static_mesh_idle_animation_count[max_static_meshes] = { };
 
 	dcon::emfx_object_id model_wake;
 	dcon::emfx_object_id model_blockaded;

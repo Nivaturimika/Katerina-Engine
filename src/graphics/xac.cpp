@@ -525,10 +525,16 @@ const char* parse_xac_mesh_v1(xac_context& context, const char* start, const cha
 
 const char* parse_xac_skinning_v3(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
 	/*
-		Influence indices indexes into the (influence starts and counts) arrays, as in:
-		start = influence_start[influence_indice[vertex_id]]
-		then the influence start and count determines the range/span into the influences array
-		influences[start:start + count] -> our influences for this vertice
+	Influence indices indexes into the (influence starts and counts) arrays, as in:
+	start = influence_start[influence_indice[vertex_id]]
+	then the influence start and count determines the range/span into the influences array
+	influences[start:start + count] -> our influences for this vertice
+
+	This amounts to the set of a weight and a node id (bone id), the bone id corresponds to a node
+	so this means nodes can be used to manipulate elements only.
+
+	For example, "UniversalManip" can be a node with no vertices, but with defined influences into a
+	visible, polygonal node (that has visible polygonal meshes).
 	*/
 	auto const sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&start, end, err);
 #ifdef XAC_DEBUG
@@ -679,6 +685,24 @@ void parse_xac(xac_context& context, const char* start, const char* end, parsers
 #endif
 }
 
+emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index) {
+	assert(node_index < context.nodes.size());
+	auto const& c_node = context.nodes[node_index];
+	if(c_node.parent_id != -1) {
+		return &context.nodes[c_node.parent_id];
+	}
+	return nullptr;
+}
+emfx::xac_pp_actor_node* get_visible_parent_node(xac_context& context, uint32_t node_index) {
+	if(auto* node = get_parent_node(context, node_index); node) {
+		if(node->visual_mesh != -1) {
+			return node;
+		}
+		return get_visible_parent_node(context, node->parent_id);
+	}
+	return nullptr;
+}
+
 void finish(xac_context& context) {
 	// Post-proccessing step: Transform ALL vectors using the given matrices
 	// for rotation and position, and scale too!
@@ -726,15 +750,26 @@ void finish(xac_context& context) {
 	}
 }
 
+xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err) {
+	// can be either 16 or 32 bit
+	auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
+	xac_vector4f nkf;
+	nkf.x = float(kf.x) / 32767.f;
+	nkf.y = float(kf.y) / 32767.f;
+	nkf.z = float(kf.z) / 32767.f;
+	nkf.w = float(kf.w) / 32767.f;
+	return nkf;
+}
+
 const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
 	uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
 	for(uint32_t i = 0; i < num_sub_motions; i++) {
 		context.animations.push_back(xsm_animation{});
 		xsm_animation& anim = context.animations.back();
-		anim.pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
-		anim.bind_pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
-		anim.pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
-		anim.bind_pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
+		anim.pose_rotation = parse_quat_16b(&start, end, err);
+		anim.bind_pose_rotation = parse_quat_16b(&start, end, err);
+		anim.pose_scale_rotation = parse_quat_16b(&start, end, err);
+		anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err);
 		//
 		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
 		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
@@ -753,7 +788,12 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 		}
 		for(uint32_t j = 0; j < num_rot_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
-			anim.rotation_keys.push_back(kf);
+			emfx::xac_vector4f nkf;
+			nkf.x = float(kf.value.x) / 32767.f;
+			nkf.y = float(kf.value.y) / 32767.f;
+			nkf.z = float(kf.value.z) / 32767.f;
+			nkf.w = float(kf.value.w) / 32767.f;
+			anim.rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
 		}
 		for(uint32_t j = 0; j < num_scale_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
@@ -761,7 +801,12 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 		}
 		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
-			anim.scale_rotation_keys.push_back(kf);
+			emfx::xac_vector4f nkf;
+			nkf.x = float(kf.value.x) / 32767.f;
+			nkf.y = float(kf.value.y) / 32767.f;
+			nkf.z = float(kf.value.z) / 32767.f;
+			nkf.w = float(kf.value.w) / 32767.f;
+			anim.scale_rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
 		}
 	}
 	return nullptr;
@@ -809,6 +854,23 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 	std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
 	std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
 #endif
+}
+
+void finish(xsm_context& context) {
+	for(auto& anim : context.animations) {
+		for(auto& s : anim.position_keys) {
+			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+		}
+		for(auto& s : anim.rotation_keys) {
+			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+		}
+		for(auto& s : anim.scale_keys) {
+			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+		}
+		for(auto& s : anim.scale_rotation_keys) {
+			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+		}
+	}
 }
 
 }

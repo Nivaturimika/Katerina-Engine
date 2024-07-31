@@ -8,6 +8,7 @@
 #include <glm/gtx/polar_coordinates.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "stb_image.h"
 #include "system_state.hpp"
@@ -417,37 +418,84 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shader_uniforms[i][uniform_model_rotation] = glGetUniformLocation(shaders[i], "model_rotation");
 		shader_uniforms[i][uniform_model_scale_rotation] = glGetUniformLocation(shaders[i], "model_scale_rotation");
 	}
+	bone_matrices_uniform_array = glGetUniformLocation(shaders[shader_map_standing_object], "bones_matrices");
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter) {
 	if(!emfx)
 		return;
 	auto index = emfx.index();
-	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
-		auto node_index = static_mesh_submesh_node_index[index][i];
-
-		emfx::xac_vector3f m_position{ 1.f, 1.f, 1.f };
-		emfx::xac_vector3f m_scale{ 1.f, 1.f, 1.f };
-		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]; true) {
-			//animations[idle_anim].bind_pose_position;
-			auto const& an = animations[idle_anim];
-			m_position = an.pose_position;
-			if(an.position_keys.size() > 0) {
-				m_position = an.position_keys[0].value;
-			}
-			m_scale = an.pose_scale;
-			if(an.scale_keys.size() > 0) {
-				m_scale = an.scale_keys[0].value;
-			}
+	std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
+	for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
+		auto const& an = animations[k + static_mesh_idle_animation_start[index]];
+		assert(an.bone_id != -1);
+		//auto scale_factor = glm::fract(time_counter); //an.total_anim_time;
+		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
+		uint32_t pos_index = uint32_t(glm::floor(time_counter)) % key_frames;
+		auto k_time = glm::fract(time_counter);
+		for(uint32_t j = pos_index; j < pos_index + 1; j++) {
+			auto k_pos1 = j < an.position_keys.size()
+				? an.position_keys[j].value
+				: an.pose_position;
+			auto k_rot1 = j < an.rotation_keys.size()
+				? an.rotation_keys[j].value
+				: an.pose_rotation;
+			auto k_sca1 = j < an.scale_keys.size()
+				? an.scale_keys[j].value
+				: an.pose_scale;
+			//
+			auto k_pos2 = j + 1 < an.position_keys.size()
+				? an.position_keys[j + 1].value
+				: an.pose_position;
+			auto k_rot2 = j + 1 < an.rotation_keys.size()
+				? an.rotation_keys[j + 1].value
+				: an.pose_rotation;
+			auto k_sca2 = j + 1 < an.scale_keys.size()
+				? an.scale_keys[j + 1].value
+				: an.pose_scale;
+			//
+			auto k_pos1_time = (j < an.position_keys.size() ? an.position_keys[j].time : 0.f);
+			auto k_pos2_time = (j + 1 < an.position_keys.size() ? an.position_keys[j + 1].time : 0.f);
+			glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
+				glm::mix(
+					glm::vec3(k_pos1.x, k_pos1.y, k_pos1.z),
+					glm::vec3(k_pos2.x, k_pos2.y, k_pos2.z),
+					k_time
+				)
+			);
+			//
+			auto k_rot1_time = (j < an.rotation_keys.size() ? an.rotation_keys[j].time : 0.f);
+			auto k_rot2_time = (j + 1 < an.rotation_keys.size() ? an.rotation_keys[j + 1].time : 0.f);
+			glm::mat4x4 mr = glm::toMat4(glm::normalize(
+				glm::slerp(
+					glm::quat(k_rot1.x, k_rot1.y, k_rot1.z, k_rot1.w),
+					glm::quat(k_rot2.x, k_rot2.y, k_rot2.z, k_rot2.w),
+					k_time
+				)
+			));
+			//
+			auto k_sca1_time = (j < an.scale_keys.size() ? an.scale_keys[j].time : 0.f);
+			auto k_sca2_time = (j + 1 < an.scale_keys.size() ? an.scale_keys[j + 1].time : 0.f);
+			glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
+				glm::mix(
+					glm::vec3(k_sca1.x, k_sca1.y, k_sca1.y),
+					glm::vec3(k_sca2.x, k_sca2.y, k_sca2.y),
+					k_time
+				)
+			);
+			//
+			assert(an.bone_id < int32_t(ar_matrices.size()));
+			ar_matrices[an.bone_id] = mt * mr * ms;//glm::mat4x4(1.f);// mt * mr * ms;
 		}
-		glUniform3f(shader_uniforms[shader_map_standing_object][uniform_model_position], m_position.x, m_position.y, m_position.z);
-		glUniform3f(shader_uniforms[shader_map_standing_object][uniform_model_scale], m_scale.x, m_scale.y, m_scale.z);
+	}
+	glUniformMatrix4fv(bone_matrices_uniform_array, GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 
+	glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
+	glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], facing);
+	glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
+	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
-		glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_facing], facing);
-		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
 		glUniform1f(shader_uniforms[shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
 		glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 	}
@@ -901,11 +949,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glClearDepth(1.f);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
+		glDepthRange(0.f, 1.f);
 
 		load_shader(shader_map_standing_object);
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
+#if 0
 		// Train stations
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
@@ -919,7 +969,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-			if(units.begin() == units.end()) {
+			if(units.begin() == units.end() && level > 0) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -928,8 +978,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Naval base (full)
 		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto units = state.world.province_get_navy_location_as_location(p);
 			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-			if(auto units = state.world.province_get_navy_location_as_location(p); units.begin() != units.end()) {
+			if(units.begin() != units.end() && level > 0) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -958,40 +1009,46 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto lc = state.world.province_get_province_building_construction(p);
-			if(lc.begin() != lc.end()) {
-				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
-				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-				render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+				auto lc = state.world.province_get_province_building_construction(p);
+				if(lc.begin() != lc.end()) {
+					auto center = state.world.province_get_mid_point(p);
+					auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
+					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
+					render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+				}
 			}
 		});
 		// Construction [naval]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto lc = state.world.province_get_province_naval_construction(p);
-			if(lc.begin() != lc.end()) {
-				auto p1 = duplicates::get_navy_location(state, p);
-				auto p2 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_construction_naval, p1, -theta, 0.f, time_counter);
+			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+				auto lc = state.world.province_get_province_naval_construction(p);
+				if(lc.begin() != lc.end()) {
+					auto p1 = duplicates::get_navy_location(state, p);
+					auto p2 = state.world.province_get_mid_point(p);
+					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+					render_model(model_construction_naval, p1, -theta, 0.f, time_counter);
+				}
 			}
 		});
 		// Construction [military]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			for(const auto pl : state.world.province_get_pop_location(p)) {
-				auto lc = pl.get_pop().get_province_land_construction();
-				if(lc.begin() != lc.end()) {
-					auto center = state.world.province_get_mid_point(p);
-					auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
-					auto seed_r = pl.get_pop().id.index();
-					render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
-					break;
+			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+				for(const auto pl : state.world.province_get_pop_location(p)) {
+					auto lc = pl.get_pop().get_province_land_construction();
+					if(lc.begin() != lc.end()) {
+						auto center = state.world.province_get_mid_point(p);
+						auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
+						auto seed_r = pl.get_pop().id.index();
+						render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+						break;
+					}
 				}
 			}
 		});
 		// Blockaded
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(military::province_is_blockaded(state, p)) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_blockaded(state, p)) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -1000,11 +1057,12 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(military::province_is_under_siege(state, p)) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
 				render_model(model_siege, center, 0.f, 0.f, time_counter);
 			}
 		});
+#endif
 
 		/*
 		auto render_canal = [&](uint32_t index, uint32_t canal_id, float theta) {
@@ -1044,9 +1102,12 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				if(p1 == p2)
+					theta = -glm::pi<float>() / 2.f;
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
+#if 0
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
@@ -1070,9 +1131,12 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+				if(p1 == p2)
+					theta = -glm::pi<float>() / 2.f;
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
+#endif
 		glDisable(GL_DEPTH_TEST);
 	}
 
@@ -1978,11 +2042,45 @@ emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material 
 		: mat.layers[0];
 }
 
+void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context) {
+	auto root = simple_fs::get_root(state.common_fs);
+	emfx::xsm_context anim_context{};
+	if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
+		parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
+		auto contents = simple_fs::view_contents(*cf);
+		emfx::parse_xsm(anim_context, contents.data, contents.data + contents.file_size, err);
+		emfx::finish(anim_context);
+		//
+		auto old_size = state.map_state.map_data.animations.size();
+		state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
+		for(const auto& anim : anim_context.animations) {
+			if(anim.position_keys.empty() && anim.rotation_keys.empty()
+			&& anim.scale_keys.empty() && anim.scale_rotation_keys.empty()) {
+				continue;
+			}
+			auto t_anim = anim;
+			t_anim.bone_id = -1;
+			for(uint32_t i = 0; i < model_context.nodes.size(); i++) {
+				if(t_anim.node == model_context.nodes[i].name) {
+					t_anim.bone_id = int32_t(i);
+					break;
+				}
+			}
+			if(t_anim.bone_id != -1) {
+				state.map_state.map_data.animations.push_back(t_anim);
+			}
+		}
+		state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+	}
+}
+
 void load_static_meshes(sys::state& state) {
 	struct static_mesh_vertex {
 		glm::vec3 position_;
 		glm::vec2 normal_;
 		glm::vec2 texture_coord_;
+		int bone_ids[4] = { -1, -1, -1, -1 };
+		float bone_weights[4] = { 0.f, 0.f, 0.f, 0.f };
 	};
 	std::vector<static_mesh_vertex> static_mesh_vertices;
 
@@ -2123,25 +2221,6 @@ void load_static_meshes(sys::state& state) {
 			}
 		}
 
-		emfx::xsm_context idle_anim_context{};
-		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.idle))); cf) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
-			auto contents = simple_fs::view_contents(*cf);
-			emfx::parse_xsm(idle_anim_context, contents.data, contents.data + contents.file_size, err);
-		}
-		emfx::xsm_context move_anim_context{};
-		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.move))); cf) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
-			auto contents = simple_fs::view_contents(*cf);
-			emfx::parse_xsm(move_anim_context, contents.data, contents.data + contents.file_size, err);
-		}
-		emfx::xsm_context attack_anim_context{};
-		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.attack))); cf) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
-			auto contents = simple_fs::view_contents(*cf);
-			emfx::parse_xsm(attack_anim_context, contents.data, contents.data + contents.file_size, err);
-		}
-
 		auto actorfile = state.to_string_view(emfx_obj.actorfile);
 		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(actorfile)); f) {
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
@@ -2149,34 +2228,14 @@ void load_static_meshes(sys::state& state) {
 			emfx::xac_context context{};
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
 			emfx::finish(context);
+
+			load_animation(state, state.to_string_view(emfx_obj.idle), k, context);
+			
 			uint32_t node_index = 0;
 			for(auto const& node : context.nodes) {
 				if(node.name == "polySurface95") {
 					node_index++;
 					continue;
-				}
-
-				assert(node_index < state.map_state.map_data.max_static_nodes);
-				for(const auto& anim : idle_anim_context.animations) {
-					if(anim.node == node.name) {
-						state.map_state.map_data.static_mesh_idle_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
-						state.map_state.map_data.animations.push_back(anim);
-						break;
-					}
-				}
-				for(const auto& anim : attack_anim_context.animations) {
-					if(anim.node == node.name) {
-						state.map_state.map_data.static_mesh_attack_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
-						state.map_state.map_data.animations.push_back(anim);
-						break;
-					}
-				}
-				for(const auto& anim : move_anim_context.animations) {
-					if(anim.node == node.name) {
-						state.map_state.map_data.static_mesh_move_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
-						state.map_state.map_data.animations.push_back(anim);
-						break;
-					}
 				}
 
 				int32_t mesh_index = 0;
@@ -2188,7 +2247,7 @@ void load_static_meshes(sys::state& state) {
 						for(uint32_t i = 0; i < uint32_t(sub.indices.size()); i += 3) {
 							static_mesh_vertex triangle_vertices[3];
 							for(uint32_t j = 0; j < 3; j++) {
-								static_mesh_vertex smv;
+								static_mesh_vertex& smv = triangle_vertices[j];
 								auto index = sub.indices[i + j] + vertex_offset;
 								auto vv = mesh.vertices[index % mesh.vertices.size()];
 								auto vn = mesh.normals.empty()
@@ -2200,7 +2259,15 @@ void load_static_meshes(sys::state& state) {
 								smv.position_ = glm::vec3(vv.x, vv.y, vv.z);
 								smv.normal_ = glm::vec3(vn.x, vn.y, vn.z);
 								smv.texture_coord_ = glm::vec2(vt.x, vt.y);
-								triangle_vertices[j] = smv;
+								//
+								uint32_t i_start = mesh.influence_starts[mesh.influence_indices[index]];
+								uint32_t i_count = mesh.influence_counts[mesh.influence_indices[index]];
+								assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
+								for(uint32_t l = 0; l < i_count; l++) {
+									smv.bone_ids[l] = mesh.influences[l + i_start].bone_id;
+									assert(smv.bone_ids[l] < state.map_state.map_data.max_bone_matrices);
+									smv.bone_weights[l] = mesh.influences[l + i_start].weight;
+								}
 							}
 							if(!is_collision) {
 								for(const auto& smv : triangle_vertices) {
@@ -2276,12 +2343,18 @@ void load_static_meshes(sys::state& state) {
 	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, position_)); // Set up vertex attribute format for the position
 	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
 	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
+	glVertexAttribIPointer(3, 4, GL_INT, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_ids));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_weights));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
 	glVertexAttribBinding(0, 0);
 	glVertexAttribBinding(1, 0);
 	glVertexAttribBinding(2, 0);
+	//glVertexAttribBinding(3, 0);
+	//glVertexAttribBinding(4, 0);
 	glBindVertexArray(0);
 }
 

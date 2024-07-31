@@ -271,30 +271,36 @@ struct xac_chunk_header {
 	// data[len]
 };
 
+emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index);
+emfx::xac_pp_actor_node* get_visible_parent_node(xac_context& context, uint32_t node_index);
+void parse_xac(xac_context& context, const char* start, const char* end, parsers::error_handler& err);
+void finish(xac_context& context);
+
 enum class xsm_chunk_type : uint8_t {
 	metadata = 0xc9,
 	bone_animation = 0xca,
 };
-
 template<typename T> struct xsm_animation_key {
 	T value;
 	float time;
 };
 struct xsm_animation {
 	std::string node;
-	emfx::xac_vector4u16 pose_rotation;
-	emfx::xac_vector4u16 bind_pose_rotation;
-	emfx::xac_vector4u16 pose_scale_rotation;
-	emfx::xac_vector4u16 bind_pose_scale_rotation;
+	emfx::xac_vector4f pose_rotation;
+	emfx::xac_vector4f bind_pose_rotation;
+	emfx::xac_vector4f pose_scale_rotation;
+	emfx::xac_vector4f bind_pose_scale_rotation;
 	emfx::xac_vector3f pose_position;
 	emfx::xac_vector3f pose_scale;
 	emfx::xac_vector3f bind_pose_position;
 	emfx::xac_vector3f bind_pose_scale;
 	std::vector<xsm_animation_key<emfx::xac_vector3f>> position_keys;
 	std::vector<xsm_animation_key<emfx::xac_vector3f>> scale_keys;
-	std::vector<xsm_animation_key<emfx::xac_vector4u16>> rotation_keys;
-	std::vector<xsm_animation_key<emfx::xac_vector4u16>> scale_rotation_keys;
+	std::vector<xsm_animation_key<emfx::xac_vector4f>> rotation_keys;
+	std::vector<xsm_animation_key<emfx::xac_vector4f>> scale_rotation_keys;
 	float max_error = 0.f;
+	int32_t bone_id = -1; //assigned by processer
+	float total_anim_time = 0.f; //to scale properly
 };
 struct xsm_context {
 	std::vector<xsm_animation> animations;
@@ -302,8 +308,7 @@ struct xsm_context {
 };
 struct xsm_header : public xac_header { };
 struct xsm_chunk_header : public xac_chunk_header { };
-
-void parse_xac(xac_context& context, const char* start, const char* end, parsers::error_handler& err);
 void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err);
-void finish(xac_context& context);
+void finish(xsm_context& context);
+
 }
