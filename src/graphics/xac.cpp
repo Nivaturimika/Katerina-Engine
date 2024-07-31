@@ -724,10 +724,10 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 	uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
 	for(uint32_t i = 0; i < num_sub_motions; i++) {
 		xsm_animation anim{};
-		anim.pose_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
-		anim.bind_pose_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
-		anim.pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
-		anim.bind_pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
+		anim.pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
+		anim.bind_pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
+		anim.pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
+		anim.bind_pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
 		//
 		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
 		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
@@ -746,7 +746,7 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 			anim.position_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_rot_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f_u16>>(&start, end, err);
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 			anim.rotation_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_scale_keys; j++) {
@@ -754,7 +754,7 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 			anim.scale_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f_u16>>(&start, end, err);
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 			anim.scale_rotation_keys.push_back(kf);
 		}
 	}

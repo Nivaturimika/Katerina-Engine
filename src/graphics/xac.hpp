@@ -47,10 +47,10 @@ struct xac_color_rgb {
 	float b = 0.f;
 };
 struct xac_vector4u16 {
-	int16_t x = 0;
-	int16_t y = 0;
-	int16_t z = 0;
-	int16_t w = 0;
+	int32_t x = 0;
+	int32_t y = 0;
+	int32_t z = 0;
+	int32_t w = 0;
 };
 struct xac_mat4x4 {
 	float m[16] = { 0.f };
