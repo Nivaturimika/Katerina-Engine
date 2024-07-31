@@ -723,7 +723,8 @@ void finish(xac_context& context) {
 const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
 	uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
 	for(uint32_t i = 0; i < num_sub_motions; i++) {
-		xsm_animation anim{};
+		context.animations.push_back(xsm_animation{});
+		xsm_animation& anim = context.animations.back();
 		anim.pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
 		anim.bind_pose_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
 		anim.pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4u16>(&start, end, err);
@@ -738,9 +739,8 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 		uint32_t num_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
 		uint32_t num_scale_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
 		uint32_t num_scale_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
-		float max_error = parse_xac_any_binary<float>(&start, end, err);
-		std::string name = "";
-		start = parse_xac_cstring_nodiscard(name, start, end, err);
+		anim.max_error = parse_xac_any_binary<float>(&start, end, err);
+		start = parse_xac_cstring_nodiscard(anim.node, start, end, err);
 		for(uint32_t j = 0; j < num_pos_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
 			anim.position_keys.push_back(kf);

@@ -281,6 +281,7 @@ template<typename T> struct xsm_animation_key {
 	float time;
 };
 struct xsm_animation {
+	std::string node;
 	emfx::xac_vector4u16 pose_rotation;
 	emfx::xac_vector4u16 bind_pose_rotation;
 	emfx::xac_vector4u16 pose_scale_rotation;
@@ -293,6 +294,7 @@ struct xsm_animation {
 	std::vector<xsm_animation_key<emfx::xac_vector3f>> scale_keys;
 	std::vector<xsm_animation_key<emfx::xac_vector4u16>> rotation_keys;
 	std::vector<xsm_animation_key<emfx::xac_vector4u16>> scale_rotation_keys;
+	float max_error = 0.f;
 };
 struct xsm_context {
 	std::vector<xsm_animation> animations;

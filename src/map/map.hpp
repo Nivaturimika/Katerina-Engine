@@ -4,11 +4,12 @@
 #define GLEW_STATIC
 #endif
 #include "glew.h"
+#include <glm/vec2.hpp>
+#include <glm/mat4x4.hpp>
 
 #include "map_modes.hpp"
 #include "opengl_wrapper.hpp"
-#include <glm/vec2.hpp>
-#include <glm/mat4x4.hpp>
+#include "xac.hpp"
 
 namespace sys {
 struct state;
@@ -267,6 +268,12 @@ public:
 	static constexpr uint32_t max_static_submeshes = 16;
 	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { };
 	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
+	uint32_t static_mesh_submesh_node_index[max_static_meshes][max_static_submeshes] = { };
+
+	static constexpr uint32_t max_static_nodes = 16;
+	uint32_t static_mesh_idle_animation_index[max_static_meshes][max_static_nodes] = { };
+	uint32_t static_mesh_attack_animation_index[max_static_meshes][max_static_nodes] = { };
+	uint32_t static_mesh_move_animation_index[max_static_meshes][max_static_nodes] = { };
 
 	dcon::emfx_object_id model_wake;
 	dcon::emfx_object_id model_blockaded;
@@ -280,6 +287,7 @@ public:
 	dcon::emfx_object_id model_construction_military;
 	dcon::emfx_object_id model_siege;
 	std::vector<dcon::emfx_object_id> model_gc_unit[uint8_t(culture::graphical_culture_type::count)];
+	std::vector<emfx::xsm_animation> animations;
 
 	void load_border_data(parsers::scenario_building_context& context);
 	void create_border_ogl_objects();

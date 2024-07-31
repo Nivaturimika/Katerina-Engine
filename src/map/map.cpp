@@ -2099,26 +2099,23 @@ void load_static_meshes(sys::state& state) {
 			}
 		}
 
-		auto move_anim = state.to_string_view(emfx_obj.idle);
-		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(move_anim)); f) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
-			auto contents = simple_fs::view_contents(*f);
-			emfx::xsm_context context{};
-			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+		emfx::xsm_context idle_anim_context{};
+		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.idle))); cf) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
+			auto contents = simple_fs::view_contents(*cf);
+			emfx::parse_xsm(idle_anim_context, contents.data, contents.data + contents.file_size, err);
 		}
-		auto attack_anim = state.to_string_view(emfx_obj.idle);
-		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(attack_anim)); f) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
-			auto contents = simple_fs::view_contents(*f);
-			emfx::xsm_context context{};
-			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+		emfx::xsm_context move_anim_context{};
+		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.move))); cf) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
+			auto contents = simple_fs::view_contents(*cf);
+			emfx::parse_xsm(move_anim_context, contents.data, contents.data + contents.file_size, err);
 		}
-		auto idle_anim = state.to_string_view(emfx_obj.idle);
-		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(idle_anim)); f) {
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
-			auto contents = simple_fs::view_contents(*f);
-			emfx::xsm_context context{};
-			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+		emfx::xsm_context attack_anim_context{};
+		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(state.to_string_view(emfx_obj.attack))); cf) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
+			auto contents = simple_fs::view_contents(*cf);
+			emfx::parse_xsm(attack_anim_context, contents.data, contents.data + contents.file_size, err);
 		}
 
 		auto actorfile = state.to_string_view(emfx_obj.actorfile);
@@ -2128,9 +2125,33 @@ void load_static_meshes(sys::state& state) {
 			emfx::xac_context context{};
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
 			emfx::finish(context);
+			uint32_t node_index = 0;
 			for(auto const& node : context.nodes) {
 				if(node.name == "polySurface95")
 					continue;
+
+				for(const auto& anim : idle_anim_context.animations) {
+					if(anim.node == node.name) {
+						state.map_state.map_data.static_mesh_idle_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
+						state.map_state.map_data.animations.push_back(anim);
+						break;
+					}
+				}
+				for(const auto& anim : attack_anim_context.animations) {
+					if(anim.node == node.name) {
+						state.map_state.map_data.static_mesh_attack_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
+						state.map_state.map_data.animations.push_back(anim);
+						break;
+					}
+				}
+				for(const auto& anim : move_anim_context.animations) {
+					if(anim.node == node.name) {
+						state.map_state.map_data.static_mesh_move_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
+						state.map_state.map_data.animations.push_back(anim);
+						break;
+					}
+				}
+
 				int32_t mesh_index = 0;
 				for(auto const& mesh : node.meshes) {
 					bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
@@ -2185,16 +2206,19 @@ void load_static_meshes(sys::state& state) {
 							}
 							state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 						}
+						state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
 						state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
 						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 					}
 					mesh_index++;
 				}
+				node_index++;
 			}
 		}
 	}
 
 	//fill missing models with any
+	/*
 	for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
 		for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
 			if(!state.map_state.map_data.model_gc_unit[i][j]) {
@@ -2215,6 +2239,7 @@ void load_static_meshes(sys::state& state) {
 			}
 		}
 	}
+	*/
 
 	if(!static_mesh_vertices.empty()) {
 		glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);
