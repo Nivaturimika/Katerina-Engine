@@ -46,6 +46,9 @@ void main() {
 	vec3 world_pos = vec3(vertex_position);
 	world_pos += skin_pos;
 
+	world_pos.xz = world_pos.zx;
+	world_pos.y *= -1.f;
+
 	world_pos = rotate_target(world_pos);
 	world_pos /= vec3(map_size.x, vertical_factor, map_size.y);
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
