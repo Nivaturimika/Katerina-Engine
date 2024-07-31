@@ -2,6 +2,8 @@
 #include "parsers.hpp"
 #include <cassert>
 
+#define XAC_DEBUG 1
+
 /*
 ==========================================================================================================
 FOR XAC FILES
@@ -269,6 +271,10 @@ const char* parse_xac_cstring(const char* start, const char* end, parsers::error
 
 const char* parse_xac_cstring_nodiscard(std::string& out, const char* start, const char* end, parsers::error_handler& err) {
 	auto const len = parse_xac_any_binary<uint32_t>(&start, end, err);
+	if(len >= 0xffff) {
+		err.accumulated_errors += "Invalid string size (" + std::to_string(len) + ")\n";
+		return start + len;
+	}
 	out.resize(size_t(len), '\0');
 	std::memcpy(&out[0], start, size_t(len));
 	out[len] = '\0';
@@ -701,12 +707,13 @@ void finish(xac_context& context) {
 				qm.m[2 * 4 + 2] * node.scale.z, //2 * 4 + 2 = 10
 				node.position.z, //2 * 4 + 3 = 11
 			};
+			float w = 1.f;
 			for(uint32_t i = 0; i < o.vertices.size(); i++) {
 				emfx::xac_vector3f v = o.vertices[i];
-				v.x = tm.m[0 * 4 + 0] * v.x + tm.m[0 * 4 + 1] * v.y + tm.m[0 * 4 + 2] * v.z + tm.m[0 * 4 + 3] * 1.f; // w = 1.f
-				v.y = tm.m[1 * 4 + 0] * v.x + tm.m[1 * 4 + 1] * v.y + tm.m[1 * 4 + 2] * v.z + tm.m[1 * 4 + 3] * 1.f;
-				v.z = tm.m[2 * 4 + 0] * v.x + tm.m[2 * 4 + 1] * v.y + tm.m[2 * 4 + 2] * v.z + tm.m[2 * 4 + 3] * 1.f;
-				//v.w = tm.m[3 * 4 + 0] * v.x + tm.m[3 * 4 + 1] * v.y + tm.m[3 * 4 + 2] * v.z + tm.m[3 * 4 + 3] * 1.f;
+				v.x = tm.m[0 * 4 + 0] * v.x + tm.m[0 * 4 + 1] * v.y + tm.m[0 * 4 + 2] * v.z + tm.m[0 * 4 + 3] * w;
+				v.y = tm.m[1 * 4 + 0] * v.x + tm.m[1 * 4 + 1] * v.y + tm.m[1 * 4 + 2] * v.z + tm.m[1 * 4 + 3] * w;
+				v.z = tm.m[2 * 4 + 0] * v.x + tm.m[2 * 4 + 1] * v.y + tm.m[2 * 4 + 2] * v.z + tm.m[2 * 4 + 3] * w;
+				//v.w = tm.m[3 * 4 + 0] * v.x + tm.m[3 * 4 + 1] * v.y + tm.m[3 * 4 + 2] * v.z + tm.m[3 * 4 + 3] * w;
 				o.vertices[i] = v;
 			}
 		}
@@ -714,44 +721,43 @@ void finish(xac_context& context) {
 }
 
 const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
-
-	/*
-			chunk CA : bone animation(v2)
-				int32 numSubMotions
-				SkeletalSubMotion[numSubMotions] :
-				quat16 poseRot
-				quat16 bindPoseRot
-				quat16 poseScaleRot
-				quat16 bindPoseScaleRot
-				vec3D posePos
-				vec3D poseScale
-				vec3D bindPosePos
-				vec3D bindPoseScale
-				int32 numPosKeys
-				int32 numRotKeys
-				int32 numScaleKeys
-				int32 numScaleRotKeys
-				float fMaxError
-				string nodeName
-
-				// fTime of first item in each array must be 0
-
-				PosKey[numPosKeys]:
-			vec3d pos
-				float fTime
-
-				RotKey[numRotKeys] :
-				quat16 rot
-				float fTime
-
-				ScaleKey[numScaleKeys] :
-				vec3d scale
-				float fTime
-
-				ScaleRotKey[numScaleRotKeys] :
-				quat16 rot
-				float fTime
-*/
+	uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
+	for(uint32_t i = 0; i < num_sub_motions; i++) {
+		xsm_animation anim{};
+		anim.pose_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
+		anim.bind_pose_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
+		anim.pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
+		anim.bind_pose_scale_rotation = parse_xac_any_binary<emfx::xac_vector4f_u16>(&start, end, err);
+		//
+		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		//
+		uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+		uint32_t num_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+		uint32_t num_scale_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+		uint32_t num_scale_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+		float max_error = parse_xac_any_binary<float>(&start, end, err);
+		std::string name = "";
+		start = parse_xac_cstring_nodiscard(name, start, end, err);
+		for(uint32_t j = 0; j < num_pos_keys; j++) {
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
+			anim.position_keys.push_back(kf);
+		}
+		for(uint32_t j = 0; j < num_rot_keys; j++) {
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f_u16>>(&start, end, err);
+			anim.rotation_keys.push_back(kf);
+		}
+		for(uint32_t j = 0; j < num_scale_keys; j++) {
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
+			anim.scale_keys.push_back(kf);
+		}
+		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
+			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f_u16>>(&start, end, err);
+			anim.scale_rotation_keys.push_back(kf);
+		}
+	}
 	return nullptr;
 }
 
@@ -794,16 +800,6 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 		}
 	}
 #ifdef XAC_DEBUG
-	for(const auto& node : context.nodes) {
-		std::printf("Node: %s\n", node.name.c_str());
-		std::printf("* Meshes: %zu\n", node.meshes.size());
-		for(const auto& o : node.meshes) {
-			std::printf("\tMesh\n");
-			std::printf("\t* vertices: %zu\n", o.vertices.size());
-			std::printf("\t* normals: %zu\n", o.normals.size());
-			std::printf("\t* texcoords: %zu\n", o.texcoords.size());
-		}
-	}
 	std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
 	std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
 #endif

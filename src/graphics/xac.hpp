@@ -46,6 +46,12 @@ struct xac_color_rgb {
 	float g = 0.f;
 	float b = 0.f;
 };
+struct xac_vector4u16 {
+	int16_t x = 0;
+	int16_t y = 0;
+	int16_t z = 0;
+	int16_t w = 0;
+};
 struct xac_mat4x4 {
 	float m[16] = { 0.f };
 };
@@ -269,12 +275,33 @@ enum class xsm_chunk_type : uint8_t {
 	metadata = 0xc9,
 	bone_animation = 0xca,
 };
+
+template<typename T> struct xsm_animation_key {
+	T value;
+	float time;
+};
+struct xsm_animation {
+	emfx::xac_vector4u16 pose_rotation;
+	emfx::xac_vector4u16 bind_pose_rotation;
+	emfx::xac_vector4u16 pose_scale_rotation;
+	emfx::xac_vector4u16 bind_pose_scale_rotation;
+	emfx::xac_vector3f pose_position;
+	emfx::xac_vector3f pose_scale;
+	emfx::xac_vector3f bind_pose_position;
+	emfx::xac_vector3f bind_pose_scale;
+	std::vector<xsm_animation_key<emfx::xac_vector3f>> position_keys;
+	std::vector<xsm_animation_key<emfx::xac_vector3f>> scale_keys;
+	std::vector<xsm_animation_key<emfx::xac_vector4u16>> rotation_keys;
+	std::vector<xsm_animation_key<emfx::xac_vector4u16>> scale_rotation_keys;
+};
 struct xsm_context {
+	std::vector<xsm_animation> animations;
 	bool ignore_length = false;
 };
 struct xsm_header : public xac_header { };
 struct xsm_chunk_header : public xac_chunk_header { };
 
 void parse_xac(xac_context& context, const char* start, const char* end, parsers::error_handler& err);
+void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err);
 void finish(xac_context& context);
 }

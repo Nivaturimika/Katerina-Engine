@@ -900,7 +900,7 @@ public:
 class minimap_zoom_in_button : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
-		state.map_state.zoom = std::clamp(state.map_state.zoom * 2.0f,map::min_zoom, map::max_zoom);
+		state.map_state.zoom = std::clamp(state.map_state.zoom * 2.0f, map::min_zoom, map::max_zoom);
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;

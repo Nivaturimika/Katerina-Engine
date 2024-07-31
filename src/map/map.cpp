@@ -455,7 +455,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
 		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
 		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
-		glUniform1f(shader_uniforms[program][uniform_counter_factor], zoom > map::zoom_close ? (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close) * 1.f : 0.f);
+		float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
+		float z_sigmoid = std::sin(z_factor * glm::pi<float>() * 0.5f);
+		//z_factor = (10.f * z_factor) - 5.f;
+		//float z_sigmoid = std::expf(z_factor) / (1.f + std::expf(z_factor));
+		glUniform1f(shader_uniforms[program][uniform_counter_factor], zoom > map::zoom_close ? z_sigmoid * 1.f : 0.f);
 		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
 	};
 
@@ -2093,6 +2097,28 @@ void load_static_meshes(sys::state& state) {
 					}
 				}
 			}
+		}
+
+		auto move_anim = state.to_string_view(emfx_obj.idle);
+		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(move_anim)); f) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
+			auto contents = simple_fs::view_contents(*f);
+			emfx::xsm_context context{};
+			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+		}
+		auto attack_anim = state.to_string_view(emfx_obj.idle);
+		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(attack_anim)); f) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
+			auto contents = simple_fs::view_contents(*f);
+			emfx::xsm_context context{};
+			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+		}
+		auto idle_anim = state.to_string_view(emfx_obj.idle);
+		if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(idle_anim)); f) {
+			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
+			auto contents = simple_fs::view_contents(*f);
+			emfx::xsm_context context{};
+			emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
 		}
 
 		auto actorfile = state.to_string_view(emfx_obj.actorfile);
