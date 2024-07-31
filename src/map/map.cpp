@@ -428,7 +428,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 
 		emfx::xac_vector3f m_position{ 1.f, 1.f, 1.f };
 		emfx::xac_vector3f m_scale{ 1.f, 1.f, 1.f };
-		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]) {
+		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]; true) {
 			//animations[idle_anim].bind_pose_position;
 			auto const& an = animations[idle_anim];
 			m_position = an.pose_position;
@@ -1033,7 +1033,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					if(auto path = unit.get_army().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
 					}
-					auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
+					auto gc = 0;//unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_army().get_army_membership()) {
 						auto utid = sm.get_regiment().get_type();
 						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
@@ -2151,8 +2151,10 @@ void load_static_meshes(sys::state& state) {
 			emfx::finish(context);
 			uint32_t node_index = 0;
 			for(auto const& node : context.nodes) {
-				if(node.name == "polySurface95")
+				if(node.name == "polySurface95") {
+					node_index++;
 					continue;
+				}
 
 				assert(node_index < state.map_state.map_data.max_static_nodes);
 				for(const auto& anim : idle_anim_context.animations) {
@@ -2200,8 +2202,6 @@ void load_static_meshes(sys::state& state) {
 								smv.texture_coord_ = glm::vec2(vt.x, vt.y);
 								triangle_vertices[j] = smv;
 							}
-							// Clip standing planes (some models have flat planes
-							// beneath them)
 							if(!is_collision) {
 								for(const auto& smv : triangle_vertices) {
 									static_mesh_vertex tmp = smv;
@@ -2212,29 +2212,31 @@ void load_static_meshes(sys::state& state) {
 						}
 						vertex_offset += sub.num_vertices;
 
-						auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
-						assert(submesh_index < state.map_state.map_data.max_static_submeshes);
-						// This is how most models fallback to find their textures...
-						auto const& mat = context.materials[sub.material_id];
-						auto const& layer = get_diffuse_layer(mat);
-						if(!layer.texture.empty()) {
-							GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
-							if(!texid) {
-								texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
+						if(!is_collision) {
+							auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
+							assert(submesh_index < state.map_state.map_data.max_static_submeshes);
+							// This is how most models fallback to find their textures...
+							auto const& mat = context.materials[sub.material_id];
+							auto const& layer = get_diffuse_layer(mat);
+							if(!layer.texture.empty()) {
+								GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
 								if(!texid) {
-									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
+									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
+									if(!texid) {
+										texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
+									}
 								}
+								if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
+									state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+								} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
+									state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+								}
+								state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 							}
-							if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
-								state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
-							} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
-								state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
-							}
-							state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
+							state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
+							state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
+							state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 						}
-						state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
-						state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
-						state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 					}
 					mesh_index++;
 				}

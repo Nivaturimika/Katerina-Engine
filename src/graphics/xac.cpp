@@ -524,6 +524,12 @@ const char* parse_xac_mesh_v1(xac_context& context, const char* start, const cha
 }
 
 const char* parse_xac_skinning_v3(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+	/*
+		Influence indices indexes into the (influence starts and counts) arrays, as in:
+		start = influence_start[influence_indice[vertex_id]]
+		then the influence start and count determines the range/span into the influences array
+		influences[start:start + count] -> our influences for this vertice
+	*/
 	auto const sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&start, end, err);
 #ifdef XAC_DEBUG
 	std::printf("NInfluences=%u\n", sh.num_influences);

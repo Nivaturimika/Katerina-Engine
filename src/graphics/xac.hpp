@@ -250,7 +250,7 @@ struct xac_skinning_v3_chunk_header {
 struct xac_skinning_v3_influence_entry {
 	float weight = 0.f;
 	int16_t bone_id = -1;
-	uint8_t unused[2] = { 0 };
+	uint8_t unused[2] = { 0, 0 };
 };
 struct xac_skinning_v3_influence_range {
 	uint32_t first_influence_index = 0;
