@@ -431,62 +431,64 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		assert(an.bone_id != -1);
 		//auto scale_factor = glm::fract(time_counter); //an.total_anim_time;
 		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
-		uint32_t pos_index = uint32_t(glm::floor(time_counter)) % key_frames;
-		auto k_time = glm::fract(time_counter);
-		for(uint32_t j = pos_index; j < pos_index + 1; j++) {
-			auto k_pos1 = j < an.position_keys.size()
-				? an.position_keys[j].value
-				: an.pose_position;
-			auto k_rot1 = j < an.rotation_keys.size()
-				? an.rotation_keys[j].value
-				: an.pose_rotation;
-			auto k_sca1 = j < an.scale_keys.size()
-				? an.scale_keys[j].value
-				: an.pose_scale;
-			//
-			auto k_pos2 = j + 1 < an.position_keys.size()
-				? an.position_keys[j + 1].value
-				: an.pose_position;
-			auto k_rot2 = j + 1 < an.rotation_keys.size()
-				? an.rotation_keys[j + 1].value
-				: an.pose_rotation;
-			auto k_sca2 = j + 1 < an.scale_keys.size()
-				? an.scale_keys[j + 1].value
-				: an.pose_scale;
-			//
-			auto k_pos1_time = (j < an.position_keys.size() ? an.position_keys[j].time : 0.f);
-			auto k_pos2_time = (j + 1 < an.position_keys.size() ? an.position_keys[j + 1].time : 0.f);
-			glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
-				glm::mix(
-					glm::vec3(k_pos1.x, k_pos1.y, k_pos1.z),
-					glm::vec3(k_pos2.x, k_pos2.y, k_pos2.z),
-					k_time
-				)
-			);
-			//
-			auto k_rot1_time = (j < an.rotation_keys.size() ? an.rotation_keys[j].time : 0.f);
-			auto k_rot2_time = (j + 1 < an.rotation_keys.size() ? an.rotation_keys[j + 1].time : 0.f);
-			glm::mat4x4 mr = glm::toMat4(glm::normalize(
-				glm::slerp(
-					glm::quat(k_rot1.x, k_rot1.y, k_rot1.z, k_rot1.w),
-					glm::quat(k_rot2.x, k_rot2.y, k_rot2.z, k_rot2.w),
-					k_time
-				)
-			));
-			//
-			auto k_sca1_time = (j < an.scale_keys.size() ? an.scale_keys[j].time : 0.f);
-			auto k_sca2_time = (j + 1 < an.scale_keys.size() ? an.scale_keys[j + 1].time : 0.f);
-			glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
-				glm::mix(
-					glm::vec3(k_sca1.x, k_sca1.y, k_sca1.y),
-					glm::vec3(k_sca2.x, k_sca2.y, k_sca2.y),
-					k_time
-				)
-			);
-			//
-			assert(an.bone_id < int32_t(ar_matrices.size()));
-			ar_matrices[an.bone_id] = mt * mr * ms;//glm::mat4x4(1.f);// mt * mr * ms;
-		}
+		//uint32_t pos_index = uint32_t(glm::floor(time_counter)) % key_frames;
+		//auto k_time = glm::fract(time_counter);
+
+		uint32_t j = 0;
+		float k_time = 0.f;
+
+		auto k_pos1 = j < an.position_keys.size()
+			? an.position_keys[j].value
+			: an.pose_position;
+		auto k_rot1 = j < an.rotation_keys.size()
+			? an.rotation_keys[j].value
+			: an.pose_rotation;
+		auto k_sca1 = j < an.scale_keys.size()
+			? an.scale_keys[j].value
+			: an.pose_scale;
+		//
+		auto k_pos2 = j + 1 < an.position_keys.size()
+			? an.position_keys[j + 1].value
+			: an.pose_position;
+		auto k_rot2 = j + 1 < an.rotation_keys.size()
+			? an.rotation_keys[j + 1].value
+			: an.pose_rotation;
+		auto k_sca2 = j + 1 < an.scale_keys.size()
+			? an.scale_keys[j + 1].value
+			: an.pose_scale;
+		//
+		auto k_pos1_time = (j < an.position_keys.size() ? an.position_keys[j].time : 0.f);
+		auto k_pos2_time = (j + 1 < an.position_keys.size() ? an.position_keys[j + 1].time : 0.f);
+		glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
+			glm::mix(
+				glm::vec3(k_pos1.x, k_pos1.y, k_pos1.z),
+				glm::vec3(k_pos2.x, k_pos2.y, k_pos2.z),
+				k_time
+			)
+		);
+		//
+		auto k_rot1_time = (j < an.rotation_keys.size() ? an.rotation_keys[j].time : 0.f);
+		auto k_rot2_time = (j + 1 < an.rotation_keys.size() ? an.rotation_keys[j + 1].time : 0.f);
+		glm::mat4x4 mr = glm::toMat4(glm::normalize(
+			glm::slerp(
+				glm::quat(k_rot1.x, k_rot1.y, k_rot1.z, k_rot1.w),
+				glm::quat(k_rot2.x, k_rot2.y, k_rot2.z, k_rot2.w),
+				k_time
+			)
+		));
+		//
+		auto k_sca1_time = (j < an.scale_keys.size() ? an.scale_keys[j].time : 0.f);
+		auto k_sca2_time = (j + 1 < an.scale_keys.size() ? an.scale_keys[j + 1].time : 0.f);
+		glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
+			glm::mix(
+				glm::vec3(k_sca1.x, k_sca1.y, k_sca1.y),
+				glm::vec3(k_sca2.x, k_sca2.y, k_sca2.y),
+				k_time
+			)
+		);
+		//
+		assert(an.bone_id < int32_t(ar_matrices.size()));
+		ar_matrices[an.bone_id] = mt * mr * ms;//glm::mat4x4(1.f);// mt * mr * ms;
 	}
 	glUniformMatrix4fv(bone_matrices_uniform_array, GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 
