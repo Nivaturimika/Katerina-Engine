@@ -428,13 +428,14 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 
 		emfx::xac_vector3f m_position{ 1.f, 1.f, 1.f };
 		emfx::xac_vector3f m_scale{ 1.f, 1.f, 1.f };
-
 		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]) {
 			//animations[idle_anim].bind_pose_position;
 			auto const& an = animations[idle_anim];
+			m_position = an.pose_position;
 			if(an.position_keys.size() > 0) {
 				m_position = an.position_keys[0].value;
 			}
+			m_scale = an.pose_scale;
 			if(an.scale_keys.size() > 0) {
 				m_scale = an.scale_keys[0].value;
 			}
@@ -2153,6 +2154,7 @@ void load_static_meshes(sys::state& state) {
 				if(node.name == "polySurface95")
 					continue;
 
+				assert(node_index < state.map_state.map_data.max_static_nodes);
 				for(const auto& anim : idle_anim_context.animations) {
 					if(anim.node == node.name) {
 						state.map_state.map_data.static_mesh_idle_animation_index[k][node_index] = uint32_t(state.map_state.map_data.animations.size());
@@ -2211,6 +2213,7 @@ void load_static_meshes(sys::state& state) {
 						vertex_offset += sub.num_vertices;
 
 						auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
+						assert(submesh_index < state.map_state.map_data.max_static_submeshes);
 						// This is how most models fallback to find their textures...
 						auto const& mat = context.materials[sub.material_id];
 						auto const& layer = get_diffuse_layer(mat);
