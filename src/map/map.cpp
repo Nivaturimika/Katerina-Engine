@@ -429,13 +429,18 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 	for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
 		auto const& an = animations[k + static_mesh_idle_animation_start[index]];
 		assert(an.bone_id != -1);
-		//auto scale_factor = glm::fract(time_counter); //an.total_anim_time;
-		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
-		//uint32_t pos_index = uint32_t(glm::floor(time_counter)) % key_frames;
-		//auto k_time = glm::fract(time_counter);
 
-		uint32_t j = 0;
-		float k_time = 0.f;
+		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
+		assert(key_frames > 0);
+		//uint32_t j = uint32_t(glm::floor(time_counter)) % key_frames;
+
+		uint32_t j = 9999;
+		float k_time = glm::fract(time_counter);
+		assert(k_time >= 0.f && k_time <= 1.f);
+
+		auto g_pos = glm::vec3(an.pose_position.x, an.pose_position.y, an.pose_position.z);
+		auto g_rot = glm::quat(an.pose_rotation.x, an.pose_rotation.y, an.pose_rotation.z, an.pose_rotation.w);
+		auto g_sca = glm::vec3(an.pose_scale.x, an.pose_scale.y, an.pose_scale.z);
 
 		auto k_pos1 = j < an.position_keys.size()
 			? an.position_keys[j].value
@@ -488,7 +493,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		);
 		//
 		assert(an.bone_id < int32_t(ar_matrices.size()));
-		ar_matrices[an.bone_id] = mt * mr * ms;//glm::mat4x4(1.f);// mt * mr * ms;
+		ar_matrices[an.bone_id] = glm::mat4x4(0.f);// mt* mr* ms; //mt * mr * ms;//glm::mat4x4(1.f);//mt * mr * ms;
 	}
 	glUniformMatrix4fv(bone_matrices_uniform_array, GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 
@@ -2238,7 +2243,7 @@ void load_static_meshes(sys::state& state) {
 			auto contents = simple_fs::view_contents(*f);
 			emfx::xac_context context{};
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
-			emfx::finish(context);
+			//emfx::finish(context);
 
 			load_animation(state, state.to_string_view(emfx_obj.idle), k, context);
 			

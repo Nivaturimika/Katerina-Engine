@@ -750,15 +750,21 @@ void finish(xac_context& context) {
 	}
 }
 
-xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err) {
+xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err, bool as_16b) {
 	// can be either 16 or 32 bit
-	auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
-	xac_vector4f nkf;
-	nkf.x = float(kf.x) / 32767.f;
-	nkf.y = float(kf.y) / 32767.f;
-	nkf.z = float(kf.z) / 32767.f;
-	nkf.w = float(kf.w) / 32767.f;
-	return nkf;
+	if(as_16b) {
+		auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
+		xac_vector4f nkf;
+		nkf.x = float(kf.x) / 32767.f;
+		nkf.y = -(float(kf.y) / 32767.f);
+		nkf.z = -(float(kf.z) / 32767.f);
+		nkf.w = float(kf.w) / 32767.f;
+		return nkf;
+	}
+	auto kf = parse_xac_any_binary<xac_vector4f>(start, end, err);
+	kf.y *= -1.f;
+	kf.z *= -1.f;
+	return kf;
 }
 
 const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
@@ -766,10 +772,10 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 	for(uint32_t i = 0; i < num_sub_motions; i++) {
 		context.animations.push_back(xsm_animation{});
 		xsm_animation& anim = context.animations.back();
-		anim.pose_rotation = parse_quat_16b(&start, end, err);
-		anim.bind_pose_rotation = parse_quat_16b(&start, end, err);
-		anim.pose_scale_rotation = parse_quat_16b(&start, end, err);
-		anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err);
+		anim.pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+		anim.bind_pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+		anim.pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+		anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
 		//
 		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
 		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
@@ -787,26 +793,40 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 			anim.position_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_rot_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 			emfx::xac_vector4f nkf;
-			nkf.x = float(kf.value.x) / 32767.f;
-			nkf.y = float(kf.value.y) / 32767.f;
-			nkf.z = float(kf.value.z) / 32767.f;
-			nkf.w = float(kf.value.w) / 32767.f;
-			anim.rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
+			if(context.use_quat_16) {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
+				nkf.x = float(kf.value.x) / 32767.f;
+				nkf.y = -(float(kf.value.y) / 32767.f);
+				nkf.z = -(float(kf.value.z) / 32767.f);
+				nkf.w = float(kf.value.w) / 32767.f;
+				anim.rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
+			} else {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f>>(&start, end, err);
+				kf.value.y *= -1.f;
+				kf.value.z *= -1.f;
+				anim.rotation_keys.push_back(xsm_animation_key{ kf.value, kf.time });
+			}
 		}
 		for(uint32_t j = 0; j < num_scale_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
 			anim.scale_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 			emfx::xac_vector4f nkf;
-			nkf.x = float(kf.value.x) / 32767.f;
-			nkf.y = float(kf.value.y) / 32767.f;
-			nkf.z = float(kf.value.z) / 32767.f;
-			nkf.w = float(kf.value.w) / 32767.f;
-			anim.scale_rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
+			if(context.use_quat_16) {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
+				nkf.x = float(kf.value.x) / 32767.f;
+				nkf.y = -(float(kf.value.y) / 32767.f);
+				nkf.z = -(float(kf.value.z) / 32767.f);
+				nkf.w = float(kf.value.w) / 32767.f;
+				anim.scale_rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
+			} else {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f>>(&start, end, err);
+				kf.value.y *= -1.f;
+				kf.value.z *= -1.f;
+				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf.value, kf.time });
+			}
 		}
 	}
 	return nullptr;
@@ -819,6 +839,7 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 		err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
 		return;
 	}
+	context.use_quat_16 = h.multiply_order == 0;
 #ifdef XAC_DEBUG
 	std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
 #endif

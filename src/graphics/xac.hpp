@@ -304,6 +304,7 @@ struct xsm_animation {
 };
 struct xsm_context {
 	std::vector<xsm_animation> animations;
+	bool use_quat_16 = false;
 	bool ignore_length = false;
 };
 struct xsm_header : public xac_header { };
