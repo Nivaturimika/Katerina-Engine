@@ -1575,6 +1575,11 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 				return false;
 			if(screen_pos.y <= float(std::numeric_limits<int16_t>::min() / 2))
 				return false;
+
+			if(screen_pos.x < 0.f || screen_pos.y < 0.f)
+				return false;
+			if(screen_pos.x > screen_size.x || screen_pos.y > screen_size.y)
+				return false;
 			return true;
 		}
 	case sys::projection_mode::num_of_modes:
