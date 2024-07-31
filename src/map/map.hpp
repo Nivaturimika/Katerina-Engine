@@ -270,7 +270,7 @@ public:
 	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
 	uint32_t static_mesh_submesh_node_index[max_static_meshes][max_static_submeshes] = { };
 
-	static constexpr uint32_t max_static_nodes = 16;
+	static constexpr uint32_t max_static_nodes = 32;
 	uint32_t static_mesh_idle_animation_index[max_static_meshes][max_static_nodes] = { };
 	uint32_t static_mesh_attack_animation_index[max_static_meshes][max_static_nodes] = { };
 	uint32_t static_mesh_move_animation_index[max_static_meshes][max_static_nodes] = { };

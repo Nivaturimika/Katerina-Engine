@@ -419,6 +419,11 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		return;
 	auto index = emfx.index();
 	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
+		auto node_index = static_mesh_submesh_node_index[index][i];
+		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]) {
+			//animations[idle_anim].bind_pose_position;
+		}
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
 		glUniform2f(shader_uniforms[shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
@@ -2218,7 +2223,6 @@ void load_static_meshes(sys::state& state) {
 	}
 
 	//fill missing models with any
-	/*
 	for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
 		for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
 			if(!state.map_state.map_data.model_gc_unit[i][j]) {
@@ -2239,7 +2243,6 @@ void load_static_meshes(sys::state& state) {
 			}
 		}
 	}
-	*/
 
 	if(!static_mesh_vertices.empty()) {
 		glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);
