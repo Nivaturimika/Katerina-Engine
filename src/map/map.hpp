@@ -260,7 +260,11 @@ public:
 	static constexpr uint32_t uniform_target_facing = 30;
 	static constexpr uint32_t uniform_target_topview_fixup = 31;
 	static constexpr uint32_t uniform_counter_factor = 32;
-	static constexpr uint32_t uniform_count = 33;
+	static constexpr uint32_t uniform_model_position = 33;
+	static constexpr uint32_t uniform_model_scale = 34;
+	static constexpr uint32_t uniform_model_rotation = 35;
+	static constexpr uint32_t uniform_model_scale_rotation = 36;
+	static constexpr uint32_t uniform_count = 37;
 	GLuint shader_uniforms[shader_count][uniform_count] = { };
 
 	// models: Textures for static meshes

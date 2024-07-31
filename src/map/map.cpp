@@ -411,6 +411,11 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shader_uniforms[i][uniform_target_topview_fixup] = glGetUniformLocation(shaders[i], "target_topview_fixup");
 		shader_uniforms[i][uniform_width] = glGetUniformLocation(shaders[i], "width");
 		shader_uniforms[i][uniform_counter_factor] = glGetUniformLocation(shaders[i], "counter_factor");
+		//model
+		shader_uniforms[i][uniform_model_position] = glGetUniformLocation(shaders[i], "model_position");
+		shader_uniforms[i][uniform_model_scale] = glGetUniformLocation(shaders[i], "model_scale");
+		shader_uniforms[i][uniform_model_rotation] = glGetUniformLocation(shaders[i], "model_rotation");
+		shader_uniforms[i][uniform_model_scale_rotation] = glGetUniformLocation(shaders[i], "model_scale_rotation");
 	}
 }
 
@@ -420,9 +425,22 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 	auto index = emfx.index();
 	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
 		auto node_index = static_mesh_submesh_node_index[index][i];
+
+		emfx::xac_vector3f m_position{ 1.f, 1.f, 1.f };
+		emfx::xac_vector3f m_scale{ 1.f, 1.f, 1.f };
+
 		if(auto idle_anim = static_mesh_idle_animation_index[index][node_index]) {
 			//animations[idle_anim].bind_pose_position;
+			auto const& an = animations[idle_anim];
+			if(an.position_keys.size() > 0) {
+				m_position = an.position_keys[0].value;
+			}
+			if(an.scale_keys.size() > 0) {
+				m_scale = an.scale_keys[0].value;
+			}
 		}
+		glUniform3f(shader_uniforms[shader_map_standing_object][uniform_model_position], m_position.x, m_position.y, m_position.z);
+		glUniform3f(shader_uniforms[shader_map_standing_object][uniform_model_scale], m_scale.x, m_scale.y, m_scale.z);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
