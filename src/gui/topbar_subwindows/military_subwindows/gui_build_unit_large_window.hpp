@@ -99,6 +99,8 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		dcon::unit_type_id utid = retrieve<dcon::unit_type_id>(state, parent);
+		if(!utid)
+			return;
 		dcon::province_id p = retrieve<dcon::province_id>(state, parent);
 		if(is_navy) {
 			text::add_line(state, contents, "military_build_unit_tooltip", text::variable_type::name, state.military_definitions.unit_base_definitions[utid].name, text::variable_type::loc, state.world.province_get_name(p));
