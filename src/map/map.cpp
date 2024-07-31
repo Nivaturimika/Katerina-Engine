@@ -591,7 +591,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glUniform1ui(shader_uniforms[shader_close_terrain][uniform_subroutines_index_2], fragment_subroutines);
 		}
 		glBindVertexArray(vao_array[vo_land]);
-		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
+		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
 	} else {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
@@ -619,7 +619,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1i(shader_uniforms[shader_far_terrain][uniform_province_highlight], 6);
 		glUniform1i(shader_uniforms[shader_far_terrain][uniform_stripes_texture], 7);
 		glBindVertexArray(vao_array[vo_land]);
-		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size() - 1), GL_UNSIGNED_SHORT, map_indices.data());
+		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
 	}
 	glDisable(GL_PRIMITIVE_RESTART);
 
@@ -672,14 +672,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
 	// impassible borders
 
-	auto const province_is_visible = [&](dcon::province_id p) {
+	std::vector<bool> province_on_screen(state.world.province_size(), false);
+	for(const auto p : state.world.in_province) {
 		glm::vec2 tmp;
-		return state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(state.world.province_get_mid_point(p)), screen_size, tmp);
-	};
+		province_on_screen[p.id.index()] = state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(p.get_mid_point()), screen_size, tmp);
+	}
 	auto const border_is_visible = [&](dcon::province_adjacency_id adj) {
 		auto p1 = state.world.province_adjacency_get_connected_provinces(adj, 0);
 		auto p2 = state.world.province_adjacency_get_connected_provinces(adj, 1);
-		return province_is_visible(p1) || province_is_visible(p2);
+		return province_on_screen[p1.index()] && province_on_screen[p2.index()];
 	};
 
 	if(zoom > map::zoom_close) {
@@ -943,15 +944,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		}
 	}
 
-		/*
-		else if(state.cheat_data.province_names) {
-			glUniform1f(15, 1.f);
-			glBindVertexArray(vao_array[vo_province_text_line]);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_province_text_line]);
-			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)province_text_line_vertices.size());
-		}
-	}*/
-
 	if(zoom > map::zoom_very_close && state.user_settings.render_models) {
 		constexpr float dist_step = 1.77777f;
 		// Render standing objects
@@ -968,7 +960,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 		// Train stations
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p)) {
+			if(province_on_screen[p.index()]) {
 				auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
 				if(level > 0) {
 					auto center = state.world.province_get_mid_point(p);
@@ -979,7 +971,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Naval base (empty)
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p)) {
+			if(province_on_screen[p.index()]) {
 				auto units = state.world.province_get_navy_location_as_location(p);
 				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
 				if(units.begin() == units.end() && level > 0) {
@@ -992,7 +984,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Naval base (full)
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p)) {
+			if(province_on_screen[p.index()]) {
 				auto units = state.world.province_get_navy_location_as_location(p);
 				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
 				if(units.begin() != units.end() && level > 0) {
@@ -1005,7 +997,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Fort
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p)) {
+			if(province_on_screen[p.index()]) {
 				auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
 				if(level > 0) {
 					auto center = state.world.province_get_mid_point(p);
@@ -1017,7 +1009,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Factory
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p)) {
+			if(province_on_screen[p.index()]) {
 				auto factories = state.world.province_get_factory_location_as_province(p);
 				if(factories.begin() != factories.end()) {
 					auto center = state.world.province_get_mid_point(p);
@@ -1029,7 +1021,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				auto lc = state.world.province_get_province_building_construction(p);
 				if(lc.begin() != lc.end()) {
 					auto center = state.world.province_get_mid_point(p);
@@ -1041,7 +1033,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction [naval]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				auto lc = state.world.province_get_province_naval_construction(p);
 				if(lc.begin() != lc.end()) {
 					auto p1 = duplicates::get_navy_location(state, p);
@@ -1053,7 +1045,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction [military]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				for(const auto pl : state.world.province_get_pop_location(p)) {
 					auto lc = pl.get_pop().get_province_land_construction();
 					if(lc.begin() != lc.end()) {
@@ -1068,7 +1060,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Blockaded
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_blockaded(state, p)) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_blockaded(state, p)) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -1077,7 +1069,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
 				render_model(model_siege, center, 0.f, 0.f, time_counter);
 			}
@@ -1101,7 +1093,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// Render armies
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_army_location_as_location(p);
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
@@ -1129,7 +1121,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
-			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
+			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
