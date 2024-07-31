@@ -432,9 +432,8 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 
 		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
 		assert(key_frames > 0);
-		//uint32_t j = uint32_t(glm::floor(time_counter)) % key_frames;
 
-		uint32_t j = 9999;
+		uint32_t j = uint32_t(glm::floor(time_counter)) % key_frames;
 		float k_time = glm::fract(time_counter);
 		assert(k_time >= 0.f && k_time <= 1.f);
 
@@ -461,6 +460,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		auto k_sca2 = j + 1 < an.scale_keys.size()
 			? an.scale_keys[j + 1].value
 			: an.pose_scale;
+
 		//
 		auto k_pos1_time = (j < an.position_keys.size() ? an.position_keys[j].time : 0.f);
 		auto k_pos2_time = (j + 1 < an.position_keys.size() ? an.position_keys[j + 1].time : 0.f);
@@ -493,7 +493,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 		);
 		//
 		assert(an.bone_id < int32_t(ar_matrices.size()));
-		ar_matrices[an.bone_id] = glm::mat4x4(0.f);// mt* mr* ms; //mt * mr * ms;//glm::mat4x4(1.f);//mt * mr * ms;
+		ar_matrices[an.bone_id] = mt * mr * ms;
 	}
 	glUniformMatrix4fv(bone_matrices_uniform_array, GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 
@@ -1109,7 +1109,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					if(auto path = unit.get_army().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
 					}
-					auto gc = 0;//unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
+					auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_army().get_army_membership()) {
 						auto utid = sm.get_regiment().get_type();
 						auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
@@ -2078,7 +2078,7 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 			t_anim.bone_id = -1;
 			for(uint32_t i = 0; i < model_context.nodes.size(); i++) {
 				if(t_anim.node == model_context.nodes[i].name) {
-					t_anim.bone_id = int32_t(i);
+					t_anim.bone_id = int32_t(i + 1);
 					break;
 				}
 			}
@@ -2281,6 +2281,7 @@ void load_static_meshes(sys::state& state) {
 								assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
 								for(uint32_t l = 0; l < i_count; l++) {
 									smv.bone_ids[l] = mesh.influences[l + i_start].bone_id;
+									assert(smv.bone_ids[l] != -1);
 									assert(smv.bone_ids[l] < state.map_state.map_data.max_bone_matrices);
 									smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 								}
