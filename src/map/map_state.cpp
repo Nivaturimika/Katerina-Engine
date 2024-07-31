@@ -1578,7 +1578,6 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 			return true;
 		}
 	case sys::projection_mode::num_of_modes:
-		return false;
 	default:
 		return false;
 	}

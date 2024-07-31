@@ -671,47 +671,57 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
 	// impassible borders
+
+	auto const province_is_visible = [&](dcon::province_id p) {
+		glm::vec2 tmp;
+		return state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(state.world.province_get_mid_point(p)), screen_size, tmp);
+	};
+	auto const border_is_visible = [&](dcon::province_adjacency_id adj) {
+		auto p1 = state.world.province_adjacency_get_connected_provinces(adj, 0);
+		auto p2 = state.world.province_adjacency_get_connected_provinces(adj, 1);
+		return province_is_visible(p1) || province_is_visible(p2);
+	};
+
 	if(zoom > map::zoom_close) {
 		if(zoom > map::zoom_very_close) { // Render province borders
 			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0001f); // width
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_prov_border]);
-
 			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit | province::border::national_bit | province::border::state_bit)) == 0) {
+				if(border_is_visible(b.adj)
+				&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit | province::border::national_bit | province::border::state_bit)) == 0) {
 					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 				}
 			}
 		}
-		{ // Render state borders
-			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0002f); // width
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
-			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
-					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
-				}
+		// Render state borders
+		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0002f); // width
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
+		for(auto b : borders) {
+			if(border_is_visible(b.adj)
+			&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
+				glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 			}
 		}
-		{
-			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.00085f); // width
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textures[texture_imp_border]);
-			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit)) == province::border::impassible_bit) {
-					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
-				}
+		// Impassable
+		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.00085f); // width
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_imp_border]);
+		for(auto b : borders) {
+			if(border_is_visible(b.adj)
+			&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::impassible_bit)) == province::border::impassible_bit) {
+				glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 			}
 		}
 		// national borders
-		{
-			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textures[texture_national_border]);
-			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::impassible_bit)) == province::border::national_bit) {
-					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
-				}
+		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_national_border]);
+		for(auto b : borders) {
+			if(border_is_visible(b.adj)
+			&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::impassible_bit)) == province::border::national_bit) {
+				glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 			}
 		}
 	} else {
@@ -720,7 +730,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_prov_border]);
 			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == 0) {
+				if(border_is_visible(b.adj)
+				&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == 0) {
 					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 				}
 			}
@@ -730,20 +741,20 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
 			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
+				if(border_is_visible(b.adj)
+				&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
 					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 				}
 			}
 		}
 		// national borders
-		{
-			glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
-			for(auto b : borders) {
-				if((state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit)) == province::border::national_bit) {
-					glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
-				}
+		glUniform1f(shader_uniforms[shader_borders][uniform_width], 0.0003f); // width
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
+		for(auto b : borders) {
+			if(border_is_visible(b.adj)
+			&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit)) == province::border::national_bit) {
+				glDrawArrays(GL_TRIANGLE_STRIP, b.start_index, b.count);
 			}
 		}
 	}
@@ -955,61 +966,70 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
-#if 0
 		// Train stations
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
-			if(level > 0) {
-				auto center = state.world.province_get_mid_point(p);
-				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
-				render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+			if(province_is_visible(p)) {
+				auto const level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
+				if(level > 0) {
+					auto center = state.world.province_get_mid_point(p);
+					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
+					render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+				}
 			}
 		});
 		// Naval base (empty)
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto units = state.world.province_get_navy_location_as_location(p);
-			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-			if(units.begin() == units.end() && level > 0) {
-				auto p1 = duplicates::get_navy_location(state, p);
-				auto p2 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base[level], p1, -theta, 0.f, time_counter);
+			if(province_is_visible(p)) {
+				auto units = state.world.province_get_navy_location_as_location(p);
+				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
+				if(units.begin() == units.end() && level > 0) {
+					auto p1 = duplicates::get_navy_location(state, p);
+					auto p2 = state.world.province_get_mid_point(p);
+					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+					render_model(model_naval_base[level], p1, -theta, 0.f, time_counter);
+				}
 			}
 		});
 		// Naval base (full)
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto units = state.world.province_get_navy_location_as_location(p);
-			auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
-			if(units.begin() != units.end() && level > 0) {
-				auto p1 = duplicates::get_navy_location(state, p);
-				auto p2 = state.world.province_get_mid_point(p);
-				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter);
+			if(province_is_visible(p)) {
+				auto units = state.world.province_get_navy_location_as_location(p);
+				auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
+				if(units.begin() != units.end() && level > 0) {
+					auto p1 = duplicates::get_navy_location(state, p);
+					auto p2 = state.world.province_get_mid_point(p);
+					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
+					render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter);
+				}
 			}
 		});
 		// Fort
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
-			if(level > 0) {
-				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
-				auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
-				render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+			if(province_is_visible(p)) {
+				auto const level = state.world.province_get_building_level(p, economy::province_building_type::fort);
+				if(level > 0) {
+					auto center = state.world.province_get_mid_point(p);
+					auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
+					auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
+					render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+				}
 			}
 		});
 		// Factory
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto factories = state.world.province_get_factory_location_as_province(p);
-			if(factories.begin() != factories.end()) {
-				auto center = state.world.province_get_mid_point(p);
-				auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
-				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-				render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+			if(province_is_visible(p)) {
+				auto factories = state.world.province_get_factory_location_as_province(p);
+				if(factories.begin() != factories.end()) {
+					auto center = state.world.province_get_mid_point(p);
+					auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
+					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
+					render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+				}
 			}
 		});
 		// Construction
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				auto lc = state.world.province_get_province_building_construction(p);
 				if(lc.begin() != lc.end()) {
 					auto center = state.world.province_get_mid_point(p);
@@ -1021,7 +1041,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction [naval]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				auto lc = state.world.province_get_province_naval_construction(p);
 				if(lc.begin() != lc.end()) {
 					auto p1 = duplicates::get_navy_location(state, p);
@@ -1033,7 +1053,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Construction [military]
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(state.map_state.visible_provinces[province::to_map_id(p)]) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)]) {
 				for(const auto pl : state.world.province_get_pop_location(p)) {
 					auto lc = pl.get_pop().get_province_land_construction();
 					if(lc.begin() != lc.end()) {
@@ -1048,7 +1068,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Blockaded
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_blockaded(state, p)) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_blockaded(state, p)) {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -1057,12 +1077,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
 				render_model(model_siege, center, 0.f, 0.f, time_counter);
 			}
 		});
-#endif
 
 		/*
 		auto render_canal = [&](uint32_t index, uint32_t canal_id, float theta) {
@@ -1082,7 +1101,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		// Render armies
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_army_location_as_location(p);
-			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
@@ -1107,11 +1126,10 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
-#if 0
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
-			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
+			if(province_is_visible(p) && state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
@@ -1136,7 +1154,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
 			}
 		});
-#endif
 		glDisable(GL_DEPTH_TEST);
 	}
 
