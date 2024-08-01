@@ -583,18 +583,18 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		} else if(map_view_mode == map_view::globe) {
-			mvp[0][0] = (1.f / aspect_ratio) * zoom;
-			mvp[0][3] = -1.f * mvp[0][0];
-			mvp[0][0] *= 2.f;
-
-			mvp[1][1] = zoom;
-			mvp[1][3] = -1.f * mvp[1][1];
-			mvp[1][1] *= 2.f;
-
-			mvp[2][2] = zoom;
-			mvp[2][3] = -1.f * mvp[2][2];
-			mvp[2][2] *= 2.f;
-
+			// (2 * x - 1) * zoom / aspect_ratio
+			// 2 * x * zoom / aspx - 1 * zoom / aspx
+			// 2 * (x + 0.5) * z - 1 * z
+			// 2 * x * z + 2 * 0.5 * z - 1 * z
+			// 2 * x * z + z * (2 * 0.5 - 1)
+			// ...
+			// (2 * (a + 0.5) - 1) * zoom
+			// (2 * a + 2 * 0.5 - 1) * zoom
+			// 2 * a + 1 - 1 * zoom
+			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
+			mvp[1][1] = -2.f * zoom / glm::pi<float>();
+			mvp[2][2] = 2.f * zoom * 0.02f / glm::pi<float>();
 			mvp[3][3] = 1.f;
 		} else if(map_view_mode == map_view::globe_perspect) {
 			/*
