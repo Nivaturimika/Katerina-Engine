@@ -593,10 +593,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			// z + z * y
 			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
 			mvp[2][0] = 0.f;
-			mvp[1][1] = -2.f * zoom / glm::pi<float>();
-			mvp[2][1] = 0.f;
-			mvp[2][2] = 2.f * zoom * 0.02f / glm::pi<float>();
-			//mvp[2][2] = 0.f;
+			mvp[2][1] = -2.f * zoom / glm::pi<float>();
+			mvp[1][1] = 0.f;
+			mvp[1][2] = 2.f * zoom * 0.02f / glm::pi<float>();
 			mvp[3][3] = 1.f;
 		} else if(map_view_mode == map_view::globe_perspect) {
 			/*
@@ -611,6 +610,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				          [m n o p]   [a*g + b*k + c*o + d*s]
 				          [q r s t]   [a*h + b*l + c*p + d*t]
 			*/
+			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
 			float m_near = 0.1f;
 			float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
 			float m_far = m_tangent_length_square / 1.2f;
@@ -622,7 +622,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near);
 			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
 			mvp[3][3] = 0.f;
-			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
 		} else if(false) { // globe but outer!?
 			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
 			mvp[2][0] = 0.f;
