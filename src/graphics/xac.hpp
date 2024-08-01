@@ -300,7 +300,24 @@ struct xsm_animation {
 	std::vector<xsm_animation_key<emfx::xac_vector4f>> scale_rotation_keys;
 	float max_error = 0.f;
 	int32_t bone_id = -1; //assigned by processer
-	float total_anim_time = 0.f; //to scale properly
+
+	float total_anim_time = 0.f;
+	float total_position_anim_time = 0.f;
+	float total_rotation_anim_time = 0.f;
+	float total_scale_anim_time = 0.f;
+	float total_scale_rotation_anim_time = 0.f;
+
+	xsm_animation_key<xac_vector3f> get_position_key(uint32_t i) const;
+	xsm_animation_key<xac_vector4f> get_rotation_key(uint32_t i) const;
+	xsm_animation_key<xac_vector3f> get_scale_key(uint32_t i) const;
+	xsm_animation_key<xac_vector4f> get_scale_rotation_key(uint32_t i) const;
+
+	uint32_t get_position_key_index(float time) const;
+	uint32_t get_rotation_key_index(float time) const;
+	uint32_t get_scale_key_index(float time) const;
+	uint32_t get_scale_rotation_key_index(float time) const;
+
+	float get_player_scale_factor(float t1, float t2, float time) const;
 };
 struct xsm_context {
 	std::vector<xsm_animation> animations;
@@ -309,7 +326,16 @@ struct xsm_context {
 };
 struct xsm_header : public xac_header { };
 struct xsm_chunk_header : public xac_chunk_header { };
+
 void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err);
 void finish(xsm_context& context);
+
+// Known animations
+enum class animation_type : uint8_t {
+	idle = 0,
+	move = 1,
+	attack = 2,
+	count
+};
 
 }

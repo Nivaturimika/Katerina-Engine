@@ -569,6 +569,8 @@ const char* parse_xac_skinning_v3(xac_context& context, const char* start, const
 				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
 				obj.influence_starts[i] = range.first_influence_index;
 				obj.influence_counts[i] = range.num_influences;
+				assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
+					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
 			}
 		} else {
 			err.accumulated_errors += "Collision mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
@@ -587,6 +589,8 @@ const char* parse_xac_skinning_v3(xac_context& context, const char* start, const
 				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
 				obj.influence_starts[i] = range.first_influence_index;
 				obj.influence_counts[i] = range.num_influences;
+				assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
+					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
 			}
 		} else {
 			err.accumulated_errors += "Visual mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
@@ -879,19 +883,84 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 #endif
 }
 
+xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
+	return i < position_keys.size() ? position_keys[i]
+		: xsm_animation_key<xac_vector3f>{ pose_position, 0.f };
+}
+xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
+	return i < rotation_keys.size() ? rotation_keys[i]
+		: xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f };
+}
+xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
+	return i < scale_keys.size() ? scale_keys[i]
+		: xsm_animation_key<xac_vector3f>{ pose_scale, 0.f };
+}
+xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
+	return i < scale_rotation_keys.size() ? scale_rotation_keys[i]
+		: xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f };
+}
+
+uint32_t xsm_animation::get_position_key_index(float time) const {
+	for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
+		if(time < position_keys[i + 1].time) {
+			return i;
+		}
+	}
+	return 0;
+}
+uint32_t xsm_animation::get_rotation_key_index(float time) const {
+	for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
+		if(time < rotation_keys[i + 1].time) {
+			return i;
+		}
+	}
+	return 0;
+}
+uint32_t xsm_animation::get_scale_key_index(float time) const {
+	for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
+		if(time < scale_keys[i + 1].time) {
+			return i;
+		}
+	}
+	return 0;
+}
+uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
+	for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
+		if(time < scale_rotation_keys[i + 1].time) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+float xsm_animation::get_player_scale_factor(float t1, float t2, float time) const {
+	assert(t1 <= t2);
+	if(t1 == t2)
+		return 0.f;
+	float mid_len = time - t1;
+	float frames_diff = t2 - t1;
+	float factor = mid_len / frames_diff;
+	//assert(factor >= 0.f && factor <= 1.f);
+	return std::fmod(factor, 1.f);
+}
+
 void finish(xsm_context& context) {
 	for(auto& anim : context.animations) {
 		for(auto& s : anim.position_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+			anim.total_position_anim_time = std::max(anim.total_position_anim_time, s.time);
 		}
 		for(auto& s : anim.rotation_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+			anim.total_rotation_anim_time = std::max(anim.total_rotation_anim_time, s.time);
 		}
 		for(auto& s : anim.scale_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+			anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
 		}
 		for(auto& s : anim.scale_rotation_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+			anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
 		}
 	}
 }

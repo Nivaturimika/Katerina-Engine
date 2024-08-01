@@ -421,79 +421,93 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	bone_matrices_uniform_array = glGetUniformLocation(shaders[shader_map_standing_object], "bones_matrices");
 }
 
-void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter) {
+static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
+	float anim_time = std::fmod(time_counter, an.total_anim_time);
+	//
+	auto pos_index = an.get_position_key_index(anim_time);
+	auto pos1 = an.get_position_key(pos_index).value;
+	auto pos1_time = an.get_position_key(pos_index).time;
+	auto pos2 = an.get_position_key(pos_index + 1).value;
+	auto pos2_time = an.get_position_key(pos_index + 1).time;
+	glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
+		glm::mix(
+			glm::vec3(pos1.x, pos1.y, pos1.z),
+			glm::vec3(pos2.x, pos2.y, pos2.z),
+			an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
+		)
+	);
+	//
+	auto sca_index = an.get_scale_key_index(anim_time);
+	auto sca1 = an.get_scale_key(sca_index).value;
+	auto sca1_time = an.get_scale_key(sca_index).time;
+	auto sca2 = an.get_scale_key(sca_index + 1).value;
+	auto sca2_time = an.get_scale_key(sca_index + 1).time;
+	glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
+		glm::mix(
+			glm::vec3(sca1.x, sca1.y, sca1.z),
+			glm::vec3(sca2.x, sca2.y, sca2.z),
+			an.get_player_scale_factor(sca1_time, sca2_time, anim_time)
+		)
+	);
+	//
+	auto rot_index = an.get_rotation_key_index(anim_time);
+	auto rot1 = an.get_rotation_key(rot_index).value;
+	auto rot1_time = an.get_rotation_key(rot_index).time;
+	auto rot2 = an.get_rotation_key(rot_index + 1).value;
+	auto rot2_time = an.get_rotation_key(rot_index + 1).time;
+	glm::mat4x4 mr = glm::toMat4(glm::normalize(
+		glm::slerp(
+			glm::quat(rot1.x, rot1.y, rot1.z, rot1.w),
+			glm::quat(rot2.x, rot2.y, rot2.z, rot2.w),
+			an.get_player_scale_factor(rot1_time, rot2_time, anim_time)
+		)
+	));
+	//
+	auto rsc_index = an.get_scale_rotation_key_index(anim_time);
+	auto rsc1 = an.get_scale_rotation_key(rsc_index).value;
+	auto rsc1_time = an.get_scale_rotation_key(rsc_index).time;
+	auto rsc2 = an.get_scale_rotation_key(rsc_index + 1).value;
+	auto rsc2_time = an.get_scale_rotation_key(rsc_index + 1).time;
+	glm::mat4x4 mu = glm::toMat4(glm::normalize(
+		glm::slerp(
+			glm::quat(rsc1.x, rsc1.y, rsc1.z, rsc1.w),
+			glm::quat(rsc2.x, rsc2.y, rsc2.z, rsc1.w),
+			an.get_player_scale_factor(rsc1_time, rsc2_time, anim_time)
+		)
+	));
+	// Rotation is fine, the halo above units works kosher
+	return (mt * ms) * (mr * mu);
+}
+
+void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at) {
 	if(!emfx)
 		return;
 	auto index = emfx.index();
 	std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
-	for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
-		auto const& an = animations[k + static_mesh_idle_animation_start[index]];
-		assert(an.bone_id != -1);
-
-		uint32_t key_frames = uint32_t(std::max(an.position_keys.size(), std::max(an.rotation_keys.size(), std::max(an.scale_keys.size(), an.scale_rotation_keys.size()))));
-		assert(key_frames > 0);
-
-		uint32_t j = uint32_t(glm::floor(time_counter)) % key_frames;
-		float k_time = glm::fract(time_counter);
-		assert(k_time >= 0.f && k_time <= 1.f);
-
-		auto g_pos = glm::vec3(an.pose_position.x, an.pose_position.y, an.pose_position.z);
-		auto g_rot = glm::quat(an.pose_rotation.x, an.pose_rotation.y, an.pose_rotation.z, an.pose_rotation.w);
-		auto g_sca = glm::vec3(an.pose_scale.x, an.pose_scale.y, an.pose_scale.z);
-
-		auto k_pos1 = j < an.position_keys.size()
-			? an.position_keys[j].value
-			: an.pose_position;
-		auto k_rot1 = j < an.rotation_keys.size()
-			? an.rotation_keys[j].value
-			: an.pose_rotation;
-		auto k_sca1 = j < an.scale_keys.size()
-			? an.scale_keys[j].value
-			: an.pose_scale;
-		//
-		auto k_pos2 = j + 1 < an.position_keys.size()
-			? an.position_keys[j + 1].value
-			: an.pose_position;
-		auto k_rot2 = j + 1 < an.rotation_keys.size()
-			? an.rotation_keys[j + 1].value
-			: an.pose_rotation;
-		auto k_sca2 = j + 1 < an.scale_keys.size()
-			? an.scale_keys[j + 1].value
-			: an.pose_scale;
-
-		//
-		auto k_pos1_time = (j < an.position_keys.size() ? an.position_keys[j].time : 0.f);
-		auto k_pos2_time = (j + 1 < an.position_keys.size() ? an.position_keys[j + 1].time : 0.f);
-		glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
-			glm::mix(
-				glm::vec3(k_pos1.x, k_pos1.y, k_pos1.z),
-				glm::vec3(k_pos2.x, k_pos2.y, k_pos2.z),
-				k_time
-			)
-		);
-		//
-		auto k_rot1_time = (j < an.rotation_keys.size() ? an.rotation_keys[j].time : 0.f);
-		auto k_rot2_time = (j + 1 < an.rotation_keys.size() ? an.rotation_keys[j + 1].time : 0.f);
-		glm::mat4x4 mr = glm::toMat4(glm::normalize(
-			glm::slerp(
-				glm::quat(k_rot1.x, k_rot1.y, k_rot1.z, k_rot1.w),
-				glm::quat(k_rot2.x, k_rot2.y, k_rot2.z, k_rot2.w),
-				k_time
-			)
-		));
-		//
-		auto k_sca1_time = (j < an.scale_keys.size() ? an.scale_keys[j].time : 0.f);
-		auto k_sca2_time = (j + 1 < an.scale_keys.size() ? an.scale_keys[j + 1].time : 0.f);
-		glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
-			glm::mix(
-				glm::vec3(k_sca1.x, k_sca1.y, k_sca1.y),
-				glm::vec3(k_sca2.x, k_sca2.y, k_sca2.y),
-				k_time
-			)
-		);
-		//
-		assert(an.bone_id < int32_t(ar_matrices.size()));
-		ar_matrices[an.bone_id] = mt * mr * ms;
+	if(at == emfx::animation_type::idle) {
+		for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
+			auto const& an = animations[k + static_mesh_idle_animation_start[index]];
+			assert(an.bone_id != -1);
+			assert(an.bone_id < int32_t(ar_matrices.size()));
+			// Rotation is fine, the halo above units works kosher
+			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+		}
+	} else if(at == emfx::animation_type::move) {
+		for(uint32_t k = 0; k < static_mesh_move_animation_count[index]; k++) {
+			auto const& an = animations[k + static_mesh_move_animation_start[index]];
+			assert(an.bone_id != -1);
+			assert(an.bone_id < int32_t(ar_matrices.size()));
+			// Rotation is fine, the halo above units works kosher
+			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+		}
+	} else if(at == emfx::animation_type::attack) {
+		for(uint32_t k = 0; k < static_mesh_attack_animation_count[index]; k++) {
+			auto const& an = animations[k + static_mesh_attack_animation_start[index]];
+			assert(an.bone_id != -1);
+			assert(an.bone_id < int32_t(ar_matrices.size()));
+			// Rotation is fine, the halo above units works kosher
+			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+		}
 	}
 	glUniformMatrix4fv(bone_matrices_uniform_array, GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 
@@ -972,7 +986,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(level > 0) {
 					auto center = state.world.province_get_mid_point(p);
 					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
-					render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+					render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -985,7 +999,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(model_naval_base[level], p1, -theta, 0.f, time_counter);
+					render_model(model_naval_base[level], p1, -theta, 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -998,7 +1012,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter);
+					render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -1010,7 +1024,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
 					auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
-					render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+					render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -1022,7 +1036,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-					render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+					render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -1034,7 +1048,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto center = state.world.province_get_mid_point(p);
 					auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
 					auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-					render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+					render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -1046,7 +1060,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(model_construction_naval, p1, -theta, 0.f, time_counter);
+					render_model(model_construction_naval, p1, -theta, 0.f, time_counter, emfx::animation_type::idle);
 				}
 			}
 		});
@@ -1059,7 +1073,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto center = state.world.province_get_mid_point(p);
 						auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
 						auto seed_r = pl.get_pop().id.index();
-						render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter);
+						render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle);
 						break;
 					}
 				}
@@ -1071,14 +1085,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				render_model(model_blockaded, p1, -theta, 0.f, time_counter);
+				render_model(model_blockaded, p1, -theta, 0.f, time_counter, emfx::animation_type::idle);
 			}
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
-				render_model(model_siege, center, 0.f, 0.f, time_counter);
+				render_model(model_siege, center, 0.f, 0.f, time_counter, emfx::animation_type::idle);
 			}
 		});
 
@@ -1105,9 +1119,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
 				dcon::unit_type_id unit_type;
+				bool is_move = false;
 				for(const auto unit : units) {
 					if(auto path = unit.get_army().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
+						is_move = true;
 					}
 					auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_army().get_army_membership()) {
@@ -1122,7 +1138,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 				if(p1 == p2)
 					theta = -glm::pi<float>() / 2.f;
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
+				emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter, at);
 			}
 		});
 		// Render navies
@@ -1133,9 +1150,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
 				dcon::unit_type_id unit_type;
+				bool is_move = false;
 				for(const auto unit : units) {
 					if(auto path = unit.get_navy().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
+						is_move = true;
 					}
 					auto gc = unit.get_navy().get_controller_from_navy_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_navy().get_navy_membership()) {
@@ -1150,7 +1169,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 				if(p1 == p2)
 					theta = -glm::pi<float>() / 2.f;
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter);
+				emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
+				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter, at);
 			}
 		});
 		glDisable(GL_DEPTH_TEST);
@@ -2058,7 +2078,7 @@ emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material 
 		: mat.layers[0];
 }
 
-void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context) {
+void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
 	auto root = simple_fs::get_root(state.common_fs);
 	emfx::xsm_context anim_context{};
 	if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
@@ -2068,7 +2088,17 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 		emfx::finish(anim_context);
 		//
 		auto old_size = state.map_state.map_data.animations.size();
-		state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
+		switch(at) {
+		case emfx::animation_type::idle:
+			state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
+			break;
+		case emfx::animation_type::move:
+			state.map_state.map_data.static_mesh_move_animation_start[index] = uint32_t(old_size);
+			break;
+		case emfx::animation_type::attack:
+			state.map_state.map_data.static_mesh_attack_animation_start[index] = uint32_t(old_size);
+			break;
+		}
 		for(const auto& anim : anim_context.animations) {
 			if(anim.position_keys.empty() && anim.rotation_keys.empty()
 			&& anim.scale_keys.empty() && anim.scale_rotation_keys.empty()) {
@@ -2078,7 +2108,7 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 			t_anim.bone_id = -1;
 			for(uint32_t i = 0; i < model_context.nodes.size(); i++) {
 				if(t_anim.node == model_context.nodes[i].name) {
-					t_anim.bone_id = int32_t(i + 1);
+					t_anim.bone_id = int32_t(i);
 					break;
 				}
 			}
@@ -2086,7 +2116,17 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 				state.map_state.map_data.animations.push_back(t_anim);
 			}
 		}
-		state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+		switch(at) {
+		case emfx::animation_type::idle:
+			state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
+		case emfx::animation_type::move:
+			state.map_state.map_data.static_mesh_move_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
+		case emfx::animation_type::attack:
+			state.map_state.map_data.static_mesh_attack_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
+		}
 	}
 }
 
@@ -2245,7 +2285,9 @@ void load_static_meshes(sys::state& state) {
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
 			//emfx::finish(context);
 
-			load_animation(state, state.to_string_view(emfx_obj.idle), k, context);
+			load_animation(state, state.to_string_view(emfx_obj.idle), k, context, emfx::animation_type::idle);
+			load_animation(state, state.to_string_view(emfx_obj.move), k, context, emfx::animation_type::move);
+			load_animation(state, state.to_string_view(emfx_obj.attack), k, context, emfx::animation_type::attack);
 			
 			uint32_t node_index = 0;
 			for(auto const& node : context.nodes) {
@@ -2276,12 +2318,13 @@ void load_static_meshes(sys::state& state) {
 								smv.normal_ = glm::vec3(vn.x, vn.y, vn.z);
 								smv.texture_coord_ = glm::vec2(vt.x, vt.y);
 								//
+								assert(mesh.influence_indices[index] < mesh.influence_starts.size());
+								assert(mesh.influence_indices[index] < mesh.influence_starts.size());
 								uint32_t i_start = mesh.influence_starts[mesh.influence_indices[index]];
 								uint32_t i_count = mesh.influence_counts[mesh.influence_indices[index]];
 								assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
 								for(uint32_t l = 0; l < i_count; l++) {
 									smv.bone_ids[l] = mesh.influences[l + i_start].bone_id;
-									assert(smv.bone_ids[l] != -1);
 									assert(smv.bone_ids[l] < state.map_state.map_data.max_bone_matrices);
 									smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 								}

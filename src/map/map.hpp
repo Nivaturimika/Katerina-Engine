@@ -279,6 +279,10 @@ public:
 
 	uint32_t static_mesh_idle_animation_start[max_static_meshes] = { };
 	uint32_t static_mesh_idle_animation_count[max_static_meshes] = { };
+	uint32_t static_mesh_move_animation_start[max_static_meshes] = { };
+	uint32_t static_mesh_move_animation_count[max_static_meshes] = { };
+	uint32_t static_mesh_attack_animation_start[max_static_meshes] = { };
+	uint32_t static_mesh_attack_animation_count[max_static_meshes] = { };
 
 	dcon::emfx_object_id model_wake;
 	dcon::emfx_object_id model_blockaded;
@@ -305,7 +309,7 @@ public:
 	void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 	void make_borders(sys::state& state, std::vector<bool>& visited);
 
-	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter);
+	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at);
 	void load_shaders(simple_fs::directory& root);
 	void create_meshes();
 	void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);
