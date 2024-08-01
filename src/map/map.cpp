@@ -569,28 +569,29 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			*/
 			mvp[0][0] = 2.f * zoom * aspect_ratio;
 			mvp[0][3] = -1.f * zoom * aspect_ratio;
-			// (2 * y - 1) * zoom
-			// 2 * zoom * y - 1 * zoom
-			// 2 * zoom * (y + oy) - 1 * zoom
-			// 2 * zoom * y + 2 * zoom * oy - 1 * zoom
+			/*
+				(2 * y - 1)* zoom -> 2 * zoom * y - 1 * zoom
+				2 * zoom * (y + oy) - 1 * zoom -> 2 * zoom * y + 2 * zoom * oy - 1 * zoom
+			*/
 			mvp[1][1] = 2.f * zoom;
 			mvp[1][3] = 2.f * zoom * offset.y - 1.f * zoom;
 			mvp[2][2] = zoom;
 			mvp[3][3] = 1.f;
 			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		} else if(map_view_mode == map_view::globe) {
-			// (2 * x - 1) * zoom / aspect_ratio
-			// 2 * x * zoom / aspx - 1 * zoom / aspx
-			// 2 * (x + 0.5) * z - 1 * z
-			// 2 * x * z + 2 * 0.5 * z - 1 * z
-			// 2 * x * z + z * (2 * 0.5 - 1)
-			// ...
-			// (2 * (a + 0.5) - 1) * zoom
-			// (2 * a + 2 * 0.5 - 1) * zoom
-			// 2 * a + 1 - 1 * zoom
-			// ...
-			// z * (1 + y)
-			// z + z * y
+			/*
+				(2 * x - 1) * zoom / aspect_ratio
+				2 * x * zoom / aspx - 1 * zoom / aspx
+				2 * (x + 0.5) * z - 1 * z
+				2 * x * z + 2 * 0.5 * z - 1 * z
+				2 * x * z + z * (2 * 0.5 - 1)
+				...
+				(2 * (a + 0.5) - 1) * zoom -> (2 * a + 2 * 0.5 - 1) * zoom -> 2 * a + 1 - 1 * zoom
+				z * (1 + y) -> z + z * y
+				[a b c] [x] = [a*x + b*y + c*z]
+				[d e f] [y]   [d*x + e*y + f*z]
+				[g h i] [z]   [g*x + h*y + i*z]
+			*/
 			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
 			mvp[2][0] = 0.f;
 			mvp[2][1] = -2.f * zoom / glm::pi<float>();
@@ -603,14 +604,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				[ e f g h ] [ r ]   [ e * q + f * r + g * s + h * t ]
 				[ i j k l ] [ s ]   [ i * q + j * r + k * s + l * t ]
 				[ m n o p ] [ t ]   [ m * q + n * r + o * s + p * t ]
-			*/
-			/*
 				[a b c d] [e f g h] = [a*e + b*i + c*m + d*q]
 				          [i j k l]   [a*f + b*j + c*n + d*r]
 				          [m n o p]   [a*g + b*k + c*o + d*s]
 				          [q r s t]   [a*h + b*l + c*p + d*t]
+				...
+				(z / PI) - 1.2 = (z - 1.2 * PI) / PI
 			*/
-			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
 			float m_near = 0.1f;
 			float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
 			float m_far = m_tangent_length_square / 1.2f;
@@ -622,15 +622,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near);
 			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
 			mvp[3][3] = 0.f;
-		} else if(false) { // globe but outer!?
-			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
-			mvp[2][0] = 0.f;
-			mvp[1][1] = -2.f * zoom / glm::pi<float>();
-			mvp[2][1] = 0.f;
-			mvp[2][2] = 2.f * zoom * 0.02f / glm::pi<float>();
-			//mvp[2][2] = 0.f;
-			mvp[3][3] = 1.f;
-			mvp[2][3] = 1.f;
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 	};
