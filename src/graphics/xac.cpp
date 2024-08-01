@@ -542,7 +542,9 @@ const char* parse_xac_skinning_v3(xac_context& context, const char* start, const
 #endif
 	std::vector<xac_skinning_v3_influence_entry> influence_data;
 	for(uint32_t i = 0; i < sh.num_influences; i++) {
-		auto const influence = parse_xac_any_binary<xac_skinning_v3_influence_entry>(&start, end, err);
+		auto influence = parse_xac_any_binary<xac_skinning_v3_influence_entry>(&start, end, err);
+		assert(influence.weight >= 0.f && influence.weight <= 1.f);
+		assert(influence.bone_id != -1);
 		influence_data.push_back(influence);
 	}
 	if(sh.node_id >= int32_t(context.nodes.size())) {
