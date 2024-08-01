@@ -476,7 +476,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 		)
 	));
 	// Rotation is fine, the halo above units works kosher
-	return (mt * ms) * (mr * mu);
+	return mt * ms;
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at) {
@@ -2297,7 +2297,7 @@ void load_static_meshes(sys::state& state) {
 			auto contents = simple_fs::view_contents(*f);
 			emfx::xac_context context{};
 			emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
-			//emfx::finish(context);
+			emfx::finish(context);
 
 			load_animation(state, state.to_string_view(emfx_obj.idle), k, context, emfx::animation_type::idle);
 			load_animation(state, state.to_string_view(emfx_obj.move), k, context, emfx::animation_type::move);

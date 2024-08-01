@@ -7,33 +7,116 @@
 #include "parsers.hpp"
 
 namespace emfx {
-enum class xac_chunk_type : uint32_t {
-	unknown_0 = 0,
-	mesh = 1,
-	skinning = 2,
-	material_3 = 3,
-	unknown_4 = 4,
-	material = 5,
-	metadata = 7,
-	node_hierachy = 11,
-	material_block = 13,
-	count
-};
 
 struct xac_vector2f {
 	float x = 0.f;
 	float y = 0.f;
+
+	xac_vector2f() = default;
+	xac_vector2f(xac_vector2f&) = default;
+	xac_vector2f(xac_vector2f const&) = default;
+	xac_vector2f(xac_vector2f&&) = default;
+	xac_vector2f& operator=(xac_vector2f&) = default;
+	xac_vector2f& operator=(xac_vector2f const&) = default;
+
+	xac_vector2f(float v) {
+		x = y = v;
+	}
+	xac_vector2f(float x_, float y_) {
+		x = x_;
+		y = y_;
+	}
+	xac_vector2f operator+(xac_vector2f const& o) const {
+		return xac_vector2f{ this->x + o.x, this->y + o.y };
+	}
+	xac_vector2f operator-(xac_vector2f const& o) const {
+		return xac_vector2f{ this->x - o.x, this->y - o.y };
+	}
+	xac_vector2f operator/(xac_vector2f const& o) const {
+		return xac_vector2f{ this->x / o.x, this->y / o.y };
+	}
+	xac_vector2f operator*(xac_vector2f const& o) const {
+		return xac_vector2f{ this->x * o.x, this->y * o.y };
+	}
 };
 struct xac_vector3f {
 	float x = 0.f;
 	float y = 0.f;
 	float z = 0.f;
+
+	xac_vector3f() = default;
+	xac_vector3f(xac_vector3f&) = default;
+	xac_vector3f(xac_vector3f const&) = default;
+	xac_vector3f(xac_vector3f&&) = default;
+	xac_vector3f& operator=(xac_vector3f&) = default;
+	xac_vector3f& operator=(xac_vector3f const&) = default;
+
+	xac_vector3f(float v) {
+		x = y = z = v;
+	}
+	xac_vector3f(float x_, float y_, float z_) {
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+	xac_vector3f(xac_vector2f& v, float z_) {
+		x = v.x;
+		y = v.y;
+		z = z_;
+	}
+	xac_vector3f operator+(xac_vector3f const& o) const {
+		return xac_vector3f{ this->x + o.x, this->y + o.y, this->z + o.z };
+	}
+	xac_vector3f operator-(xac_vector3f const& o) const {
+		return xac_vector3f{ this->x - o.x, this->y - o.y, this->z - o.z };
+	}
+	xac_vector3f operator/(xac_vector3f const& o) const {
+		return xac_vector3f{ this->x / o.x, this->y / o.y, this->z / o.z };
+	}
+	xac_vector3f operator*(xac_vector3f const& o) const {
+		return xac_vector3f{ this->x * o.x, this->y * o.y, this->z * o.z };
+	}
 };
 struct xac_vector4f {
 	float x = 0.f;
 	float y = 0.f;
 	float z = 0.f;
 	float w = 0.f;
+
+	xac_vector4f() = default;
+	xac_vector4f(xac_vector4f&) = default;
+	xac_vector4f(xac_vector4f const&) = default;
+	xac_vector4f(xac_vector4f&&) = default;
+	xac_vector4f& operator=(xac_vector4f&) = default;
+	xac_vector4f& operator=(xac_vector4f const&) = default;
+
+	xac_vector4f(float v) {
+		x = y = z = w = v;
+	}
+	xac_vector4f(float x_, float y_, float z_, float w_) {
+		x = x_;
+		y = y_;
+		z = z_;
+		w = w_;
+	}
+	xac_vector4f(xac_vector3f& v, float w_) {
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = w_;
+	}
+	xac_vector4f operator+(xac_vector4f const& o) const {
+		return xac_vector4f{ this->x + o.x, this->y + o.y, this->z + o.z, this->w + o.w };
+	}
+	xac_vector4f operator-(xac_vector4f const& o) const {
+		return xac_vector4f{ this->x - o.x, this->y - o.y, this->z - o.z, this->w - o.w };
+	}
+	xac_vector4f operator/(xac_vector4f const& o) const {
+		return xac_vector4f{ this->x / o.x, this->y / o.y, this->z / o.z, this->w / o.w };
+	}
+	xac_vector4f operator*(xac_vector4f const& o) const {
+		return xac_vector4f{ this->x * o.x, this->y * o.y, this->z * o.z, this->w * o.w };
+	}
 };
 struct xac_color_rgba {
 	float r = 0.f;
@@ -51,9 +134,55 @@ struct xac_vector4u16 {
 	float y = 0.f;
 	float z = 0.f;
 	float w = 0.f;
+	xac_vector4f to_vector4f() {
+		return xac_vector4f{
+			float(this->x) / 32767.f,
+			float(this->y) / 32767.f,
+			float(this->z) / 32767.f,
+			float(this->w) / 32767.f,
+		};
+	}
 };
 struct xac_mat4x4 {
-	float m[16] = { 0.f };
+	float m[4][4] = {
+		{ 0.f, 0.f, 0.f, 0.f },
+		{ 0.f, 0.f, 0.f, 0.f },
+		{ 0.f, 0.f, 0.f, 0.f },
+		{ 0.f, 0.f, 0.f, 0.f },
+	};
+	xac_vector4f row_as_vector4f(uint32_t n) const {
+		return xac_vector4f{ m[n][0], m[n][1], m[n][2], m[n][3] };
+	}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+enum class xac_chunk_type : uint32_t {
+	unknown_0 = 0,
+	mesh = 1,
+	skinning = 2,
+	material_3 = 3,
+	unknown_4 = 4,
+	material = 5,
+	metadata = 7,
+	node_hierachy = 11,
+	material_block = 13,
+	count
 };
 
 //post-parse data
