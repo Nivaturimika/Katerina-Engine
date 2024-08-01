@@ -94,9 +94,9 @@ public:
 
 	bool screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_view view_mode, glm::vec2& map_pos);
 
-	float get_zoom() {
-		return zoom;
-	}
+	float get_aspect_ratio(glm::vec2 screen_size, map_view view) const;
+	float get_counter_factor() const;
+	float get_zoom() const;
 };
 
 void update_text_lines(sys::state& state, display_data& map_data);

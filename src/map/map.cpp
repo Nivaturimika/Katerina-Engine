@@ -417,6 +417,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shader_uniforms[i][uniform_model_scale] = glGetUniformLocation(shaders[i], "model_scale");
 		shader_uniforms[i][uniform_model_rotation] = glGetUniformLocation(shaders[i], "model_rotation");
 		shader_uniforms[i][uniform_model_scale_rotation] = glGetUniformLocation(shaders[i], "model_scale_rotation");
+		shader_uniforms[i][uniform_model_proj_view] = glGetUniformLocation(shaders[i], "model_proj_view");
 	}
 	bone_matrices_uniform_array = glGetUniformLocation(shaders[shader_map_standing_object], "bones_matrices");
 }
@@ -538,22 +539,90 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	auto load_shader = [&](GLuint program) {
 		glUseProgram(shaders[program]);
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
-		if(map_view_mode == map_view::flat) {
-			glUniform1f(shader_uniforms[program][uniform_aspect_ratio], 1.f / (screen_size.x / screen_size.y) * float(size_x) / float(size_y));
-		} else {
-			glUniform1f(shader_uniforms[program][uniform_aspect_ratio], screen_size.x / screen_size.y);
-		}
+		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], state.map_state.get_aspect_ratio(screen_size, map_view_mode));
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
 		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
 		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
 		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
-		float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
-		float z_sigmoid = std::sin(z_factor * glm::pi<float>() * 0.5f);
-		//z_factor = (10.f * z_factor) - 5.f;
-		//float z_sigmoid = std::expf(z_factor) / (1.f + std::expf(z_factor));
-		glUniform1f(shader_uniforms[program][uniform_counter_factor], zoom > map::zoom_close ? z_sigmoid * 1.f : 0.f);
+		glUniform1f(shader_uniforms[program][uniform_counter_factor], state.map_state.get_counter_factor());
 		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
+
+		/*
+			world_pos -= vec3(offset.x, 0.f, -offset.y);
+			world_pos.x = mod(world_pos.x, 1.0f);
+			vec3 v = vec3(\n"
+				(2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
+				(2.f * world_pos.z - 1.f) * zoom,
+				world_pos.y * zoom);
+			return vec4(rotate_skew(v, counter_factor), 1.f);
+		*/
+
+		glm::mat4x4 mvp(1.f);
+		if(map_view_mode == map_view::flat) {
+			/*
+				[ a 0 0 -1 ] [ 2 * x - 1 ] = [ a * (2 * x - 1) + (-1 * 1) ]
+				[ 0 b 0 0  ] [ 2 * z - 1 ]   [ b * (2 * z - 1)    ]
+				[ 0 0 c 0  ] [ y         ]   [ c * y			  ]
+				[ 0 0 0 d  ] [ 1         ]   [ d * 1			  ]
+			*/
+			mvp[0][0] = zoom * state.map_state.get_aspect_ratio(screen_size, map_view_mode);
+			mvp[0][3] = -1.f * mvp[0][0];
+			mvp[0][0] *= 2.f;
+
+			// (2 * y - 1) * zoom
+			// 2 * zoom * y - 1 * zoom
+			// 2 * zoom * (y + oy) - 1 * zoom
+			// 2 * zoom * y + 2 * zoom * oy - 1 * zoom
+			mvp[1][1] = 2.f * zoom;
+			mvp[1][3] = 2.f * zoom * offset.y - 1.f * zoom;
+
+			mvp[2][2] = zoom;
+
+			mvp[3][3] = 1.f;
+
+			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
+		} else if(map_view_mode == map_view::globe) {
+			mvp[0][0] = (1.f / state.map_state.get_aspect_ratio(screen_size, map_view_mode)) * zoom;
+			mvp[0][3] = -1.f * mvp[0][0];
+			mvp[0][0] *= 2.f;
+
+			mvp[1][1] = zoom;
+			mvp[1][3] = -1.f * mvp[1][1];
+			mvp[1][1] *= 2.f;
+
+			mvp[2][2] = zoom;
+			mvp[2][3] = -1.f * mvp[2][2];
+			mvp[2][2] *= 2.f;
+
+			mvp[3][3] = 1.f;
+		} else if(map_view_mode == map_view::globe_perspect) {
+			/*
+				[ a b c d ] [ q ] = [ a * q + b * r + c * s + d * t ]
+				[ e f g h ] [ r ]   [ e * q + f * r + g * s + h * t ]
+				[ i j k l ] [ s ]   [ i * q + j * r + k * s + l * t ]
+				[ m n o p ] [ t ]   [ m * q + n * r + o * s + p * t ]
+			*/
+			/*
+				[a b c d] [e f g h] = [a*e + b*i + c*m + d*q]
+				          [i j k l]   [a*f + b*j + c*n + d*r]
+				          [m n o p]   [a*g + b*k + c*o + d*s]
+				          [q r s t]   [a*h + b*l + c*p + d*t]
+			*/
+			float m_near = 0.1f;
+			float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
+			float m_far = m_tangent_length_square / 1.2f;
+			float m_right = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
+			float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
+			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / state.map_state.get_aspect_ratio(screen_size, map_view_mode)));
+			mvp[1][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
+			mvp[2][2] = 1.f * (1.f / glm::pi<float>());
+			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
+			mvp[3][3] = 0.f;
+
+			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
+		}
+		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 	};
 
 	glEnable(GL_PRIMITIVE_RESTART);

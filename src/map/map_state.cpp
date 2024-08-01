@@ -967,16 +967,16 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 	}
 	map_data.set_text_lines(state, text_data);
 
-	if(true) {
-		std::vector<text_line_generator_data> p_text_data;
-		for(auto p : state.world.in_province) {
-			if(p.get_name()) {
-				std::string name = text::produce_simple_string(state, p.get_name());
-				p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), glm::vec4(0.f, 0.f, 0.f, 0.f), p.get_mid_point() - glm::vec2(5.f, 0.f), glm::vec2(10.f, 10.f));
-			}
+	std::vector<text_line_generator_data> p_text_data;
+	for(auto p : state.world.in_province) {
+		if(p.get_name()) {
+			std::string name = text::produce_simple_string(state, p.get_name());
+			auto t_origin = p.get_mid_point() - glm::vec2(5.f, 0.f);
+			auto t_size = glm::vec2(10.f, 10.f);
+			p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), glm::vec4(0.f, 0.f, 0.f, 0.f), t_origin, t_size);
 		}
-		map_data.set_province_text_lines(state, p_text_data);
 	}
+	map_data.set_province_text_lines(state, p_text_data);
 }
 
 void map_state::update(sys::state& state) {
@@ -1425,6 +1425,23 @@ dcon::province_id map_state::get_province_under_mouse(sys::state& state, int32_t
 	}
 }
 
+float map_state::get_aspect_ratio(glm::vec2 screen_size, map_view view) const {
+	if(view == map_view::flat)
+		return 1.f / (screen_size.x / screen_size.y) * float(map_data.size_x) / float(map_data.size_y);
+	return screen_size.x / screen_size.y;
+}
+float map_state::get_counter_factor() const {
+	if(zoom <= map::zoom_close)
+		return 0.f;
+	float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
+	float z_sigmoid = std::sin(z_factor * 3.1415965f * 0.5f);
+	return z_sigmoid;
+}
+
+float map_state::get_zoom() const {
+	return zoom;
+}
+
 bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 screen_size, glm::vec2& screen_pos) {
 	switch(state.user_settings.map_is_globe) {
 	case sys::projection_mode::globe_ortho: {
@@ -1550,19 +1567,34 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		return true;
 	}
 	case sys::projection_mode::flat: {
-		map_pos -= pos;
-
-		if(map_pos.x >= 0.5f)
-			map_pos.x -= 1.0f;
-		if(map_pos.x < -0.5f)
-			map_pos.x += 1.0f;
-
-		map_pos *= zoom;
+		auto rotate_skew = [&](glm::vec3 v, float w) {
+			glm::vec3 k = glm::vec3(1.f, 0.f, 0.f);
+			float cos_theta = std::cos(w);
+			float sin_theta = std::sin(w);
+			glm::vec3 s = (v * cos_theta) + (glm::cross(k, v) * sin_theta) + (k * glm::dot(k, v)) * (1.f - cos_theta);
+			return glm::vec3(s.x, s.y, std::clamp(s.z, -1.f, 1.f));
+		};
+		float aspect_ratio = get_aspect_ratio(screen_size, map_view::flat);
+		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
+		auto flat_coords = [&](glm::vec3 world_pos) {
+			world_pos -= glm::vec3(offset.x, 0.f, -offset.y);
+			world_pos.x = std::fmod(world_pos.x, 1.f);
+			glm::vec3 v = glm::vec3(
+				(2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
+				(2.f * world_pos.z - 1.f) * zoom,
+				world_pos.y * zoom
+			);
+			return rotate_skew(v, get_counter_factor());
+		};
+		glm::vec3 rvec = flat_coords(glm::vec3(map_pos.x, 0.f, map_pos.y));
+		map_pos.x = rvec.x * rvec.z;
+		map_pos.y = rvec.y * rvec.z;
 
 		map_pos.x *= float(map_data.size_x) / float(map_data.size_y);
 		map_pos.x *= screen_size.y / screen_size.x;
 		map_pos *= screen_size;
 		map_pos += screen_size * 0.5f;
+
 		screen_pos = map_pos;
 		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
 			return false;

@@ -265,7 +265,8 @@ public:
 	static constexpr uint32_t uniform_model_scale = 34;
 	static constexpr uint32_t uniform_model_rotation = 35;
 	static constexpr uint32_t uniform_model_scale_rotation = 36;
-	static constexpr uint32_t uniform_count = 37;
+	static constexpr uint32_t uniform_model_proj_view = 37;
+	static constexpr uint32_t uniform_count = 38;
 	GLuint shader_uniforms[shader_count][uniform_count] = { };
 
 	static constexpr uint32_t max_bone_matrices = 100;
