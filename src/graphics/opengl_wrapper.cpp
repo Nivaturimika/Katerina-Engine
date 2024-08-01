@@ -147,7 +147,6 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		"\tfloat right = near * tan(PI / 6) / zoom;\n"
 		"\tfloat top = near * tan(PI / 6) / zoom;\n"
 		"\tnew_world_pos = model_proj_view * new_world_pos;\n"
-		"\tnew_world_pos.z = -(far + near) / (far - near) * (new_world_pos.z - (- 2 * far * near / (far - near)));\n"
 		"\treturn vec4(new_world_pos);\n"
 		"}\n"
 		"//Flat coords\n"

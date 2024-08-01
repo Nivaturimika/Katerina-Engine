@@ -618,8 +618,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
 			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
 			mvp[1][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
-			mvp[2][2] = 1.f * (1.f / glm::pi<float>());
-			mvp[2][3] = -2.f * m_far * m_near / (m_far - m_near);
+			mvp[2][2] = (-(m_far + m_near) / (m_far - m_near)) * (1.f / glm::pi<float>());
+			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near);
 			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
 			mvp[3][3] = 0.f;
 			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
