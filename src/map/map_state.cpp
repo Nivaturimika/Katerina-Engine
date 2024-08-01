@@ -1568,7 +1568,7 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio);
 		v.w *= 1.f - v.z;
 		v /= v.w;
-		screen_pos = ((glm::vec2(v.x, v.y) + 1.f) / 2.f) * screen_size;
+		screen_pos = ((glm::vec2(v.x, v.y) + glm::vec2(1.f, 0.f)) / 2.f) * screen_size;
 		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2.f)
 		|| screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2.f)
 		|| screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2.f)
