@@ -609,7 +609,7 @@ void projection_mode_display::on_update(sys::state& state) noexcept {
 	auto it = std::string_view("map_projection_globe");
 	if(state.user_settings.map_is_globe == sys::projection_mode::flat) {
 		it = std::string_view("map_projection_flat");
-	} else if (state.user_settings.map_is_globe == sys::projection_mode::globe_perpect) {
+	} else if (state.user_settings.map_is_globe == sys::projection_mode::globe_perspect) {
 		it = std::string_view("map_projection_globe_perspective");
 	}
 

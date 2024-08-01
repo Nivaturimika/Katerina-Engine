@@ -523,7 +523,7 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 	}
 }
 
-void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, map_view map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
+void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 

@@ -125,8 +125,8 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		"vec4 calc_gl_position(in vec3 world_pos) {\n"
 		"\tswitch(int(subroutines_index)) {\n"
 		"\t\tcase 0: return globe_coords(vec3(world_pos.x, world_pos.z, world_pos.y));\n"
-		"\t\tcase 1: return perspective_coords(vec2(world_pos.x, world_pos.z));\n"
-		"\t\tcase 2: return flat_coords(vec4(world_pos.x, world_pos.z, world_pos.y, 1.f));\n"
+		"\t\tcase 2: return perspective_coords(vec2(world_pos.x, world_pos.z));\n"
+		"\t\tcase 1: return flat_coords(vec4(world_pos.x, world_pos.z, world_pos.y, 1.f));\n"
 		"\t}\n"
 		"\treturn vec4(0.f);\n"
 		"}\n", GL_VERTEX_SHADER);

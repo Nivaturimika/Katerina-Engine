@@ -82,7 +82,6 @@ struct border {
 	uint16_t padding = 0;
 };
 
-enum class map_view;
 class display_data {
 public:
 	display_data(){};
@@ -93,8 +92,7 @@ public:
 	// Called to load the map. Will load the texture and shaders from disk
 	void load_map(sys::state& state);
 
-	void render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, map_view map_view_mode, map_mode::mode active_map_mode,
-			glm::mat3 globe_rotation, float time_counter);
+	void render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter);
 	void update_borders(sys::state& state);
 	void update_fog_of_war(sys::state& state);
 	void set_selected_province(sys::state& state, dcon::province_id province_id);

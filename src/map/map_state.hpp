@@ -4,6 +4,7 @@
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 #include "map.hpp"
+#include "constants.hpp"
 
 namespace sys {
 struct state;
@@ -14,7 +15,6 @@ struct scenario_building_context;
 
 namespace map {
 
-enum class map_view { globe, globe_perspect, flat };
 class map_state {
 public:
 	map_state(){};
@@ -24,7 +24,7 @@ public:
 	// Called to load the map. Will load the texture and shaders from disk
 	void load_map(sys::state& state);
 
-	map_view current_view(sys::state& state);
+	sys::projection_mode current_view(sys::state& state);
 
 	void render(sys::state& state, uint32_t screen_x, uint32_t screen_y);
 	void set_province_color(std::vector<uint32_t> const& prov_color, map_mode::mode map_mode);
@@ -92,12 +92,12 @@ public:
 
 	void update(sys::state& state);
 
-	bool screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_view view_mode, glm::vec2& map_pos);
+	bool screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::projection_mode view_mode, glm::vec2& map_pos);
 
-	float get_aspect_ratio(glm::vec2 screen_size, map_view view) const;
+	float get_aspect_ratio(glm::vec2 screen_size, sys::projection_mode view) const;
 	float get_counter_factor() const;
 	float get_zoom() const;
-	glm::mat4x4 get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const;
+	glm::mat4x4 get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const;
 };
 
 void update_text_lines(sys::state& state, display_data& map_data);

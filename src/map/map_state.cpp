@@ -25,14 +25,8 @@ void map_state::load_map(sys::state& state) {
 	map_data.load_map(state);
 }
 
-map_view map_state::current_view(sys::state& state) {
-	auto current_view = map::map_view::globe;
-	if(state.user_settings.map_is_globe == sys::projection_mode::flat) {
-		current_view = map::map_view::flat;
-	} else if(state.user_settings.map_is_globe == sys::projection_mode::globe_perpect) {
-		current_view = map::map_view::globe_perspect;
-	}
-	return current_view;
+sys::projection_mode map_state::current_view(sys::state& state) {
+	return state.user_settings.map_is_globe;
 }
 
 void map_state::set_selected_province(dcon::province_id prov_id) {
@@ -1226,7 +1220,7 @@ void map_state::on_mouse_move(int32_t x, int32_t y, int32_t screen_size_x, int32
 	auto screen_size = glm::vec2(screen_size_x, screen_size_y);
 	if(is_dragging) { // Drag the map with middlemouse
 		glm::vec2 map_pos;
-		screen_to_map(mouse_pos, screen_size, map_view::flat, map_pos);
+		screen_to_map(mouse_pos, screen_size, sys::projection_mode::flat, map_pos);
 
 		set_pos(pos + last_camera_drag_pos - glm::vec2(map_pos));
 	}
@@ -1243,8 +1237,8 @@ void map_state::on_mouse_move(int32_t x, int32_t y, int32_t screen_size_x, int32
 	}	
 }
 
-bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_view view_mode, glm::vec2& map_pos) {
-	if(view_mode == map_view::globe) {
+bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::projection_mode view_mode, glm::vec2& map_pos) {
+	if(view_mode == sys::projection_mode::globe_ortho) {
 		screen_pos -= screen_size * 0.5f;
 		screen_pos /= screen_size;
 		screen_pos.x *= screen_size.x / screen_size.y;
@@ -1268,7 +1262,7 @@ bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_v
 			return true;
 		}
 		return false;
-	} else if (view_mode == map_view::globe_perspect) {
+	} else if (view_mode == sys::projection_mode::globe_perspect) {
 		float aspect_ratio = screen_size.x / screen_size.y;
 		float pi = glm::pi<float>();
 
@@ -1319,17 +1313,6 @@ bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, map_v
 
 		screen_pos /= zoom;
 		screen_pos += pos;
-		/*if(zoom > 5.f) {
-			auto const rotate_skew = [&](glm::vec3 v, float w) -> glm::vec3 {
-				glm::vec3 k = glm::vec3(1.f, 0.f, 0.f);
-				float cos_theta = cos(w);
-				float sin_theta = sin(w);
-				return (v * cos_theta) + (glm::cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
-			};
-			glm::vec3 v = rotate_skew(glm::vec3(screen_pos, 1.f), (zoom - 5.f) * 0.0175f);
-			screen_pos.x = v.x;
-			screen_pos.y = v.y;
-		}*/
 		map_pos = screen_pos;
 		return (map_pos.x >= 0 && map_pos.y >= 0 && map_pos.x <= map_data.size_x && map_pos.y <= map_data.size_y);
 	}
@@ -1340,7 +1323,7 @@ void map_state::on_mbuttom_down(int32_t x, int32_t y, int32_t screen_size_x, int
 	auto screen_size = glm::vec2(screen_size_x, screen_size_y);
 
 	glm::vec2 map_pos;
-	screen_to_map(mouse_pos, screen_size, map_view::flat, map_pos);
+	screen_to_map(mouse_pos, screen_size, sys::projection_mode::flat, map_pos);
 
 	last_camera_drag_pos = map_pos;
 	is_dragging = true;
@@ -1425,8 +1408,8 @@ dcon::province_id map_state::get_province_under_mouse(sys::state& state, int32_t
 	}
 }
 
-float map_state::get_aspect_ratio(glm::vec2 screen_size, map_view view) const {
-	if(view == map_view::flat)
+float map_state::get_aspect_ratio(glm::vec2 screen_size, sys::projection_mode view) const {
+	if(view == sys::projection_mode::flat)
 		return 1.f / (screen_size.x / screen_size.y) * float(map_data.size_x) / float(map_data.size_y);
 	return screen_size.x / screen_size.y;
 }
@@ -1490,7 +1473,7 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		screen_pos *= screen_size;
 		return true;
 	}
-	case sys::projection_mode::globe_perpect: {
+	case sys::projection_mode::globe_perspect: {
 		float aspect_ratio = screen_size.x / screen_size.y;
 
 		glm::vec3 cartesian_coords;
@@ -1559,32 +1542,25 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		}
 
 		screen_pos = glm::vec2(cartesian_coords.x, cartesian_coords.y) / w;
-		//screen_pos = (2.f * screen_pos - glm::vec2(1.f));
-		//screen_pos *= zoom;
 		screen_pos.x *= screen_size.y / screen_size.x;
 		screen_pos = ((screen_pos + glm::vec2(1.f)) * 0.5f);
 		screen_pos *= screen_size;
 		return true;
 	}
 	case sys::projection_mode::flat: {
-		float aspect_ratio = get_aspect_ratio(screen_size, map_view::flat);
+		float aspect_ratio = get_aspect_ratio(screen_size, sys::projection_mode::flat);
 		glm::mat4x4 globe_rot4x4(1.f);
 		for(uint32_t i = 0; i < 3; i++) {
 			globe_rot4x4[i][0] = globe_rotation[i][0];
 			globe_rot4x4[i][1] = globe_rotation[i][1];
 			globe_rot4x4[i][2] = globe_rotation[i][2];
 		}
-		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
-		auto map_pos4 = glm::vec4(map_pos.x, 0.f, map_pos.y, 1.f);
-		//in 4 dimensions
-		map_pos4.x = std::fmod(map_pos4.x - offset.x, 1.f);
-		map_pos4 = map_pos4 * get_mvp_matrix(map_view::flat, globe_rot4x4, offset, aspect_ratio);
-		map_pos4.w = 1.f - map_pos4.z;
+		auto v = glm::vec4(map_pos.x, 0.f, map_pos.y, 1.f);
+		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, map_pos, aspect_ratio);
+		v.w *= 1.f - v.z;
 		//now back to 2d
-		map_pos.x = (map_pos4.x - 1.f) / map_pos4.w;
-		map_pos.y = (map_pos4.y) / map_pos4.w;
-
-		screen_pos = map_pos;
+		v /= v.w;
+		screen_pos = ((glm::vec2(v) + 1.f) / 2.f) * screen_size;
 		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
 			return false;
 		if(screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2))
@@ -1612,10 +1588,10 @@ glm::vec2 map_state::normalize_map_coord(glm::vec2 p) {
 	return new_pos;
 }
 
-glm::mat4x4 map_state::get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const {
+glm::mat4x4 map_state::get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const {
 	glm::mat4x4 mvp(1.f);
 	switch(mode) {
-	case map_view::flat: {
+	case sys::projection_mode::flat: {
 		/*
 			[ a 0 0 -1 ] [ 2 * x - 1 ] = [ a * (2 * x - 1) + (-1 * 1) ]
 			[ 0 b 0 0  ] [ 2 * z - 1 ]   [ b * (2 * z - 1)    ]
@@ -1635,7 +1611,7 @@ glm::mat4x4 map_state::get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, g
 		mvp = glm::rotate(mvp, get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		break;
 	}
-	case map_view::globe: {
+	case sys::projection_mode::globe_ortho: {
 		/*
 			(2 * x - 1) * zoom / aspect_ratio
 			2 * x * zoom / aspx - 1 * zoom / aspx
@@ -1667,7 +1643,7 @@ glm::mat4x4 map_state::get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, g
 		mvp *= globe_rot4x4;
 		break;
 	}
-	case map_view::globe_perspect: {
+	case sys::projection_mode::globe_perspect: {
 		/*
 			[ a b c d ] [ q ] = [ a * q + b * r + c * s + d * t ]
 			[ e f g h ] [ r ]   [ e * q + f * r + g * s + h * t ]

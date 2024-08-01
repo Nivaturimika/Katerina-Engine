@@ -583,6 +583,12 @@ constexpr inline float zoom_close = 5.f;
 constexpr inline float zoom_very_close = 8.f;
 }
 
+namespace sys {
+enum class projection_mode : uint8_t {
+	globe_ortho = 0, flat = 1, globe_perspect = 2, num_of_modes = 3
+};
+};
+
 namespace ai {
 enum class fleet_activity {
 	unspecified = 0,			// ai hasn't run on this unit yet

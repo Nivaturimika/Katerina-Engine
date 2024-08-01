@@ -92,12 +92,12 @@ bool belongs_on_map(sys::state& state, ui::element_base* checked_element) {
 	return false;
 }
 
-map::map_view get_view(sys::state& state) {
-	auto current_view = map::map_view::globe;
+sys::projection_mode get_view(sys::state& state) {
+	auto current_view = sys::projection_mode::globe_ortho;
 	if(state.user_settings.map_is_globe == sys::projection_mode::flat) {
-		current_view = map::map_view::flat;
-	} else if(state.user_settings.map_is_globe == sys::projection_mode::globe_perpect) {
-		current_view = map::map_view::globe_perspect;
+		current_view = sys::projection_mode::flat;
+	} else if(state.user_settings.map_is_globe == sys::projection_mode::globe_perspect) {
+		current_view = sys::projection_mode::globe_perspect;
 	}
 
 	return current_view;
