@@ -584,15 +584,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		} else if(map_view_mode == map_view::globe) {
 			mvp[0][0] = (1.f / aspect_ratio) * zoom;
-			mvp[3][0] = -1.f * mvp[0][0];
+			mvp[0][3] = -1.f * mvp[0][0];
 			mvp[0][0] *= 2.f;
 
 			mvp[1][1] = zoom;
-			mvp[3][1] = -1.f * mvp[1][1];
+			mvp[1][3] = -1.f * mvp[1][1];
 			mvp[1][1] *= 2.f;
 
 			mvp[2][2] = zoom;
-			mvp[3][2] = -1.f * mvp[2][2];
+			mvp[2][3] = -1.f * mvp[2][2];
 			mvp[2][2] *= 2.f;
 
 			mvp[3][3] = 1.f;
