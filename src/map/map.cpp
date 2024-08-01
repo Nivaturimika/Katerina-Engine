@@ -537,9 +537,10 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// Load general shader stuff, used by both land and borders
 	auto load_shader = [&](GLuint program) {
+		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
 		glUseProgram(shaders[program]);
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
-		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], state.map_state.get_aspect_ratio(screen_size, map_view_mode));
+		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
 		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
@@ -566,9 +567,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				[ 0 0 c 0  ] [ y         ]   [ c * y			  ]
 				[ 0 0 0 d  ] [ 1         ]   [ d * 1			  ]
 			*/
-			mvp[0][0] = zoom * state.map_state.get_aspect_ratio(screen_size, map_view_mode);
-			mvp[0][3] = -1.f * mvp[0][0];
-			mvp[0][0] *= 2.f;
+			mvp[0][0] = 2.f * zoom * aspect_ratio;
+			mvp[0][3] = -1.f * zoom * aspect_ratio;
 
 			// (2 * y - 1) * zoom
 			// 2 * zoom * y - 1 * zoom
@@ -583,16 +583,16 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		} else if(map_view_mode == map_view::globe) {
-			mvp[0][0] = (1.f / state.map_state.get_aspect_ratio(screen_size, map_view_mode)) * zoom;
-			mvp[0][3] = -1.f * mvp[0][0];
+			mvp[0][0] = (1.f / aspect_ratio) * zoom;
+			mvp[3][0] = -1.f * mvp[0][0];
 			mvp[0][0] *= 2.f;
 
 			mvp[1][1] = zoom;
-			mvp[1][3] = -1.f * mvp[1][1];
+			mvp[3][1] = -1.f * mvp[1][1];
 			mvp[1][1] *= 2.f;
 
 			mvp[2][2] = zoom;
-			mvp[2][3] = -1.f * mvp[2][2];
+			mvp[3][2] = -1.f * mvp[2][2];
 			mvp[2][2] *= 2.f;
 
 			mvp[3][3] = 1.f;
@@ -614,9 +614,10 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			float m_far = m_tangent_length_square / 1.2f;
 			float m_right = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
 			float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
-			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / state.map_state.get_aspect_ratio(screen_size, map_view_mode)));
+			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
 			mvp[1][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
 			mvp[2][2] = 1.f * (1.f / glm::pi<float>());
+			mvp[2][3] = -2.f * m_far * m_near / (m_far - m_near);
 			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
 			mvp[3][3] = 0.f;
 

@@ -80,8 +80,7 @@ inline uint32_t display_subeffects(EFFECT_DISPLAY_PARAMS) {
 
 	uint32_t i = 0;
 	while(sub_units_start < tval + source_size) {
-		i += internal_make_effect_description(ws, sub_units_start, layout, primary_slot, this_slot, from_slot, r_hi, r_lo + i,
-				indentation);
+		i += internal_make_effect_description(ws, sub_units_start, layout, primary_slot, this_slot, from_slot, r_hi, r_lo + i, indentation);
 		sub_units_start += 1 + effect::get_generic_effect_payload_size(sub_units_start);
 	}
 	return i;
@@ -767,9 +766,11 @@ uint32_t es_x_owned_scope_state(EFFECT_DISPLAY_PARAMS) {
 				auto box = text::open_layout_box(layout, indentation);
 				text::add_to_layout_box(ws, layout, box, rlist[r]);
 				text::close_layout_box(layout, box);
-				show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				if(ws.user_settings.spoilers) {
+					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
-											 indentation + indentation_amount);
+					indentation + indentation_amount);
 			}
 			return 0;
 		}
@@ -3209,35 +3210,27 @@ uint32_t ef_civilized_yes(EFFECT_DISPLAY_PARAMS) {
 	return 0;
 }
 uint32_t ef_civilized_no(EFFECT_DISPLAY_PARAMS) {
-	{
-		auto box = text::open_layout_box(layout, indentation);
-		text::localised_format_box(ws, layout, box, "become_unciv");
-		text::close_layout_box(layout, box);
-	}
+	auto box = text::open_layout_box(layout, indentation);
+	text::localised_format_box(ws, layout, box, "become_unciv");
+	text::close_layout_box(layout, box);
 	return 0;
 }
 uint32_t ef_is_slave_state_no(EFFECT_DISPLAY_PARAMS) {
-	{
-		auto box = text::open_layout_box(layout, indentation);
-		text::localised_format_box(ws, layout, box, "free_slave_state");
-		text::close_layout_box(layout, box);
-	}
+	auto box = text::open_layout_box(layout, indentation);
+	text::localised_format_box(ws, layout, box, "free_slave_state");
+	text::close_layout_box(layout, box);
 	return 0;
 }
 uint32_t ef_is_slave_pop_no(EFFECT_DISPLAY_PARAMS) {
-	{
-		auto box = text::open_layout_box(layout, indentation);
-		text::localised_format_box(ws, layout, box, "free_slave_pop");
-		text::close_layout_box(layout, box);
-	}
+	auto box = text::open_layout_box(layout, indentation);
+	text::localised_format_box(ws, layout, box, "free_slave_pop");
+	text::close_layout_box(layout, box);
 	return 0;
 }
 uint32_t ef_election(EFFECT_DISPLAY_PARAMS) {
-	{
-		auto box = text::open_layout_box(layout, indentation);
-		text::localised_format_box(ws, layout, box, "hold_election");
-		text::close_layout_box(layout, box);
-	}
+	auto box = text::open_layout_box(layout, indentation);
+	text::localised_format_box(ws, layout, box, "hold_election");
+	text::close_layout_box(layout, box);
 	return 0;
 }
 uint32_t ef_social_reform(EFFECT_DISPLAY_PARAMS) {
