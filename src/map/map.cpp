@@ -537,18 +537,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// Load general shader stuff, used by both land and borders
 	auto load_shader = [&](GLuint program) {
-		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
-		glUseProgram(shaders[program]);
-		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
-		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
-		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
-		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
-		glUniformMatrix3fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(glm::mat3(globe_rotation)));
-		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
-		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
-		glUniform1f(shader_uniforms[program][uniform_counter_factor], state.map_state.get_counter_factor());
-		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
-
 		/*
 			world_pos -= vec3(offset.x, 0.f, -offset.y);
 			world_pos.x = mod(world_pos.x, 1.0f);
@@ -558,7 +546,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				world_pos.y * zoom);
 			return vec4(rotate_skew(v, counter_factor), 1.f);
 		*/
-
+		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
+		glUseProgram(shaders[program]);
 		glm::mat4x4 mvp(1.f);
 		if(map_view_mode == map_view::flat) {
 			/*
@@ -591,12 +580,21 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				[a b c] [x] = [a*x + b*y + c*z]
 				[d e f] [y]   [d*x + e*y + f*z]
 				[g h i] [z]   [g*x + h*y + i*z]
+
+				[a11 a12 a13 a14] [x] = [a11*x + a12*y + a13*z + a14*w]
+				[a21 a22 a23 a24] [y]   [a21*x + a22*y + a23*z + a24*w]
+				[a31 a32 a33 a34] [z]   [a31*x + a32*y + a33*z + a34*w]
+				[a41 a42 a43 a44] [w]   [a41*x + a42*y + a43*z + a44*w]
 			*/
+			//x = a11 * x = a11 * (a*x + b*y + c*z) = a11*a*x + a11*b*y + a11*c*z
 			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
-			mvp[2][0] = 0.f;
-			mvp[2][1] = -2.f * zoom / glm::pi<float>();
+			//y = a22 * y + a23 * z
 			mvp[1][1] = 0.f;
+			mvp[2][1] = -2.f * zoom / glm::pi<float>();
+			//z = a32 * y + a33 * z
 			mvp[1][2] = 2.f * zoom * 0.02f / glm::pi<float>();
+			mvp[2][2] = 1.f;
+			//w = a44 * w
 			mvp[3][3] = 1.f;
 		} else if(map_view_mode == map_view::globe_perspect) {
 			/*
@@ -624,6 +622,22 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[3][3] = 0.f;
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
+		glm::mat4x4 globe_rot4x4(1.f);
+		for(uint32_t i = 0; i < 3; i++) {
+			globe_rot4x4[i][0] = globe_rotation[i][0];
+			globe_rot4x4[i][1] = globe_rotation[i][1];
+			globe_rot4x4[i][2] = globe_rotation[i][2];
+		}
+		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
+
+		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
+		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
+		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
+		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
+		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
+		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
+		glUniform1f(shader_uniforms[program][uniform_counter_factor], state.map_state.get_counter_factor());
+		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
 	};
 
 	glEnable(GL_PRIMITIVE_RESTART);
