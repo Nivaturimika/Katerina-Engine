@@ -477,7 +477,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 		)
 	));
 	// Rotation is fine, the halo above units works kosher
-	return mt * ms * mr * mu;
+	return mt * mr * ms;
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at) {
@@ -537,17 +537,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	// Load general shader stuff, used by both land and borders
 	auto load_shader = [&](GLuint program) {
-		/*
-			world_pos -= vec3(offset.x, 0.f, -offset.y);
-			world_pos.x = mod(world_pos.x, 1.0f);
-			vec3 v = vec3(\n"
-				(2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
-				(2.f * world_pos.z - 1.f) * zoom,
-				world_pos.y * zoom);
-			return vec4(rotate_skew(v, counter_factor), 1.f);
-		*/
-		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
 		glUseProgram(shaders[program]);
+		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
 		glm::mat4x4 globe_rot4x4(1.f);
 		for(uint32_t i = 0; i < 3; i++) {
 			globe_rot4x4[i][0] = globe_rotation[i][0];

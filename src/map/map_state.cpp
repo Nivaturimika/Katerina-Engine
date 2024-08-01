@@ -37,8 +37,7 @@ void map_state::set_selected_province(dcon::province_id prov_id) {
 void map_state::render(sys::state& state, uint32_t screen_x, uint32_t screen_y) {
 	update(state);
 	glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
-	map_data.render(state, glm::vec2(screen_x, screen_y), offset, zoom,
-			current_view(state), active_map_mode, globe_rotation, time_counter);
+	map_data.render(state, glm::vec2(screen_x, screen_y), offset, zoom, current_view(state), active_map_mode, globe_rotation, time_counter);
 }
 
 glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
@@ -1425,6 +1424,16 @@ float map_state::get_zoom() const {
 }
 
 bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 screen_size, glm::vec2& screen_pos) {
+	assert(map_pos.x >= 0.f && map_pos.x <= 1.f);
+	assert(map_pos.y >= 0.f && map_pos.y <= 1.f);
+
+	float aspect_ratio = get_aspect_ratio(screen_size, state.user_settings.map_is_globe);
+	glm::mat4x4 globe_rot4x4(1.f);
+	for(uint32_t i = 0; i < 3; i++) {
+		globe_rot4x4[i][0] = globe_rotation[i][0];
+		globe_rot4x4[i][1] = globe_rotation[i][1];
+		globe_rot4x4[i][2] = globe_rotation[i][2];
+	}
 	switch(state.user_settings.map_is_globe) {
 	case sys::projection_mode::globe_ortho: {
 		glm::vec3 cartesian_coords;
@@ -1473,8 +1482,6 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		return true;
 	}
 	case sys::projection_mode::globe_perspect: {
-		float aspect_ratio = screen_size.x / screen_size.y;
-
 		glm::vec3 cartesian_coords;
 		float section = 200;
 		float angle_x1 = 2.f * glm::pi<float>() * std::floor(map_pos.x * section) / section;
@@ -1547,19 +1554,21 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		return true;
 	}
 	case sys::projection_mode::flat: {
-		float aspect_ratio = get_aspect_ratio(screen_size, sys::projection_mode::flat);
-		glm::mat4x4 globe_rot4x4(1.f);
-		for(uint32_t i = 0; i < 3; i++) {
-			globe_rot4x4[i][0] = globe_rotation[i][0];
-			globe_rot4x4[i][1] = globe_rotation[i][1];
-			globe_rot4x4[i][2] = globe_rotation[i][2];
-		}
-		auto v = glm::vec4(map_pos.x, 0.f, map_pos.y, 1.f);
-		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, map_pos, aspect_ratio);
+		/*
+			world_pos -= vec3(offset.x, 0.f, -offset.y);
+			world_pos.x = mod(world_pos.x, 1.0f);
+			vec3 v = vec3(\n"
+				(2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
+				(2.f * world_pos.z - 1.f) * zoom,
+				world_pos.y * zoom);
+			return vec4(rotate_skew(v, counter_factor), 1.f);
+		*/
+		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
+		auto v = glm::vec4(glm::mod(map_pos.x - offset.x, 1.f), map_pos.y, 0.f, 1.f);
+		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio);
 		v.w *= 1.f - v.z;
-		//now back to 2d
 		v /= v.w;
-		screen_pos = ((glm::vec2(v) + 1.f) / 2.f) * screen_size;
+		screen_pos = ((glm::vec2(v.x, v.y) + 1.f) / 2.f) * screen_size;
 		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2.f)
 		|| screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2.f)
 		|| screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2.f)
@@ -1577,8 +1586,11 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 }
 
 glm::vec2 map_state::normalize_map_coord(glm::vec2 p) {
-	auto new_pos = p / glm::vec2{ float(map_data.size_x), float(map_data.size_y) };
+	assert(p.x >= 0.f && p.y >= 0.f);
+	auto new_pos = p / glm::vec2(float(map_data.size_x), float(map_data.size_y));
 	new_pos.y = 1.f - new_pos.y;
+	assert(new_pos.x >= 0.f && new_pos.y <= 1.f);
+	assert(new_pos.y >= 0.f && new_pos.y <= 1.f);
 	return new_pos;
 }
 
