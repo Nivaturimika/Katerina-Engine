@@ -569,18 +569,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			*/
 			mvp[0][0] = 2.f * zoom * aspect_ratio;
 			mvp[0][3] = -1.f * zoom * aspect_ratio;
-
 			// (2 * y - 1) * zoom
 			// 2 * zoom * y - 1 * zoom
 			// 2 * zoom * (y + oy) - 1 * zoom
 			// 2 * zoom * y + 2 * zoom * oy - 1 * zoom
 			mvp[1][1] = 2.f * zoom;
 			mvp[1][3] = 2.f * zoom * offset.y - 1.f * zoom;
-
 			mvp[2][2] = zoom;
-
 			mvp[3][3] = 1.f;
-
 			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
 		} else if(map_view_mode == map_view::globe) {
 			// (2 * x - 1) * zoom / aspect_ratio
@@ -592,9 +588,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			// (2 * (a + 0.5) - 1) * zoom
 			// (2 * a + 2 * 0.5 - 1) * zoom
 			// 2 * a + 1 - 1 * zoom
+			// ...
+			// z * (1 + y)
+			// z + z * y
 			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
+			mvp[2][0] = 0.f;
 			mvp[1][1] = -2.f * zoom / glm::pi<float>();
+			mvp[2][1] = 0.f;
 			mvp[2][2] = 2.f * zoom * 0.02f / glm::pi<float>();
+			//mvp[2][2] = 0.f;
 			mvp[3][3] = 1.f;
 		} else if(map_view_mode == map_view::globe_perspect) {
 			/*
@@ -620,8 +622,16 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[2][3] = -2.f * m_far * m_near / (m_far - m_near);
 			mvp[2][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
 			mvp[3][3] = 0.f;
-
 			//(z / PI) - 1.2 = (z - 1.2 * PI) / PI
+		} else if(false) { // globe but outer!?
+			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
+			mvp[2][0] = 0.f;
+			mvp[1][1] = -2.f * zoom / glm::pi<float>();
+			mvp[2][1] = 0.f;
+			mvp[2][2] = 2.f * zoom * 0.02f / glm::pi<float>();
+			//mvp[2][2] = 0.f;
+			mvp[3][3] = 1.f;
+			mvp[2][3] = 1.f;
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 	};
