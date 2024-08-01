@@ -434,7 +434,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 			glm::vec3(pos1.x, pos1.y, pos1.z),
 			glm::vec3(pos2.x, pos2.y, pos2.z),
 			an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
-		)
+		) * glm::vec3(0.01f, 0.01f, 0.01f)
 	);
 	//
 	auto sca_index = an.get_scale_key_index(anim_time);
@@ -1138,8 +1138,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 				if(p1 == p2)
 					theta = -glm::pi<float>() / 2.f;
-				emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter, at);
+				auto lb = state.world.province_get_land_battle_location(p);
+				if(lb.begin() != lb.end()) {
+					emfx::animation_type at = emfx::animation_type::attack;
+					render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, 0.f, time_counter, at);
+					render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), 0.f, time_counter, at);
+				} else {
+					emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
+					render_model(unit_model, glm::vec2(p1.x, p1.y), -theta, 0.f, time_counter, at);
+				}
 			}
 		});
 		// Render navies
@@ -1169,8 +1176,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 				if(p1 == p2)
 					theta = -glm::pi<float>() / 2.f;
-				emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
-				render_model(unit_model, glm::vec2(p1.x, p1.y + dist_step), -theta, 0.f, time_counter, at);
+				auto lb = state.world.province_get_naval_battle_location(p);
+				if(lb.begin() != lb.end()) {
+					emfx::animation_type at = emfx::animation_type::attack;
+					render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, 0.f, time_counter, at);
+					render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), 0.f, time_counter, at);
+				} else {
+					emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
+					render_model(unit_model, glm::vec2(p1.x, p1.y), -theta, 0.f, time_counter, at);
+				}
 			}
 		});
 		glDisable(GL_DEPTH_TEST);

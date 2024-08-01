@@ -1427,161 +1427,158 @@ dcon::province_id map_state::get_province_under_mouse(sys::state& state, int32_t
 
 bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 screen_size, glm::vec2& screen_pos) {
 	switch(state.user_settings.map_is_globe) {
-	case sys::projection_mode::globe_ortho:
-		{
-			glm::vec3 cartesian_coords;
-			float section = 200;
-			float pi = glm::pi<float>();
-			float angle_x1 = 2 * pi * std::floor(map_pos.x * section) / section;
-			float angle_x2 = 2 * pi * std::floor(map_pos.x * section + 1) / section;
-			if(!std::isfinite(angle_x1)) {
-				assert(false);
-				angle_x1 = 0.0f;
-			}
-			if(!std::isfinite(angle_x2)) {
-				assert(false);
-				angle_x2 = 0.0f;
-			}
-			if(!std::isfinite(map_pos.x)) {
-				assert(false);
-				map_pos.x = 0.0f;
-			}
-			if(!std::isfinite(map_pos.y)) {
-				assert(false);
-				map_pos.y = 0.0f;
-			}
-			cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(map_pos.x * section, 1.f));
-			cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(map_pos.x * section, 1.f));
-
-			float angle_y = (1.f - map_pos.y) * pi;
-			cartesian_coords.x *= std::sin(angle_y);
-			cartesian_coords.y *= std::sin(angle_y);
-			cartesian_coords.z = std::cos(angle_y);
-			cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
-			cartesian_coords /= glm::pi<float>();
-			cartesian_coords.x *= -1;
-			cartesian_coords.y *= -1;
-			if(cartesian_coords.y > 0) {
-				return false;
-			}
-			cartesian_coords += glm::vec3(0.5f);
-
-			screen_pos = glm::vec2(cartesian_coords.x, cartesian_coords.z);
-			screen_pos = (2.f * screen_pos - glm::vec2(1.f));
-			screen_pos *= zoom;
-			screen_pos.x *= screen_size.y / screen_size.x;
-			screen_pos = ((screen_pos + glm::vec2(1.f)) * 0.5f);
-			screen_pos *= screen_size;
-			return true;
+	case sys::projection_mode::globe_ortho: {
+		glm::vec3 cartesian_coords;
+		float section = 200;
+		float pi = glm::pi<float>();
+		float angle_x1 = 2 * pi * std::floor(map_pos.x * section) / section;
+		float angle_x2 = 2 * pi * std::floor(map_pos.x * section + 1) / section;
+		if(!std::isfinite(angle_x1)) {
+			assert(false);
+			angle_x1 = 0.0f;
 		}
-	case sys::projection_mode::globe_perpect:
-		{
-			float aspect_ratio = screen_size.x / screen_size.y;
-
-			glm::vec3 cartesian_coords;
-			float section = 200;
-			float angle_x1 = 2.f * glm::pi<float>() * std::floor(map_pos.x * section) / section;
-			float angle_x2 = 2.f * glm::pi<float>() * std::floor(map_pos.x * section + 1) / section;
-			if(!std::isfinite(angle_x1)) {
-				assert(false);
-				angle_x1 = 0.0f;
-			}
-			if(!std::isfinite(angle_x2)) {
-				assert(false);
-				angle_x2 = 0.0f;
-			}
-			if(!std::isfinite(map_pos.x)) {
-				assert(false);
-				map_pos.x = 0.0f;
-			}
-			if(!std::isfinite(map_pos.y)) {
-				assert(false);
-				map_pos.y = 0.0f;
-			}
-			cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(map_pos.x * section, 1.f));
-			cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(map_pos.x * section, 1.f));
-
-			float angle_y = (map_pos.y) * glm::pi<float>();
-			cartesian_coords.x *= std::sin(angle_y);
-			cartesian_coords.y *= std::sin(angle_y);
-			cartesian_coords.z = std::cos(angle_y);
-
-			glm::vec3 temp_vector = cartesian_coords;
-
-			// Apply rotation
-			cartesian_coords.z *= -1;
-			cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
-			cartesian_coords.z *= -1;
-
-			cartesian_coords /= glm::pi<float>(); // Will make the zoom be the same for the globe and flat map
-			cartesian_coords.x *= -1;
-			cartesian_coords.z *= -1;
-
-			float temp = cartesian_coords.z;
-			cartesian_coords.z = cartesian_coords.y;
-			cartesian_coords.y = temp;
-
-			// shift the globe away from camera
-			cartesian_coords.z -= 1.2f;
-			float near_plane = 0.1f;
-
-			// optimal far plane for culling out invisible part of a planet
-			constexpr float tangent_length_square = 1.2f * 1.2f - 1 / glm::pi<float>() / glm::pi<float>();
-			float far_plane = tangent_length_square / 1.2f;
-
-			float right = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
-			float top = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
-
-			cartesian_coords.x *= near_plane / right;
-			cartesian_coords.y *= near_plane / top;
-
-			// depth calculations just for reference
-			float w = -cartesian_coords.z;
-			cartesian_coords.z = -(far_plane + near_plane) / (far_plane - near_plane) * cartesian_coords.z - 2 * far_plane * near_plane / (far_plane - near_plane);
-
-			if(cartesian_coords.z > far_plane) {
-				return false;
-			}
-
-			screen_pos = glm::vec2(cartesian_coords.x, cartesian_coords.y) / w;
-			//screen_pos = (2.f * screen_pos - glm::vec2(1.f));
-			//screen_pos *= zoom;
-			screen_pos.x *= screen_size.y / screen_size.x;
-			screen_pos = ((screen_pos + glm::vec2(1.f)) * 0.5f);
-			screen_pos *= screen_size;
-			return true;
+		if(!std::isfinite(angle_x2)) {
+			assert(false);
+			angle_x2 = 0.0f;
 		}
-	case sys::projection_mode::flat:
-		{
-			map_pos -= pos;
-
-			if(map_pos.x >= 0.5f)
-				map_pos.x -= 1.0f;
-			if(map_pos.x < -0.5f)
-				map_pos.x += 1.0f;
-
-			map_pos *= zoom;
-
-			map_pos.x *= float(map_data.size_x) / float(map_data.size_y);
-			map_pos.x *= screen_size.y / screen_size.x;
-			map_pos *= screen_size;
-			map_pos += screen_size * 0.5f;
-			screen_pos = map_pos;
-			if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
-				return false;
-			if(screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2))
-				return false;
-			if(screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2))
-				return false;
-			if(screen_pos.y <= float(std::numeric_limits<int16_t>::min() / 2))
-				return false;
-
-			if(screen_pos.x < 0.f || screen_pos.y < 0.f)
-				return false;
-			if(screen_pos.x > screen_size.x || screen_pos.y > screen_size.y)
-				return false;
-			return true;
+		if(!std::isfinite(map_pos.x)) {
+			assert(false);
+			map_pos.x = 0.0f;
 		}
+		if(!std::isfinite(map_pos.y)) {
+			assert(false);
+			map_pos.y = 0.0f;
+		}
+		cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(map_pos.x * section, 1.f));
+		cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(map_pos.x * section, 1.f));
+
+		float angle_y = (1.f - map_pos.y) * pi;
+		cartesian_coords.x *= std::sin(angle_y);
+		cartesian_coords.y *= std::sin(angle_y);
+		cartesian_coords.z = std::cos(angle_y);
+		cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
+		cartesian_coords /= glm::pi<float>();
+		cartesian_coords.x *= -1;
+		cartesian_coords.y *= -1;
+		if(cartesian_coords.y > 0) {
+			return false;
+		}
+		cartesian_coords += glm::vec3(0.5f);
+
+		screen_pos = glm::vec2(cartesian_coords.x, cartesian_coords.z);
+		screen_pos = (2.f * screen_pos - glm::vec2(1.f));
+		screen_pos *= zoom;
+		screen_pos.x *= screen_size.y / screen_size.x;
+		screen_pos = ((screen_pos + glm::vec2(1.f)) * 0.5f);
+		screen_pos *= screen_size;
+		return true;
+	}
+	case sys::projection_mode::globe_perpect: {
+		float aspect_ratio = screen_size.x / screen_size.y;
+
+		glm::vec3 cartesian_coords;
+		float section = 200;
+		float angle_x1 = 2.f * glm::pi<float>() * std::floor(map_pos.x * section) / section;
+		float angle_x2 = 2.f * glm::pi<float>() * std::floor(map_pos.x * section + 1) / section;
+		if(!std::isfinite(angle_x1)) {
+			assert(false);
+			angle_x1 = 0.0f;
+		}
+		if(!std::isfinite(angle_x2)) {
+			assert(false);
+			angle_x2 = 0.0f;
+		}
+		if(!std::isfinite(map_pos.x)) {
+			assert(false);
+			map_pos.x = 0.0f;
+		}
+		if(!std::isfinite(map_pos.y)) {
+			assert(false);
+			map_pos.y = 0.0f;
+		}
+		cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(map_pos.x * section, 1.f));
+		cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(map_pos.x * section, 1.f));
+
+		float angle_y = (map_pos.y) * glm::pi<float>();
+		cartesian_coords.x *= std::sin(angle_y);
+		cartesian_coords.y *= std::sin(angle_y);
+		cartesian_coords.z = std::cos(angle_y);
+
+		glm::vec3 temp_vector = cartesian_coords;
+
+		// Apply rotation
+		cartesian_coords.z *= -1;
+		cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
+		cartesian_coords.z *= -1;
+
+		cartesian_coords /= glm::pi<float>(); // Will make the zoom be the same for the globe and flat map
+		cartesian_coords.x *= -1;
+		cartesian_coords.z *= -1;
+
+		float temp = cartesian_coords.z;
+		cartesian_coords.z = cartesian_coords.y;
+		cartesian_coords.y = temp;
+
+		// shift the globe away from camera
+		cartesian_coords.z -= 1.2f;
+		float near_plane = 0.1f;
+
+		// optimal far plane for culling out invisible part of a planet
+		constexpr float tangent_length_square = 1.2f * 1.2f - 1 / glm::pi<float>() / glm::pi<float>();
+		float far_plane = tangent_length_square / 1.2f;
+
+		float right = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
+		float top = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
+
+		cartesian_coords.x *= near_plane / right;
+		cartesian_coords.y *= near_plane / top;
+
+		// depth calculations just for reference
+		float w = -cartesian_coords.z;
+		cartesian_coords.z = -(far_plane + near_plane) / (far_plane - near_plane) * cartesian_coords.z - 2 * far_plane * near_plane / (far_plane - near_plane);
+
+		if(cartesian_coords.z > far_plane) {
+			return false;
+		}
+
+		screen_pos = glm::vec2(cartesian_coords.x, cartesian_coords.y) / w;
+		//screen_pos = (2.f * screen_pos - glm::vec2(1.f));
+		//screen_pos *= zoom;
+		screen_pos.x *= screen_size.y / screen_size.x;
+		screen_pos = ((screen_pos + glm::vec2(1.f)) * 0.5f);
+		screen_pos *= screen_size;
+		return true;
+	}
+	case sys::projection_mode::flat: {
+		map_pos -= pos;
+
+		if(map_pos.x >= 0.5f)
+			map_pos.x -= 1.0f;
+		if(map_pos.x < -0.5f)
+			map_pos.x += 1.0f;
+
+		map_pos *= zoom;
+
+		map_pos.x *= float(map_data.size_x) / float(map_data.size_y);
+		map_pos.x *= screen_size.y / screen_size.x;
+		map_pos *= screen_size;
+		map_pos += screen_size * 0.5f;
+		screen_pos = map_pos;
+		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
+			return false;
+		if(screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2))
+			return false;
+		if(screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2))
+			return false;
+		if(screen_pos.y <= float(std::numeric_limits<int16_t>::min() / 2))
+			return false;
+
+		if(screen_pos.x < 0.f || screen_pos.y < 0.f)
+			return false;
+		if(screen_pos.x > screen_size.x || screen_pos.y > screen_size.y)
+			return false;
+		return true;
+	}
 	case sys::projection_mode::num_of_modes:
 	default:
 		return false;

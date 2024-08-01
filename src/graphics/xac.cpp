@@ -762,14 +762,12 @@ xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_
 		auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
 		xac_vector4f nkf;
 		nkf.x = float(kf.x) / 32767.f;
-		nkf.y = -(float(kf.y) / 32767.f);
-		nkf.z = -(float(kf.z) / 32767.f);
+		nkf.y = float(kf.y) / 32767.f;
+		nkf.z = float(kf.z) / 32767.f;
 		nkf.w = float(kf.w) / 32767.f;
 		return nkf;
 	}
 	auto kf = parse_xac_any_binary<xac_vector4f>(start, end, err);
-	kf.y *= -1.f;
-	kf.z *= -1.f;
 	return kf;
 }
 
@@ -803,8 +801,8 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 			if(context.use_quat_16) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 				nkf.x = float(kf.value.x) / 32767.f;
-				nkf.y = -(float(kf.value.y) / 32767.f);
-				nkf.z = -(float(kf.value.z) / 32767.f);
+				nkf.y = float(kf.value.y) / 32767.f;
+				nkf.z = float(kf.value.z) / 32767.f;
 				nkf.w = float(kf.value.w) / 32767.f;
 				anim.rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
 			} else {
@@ -823,14 +821,12 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 			if(context.use_quat_16) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
 				nkf.x = float(kf.value.x) / 32767.f;
-				nkf.y = -(float(kf.value.y) / 32767.f);
-				nkf.z = -(float(kf.value.z) / 32767.f);
+				nkf.y = float(kf.value.y) / 32767.f;
+				nkf.z = float(kf.value.z) / 32767.f;
 				nkf.w = float(kf.value.w) / 32767.f;
 				anim.scale_rotation_keys.push_back(xsm_animation_key{ nkf, kf.time });
 			} else {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f>>(&start, end, err);
-				kf.value.y *= -1.f;
-				kf.value.z *= -1.f;
 				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf.value, kf.time });
 			}
 		}
@@ -884,25 +880,30 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 }
 
 xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
-	return i < position_keys.size() ? position_keys[i]
+	auto kf = i < position_keys.size() ? position_keys[i]
 		: xsm_animation_key<xac_vector3f>{ pose_position, 0.f };
+	return kf;
 }
 xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
-	return i < rotation_keys.size() ? rotation_keys[i]
+	auto kf = i < rotation_keys.size() ? rotation_keys[i]
 		: xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f };
+	return kf;
 }
 xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
-	return i < scale_keys.size() ? scale_keys[i]
+	auto kf = i < scale_keys.size() ? scale_keys[i]
 		: xsm_animation_key<xac_vector3f>{ pose_scale, 0.f };
+	return kf;
 }
 xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
-	return i < scale_rotation_keys.size() ? scale_rotation_keys[i]
+	auto kf = i < scale_rotation_keys.size() ? scale_rotation_keys[i]
 		: xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f };
+	return kf;
 }
 
 uint32_t xsm_animation::get_position_key_index(float time) const {
 	for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
-		if(time < position_keys[i + 1].time) {
+		if(time >= position_keys[i + 0].time
+		&& time <= position_keys[i + 1].time) {
 			return i;
 		}
 	}
@@ -910,7 +911,8 @@ uint32_t xsm_animation::get_position_key_index(float time) const {
 }
 uint32_t xsm_animation::get_rotation_key_index(float time) const {
 	for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
-		if(time < rotation_keys[i + 1].time) {
+		if(time >= rotation_keys[i + 0].time
+		&& time <= rotation_keys[i + 1].time) {
 			return i;
 		}
 	}
@@ -918,7 +920,8 @@ uint32_t xsm_animation::get_rotation_key_index(float time) const {
 }
 uint32_t xsm_animation::get_scale_key_index(float time) const {
 	for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
-		if(time < scale_keys[i + 1].time) {
+		if(time >= scale_keys[i + 0].time
+		&& time <= scale_keys[i + 1].time) {
 			return i;
 		}
 	}
@@ -926,7 +929,8 @@ uint32_t xsm_animation::get_scale_key_index(float time) const {
 }
 uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
 	for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
-		if(time < scale_rotation_keys[i + 1].time) {
+		if(time >= scale_rotation_keys[i + 0].time
+		&& time <= scale_rotation_keys[i + 1].time) {
 			return i;
 		}
 	}
