@@ -616,12 +616,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
 			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
 			mvp[1][1] = 0.f;
+			//y = z * S
 			mvp[2][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
-			mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) * (1.f / glm::pi<float>());
+			//mvp[3][1] = 1.2f * glm::pi<float>();
+			//z = y * S = (y - 1.2f * pi) * S = y * S - 1.2f * pi * S
+			mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) / glm::pi<float>();
 			mvp[2][2] = 0.f;
-			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near);
-			mvp[1][3] = -1.f * (1.f / glm::pi<float>()); //w = -z
-			mvp[3][3] = 0.f;
+			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * glm::pi<float>() * mvp[1][2];
+			mvp[1][3] = -1.f / glm::pi<float>(); //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
+			mvp[3][3] = 1.2f;
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 		glm::mat4x4 globe_rot4x4(1.f);
