@@ -1179,8 +1179,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				auto lb = state.world.province_get_naval_battle_location(p);
 				if(lb.begin() != lb.end()) {
 					emfx::animation_type at = emfx::animation_type::attack;
-					render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, 0.f, time_counter, at);
-					render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), 0.f, time_counter, at);
+					render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, 0.f, time_counter, at);
+					render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, 0.f, time_counter, at);
 				} else {
 					emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 					render_model(unit_model, glm::vec2(p1.x, p1.y), -theta, 0.f, time_counter, at);
