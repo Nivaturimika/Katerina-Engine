@@ -548,6 +548,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		*/
 		float aspect_ratio = state.map_state.get_aspect_ratio(screen_size, map_view_mode);
 		glUseProgram(shaders[program]);
+		glm::mat4x4 globe_rot4x4(1.f);
+		for(uint32_t i = 0; i < 3; i++) {
+			globe_rot4x4[i][0] = globe_rotation[i][0];
+			globe_rot4x4[i][1] = globe_rotation[i][1];
+			globe_rot4x4[i][2] = globe_rotation[i][2];
+		}
+		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
 		glm::mat4x4 mvp(1.f);
 		if(map_view_mode == map_view::flat) {
 			/*
@@ -596,6 +603,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[2][2] = 1.f;
 			//w = a44 * w
 			mvp[3][3] = 1.f;
+			mvp *= globe_rot4x4;
 		} else if(map_view_mode == map_view::globe_perspect) {
 			/*
 				[ a b c d ] [ q ] = [ a * q + b * r + c * s + d * t ]
@@ -625,16 +633,9 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * glm::pi<float>() * mvp[1][2];
 			mvp[1][3] = -1.f / glm::pi<float>(); //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
 			mvp[3][3] = 1.2f;
+			mvp *= globe_rot4x4;
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
-		glm::mat4x4 globe_rot4x4(1.f);
-		for(uint32_t i = 0; i < 3; i++) {
-			globe_rot4x4[i][0] = globe_rotation[i][0];
-			globe_rot4x4[i][1] = globe_rotation[i][1];
-			globe_rot4x4[i][2] = globe_rotation[i][2];
-		}
-		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
-
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
 		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
