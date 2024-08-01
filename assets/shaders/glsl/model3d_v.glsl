@@ -41,8 +41,8 @@ void main() {
 		vec4 local_pos = bones_matrices[bone_ids[i]] * vec4(vertex_position, 1.f);
 		skin_pos += local_pos.xyz * bone_weights[i];
 	}
-	//vec3 world_pos = vertex_position;
-	vec3 world_pos = skin_pos;
+	vec3 world_pos = vertex_position;
+	//vec3 world_pos = skin_pos;
 
 	world_pos.xz = world_pos.zx;
 	world_pos.y *= -1.f;
