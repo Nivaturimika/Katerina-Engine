@@ -1567,33 +1567,22 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		return true;
 	}
 	case sys::projection_mode::flat: {
-		auto rotate_skew = [&](glm::vec3 v, float w) {
-			glm::vec3 k = glm::vec3(1.f, 0.f, 0.f);
-			float cos_theta = std::cos(w);
-			float sin_theta = std::sin(w);
-			glm::vec3 s = (v * cos_theta) + (glm::cross(k, v) * sin_theta) + (k * glm::dot(k, v)) * (1.f - cos_theta);
-			return glm::vec3(s.x, s.y, std::clamp(s.z, -1.f, 1.f));
-		};
 		float aspect_ratio = get_aspect_ratio(screen_size, map_view::flat);
+		glm::mat4x4 globe_rot4x4(1.f);
+		for(uint32_t i = 0; i < 3; i++) {
+			globe_rot4x4[i][0] = globe_rotation[i][0];
+			globe_rot4x4[i][1] = globe_rotation[i][1];
+			globe_rot4x4[i][2] = globe_rotation[i][2];
+		}
 		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
-		auto flat_coords = [&](glm::vec3 world_pos) {
-			world_pos -= glm::vec3(offset.x, 0.f, -offset.y);
-			world_pos.x = std::fmod(world_pos.x, 1.f);
-			glm::vec3 v = glm::vec3(
-				(2.f * world_pos.x - 1.f) * zoom * aspect_ratio,
-				(2.f * world_pos.z - 1.f) * zoom,
-				world_pos.y * zoom
-			);
-			return rotate_skew(v, get_counter_factor());
-		};
-		glm::vec3 rvec = flat_coords(glm::vec3(map_pos.x, 0.f, map_pos.y));
-		map_pos.x = rvec.x * rvec.z;
-		map_pos.y = rvec.y * rvec.z;
-
-		map_pos.x *= float(map_data.size_x) / float(map_data.size_y);
-		map_pos.x *= screen_size.y / screen_size.x;
-		map_pos *= screen_size;
-		map_pos += screen_size * 0.5f;
+		auto map_pos4 = glm::vec4(map_pos.x, 0.f, map_pos.y, 1.f);
+		//in 4 dimensions
+		map_pos4.x = std::fmod(map_pos4.x - offset.x, 1.f);
+		map_pos4 = map_pos4 * get_mvp_matrix(map_view::flat, globe_rot4x4, offset, aspect_ratio);
+		map_pos4.w = 1.f - map_pos4.z;
+		//now back to 2d
+		map_pos.x = (map_pos4.x - 1.f) / map_pos4.w;
+		map_pos.y = (map_pos4.y) / map_pos4.w;
 
 		screen_pos = map_pos;
 		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
@@ -1621,6 +1610,97 @@ glm::vec2 map_state::normalize_map_coord(glm::vec2 p) {
 	auto new_pos = p / glm::vec2{ float(map_data.size_x), float(map_data.size_y) };
 	new_pos.y = 1.f - new_pos.y;
 	return new_pos;
+}
+
+glm::mat4x4 map_state::get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const {
+	glm::mat4x4 mvp(1.f);
+	switch(mode) {
+	case map_view::flat: {
+		/*
+			[ a 0 0 -1 ] [ 2 * x - 1 ] = [ a * (2 * x - 1) + (-1 * 1) ]
+			[ 0 b 0 0  ] [ 2 * z - 1 ]   [ b * (2 * z - 1)    ]
+			[ 0 0 c 0  ] [ y         ]   [ c * y			  ]
+			[ 0 0 0 d  ] [ 1         ]   [ d * 1			  ]
+		*/
+		mvp[0][0] = 2.f * zoom * aspect_ratio;
+		mvp[0][3] = -1.f * zoom * aspect_ratio;
+		/*
+			(2 * y - 1)* zoom -> 2 * zoom * y - 1 * zoom
+			2 * zoom * (y + oy) - 1 * zoom -> 2 * zoom * y + 2 * zoom * oy - 1 * zoom
+		*/
+		mvp[1][1] = 2.f * zoom;
+		mvp[1][3] = 2.f * zoom * offset.y - 1.f * zoom;
+		mvp[2][2] = zoom;
+		mvp[3][3] = 1.f;
+		mvp = glm::rotate(mvp, get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
+		break;
+	}
+	case map_view::globe: {
+		/*
+			(2 * x - 1) * zoom / aspect_ratio
+			2 * x * zoom / aspx - 1 * zoom / aspx
+			2 * (x + 0.5) * z - 1 * z
+			2 * x * z + 2 * 0.5 * z - 1 * z
+			2 * x * z + z * (2 * 0.5 - 1)
+			...
+			(2 * (a + 0.5) - 1) * zoom -> (2 * a + 2 * 0.5 - 1) * zoom -> 2 * a + 1 - 1 * zoom
+			z * (1 + y) -> z + z * y
+			[a b c] [x] = [a*x + b*y + c*z]
+			[d e f] [y]   [d*x + e*y + f*z]
+			[g h i] [z]   [g*x + h*y + i*z]
+
+			[a11 a12 a13 a14] [x] = [a11*x + a12*y + a13*z + a14*w]
+			[a21 a22 a23 a24] [y]   [a21*x + a22*y + a23*z + a24*w]
+			[a31 a32 a33 a34] [z]   [a31*x + a32*y + a33*z + a34*w]
+			[a41 a42 a43 a44] [w]   [a41*x + a42*y + a43*z + a44*w]
+		*/
+		//x = a11 * x = a11 * (a*x + b*y + c*z) = a11*a*x + a11*b*y + a11*c*z
+		mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
+		//y = a22 * y + a23 * z
+		mvp[1][1] = 0.f;
+		mvp[2][1] = -2.f * zoom / glm::pi<float>();
+		//z = a32 * y + a33 * z
+		mvp[1][2] = 2.f * zoom * 0.02f / glm::pi<float>();
+		mvp[2][2] = 1.f;
+		//w = a44 * w
+		mvp[3][3] = 1.f;
+		mvp *= globe_rot4x4;
+		break;
+	}
+	case map_view::globe_perspect: {
+		/*
+			[ a b c d ] [ q ] = [ a * q + b * r + c * s + d * t ]
+			[ e f g h ] [ r ]   [ e * q + f * r + g * s + h * t ]
+			[ i j k l ] [ s ]   [ i * q + j * r + k * s + l * t ]
+			[ m n o p ] [ t ]   [ m * q + n * r + o * s + p * t ]
+			[a b c d] [e f g h] = [a*e + b*i + c*m + d*q]
+						[i j k l]   [a*f + b*j + c*n + d*r]
+						[m n o p]   [a*g + b*k + c*o + d*s]
+						[q r s t]   [a*h + b*l + c*p + d*t]
+			...
+			(z / PI) - 1.2 = (z - 1.2 * PI) / PI
+		*/
+		float m_near = 0.1f;
+		float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
+		float m_far = m_tangent_length_square / 1.2f;
+		float m_right = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
+		float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
+		mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
+		mvp[1][1] = 0.f;
+		//y = z * S
+		mvp[2][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
+		//mvp[3][1] = 1.2f * glm::pi<float>();
+		//z = y * S = (y - 1.2f * pi) * S = y * S - 1.2f * pi * S
+		mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) / glm::pi<float>();
+		mvp[2][2] = 0.f;
+		mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * glm::pi<float>() * mvp[1][2];
+		mvp[1][3] = -1.f / glm::pi<float>(); //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
+		mvp[3][3] = 1.2f;
+		mvp *= globe_rot4x4;
+		break;
+	}
+	}
+	return mvp;
 }
 
 } // namespace map

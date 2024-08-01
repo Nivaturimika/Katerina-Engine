@@ -97,6 +97,7 @@ public:
 	float get_aspect_ratio(glm::vec2 screen_size, map_view view) const;
 	float get_counter_factor() const;
 	float get_zoom() const;
+	glm::mat4x4 get_mvp_matrix(map_view mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const;
 };
 
 void update_text_lines(sys::state& state, display_data& map_data);

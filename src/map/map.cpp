@@ -435,7 +435,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 			glm::vec3(pos1.x, pos1.y, pos1.z),
 			glm::vec3(pos2.x, pos2.y, pos2.z),
 			an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
-		) * glm::vec3(0.01f, 0.01f, 0.01f)
+		)
 	);
 	//
 	auto sca_index = an.get_scale_key_index(anim_time);
@@ -477,7 +477,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 		)
 	));
 	// Rotation is fine, the halo above units works kosher
-	return mt * ms;
+	return mt * ms * mr * mu;
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at) {
@@ -555,86 +555,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			globe_rot4x4[i][2] = globe_rotation[i][2];
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
-		glm::mat4x4 mvp(1.f);
-		if(map_view_mode == map_view::flat) {
-			/*
-				[ a 0 0 -1 ] [ 2 * x - 1 ] = [ a * (2 * x - 1) + (-1 * 1) ]
-				[ 0 b 0 0  ] [ 2 * z - 1 ]   [ b * (2 * z - 1)    ]
-				[ 0 0 c 0  ] [ y         ]   [ c * y			  ]
-				[ 0 0 0 d  ] [ 1         ]   [ d * 1			  ]
-			*/
-			mvp[0][0] = 2.f * zoom * aspect_ratio;
-			mvp[0][3] = -1.f * zoom * aspect_ratio;
-			/*
-				(2 * y - 1)* zoom -> 2 * zoom * y - 1 * zoom
-				2 * zoom * (y + oy) - 1 * zoom -> 2 * zoom * y + 2 * zoom * oy - 1 * zoom
-			*/
-			mvp[1][1] = 2.f * zoom;
-			mvp[1][3] = 2.f * zoom * offset.y - 1.f * zoom;
-			mvp[2][2] = zoom;
-			mvp[3][3] = 1.f;
-			mvp = glm::rotate(mvp, state.map_state.get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
-		} else if(map_view_mode == map_view::globe) {
-			/*
-				(2 * x - 1) * zoom / aspect_ratio
-				2 * x * zoom / aspx - 1 * zoom / aspx
-				2 * (x + 0.5) * z - 1 * z
-				2 * x * z + 2 * 0.5 * z - 1 * z
-				2 * x * z + z * (2 * 0.5 - 1)
-				...
-				(2 * (a + 0.5) - 1) * zoom -> (2 * a + 2 * 0.5 - 1) * zoom -> 2 * a + 1 - 1 * zoom
-				z * (1 + y) -> z + z * y
-				[a b c] [x] = [a*x + b*y + c*z]
-				[d e f] [y]   [d*x + e*y + f*z]
-				[g h i] [z]   [g*x + h*y + i*z]
-
-				[a11 a12 a13 a14] [x] = [a11*x + a12*y + a13*z + a14*w]
-				[a21 a22 a23 a24] [y]   [a21*x + a22*y + a23*z + a24*w]
-				[a31 a32 a33 a34] [z]   [a31*x + a32*y + a33*z + a34*w]
-				[a41 a42 a43 a44] [w]   [a41*x + a42*y + a43*z + a44*w]
-			*/
-			//x = a11 * x = a11 * (a*x + b*y + c*z) = a11*a*x + a11*b*y + a11*c*z
-			mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
-			//y = a22 * y + a23 * z
-			mvp[1][1] = 0.f;
-			mvp[2][1] = -2.f * zoom / glm::pi<float>();
-			//z = a32 * y + a33 * z
-			mvp[1][2] = 2.f * zoom * 0.02f / glm::pi<float>();
-			mvp[2][2] = 1.f;
-			//w = a44 * w
-			mvp[3][3] = 1.f;
-			mvp *= globe_rot4x4;
-		} else if(map_view_mode == map_view::globe_perspect) {
-			/*
-				[ a b c d ] [ q ] = [ a * q + b * r + c * s + d * t ]
-				[ e f g h ] [ r ]   [ e * q + f * r + g * s + h * t ]
-				[ i j k l ] [ s ]   [ i * q + j * r + k * s + l * t ]
-				[ m n o p ] [ t ]   [ m * q + n * r + o * s + p * t ]
-				[a b c d] [e f g h] = [a*e + b*i + c*m + d*q]
-				          [i j k l]   [a*f + b*j + c*n + d*r]
-				          [m n o p]   [a*g + b*k + c*o + d*s]
-				          [q r s t]   [a*h + b*l + c*p + d*t]
-				...
-				(z / PI) - 1.2 = (z - 1.2 * PI) / PI
-			*/
-			float m_near = 0.1f;
-			float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
-			float m_far = m_tangent_length_square / 1.2f;
-			float m_right = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
-			float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
-			mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
-			mvp[1][1] = 0.f;
-			//y = z * S
-			mvp[2][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
-			//mvp[3][1] = 1.2f * glm::pi<float>();
-			//z = y * S = (y - 1.2f * pi) * S = y * S - 1.2f * pi * S
-			mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) / glm::pi<float>();
-			mvp[2][2] = 0.f;
-			mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * glm::pi<float>() * mvp[1][2];
-			mvp[1][3] = -1.f / glm::pi<float>(); //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
-			mvp[3][3] = 1.2f;
-			mvp *= globe_rot4x4;
-		}
+		auto mvp = state.map_state.get_mvp_matrix(map_view_mode, globe_rot4x4, offset, aspect_ratio);
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
 		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
@@ -1072,7 +993,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glClearDepth(1.f);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
 		glDepthRange(0.f, 1.f);
 
 		load_shader(shader_map_standing_object);
