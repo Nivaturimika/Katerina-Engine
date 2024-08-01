@@ -967,7 +967,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 	}
 	map_data.set_text_lines(state, text_data);
 
-	if(state.cheat_data.province_names) {
+	if(true) {
 		std::vector<text_line_generator_data> p_text_data;
 		for(auto p : state.world.in_province) {
 			if(p.get_name()) {
