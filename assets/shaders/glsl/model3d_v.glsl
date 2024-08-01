@@ -6,7 +6,6 @@ layout (location = 3) in int bone_ids[4];
 layout (location = 4) in float bone_weights[4];
 
 out vec2 tex_coord;
-out vec3 dbg_color;
 
 uniform vec2 offset;
 uniform float aspect_ratio;
@@ -52,7 +51,5 @@ void main() {
 	world_pos /= vec3(map_size.x, vertical_factor, map_size.y);
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
 	gl_Position = calc_gl_position(world_pos);
-
-	dbg_color = abs(skin_pos - world_pos);
 	tex_coord = texture_coord;
 }
