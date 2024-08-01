@@ -1417,8 +1417,7 @@ float map_state::get_counter_factor() const {
 	if(zoom <= map::zoom_close)
 		return 0.f;
 	float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
-	float z_sigmoid = std::sin(z_factor * 3.1415965f * 0.5f);
-	return z_sigmoid;
+	return std::sin(z_factor * glm::pi<float>() / 2.f) * glm::pi<float>() / 2.f;
 }
 
 float map_state::get_zoom() const {
@@ -1561,18 +1560,13 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		//now back to 2d
 		v /= v.w;
 		screen_pos = ((glm::vec2(v) + 1.f) / 2.f) * screen_size;
-		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2))
+		if(screen_pos.x >= float(std::numeric_limits<int16_t>::max() / 2.f)
+		|| screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2.f)
+		|| screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2.f)
+		|| screen_pos.y <= float(std::numeric_limits<int16_t>::min() / 2.f))
 			return false;
-		if(screen_pos.x <= float(std::numeric_limits<int16_t>::min() / 2))
-			return false;
-		if(screen_pos.y >= float(std::numeric_limits<int16_t>::max() / 2))
-			return false;
-		if(screen_pos.y <= float(std::numeric_limits<int16_t>::min() / 2))
-			return false;
-
-		if(screen_pos.x < 0.f || screen_pos.y < 0.f)
-			return false;
-		if(screen_pos.x > screen_size.x || screen_pos.y > screen_size.y)
+		if(screen_pos.x < 0.f || screen_pos.y < 0.f
+		|| screen_pos.x > screen_size.x || screen_pos.y > screen_size.y)
 			return false;
 		return true;
 	}
