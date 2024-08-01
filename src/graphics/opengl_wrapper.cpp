@@ -120,7 +120,7 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		"vec4 flat_coords(vec4 world_pos) {\n"
 		"\tworld_pos.x = mod(world_pos.x - offset.x, 1.f);\n"
 		"\tvec4 v = world_pos * model_proj_view;\n"
-		"\treturn vec4(v.x, v.y, v.z, v.w * (1.f - v.z));\n"
+		"\treturn v * vec4(1.f, 1.f, 1.f, 1.f - v.z);\n"
 		"}\n"
 		"vec4 calc_gl_position(in vec3 world_pos) {\n"
 		"\tswitch(int(subroutines_index)) {\n"

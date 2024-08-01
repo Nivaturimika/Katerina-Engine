@@ -15,7 +15,6 @@ uniform float zoom;
 uniform vec2 map_size;
 // The scaling factor for the width
 uniform float border_width;
-uniform mat3 rotation;
 uniform uint subroutines_index;
 uniform float counter_factor;
 

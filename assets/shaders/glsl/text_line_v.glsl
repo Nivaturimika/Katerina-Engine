@@ -16,7 +16,6 @@ uniform float aspect_ratio;
 uniform float zoom;
 // The size of the map in pixels
 uniform vec2 map_size;
-uniform mat3 rotation;
 uniform float opaque;
 uniform uint subroutines_index;
 uniform float counter_factor;

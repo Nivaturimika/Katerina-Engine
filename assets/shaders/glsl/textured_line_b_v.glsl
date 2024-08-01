@@ -14,7 +14,6 @@ uniform float aspect_ratio;
 uniform float zoom;
 uniform vec2 map_size;
 uniform float width;
-uniform mat3 rotation;
 uniform uint subroutines_index;
 uniform float counter_factor;
 
