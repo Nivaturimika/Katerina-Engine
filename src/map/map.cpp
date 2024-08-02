@@ -309,27 +309,31 @@ void display_data::create_meshes() {
 }
 
 void display_data::clear_opengl_objects() {
+	assert(loaded_map);
+	loaded_map = false;
 	/* We don't need to check against 0, since the delete functions already do that for us */
-	glDeleteTextures(texture_count, &textures[0]);
-	glDeleteTextures(texture_count, &texture_arrays[0]);
+	glDeleteTextures(texture_count, textures);
+	glDeleteTextures(texture_count, texture_arrays);
 	glDeleteTextures(max_static_meshes * max_static_submeshes, &static_mesh_textures[0][0]);
-	glDeleteVertexArrays(vo_count, &vao_array[0]);
-	glDeleteBuffers(vo_count, &vbo_array[0]);
+	glDeleteVertexArrays(vo_count, vao_array);
+	glDeleteBuffers(vo_count, vbo_array);
 	/* Flags shader for deletion, but doesn't delete them until they're no longer in the rendering context */
 	for(const auto shader : shaders) {
 		glDeleteProgram(shader);
 	}
 	//Some graphics drivers will crash if we dont memset to 0
-	std::memset(&textures[0], 0, sizeof(textures));
-	std::memset(&texture_arrays[0], 0, sizeof(texture_arrays));
-	std::memset(&static_mesh_textures[0][0], 0, sizeof(static_mesh_textures));
-	std::memset(&vao_array[0], 0, sizeof(vao_array));
-	std::memset(&vbo_array[0], 0, sizeof(vbo_array));
-	std::memset(&shaders[0], 0, sizeof(shaders));
+	std::memset(textures, 0, sizeof(textures));
+	std::memset(texture_arrays, 0, sizeof(texture_arrays));
+	std::memset(static_mesh_textures, 0, sizeof(static_mesh_textures));
+	std::memset(vao_array, 0, sizeof(vao_array));
+	std::memset(vbo_array, 0, sizeof(vbo_array));
+	std::memset(shaders, 0, sizeof(shaders));
 }
 
 display_data::~display_data() {
-	clear_opengl_objects();
+	if(loaded_map) { //only clear when map is loaded
+		clear_opengl_objects();
+	}
 }
 
 std::optional<simple_fs::file> try_load_shader(simple_fs::directory& root, native_string_view name) {
@@ -2449,6 +2453,9 @@ void load_static_meshes(sys::state& state) {
 }
 
 void display_data::load_map(sys::state& state) {
+	assert(!loaded_map);
+	loaded_map = true;
+
 	auto root = simple_fs::get_root(state.common_fs);
 	glGenVertexArrays(vo_count, vao_array);
 	glGenBuffers(vo_count, vbo_array);

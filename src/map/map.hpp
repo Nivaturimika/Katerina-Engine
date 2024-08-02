@@ -83,6 +83,7 @@ struct border {
 };
 
 class display_data {
+	bool loaded_map = false;
 public:
 	display_data(){};
 	~display_data();
