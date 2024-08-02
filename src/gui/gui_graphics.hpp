@@ -504,6 +504,9 @@ struct state {
 	element_base* build_province_unit_window = nullptr;
 	element_base* national_focus_overwrite_window = nullptr;
 
+	element_base* army_reorg_window = nullptr;
+	element_base* navy_reorg_window = nullptr;
+
 	std::array<chat_message, 32> chat_messages;
 	std::vector<dcon::technology_id> tech_queue;
 	uint8_t chat_messages_index = 0;

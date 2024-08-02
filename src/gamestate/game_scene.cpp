@@ -189,6 +189,12 @@ void open_province_window(sys::state& state, dcon::province_id p) {
 			if(state.ui_state.multi_unit_selection_window) {
 				state.ui_state.multi_unit_selection_window->set_visible(state, false);
 			}
+			if(state.ui_state.army_reorg_window) {
+				state.ui_state.army_reorg_window->set_visible(state, false);
+			}
+			if(state.ui_state.navy_reorg_window) {
+				state.ui_state.navy_reorg_window->set_visible(state, false);
+			}
 		}
 	}
 }

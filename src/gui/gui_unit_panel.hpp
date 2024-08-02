@@ -470,23 +470,8 @@ class unit_selection_panel : public window_element_base {
 	dcon::gfx_object_id disband_gfx{};
 	unit_selection_disband_too_small_button* disband_too_small_btn = nullptr;
 public:
-	window_element_base* reorg_window = nullptr;
 	window_element_base* combat_window = nullptr;
-
 	void on_create(sys::state& state) noexcept override {
-		if constexpr(std::is_same_v<T, dcon::army_id>) {
-			auto win2 = make_element_by_type<unit_reorg_window<T, dcon::regiment_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
-			win2->base_data.position.y = base_data.position.y - 29;
-			win2->set_visible(state, false);
-			reorg_window = win2.get();
-			add_child_to_front(std::move(win2));
-		} else {
-			auto win2 = make_element_by_type<unit_reorg_window<T, dcon::ship_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
-			win2->base_data.position.y = base_data.position.y - 29;
-			win2->set_visible(state, false);
-			reorg_window = win2.get();
-			add_child_to_front(std::move(win2));
-		}
 		window_element_base::on_create(state);
 		if(disband_too_small_btn && disband_gfx) {
 			disband_too_small_btn->base_data.data.button.button_image = disband_gfx;
@@ -563,16 +548,38 @@ public:
 				parent->impl_get(state, payload);
 				// Tell reorg window to clean up after itself
 				Cyto::Any cpayload = element_selection_wrapper<reorg_win_action>{reorg_win_action{reorg_win_action::close}};
+				auto* reorg_window = std::is_same_v<T, dcon::army_id>
+					? state.ui_state.army_reorg_window
+					: state.ui_state.navy_reorg_window;
 				reorg_window->impl_get(state, cpayload);
 				break;
-			} case unitpanel_action::reorg: {
-				reorg_window->is_visible() ? reorg_window->set_visible(state, false) : reorg_window->set_visible(state, true);
+			}
+			case unitpanel_action::reorg: {
+				auto* reorg_window = std::is_same_v<T, dcon::army_id>
+					? state.ui_state.army_reorg_window
+					: state.ui_state.navy_reorg_window;
+				bool keep_shown = false;
+				if constexpr(std::is_same_v<T, dcon::army_id>) {
+					auto u = retrieve<T>(state, parent);
+					auto* win = static_cast<unit_reorg_window<T, dcon::regiment_id>*>(state.ui_state.army_reorg_window);
+					keep_shown = win->unit_to_reorg != u && win->is_visible();
+					win->unit_to_reorg = u;
+				} else {
+					auto u = retrieve<T>(state, parent);
+					auto* win = static_cast<unit_reorg_window<T, dcon::ship_id>*>(state.ui_state.navy_reorg_window);
+					keep_shown = win->unit_to_reorg != u && win->is_visible();
+					win->unit_to_reorg = u;
+				}
+				//reorg_window->base_data.position.y = base_data.position.y - 29;
+				reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
 				reorg_window->impl_on_update(state);
 				break;
-			} case unitpanel_action::changeleader: {
+			}
+			case unitpanel_action::changeleader: {
 				
 				break;
-			} default: {
+			}
+			default: {
 				break;
 			}
 			}
@@ -1517,7 +1524,8 @@ public:
 			case unitpanel_action::close:
 			{
 				Cyto::Any cpayload = element_selection_wrapper<reorg_win_action>{reorg_win_action{reorg_win_action::close}};
-				unit_selection_win->reorg_window->impl_get(state, cpayload);
+				state.ui_state.army_reorg_window->impl_get(state, cpayload);
+				state.ui_state.navy_reorg_window->impl_get(state, cpayload);
 				state.selected_armies.clear();
 				state.selected_navies.clear();
 				set_visible(state, false);

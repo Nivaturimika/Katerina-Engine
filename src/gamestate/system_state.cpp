@@ -205,6 +205,20 @@ void create_in_game_windows(sys::state& state) {
 		state.ui_state.root->add_child_to_front(std::move(mselection));
 	}
 	{
+		auto win = make_element_by_type<unit_reorg_window<dcon::army_id, dcon::regiment_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+		//win->base_data.position.y = base_data.position.y - 29;
+		win->set_visible(state, false);
+		state.ui_state.army_reorg_window = win.get();
+		state.ui_state.root->add_child_to_front(std::move(win));
+	}
+	{
+		auto win = make_element_by_type<unit_reorg_window<dcon::navy_id, dcon::ship_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+		//win->base_data.position.y = base_data.position.y - 29;
+		win->set_visible(state, false);
+		state.ui_state.navy_reorg_window = win.get();
+		state.ui_state.root->add_child_to_front(std::move(win));
+	}
+	{
 		auto new_elm = ui::make_element_by_type<ui::diplomacy_request_window>(state, "defaultdialog");
 		state.ui_state.request_window = new_elm.get();
 		state.ui_state.root->add_child_to_front(std::move(new_elm));
