@@ -8,7 +8,6 @@ layout (location = 4) in float bone_weights[4];
 out vec2 tex_coord;
 
 uniform vec2 offset;
-uniform float aspect_ratio;
 uniform float zoom;
 uniform vec2 map_size;
 uniform float time;
@@ -16,7 +15,6 @@ uniform vec2 model_offset;
 uniform float target_facing;
 uniform float target_topview_fixup;
 uniform uint subroutines_index;
-uniform float counter_factor;
 
 #define MAX_BONES 100
 uniform mat4 bones_matrices[MAX_BONES];

@@ -9,12 +9,10 @@ out float o_dist;
 out vec2 map_coord;
 
 uniform vec2 offset;
-uniform float aspect_ratio;
 uniform float zoom;
 uniform vec2 map_size;
 uniform float width;
 uniform float time;
-uniform float counter_factor;
 
 vec4 calc_gl_position(in vec3 v);
 

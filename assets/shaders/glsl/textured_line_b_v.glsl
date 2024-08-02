@@ -15,7 +15,6 @@ uniform float zoom;
 uniform vec2 map_size;
 uniform float width;
 uniform uint subroutines_index;
-uniform float counter_factor;
 
 vec4 calc_gl_position(in vec3 v);
 

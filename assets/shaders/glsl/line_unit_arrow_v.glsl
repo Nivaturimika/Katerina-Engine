@@ -8,7 +8,6 @@ layout (location = 4) in float type;
 out vec2 tex_coord;
 // Camera position
 uniform vec2 offset;
-uniform float aspect_ratio;
 // Zoom: big numbers = close
 uniform float zoom;
 // The size of the map in pixels
@@ -16,7 +15,6 @@ uniform vec2 map_size;
 // The scaling factor for the width
 uniform float border_width;
 uniform uint subroutines_index;
-uniform float counter_factor;
 
 vec4 calc_gl_position(in vec3 v);
 
