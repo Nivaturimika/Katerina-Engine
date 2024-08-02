@@ -988,9 +988,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glClearDepth(1.f);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LEQUAL);
-		glDepthRange(0.f, 1.f);
+		glDepthFunc(GL_LESS);
 
 		load_shader(shader_map_standing_object);
 		glBindVertexArray(vao_array[vo_static_mesh]);

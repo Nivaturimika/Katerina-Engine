@@ -47,8 +47,11 @@ void main() {
 	//This is quirky hack... and it works!
 	if(apt.x < -1.f || apt.x > 1.f
 	|| bpt.x < -1.f || bpt.x > 1.f
-	|| cpt.x < -1.f || cpt.x > 1.f) {
-		gl_Position = vec4(0.f);
+	|| cpt.x < -1.f || cpt.x > 1.f
+	|| apt.y < -1.f || apt.y > 1.f
+	|| bpt.y < -1.f || bpt.y > 1.f
+	|| cpt.y < -1.f || cpt.y > 1.f) {
+		gl_Position = central_pos;
 	}
 
 	// pass data to frag shader
