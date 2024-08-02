@@ -2157,6 +2157,10 @@ TRIGGER_FUNCTION(tf_has_country_flag_state) {
 	auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot));
 	return compare_to_true(tval[0], ws.world.nation_get_flag_variables(owner, payload(tval[1]).natf_id));
 }
+TRIGGER_FUNCTION(tf_has_province_flag) {
+	auto prov = to_prov(primary_slot);
+	return compare_to_true(tval[0], ws.world.province_get_flag_variables(prov, payload(tval[1]).provf_id));
+}
 TRIGGER_FUNCTION(tf_continent_province) {
 	return compare_values_eq(tval[0], ws.world.province_get_continent(to_prov(primary_slot)), trigger::payload(tval[1]).mod_id);
 }

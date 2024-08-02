@@ -458,13 +458,15 @@ EFFECT_BYTECODE_ELEMENT(0x01B6, change_terrain_pop, 1) \
 EFFECT_BYTECODE_ELEMENT(0x01B7, change_terrain_province, 1) \
 EFFECT_BYTECODE_ELEMENT(0x01B8, masquerade_as_nation_this, 0) \
 EFFECT_BYTECODE_ELEMENT(0x01B9, masquerade_as_nation_from, 0) \
+EFFECT_BYTECODE_ELEMENT(0x01BA, set_province_flag, 1) \
+EFFECT_BYTECODE_ELEMENT(0x01BB, clr_province_flag, 1) \
 
 #define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	EFFECT_BYTECODE_LIST
 #undef EFFECT_BYTECODE_ELEMENT
 
 // invalid
-constexpr inline uint16_t first_scope_code = 0x01BA;
+constexpr inline uint16_t first_scope_code = 0x01BC;
 
 // scopes
 constexpr inline uint16_t generic_scope = first_scope_code + 0x0000; // default grouping of effects (or hidden_tooltip)
@@ -1359,13 +1361,14 @@ TRIGGER_BYTECODE_ELEMENT(0x02DD, has_building_university, 0) \
 TRIGGER_BYTECODE_ELEMENT(0x02DE, test, 1) \
 TRIGGER_BYTECODE_ELEMENT(0x02DF, unit_has_leader, 0) \
 TRIGGER_BYTECODE_ELEMENT(0x02E0, has_national_focus_state, 1) \
-TRIGGER_BYTECODE_ELEMENT(0x02E1, has_national_focus_province, 1)
+TRIGGER_BYTECODE_ELEMENT(0x02E1, has_national_focus_province, 1) \
+TRIGGER_BYTECODE_ELEMENT(0x02E2, has_province_flag, 1)
 
 #define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 TRIGGER_BYTECODE_LIST
 #undef TRIGGER_BYTECODE_ELEMENT
 
-constexpr inline uint16_t first_scope_code = 0x02E2;
+constexpr inline uint16_t first_scope_code = 0x02E3;
 
 // technology name -- payload 1
 // ideology name -- 4 variants payload 2
@@ -1485,6 +1488,7 @@ union payload {
 	dcon::region_id reg_id;
 	dcon::stored_trigger_id str_id;
 	dcon::national_focus_id nf_id;
+	dcon::provincial_flag_id provf_id;
 
 	// variables::national_variable_tag nat_var;
 	// variables::national_flag_tag nat_flag;
@@ -1498,6 +1502,10 @@ union payload {
 	payload(bool i) {
 		memset(this, 0, sizeof(payload));
 		boolean_value = i;
+	}
+	payload(dcon::provincial_flag_id i) {
+		memset(this, 0, sizeof(payload));
+		provf_id = i;
 	}
 	payload(dcon::national_focus_id i) {
 		memset(this, 0, sizeof(payload));

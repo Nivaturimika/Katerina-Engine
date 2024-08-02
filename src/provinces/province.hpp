@@ -18,6 +18,8 @@ inline constexpr dcon::province_id from_map_id(uint16_t id) {
 }
 
 struct global_provincial_state {
+	tagged_vector<dcon::text_key, dcon::provincial_flag_id> flag_variable_names;
+	int32_t num_allocated_provincial_flags = 0;
 	std::vector<dcon::province_adjacency_id> canals;
 	std::vector<dcon::province_id> canal_provinces;
 	ankerl::unordered_dense::map<dcon::modifier_id, dcon::gfx_object_id, sys::modifier_hash> terrain_to_gfx_map;

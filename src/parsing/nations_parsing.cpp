@@ -765,6 +765,18 @@ dcon::national_flag_id scenario_building_context::get_national_flag(std::string 
 	}
 }
 
+dcon::provincial_flag_id scenario_building_context::get_provincial_flag(std::string const& name) {
+	if(auto it = map_of_provincial_flags.find(name); it != map_of_provincial_flags.end()) {
+		return it->second;
+	} else {
+		dcon::provincial_flag_id new_id = dcon::provincial_flag_id(dcon::provincial_flag_id::value_base_t(state.province_definitions.num_allocated_provincial_flags));
+		++state.province_definitions.num_allocated_provincial_flags;
+		map_of_provincial_flags.insert_or_assign(name, new_id);
+		state.province_definitions.flag_variable_names.safe_get(new_id) = text::find_or_add_key(state, name, false);
+		return new_id;
+	}
+}
+
 dcon::global_flag_id scenario_building_context::get_global_flag(std::string const& name) {
 	if(auto it = map_of_global_flags.find(name); it != map_of_global_flags.end()) {
 		return it->second;

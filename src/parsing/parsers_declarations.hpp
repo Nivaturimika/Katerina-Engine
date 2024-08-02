@@ -430,6 +430,7 @@ struct scenario_building_context {
 	ankerl::unordered_dense::map<std::string, dcon::leader_images_id> map_of_leader_graphics;
 	ankerl::unordered_dense::map<std::string, std::vector<saved_stored_condition>> map_of_stored_triggers;
 	ankerl::unordered_dense::map<std::string, dcon::national_focus_id> map_of_national_focuses;
+	ankerl::unordered_dense::map<std::string, dcon::provincial_flag_id> map_of_provincial_flags;
 
 	tagged_vector<province_data, dcon::province_id> prov_id_to_original_id_map;
 	std::vector<dcon::province_id> original_id_to_prov_id_map;
@@ -457,6 +458,7 @@ struct scenario_building_context {
 
 	dcon::national_variable_id get_national_variable(std::string const& name);
 	dcon::national_flag_id get_national_flag(std::string const& name);
+	dcon::provincial_flag_id get_provincial_flag(std::string const& name);
 	dcon::global_flag_id get_global_flag(std::string const& name);
 
 	int32_t number_of_commodities_seen = 0;

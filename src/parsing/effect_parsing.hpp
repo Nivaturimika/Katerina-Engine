@@ -1153,6 +1153,24 @@ struct effect_body {
 			return;
 		}
 	}
+	void set_province_flag(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(context.main_slot == trigger::slot_contents::province) {
+			context.compiled_effect.push_back(uint16_t(effect::set_province_flag));
+			context.compiled_effect.push_back(trigger::payload(context.outer_context.get_provincial_flag(std::string(value))).value);
+		} else {
+			err.accumulated_errors += "set_province_flag effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+	void clr_province_flag(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(context.main_slot == trigger::slot_contents::province) {
+			context.compiled_effect.push_back(uint16_t(effect::clr_province_flag));
+			context.compiled_effect.push_back(trigger::payload(context.outer_context.get_provincial_flag(std::string(value))).value);
+		} else {
+			err.accumulated_errors += "clr_province_flag effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
 	void country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 	void province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 	void military_access(association_type t, std::string_view value, error_handler& err, int32_t line,

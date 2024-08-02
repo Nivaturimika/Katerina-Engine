@@ -3028,6 +3028,18 @@ struct trigger_body {
 		}
 		context.compiled_trigger.push_back(trigger::payload(context.outer_context.get_national_flag(std::string(value))).value);
 	}
+	void has_province_flag(association_type a, std::string_view value, error_handler& err, int32_t line,
+			trigger_building_context& context) {
+		if(context.main_slot == trigger::slot_contents::province) {
+			context.compiled_trigger.push_back(uint16_t(trigger::has_province_flag | association_to_bool_code(a)));
+		} else {
+			err.accumulated_errors += "has_province_flag trigger used in an incorrect scope type " +
+				slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+				std::to_string(line) + ")\n";
+			return;
+		}
+		context.compiled_trigger.push_back(trigger::payload(context.outer_context.get_provincial_flag(std::string(value))).value);
+	}
 	void has_global_flag(association_type a, std::string_view value, error_handler& err, int32_t line,
 			trigger_building_context& context) {
 		if(is_fixed_token_ci(value.data(), value.data() + value.length(), "project_alice")) {

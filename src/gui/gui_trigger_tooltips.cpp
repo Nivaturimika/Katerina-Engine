@@ -2460,6 +2460,16 @@ void tf_has_country_flag(TRIGGER_DISPLAY_PARAMS) {
 		text::close_layout_box(layout, box);
 	}
 }
+void tf_has_province_flag(TRIGGER_DISPLAY_PARAMS) {
+	if(ws.user_settings.spoilers) {
+		auto box = text::open_layout_box(layout, indentation);
+		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+		display_with_comparison(tval[0],
+			text::produce_simple_string(ws, ws.province_definitions.flag_variable_names[trigger::payload(tval[1]).provf_id]),
+			text::produce_simple_string(ws, "att_set"), ws, layout, box);
+		text::close_layout_box(layout, box);
+	}
+}
 void tf_continent_province(TRIGGER_DISPLAY_PARAMS) {
 	auto t = trigger::payload(tval[1]).mod_id;
 	auto box = text::open_layout_box(layout, indentation);
@@ -8404,6 +8414,7 @@ constexpr inline void (*trigger_functions[])(TRIGGER_DISPLAY_PARAMS) = {
 		tf_unit_has_leader, //constexpr inline uint16_t unit_has_leader = 0x02DF
 		tf_has_national_focus_state, //constexpr inline uint16_t has_national_focus_state = 0x02E0
 		tf_has_national_focus_province, //constexpr inline uint16_t has_national_focus_province = 0x02E1
+		tf_has_province_flag, //constexpr inline uint16_t has_province_flag = 0x02E1
 
 		//
 		// scopes

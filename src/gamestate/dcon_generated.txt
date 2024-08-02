@@ -25,6 +25,7 @@ make_index{pop_demographics_key}{uint16_t}
 make_index{demographics_key}{uint16_t}
 make_index{provincial_modifier_value}{uint8_t}
 make_index{national_modifier_value}{uint8_t}
+make_index{provincial_flag_id}{uint16_t}
 
 object{
 	name{ national_identity }
@@ -1574,6 +1575,11 @@ object {
 	property{
 		name{ former_rebel_controller }
 		type{ dcon::rebel_faction_id }
+	}
+	property{
+		name{ flag_variables }
+		type{array{provincial_flag_id}{bitfield}}
+		tag{ save }
 	}
 }
 

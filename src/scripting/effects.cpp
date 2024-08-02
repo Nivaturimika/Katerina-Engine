@@ -4806,6 +4806,14 @@ uint32_t ef_set_country_flag_pop(EFFECT_PARAMTERS) {
 		return ef_set_country_flag(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
 	return 0;
 }
+uint32_t ef_set_province_flag(EFFECT_PARAMTERS) {
+	ws.world.province_set_flag_variables(trigger::to_prov(primary_slot), trigger::payload(tval[1]).provf_id, true);
+	return 0;
+}
+uint32_t ef_clr_province_flag(EFFECT_PARAMTERS) {
+	ws.world.province_set_flag_variables(trigger::to_prov(primary_slot), trigger::payload(tval[1]).provf_id, true);
+	return 0;
+}
 uint32_t ef_add_country_modifier_province(EFFECT_PARAMTERS) {
 	if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
 		return ef_add_country_modifier(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);

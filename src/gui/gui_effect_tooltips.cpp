@@ -6253,6 +6253,26 @@ uint32_t ef_set_country_flag_province(EFFECT_DISPLAY_PARAMS) {
 	}
 	return 0;
 }
+uint32_t ef_set_province_flag(EFFECT_DISPLAY_PARAMS) {
+	{
+		auto box = text::open_layout_box(layout, indentation);
+		text::substitution_map m;
+		text::add_to_substitution_map(m, text::variable_type::text, ws.province_definitions.flag_variable_names[trigger::payload(tval[1]).provf_id]);
+		text::localised_format_box(ws, layout, box, "o_set_provincial_flag", m);
+		text::close_layout_box(layout, box);
+	}
+	return 0;
+}
+uint32_t ef_clr_province_flag(EFFECT_DISPLAY_PARAMS) {
+	{
+		auto box = text::open_layout_box(layout, indentation);
+		text::substitution_map m;
+		text::add_to_substitution_map(m, text::variable_type::text, ws.province_definitions.flag_variable_names[trigger::payload(tval[1]).provf_id]);
+		text::localised_format_box(ws, layout, box, "o_clr_provincial_flag", m);
+		text::close_layout_box(layout, box);
+	}
+	return 0;
+}
 uint32_t ef_add_country_modifier_province(EFFECT_DISPLAY_PARAMS) {
 	auto box = text::open_layout_box(layout, indentation);
 	text::substitution_map m;
@@ -7113,6 +7133,8 @@ ef_change_terrain_province, //constexpr inline uint16_t change_terrain_province 
 ef_change_terrain_pop, //constexpr inline uint16_t change_terrain_pop = 0x01B7;
 ef_masquerade_as_nation_this, //constexpr inline uint16_t ef_masquerade_as_nation_this = 0x01B8;
 ef_masquerade_as_nation_from, //constexpr inline uint16_t ef_masquerade_as_nation_from = 0x01B9;
+ef_set_province_flag,
+ef_clr_province_flag,
 
 //
 // SCOPES
