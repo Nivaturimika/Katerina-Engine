@@ -372,7 +372,7 @@ struct user_settings_s {
 	map_label_mode map_label = map_label_mode::quadratic;
 	uint8_t antialias_level = 4;
 	float gaussianblur_level = 1.f;
-	float gamma = 1.f;
+	float gamma = 2.2f;
 	bool railroads_enabled = true;
 	bool rivers_enabled = true;
 	map_zoom_mode zoom_mode = map_zoom_mode::panning;
@@ -389,7 +389,7 @@ struct user_settings_s {
 	sys::color_blind_mode color_blind_mode = sys::color_blind_mode::none;
 	uint32_t UNUSED_UINT32_T = 0;
 	char locale[16] = "en-US";
-	float map_counter_factor = 0.0175f;
+	float map_counter_factor = 0.385f;
 };
 
 struct global_scenario_data_s { // this struct holds miscellaneous global properties of the scenario

@@ -546,7 +546,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			globe_rot4x4[i][2] = globe_rotation[i][2];
 		}
 		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
-		auto mvp = state.map_state.get_mvp_matrix(map_view_mode, globe_rot4x4, offset, aspect_ratio);
+		float counter_factor = state.map_state.get_counter_factor(state.user_settings.map_counter_factor);
+		auto mvp = state.map_state.get_mvp_matrix(map_view_mode, globe_rot4x4, offset, aspect_ratio, counter_factor);
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
 		glUniform2f(shader_uniforms[program][uniform_offset], offset.x, offset.y);
 		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
@@ -554,7 +555,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
 		glUniform1ui(shader_uniforms[program][uniform_subroutines_index], GLuint(map_view_mode));
 		glUniform1f(shader_uniforms[program][uniform_time], time_counter);
-		glUniform1f(shader_uniforms[program][uniform_counter_factor], state.map_state.get_counter_factor());
+		glUniform1f(shader_uniforms[program][uniform_counter_factor], counter_factor);
 		glUniform1f(shader_uniforms[program][uniform_gamma], state.user_settings.gamma);
 	};
 

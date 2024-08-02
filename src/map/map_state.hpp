@@ -95,9 +95,9 @@ public:
 	bool screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::projection_mode view_mode, glm::vec2& map_pos);
 
 	float get_aspect_ratio(glm::vec2 screen_size, sys::projection_mode view) const;
-	float get_counter_factor() const;
+	float get_counter_factor(float v) const;
 	float get_zoom() const;
-	glm::mat4x4 get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const;
+	glm::mat4x4 get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio, float counter_factor) const;
 };
 
 void update_text_lines(sys::state& state, display_data& map_data);

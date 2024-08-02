@@ -1237,6 +1237,7 @@ void map_state::on_mouse_move(int32_t x, int32_t y, int32_t screen_size_x, int32
 }
 
 bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::projection_mode view_mode, glm::vec2& map_pos) {
+	float aspect_ratio = get_aspect_ratio(screen_size, view_mode);
 	if(view_mode == sys::projection_mode::globe_ortho) {
 		screen_pos -= screen_size * 0.5f;
 		screen_pos /= screen_size;
@@ -1262,7 +1263,6 @@ bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::
 		}
 		return false;
 	} else if (view_mode == sys::projection_mode::globe_perspect) {
-		float aspect_ratio = screen_size.x / screen_size.y;
 		float pi = glm::pi<float>();
 
 		//normalize screen
@@ -1287,12 +1287,10 @@ bool map_state::screen_to_map(glm::vec2 screen_pos, glm::vec2 screen_size, sys::
 		glm::vec3 sphere_center = glm::vec3(0.f, 0.f, -1.2f);
 		float sphere_radius = 1.f / pi;
 
-
 		glm::vec3 intersection_pos;
 		glm::vec3 intersection_normal;
 
-		if(glm::intersectRaySphere(camera, cursor_direction, sphere_center, sphere_radius, intersection_pos,
-			intersection_normal)) {
+		if(glm::intersectRaySphere(camera, cursor_direction, sphere_center, sphere_radius, intersection_pos, intersection_normal)) {
 			intersection_pos -= sphere_center;
 
 			intersection_pos = glm::vec3(-intersection_pos.x, -intersection_pos.z, intersection_pos.y);
@@ -1412,10 +1410,11 @@ float map_state::get_aspect_ratio(glm::vec2 screen_size, sys::projection_mode vi
 		return 1.f / (screen_size.x / screen_size.y) * float(map_data.size_x) / float(map_data.size_y);
 	return screen_size.x / screen_size.y;
 }
-float map_state::get_counter_factor() const {
+float map_state::get_counter_factor(float v) const {
 	if(zoom <= map::zoom_close)
 		return 0.f;
 	float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
+	z_factor *= v;
 	return std::sin(z_factor * glm::pi<float>() / 2.f) * glm::pi<float>() / 2.f;
 }
 
@@ -1474,22 +1473,10 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		float section = 200.f;
 		float angle_x1 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section) / section;
 		float angle_x2 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section + 1) / section;
-		if(!std::isfinite(angle_x1)) {
-			assert(false);
-			angle_x1 = 0.0f;
-		}
-		if(!std::isfinite(angle_x2)) {
-			assert(false);
-			angle_x2 = 0.0f;
-		}
-		if(!std::isfinite(target_pos.x)) {
-			assert(false);
-			target_pos.x = 0.0f;
-		}
-		if(!std::isfinite(target_pos.y)) {
-			assert(false);
-			target_pos.y = 0.0f;
-		}
+		assert(std::isfinite(angle_x1));
+		assert(std::isfinite(angle_x2));
+		assert(std::isfinite(target_pos.x));
+		assert(std::isfinite(target_pos.y));
 		cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(target_pos.x * section, 1.f));
 		cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(target_pos.x * section, 1.f));
 
@@ -1543,7 +1530,7 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 	case sys::projection_mode::flat: {
 		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, 0.5f - pos.y);
 		auto v = glm::vec4(glm::mod(target_pos.x - offset.x, 1.f), target_pos.y, 0.f, 1.f);
-		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio);
+		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio, get_counter_factor(state.user_settings.map_counter_factor));
 		//v.w = 1.f - v.z;
 		v /= 1.f + v.z;
 		if(v.x < -1.f || v.x > 1.f || v.y < -1.f || v.y > 1.f)
@@ -1577,7 +1564,7 @@ glm::vec2 map_state::normalize_map_coord(glm::vec2 p) {
 	return new_pos;
 }
 
-glm::mat4x4 map_state::get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio) const {
+glm::mat4x4 map_state::get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio, float counter_factor) const {
 	glm::mat4x4 mvp(1.f);
 	switch(mode) {
 	case sys::projection_mode::flat: {
@@ -1597,7 +1584,7 @@ glm::mat4x4 map_state::get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 glo
 		mvp[2][2] = zoom;
 		//mvp[3][2] = -1.f;
 		mvp[3][3] = 1.f;
-		mvp = glm::rotate(mvp, get_counter_factor(), glm::vec3(1.f, 0.f, 0.f));
+		mvp = glm::rotate(mvp, counter_factor, glm::vec3(1.f, 0.f, 0.f));
 		break;
 	}
 	case sys::projection_mode::globe_ortho: {
