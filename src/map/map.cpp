@@ -2461,8 +2461,9 @@ void display_data::load_map(sys::state& state) {
 	auto assets_dir = simple_fs::open_directory(root, NATIVE("assets"));
 	auto map_dir = simple_fs::open_directory(root, NATIVE("map"));
 	auto map_terrain_dir = simple_fs::open_directory(map_dir, NATIVE("terrain"));
-	auto map_items_dir = simple_fs::open_directory(root, NATIVE("gfx/mapitems"));
-	auto gfx_anims_dir = simple_fs::open_directory(root, NATIVE("gfx/anims"));
+	auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
+	auto map_items_dir = simple_fs::open_directory(gfx_dir, NATIVE("mapitems"));
+	auto gfx_anims_dir = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
 
 	glGenTextures(1, &textures[texture_diag_border_identifier]);
 	if(textures[texture_diag_border_identifier]) {
