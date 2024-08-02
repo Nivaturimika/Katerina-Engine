@@ -481,7 +481,7 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 		)
 	));
 	// Rotation is fine, the halo above units works kosher
-	return mt * mr * ms;
+	return ms * mr * mt;
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at) {

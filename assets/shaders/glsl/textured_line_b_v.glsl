@@ -7,14 +7,11 @@ layout (location = 4) in float distance;
 
 out float tex_coord;
 out float o_dist;
-out vec2 map_coord;
 
 uniform vec2 offset;
 uniform float aspect_ratio;
 uniform float zoom;
-uniform vec2 map_size;
 uniform float width;
-uniform uint subroutines_index;
 
 vec4 calc_gl_position(in vec3 v);
 
@@ -57,5 +54,4 @@ void main() {
 	// pass data to frag shader
 	tex_coord = texture_coord;
 	o_dist = distance / (2.0f * width);
-	map_coord = vertex_position;
 }
