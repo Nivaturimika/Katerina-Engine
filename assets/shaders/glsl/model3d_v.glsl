@@ -23,8 +23,8 @@ vec4 calc_gl_position(in vec3 v);
 
 // A rotation so units can face were they are going
 vec3 rotate_target(vec3 v, vec3 k, float s) {
-	float cos_theta = cos(s);
-	float sin_theta = sin(s);
+	float cos_theta = cos(s + PI / 2.f);
+	float sin_theta = sin(s + PI / 2.f);
 	return (v * cos_theta) + (cross(k, v) * sin_theta) + (k * dot(k, v)) * (1.f - cos_theta);
 }
 
@@ -38,17 +38,15 @@ void main() {
 	}
 	vec3 world_pos = vertex_position;
 	//vec3 world_pos = skin_pos;
-
-	world_pos.xz = world_pos.zx;
 //
-	//world_pos = rotate_target(world_pos, vec3(1.f, 0.f, 0.f), -vertex_position.x);
-	//world_pos = rotate_target(world_pos, vec3(0.f, 0.f, 1.f), -vertex_position.y);
-	//world_pos = rotate_target(world_pos, vec3(0.f, 1.f, 0.f), target_facing);
+	world_pos = rotate_target(world_pos, vec3(1.f, 0.f, 0.f), PI / 2.f);
+	world_pos = rotate_target(world_pos, vec3(0.f, 1.f, 0.f), target_facing);
 //
-	float vertical_factor = (map_size.x + map_size.y) / 4.f;
+	float vertical_factor = (map_size.x + map_size.y) / 2.f;
 	world_pos /= vec3(map_size.x, vertical_factor, map_size.y);
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
-	gl_Position = calc_gl_position(world_pos);
+	vec4 t = calc_gl_position(world_pos);
+	gl_Position = t;
 
 	tex_coord = texture_coord;
 }

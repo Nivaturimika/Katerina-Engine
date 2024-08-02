@@ -993,6 +993,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glClearDepth(1.f);
 		glDepthFunc(GL_LESS);
+		//glCullFace(GL_FRONT);
 
 		load_shader(shader_map_standing_object);
 		glBindVertexArray(vao_array[vo_static_mesh]);
