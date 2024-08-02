@@ -704,7 +704,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	auto const border_is_visible = [&](dcon::province_adjacency_id adj) {
 		auto p1 = state.world.province_adjacency_get_connected_provinces(adj, 0);
 		auto p2 = state.world.province_adjacency_get_connected_provinces(adj, 1);
-		return province_on_screen[p1.index()] && province_on_screen[p2.index()];
+		return province_on_screen[p1.index()] || province_on_screen[p2.index()];
 	};
 
 	if(zoom > map::zoom_close) {
