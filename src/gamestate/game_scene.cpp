@@ -494,7 +494,6 @@ sys::virtual_key replace_keycodes(sys::state& state, sys::virtual_key keycode, s
 		return sys::virtual_key::SUBTRACT;
 	else if(keycode == sys::virtual_key::PLUS)
 		return sys::virtual_key::ADD;
-
 	return state.current_scene.keycode_mapping(state, keycode, mod);
 }
 

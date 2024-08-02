@@ -45,6 +45,12 @@ void main() {
 	corner_shift.x /= aspect_ratio;
 
 	gl_Position = central_pos + vec4(corner_shift.x, corner_shift.y, 0.0f, 0.0f);
+	//This is quirky hack... and it works!
+	if(apt.x < -1.f || apt.x > 1.f
+	|| bpt.x < -1.f || bpt.x > 1.f
+	|| cpt.x < -1.f || cpt.x > 1.f) {
+		gl_Position = vec4(0.f);
+	}
 
 	// pass data to frag shader
 	tex_coord = texture_coord;
