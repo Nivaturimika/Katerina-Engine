@@ -444,6 +444,11 @@ private:
 public:
 	T unit_to_reorg{};
 
+	void on_create(sys::state& state) noexcept override {
+		window_element_base::on_create(state);
+		base_data.position.y += 29;
+	}
+
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "reorg_bg") {
 			return make_element_by_type<opaque_element_base>(state, id);
