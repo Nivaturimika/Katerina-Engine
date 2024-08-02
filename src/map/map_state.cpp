@@ -1530,7 +1530,7 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 	case sys::projection_mode::flat: {
 		glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, 0.5f - pos.y);
 		auto v = glm::vec4(glm::mod(target_pos.x - offset.x, 1.f), target_pos.y, 0.f, 1.f);
-		v = v * get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio, get_counter_factor(state.user_settings.map_counter_factor));
+		v = get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio, get_counter_factor(state.user_settings.map_counter_factor)) * v;
 		//v.w = 1.f - v.z;
 		v /= 1.f + v.z;
 		if(v.x < -1.f || v.x > 1.f || v.y < -1.f || v.y > 1.f)
@@ -1578,13 +1578,14 @@ glm::mat4x4 map_state::get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 glo
 			2 * zoom * (y + oy) - 1 * zoom -> 2 * zoom * y + 2 * zoom * oy - 1 * zoom
 		*/
 		mvp[0][0] = 2.f * zoom * aspect_ratio;
-		mvp[0][3] = -zoom * aspect_ratio;
+		mvp[3][0] = -zoom * aspect_ratio;
 		mvp[1][1] = 2.f * zoom;
-		mvp[1][3] = 2.f * zoom * offset.y - zoom;
+		mvp[3][1] = 2.f * zoom * offset.y - zoom;
 		mvp[2][2] = zoom;
 		//mvp[3][2] = -1.f;
 		mvp[3][3] = 1.f;
-		mvp = glm::rotate(mvp, counter_factor, glm::vec3(1.f, 0.f, 0.f));
+		//
+		mvp = glm::rotate(glm::mat4x4(1.f), -counter_factor, glm::vec3(1.f, 0.f, 0.f)) * mvp;
 		break;
 	}
 	case sys::projection_mode::globe_ortho: {
