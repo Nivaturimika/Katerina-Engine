@@ -548,7 +548,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniformMatrix4fv(shader_uniforms[program][uniform_rotation], 1, GL_FALSE, glm::value_ptr(globe_rot4x4));
 		auto mvp = state.map_state.get_mvp_matrix(map_view_mode, globe_rot4x4, offset, aspect_ratio);
 		glUniformMatrix4fv(shader_uniforms[program][uniform_model_proj_view], 1, GL_FALSE, glm::value_ptr(mvp));
-		glUniform2f(shader_uniforms[program][uniform_offset], offset.x + 0.f, offset.y);
+		glUniform2f(shader_uniforms[program][uniform_offset], offset.x, offset.y);
 		glUniform1f(shader_uniforms[program][uniform_aspect_ratio], aspect_ratio);
 		glUniform1f(shader_uniforms[program][uniform_zoom], zoom);
 		glUniform2f(shader_uniforms[program][uniform_map_size], GLfloat(size_x), GLfloat(size_y));
