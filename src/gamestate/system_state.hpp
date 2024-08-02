@@ -389,7 +389,7 @@ struct user_settings_s {
 	sys::color_blind_mode color_blind_mode = sys::color_blind_mode::none;
 	uint32_t UNUSED_UINT32_T = 0;
 	char locale[16] = "en-US";
-	float map_counter_factor = 0.385f;
+	float map_counter_factor = 0.185f;
 };
 
 struct global_scenario_data_s { // this struct holds miscellaneous global properties of the scenario
