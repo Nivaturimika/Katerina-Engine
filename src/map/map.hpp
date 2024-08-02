@@ -91,6 +91,7 @@ public:
 	void load_map_data(parsers::scenario_building_context& context);
 	// Called to load the map. Will load the texture and shaders from disk
 	void load_map(sys::state& state);
+	void clear_opengl_objects();
 
 	void render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter);
 	void update_borders(sys::state& state);

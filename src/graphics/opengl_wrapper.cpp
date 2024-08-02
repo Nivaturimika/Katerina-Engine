@@ -357,8 +357,7 @@ void initialize_opengl(sys::state& state) {
 	assert(state.flag_type_map[0] == 0); // default_flag
 
 	// Allocate textures for the flags
-	state.open_gl.asset_textures.resize(
-			state.ui_defs.textures.size() + (state.world.national_identity_size() + 1) * state.flag_types.size());
+	state.open_gl.asset_textures.resize(state.ui_defs.textures.size() + (state.world.national_identity_size() + 1) * state.flag_types.size());
 
 	state.map_state.load_map(state);
 

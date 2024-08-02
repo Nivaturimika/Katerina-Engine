@@ -684,7 +684,9 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 	switch(pstate.cmd.mode) {
 	case command_info::type::reload:
 		log_to_console(state, parent, "Reloading...");
-		state.map_state.load_map(state);
+		state.map_state.map_data.clear_opengl_objects();
+		state.map_state.map_data.load_map(state);
+		state.map_state.update_borders(state);
 		break;
 	case command_info::type::abort:
 		log_to_console(state, parent, "Aborting...");

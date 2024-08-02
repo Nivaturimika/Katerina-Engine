@@ -308,24 +308,28 @@ void display_data::create_meshes() {
 	glBindVertexArray(0);
 }
 
-display_data::~display_data() {
+void display_data::clear_opengl_objects() {
 	/* We don't need to check against 0, since the delete functions already do that for us */
-	if(textures[0])
-		glDeleteTextures(texture_count, textures);
-	if(texture_arrays[0])
-		glDeleteTextures(texture_count, texture_arrays);
-	for(const auto submesh_textures : static_mesh_textures)
-		glDeleteTextures(max_static_submeshes, submesh_textures);
-	if(vao_array[0])
-		glDeleteVertexArrays(vo_count, vao_array);
-	if(vbo_array[0])
-		glDeleteBuffers(vo_count, vbo_array);
-
+	glDeleteTextures(texture_count, &textures[0]);
+	glDeleteTextures(texture_count, &texture_arrays[0]);
+	glDeleteTextures(max_static_meshes * max_static_submeshes, &static_mesh_textures[0][0]);
+	glDeleteVertexArrays(vo_count, &vao_array[0]);
+	glDeleteBuffers(vo_count, &vbo_array[0]);
 	/* Flags shader for deletion, but doesn't delete them until they're no longer in the rendering context */
 	for(const auto shader : shaders) {
-		if(shader)
-			glDeleteProgram(shader);
+		glDeleteProgram(shader);
 	}
+	//Some graphics drivers will crash if we dont memset to 0
+	std::memset(&textures[0], 0, sizeof(textures));
+	std::memset(&texture_arrays[0], 0, sizeof(texture_arrays));
+	std::memset(&static_mesh_textures[0][0], 0, sizeof(static_mesh_textures));
+	std::memset(&vao_array[0], 0, sizeof(vao_array));
+	std::memset(&vbo_array[0], 0, sizeof(vbo_array));
+	std::memset(&shaders[0], 0, sizeof(shaders));
+}
+
+display_data::~display_data() {
+	clear_opengl_objects();
 }
 
 std::optional<simple_fs::file> try_load_shader(simple_fs::directory& root, native_string_view name) {
@@ -2173,11 +2177,16 @@ void load_static_meshes(sys::state& state) {
 	auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
 	auto gfx_anims = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
 
+	state.map_state.map_data.animations.clear(); //clear animations list
 	for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
 		state.map_state.map_data.model_gc_unit[i].resize(state.military_definitions.unit_base_definitions.size());
 	}
 	state.map_state.map_data.static_mesh_counts.resize(display_data::max_static_meshes);
 	state.map_state.map_data.static_mesh_starts.resize(display_data::max_static_meshes);
+	for(uint32_t i = 0; i < uint32_t(display_data::max_static_meshes); i++) { //reset for reloading
+		state.map_state.map_data.static_mesh_counts[i].clear();
+		state.map_state.map_data.static_mesh_starts[i].clear();
+	}
 	for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
 		auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
 		ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
@@ -2375,13 +2384,7 @@ void load_static_meshes(sys::state& state) {
 							auto const& mat = context.materials[sub.material_id];
 							auto const& layer = get_diffuse_layer(mat);
 							if(!layer.texture.empty()) {
-								GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "_Diffuse.dds"), 0);
-								if(!texid) {
-									texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + "Diffuse.dds"), 0);
-									if(!texid) {
-										texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
-									}
-								}
+								GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
 								if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
 									state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
 								} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
