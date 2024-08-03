@@ -202,7 +202,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					err.accumulated_warnings.clear();
 					//
 					auto inner_game_state = std::make_unique<sys::state>();
-					simple_fs::add_root(inner_game_state->common_fs, L".");
+					simple_fs::add_root(inner_game_state->common_fs, NATIVE("."));
 
 					inner_game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
 					if(err.fatal)

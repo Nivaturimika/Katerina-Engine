@@ -249,7 +249,7 @@ void shutdown_opengl(sys::state& state);
 bool display_tag_is_valid(sys::state& state, char tag[3]);
 
 GLint compile_shader(std::string_view source, GLenum type);
-GLuint create_program(std::string_view vertex_shader, std::string_view fragment_shader);
+GLuint create_program(std::string_view vertex_shader, std::string_view fragment_shader, uint32_t flags);
 void load_shaders(sys::state& state);
 void load_global_squares(sys::state& state);
 

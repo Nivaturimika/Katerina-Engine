@@ -225,7 +225,7 @@ public:
 	static constexpr uint32_t shader_railroad_line = 8;
 	static constexpr uint32_t shader_map_standing_object = 9;
 	static constexpr uint32_t shader_count = 10;
-	GLuint shaders[shader_count] = { 0 };
+	GLuint shaders[uint8_t(sys::projection_mode::num_of_modes)][shader_count] = { 0 };
 
 	static constexpr uint32_t uniform_offset = 0;
 	static constexpr uint32_t uniform_aspect_ratio = 1;
@@ -267,10 +267,10 @@ public:
 	static constexpr uint32_t uniform_model_scale_rotation = 36;
 	static constexpr uint32_t uniform_model_proj_view = 37;
 	static constexpr uint32_t uniform_count = 38;
-	GLuint shader_uniforms[shader_count][uniform_count] = { };
+	GLuint shader_uniforms[uint8_t(sys::projection_mode::num_of_modes)][shader_count][uniform_count] = { };
 
 	static constexpr uint32_t max_bone_matrices = 100;
-	GLuint bone_matrices_uniform_array = 0;
+	GLuint bone_matrices_uniform_array[uint8_t(sys::projection_mode::num_of_modes)] = { };
 
 	// models: Textures for static meshes
 	static constexpr uint32_t max_static_meshes = 0x140;
@@ -311,7 +311,7 @@ public:
 	void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 	void make_borders(sys::state& state, std::vector<bool>& visited);
 
-	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at);
+	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at, sys::projection_mode map_view_mode);
 	void load_shaders(simple_fs::directory& root);
 	void create_meshes();
 	void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);

@@ -71,7 +71,7 @@ GLint compile_shader(std::string_view source, GLenum type) {
 	return return_value;
 }
 
-GLuint create_program(std::string_view vertex_shader, std::string_view fragment_shader) {
+GLuint create_program(std::string_view vertex_shader, std::string_view fragment_shader, uint32_t flags) {
 	GLuint return_value = glCreateProgram();
 	if(return_value == 0) {
 		notify_user_of_fatal_opengl_error("program creation failed");
@@ -86,41 +86,54 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		"\treturn vec4(pow(colour.rgb, vec3(1.f / gamma)), colour.a);\n"
 		"}\n"
 		"\n", GL_FRAGMENT_SHADER);
-	auto lib_v_shader = compile_shader(
-		"uniform vec2 offset;\n"
-		"uniform uint subroutines_index;\n"
-		"uniform mat4 model_proj_view;\n"
-		"//Globe coords\n"
-		"vec4 globe_coords(vec3 world_pos) {\n"
-		"\t\tvec4 new_world_pos = vec4(1.f);\n"
-		"\tnew_world_pos.x = cos(world_pos.x * 2.f * PI) * sin(world_pos.y * PI);\n"
-		"\tnew_world_pos.y = 2.f * sin(world_pos.x * PI) * cos(world_pos.x * PI) * sin(world_pos.y * PI);\n"
-		"\tnew_world_pos.z = cos(world_pos.y * PI);\n"
-		"\t\treturn model_proj_view * new_world_pos * (1.f + world_pos.z);\n"
-		"}\n"
-		"//Perspective coords\n"
-		"vec4 perspective_coords(vec2 world_pos) {\n"
-		"\t\tvec4 new_world_pos = vec4(1.f);\n"
-		"\tnew_world_pos.x = cos(world_pos.x * 2.f * PI) * sin(world_pos.y * PI);\n"
-		"\tnew_world_pos.y = 2.f * sin(world_pos.x * PI) * cos(world_pos.x * PI) * sin(world_pos.y * PI);\n"
-		"\tnew_world_pos.z = cos(world_pos.y * PI);\n"
-		"\treturn model_proj_view * new_world_pos;\n"
-		"}\n"
-		"//Flat coords\n"
-		"vec4 flat_coords(vec4 world_pos) {\n"
-		"\tworld_pos.x = mod(world_pos.x - offset.x, 1.f);\n"
-		"\tvec4 v = model_proj_view * world_pos;\n"
-		"\tv.w = v.z + 0.5f;\n"
-		"\treturn v;\n"
-		"}\n"
-		"vec4 calc_gl_position(in vec3 world_pos) {\n"
-		"\tswitch(int(subroutines_index)) {\n"
-		"\t\tcase 0: return globe_coords(vec3(world_pos.x, world_pos.z, world_pos.y));\n"
-		"\t\tcase 2: return perspective_coords(vec2(world_pos.x, world_pos.z));\n"
-		"\t\tcase 1: return flat_coords(vec4(world_pos.x, world_pos.z, world_pos.y, 1.f));\n"
-		"\t}\n"
-		"\treturn vec4(0.f);\n"
-		"}\n", GL_VERTEX_SHADER);
+
+	GLint lib_v_shader = 0;
+	if(flags == 0) {
+		// Globe coords
+		lib_v_shader = compile_shader(
+			"uniform vec2 offset;\n"
+			"uniform mat4 model_proj_view;\n"
+			"vec4 globe_coords(vec3 world_pos) {\n"
+			"\t\tvec4 new_world_pos = vec4(1.f);\n"
+			"\tnew_world_pos.x = cos(world_pos.x * 2.f * PI) * sin(world_pos.y * PI);\n"
+			"\tnew_world_pos.y = 2.f * sin(world_pos.x * PI) * cos(world_pos.x * PI) * sin(world_pos.y * PI);\n"
+			"\tnew_world_pos.z = cos(world_pos.y * PI);\n"
+			"\t\treturn model_proj_view * new_world_pos * (1.f + world_pos.z);\n"
+			"}\n"
+			"vec4 calc_gl_position(in vec3 world_pos) {\n"
+			"\treturn globe_coords(vec3(world_pos.x, world_pos.z, world_pos.y));\n"
+			"}\n", GL_VERTEX_SHADER);
+	} else if(flags == 1) {
+		//Flat coords
+		lib_v_shader = compile_shader(
+			"uniform vec2 offset;\n"
+			"uniform mat4 model_proj_view;\n"
+			"//Flat coords\n"
+			"vec4 flat_coords(vec4 world_pos) {\n"
+			"\tworld_pos.x = mod(world_pos.x - offset.x, 1.f);\n"
+			"\tvec4 v = model_proj_view * world_pos;\n"
+			"\tv.w = v.z + 0.5f;\n"
+			"\treturn v;\n"
+			"}\n"
+			"vec4 calc_gl_position(in vec3 world_pos) {\n"
+			"\treturn flat_coords(vec4(world_pos.x, world_pos.z, world_pos.y, 1.f));\n"
+			"}\n", GL_VERTEX_SHADER);
+	} else if(flags == 2) {
+		//Perspective coords
+		lib_v_shader = compile_shader(
+			"uniform vec2 offset;\n"
+			"uniform mat4 model_proj_view;\n"
+			"vec4 perspective_coords(vec2 world_pos) {\n"
+			"\t\tvec4 new_world_pos = vec4(1.f);\n"
+			"\tnew_world_pos.x = cos(world_pos.x * 2.f * PI) * sin(world_pos.y * PI);\n"
+			"\tnew_world_pos.y = 2.f * sin(world_pos.x * PI) * cos(world_pos.x * PI) * sin(world_pos.y * PI);\n"
+			"\tnew_world_pos.z = cos(world_pos.y * PI);\n"
+			"\treturn model_proj_view * new_world_pos;\n"
+			"}\n"
+			"vec4 calc_gl_position(in vec3 world_pos) {\n"
+			"\treturn perspective_coords(vec2(world_pos.x, world_pos.z));\n"
+			"}\n", GL_VERTEX_SHADER);
+	}
 
 	glAttachShader(return_value, v_shader);
 	glAttachShader(return_value, f_shader);
@@ -294,7 +307,7 @@ void initialize_msaa(sys::state& state, int32_t size_x, int32_t size_y) {
 	if(bool(msaa_fshader) && bool(msaa_vshader)) {
 		auto vertex_content = view_contents(*msaa_vshader);
 		auto fragment_content = view_contents(*msaa_fshader);
-		state.open_gl.msaa_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size));
+		state.open_gl.msaa_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size), 0);
 		state.open_gl.msaa_uniform_screen_size = glGetUniformLocation(state.open_gl.msaa_shader_program, "screen_size");
 		state.open_gl.msaa_uniform_gaussian_blur = glGetUniformLocation(state.open_gl.msaa_shader_program, "gaussian_radius");
 	} else {
@@ -448,7 +461,7 @@ void load_shaders(sys::state& state) {
 	if(bool(ui_fshader) && bool(ui_vshader)) {
 		auto vertex_content = view_contents(*ui_vshader);
 		auto fragment_content = view_contents(*ui_fshader);
-		state.open_gl.ui_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size));
+		state.open_gl.ui_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size) ,0);
 
 		state.open_gl.ui_shader_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "texture_sampler");
 		state.open_gl.ui_shader_secondary_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "secondary_texture_sampler");
