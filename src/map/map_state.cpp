@@ -1496,7 +1496,7 @@ bool map_state::map_to_screen(sys::state& state, glm::vec2 map_pos, glm::vec2 sc
 		auto v = glm::vec4(glm::mod(target_pos.x - offset.x, 1.f), target_pos.y, 0.f, 1.f);
 		v = get_mvp_matrix(sys::projection_mode::flat, globe_rot4x4, offset, aspect_ratio, get_counter_factor(state.user_settings.map_counter_factor)) * v;
 		//v.w = 1.f - v.z;
-		v /= -v.z + 0.5f;
+		v /= -v.z + 1.f;
 		if(v.x < -1.f || v.x > 1.f || v.y < -1.f || v.y > 1.f)
 			return false;
 

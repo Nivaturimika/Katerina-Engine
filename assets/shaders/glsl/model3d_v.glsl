@@ -42,7 +42,7 @@ void main() {
 	world_pos = rotate_target(world_pos, vec3(1.f, 0.f, 0.f), PI / 2.f);
 	world_pos = rotate_target(world_pos, vec3(0.f, 1.f, 0.f), target_facing);
 //
-	float vertical_factor = (map_size.x + map_size.y) / 2.f;
+	float vertical_factor = (map_size.x + map_size.y) / 4.f;
 	world_pos /= vec3(map_size.x, vertical_factor, map_size.y);
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
 	vec4 t = calc_gl_position(world_pos);
