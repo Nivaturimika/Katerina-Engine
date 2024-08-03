@@ -676,7 +676,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	}
 
 	// Draw the railroads
-	if(zoom > map::zoom_close && !railroad_vertices.empty()) {
+	if(state.user_settings.railroads_enabled && zoom > map::zoom_close && !railroad_vertices.empty()) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_railroad]);
 		glActiveTexture(GL_TEXTURE1);
