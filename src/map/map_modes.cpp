@@ -214,13 +214,13 @@ std::vector<uint32_t> factory_map_from(sys::state& state) {
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
 		auto sdef = state.world.state_instance_get_definition(sid);
 		if(!sel_nation || sel_nation == state.world.state_instance_get_nation_from_state_ownership(sid)) {
-			int32_t total = economy::state_factory_count(state, sid);
+			int32_t total = economy::state_built_factory_count(state, sid);
 			if(total > max_total)
 				max_total = total;
 		}
 	});
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
-		int32_t total = economy::state_factory_count(state, sid);
+		int32_t total = economy::state_built_factory_count(state, sid);
 		if(total == 0)
 			return;
 		auto sdef = state.world.state_instance_get_definition(sid);

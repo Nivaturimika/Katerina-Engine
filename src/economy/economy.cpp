@@ -4579,6 +4579,18 @@ int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid) {
 	return num_factories;
 }
 
+int32_t state_built_factory_count(sys::state& state, dcon::state_instance_id sid) {
+	dcon::nation_id n = state.world.state_instance_get_nation_from_state_ownership(sid);
+	int32_t num_factories = 0;
+	auto d = state.world.state_instance_get_definition(sid);
+	for(auto p : state.world.state_definition_get_abstract_state_membership(d))
+		if(p.get_province().get_nation_from_province_ownership() == n)
+			num_factories += int32_t(state.world.province_get_factory_location(p.get_province()).end() - state.world.province_get_factory_location(p.get_province()).begin());
+	// For new factories: no more than defines:FACTORIES_PER_STATE existing + under construction new factories must be
+	assert(num_factories <= int32_t(state.defines.factories_per_state));
+	return num_factories;
+}
+
 float unit_construction_progress(sys::state& state, dcon::province_land_construction_id c) {
 
 	float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_land_construction_get_nation(c));
