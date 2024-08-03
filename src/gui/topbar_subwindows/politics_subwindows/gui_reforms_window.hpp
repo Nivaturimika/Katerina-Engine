@@ -45,54 +45,26 @@ void reform_rules_description(sys::state& state, text::columnar_layout& contents
 	if((rules & (issue_rule::build_factory | issue_rule::expand_factory | issue_rule::open_factory | issue_rule::destroy_factory | issue_rule::factory_priority | issue_rule::can_subsidise | issue_rule::pop_build_factory | issue_rule::pop_expand_factory | issue_rule::pop_open_factory | issue_rule::delete_factory_if_no_input | issue_rule::allow_foreign_investment | issue_rule::slavery_allowed | issue_rule::build_railway | issue_rule::build_bank | issue_rule::build_university)) != 0) {
 
 		text::add_line(state, contents, "special_rules");
-		if((rules & issue_rule::build_factory) != 0) {
-			text::add_line(state, contents, "rule_build_factory");
-		}
-		if((rules & issue_rule::expand_factory) != 0) {
-			text::add_line(state, contents, "rule_expand_factory");
-		}
-		if((rules & issue_rule::open_factory) != 0) {
-			text::add_line(state, contents, "remove_rule_open_factory");
-		}
-		if((rules & issue_rule::destroy_factory) != 0) {
-			text::add_line(state, contents, "rule_destroy_factory");
-		}
-		if((rules & issue_rule::factory_priority) != 0) {
-			text::add_line(state, contents, "rule_factory_priority");
-		}
-		if((rules & issue_rule::can_subsidise) != 0) {
-			text::add_line(state, contents, "rule_can_subsidise");
-		}
-		if((rules & issue_rule::pop_build_factory) != 0) {
-			text::add_line(state, contents, "rule_pop_build_factory");
-		}
-		if((rules & issue_rule::pop_expand_factory) != 0) {
-			text::add_line(state, contents, "rule_pop_expand_factory");
-		}
-		if((rules & issue_rule::pop_open_factory) != 0) {
-			text::add_line(state, contents, "rule_pop_open_factory");
-		}
-		if((rules & issue_rule::delete_factory_if_no_input) != 0) {
-			text::add_line(state, contents, "rule_delete_factory_if_no_input");
-		}
-		if((rules & issue_rule::allow_foreign_investment) != 0) {
-			text::add_line(state, contents, "rule_allow_foreign_investment");
-		}
-		if((rules & issue_rule::slavery_allowed) != 0) {
-			text::add_line(state, contents, "rule_slavery_allowed");
-		}
-		if((rules & issue_rule::build_railway) != 0) {
-			text::add_line(state, contents, "rule_build_railway");
-		}
+		text::add_line_with_condition(state, contents, "rule_build_factory", (rules & issue_rule::build_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_expand_factory", (rules & issue_rule::expand_factory) != 0);
+		text::add_line_with_condition(state, contents, "remove_rule_open_factory", (rules & issue_rule::open_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_destroy_factory", (rules & issue_rule::destroy_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_factory_priority", (rules & issue_rule::factory_priority) != 0);
+		text::add_line_with_condition(state, contents, "rule_can_subsidise", (rules & issue_rule::can_subsidise) != 0);
+		text::add_line_with_condition(state, contents, "rule_pop_build_factory", (rules & issue_rule::pop_build_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_pop_expand_factory", (rules & issue_rule::pop_expand_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_pop_open_factory", (rules & issue_rule::pop_open_factory) != 0);
+		text::add_line_with_condition(state, contents, "rule_delete_factory_if_no_input", (rules & issue_rule::delete_factory_if_no_input) != 0);
+		text::add_line_with_condition(state, contents, "rule_allow_foreign_investment", (rules & issue_rule::allow_foreign_investment) != 0);
+		text::add_line_with_condition(state, contents, "rule_build_factory_invest", (rules & issue_rule::build_factory_invest) != 0);
+		text::add_line_with_condition(state, contents, "rule_build_railway_invest", (rules & issue_rule::build_railway_invest) != 0);
+		text::add_line_with_condition(state, contents, "rule_slavery_allowed", (rules & issue_rule::slavery_allowed) != 0);
+		text::add_line_with_condition(state, contents, "rule_build_railway", (rules & issue_rule::build_railway) != 0);
 		if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::bank)].defined) {
-			if((rules & issue_rule::build_bank) != 0) {
-				text::add_line(state, contents, "rule_build_bank");
-			}
+			text::add_line_with_condition(state, contents, "rule_build_bank", (rules & issue_rule::build_bank) != 0);
 		}
 		if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::university)].defined) {
-			if((rules & issue_rule::build_university) != 0) {
-				text::add_line(state, contents, "rule_build_university");
-			}
+			text::add_line_with_condition(state, contents, "rule_build_university", (rules & issue_rule::build_university) != 0);
 		}
 	}
 }
