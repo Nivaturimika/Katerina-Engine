@@ -1791,25 +1791,27 @@ public:
 				return;
 			}
 		} else {
-			bool all_visited = true;
+			bool is_match = false;
 			for(const auto n1 : targets) {
+				is_match = false;
 				for(const auto n2 : visited_nations) {
-					if(n1 != n2) {
-						all_visited = false;
+					if(n1 == n2) {
+						is_match = true;
 						break;
 					}
 				}
-				if(!all_visited)
+				if(!is_match) { //not on list, add it
+					state.open_diplomacy(n1);
+					visited_nations.push_back(n1);
 					break;
+				}
 			}
-			if(all_visited) {
+			if(is_match) {
 				if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
 					state.ui_state.diplomacy_subwindow->set_visible(state, false);
 				}
 				visited_nations.clear();
 			}
-			state.open_diplomacy(targets[index]);
-			visited_nations.push_back(targets[index]);
 		}
 	}
 
