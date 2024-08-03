@@ -228,6 +228,20 @@ void create_drag_box_vbo(GLuint vbo) {
 	glVertexAttribBinding(0, 0);
 }
 
+void create_textured_quad_vbo(GLuint vbo) {
+	// Create and populate the border VBO
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// Bind the VBO to 0 of the VAO
+	glBindVertexBuffer(0, vbo, 0, sizeof(textured_screen_vertex));
+	// Set up vertex attribute format for the position
+	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(textured_screen_vertex, position_));
+	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(textured_screen_vertex, texcoord_));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribBinding(0, 0);
+	glVertexAttribBinding(1, 0);
+}
+
 void display_data::create_border_ogl_objects() {
 	// TODO: remove unused function
 }
@@ -305,6 +319,8 @@ void display_data::create_meshes() {
 	create_text_line_vbo(vbo_array[vo_province_text_line]);
 	glBindVertexArray(vao_array[vo_drag_box]);
 	create_drag_box_vbo(vbo_array[vo_drag_box]);
+	glBindVertexArray(vao_array[vo_selection]);
+	create_textured_quad_vbo(vbo_array[vo_selection]);
 	glBindVertexArray(0);
 }
 
@@ -359,7 +375,9 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	auto map_far_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_far_f.glsl"));
 	auto map_close_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_close_f.glsl"));
 	auto screen_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/screen_v.glsl"));
+	auto selection_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/selection_v.glsl"));
 	auto white_color_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/white_color_f.glsl"));
+	auto selection_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/selection_f.glsl"));
 
 	// Line shaders
 	auto line_unit_arrow_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/line_unit_arrow_v.glsl"));
@@ -386,6 +404,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 		shaders[j][shader_line_unit_arrow] = create_program(*line_unit_arrow_vshader, *line_unit_arrow_fshader, j);
 		shaders[j][shader_text_line] = create_program(*text_line_vshader, *text_line_fshader, j);
 		shaders[j][shader_drag_box] = create_program(*screen_vshader, *white_color_fshader, j);
+		shaders[j][shader_selection] = create_program(*selection_vshader, *selection_fshader, j);
 		shaders[j][shader_map_standing_object] = create_program(*model3d_vshader, *model3d_fshader, j);
 		for(uint32_t i = 0; i < shader_count; i++) {
 			if(shaders[j][i] == 0)
@@ -718,7 +737,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			auto p1 = state.world.province_adjacency_get_connected_provinces(adj, 0);
 			auto p2 = state.world.province_adjacency_get_connected_provinces(adj, 1);
 			return province_on_screen[p1.index()] || province_on_screen[p2.index()];
-			};
+		};
 
 		if(zoom > map::zoom_close) {
 			if(zoom > map::zoom_very_close) { // Render province borders
@@ -905,6 +924,23 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
 		}
 
+
+		if(!drag_box_vertices.empty()) {
+			glUseProgram(shaders[uint8_t(map_view_mode)][shader_drag_box]);
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_drag_box][uniform_gamma], state.user_settings.gamma);
+			glBindVertexArray(vao_array[vo_drag_box]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_drag_box]);
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)drag_box_vertices.size());
+		}
+
+		if(!selection_vertices.empty()) {
+			glUseProgram(shaders[uint8_t(map_view_mode)][shader_selection]);
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_selection][uniform_gamma], state.user_settings.gamma);
+			glBindVertexArray(vao_array[vo_selection]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_selection]);
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)selection_vertices.size());
+		}
+
 		if(zoom > map::zoom_close) { //only render if close enough
 			if(!unit_arrow_vertices.empty() || !attack_unit_arrow_vertices.empty() || !retreat_unit_arrow_vertices.empty()
 			|| !strategy_unit_arrow_vertices.empty() || !objective_unit_arrow_vertices.empty() || !other_objective_unit_arrow_vertices.empty()) {
@@ -954,14 +990,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_other_objective_unit_arrow]);
 				glMultiDrawArrays(GL_TRIANGLE_STRIP, other_objective_unit_arrow_starts.data(), other_objective_unit_arrow_counts.data(), (GLsizei)retreat_unit_arrow_counts.size());
 			}
-		}
-
-		if(!drag_box_vertices.empty()) {
-			glUseProgram(shaders[uint8_t(map_view_mode)][shader_drag_box]);
-			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_drag_box][uniform_gamma], state.user_settings.gamma);
-			glBindVertexArray(vao_array[vo_drag_box]);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_drag_box]);
-			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)drag_box_vertices.size());
 		}
 
 		if(state.user_settings.map_label != sys::map_label_mode::none) {
@@ -1341,6 +1369,21 @@ void display_data::set_drag_box(bool draw_box, glm::vec2 pos1, glm::vec2 pos2, g
 	assert(!drag_box_vertices.empty());
 	glBufferData(GL_ARRAY_BUFFER, sizeof(screen_vertex) * drag_box_vertices.size(), &drag_box_vertices[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void make_selection_quad(sys::state& state, glm::vec2 p) {
+	glm::vec2 map_size(float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y));
+	glm::vec2 size = glm::vec2(8.f, 8.f);
+	p /= map_size;
+	size /= map_size;
+	//
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x, p.y), glm::vec2(0.f, 0.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y), glm::vec2(1.f, 0.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y + size.y), glm::vec2(1.f, 1.f));
+	//
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y + size.y), glm::vec2(1.f, 1.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y), glm::vec2(1.f, 0.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x, p.y + size.x), glm::vec2(0.f, 1.f));
 }
 
 void add_arrow_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 prev_normal_dir, glm::vec2 next_normal_dir, float fill_progress, bool end_arrow, float size_x, float size_y) {

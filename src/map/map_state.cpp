@@ -96,7 +96,10 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 	map_data.other_objective_unit_arrow_counts.clear();
 	map_data.other_objective_unit_arrow_starts.clear();
 
+	map_data.selection_vertices.clear();
+
 	for(auto selected_army : state.selected_armies) {
+		map::make_selection_quad(state, state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army)));
 		if(auto ps = state.world.army_get_path(selected_army); ps.size() > 0) {
 			auto dest_controller = state.world.province_get_nation_from_province_control(ps[0]);
 			if(state.world.army_get_black_flag(selected_army) || state.world.army_get_is_retreating(selected_army)) {
@@ -130,6 +133,7 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 		}
 	}
 	for(auto selected_navy : state.selected_navies) {
+		map::make_selection_quad(state, state.world.province_get_mid_point(state.world.navy_get_location_from_navy_location(selected_navy)));
 		if(state.world.navy_get_is_retreating(selected_navy)) {
 			auto old_size = map_data.retreat_unit_arrow_vertices.size();
 			map_data.retreat_unit_arrow_starts.push_back(GLint(old_size));
@@ -166,6 +170,11 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 	if(!map_data.other_objective_unit_arrow_vertices.empty()) {
 		glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_other_objective_unit_arrow]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(curved_line_vertex) * map_data.other_objective_unit_arrow_vertices.size(), map_data.other_objective_unit_arrow_vertices.data(), GL_STATIC_DRAW);
+	}
+	//selection
+	if(!map_data.selection_vertices.empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_selection]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_screen_vertex) * map_data.selection_vertices.size(), map_data.selection_vertices.data(), GL_STATIC_DRAW);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

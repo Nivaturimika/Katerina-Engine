@@ -276,10 +276,10 @@ void button_element_base::render(sys::state& state, int32_t x, int32_t y) noexce
 						tcolor = sys::pack_color(0.75f, 0.75f, 1.f);
 					}
 				} else if(cmod == ogl::color_modification::interactable_disabled) {
-					tcolor = sys::pack_color(0.66f, 0.66f, 0.66f);
+					tcolor = sys::pack_color(0.5f, 0.5f, 0.5f);
 					text_color = black_text ? ogl::color3f{ 1.f, 1.f, 1.f } : ogl::color3f{ 0.f, 0.f, 0.f };
 				} else if(cmod == ogl::color_modification::disabled) {
-					tcolor = sys::pack_color(0.44f, 0.44f, 0.44f);
+					tcolor = sys::pack_color(0.25f, 0.25f, 0.25f);
 					text_color = black_text ? ogl::color3f{ 1.f, 1.f, 1.f } : ogl::color3f{ 0.f, 0.f, 0.f };
 				}
 				if(gfx_def.number_of_frames > 1) {

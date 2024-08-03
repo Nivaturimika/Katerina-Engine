@@ -29,6 +29,12 @@ struct screen_vertex {
 	glm::vec2 position_;
 };
 
+struct textured_screen_vertex {
+	textured_screen_vertex(glm::vec2 position, glm::vec2 texcoord) : position_(position), texcoord_(texcoord) { };
+	glm::vec2 position_;
+	glm::vec2 texcoord_;
+};
+
 struct curved_line_vertex {
 	curved_line_vertex(){};
 	curved_line_vertex(glm::vec2 position, glm::vec2 normal_direction, glm::vec2 direction, glm::vec2 texture_coord, float type)
@@ -147,6 +153,7 @@ public:
 	std::vector<text_line_vertex> text_line_vertices;
 	std::vector<text_line_vertex> province_text_line_vertices;
 	std::vector<screen_vertex> drag_box_vertices;
+	std::vector<textured_screen_vertex> selection_vertices;
 	std::vector<uint8_t> terrain_id_map;
 	std::vector<uint8_t> median_terrain_type;
 	std::vector<uint32_t> province_area;
@@ -176,7 +183,8 @@ public:
 	static constexpr uint32_t vo_strategy_unit_arrow = 12;
 	static constexpr uint32_t vo_objective_unit_arrow = 13;
 	static constexpr uint32_t vo_other_objective_unit_arrow = 14;
-	static constexpr uint32_t vo_count = 15;
+	static constexpr uint32_t vo_selection = 15;
+	static constexpr uint32_t vo_count = 16;
 	GLuint vao_array[vo_count] = { 0 };
 	GLuint vbo_array[vo_count] = { 0 };
 	// Textures
@@ -206,7 +214,8 @@ public:
 	static constexpr uint32_t texture_other_objective_unit_arrow = 23;
 	static constexpr uint32_t texture_hover_border = 24;
 	static constexpr uint32_t texture_shoreline = 25;
-	static constexpr uint32_t texture_count = 26;
+	static constexpr uint32_t texture_selection = 26;
+	static constexpr uint32_t texture_count = 27;
 	GLuint textures[texture_count] = { 0 };
 	// Texture Array
 	static constexpr uint32_t texture_array_terrainsheet = 0;
@@ -224,7 +233,8 @@ public:
 	static constexpr uint32_t shader_borders = 7;
 	static constexpr uint32_t shader_railroad_line = 8;
 	static constexpr uint32_t shader_map_standing_object = 9;
-	static constexpr uint32_t shader_count = 10;
+	static constexpr uint32_t shader_selection = 10;
+	static constexpr uint32_t shader_count = 11;
 	GLuint shaders[uint8_t(sys::projection_mode::num_of_modes)][shader_count] = { 0 };
 
 	static constexpr uint32_t uniform_offset = 0;
@@ -323,6 +333,7 @@ void load_river_crossings(parsers::scenario_building_context& context, std::vect
 
 void make_navy_path(sys::state& state, std::vector<map::curved_line_vertex>& buffer, dcon::navy_id selected_navy, float size_x, float size_y);
 void make_army_path(sys::state& state, std::vector<map::curved_line_vertex>& buffer, dcon::army_id selected_army, float size_x, float size_y);
+void make_selection_quad(sys::state& state, glm::vec2 p);
 glm::vec2 put_in_local(glm::vec2 new_point, glm::vec2 base_point, float size_x);
 void add_bezier_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 start_per, glm::vec2 end_per, float progress, bool last_curve, float size_x, float size_y, uint32_t num_b_segments);
 void add_tl_bezier_to_buffer(std::vector<map::textured_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 start_per, glm::vec2 end_per, float progress, bool last_curve, float size_x, float size_y, uint32_t num_b_segments, float& distance);

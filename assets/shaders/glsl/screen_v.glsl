@@ -1,4 +1,3 @@
-// The screen coordinates in normalized coordinates (0-1)
 layout (location = 0) in vec2 vertex_position;
 void main() {
 	gl_Position = vec4(
