@@ -6,7 +6,7 @@
 
 namespace ui {
 
-class leader_portrait : public image_element_base {
+class leader_portrait : public button_element_base {
 	void on_update(sys::state& state) noexcept override {
 		auto pculture = state.world.nation_get_primary_culture(state.local_player_nation);
 		auto ltype = pculture.get_group_from_culture_group_membership().get_leader();
@@ -18,14 +18,14 @@ class leader_portrait : public image_element_base {
 				if(arange.size() > 0) {
 					auto rval = rng::get_random(state, uint32_t(state.world.leader_get_since(lid).value), uint32_t(lid.value));
 					auto in_range = rng::reduce(uint32_t(rval), arange.size());
-					base_data.data.image.gfx_object = arange[in_range];
+					base_data.data.button.button_image = arange[in_range];
 				}
 			} else {
 				auto grange = ltype.get_generals();
 				if(grange.size() > 0) {
 					auto rval = rng::get_random(state, uint32_t(state.world.leader_get_since(lid).value), uint32_t(lid.value));
 					auto in_range = rng::reduce(uint32_t(rval), grange.size());
-					base_data.data.image.gfx_object = grange[in_range];
+					base_data.data.button.button_image = grange[in_range];
 				}
 			}
 		}	
