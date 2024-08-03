@@ -1022,7 +1022,7 @@ void map_state::update(sys::state& state) {
 
 	auto zoom_diff = (zoom_change * seconds_since_last_update) / (1 / zoom);
 	zoom += zoom_diff;
-	zoom_change *= std::exp(-seconds_since_last_update * state.user_settings.zoom_speed);
+	zoom_change *= std::exp(-seconds_since_last_update * 3.33f);
 	zoom = glm::clamp(zoom, min_zoom, max_zoom);
 
 	glm::vec2 pos_after_zoom;
@@ -1171,11 +1171,10 @@ void map_state::center_map_on_province(sys::state& state, dcon::province_id p) {
 	set_pos(map_pos);
 }
 
-void map_state::on_mouse_wheel(int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y, sys::key_modifiers mod,
-		float amount) {
-	constexpr auto zoom_speed_factor = 15.f;
-
-	zoom_change = (amount / 5.f) * zoom_speed_factor;
+void map_state::on_mouse_wheel(int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y, sys::key_modifiers mod, float amount) {
+	constexpr float zoom_speed_factor = 0.85f;
+	zoom_change += amount * zoom_speed_factor;
+	zoom_change = std::clamp(zoom_change, -1.5f, 1.5f);
 }
 
 void map_state::on_mouse_move(int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y, sys::key_modifiers mod) {

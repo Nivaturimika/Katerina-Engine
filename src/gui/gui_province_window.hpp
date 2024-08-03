@@ -1134,7 +1134,8 @@ public:
 			return make_element_by_type<land_rally_point>(state, id);
 		} else if(name == "rallypoint_checkbox_naval") {
 			return make_element_by_type<naval_rally_point>(state, id);
-		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval") {
+		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval"
+			|| name == "rallypoint_merge_icon_naval" || name == "rallypoint_merge_icon") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else {
 			return nullptr;
@@ -1686,8 +1687,9 @@ public:
 			return make_element_by_type<land_rally_point>(state, id);
 		} else if(name == "rallypoint_checkbox_naval") {
 			return make_element_by_type<naval_rally_point>(state, id);
-		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval") {
-			return make_element_by_type<merge_rally_point>(state, id);
+		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval"
+			|| name == "rallypoint_merge_icon_naval" || name == "rallypoint_merge_icon") {
+			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "build_army") {
 			return make_element_by_type<province_build_unit<dcon::army_id>>(state, id);
 		} else if(name == "build_navy") {
@@ -2064,8 +2066,9 @@ public:
 			return make_element_by_type<land_rally_point>(state, id);
 		} else if(name == "rallypoint_checkbox_naval") {
 			return make_element_by_type<naval_rally_point>(state, id);
-		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval") {
-			return make_element_by_type<merge_rally_point>(state, id);
+		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval"
+			|| name == "rallypoint_merge_icon_naval" || name == "rallypoint_merge_icon") {
+			return make_element_by_type<invisible_element>(state, id);
 		} else {
 			return nullptr;
 		}
