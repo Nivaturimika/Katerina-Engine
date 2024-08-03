@@ -963,11 +963,12 @@ void map_state::update(sys::state& state) {
 
 	if((left_arrow_key_down xor right_arrow_key_down) or (up_arrow_key_down xor down_arrow_key_down)) {
 		glm::vec2 arrow_key_velocity_vector{};
-		if (left_arrow_key_down) {
+		if(left_arrow_key_down) {
 			arrow_key_velocity_vector.x -= 1.f;
-		} else if (right_arrow_key_down) {
+		} else if(right_arrow_key_down) {
 			arrow_key_velocity_vector.x += 1.f;
-		} else if (up_arrow_key_down) {
+		}
+		if(up_arrow_key_down) {
 			arrow_key_velocity_vector.y -= 1.f;
 		} else if(down_arrow_key_down) {
 			arrow_key_velocity_vector.y += 1.f;
