@@ -426,11 +426,7 @@ void state::on_text(char32_t c) { // c is win1250 codepage value
 
 inline constexpr int32_t tooltip_width = 400;
 
-void state::render() { // called to render the frame may (and should) delay returning until the frame is rendered, including
-	// waiting for vsync
-	if(!current_scene.get_root)
-		return;
-
+void state::update_render() {
 	auto game_state_was_updated = game_state_updated.exchange(false, std::memory_order::acq_rel);
 	if(game_state_was_updated && !current_scene.starting_scene && !ui_state.lazy_load_in_game) {
 		window::change_cursor(*this, window::cursor_type::busy);
@@ -441,52 +437,12 @@ void state::render() { // called to render the frame may (and should) delay retu
 	if(ownership_update) {
 		if(user_settings.map_label != sys::map_label_mode::none) {
 			map::update_text_lines(*this, map_state.map_data);
+			map::update_province_text_lines(*this, map_state.map_data);
 		}
 	}
+	// Update next frame
 	if(game_state_was_updated) {
 		map_state.map_data.update_fog_of_war(*this);
-	}
-
-	std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
-	if(ui_state.last_render_time == std::chrono::time_point<std::chrono::steady_clock>{}) {
-		ui_state.last_render_time = now;
-	}
-	if(ui_state.fps_timer > 20) {
-		auto microseconds_since_last_render = std::chrono::duration_cast<std::chrono::microseconds>(now - ui_state.last_render_time);
-		auto frames_per_second = 1.f / float(microseconds_since_last_render.count() / 1e6);
-		ui_state.last_fps = frames_per_second;
-		ui_state.fps_timer = 0;
-		ui_state.last_render_time = now;
-	}
-	ui_state.fps_timer += 1;
-
-	if(ui_state.scrollbar_timer > 500 * (ui_state.last_fps / 60)) {
-		ui_state.scrollbar_continuous_movement = true;
-		if(ui_state.left_mouse_hold_target != nullptr) {
-			Cyto::Any payload = ui::scrollbar_settings{};
-			ui_state.left_mouse_hold_target->impl_set(*this, payload);
-		}
-	}
-
-	if(ui_state.left_mouse_hold_target != nullptr) {
-		ui_state.scrollbar_timer += 1;
-	}
-
-	current_scene.clean_up(*this);
-
-	ui::element_base* root_elm = current_scene.get_root(*this);
-
-	root_elm->base_data.size.x = ui_state.root->base_data.size.x;
-	root_elm->base_data.size.y = ui_state.root->base_data.size.y;
-
-	auto mouse_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
-		int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::click);
-	auto tooltip_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
-		int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::tooltip);
-
-	if(!mouse_probe.under_mouse && map_state.get_zoom() > map::zoom_close) {
-		mouse_probe = current_scene.recalculate_mouse_probe(*this, mouse_probe, tooltip_probe);
-		tooltip_probe = current_scene.recalculate_tooltip_probe(*this, mouse_probe, tooltip_probe);
 	}
 
 	if(game_state_was_updated) {
@@ -512,9 +468,8 @@ void state::render() { // called to render the frame may (and should) delay retu
 		static std::vector<dcon::province_id> provinces_to_maintain;
 		static std::vector<float> regiments_distribution;
 		regiments_distribution.resize(military_definitions.unit_base_definitions.size() + 2);
-		
-		
-		for(army_group & army_group : army_groups) {
+
+		for(army_group& army_group : army_groups) {
 			update_armies_and_fleets(&army_group);
 
 			// handle "defence line" orders
@@ -550,10 +505,10 @@ void state::render() { // called to render the frame may (and should) delay retu
 						}
 					}
 				}
-			}			
+			}
 
 			// handle naval travels
-			
+
 			// fill travel origin provinces with army
 			{
 				for(uint32_t i = 0; i < military_definitions.unit_base_definitions.size(); ++i) {
@@ -674,7 +629,7 @@ void state::render() { // called to render the frame may (and should) delay retu
 
 						bool fleet_is_busy = false;
 
-						for(auto item: transported_armies) {
+						for(auto item : transported_armies) {
 							auto army = item.get_army();
 
 							auto path_army = world.army_get_path(army);
@@ -1065,7 +1020,6 @@ void state::render() { // called to render the frame may (and should) delay retu
 					}
 				}
 
-
 				// Sound effects(tm)
 				if(settings_bits != 0 && local_player_nation && (c6->source == local_player_nation || c6->target == local_player_nation)) {
 					switch(base_type) {
@@ -1157,10 +1111,62 @@ void state::render() { // called to render the frame may (and should) delay retu
 				ui_state.root->move_child_to_front(ui_state.msg_window);
 			}
 		}
+	}
+}
+
+void state::render() { // called to render the frame may (and should) delay returning until the frame is rendered, including
+	// waiting for vsync
+	if(!current_scene.get_root)
+		return;
+
+	std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
+	if(ui_state.last_render_time == std::chrono::time_point<std::chrono::steady_clock>{}) {
+		ui_state.last_render_time = now;
+	}
+	if(ui_state.fps_timer > 20) {
+		auto microseconds_since_last_render = std::chrono::duration_cast<std::chrono::microseconds>(now - ui_state.last_render_time);
+		auto frames_per_second = 1.f / float(microseconds_since_last_render.count() / 1e6);
+		ui_state.last_fps = frames_per_second;
+		ui_state.fps_timer = 0;
+		ui_state.last_render_time = now;
+	}
+	ui_state.fps_timer += 1;
+
+	if(ui_state.scrollbar_timer > 500 * (ui_state.last_fps / 60)) {
+		ui_state.scrollbar_continuous_movement = true;
+		if(ui_state.left_mouse_hold_target != nullptr) {
+			Cyto::Any payload = ui::scrollbar_settings{};
+			ui_state.left_mouse_hold_target->impl_set(*this, payload);
+		}
+	}
+
+	if(ui_state.left_mouse_hold_target != nullptr) {
+		ui_state.scrollbar_timer += 1;
+	}
+
+	current_scene.clean_up(*this);
+
+	ui::element_base* root_elm = current_scene.get_root(*this);
+	root_elm->base_data.size.x = ui_state.root->base_data.size.x;
+	root_elm->base_data.size.y = ui_state.root->base_data.size.y;
+
+	auto mouse_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
+		int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::click);
+	auto tooltip_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
+		int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::tooltip);
+	if(!mouse_probe.under_mouse && map_state.get_zoom() > map::zoom_close) {
+		mouse_probe = current_scene.recalculate_mouse_probe(*this, mouse_probe, tooltip_probe);
+		tooltip_probe = current_scene.recalculate_tooltip_probe(*this, mouse_probe, tooltip_probe);
+	}
+
+	ui::display_pending_error_window(*this);
+
+	// Do not update state sensitive updates!
+	if(network_state.save_slock.load(std::memory_order::acquire) == false) {
+		update_render();
+
 		root_elm->impl_on_update(*this);
-
 		current_scene.on_game_state_update_update_ui(*this);
-
 		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
 			auto type = ui_state.last_tooltip->has_tooltip(*this);
 			if(type == ui::tooltip_behavior::variable_tooltip || type == ui::tooltip_behavior::position_sensitive_tooltip) {
@@ -4565,6 +4571,18 @@ void state::game_loop() {
 	game_speed[4] = int32_t(defines.alice_speed_4);
 
 	while(quit_signaled.load(std::memory_order::acquire) == false) {
+		/* An issue that arose in multiplayer is that the UI was loading the savefile
+		directly, while the game state loop was running, this was fine with the
+		assumption that commands weren't executed while the save was being loaded
+		HOWEVER in multiplayer this is often the case, so we have to block all
+		commands until the savefile is finished loading
+		This way, we're able to effectively and safely queue commands until we
+		can receive them AFTER loading the savefile. */
+		if(network_state.save_slock.load(std::memory_order::acquire) == true) {
+			command::load_savefile(*this, load_file_name, load_is_new_game);
+			network_state.save_slock.store(false, std::memory_order::release);
+		}
+
 		network::send_and_receive_commands(*this);
 		command::execute_pending_commands(*this);
 		if(network_mode == sys::network_mode_type::client) {

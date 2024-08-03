@@ -253,22 +253,6 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 	float step_x = float(map_data.size_x) / float(samples_N);
 	float step_y = float(map_data.size_y) / float(samples_M);
 
-	// generate additional points
-	/*std::vector<uint16_t> samples_regions;
-	for(int i = 0; i < samples_N; i++)
-		for(int j = 0; j < samples_M; j++) {
-			float x = float(i) * step_x;
-			float y = float(map_data.size_y) - float(j) * step_y;
-			auto idx = int32_t(y) * int32_t(map_data.size_x) + int32_t(x);
-
-			if(0 <= idx && size_t(idx) < map_data.province_id_map.size()) {
-				auto fat_id = dcon::fatten(state.world, province::from_map_id(map_data.province_id_map[idx]));
-				samples_regions.push_back(fat_id.get_connected_region_id());
-			} else {
-				samples_regions.push_back(0);
-			}
-		}*/
-
 	// generate graph of regions:
 	for(auto candidate : state.world.in_province) {
 		auto rid = candidate.get_connected_region_id();
@@ -431,8 +415,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				}
 			}
 		}
-		//name = "جُمْهُورِيَّة ٱلْعِرَاق";
-		//name = "在标准状况下";
+
 		if(name.empty())
 			continue;
 
@@ -465,7 +448,6 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		if(rough_box_right - rough_box_left > map_data.size_x * 0.9f) {
 			continue;
 		}
-
 
 		std::vector<glm::vec2> points;
 		std::vector<glm::vec2> bad_points;
@@ -643,11 +625,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		//throwing away bad cluster
 
 		std::vector<glm::vec2> good_points;
-
 		glm::vec2 sum_points = { 0.f, 0.f };
-
-		//OutputDebugStringA("\n\n");
-
 		for(auto point : points) {
 			size_t closest = 0;
 			float best_dist = std::numeric_limits<float>::max();
@@ -660,7 +638,6 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				}
 			}
 
-
 			bool is_good = false;
 			for(size_t i = 0; i < good_centroids.size(); i++) {
 				if(closest == good_centroids[i])
@@ -672,9 +649,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				sum_points += point;
 			}
 		}
-
 		points = good_points;
-		
 
 		//initial center:
 		glm::vec2 center = sum_points / (float)(points.size());
@@ -698,7 +673,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		float left = 0.f;
 		float top = 0.f;
 		float bottom = 0.f;
-		for(auto point: points) {
+		for(auto point : points) {
 			//OutputDebugStringA((std::to_string(point.x) + ", " + std::to_string(point.y) + ", \n").c_str());
 			glm::vec2 current = point - center;
 			if((current.x > right) && (current.x * current.x < limit)) {
@@ -735,7 +710,6 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 			update_bbox(key_provs, key_point);
 		}
 
-
 		glm::vec2 map_size{ float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y) };
 		glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
 		glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
@@ -762,13 +736,8 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 
 		for (auto point : points) {
 			auto e = point;
-
-			if(e.x < basis.x) {
+			if(e.x < basis.x || e.x > basis.x + ratio.x)
 				continue;
-			}
-			if(e.x > basis.x + ratio.x) {
-				continue;
-			}
 
 			w.push_back(1);
 
@@ -923,9 +892,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				return mo[0] * l_0 + mo[1] * x * l_1;
 			};
 
-
 			// check if this is really better than taking the longest horizontal
-
 			// firstly check if we are already horizontal
 			if(abs(mo[1]) > 0.05) {
 				// calculate where our line will start and end:
@@ -952,14 +919,15 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 					mo[1] = 0;
 				}
 			}
-
-
-			if(ratio.x <= map_size.x * 0.75f && ratio.y <= map_size.y * 0.75f)
+			if(ratio.x <= map_size.x * 0.75f && ratio.y <= map_size.y * 0.75f) {
 				text_data.emplace_back(std::move(prepared_name), glm::vec4(mo, 0.f, 0.f), basis, ratio);
+			}
 		}
 	}
 	map_data.set_text_lines(state, text_data);
+}
 
+void update_province_text_lines(sys::state& state, display_data& map_data) {
 	std::vector<text_line_generator_data> p_text_data;
 	for(auto p : state.world.in_province) {
 		if(p.get_name()) {
@@ -997,14 +965,11 @@ void map_state::update(sys::state& state) {
 		glm::vec2 arrow_key_velocity_vector{};
 		if (left_arrow_key_down) {
 			arrow_key_velocity_vector.x -= 1.f;
-		}
-		if (right_arrow_key_down) {
+		} else if (right_arrow_key_down) {
 			arrow_key_velocity_vector.x += 1.f;
-		}
-		if (up_arrow_key_down) {
+		} else if (up_arrow_key_down) {
 			arrow_key_velocity_vector.y -= 1.f;
-		}
-		if (down_arrow_key_down) {
+		} else if(down_arrow_key_down) {
 			arrow_key_velocity_vector.y += 1.f;
 		}
 		arrow_key_velocity_vector = glm::normalize(arrow_key_velocity_vector);
@@ -1109,7 +1074,6 @@ void map_state::update(sys::state& state) {
 		pos += pos_before_keyboard_zoom - pos_after_keyboard_zoom;
 	}
 
-
 	globe_rotation = glm::rotate(glm::mat4(1.f), (0.25f - pos.x) * 2 * glm::pi<float>(), glm::vec3(0, 0, 1));
 	// Rotation axis
 	glm::vec3 axis = glm::vec3(globe_rotation * glm::vec4(1, 0, 0, 0));
@@ -1117,7 +1081,6 @@ void map_state::update(sys::state& state) {
 	axis = glm::normalize(axis);
 	axis.y *= -1;
 	globe_rotation = glm::rotate(globe_rotation, (-pos.y + 0.5f) * glm::pi<float>(), axis);
-
 
 	if(unhandled_province_selection) {
 		map_mode::update_map_mode(state);

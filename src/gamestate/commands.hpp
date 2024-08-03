@@ -909,6 +909,8 @@ void execute_command(sys::state& state, payload& c);
 void execute_pending_commands(sys::state& state);
 bool can_perform_command(sys::state& state, payload& c);
 
+void load_savefile(sys::state& state, native_string file_name, bool is_new_game);
+
 } // namespace command
 
 #include "cheats.hpp"

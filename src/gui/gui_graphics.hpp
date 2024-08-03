@@ -507,6 +507,10 @@ struct state {
 	element_base* army_reorg_window = nullptr;
 	element_base* navy_reorg_window = nullptr;
 
+	std::atomic<bool> update_error_window = false;
+	std::string error_window_title;
+	std::string error_window_body;
+
 	std::array<chat_message, 32> chat_messages;
 	std::vector<dcon::technology_id> tech_queue;
 	uint8_t chat_messages_index = 0;

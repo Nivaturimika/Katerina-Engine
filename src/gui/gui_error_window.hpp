@@ -19,4 +19,5 @@ public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override;
 };
 void popup_error_window(sys::state& state, std::string_view title, std::string_view body);
+void display_pending_error_window(sys::state& state);
 } // namespace ui

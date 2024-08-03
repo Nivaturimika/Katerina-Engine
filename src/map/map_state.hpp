@@ -101,5 +101,6 @@ public:
 };
 
 void update_text_lines(sys::state& state, display_data& map_data);
+void update_province_text_lines(sys::state& state, display_data& map_data);
 
 } // namespace map

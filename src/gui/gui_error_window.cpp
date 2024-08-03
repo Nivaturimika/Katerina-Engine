@@ -60,16 +60,23 @@ std::unique_ptr<element_base> error_dialog_window::make_child(sys::state& state,
 	}
 }
 void popup_error_window(sys::state& state, std::string_view title, std::string_view body) {
-	if(state.ui_state.error_win == nullptr) {
-		auto new_elm = ui::make_element_by_type<ui::error_dialog_window>(state, "defaultinfodialog");
-		state.ui_state.error_win = new_elm.get();
-		state.current_scene.get_root(state)->add_child_to_front(std::move(new_elm));
+	state.ui_state.error_window_title = std::string(title);
+	state.ui_state.error_window_body = std::string(body);
+	state.ui_state.update_error_window.store(true, std::memory_order::release);
+}
+void display_pending_error_window(sys::state& state) {
+	if(state.ui_state.update_error_window.load(std::memory_order::acquire) == true) {
+		state.ui_state.update_error_window = false;
+		if(state.ui_state.error_win == nullptr) {
+			auto new_elm = ui::make_element_by_type<ui::error_dialog_window>(state, "defaultinfodialog");
+			state.ui_state.error_win = new_elm.get();
+			state.current_scene.get_root(state)->add_child_to_front(std::move(new_elm));
+		}
+		auto win = static_cast<ui::error_dialog_window*>(state.ui_state.error_win);
+		win->title->set_text(state, state.ui_state.error_window_title);
+		win->body->msg = state.ui_state.error_window_body;
+		win->set_visible(state, true);
+		win->impl_on_update(state);
 	}
-
-	auto win = static_cast<ui::error_dialog_window*>(state.ui_state.error_win);
-	win->title->set_text(state, std::string(title));
-	win->body->msg = std::string(body);
-	win->set_visible(state, true);
-	win->impl_on_update(state);
 }
 }

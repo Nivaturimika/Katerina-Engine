@@ -2,7 +2,6 @@
 #include "demographics.hpp"
 #include "economy_templates.hpp"
 #include "effects.hpp"
-#include "gui_event.hpp"
 #include "serialization.hpp"
 #include "system_state.hpp"
 #include "nations.hpp"
@@ -11,8 +10,10 @@
 #include "province_templates.hpp"
 #include "rebels.hpp"
 #include "triggers.hpp"
-
 #include "cheats.cpp"
+
+#include "gui_event.hpp"
+#include "gui_error_window.hpp"
 
 namespace command {
 
@@ -5580,6 +5581,75 @@ void execute_pending_commands(sys::state& state) {
 		nations::update_cached_values(state);
 		state.game_state_updated.store(true, std::memory_order::release);
 	}
+}
+
+void load_savefile(sys::state& state, native_string file_name, bool is_new_game) {
+	window::change_cursor(state, window::cursor_type::busy); //show busy cursor so player doesn't question
+
+	std::vector<dcon::nation_id> players;
+	for(const auto n : state.world.in_nation)
+		if(state.world.nation_get_is_player_controlled(n))
+			players.push_back(n);
+	dcon::nation_id old_local_player_nation = state.local_player_nation;
+	state.preload();
+	bool loaded = false;
+	if(is_new_game) {
+		if(!sys::try_read_scenario_as_save_file(state, state.loaded_scenario_file)) {
+			auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
+			ui::popup_error_window(state, "Scenario Error", msg);
+		} else {
+			loaded = true;
+		}
+	} else {
+		if(!sys::try_read_save_file(state, file_name)) {
+			auto msg = std::string("Save file ") + simple_fs::native_to_utf8(file_name) + " could not be loaded.";
+			ui::popup_error_window(state, "Save Error", msg);
+			state.save_list_updated.store(true, std::memory_order::release); //update savefile list
+			//try loading save from scenario so we atleast have something to work on
+			if(!sys::try_read_scenario_as_save_file(state, state.loaded_scenario_file)) {
+				auto msg2 = std::string("Scenario file ") + simple_fs::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
+				ui::popup_error_window(state, "Scenario Error", msg2);
+			} else {
+				loaded = true;
+			}
+		} else {
+			loaded = true;
+		}
+	}
+	if(loaded) {
+		/* Updating this flag lets the network state know that we NEED to send the
+		savefile data, otherwise it is safe to assume the client has its own data
+		friendly reminder that, scenario loading and reloading ends up with different outcomes */
+		state.network_state.is_new_game = false;
+		if(state.network_mode == sys::network_mode_type::host) {
+			/* Save the buffer before we fill the unsaved data */
+			state.local_player_nation = dcon::nation_id{ };
+			network::write_network_save(state);
+			state.fill_unsaved_data();
+			for(const auto n : players)
+				state.world.nation_set_is_player_controlled(n, true);
+			state.local_player_nation = old_local_player_nation;
+			assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
+			/* Now send the saved buffer before filling the unsaved data to the clients
+			henceforth. */
+			command::payload c;
+			memset(&c, 0, sizeof(command::payload));
+			c.type = command::command_type::notify_save_loaded;
+			c.source = state.local_player_nation;
+			c.data.notify_save_loaded.target = dcon::nation_id{};
+			network::broadcast_save_to_clients(state, c, state.network_state.current_save_buffer.get(), state.network_state.current_save_length, state.network_state.current_save_checksum);
+		} else {
+			state.fill_unsaved_data();
+		}
+	}
+	/* Savefiles might load with new railroads, so for responsiveness we
+	   update whenever one is loaded. */
+	state.map_state.set_selected_province(dcon::province_id{});
+	state.map_state.unhandled_province_selection = true;
+	state.railroad_built.store(true, std::memory_order::release);
+	state.game_state_updated.store(true, std::memory_order_release);
+
+	window::change_cursor(state, window::cursor_type::normal); //normal cursor now
 }
 
 } // namespace command

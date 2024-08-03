@@ -707,7 +707,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
 	// impassible borders
 
-	std::vector<bool> province_on_screen(state.world.province_size(), false);
+	// a constant, as to not depend on a scenario/save being reloaded
+	std::vector<bool> province_on_screen(0xffff, false);
 	for(const auto p : state.world.in_province) {
 		glm::vec2 tmp;
 		province_on_screen[p.id.index()] = state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(p.get_mid_point()), screen_size, tmp);

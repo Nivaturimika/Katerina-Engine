@@ -851,16 +851,6 @@ static void accept_new_clients(sys::state& state) {
 }
 
 void send_and_receive_commands(sys::state& state) {
-	/* An issue that arose in multiplayer is that the UI was loading the savefile
-	   directly, while the game state loop was running, this was fine with the
-	   assumption that commands weren't executed while the save was being loaded
-	   HOWEVER in multiplayer this is often the case, so we have to block all
-	   commands until the savefile is finished loading
-	   This way, we're able to effectively and safely queue commands until we
-	   can receive them AFTER loading the savefile. */
-	if(state.network_state.save_slock.load(std::memory_order::acquire) == true)
-		return;
-
 	if(state.network_state.finished)
 		return;
 
