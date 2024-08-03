@@ -1103,7 +1103,7 @@ att_call_no_allies;You don't have any allies!
 domestic_investment_label;Domestic investment:
 modifier_min_domestic_investment;Min domestic investment rate
 modifier_max_domestic_investment;Max domestic investment rate
-mouse_left_click_mode_label;Click hold release
+mouse_left_click_mode_label;Hold mouse click
 alice_supply_limit_desc;Supply limit: $x$
 alice_factory_worker_1;Employed: ?G$x$?W
 alice_factory_worker_2;Unemployed: ?R$x$?W
