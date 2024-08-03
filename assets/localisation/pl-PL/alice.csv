@@ -1043,7 +1043,6 @@ alice_con_decay_description;Naturalny rozkład ?R-$x$
 x_from_y;$x$ z $y$
 reinforce_rate;Pułk ten może wzmocnić do x $ żołnierzy miesięcznie.
 reinforce_rate_none;Pułk ten nie może być obecnie wzmocniony.
-domestic_investment_button;Inwestowanie w indywidualne projekty jest „przestarzałe”. Zamiast tego użyj suwaka „Inwestycje krajowe” na ekranie budżetu
 domestic_investment_pops;Mamy kapitalistów o wartości x $, którym możemy pośrednio przekazywać hojne datki
 domestic_investment_needs;Każdego dnia potrzebują x $, aby zaspokoić swój luksusowy styl życia
 alice_budget_scaled_inc;Dochód: ?Wartość G$

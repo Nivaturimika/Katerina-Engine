@@ -1043,7 +1043,6 @@ alice_con_decay_description;자연 부패 ?R-$x$
 x_from_y;$y$에서 $x$
 reinforce_rate;이 연대는 매달 최대 $x$의 병사를 증원할 수 있습니다.
 reinforce_rate_none;이 연대는 현재 강화될 수 없습니다.
-domestic_investment_button;"개별 프로젝트에 대한 투자는 ""Rdeprecated""W입니다. 대신 예산 화면의 ""Y국내 투자""W 슬라이더를 사용하세요."
 domestic_investment_pops;우리는 간접적으로 관대 한 기부를 할 수 있는 $x$ 자본가를 보유하고 있습니다.
 domestic_investment_needs;호화로운 생활 방식을 만족하려면 매일 $x$가 필요합니다.
 alice_budget_scaled_inc;소득: ?G$value$

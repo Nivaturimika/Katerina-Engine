@@ -1043,7 +1043,6 @@ alice_con_decay_description;Decadimento naturale ?R-$x$
 x_from_y;$x$ da $y$
 reinforce_rate;Questo reggimento può rinforzare fino a $x$ soldati al mese.
 reinforce_rate_none;Al momento questo reggimento non può essere rinforzato.
-domestic_investment_button;Investire in progetti individuali è ?Rdeprecato?W, utilizza invece il dispositivo di scorrimento ?Yinvestimento domestico?W nella schermata del budget
 domestic_investment_pops;Abbiamo capitalisti $x$ a cui possiamo indirettamente fare generose donazioni
 domestic_investment_needs;Hanno bisogno di $x$ ogni giorno per soddisfare il loro stile di vita lussuoso
 alice_budget_scaled_inc;Reddito: ?G$valore$

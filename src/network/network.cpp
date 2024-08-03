@@ -275,7 +275,22 @@ std::string get_last_error_msg() {
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, err, 0, (LPTSTR)&err_buf, 0, nullptr);
 	native_string err_text = err_buf;
 	LocalFree(err_buf);
-	return std::to_string(err) + " = " + simple_fs::native_to_utf8(err_text);
+
+	std::string err_msg;
+	if(err == WSAECONNRESET) {
+		err_msg += "Host game was lost";
+	} else if(err == WSAEHOSTDOWN) {
+		err_msg += "Host game is down";
+	} else if(err == WSAEHOSTUNREACH) {
+		err_msg += "Host game is unreachable";
+	} else {
+		err_msg += "A network issue ocurred";
+	}
+	err_msg += "\nTechnical details: ";
+	err_msg += std::to_string(err);
+	err_msg += "=";
+	err_msg += simple_fs::native_to_utf8(err_text);
+	return err_msg;
 #else
 	return std::string("Dummy");
 #endif

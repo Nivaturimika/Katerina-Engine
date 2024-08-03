@@ -737,7 +737,7 @@ dec_op_explain_4;The target's opinion of a great power can't be made worse than 
 iaction_explain_5;You're a great power
 iaction_explain_6;The target is not a great power
 state_transfer_di;State transfer
-state_transfer_button;State transfer
+state_transfer_button;State transfer...
 state_transfer_offer;$actor$ is offering to give us the states of:
 state_transfer_desc;Transfers the ownership of one state to another nation, useful for negotiations beyond the game's scope
 state_transfer_explain_1;The target nation is a player
@@ -1043,7 +1043,6 @@ alice_con_decay_description;Natural decay ?R-$x$
 x_from_y;$x$ from $y$
 reinforce_rate;This regiment can reinforce up to $x$ soldiers per month.
 reinforce_rate_none;This regiment can't currently be reinforced.
-domestic_investment_button;Investing in individual projects is ?Rdeprecated?W, use the ?Ydomestic investment?W slider on the budget screen instead
 domestic_investment_pops;We have $x$ capitalists we can indirectly give generous donations to
 domestic_investment_needs;They require $x$ each day to satisfy their luxurious lifestyle
 alice_budget_scaled_inc;Income: ?G$value$
@@ -1192,58 +1191,3 @@ alice_pnt_dominant_religion;?YDominant religion:?! $x$
 alice_pnt_dominant_ideology;?YDominant Ideology:?! $x$
 ledger_ppp_gdp;GDP(PPP)
 ledger_ppp_gdp_per_capita;GDP(PPP) per 1m people
-alice_ledger_header_gdp_history;GDP(PPP) over time
-alice_countryalert_colonialgood_start;You can colonize $region$
-alice_overseas_mil_description;Overseas militancy
-alice_armygroup_go_to_selection;Add armies
-alice_battleplanner_travel_destination_order;Toggle ferry target
-alice_battleplanner_travel_origin_order;Toggle ferry origin
-alice_battleplanner_defend_order;Toggle defence status
-alice_exit_battleplanner_deselection;Exit deselection mode
-alice_exit_battleplanner_selection;Exit selection mode
-alice_exit_battleplanner;Exit battle planner
-alice_battleplanner_add_selected;Add selected
-alice_battleplanner_remove_selected;Remove selected
-fab_explain_8;Doesn't have a truce
-political_support_for_reform_header;Political support for this reform (a total of 50% or greater is required to choose the reform)
-no_political_support_for_reform;Currently there is no political support for this reform
-ol_view_stockpile_header;Stockpiles
-ol_view_stockpile;Stockpiles
-nf_overwrite_header;Remove an existing national focus first
-percent_wants_to_enact_reform;$x$ wants to enact a new reform
-modifier_mine_rgo_size;Mine RGO size
-modifier_farm_rgo_size;Farm RGO size
-sort_by_focus;Sort by national focus
-sort_by_name;Sort by name
-sort_by_factories;Sort by the number of factories
-sort_by_unemployed_workers;Sort by the number of unemployed workers
-sort_by_capitalists;Sort by the percent of capitalists
-sort_by_infrastructure;Sort by the percent of infrastructure
-sort_by_size;Sort by size
-sort_by_type;Sort by type
-sort_by_culture;Sort by culture
-sort_by_religion;Sort by religion
-sort_by_location;Sort by location
-sort_by_militancy;Sort by militancy
-sort_by_conciousness;Sort by conciousness
-sort_by_ideology;Sort by ideology
-sort_by_issues;Sort by issues
-sort_by_unemployment;Sort by unemployment
-sort_by_savings;Sort by savings
-sort_by_life_needs;Sort by life needs
-sort_by_everyday_needs;Sort by everyday needs
-sort_by_luxury_needs;Sort by luxury needs
-sort_by_faction;Sort by faction
-sort_by_growth;Sort by growth
-sort_by_literacy;Sort by literacy
-sort_by_priority;Sort by priority
-sort_by_prestige_rank;Sort by prestige rank
-sort_by_economic_rank;Sort by industrial rank
-sort_by_military_rank;Sort by military rank
-sort_by_rank;Sort by rank
-sort_by_spherelord;Sort by spherelord
-sort_by_opinion;Sort by opinion
-sort_by_relation;Sort by relation
-sort_by_country;Sort by country
-sort_by_our_influence;Sort by our influence
-sort_by_our_investment;Sort by our investment

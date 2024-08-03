@@ -1043,7 +1043,6 @@ alice_con_decay_description;Természetes bomlás ?R-$x$
 x_from_y;$x$ $y$-tól
 reinforce_rate;Ez az ezred havonta akár $x$ katonát is megerősíthet.
 reinforce_rate_none;Ezt az ezredet jelenleg nem lehet megerősíteni.
-domestic_investment_button;"Az egyedi projektekbe való befektetés „elévült”; használja helyette a költségvetés képernyőn a „Hazai beruházás” csúszkát."
 domestic_investment_pops;Vannak $x$ tőkéseink, akiknek közvetve nagylelkű adományokat tudunk adni
 domestic_investment_needs;Minden nap $x$-ra van szükségük, hogy kielégítsék fényűző életmódjukat
 alice_budget_scaled_inc;Jövedelem: ?G$érték$

@@ -1,0 +1,67 @@
+alice_ledger_header_gdp_history;GDP(PPP) over time
+alice_countryalert_colonialgood_start;You can colonize $region$
+alice_overseas_mil_description;Overseas militancy
+alice_armygroup_go_to_selection;Add armies
+alice_battleplanner_travel_destination_order;Toggle ferry target
+alice_battleplanner_travel_origin_order;Toggle ferry origin
+alice_battleplanner_defend_order;Toggle defence status
+alice_exit_battleplanner_deselection;Exit deselection mode
+alice_exit_battleplanner_selection;Exit selection mode
+alice_exit_battleplanner;Exit battle planner
+alice_battleplanner_add_selected;Add selected
+alice_battleplanner_remove_selected;Remove selected
+fab_explain_8;Doesn't have a truce
+political_support_for_reform_header;Political support for this reform (a total of 50% or greater is required to choose the reform)
+no_political_support_for_reform;Currently there is no political support for this reform
+ol_view_stockpile_header;Stockpiles
+ol_view_stockpile;Stockpiles
+nf_overwrite_header;Remove an existing national focus first
+percent_wants_to_enact_reform;$x$ wants to enact a new reform
+modifier_mine_rgo_size;Mine RGO size
+modifier_farm_rgo_size;Farm RGO size
+sort_by_focus;Sort by national focus
+sort_by_name;Sort by name
+sort_by_factories;Sort by the number of factories
+sort_by_unemployed_workers;Sort by the number of unemployed workers
+sort_by_capitalists;Sort by the percent of capitalists
+sort_by_infrastructure;Sort by the percent of infrastructure
+sort_by_size;Sort by size
+sort_by_type;Sort by type
+sort_by_culture;Sort by culture
+sort_by_religion;Sort by religion
+sort_by_location;Sort by location
+sort_by_militancy;Sort by militancy
+sort_by_conciousness;Sort by conciousness
+sort_by_ideology;Sort by ideology
+sort_by_issues;Sort by issues
+sort_by_unemployment;Sort by unemployment
+sort_by_savings;Sort by savings
+sort_by_life_needs;Sort by life needs
+sort_by_everyday_needs;Sort by everyday needs
+sort_by_luxury_needs;Sort by luxury needs
+sort_by_faction;Sort by faction
+sort_by_growth;Sort by growth
+sort_by_literacy;Sort by literacy
+sort_by_priority;Sort by priority
+sort_by_prestige_rank;Sort by prestige rank
+sort_by_economic_rank;Sort by industrial rank
+sort_by_military_rank;Sort by military rank
+sort_by_rank;Sort by rank
+sort_by_spherelord;Sort by spherelord
+sort_by_opinion;Sort by opinion
+sort_by_relation;Sort by relation
+sort_by_country;Sort by country
+sort_by_our_influence;Sort by our influence
+sort_by_our_investment;Sort by our investment
+make_cb_button;Justify War...
+decreaseopinion_button;Decrease Opinion...
+discredit_button;Discredit...
+expeladvisors_button;Expel Advisors...
+banembassy_button;Ban Embassy...
+peace_button;Offer Peace...
+war_button;Declare War...
+crisis_back_down;Negotiate...
+politics_release_vassal;Release...
+diplomacy_add_wargoal;Add Wargoal...
+military_build_army_label;Build Army...
+military_build_navy_label;Build Navy...

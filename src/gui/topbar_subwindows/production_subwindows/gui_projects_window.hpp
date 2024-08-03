@@ -60,25 +60,6 @@ protected:
 	}
 };
 
-class production_project_invest_button : public button_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		disabled = true;
-	}
-	void button_action(sys::state& state) noexcept override {
-		//if(parent) {
-		//	Cyto::Any payload = element_selection_wrapper<production_action>{production_action{production_action::investment_window}};
-		//	parent->impl_get(state, payload);
-		//}
-	}
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::tooltip;
-	}
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		text::add_line(state, contents, "domestic_investment_button");
-	}
-};
-
 class production_project_info : public listbox_row_element_base<production_project_data> {
 	image_element_base* building_icon = nullptr;
 	image_element_base* factory_icon = nullptr;
@@ -132,7 +113,7 @@ public:
 		} else if(name == "pop_icon" || name == "pop_amount") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "invest_project") {
-			return make_element_by_type<production_project_invest_button>(state, id);
+			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "input_goods") {
 			auto ptr = make_element_by_type<production_project_input_listbox>(state, id);
 			input_listbox = ptr.get();

@@ -1043,7 +1043,6 @@ alice_con_decay_description;Natürlicher Verfall ?R-$x$
 x_from_y;$x$ von $y$
 reinforce_rate;Dieses Regiment kann bis zu $x$ Soldaten pro Monat verstärken.
 reinforce_rate_none;Dieses Regiment kann derzeit nicht verstärkt werden.
-domestic_investment_button;Investitionen in einzelne Projekte sind veraltet. Verwenden Sie stattdessen den Schieberegler „Inländische Investitionen“ auf dem Budgetbildschirm
 domestic_investment_pops;Wir haben $x$-Kapitalisten, denen wir indirekt großzügige Spenden geben können
 domestic_investment_needs;Sie benötigen jeden Tag x$, um ihren luxuriösen Lebensstil zu befriedigen
 alice_budget_scaled_inc;Einkommen: ?G$Wert$

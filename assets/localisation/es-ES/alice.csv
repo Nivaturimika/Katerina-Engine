@@ -1042,7 +1042,6 @@ alice_con_decay_description;
 x_from_y;
 reinforce_rate;
 reinforce_rate_none;
-domestic_investment_button;
 domestic_investment_pops;
 domestic_investment_needs;
 alice_budget_scaled_inc;

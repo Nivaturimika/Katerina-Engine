@@ -34,6 +34,7 @@ public:
 	}
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		text::add_line(state, contents, "rally_point_enable_info");
+		text::add_line(state, contents, "alice_merge_rally_point_why");
 	}
 };
 
@@ -53,19 +54,6 @@ public:
 	}
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		text::add_line(state, contents, "rally_point_enable_info");
-	}
-};
-
-class merge_rally_point : public button_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		disabled = true;
-	}
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::tooltip;
-	}
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		text::add_line(state, contents, "alice_merge_rally_point_why");
 	}
 };
@@ -1147,7 +1135,7 @@ public:
 		} else if(name == "rallypoint_checkbox_naval") {
 			return make_element_by_type<naval_rally_point>(state, id);
 		} else if(name == "rallypoint_merge_checkbox" || name == "rallypoint_merge_checkbox_naval") {
-			return make_element_by_type<merge_rally_point>(state, id);
+			return make_element_by_type<invisible_element>(state, id);
 		} else {
 			return nullptr;
 		}

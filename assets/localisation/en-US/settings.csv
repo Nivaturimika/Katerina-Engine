@@ -10,7 +10,7 @@ map_projection;Projection
 map_projection_globe;Orthographic
 map_projection_flat;Equirectangular
 map_projection_globe_perspective;Vertical
-dm_popup_label;Diplomatic message as popups
+dm_popup_label;Auto-open alerts
 ui_scale;UI scale
 zoom_mode_label;Zoom style
 zoom_mode_panning;Panning
@@ -19,14 +19,14 @@ zoom_mode_centered;Centered
 zoom_mode_to_cursor;To cursor
 zoom_mode_away_from_cursor;Away from cursor
 zoom_speed_label;Zoom Acceleration
-river_label;Show rivers
+river_label;Rivers
 mute_on_focus_lost_label;Mute on focus lost
-wasd_for_map_movement_label;Use WASD movement
+wasd_for_map_movement_label;WASD movement
 vassal_color_label;Vassal coloring
 vassal_color_inherit;Inherit
 vassal_color_same;Same
 vassal_color_none;None
-black_map_font_label;Show black map font
+black_map_font_label;Black font
 edge_scrolling_label;Scroll on edge
 color_blind_mode_label;Color blind
 color_blind_mode_none;None
@@ -34,9 +34,9 @@ color_blind_mode_deutan;Deutan
 color_blind_mode_protan;Protan
 color_blind_mode_tritan;Tritan
 color_blind_mode_achroma;Achroma
-render_models_label;Show 3D models
+render_models_label;3D models
 language_label;Language
-fow_label;Enable FoW
+fow_label;Fog of War
 railroad_label;Show railroads
 master_volume_label;Master volume
 music_volume_label;Music volume
@@ -52,5 +52,5 @@ map_label_0;None
 map_label_1;Linear
 map_label_2;Quadratic
 map_label_3;Cubic
-antialiasing_label;Enable antialiasing
-spoilers_label;Show spoilers
+antialiasing_label;Antialias
+spoilers_label;Debug info
