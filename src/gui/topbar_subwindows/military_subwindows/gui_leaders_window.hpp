@@ -133,18 +133,78 @@ public:
 	}
 };
 
+enum class leader_sort : uint8_t {
+	name, prestige, type, army
+};
+
 class military_leaders_listbox : public listbox_element_base<military_leaders, dcon::leader_id> {
 protected:
 	std::string_view get_row_element_name() override {
 		return "milview_leader_entry";
 	}
 
+	bool is_asc = false;
+	leader_sort sort = leader_sort::name;
 public:
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
-		for(auto const fat_id : state.world.nation_get_leader_loyalty(state.local_player_nation))
+		for(auto const fat_id : state.world.nation_get_leader_loyalty(state.local_player_nation)) {
 			row_contents.push_back(fat_id.get_leader());
+		}
+		switch(sort) {
+		case leader_sort::name:
+			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				auto in_a = state.to_string_view(state.world.leader_get_name(a));
+				auto in_b = state.to_string_view(state.world.leader_get_name(b));
+				if(in_a != in_b)
+					return in_a < in_b;
+				return a.index() < b.index();
+			});
+			break;
+		case leader_sort::prestige:
+			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				auto in_a = state.world.leader_get_prestige(a);
+				auto in_b = state.world.leader_get_prestige(b);
+				if(in_a != in_b)
+					return in_a < in_b;
+				return a.index() < b.index();
+			});
+			break;
+		case leader_sort::type:
+			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				auto in_a = state.world.leader_get_is_admiral(a);
+				auto in_b = state.world.leader_get_is_admiral(b);
+				if(in_a != in_b)
+					return in_a < in_b;
+				return a.index() < b.index();
+			});
+			break;
+		case leader_sort::army:
+			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				auto ar_a = state.world.leader_get_army_from_army_leadership(a);
+				auto ar_b = state.world.leader_get_army_from_army_leadership(b);
+				auto in_a = state.to_string_view(state.world.army_get_name(ar_a));
+				auto in_b = state.to_string_view(state.world.army_get_name(ar_b));
+				if(in_a != in_b)
+					return in_a < in_b;
+				return a.index() < b.index();
+			});
+			break;
+		}
 		update(state);
+	}
+
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+		if(payload.holds_type<leader_sort>()) {
+			auto s = Cyto::any_cast<leader_sort>(payload);
+			if(sort == s) {
+				is_asc = !is_asc;
+			}
+			sort = s;
+			on_update(state);
+			return message_result::consumed;
+		}
+		return message_result::unseen;
 	}
 };
 
@@ -189,6 +249,10 @@ public:
 
 class leaders_sortby_prestige : public button_element_base {
 public:
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, leader_sort::prestige);
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
@@ -202,6 +266,10 @@ public:
 
 class leaders_sortby_type : public button_element_base {
 public:
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, leader_sort::type);
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
@@ -215,6 +283,10 @@ public:
 
 class leaders_sortby_name : public button_element_base {
 public:
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, leader_sort::name);
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
@@ -228,6 +300,10 @@ public:
 
 class leaders_sortby_army : public button_element_base {
 public:
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, leader_sort::army);
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
@@ -268,6 +344,7 @@ public:
 };
 
 class leaders_window : public window_element_base {
+	military_leaders_listbox* listbox = nullptr;
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "sort_leader_prestige") {
@@ -281,7 +358,9 @@ public:
 		} else if(name == "sort_leader_army") {
 			return make_element_by_type<leaders_sortby_army>(state, id);
 		} else if(name == "leader_listbox") {
-			return make_element_by_type<military_leaders_listbox>(state, id);
+			auto ptr = make_element_by_type<military_leaders_listbox>(state, id);
+			listbox = ptr.get();
+			return ptr;
 		} else if(name == "new_general") {
 			return make_element_by_type<military_make_leader_button<true>>(state, id);
 		} else if(name == "new_admiral") {
@@ -301,6 +380,14 @@ public:
 		} else {
 			return nullptr;
 		}
+	}
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+		if(payload.holds_type<leader_sort>()) {
+			if(listbox)
+				listbox->impl_get(state, payload);
+			return message_result::consumed;
+		}
+		return message_result::unseen;
 	}
 };
 
