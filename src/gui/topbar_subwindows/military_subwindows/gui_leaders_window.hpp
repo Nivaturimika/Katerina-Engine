@@ -176,6 +176,12 @@ public:
 				auto in_b = state.world.leader_get_is_admiral(b);
 				if(in_a != in_b)
 					return in_a < in_b;
+				auto in_a1 = state.world.leader_trait_get_attack(state.world.leader_get_background(a))
+					+ state.world.leader_trait_get_attack(state.world.leader_get_personality(a));
+				auto in_b1 = state.world.leader_trait_get_attack(state.world.leader_get_background(b))
+					+ state.world.leader_trait_get_attack(state.world.leader_get_personality(b));
+				if(in_a1 != in_b1)
+					return in_a1 < in_b1;
 				return a.index() < b.index();
 			});
 			break;
@@ -190,6 +196,9 @@ public:
 				return a.index() < b.index();
 			});
 			break;
+		}
+		if(is_asc) {
+			std::reverse(row_contents.begin(), row_contents.end());
 		}
 		update(state);
 	}
