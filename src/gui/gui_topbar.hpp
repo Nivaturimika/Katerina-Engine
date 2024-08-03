@@ -1763,7 +1763,7 @@ public:
 
 class topbar_sphere_icon : public button_element_base {
 public:
-	uint32_t index = 0;
+	std::vector<dcon::nation_id> visited_nations;
 
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
@@ -1791,15 +1791,25 @@ public:
 				return;
 			}
 		} else {
-			if(index >= uint32_t(targets.size())) {
+			bool all_visited = true;
+			for(const auto n1 : targets) {
+				for(const auto n2 : visited_nations) {
+					if(n1 != n2) {
+						all_visited = false;
+						break;
+					}
+				}
+				if(!all_visited)
+					break;
+			}
+			if(all_visited) {
 				if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
 					state.ui_state.diplomacy_subwindow->set_visible(state, false);
-					return;
 				}
-				index = 0;
+				visited_nations.clear();
 			}
 			state.open_diplomacy(targets[index]);
-			++index;
+			visited_nations.push_back(targets[index]);
 		}
 	}
 
