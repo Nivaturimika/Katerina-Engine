@@ -1108,21 +1108,23 @@ public:
 		auto source = state.local_player_nation;
 		auto target = retrieve<dcon::nation_id>(state, parent);
 
+		auto ol = state.world.nation_get_overlord_as_subject(source);
 		disabled = false;
 		if(source == target)
 			disabled = true;
-		if(state.world.nation_get_constructing_cb_type(source))
+		else if(state.world.nation_get_constructing_cb_type(source))
 			disabled = true;
-		auto ol = state.world.nation_get_overlord_as_subject(source);
-		if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
+		else if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
 			disabled = true;
-		if(state.world.nation_get_in_sphere_of(target) == source)
+		else if(state.world.nation_get_in_sphere_of(target) == source)
 			disabled = true;
-		if(state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
+		else if(state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
 			disabled = true;
-		if(military::are_at_war(state, target, source))
+		else if(military::are_at_war(state, target, source))
 			disabled = true;
-		if(!has_any_usable_cb(state, target))
+		else if(military::has_truce_with(state, target, source))
+			disabled = true;
+		else if(!has_any_usable_cb(state, target))
 			disabled = true;
 	}
 
