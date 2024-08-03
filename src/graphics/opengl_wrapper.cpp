@@ -33,13 +33,11 @@ void notify_user_of_fatal_opengl_error(std::string message) {
 	std::string full_message = message;
 	full_message += "\n";
 	full_message += opengl_get_error_name(glGetError());
-	window::emit_error_message("OpenGL error:" + full_message, true);
+	window::emit_error_message("OpenGL error:" + full_message, false);
 }
-
 
 GLint compile_shader(std::string_view source, GLenum type) {
 	GLuint return_value = glCreateShader(type);
-
 	if(return_value == 0) {
 		notify_user_of_fatal_opengl_error("shader creation failed");
 	}
