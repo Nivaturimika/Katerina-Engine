@@ -37,7 +37,6 @@ bool is_in_fullscreen(sys::state const& game_state) {
 void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
 	if(game_state.win_ptr && game_state.win_ptr->hwnd && game_state.win_ptr->in_fullscreen != fullscreen) {
 		if(!fullscreen) {
-
 			auto monitor_handle = MonitorFromWindow(game_state.win_ptr->hwnd, MONITOR_DEFAULTTOPRIMARY);
 			MONITORINFO mi;
 			mi.cbSize = sizeof(mi);
@@ -46,8 +45,7 @@ void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
 			int left = (mi.rcWork.right - mi.rcWork.left) / 2 - game_state.win_ptr->creation_x_size / 2;
 			int top = (mi.rcWork.bottom - mi.rcWork.top) / 2 - game_state.win_ptr->creation_y_size / 2;
 
-			DWORD win32Style = WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU |
-												 WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+			DWORD win32Style = WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 			RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
 			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
@@ -64,15 +62,13 @@ void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
 			int32_t final_height = rectangle.bottom - rectangle.top;
 
 			SetWindowLongW(game_state.win_ptr->hwnd, GWL_STYLE, win32Style);
-			SetWindowPos(game_state.win_ptr->hwnd, HWND_NOTOPMOST, rectangle.left, rectangle.top, final_width, final_height,
-					SWP_NOREDRAW);
+			SetWindowPos(game_state.win_ptr->hwnd, HWND_NOTOPMOST, rectangle.left, rectangle.top, final_width, final_height, SWP_NOREDRAW);
 			SetWindowRgn(game_state.win_ptr->hwnd, NULL, TRUE);
 			ShowWindow(game_state.win_ptr->hwnd, SW_MAXIMIZE);
 
 			game_state.win_ptr->in_fullscreen = false;
 		} else {
 			// ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
-
 			auto monitor_handle = MonitorFromWindow(game_state.win_ptr->hwnd, MONITOR_DEFAULTTOPRIMARY);
 			MONITORINFO mi;
 			mi.cbSize = sizeof(mi);
@@ -195,7 +191,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 		state->mouse_x_position = x;
 		state->mouse_y_position = y;
-
 		return 0;
 	}
 	case WM_RBUTTONDOWN: {
@@ -251,7 +246,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		// TODO MAP CAMERA HERE CODE HERE
 		// state->map_camera = map::flat_camera(glm::vec2{ state->x_size, state->y_size }, glm::vec2{
 		// state->map_provinces_texture.size_x, state->map_provinces_texture.size_y });
-
 		return 0;
 	}
 	case WM_MOUSEWHEEL: {
@@ -288,7 +282,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		return 0;
 	}
-
 	case WM_PAINT:
 	case WM_DISPLAYCHANGE: {
 		PAINTSTRUCT ps;
@@ -296,10 +289,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		EndPaint(hwnd, &ps);
 		return 0;
 	}
-
 	case WM_DPICHANGED:
 		return 0;
-
 	case WM_GRAPHNOTIFY:
 		// this is the message that tells us there is a DirectShow event
 		sound::update_music_track(*state);
@@ -323,6 +314,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		LPMINMAXINFO info = (LPMINMAXINFO)lParam;
 		info->ptMinTrackSize.x = 640;
 		info->ptMinTrackSize.y = 400;
+		break;
 	}
 	return DefWindowProcW(hwnd, message, wParam, lParam);
 }
@@ -345,19 +337,17 @@ void create_window(sys::state& game_state, creation_parameters const& params) {
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hIcon = (HICON)LoadImage(GetModuleHandleW(nullptr), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON,
-		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0);
+	wcex.hIcon = (HICON)LoadImage(GetModuleHandleW(nullptr), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0);
 	wcex.lpszClassName = L"project_alice_class";
 	if(RegisterClassExW(&wcex) == 0) {
 		window::emit_error_message("Unable to register window class", true);
 	}
 
-	DWORD win32Style = !params.borderless_fullscreen ? (WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX |
-																												 WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
-																									 : WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+	DWORD win32Style = !params.borderless_fullscreen ?
+		(WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
+		: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-	game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT,
-			CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(nullptr), &game_state);
+	game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(nullptr), &game_state);
 
 	if(!game_state.win_ptr->hwnd)
 		return;
@@ -389,8 +379,7 @@ void create_window(sys::state& game_state, creation_parameters const& params) {
 		int32_t final_height = rectangle.bottom - rectangle.top;
 
 		SetWindowLongW(game_state.win_ptr->hwnd, GWL_STYLE, win32Style);
-		SetWindowPos(game_state.win_ptr->hwnd, HWND_NOTOPMOST, rectangle.left, rectangle.top, final_width, final_height,
-				SWP_FRAMECHANGED);
+		SetWindowPos(game_state.win_ptr->hwnd, HWND_NOTOPMOST, rectangle.left, rectangle.top, final_width, final_height, SWP_FRAMECHANGED);
 		SetWindowRgn(game_state.win_ptr->hwnd, NULL, TRUE);
 
 		if(params.initial_state == window_state::maximized)
