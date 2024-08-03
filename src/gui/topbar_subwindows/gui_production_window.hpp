@@ -1256,7 +1256,7 @@ public:
 		bool non_colonial = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(sid));
 
 		bool is_civilized = state.world.nation_get_is_civilized(n);
-		int32_t num_factories = economy::state_factory_count(state, sid, n);
+		int32_t num_factories = economy::state_factory_count(state, sid);
 
 		text::add_line(state, contents, "production_build_new_factory_tooltip");
 		text::add_line_break_to_layout(state, contents);
@@ -1325,7 +1325,7 @@ public:
 		bool non_colonial = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(sid));
 
 		bool is_civilized = state.world.nation_get_is_civilized(n);
-		int32_t num_factories = economy::state_factory_count(state, sid, n);
+		int32_t num_factories = economy::state_factory_count(state, sid);
 
 		text::add_line(state, contents, "production_build_new_factory_tooltip");
 		text::add_line_break_to_layout(state, contents);

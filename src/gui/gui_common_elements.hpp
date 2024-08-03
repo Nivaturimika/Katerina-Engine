@@ -323,7 +323,7 @@ class state_factory_count_text : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::state_instance_id>(state, parent);
-		int32_t count = economy::state_factory_count(state, content, state.local_player_nation);
+		int32_t count = economy::state_factory_count(state, content);
 		auto txt = std::to_string(count) + "/" + std::to_string(int32_t(state.defines.factories_per_state));
 		set_text(state, txt);
 	}

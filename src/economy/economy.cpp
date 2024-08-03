@@ -4564,7 +4564,8 @@ bool state_contains_factory(sys::state& state, dcon::state_instance_id s, dcon::
 	return false;
 }
 
-int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid, dcon::nation_id n) {
+int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid) {
+	dcon::nation_id n = state.world.state_instance_get_nation_from_state_ownership(sid);
 	int32_t num_factories = 0;
 	auto d = state.world.state_instance_get_definition(sid);
 	for(auto p : state.world.state_definition_get_abstract_state_membership(d))
@@ -4573,7 +4574,6 @@ int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid, dcon
 	for(auto p : state.world.state_instance_get_state_building_construction(sid))
 		if(p.get_is_upgrade() == false)
 			++num_factories;
-
 	// For new factories: no more than defines:FACTORIES_PER_STATE existing + under construction new factories must be
 	assert(num_factories <= int32_t(state.defines.factories_per_state));
 	return num_factories;

@@ -243,7 +243,7 @@ struct upgraded_factory {
 
 bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id si, dcon::factory_type_id ft);
 bool state_contains_factory(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id ft);
-int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid, dcon::nation_id n);
+int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid);
 float unit_construction_progress(sys::state& state, dcon::province_land_construction_id c);
 float unit_construction_progress(sys::state& state, dcon::province_naval_construction_id c);
 void try_add_factory_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t);

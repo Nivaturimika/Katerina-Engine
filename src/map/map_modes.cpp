@@ -210,29 +210,24 @@ std::vector<uint32_t> factory_map_from(sys::state& state) {
 
 	auto sel_nation = state.world.province_get_nation_from_province_ownership(state.map_state.get_selected_province());
 	// get state with most factories
-	int32_t max_total = 0;
+	int32_t max_total = 1;
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
 		auto sdef = state.world.state_instance_get_definition(sid);
-		int32_t total = 0;
-		if(sel_nation) {
-			total = economy::state_factory_count(state, sid, sel_nation);
-		} else {
-			for(const auto abm : state.world.state_definition_get_abstract_state_membership(sdef)) {
-				total = std::max(total, economy::state_factory_count(state, sid, abm.get_province().get_nation_from_province_ownership()));
-			}
+		if(!sel_nation || sel_nation == state.world.state_instance_get_nation_from_state_ownership(sid)) {
+			int32_t total = economy::state_factory_count(state, sid);
+			if(total > max_total)
+				max_total = total;
 		}
-		if(total > max_total)
-			max_total = total;
-		if(max_total == 0)
-			max_total = 1;
 	});
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
+		int32_t total = economy::state_factory_count(state, sid);
+		if(total == 0)
+			return;
 		auto sdef = state.world.state_instance_get_definition(sid);
-		int32_t total = economy::state_factory_count(state, sid, state.world.state_instance_get_nation_from_state_ownership(sid));
 		for(const auto abm : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if((sel_nation && abm.get_province().get_province_ownership().get_nation() != sel_nation)
 				|| !(abm.get_province().get_nation_from_province_ownership())
-				|| total == 0)
+				|| abm.get_province().get_nation_from_province_ownership() != state.world.state_instance_get_nation_from_state_ownership(sid))
 				continue;
 			float value = float(total) / float(max_total);
 			uint32_t color = ogl::color_gradient(value,

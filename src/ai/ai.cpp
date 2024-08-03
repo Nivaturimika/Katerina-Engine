@@ -1114,7 +1114,7 @@ void update_ai_econ_construction(sys::state& state) {
 						}
 
 						// else -- try to build -- must have room
-						int32_t num_factories = economy::state_factory_count(state, si, n);
+						int32_t num_factories = economy::state_factory_count(state, si);
 						if(num_factories < int32_t(state.defines.factories_per_state)) {
 							auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
 							new_up.set_is_pop_project(false);

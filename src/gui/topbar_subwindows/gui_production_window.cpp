@@ -38,8 +38,8 @@ void populate_production_states_list(sys::state& state, std::vector<dcon::state_
 		return a_name < b_name;
 	};
 	auto sort_by_factories = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-		auto acount = economy::state_factory_count(state, a, state.world.state_instance_get_nation_from_state_ownership(a));
-		auto bcount = economy::state_factory_count(state, b, state.world.state_instance_get_nation_from_state_ownership(b));
+		auto acount = economy::state_factory_count(state, a);
+		auto bcount = economy::state_factory_count(state, b);
 		return acount > bcount;
 	};
 	auto sort_by_primary_workers = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
