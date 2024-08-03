@@ -469,28 +469,20 @@ public:
 		} else if(name == "left_list") {
 			if constexpr(std::is_same_v<T, dcon::army_id>) {
 				auto ptr = make_element_by_type<reorg_unit_listbox_left<T, T2>>(state, id);
-				//ptr->base_data.position.x += 255;	// Nudge
-				//ptr->list_scrollbar->base_data.position.x += 256;
 				ptr->base_data.size.x += 256;
 				return ptr;
 			} else {
 				auto ptr = make_element_by_type<reorg_unit_listbox_left<T, T2>>(state, id);
-				//ptr->base_data.position.x += 255;	// Nudge
-				//ptr->list_scrollbar->base_data.position.x += 256;
 				ptr->base_data.size.x += 256;
 				return ptr;
 			}
 		} else if(name == "right_list") {
 			if constexpr(std::is_same_v<T, dcon::army_id>) {
 				auto ptr = make_element_by_type<reorg_unit_listbox_right<T, T2>>(state, id);
-				//ptr->base_data.position.x += 255;	// Nudge
-				//ptr->list_scrollbar->base_data.position.x += 256;
 				ptr->base_data.size.x += 256;
 				return ptr;
 			} else {
 				auto ptr = make_element_by_type<reorg_unit_listbox_right<T, T2>>(state, id);
-				//ptr->base_data.position.x += 255;	// Nudge
-				//ptr->list_scrollbar->base_data.position.x += 256;
 				ptr->base_data.size.x += 256;
 				return ptr;
 			}

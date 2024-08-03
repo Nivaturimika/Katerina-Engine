@@ -564,15 +564,20 @@ public:
 					auto* win = static_cast<unit_reorg_window<T, dcon::regiment_id>*>(state.ui_state.army_reorg_window);
 					keep_shown = win->unit_to_reorg != u && win->is_visible();
 					win->unit_to_reorg = u;
+					if(u) {
+						reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
+						reorg_window->impl_on_update(state);
+					}
 				} else {
 					auto u = retrieve<T>(state, parent);
 					auto* win = static_cast<unit_reorg_window<T, dcon::ship_id>*>(state.ui_state.navy_reorg_window);
 					keep_shown = win->unit_to_reorg != u && win->is_visible();
 					win->unit_to_reorg = u;
+					if(u) {
+						reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
+						reorg_window->impl_on_update(state);
+					}
 				}
-				//reorg_window->base_data.position.y = base_data.position.y - 29;
-				reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
-				reorg_window->impl_on_update(state);
 				break;
 			}
 			case unitpanel_action::changeleader: {
