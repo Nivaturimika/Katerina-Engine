@@ -8,6 +8,7 @@
 #include "politics.hpp"
 #include "prng.hpp"
 #include "province_templates.hpp"
+#include "nations_templates.hpp"
 #include "triggers.hpp"
 
 namespace ai {
@@ -4395,6 +4396,41 @@ void gather_to_battle(sys::state& state, dcon::nation_id n, dcon::province_id p)
 	}
 }
 
+float estimate_unit_type_value(sys::state& state, dcon::nation_id n, dcon::unit_type_id utid) {
+	auto const& ut = state.military_definitions.unit_base_definitions[utid];
+	auto const& uts = state.world.nation_get_unit_stats(n, utid);
+	switch(state.military_definitions.unit_base_definitions[utid].type) {
+	case military::unit_type::cavalry:
+	case military::unit_type::infantry:
+	{
+		float atk = (uts.attack_or_gun_power * 0.1f + 1.0f);
+		float def = (uts.attack_or_gun_power * 0.1f + 1.0f);
+		float v = std::max<float>(atk + def, 1.f) / 2.f;
+		return v;
+	}
+	case military::unit_type::support:
+	case military::unit_type::special:
+	{
+		float atk = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support;
+		float def = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support;
+		float v = std::max<float>(atk + def, 1.f) / 2.f;
+		return v;
+	}
+	default:
+		break;
+	}
+	return 0.f;
+}
+
+void update_frontline_counters(sys::state& state, dcon::unit_type_id utid, int32_t& num_frontline, int32_t& num_support) {
+	if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::support
+		|| state.military_definitions.unit_base_definitions[utid].type == military::unit_type::special) {
+		++num_support;
+		return;
+	}
+	++num_frontline;
+}
+
 float estimate_balanced_composition_factor(sys::state& state, dcon::army_id a) {
 	auto regs = state.world.army_get_army_membership(a);
 	if(regs.begin() == regs.end())
@@ -5030,59 +5066,98 @@ void update_land_constructions(sys::state& state) {
 		int32_t num_frontline = 0;
 		int32_t num_support = 0;
 
-		bool can_make_inf = state.world.nation_get_active_unit(n, state.military_definitions.infantry) || state.military_definitions.unit_base_definitions[state.military_definitions.infantry].active;
-		bool can_make_art = state.world.nation_get_active_unit(n, state.military_definitions.artillery) || state.military_definitions.unit_base_definitions[state.military_definitions.artillery].active;
-		bool art_req_pc = state.military_definitions.unit_base_definitions[state.military_definitions.artillery].primary_culture;
+		std::array<dcon::unit_type_id, 4> best_inf{
+			dcon::unit_type_id{ }, //normal
+			dcon::unit_type_id{ }, //build overseas
+			dcon::unit_type_id{ }, //non-accepted
+			dcon::unit_type_id{ }, //non-accepted + build overseas
+		};
+		std::array<dcon::unit_type_id, 4> best_art{
+			dcon::unit_type_id{ }, //normal
+			dcon::unit_type_id{ }, //build overseas
+			dcon::unit_type_id{ }, //non-accepted
+			dcon::unit_type_id{ }, //non-accepted + build overseas
+		};
+		for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
+			dcon::unit_type_id utid{ dcon::unit_type_id::value_base_t(i) };
+			if(!state.military_definitions.unit_base_definitions[utid].is_land)
+				continue;
+			if(!n.get_active_unit(utid) && !state.military_definitions.unit_base_definitions[utid].active)
+				continue;
+			float s2 = estimate_unit_type_value(state, n, utid);
+			if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::infantry) {
+				for(uint32_t j = 0; j < 4; j++) {
+					float s1 = estimate_unit_type_value(state, n, best_inf[j]);
+					if(!best_inf[j] || s1 < s2) {
+						bool b_ov = (j & 1) == 0 || state.military_definitions.unit_base_definitions[utid].can_build_overseas;
+						bool b_pc = (j & 2) == 0 || !state.military_definitions.unit_base_definitions[utid].primary_culture;
+						if(b_ov && b_pc)
+							best_inf[j] = utid;
+					}
+				}
+			} else if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::support
+				|| state.military_definitions.unit_base_definitions[utid].type == military::unit_type::special) {
+				for(uint32_t j = 0; j < 4; j++) {
+					float s1 = estimate_unit_type_value(state, n, best_art[j]);
+					if(!best_art[j] || s1 < s2) {
+						bool b_ov = (j & 1) == 0 || state.military_definitions.unit_base_definitions[utid].can_build_overseas;
+						bool b_pc = (j & 2) == 0 || !state.military_definitions.unit_base_definitions[utid].primary_culture;
+						if(b_ov && b_pc)
+							best_art[j] = utid;
+					}
+				}
+			}
+		}
+		auto const decide_type = [&](dcon::pop_id pop, bool overseas) {
+			bool is_pc = nations::nation_accepts_culture(state, n, state.world.pop_get_culture(pop));
+			uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
+			if(num_frontline > num_support && best_art[index])
+				return best_art[index];
+			return best_inf[index] ? best_inf[index] : best_inf[3];
+		};
 
 		for(auto ar : state.world.nation_get_army_control(n)) {
 			for(auto r : ar.get_army().get_army_membership()) {
 				auto type = r.get_regiment().get_type();
 				auto etype = state.military_definitions.unit_base_definitions[type].type;
+				bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
+				bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());
+				uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
 				if(etype == military::unit_type::support || etype == military::unit_type::special) {
+					if(best_art[index] && type != best_art[index]) { // free ai upgrades
+						r.get_regiment().set_type(best_art[index]);
+					}
 					++num_support;
 				} else {
+					if(best_inf[index] && etype == military::unit_type::infantry && type != best_inf[index]) { // free ai upgrades
+						r.get_regiment().set_type(best_inf[index]);
+					}
 					++num_frontline;
-				}
-				if(can_make_inf && type == state.military_definitions.irregular) { // free ai upgrades
-					r.get_regiment().set_type(state.military_definitions.infantry);
 				}
 			}
 		}
-
-		const auto decide_type = [&](bool pc) {
-			if(can_make_art && (!art_req_pc || (art_req_pc && pc))) {
-				if(num_frontline > num_support) {
-					++num_support;
-					return state.military_definitions.artillery;
-				} else {
-					++num_frontline;
-					return can_make_inf ? state.military_definitions.infantry : state.military_definitions.irregular;
-				}
-			} else {
-				return can_make_inf ? state.military_definitions.infantry : state.military_definitions.irregular;
-			}
-		};
 
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			if(p.get_province().get_nation_from_province_control() != n)
 				continue;
 
+			bool overseas = province::is_overseas(state, p.get_province());
 			if(p.get_province().get_is_colonial()) {
 				float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_colony_multiplier;
 				float minimum = state.defines.pop_min_size_for_regiment;
-
 				for(auto pop : p.get_province().get_pop_location()) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
+							auto t = decide_type(pop.get_pop(), overseas);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
 							auto num_to_make = amount - ((regs.end() - regs.begin()) + (building.end() - building.begin()));
 							while(num_to_make > 0) {
-								auto t = decide_type(pop.get_pop().get_is_primary_or_accepted_culture());
 								assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 								auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
 								c.set_type(t);
+								update_frontline_counters(state, t, num_frontline, num_support);
 								--num_to_make;
 							}
 						}
@@ -5091,20 +5166,19 @@ void update_land_constructions(sys::state& state) {
 			} else if(!p.get_province().get_is_owner_core()) {
 				float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_noncore_multiplier;
 				float minimum = state.defines.pop_min_size_for_regiment;
-
-				dcon::pop_id non_preferred;
 				for(auto pop : p.get_province().get_pop_location()) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
+							auto t = decide_type(pop.get_pop(), overseas);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
 							auto num_to_make = amount - ((regs.end() - regs.begin()) + (building.end() - building.begin()));
 							while(num_to_make > 0) {
-								auto t = decide_type(pop.get_pop().get_is_primary_or_accepted_culture());
 								assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 								auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
 								c.set_type(t);
+								update_frontline_counters(state, t, num_frontline, num_support);
 								--num_to_make;
 							}
 						}
@@ -5113,20 +5187,19 @@ void update_land_constructions(sys::state& state) {
 			} else {
 				float divisor = state.defines.pop_size_per_regiment;
 				float minimum = state.defines.pop_min_size_for_regiment;
-
-				dcon::pop_id non_preferred;
 				for(auto pop : p.get_province().get_pop_location()) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
+							auto t = decide_type(pop.get_pop(), overseas);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
 							auto num_to_make = amount - ((regs.end() - regs.begin()) + (building.end() - building.begin()));
 							while(num_to_make > 0) {
-								auto t = decide_type(pop.get_pop().get_is_primary_or_accepted_culture());
 								assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 								auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
 								c.set_type(t);
+								update_frontline_counters(state, t, num_frontline, num_support);
 								--num_to_make;
 							}
 						}
@@ -5156,7 +5229,8 @@ void new_units_and_merging(sys::state& state) {
 					// existing multi-unit formation
 					ar.set_ai_activity(uint8_t(army_activity::on_guard));
 				} else {
-					bool is_art = state.military_definitions.artillery == (*regs.begin()).get_regiment().get_type();
+					auto art_type = state.military_definitions.unit_base_definitions[(*regs.begin()).get_regiment().get_type()].type;
+					bool is_art = art_type == military::unit_type::support || art_type == military::unit_type::special;
 					dcon::province_id target_location;
 					float nearest_distance = 1.0f;
 
@@ -5217,7 +5291,8 @@ void new_units_and_merging(sys::state& state) {
 					// empty army -- cleanup will get it
 					continue;
 				}
-				bool is_art = state.military_definitions.artillery == (*regs.begin()).get_regiment().get_type();
+				auto art_type = state.military_definitions.unit_base_definitions[(*regs.begin()).get_regiment().get_type()].type;
+				bool is_art = art_type == military::unit_type::support || art_type == military::unit_type::special;
 				for(auto o : location.get_army_location()) {
 					if(o.get_army().get_ai_activity() == uint8_t(army_activity::on_guard)
 						&& o.get_army().get_controller_from_army_control() == controller) {
