@@ -664,7 +664,7 @@ public:
 class tr_controller_flag : public flag_button2 {
 public:
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-		if(visible && type == mouse_probe_type::tooltip)
+		if(type == mouse_probe_type::tooltip)
 			return flag_button2::impl_probe_mouse(state, x, y, type);
 		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
@@ -941,7 +941,7 @@ public:
 class tl_sm_controller_flag : public flag_button {
 public:
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-		if(visible && type == mouse_probe_type::tooltip)
+		if(type == mouse_probe_type::tooltip)
 			return flag_button::impl_probe_mouse(state, x, y, type);
 		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
