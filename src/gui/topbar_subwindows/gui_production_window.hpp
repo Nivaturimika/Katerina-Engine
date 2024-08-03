@@ -907,6 +907,14 @@ public:
 		return tooltip_behavior::tooltip;
 	}
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto v = retrieve<economy::new_factory>(state, parent);
+		auto sid = retrieve<dcon::state_instance_id>(state, parent);
+		for(auto c : state.world.state_instance_get_state_building_construction(sid)) {
+			if(c.get_type() == v.type && c.get_nation() == state.local_player_nation && c.get_is_pop_project()) {
+				text::add_line(state, contents, "warn_pop_project_cancel");
+				break;
+			}
+		}
 		text::add_line(state, contents, "cancel_fac_construction");
 	}
 };

@@ -65,12 +65,10 @@ std::vector<uint32_t> migration_map_from(sys::state& state) {
 				greatest_pos = std::max(nation_pos[i], greatest_pos);
 			}
 			for(uint32_t i = 0; i < sz; ++i) {
-				if(nation_neg[i] < 0.0f) {
+				if(nation_neg[i] != 0.0f)
 					nation_neg[i] = nation_neg[i] / least_neg;
-				}
-				if(nation_pos[i] > 0.0f) {
+				if(nation_pos[i] != 0.0f)
 					nation_pos[i] = nation_pos[i] / greatest_pos;
-				}
 			}
 		}
 		for(auto p : state.world.in_province) {
@@ -80,12 +78,12 @@ std::vector<uint32_t> migration_map_from(sys::state& state) {
 				if(uint32_t(owner.id.index()) < nation_pos.size()
 				&& uint32_t(owner.id.index()) < nation_neg.size()) {
 					uint32_t in_color = ogl::color_gradient(nation_pos[owner.id.index()],
-						sys::pack_color(15, 64, 15),
-						sys::pack_color(255, 15, 15)
+						sys::pack_color(15, 255, 15),
+						sys::pack_color(15, 64, 15)
 					);
 					uint32_t em_color = ogl::color_gradient(nation_neg[owner.id.index()],
-						sys::pack_color(64, 15, 15),
-						sys::pack_color(255, 15, 15)
+						sys::pack_color(255, 15, 15),
+						sys::pack_color(64, 15, 15)
 					);
 					if(nation_pos[owner.id.index()] != 0.f) { //has im
 						prov_color[i] = in_color;
@@ -95,6 +93,7 @@ std::vector<uint32_t> migration_map_from(sys::state& state) {
 							prov_color[i + texture_size] = in_color;
 						}
 					} else if(nation_neg[owner.id.index()] != 0.f) { //only em -- else has no em or im
+						prov_color[i] = em_color;
 						prov_color[i + texture_size] = em_color;
 					}
 				}
