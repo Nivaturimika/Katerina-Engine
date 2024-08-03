@@ -71,7 +71,7 @@ std::vector<uint32_t> migration_map_from(sys::state& state) {
 		}
 		for(auto p : state.world.in_province) {
 			auto owner = p.get_nation_from_province_ownership();
-			if(owner && uint32_t(owner.id.index()) < nation_totals.size()) {
+			if(owner && uint32_t(owner.id.index()) < nation_totals.size() && nation_totals[owner.id.index()] != 0.f) {
 				uint32_t color = ogl::color_gradient(nation_totals[owner.id.index()],
 					sys::pack_color(46, 247, 15),	// to green
 					sys::pack_color(247, 15, 15)	// from red

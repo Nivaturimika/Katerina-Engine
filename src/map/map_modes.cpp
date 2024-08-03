@@ -227,14 +227,13 @@ std::vector<uint32_t> factory_map_from(sys::state& state) {
 			max_total = 1;
 	});
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
-		int32_t total = 0;
 		auto sdef = state.world.state_instance_get_definition(sid);
-
+		int32_t total = economy::state_factory_count(state, sid, state.world.state_instance_get_nation_from_state_ownership(sid));
 		for(const auto abm : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if((sel_nation && abm.get_province().get_province_ownership().get_nation() != sel_nation)
-				|| !(abm.get_province().get_nation_from_province_ownership()))
+				|| !(abm.get_province().get_nation_from_province_ownership())
+				|| total == 0)
 				continue;
-			total = economy::state_factory_count(state, sid, abm.get_province().get_nation_from_province_ownership());
 			float value = float(total) / float(max_total);
 			uint32_t color = ogl::color_gradient(value,
 				sys::pack_color(46, 247, 15), // green
