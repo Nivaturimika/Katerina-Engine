@@ -38,8 +38,9 @@ void notify_user_of_fatal_opengl_error(std::string message) {
 
 GLint compile_shader(std::string_view source, GLenum type) {
 	GLuint return_value = glCreateShader(type);
-	if(return_value == 0) {
+	if(!return_value) {
 		notify_user_of_fatal_opengl_error("shader creation failed");
+		return 0;
 	}
 
 	std::string s_source(source);
@@ -65,6 +66,9 @@ GLint compile_shader(std::string_view source, GLenum type) {
 		GLsizei written = 0;
 		glGetShaderInfoLog(return_value, log_length, &written, log.get());
 		notify_user_of_fatal_opengl_error(std::string("Shader failed to compile:\n") + log.get());
+		//dispose of resource
+		glDeleteShader(result);
+		return 0;
 	}
 	return return_value;
 }
@@ -75,17 +79,31 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		notify_user_of_fatal_opengl_error("program creation failed");
 	}
 
-	auto v_shader = compile_shader(vertex_shader, GL_VERTEX_SHADER);
-	auto f_shader = compile_shader(fragment_shader, GL_FRAGMENT_SHADER);
+	GLint result = 0;
+	GLint lib_v_shader = 0;
+	GLint lib_f_shader = 0;
+	GLint v_shader = 0;
+	GLint f_shader = 0;
 
-	auto lib_f_shader = compile_shader(
+
+	v_shader = compile_shader(vertex_shader, GL_VERTEX_SHADER);
+	if(!v_shader)
+		goto error_exit;
+
+	f_shader = compile_shader(fragment_shader, GL_FRAGMENT_SHADER);
+	if(!f_shader)
+		goto error_exit;
+	
+	lib_f_shader = compile_shader(
 		"uniform float gamma;\n"
 		"vec4 gamma_correct(vec4 colour) {\n"
 		"\treturn vec4(pow(colour.rgb, vec3(1.f / gamma)), colour.a);\n"
 		"}\n"
 		"\n", GL_FRAGMENT_SHADER);
+	if(!lib_f_shader)
+		goto error_exit;
 
-	GLint lib_v_shader = 0;
+	lib_v_shader = 0;
 	if(flags == 0) {
 		// Globe coords
 		lib_v_shader = compile_shader(
@@ -132,14 +150,15 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 			"\treturn perspective_coords(vec2(world_pos.x, world_pos.z));\n"
 			"}\n", GL_VERTEX_SHADER);
 	}
+	if(!lib_v_shader) {
+		goto error_exit;
+	}
 
 	glAttachShader(return_value, v_shader);
 	glAttachShader(return_value, f_shader);
 	glAttachShader(return_value, lib_v_shader);
 	glAttachShader(return_value, lib_f_shader);
 	glLinkProgram(return_value);
-
-	GLint result;
 	glGetProgramiv(return_value, GL_LINK_STATUS, &result);
 	if(result == GL_FALSE) {
 		GLint logLen;
@@ -149,12 +168,26 @@ GLuint create_program(std::string_view vertex_shader, std::string_view fragment_
 		GLsizei written;
 		glGetProgramInfoLog(return_value, logLen, &written, log);
 		notify_user_of_fatal_opengl_error(std::string("Program failed to link:\n") + log);
+		goto error_exit;
 	}
 
 	glDeleteShader(v_shader);
 	glDeleteShader(f_shader);
-
+	glDeleteShader(lib_v_shader);
+	glDeleteShader(lib_f_shader);
 	return return_value;
+error_exit:
+	if(v_shader)
+		glDeleteShader(v_shader);
+	if(f_shader)
+		glDeleteShader(f_shader);
+	if(lib_v_shader)
+		glDeleteShader(lib_v_shader);
+	if(lib_f_shader)
+		glDeleteShader(lib_f_shader);
+	if(return_value)
+		glDeleteProgram(return_value);
+	return 0;
 }
 
 void load_special_icons(sys::state& state) {
