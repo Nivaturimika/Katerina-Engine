@@ -269,10 +269,8 @@ public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "band_reorg_regiment") {
 			return make_element_by_type<reorg_unit_transfer_button<T>>(state, id);
-
 		} else if(name == "band_reorg_naval") {
 			return make_element_by_type<reorg_unit_transfer_button<T>>(state, id);
-
 		} else if(name == "unit_icon") {
 			return make_element_by_type<subunit_details_type_icon<T>>(state, id);
 		} else if(name == "subunit_name") {

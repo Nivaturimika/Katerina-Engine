@@ -614,8 +614,9 @@ class attacker_combat_modifiers : public overlapping_listbox_element_base<lc_mod
 		auto attacker_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_attacking_general(b));
 		auto attacker_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_attacking_general(b));
 
-		auto attack_bonus =
-			int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
+		auto attack_bonus = attacker_per
+			? int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg))
+			: int32_t(state.defines.ke_no_leader_attack_modifier);
 
 		row_contents.push_back(lc_modifier_data{lc_mod_type::dice, attacker_dice });
 		if(crossing_adjustment != 0)
