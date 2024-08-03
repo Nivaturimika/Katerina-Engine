@@ -663,8 +663,10 @@ public:
 
 class tr_controller_flag : public flag_button2 {
 public:
-	void button_action(sys::state& state) noexcept override {
-		//nothing
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(visible && type == mouse_probe_type::tooltip)
+			return flag_button2::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<dcon::nation_id>()) {
@@ -899,9 +901,6 @@ public:
 class tl_controller_flag : public flag_button2 {
 public:
 	bool visible = true;
-	void button_action(sys::state& state) noexcept override {
-		//nothing
-	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<dcon::nation_id>()) {
 			top_display_parameters* params = retrieve<top_display_parameters*>(state, parent);
@@ -933,17 +932,18 @@ public:
 			flag_button2::render(state, x, y);
 	}
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-		if(visible)
+		if(visible && type == mouse_probe_type::tooltip)
 			return flag_button2::impl_probe_mouse(state, x, y, type);
-		else
-			return mouse_probe{ nullptr, ui::xy_pair{} };
+		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
 };
 
 class tl_sm_controller_flag : public flag_button {
 public:
-	void button_action(sys::state& state) noexcept override {
-		//nothing
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(visible && type == mouse_probe_type::tooltip)
+			return flag_button::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
 	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 		top_display_parameters* params = retrieve<top_display_parameters*>(state, parent);
