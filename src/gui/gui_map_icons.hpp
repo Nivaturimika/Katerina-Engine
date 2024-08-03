@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include "dcon_generated.hpp"
 #include "gui_element_types.hpp"
@@ -663,6 +663,9 @@ public:
 
 class tr_controller_flag : public flag_button2 {
 public:
+	void button_action(sys::state& state) noexcept override {
+		//nothing
+	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<dcon::nation_id>()) {
 			top_display_parameters* params = retrieve<top_display_parameters*>(state, parent);
@@ -896,7 +899,9 @@ public:
 class tl_controller_flag : public flag_button2 {
 public:
 	bool visible = true;
-
+	void button_action(sys::state& state) noexcept override {
+		//nothing
+	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<dcon::nation_id>()) {
 			top_display_parameters* params = retrieve<top_display_parameters*>(state, parent);
@@ -937,7 +942,9 @@ public:
 
 class tl_sm_controller_flag : public flag_button {
 public:
-
+	void button_action(sys::state& state) noexcept override {
+		//nothing
+	}
 	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 		top_display_parameters* params = retrieve<top_display_parameters*>(state, parent);
 		if(params)
