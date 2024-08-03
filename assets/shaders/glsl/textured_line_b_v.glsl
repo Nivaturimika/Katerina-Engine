@@ -17,9 +17,14 @@ vec4 calc_gl_position(in vec3 v);
 
 void main() {
 	vec4 central_pos = calc_gl_position(vec3(vertex_position.x, 0.f, vertex_position.y));
+	central_pos /= central_pos.w;
+
+	vec4 apt4 = calc_gl_position(vec3(prev_point.x, 0.f, prev_point.y));
+	vec4 cpt4 = calc_gl_position(vec3(next_point.x, 0.f, next_point.y));
+
 	vec2 bpt = central_pos.xy;
-	vec2 apt = calc_gl_position(vec3(prev_point.x, 0.f, prev_point.y)).xy;
-	vec2 cpt = calc_gl_position(vec3(next_point.x, 0.f, next_point.y)).xy;
+	vec2 apt = apt4.xy / apt4.w;
+	vec2 cpt = cpt4.xy / cpt4.w;
 
 	// we want to thicken the line in "perceived" coordinates, so
 	// transform to perceived coordinates + depth

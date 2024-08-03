@@ -2,8 +2,8 @@
 layout (location = 0) in vec3 vertex_position;
 layout (location = 1) in vec2 normal_direction;
 layout (location = 2) in vec2 texture_coord;
-layout (location = 3) in int bone_ids[4];
-layout (location = 4) in float bone_weights[4];
+layout (location = 3) in ivec4 bone_ids;
+layout (location = 4) in vec4 bone_weights;
 
 out vec2 tex_coord;
 

@@ -71,10 +71,6 @@
 #include "glew.h"
 #include "wglew.h"
 #include <cassert>
-#include "resource.h"
-#pragma comment(lib, "Ole32.lib")
-#pragma comment(lib, "Shell32.lib")
-#pragma comment(lib, "icu.lib")
 #include "fonts.hpp"
 #include "texture.hpp"
 #include "text.hpp"
@@ -83,6 +79,14 @@
 #include "serialization.hpp"
 #include "network.hpp"
 #include "simple_fs.hpp"
+
+#include "resource.h"
+#pragma comment(lib, "Ole32.lib")
+#pragma comment(lib, "Shell32.lib")
+
+#pragma comment(lib, "icudt.lib")
+#pragma comment(lib, "icuin.lib")
+#pragma comment(lib, "icuuc.lib")
 
 namespace launcher {
 

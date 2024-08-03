@@ -8,13 +8,9 @@
 #include "parsers.hpp"
 #include "simple_fs.hpp"
 #include "system_state.hpp"
-#ifdef _WIN32
-#include <icu.h>
-#else
-#include <unicode/ubrk.h>
-#include <unicode/utypes.h>
-#include <unicode/ubidi.h>
-#endif
+#include "unicode/ubrk.h"
+#include "unicode/utypes.h"
+#include "unicode/ubidi.h"
 
 namespace text {
 
