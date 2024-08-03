@@ -28,8 +28,22 @@ class leader_portrait : public image_element_base {
 					base_data.data.image.gfx_object = grange[in_range];
 				}
 			}
+		}	
+	}
+
+	void button_action(sys::state& state) noexcept override {
+		auto location = get_absolute_non_mirror_location(state, *this);
+		auto lid = retrieve<dcon::leader_id>(state, parent);
+		auto admiral = state.world.leader_get_is_admiral(lid);
+		if(admiral) {
+			auto a = state.world.leader_get_navy_from_navy_leadership(lid);
+			if(command::can_change_admiral(state, state.local_player_nation, a, dcon::leader_id{}))
+				open_leader_selection(state, dcon::army_id{}, a, location.x, location.y);
+		} else {
+			auto a = state.world.leader_get_army_from_army_leadership(lid);
+			if(command::can_change_general(state, state.local_player_nation, a, dcon::leader_id{}))
+				open_leader_selection(state, a, dcon::navy_id{}, location.x, location.y);
 		}
-		
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -65,25 +79,20 @@ public:
 			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
 			background = ptr.get();
 			return ptr;
-
 		} else if(name == "personality") {
 			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
 			personality = ptr.get();
 			return ptr;
-
 		} else if(name == "use_leader") {
 			return make_element_by_type<invisible_element>(state, id);
-
 		} else if(name == "army") {
 			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
 			army = ptr.get();
 			return ptr;
-
 		} else if(name == "location") {
 			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
 			location = ptr.get();
 			return ptr;
-
 		} else {
 			return nullptr;
 		}
