@@ -210,33 +210,43 @@ std::vector<uint32_t> factory_map_from(sys::state& state) {
 
 	auto sel_nation = state.world.province_get_nation_from_province_ownership(state.map_state.get_selected_province());
 	// get state with most factories
+	int32_t max_built_total = 1;
 	int32_t max_total = 1;
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
 		auto sdef = state.world.state_instance_get_definition(sid);
 		if(!sel_nation || sel_nation == state.world.state_instance_get_nation_from_state_ownership(sid)) {
-			int32_t total = economy::state_built_factory_count(state, sid);
+			int32_t built = economy::state_built_factory_count(state, sid);
+			if(built > max_built_total)
+				max_built_total = built;
+			int32_t total = economy::state_factory_count(state, sid);
 			if(total > max_total)
 				max_total = total;
 		}
 	});
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
-		int32_t total = economy::state_built_factory_count(state, sid);
+		int32_t total = economy::state_factory_count(state, sid);
 		if(total == 0)
 			return;
+		int32_t built = economy::state_built_factory_count(state, sid);
 		auto sdef = state.world.state_instance_get_definition(sid);
 		for(const auto abm : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if((sel_nation && abm.get_province().get_province_ownership().get_nation() != sel_nation)
 				|| !(abm.get_province().get_nation_from_province_ownership())
 				|| abm.get_province().get_nation_from_province_ownership() != state.world.state_instance_get_nation_from_state_ownership(sid))
 				continue;
-			float value = float(total) / float(max_total);
-			uint32_t color = ogl::color_gradient(value,
-				sys::pack_color(46, 247, 15), // green
-				sys::pack_color(247, 15, 15) // red
-			);
 			auto i = province::to_map_id(abm.get_province());
-			prov_color[i] = color;
-			prov_color[i + texture_size] = color;
+			if(total > 0) {
+				prov_color[i + texture_size] = ogl::color_gradient(float(total) / float(max_total),
+					sys::pack_color(46, 247, 15), // green
+					sys::pack_color(247, 15, 15) // red
+				);
+				if(built > 0) {
+					prov_color[i] = ogl::color_gradient(float(built) / float(max_built_total),
+						sys::pack_color(46, 247, 15), // green
+						sys::pack_color(247, 15, 15) // red
+					);
+				}
+			}
 		}
 	});
 	return prov_color;
