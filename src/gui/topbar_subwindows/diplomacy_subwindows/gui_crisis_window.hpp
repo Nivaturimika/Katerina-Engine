@@ -156,8 +156,9 @@ class propose_attacker_solution_button : public button_element_base {
 	bool show = true;
 
 	void on_update(sys::state& state) noexcept override {
-		show = command::can_start_crisis_peace_offer(state, state.local_player_nation, true)
-			|| command::can_start_crisis_peace_offer(state, state.local_player_nation, false);
+		show = state.local_player_nation == state.primary_crisis_attacker
+			&& (command::can_start_crisis_peace_offer(state, state.local_player_nation, true)
+			|| command::can_start_crisis_peace_offer(state, state.local_player_nation, false));
 	}
 	void button_action(sys::state& state) noexcept override {
 		if(show)
@@ -180,8 +181,9 @@ class propose_defender_solution_button : public button_element_base {
 	bool show = true;
 
 	void on_update(sys::state& state) noexcept override {
-		show = command::can_start_crisis_peace_offer(state, state.local_player_nation, true)
-			|| command::can_start_crisis_peace_offer(state, state.local_player_nation, false);
+		show = state.local_player_nation == state.primary_crisis_defender
+			&& (command::can_start_crisis_peace_offer(state, state.local_player_nation, true)
+			|| command::can_start_crisis_peace_offer(state, state.local_player_nation, false));
 	}
 	void button_action(sys::state& state) noexcept override {
 		if(show)
