@@ -5057,7 +5057,7 @@ void update_land_constructions(sys::state& state) {
 
 		for(auto item : hopeless_construction) {
 			state.world.delete_province_land_construction(item);
-		}			
+		}
 
 		auto constructions = state.world.nation_get_province_land_construction(n);
 		if(constructions.begin() != constructions.end())

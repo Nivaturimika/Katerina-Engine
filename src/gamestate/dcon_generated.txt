@@ -4133,7 +4133,7 @@ relationship{
 
 relationship{
 	name{ province_land_construction }
-	storage_type{ compactable }
+	storage_type{ erasable }
 	size{ 16000 }
 	tag{ save }
 
@@ -4169,7 +4169,7 @@ relationship{
 
 relationship{
 	name{ province_naval_construction }
-	storage_type{ compactable }
+	storage_type{ erasable }
 	size{ 16000 }
 	tag{ save }
 
