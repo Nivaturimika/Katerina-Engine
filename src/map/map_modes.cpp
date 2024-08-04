@@ -382,22 +382,34 @@ std::vector<uint32_t> employment_map_from(sys::state& state) {
 	state.world.for_each_province([&](dcon::province_id prov_id) {
 		auto nation = state.world.province_get_nation_from_province_ownership(prov_id);
 		if((sel_nation && nation == sel_nation) || !sel_nation) {
-			float total = 0.f;
-			float employed = 0.f;
+			float pw_total = 0.f;
+			float pw_employed = 0.f;
+			float sw_total = 0.f;
+			float sw_employed = 0.f;
 			for(const auto pl : state.world.province_get_pop_location(prov_id)) {
-				if(pl.get_pop().get_poptype() == state.culture_definitions.primary_factory_worker
-				|| pl.get_pop().get_poptype() == state.culture_definitions.secondary_factory_worker) {
-					total += pl.get_pop().get_size();
-					employed += pl.get_pop().get_employment();
+				if(pl.get_pop().get_poptype() == state.culture_definitions.primary_factory_worker) {
+					pw_total += pl.get_pop().get_size();
+					pw_employed += pl.get_pop().get_employment();
+				} else if(pl.get_pop().get_poptype() == state.culture_definitions.secondary_factory_worker) {
+					sw_total += pl.get_pop().get_size();
+					sw_employed += pl.get_pop().get_employment();
 				}
 			}
-			uint32_t color = ogl::color_gradient(employed / total,
-				sys::pack_color(46, 247, 15), // green
-				sys::pack_color(247, 15, 15) // red
-			);
 			auto i = province::to_map_id(prov_id);
-			prov_color[i] = color;
-			prov_color[i + texture_size] = color;
+			if(pw_total > 0.f && pw_employed > 0.f) {
+				uint32_t color = ogl::color_gradient(pw_employed / pw_total,
+					sys::pack_color(46, 247, 15), // green
+					sys::pack_color(247, 15, 15) // red
+				);
+				prov_color[i] = color;
+			}
+			if(sw_total > 0.f && sw_employed > 0.f) {
+				uint32_t color = ogl::color_gradient(sw_employed / sw_total,
+					sys::pack_color(46, 247, 15), // green
+					sys::pack_color(247, 15, 15) // red
+				);
+				prov_color[i + texture_size] = color;
+			}
 		}
 	});
 	return prov_color;

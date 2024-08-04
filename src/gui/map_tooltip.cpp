@@ -948,17 +948,18 @@ void employment_map_tt_box(sys::state& state, text::columnar_layout& contents, d
 		auto box = text::open_layout_box(contents);
 		float total = 0.f;
 		float employed = 0.f;
-		for(const auto pl : state.world.province_get_pop_location(prov_id)) {
+		for(const auto pl : state.world.province_get_pop_location(prov)) {
 			if(pl.get_pop().get_poptype() == state.culture_definitions.primary_factory_worker
 			|| pl.get_pop().get_poptype() == state.culture_definitions.secondary_factory_worker) {
 				total += pl.get_pop().get_size();
 				employed += pl.get_pop().get_employment();
 			}
 		}
+		float ratio = total == 0.f ? 0.f : total / employed;
 		text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_total_employment"));
-		text::add_to_layout_box(state, contents, box, text::fp_percentage_one_place{ employed / total },
-			(employed / total >= 0.75f ? text::text_color::green
-			: (employed / total >= 0.25 ? text::text_color::orange
+		text::add_to_layout_box(state, contents, box, text::fp_percentage_one_place{ ratio },
+			(ratio >= 0.75f ? text::text_color::green
+			: (ratio >= 0.25 ? text::text_color::orange
 			: text::text_color::red)));
 		text::close_layout_box(contents, box);
 	}
