@@ -44,6 +44,12 @@ void make_trait(std::string_view name, token_generator& gen, error_handler& err,
 	dcon::leader_trait_id new_id = context.state.world.create_leader_trait();
 	auto name_id = text::find_or_add_key(context.state, name, false);
 
+	if(name == "no_background") {
+		context.state.military_definitions.no_background = new_id;
+	} else if(name == "no_personality") {
+		context.state.military_definitions.no_personality = new_id;
+	}
+
 	context.state.world.leader_trait_set_name(new_id, name_id);
 	context.map_of_leader_traits.insert_or_assign(std::string(name), new_id);
 

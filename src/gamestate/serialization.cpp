@@ -194,6 +194,8 @@ uint8_t const* read_scenario_section(uint8_t const* ptr_in, uint8_t const* secti
 	}
 	{ // military definitions
 		ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.first_background_trait);
+		ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.no_background);
+		ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.no_personality);
 		ptr_in = deserialize(ptr_in, state.military_definitions.unit_base_definitions);
 		ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.base_army_unit);
 		ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.base_naval_unit);
@@ -379,6 +381,8 @@ uint8_t* write_scenario_section(uint8_t* ptr_in, sys::state& state) {
 	}
 	{ // military definitions
 		ptr_in = memcpy_serialize(ptr_in, state.military_definitions.first_background_trait);
+		ptr_in = memcpy_serialize(ptr_in, state.military_definitions.no_background);
+		ptr_in = memcpy_serialize(ptr_in, state.military_definitions.no_personality);
 		ptr_in = serialize(ptr_in, state.military_definitions.unit_base_definitions);
 		ptr_in = memcpy_serialize(ptr_in, state.military_definitions.base_army_unit);
 		ptr_in = memcpy_serialize(ptr_in, state.military_definitions.base_naval_unit);
@@ -558,6 +562,8 @@ scenario_size sizeof_scenario_section(sys::state& state) {
 	}
 	{ // military definitions
 		sz += sizeof(state.military_definitions.first_background_trait);
+		sz += sizeof(state.military_definitions.no_background);
+		sz += sizeof(state.military_definitions.no_personality);
 		sz += serialize_size(state.military_definitions.unit_base_definitions);
 		sz += sizeof(state.military_definitions.base_army_unit);
 		sz += sizeof(state.military_definitions.base_naval_unit);

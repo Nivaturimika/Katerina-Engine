@@ -566,6 +566,8 @@ class defender_combat_modifiers : public overlapping_listbox_element_base<lc_mod
 
 		auto defender_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_defending_general(b));
 		auto defender_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_defending_general(b));
+		defender_per = bool(defender_per) ? defender_per : state.military_definitions.no_personality;
+		defender_bg = bool(defender_bg) ? defender_bg : state.military_definitions.no_background;
 
 		auto defence_bonus =
 			int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
@@ -613,10 +615,10 @@ class attacker_combat_modifiers : public overlapping_listbox_element_base<lc_mod
 
 		auto attacker_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_attacking_general(b));
 		auto attacker_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_attacking_general(b));
+		attacker_per = bool(attacker_per) ? attacker_per : state.military_definitions.no_personality;
+		attacker_bg = bool(attacker_bg) ? attacker_bg : state.military_definitions.no_background;
 
-		auto attack_bonus = attacker_per
-			? int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg))
-			: int32_t(state.defines.ke_no_leader_attack_modifier);
+		auto attack_bonus = int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
 
 		row_contents.push_back(lc_modifier_data{lc_mod_type::dice, attacker_dice });
 		if(crossing_adjustment != 0)
