@@ -271,6 +271,10 @@ public:
 			return make_element_by_type<tinted_image_element_base>(state, id, sys::pack_color(212, 214, 62));
 		} else if(name == "s3_ico") {
 			return make_element_by_type<tinted_image_element_base>(state, id, sys::pack_color(155, 156, 149));
+		} else if(name == "s4_ico") {
+			return make_element_by_type<tinted_image_element_base>(state, id, sys::pack_color(0, 0, 0));
+		} else if(name == "s4_ico_b") {
+			return make_element_by_type<tinted_image_element_base>(state, id, sys::pack_color(128, 128, 255));
 		} else {
 			return nullptr;
 		}

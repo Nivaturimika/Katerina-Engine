@@ -3412,6 +3412,29 @@ guiTypes = {
 			orientation = "UPPER_LEFT"
 			format = left
 		}
+		iconType = {
+			name = "s4_ico"
+			spriteType = "GFX_alice_white_rectangle"
+			position = { 158 28 }
+			Orientation = "UPPER_LEFT"
+		}
+		iconType = {
+			name = "s4_ico_b"
+			spriteType = "GFX_alice_striped_rectangle"
+			position = { 158 28 }
+			scale = 0.5
+			Orientation = "UPPER_LEFT"
+		}
+		instantTextBoxType = {
+			name = "s4_label"
+			text = "aml_rec_s4"
+			position = { 186 29 }
+			font = "Arial16"
+			borderSize = { 0 0 }
+			maxsize = { 120 16 }
+			orientation = "UPPER_LEFT"
+			format = left
+		}
 	}
 	
 	windowType = {
