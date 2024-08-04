@@ -280,15 +280,23 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 	uint32_t end_language = 0;
 	auto locale_name = state.world.locale_get_locale_name(l);
 	std::string_view localename_sv((char const*)locale_name.begin(), locale_name.size());
+
+	std::string localename_str(localename_sv);
+	for(uint32_t i = 0; i < uint32_t(localename_str.size()); i++) {
+		if(localename_str[i] == '_') {
+			localename_str[i] = '-';
+		}
+	}
+
 	while(end_language < locale_name.size()) {
-		if(localename_sv[end_language] == '-')
+		if(localename_str[end_language] == '-')
 			break;
 		++end_language;
 	}
 
-	std::string lang_str{ localename_sv .substr(0, end_language) };
+	std::string lang_str{ localename_str .substr(0, end_language) };
 	
-	state.world.locale_set_resolved_language(l, hb_language_from_string(localename_sv.data(), int(end_language)));
+	state.world.locale_set_resolved_language(l, hb_language_from_string(localename_str.data(), int(end_language)));
 
 	{
 		auto f = state.world.locale_get_body_font(l);
@@ -424,7 +432,6 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 	ubrk_getBinaryRules(lb_it, state.font_collection.compiled_ubrk_rules.data(), rule_size, &errorCode);
 
 	ubrk_close(lb_it);
-
 	state.load_locale_strings(localename_sv);
 }
 

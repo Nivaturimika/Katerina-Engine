@@ -334,8 +334,11 @@ void initialize_msaa(sys::state& state, int32_t size_x, int32_t size_y) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	auto root = get_root(state.common_fs);
-	auto msaa_fshader = open_file(root, NATIVE("assets/shaders/glsl/msaa_f_shader.glsl"));
-	auto msaa_vshader = open_file(root, NATIVE("assets/shaders/glsl/msaa_v_shader.glsl"));
+
+	auto assets_dir = open_directory(root, NATIVE("assets"));
+	auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
+	auto msaa_fshader = open_file(shaders_dir, NATIVE("msaa_f_shader.glsl"));
+	auto msaa_vshader = open_file(shaders_dir, NATIVE("msaa_v_shader.glsl"));
 	if(bool(msaa_fshader) && bool(msaa_vshader)) {
 		auto vertex_content = view_contents(*msaa_vshader);
 		auto fragment_content = view_contents(*msaa_fshader);
@@ -488,8 +491,11 @@ static const GLfloat global_rtl_square_left_flipped_data[] = {
 
 void load_shaders(sys::state& state) {
 	auto root = get_root(state.common_fs);
-	auto ui_fshader = open_file(root, NATIVE("assets/shaders/glsl/ui_f_shader.glsl"));
-	auto ui_vshader = open_file(root, NATIVE("assets/shaders/glsl/ui_v_shader.glsl"));
+
+	auto assets_dir = open_directory(root, NATIVE("assets"));
+	auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
+	auto ui_fshader = open_file(shaders_dir, NATIVE("ui_f_shader.glsl"));
+	auto ui_vshader = open_file(shaders_dir, NATIVE("ui_v_shader.glsl"));
 	if(bool(ui_fshader) && bool(ui_vshader)) {
 		auto vertex_content = view_contents(*ui_vshader);
 		auto fragment_content = view_contents(*ui_fshader);

@@ -371,29 +371,28 @@ GLuint create_program(simple_fs::file& vshader_file, simple_fs::file& fshader_fi
 
 void display_data::load_shaders(simple_fs::directory& root) {
 	// Map shaders
-	auto map_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_v.glsl"));
-	auto map_far_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_far_f.glsl"));
-	auto map_close_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/map_close_f.glsl"));
-	auto screen_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/screen_v.glsl"));
-	auto selection_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/selection_v.glsl"));
-	auto white_color_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/white_color_f.glsl"));
-	auto selection_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/selection_f.glsl"));
+	auto assets_dir = open_directory(root, NATIVE("assets"));
+	auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
+
+	auto map_vshader = try_load_shader(shaders_dir, NATIVE("map_v.glsl"));
+	auto map_far_fshader = try_load_shader(shaders_dir, NATIVE("map_far_f.glsl"));
+	auto map_close_fshader = try_load_shader(shaders_dir, NATIVE("map_close_f.glsl"));
+	auto screen_vshader = try_load_shader(shaders_dir, NATIVE("screen_v.glsl"));
+	auto selection_vshader = try_load_shader(shaders_dir, NATIVE("selection_v.glsl"));
+	auto white_color_fshader = try_load_shader(shaders_dir, NATIVE("white_color_f.glsl"));
+	auto selection_fshader = try_load_shader(shaders_dir, NATIVE("selection_f.glsl"));
 
 	// Line shaders
-	auto line_unit_arrow_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/line_unit_arrow_v.glsl"));
-	auto line_unit_arrow_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/line_unit_arrow_f.glsl"));
-
-	auto text_line_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/text_line_v.glsl"));
-	auto text_line_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/text_line_f.glsl"));
-
-	auto tline_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/textured_line_v.glsl"));
-	auto tline_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/textured_line_f.glsl"));
-
-	auto tlineb_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/textured_line_b_v.glsl"));
-	auto tlineb_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/textured_line_b_f.glsl"));
-
-	auto model3d_vshader = try_load_shader(root, NATIVE("assets/shaders/glsl/model3d_v.glsl"));
-	auto model3d_fshader = try_load_shader(root, NATIVE("assets/shaders/glsl/model3d_f.glsl"));
+	auto line_unit_arrow_vshader = try_load_shader(shaders_dir, NATIVE("line_unit_arrow_v.glsl"));
+	auto line_unit_arrow_fshader = try_load_shader(shaders_dir, NATIVE("line_unit_arrow_f.glsl"));
+	auto text_line_vshader = try_load_shader(shaders_dir, NATIVE("text_line_v.glsl"));
+	auto text_line_fshader = try_load_shader(shaders_dir, NATIVE("text_line_f.glsl"));
+	auto tline_vshader = try_load_shader(shaders_dir, NATIVE("textured_line_v.glsl"));
+	auto tline_fshader = try_load_shader(shaders_dir, NATIVE("textured_line_f.glsl"));
+	auto tlineb_vshader = try_load_shader(shaders_dir, NATIVE("textured_line_b_v.glsl"));
+	auto tlineb_fshader = try_load_shader(shaders_dir, NATIVE("textured_line_b_f.glsl"));
+	auto model3d_vshader = try_load_shader(shaders_dir, NATIVE("model3d_v.glsl"));
+	auto model3d_fshader = try_load_shader(shaders_dir, NATIVE("model3d_f.glsl"));
 
 	for(uint32_t j = 0; j < uint8_t(sys::projection_mode::num_of_modes); j++) {
 		shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j);
@@ -2437,7 +2436,8 @@ void load_static_meshes(sys::state& state) {
 							auto const& mat = context.materials[sub.material_id];
 							auto const& layer = get_diffuse_layer(mat);
 							if(!layer.texture.empty()) {
-								GLuint texid = load_dds_texture(gfx_anims, simple_fs::utf8_to_native(layer.texture + ".dds"), 0);
+								native_string fname = simple_fs::win1250_to_native(layer.texture) + NATIVE(".dds");
+								GLuint texid = load_dds_texture(gfx_anims, fname, 0);
 								if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
 									state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
 								} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {

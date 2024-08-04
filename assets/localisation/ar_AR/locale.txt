@@ -1,12 +1,12 @@
 display_name = "العربية"
 script = Arab
 
-body_font = NotoNaskhArabic-Regular.ttf
+body_font = NotoNaskhArabic_Regular.ttf
 
-header_font = NotoNaskhArabic-Bold.ttf
+header_font = NotoNaskhArabic_Bold.ttf
 header_feature = smcp
 
-map_font = NotoNaskhArabic-Regular.ttf
+map_font = NotoNaskhArabic_Regular.ttf
 map_feature = smcp
 
 fallback = en-US

@@ -1595,8 +1595,8 @@ void state::reset_locale_pool() {
 
 void state::load_locale_strings(std::string_view locale_name) {
 	auto root_dir = get_root(common_fs);
-	auto assets_dir = open_directory(root_dir, NATIVE("assets\\localisation"));
-
+	auto assets_dir = open_directory(root_dir, NATIVE("assets"));
+	auto localisation_dir = open_directory(assets_dir, NATIVE("localisation"));
 	auto load_base_files = [&](int32_t column) {
 		auto text_dir = open_directory(root_dir, NATIVE("localisation"));
 		for(auto& file : list_files(text_dir, NATIVE(".csv"))) {
@@ -1605,7 +1605,7 @@ void state::load_locale_strings(std::string_view locale_name) {
 				text::consume_csv_file(*this, content.data, content.file_size, column, false);
 			}
 		}
-		for(auto& file : list_files(assets_dir, NATIVE(".csv"))) {
+		for(auto& file : list_files(localisation_dir, NATIVE(".csv"))) {
 			if(auto ofile = open_file(file); ofile) {
 				auto content = view_contents(*ofile);
 				text::consume_csv_file(*this, content.data, content.file_size, column, false);
@@ -1641,7 +1641,7 @@ void state::load_locale_strings(std::string_view locale_name) {
 		load_base_files(13);
 	}
 
-	auto locale_dir = open_directory(assets_dir, simple_fs::utf8_to_native(locale_name));
+	auto locale_dir = open_directory(localisation_dir, simple_fs::utf8_to_native(locale_name));
 	for(auto& file : list_files(locale_dir, NATIVE(".csv"))) {
 		if(auto ofile = open_file(file); ofile) {
 			auto content = view_contents(*ofile);
@@ -2035,7 +2035,7 @@ void state::load_user_settings() {
 		for(auto l : world.in_locale) {
 			auto ln = l.get_locale_name();
 			auto ln_sv = std::string_view{ (char const*)ln.begin(), ln.size() };
-			if(ln_sv == "en-US") {
+			if(ln_sv == "en-US" || ln_sv == "en_US") {
 				font_collection.change_locale(*this, l);
 				locale_loaded = true;
 				break;
