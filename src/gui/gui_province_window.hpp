@@ -974,7 +974,7 @@ public:
 	void button_action(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::province_id>(state, parent);
 		if(content) {
-			open_build_foreign_factory(state, state.world.province_get_state_membership(content));
+			open_build_factory(state, state.world.province_get_state_membership(content));
 		}
 	}
 

@@ -55,7 +55,7 @@ enum class country_list_filter : uint8_t {
 bool country_category_filter_check(sys::state& state, country_list_filter filt, dcon::nation_id a, dcon::nation_id b);
 void sort_countries(sys::state& state, std::vector<dcon::nation_id>& list, country_list_sort sort, bool sort_ascend);
 
-void open_build_foreign_factory(sys::state& state, dcon::state_instance_id st);
+void open_build_factory(sys::state& state, dcon::state_instance_id st);
 void open_foreign_investment(sys::state& state, dcon::nation_id n);
 
 std::string get_status_text(sys::state& state, dcon::nation_id nation_id);

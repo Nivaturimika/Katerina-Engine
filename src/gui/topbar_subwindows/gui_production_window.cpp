@@ -119,7 +119,7 @@ void open_foreign_investment(sys::state& state, dcon::nation_id n) {
 	send(state, state.ui_state.production_subwindow, open_investment_nation{n});
 }
 
-void open_build_foreign_factory(sys::state& state, dcon::state_instance_id st) {
+void open_build_factory(sys::state& state, dcon::state_instance_id st) {
 	if(state.ui_state.topbar_subwindow->is_visible()) {
 		state.ui_state.topbar_subwindow->set_visible(state, false);
 	}
@@ -127,10 +127,13 @@ void open_build_foreign_factory(sys::state& state, dcon::state_instance_id st) {
 	state.ui_state.root->move_child_to_front(state.ui_state.production_subwindow);
 	state.ui_state.topbar_subwindow = state.ui_state.production_subwindow;
 
-	send(state, state.ui_state.production_subwindow,
-			open_investment_nation{state.world.state_instance_get_nation_from_state_ownership(st)});
-
-	send(state, state.ui_state.production_subwindow, production_selection_wrapper{st, true, xy_pair{0, 0}});
+	auto owner = state.world.state_instance_get_nation_from_state_ownership(st);
+	if(owner != state.local_player_nation) {
+		send(state, state.ui_state.production_subwindow, open_investment_nation{ owner });
+	} else {
+		send(state, state.ui_state.production_subwindow, production_window_tab::factories);
+	}
+	send(state, state.ui_state.production_subwindow, production_selection_wrapper{ st, true, xy_pair{0, 0} });
 }
 
 } // namespace ui

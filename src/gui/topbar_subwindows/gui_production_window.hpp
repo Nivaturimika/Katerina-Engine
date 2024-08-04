@@ -1247,15 +1247,9 @@ public:
 	}
 
 	void button_action(sys::state& state) noexcept override {
-		if(parent) {
-			const dcon::province_id pid = retrieve<dcon::province_id>(state, parent);
-			const dcon::state_instance_id sid = state.world.province_get_state_membership(pid);
-			state.ui_state.production_subwindow->set_visible(state, true);
-			state.ui_state.root->move_child_to_front(state.ui_state.production_subwindow);
-			state.ui_state.topbar_subwindow = state.ui_state.production_subwindow;
-			send(state, state.ui_state.production_subwindow, production_window_tab::factories);
-			send(state, state.ui_state.production_subwindow, production_selection_wrapper{ sid, true, xy_pair{0, 0} });
-		}
+		auto const pid = retrieve<dcon::province_id>(state, parent);
+		auto const sid = state.world.province_get_state_membership(pid);
+		open_build_factory(state, sid);
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -2126,6 +2120,6 @@ public:
 };
 
 void open_foreign_investment(sys::state& state, dcon::nation_id n);
-void open_build_foreign_factory(sys::state& state, dcon::state_instance_id st);
+void open_build_factory(sys::state& state, dcon::state_instance_id st);
 
 } // namespace ui
