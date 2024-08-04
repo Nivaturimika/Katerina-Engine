@@ -46,11 +46,8 @@ public:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		text::add_line(state, contents, "subsidize_all_tooltip");
 		if(disabled) {
-			text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
 			text::add_line(state, contents, "cant_subsidize_explanation");
-		} else {
-			text::add_line(state, contents, "production_allowed_to_subsidise_tooltip");
-		}
+		
 	}
 };
 
@@ -92,10 +89,7 @@ public:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		text::add_line(state, contents, "unsubsidize_all_tooltip");
 		if(disabled) {
-			text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
 			text::add_line(state, contents, "cant_subsidize_explanation");
-		} else {
-			text::add_line(state, contents, "production_allowed_to_subsidise_tooltip");
 		}
 	}
 };

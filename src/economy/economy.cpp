@@ -1475,13 +1475,7 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 	float max_pure_profit = profit - spendings;
 	state.world.factory_set_unprofitable(f, !(max_pure_profit > 0.0f));
 
-	float effective_production_scale = update_factory_scale(
-		state,
-		fac,
-		max_production_scale,
-		profit,
-		desired_profit
-	);	
+	float effective_production_scale = update_factory_scale(state, fac, max_production_scale, profit, desired_profit);	
 
 	auto& inputs = fac_type.get_inputs();
 	auto& e_inputs = fac_type.get_efficiency_inputs();
@@ -3969,6 +3963,18 @@ float government_consumption(sys::state& state, dcon::nation_id n, dcon::commodi
 
 float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 	auto amount = 0.f;
+	for(const auto po : state.world.nation_get_province_ownership(n)) {
+		for(const auto fl : po.get_province().get_factory_location()) {
+			auto const& inputs = fl.get_factory().get_building_type().get_inputs();
+			for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
+				if(inputs.commodity_type[i]) {
+					amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
+				} else {
+					break;
+				}
+			}
+		}
+	}
 	return amount;
 }
 
@@ -3977,10 +3983,13 @@ float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodi
 	auto kf = state.world.commodity_get_key_factory(c);
 	if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 		state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
-			amount += (state.world.pop_type_get_life_needs(pt, c) + state.world.pop_type_get_everyday_needs(pt, c) + state.world.pop_type_get_luxury_needs(pt, c)) * state.world.nation_get_demographics(n, demographics::to_key(state, pt)) / state.defines.alice_needs_scaling_factor;
+			float needs = state.world.pop_type_get_life_needs(pt, c)
+				+ state.world.pop_type_get_everyday_needs(pt, c)
+				+ state.world.pop_type_get_luxury_needs(pt, c);
+			amount += needs * state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 		});
 	}
-	return amount;
+	return amount / state.defines.alice_needs_scaling_factor;
 }
 
 float nation_total_imports(sys::state& state, dcon::nation_id n) {
