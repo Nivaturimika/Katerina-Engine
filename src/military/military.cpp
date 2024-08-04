@@ -5599,7 +5599,7 @@ void update_naval_battles(sys::state& state) {
 		attacker_per = bool(attacker_per) ? attacker_per : state.military_definitions.no_personality;
 		attacker_bg = bool(attacker_bg) ? attacker_bg : state.military_definitions.no_background;
 
-		auto attack_bonus = state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg);
+		auto attack_bonus = int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
 		auto attacker_org_bonus = 1.0f + state.world.leader_trait_get_organisation(attacker_per) + state.world.leader_trait_get_organisation(attacker_bg);
 
 		auto defender_per = state.world.leader_get_personality(state.world.naval_battle_get_admiral_from_defending_admiral(b));
