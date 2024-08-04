@@ -1271,9 +1271,7 @@ public:
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
 		std::array<dcon::pop_type_id, 4> factory_workers{
 			state.culture_definitions.primary_factory_worker,
-			state.culture_definitions.secondary_factory_worker,
-			state.culture_definitions.farmers,
-			state.culture_definitions.laborers
+			state.culture_definitions.secondary_factory_worker
 		};
 		struct unemployed_data {
 			float amount = 0.f;
@@ -1307,12 +1305,13 @@ public:
 					return a.sid.index() < b.sid.index();
 				return a.pt.index() < b.pt.index();
 			});
+			std::reverse(data.begin(), data.end());
 			for(uint32_t i = 0; i < uint32_t(data.size()) && i < 10; i++) {
 				text::substitution_map sub;
 				text::add_to_substitution_map(sub, text::variable_type::num, int64_t(data[i].amount));
 				text::add_to_substitution_map(sub, text::variable_type::type, state.world.pop_type_get_name(data[i].pt));
 				text::add_to_substitution_map(sub, text::variable_type::state, data[i].sid);
-				text::add_to_substitution_map(sub, text::variable_type::perc, text::fp_two_places{ data[i].ratio });
+				text::add_to_substitution_map(sub, text::variable_type::perc, text::fp_percentage_one_place{ data[i].ratio });
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "topbar_unemployed_pop", sub);
 				text::close_layout_box(contents, box);
