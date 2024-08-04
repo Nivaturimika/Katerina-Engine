@@ -949,6 +949,9 @@ void update_unit_selection_ui(sys::state& state) {
 		state.ui_state.multi_unit_selection_window->set_visible(state, false);
 		state.ui_state.army_status_window->set_visible(state, false);
 		state.ui_state.navy_status_window->set_visible(state, false);
+		//?
+		state.ui_state.army_reorg_window->set_visible(state, false);
+		state.ui_state.navy_reorg_window->set_visible(state, false);
 	}
 }
 
