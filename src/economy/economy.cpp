@@ -2046,7 +2046,7 @@ float full_pop_spending_cost(sys::state& state, dcon::nation_id n) {
 	assert(p_level >= 0.f);
 	auto const unemp_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::unemployment_benefit);
 	assert(unemp_level >= 0.f);
-	auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) * float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f / 100.0f;
+	auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f;
 	float total = di_spending *
 		(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists))
 		* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists)
@@ -2763,7 +2763,7 @@ profit_distribution distribute_factory_profit(sys::state const & state, dcon::st
 }
 
 void daily_update(sys::state& state, bool initiate_buildings) {
-	state.defines.alice_needs_scaling_factor = 20000.f;
+	state.defines.alice_needs_scaling_factor = 500000.f;
 
 	/* initialization parallel block */
 	concurrency::parallel_for(0, 10, [&](int32_t index) {
@@ -4159,18 +4159,13 @@ float estimate_diplomatic_balance(sys::state& state, dcon::nation_id n) {
 }
 
 float estimate_domestic_investment(sys::state& state, dcon::nation_id n) {
-	auto adj_pop_of_type_capis = (state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists))) / state.defines.alice_needs_scaling_factor;
-	auto adj_pop_of_type_arist = (state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))) / state.defines.alice_needs_scaling_factor;
-	float arist_costs =
-		state.world.nation_get_life_needs_costs(n, state.culture_definitions.aristocrat)
-		+ state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.aristocrat)
-		+ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.aristocrat);
-	float capis_costs =
-		state.world.nation_get_life_needs_costs(n, state.culture_definitions.capitalists)
-		+ state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.capitalists)
-		+ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists);
-	return (adj_pop_of_type_capis * capis_costs + adj_pop_of_type_arist * arist_costs)
-		/ (0.25f / state.defines.alice_needs_scaling_factor);
+	auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f;
+	return di_spending *
+		(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists))
+		* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists)
+		+ state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))
+		* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.aristocrat))
+		* (0.25f / state.defines.alice_needs_scaling_factor);
 }
 
 float estimate_land_spending(sys::state& state, dcon::nation_id n) {
