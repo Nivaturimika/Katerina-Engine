@@ -706,14 +706,53 @@ void interface_volume::on_value_change(sys::state& state, int32_t v) noexcept {
 void master_volume::on_update(sys::state& state) noexcept {
 	update_raw_value(state, int32_t(state.user_settings.master_volume * 128.0f));
 }
+tooltip_behavior master_volume::has_tooltip(sys::state& state) noexcept {
+	return tooltip_behavior::variable_tooltip;
+}
+void master_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+	auto n = retrieve<dcon::nation_id>(state, parent);
+	auto box = text::open_layout_box(contents, 0);
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	text::close_layout_box(contents, box);
+}
+//
 void music_volume::on_update(sys::state& state) noexcept {
 	update_raw_value(state, int32_t(state.user_settings.music_volume * 128.0f));
 }
+tooltip_behavior music_volume::has_tooltip(sys::state& state) noexcept {
+	return tooltip_behavior::variable_tooltip;
+}
+void music_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+	auto n = retrieve<dcon::nation_id>(state, parent);
+	auto box = text::open_layout_box(contents, 0);
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	text::close_layout_box(contents, box);
+}
+//
 void effects_volume::on_update(sys::state& state) noexcept {
 	update_raw_value(state, int32_t(state.user_settings.effects_volume * 128.0f));
 }
+tooltip_behavior effects_volume::has_tooltip(sys::state& state) noexcept {
+	return tooltip_behavior::variable_tooltip;
+}
+void effects_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+	auto n = retrieve<dcon::nation_id>(state, parent);
+	auto box = text::open_layout_box(contents, 0);
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	text::close_layout_box(contents, box);
+}
+//
 void interface_volume::on_update(sys::state& state) noexcept {
 	update_raw_value(state, int32_t(state.user_settings.interface_volume * 128.0f));
+}
+tooltip_behavior interface_volume::has_tooltip(sys::state& state) noexcept {
+	return tooltip_behavior::variable_tooltip;
+}
+void interface_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+	auto n = retrieve<dcon::nation_id>(state, parent);
+	auto box = text::open_layout_box(contents, 0);
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	text::close_layout_box(contents, box);
 }
 
  //TODO: Perhaps add a tooltip of which next song is going to be played, or the queue of songs

@@ -52,17 +52,13 @@ public:
 	bool is_active(sys::state& state) noexcept override;
 
 	message_result on_lbutton_down(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept override {
-		
 		if(!disabled) {
-			sound::play_interface_sound(state, sound::get_click_sound(state),
-						state.user_settings.interface_volume * state.user_settings.master_volume);
+			sound::play_interface_sound(state, sound::get_click_sound(state), state.user_settings.interface_volume * state.user_settings.master_volume);
 			button_action(state);
 		}
-
 		return message_result::consumed;
 	}
 	message_result on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods, bool under_mouse) noexcept override {
-
 		return message_result::consumed;
 	}
 };
@@ -70,18 +66,26 @@ public:
 class master_volume : public scrollbar {
 	void on_value_change(sys::state& state, int32_t v) noexcept final;
 	void on_update(sys::state& state) noexcept final;
+	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
 };
 class music_volume : public scrollbar {
 	void on_value_change(sys::state& state, int32_t v) noexcept final;
 	void on_update(sys::state& state) noexcept final;
+	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
 };
 class effects_volume : public scrollbar {
 	void on_value_change(sys::state& state, int32_t v) noexcept final;
 	void on_update(sys::state& state) noexcept final;
+	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
 };
 class interface_volume : public scrollbar {
 	void on_value_change(sys::state& state, int32_t v) noexcept final;
 	void on_update(sys::state& state) noexcept final;
+	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
 };
 
 class autosave_left : public button_element_base {
