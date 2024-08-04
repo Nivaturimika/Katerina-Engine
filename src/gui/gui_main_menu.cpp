@@ -712,7 +712,8 @@ tooltip_behavior master_volume::has_tooltip(sys::state& state) noexcept {
 void master_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 	auto n = retrieve<dcon::nation_id>(state, parent);
 	auto box = text::open_layout_box(contents, 0);
-	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	float v = float(stored_value) / 128.f;
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::fp_percentage{ v });
 	text::close_layout_box(contents, box);
 }
 //
@@ -725,7 +726,8 @@ tooltip_behavior music_volume::has_tooltip(sys::state& state) noexcept {
 void music_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 	auto n = retrieve<dcon::nation_id>(state, parent);
 	auto box = text::open_layout_box(contents, 0);
-	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	float v = float(stored_value) / 128.f;
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::fp_percentage{ v });
 	text::close_layout_box(contents, box);
 }
 //
@@ -738,7 +740,8 @@ tooltip_behavior effects_volume::has_tooltip(sys::state& state) noexcept {
 void effects_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 	auto n = retrieve<dcon::nation_id>(state, parent);
 	auto box = text::open_layout_box(contents, 0);
-	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	float v = float(stored_value) / 128.f;
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::fp_percentage{ v });
 	text::close_layout_box(contents, box);
 }
 //
@@ -751,7 +754,8 @@ tooltip_behavior interface_volume::has_tooltip(sys::state& state) noexcept {
 void interface_volume::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 	auto n = retrieve<dcon::nation_id>(state, parent);
 	auto box = text::open_layout_box(contents, 0);
-	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+	float v = float(stored_value) / 128.f;
+	text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::fp_percentage{ v });
 	text::close_layout_box(contents, box);
 }
 

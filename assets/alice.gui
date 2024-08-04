@@ -4096,69 +4096,55 @@ guiTypes = {
     }
     
     windowType = {
-			name = "gdp_ledger_linegraphs"
-			backGround =""
-			position = { x = 80 y = 130 }
-			size = { x=690 y = 540 }
-			moveable = 0
-			dontRender = ""
-			horizontalBorder = "0"
-			verticalBorder = ""
-			fullScreen = no
-		}
+		name = "gdp_ledger_linegraphs"
+		position = { 80 130 }
+		size = { 690 540 }
+		moveable = 0
+		horizontalBorder = 0
+		fullScreen = no
+	}
 		
     windowType = {
         name = "gdp_ledger_linegraph_legend"
         backGround =""
-        position = { x = 830 y = 153 }
-        size = { x=200 y = 540 }
+        position = { 830 153 }
+        size = { 200 540 }
         moveable = 0
-        dontRender = ""
-        horizontalBorder = "0"
-        verticalBorder = ""
+        horizontalBorder = 0
         fullScreen = no
-        
         listboxType = {
             name ="legend_nations_list"
-            position = { x = 0 y = 0 }
-            backGround=""
-            size = { x=208 y = 528 }
+            position = { 0 0 }
+            size = { 208 528 }
             Orientation = "UPPER_LEFT"
             spacing = 2
             scrollbartype = "standardlistbox_slider"
-            borderSize = {x = 1 y = 1}
+            borderSize = { 1 1 }
         }
     }
     
     windowType = {
 		name = "ledger_nations_legend_entry"
-		backGround=""
-		position = { x=0 y=-0 }	
-		size = { x=200 y=24 }
-		moveable = 0
-		dontRender = ""
-		horizontalBorder= ""
-		verticalBorder= ""
+		position = { 0 0 }	
+		size = { 200 24 }
 		fullScreen = no
 		Orientation = "UPPER_LEFT"
-		
 		checkboxType = {
 			name = "nation_ledger_legend_checkbox"	
-			position = {x = 24 y = 1 }
+			position = { 24 1 }
 			quadTextureSprite ="GFX_checkbox_default"
 		}
 		
 		iconType = {
 			name ="nation_ledger_legend_plupp"
 			spriteType = "GFX_politics_party_plupp"
-			position = { x= 0 y = 0 }
+			position = { 0 0 }
 		}
 		
 		instantTextBoxType = { 
 			name = "nation_ledger_default_textbox"
-			position = { x = 47 y = 5 }
+			position = { 47 5 }
 			font = "Arial12_bold_black"
-			text = " "	
 			maxWidth = 160
 			maxHeight = 16
 			fixedsize = yes
@@ -4166,13 +4152,15 @@ guiTypes = {
 	}
 
 	checkboxType = {
-		name = "alice_debt_checkbox"
+		name = "debt_checkbox"
+		extends = "country_budget"
 		position = { 165 490 }
 		quadTextureSprite = "GFX_checkbox_default"
 	}
 
 	instantTextBoxType = {
-		name = "alice_domestic_investment_label"
+		name = "domestic_investment_label"
+		extends = "country_budget"
 		text = "domestic_investment_label"
 		position = { 38 580 }
 		font = "vic_18_black"
@@ -4182,7 +4170,8 @@ guiTypes = {
 		format = left
 	}
 	instantTextBoxType = {
-		name = "alice_domestic_investment_value"
+		name = "domestic_investment_value"
+		extends = "country_budget"
 		text = "0.0"
 		position = { 418 580 }
 		font = "vic_18_black"
@@ -4192,7 +4181,8 @@ guiTypes = {
 		format = right
 	}
 	scrollbarType = {
-		name = "alice_domestic_investment_slider"	
+		name = "domestic_investment_slider"
+		extends = "country_budget"
 		slider = "slider"
 		track = "track"
 		leftbutton = "up"
@@ -4244,7 +4234,8 @@ guiTypes = {
     
     
     instantTextBoxType = {
-		name = "alice_overseas_maintenance_label"
+		name = "overseas_maintenance_label"
+		extends = "country_budget"
 		text = "BUDGET_OVERSEAS"
 		position = { 38 598 }
 		font = "vic_18_black"
@@ -4254,7 +4245,8 @@ guiTypes = {
 		format = left
 	}
 	instantTextBoxType = {
-		name = "alice_overseas_maintenance_value"
+		name = "overseas_maintenance_value"
+		extends = "country_budget"
 		text = "0.0"
 		position = { 418 598 }
 		font = "vic_18_black"
@@ -4264,7 +4256,8 @@ guiTypes = {
 		format = right
 	}
 	scrollbarType = {
-		name = "alice_overseas_maintenance_slider"	
+		name = "overseas_maintenance_slider"
+		extends = "country_budget"
 		slider = "slider"
 		track = "track"
 		leftbutton = "up"
@@ -4316,8 +4309,10 @@ guiTypes = {
 
 	windowType = {
 		name = "alice_macro_builder"
-		position = { 420 400 }
+		orientation = "CENTER"
+		position = { -320 -160 }
 		size = { 640 320 }
+		moveable = 1
 		guiButtonType = {
 			name = "background"
 			position = { 0 0 }

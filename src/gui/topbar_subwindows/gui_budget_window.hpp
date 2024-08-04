@@ -1881,43 +1881,22 @@ public:
 		win101->set_visible(state, false);
 		add_child_to_front(std::move(win101));
 
-		{
-			auto elm = make_element_by_type<enable_debt_toggle>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_debt_checkbox"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-
-		{
-			auto elm = make_element_by_type<domestic_investment_slider>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_domestic_investment_slider"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-		{
-			auto elm = make_element_by_type<simple_text_element_base>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_domestic_investment_label"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-		{
-			auto elm = make_element_by_type<domestic_investment_estimated_text>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_domestic_investment_value"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-
-		{
-			auto elm = make_element_by_type<overseas_maintenance_slider>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_overseas_maintenance_slider"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-		{
-			auto elm = make_element_by_type<simple_text_element_base>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_overseas_maintenance_label"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-		{
-			auto elm = make_element_by_type<overseas_maintenance_estimated_text>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_overseas_maintenance_value"))->second.definition);
-			add_child_to_front(std::move(elm));
-		}
-
 		set_visible(state, false);
 	}
 
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "main_bg") {
 			return make_element_by_type<image_element_base>(state, id);
+		} else if(name == "debt_checkbox") {
+			return make_element_by_type<enable_debt_toggle>(state, id);
+		} else if(name == "domestic_investment_slider") {
+			return make_element_by_type<domestic_investment_slider>(state, id);
+		} else if(name == "domestic_investment_value") {
+			return make_element_by_type<domestic_investment_estimated_text>(state, id);
+		} else if(name == "overseas_maintenance_slider") {
+			return make_element_by_type<overseas_maintenance_slider>(state, id);
+		} else if(name == "overseas_maintenance_value") {
+			return make_element_by_type<overseas_maintenance_estimated_text>(state, id);
 		} else if(name == "bg_budget") {
 			return make_element_by_type<opaque_element_base>(state, id);
 		} else if(name == "tariff_mid") {
