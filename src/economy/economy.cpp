@@ -3462,10 +3462,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto const poor_effect = float(state.world.nation_get_poor_tax(n)) / 100.0f;
 		auto const middle_effect = float(state.world.nation_get_middle_tax(n)) / 100.0f;
 		auto const rich_effect = float(state.world.nation_get_rich_tax(n)) / 100.0f;
-		auto const a_effect = float(state.world.nation_get_administrative_spending(n)) / 100.f;
-		auto const m_effect = float(state.world.nation_get_military_spending(n)) / 100.f;
-		auto const e_effect = float(state.world.nation_get_education_spending(n)) / 100.f;
-		auto const s_effect = float(state.world.nation_get_social_spending(n)) / 100.f;
 		auto const p_effect = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::pension_level);
 		assert(poor_effect >= 0.f && middle_effect >= 0.f && rich_effect >= 0.f);
 		for(auto p : state.world.nation_get_province_ownership(n)) {
@@ -3473,16 +3469,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			if(state.world.province_get_nation_from_province_ownership(province) == state.world.province_get_nation_from_province_control(province)) {
 				for(auto pl : province.get_pop_location()) {
 					float divisor = 1.f;
-					if(culture::income_type(pl.get_pop().get_poptype().get_life_needs_income_type()) == culture::income_type::administration) {
-						divisor *= 1.f + a_effect;
-					} else if(culture::income_type(pl.get_pop().get_poptype().get_life_needs_income_type()) == culture::income_type::military) {
-						divisor *= 1.f + m_effect;
-					} else if(culture::income_type(pl.get_pop().get_poptype().get_life_needs_income_type()) == culture::income_type::education) {
-						divisor *= 1.f + e_effect;
-					} else {
-						divisor *= 1.f + s_effect;
-						divisor *= 1.f + p_effect;
-					}
 					// Money drain when admin effectiveness is <100%
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
