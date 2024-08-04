@@ -5123,15 +5123,16 @@ void update_land_constructions(sys::state& state) {
 				bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
 				bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());
 				uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
+				// NOTE: Free AI upgrades are OFF, and it also causes issues while in battle!
 				if(etype == military::unit_type::support || etype == military::unit_type::special) {
-					if(best_art[index] && type != best_art[index]) { // free ai upgrades
-						r.get_regiment().set_type(best_art[index]);
-					}
+					//if(best_art[index] && type != best_art[index]) { // free ai upgrades
+					//	r.get_regiment().set_type(best_art[index]);
+					//}
 					++num_support;
 				} else {
-					if(best_inf[index] && etype == military::unit_type::infantry && type != best_inf[index]) { // free ai upgrades
-						r.get_regiment().set_type(best_inf[index]);
-					}
+					//if(best_inf[index] && etype == military::unit_type::infantry && type != best_inf[index]) { // free ai upgrades
+					//	r.get_regiment().set_type(best_inf[index]);
+					//}
 					++num_frontline;
 				}
 			}
