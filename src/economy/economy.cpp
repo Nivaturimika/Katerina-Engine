@@ -64,10 +64,9 @@ float interest_payment(sys::state& state, dcon::nation_id n) {
 	Every day, a nation must pay its creditors. It must pay national-modifier-to-loan-interest x debt-amount x interest-to-debt-holder-rate / 30
 	When a nation takes a loan, the interest-to-debt-holder-rate is set at nation-taking-the-loan-technology-loan-interest-modifier + define:LOAN_BASE_INTEREST, with a minimum of 0.01.
 	*/
-	auto debt = state.world.nation_get_stockpiles(n, money);
+	auto debt = state.world.nation_get_stockpiles(n, economy::money);
 	if(debt >= 0)
 		return 0.0f;
-
 	return -debt * std::max(0.01f, (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::loan_interest) + 1.0f) * state.defines.loan_base_interest) / 30.0f;
 }
 float max_loan(sys::state& state, dcon::nation_id n) {
@@ -3029,10 +3028,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 		{
 			// update national spending
-			//
 			// step 1: figure out total
 			float total = full_spending_cost(state, n);
-
 			// step 2: limit to actual budget
 			float budget = 0.0f;
 			float spending_scale = 0.0f;
@@ -3052,6 +3049,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				spending_scale = (total < 0.001f || total <= budget) ? 1.0f : budget / total;
 			}
 
+			assert(total >= 0.f);
 			assert(spending_scale >= 0);
 			assert(std::isfinite(spending_scale));
 			assert(std::isfinite(budget));
@@ -3355,6 +3353,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		}
 
 		assert(std::isfinite(refund) && refund >= 0.0f);
+		// TODO: Fix refund
 		state.world.nation_get_stockpiles(n, money) += refund;
 
 		auto const min_wage_factor = pop_min_wage_factor(state, n);
@@ -4652,7 +4651,6 @@ void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dc
 }
 
 void resolve_constructions(sys::state& state) {
-
 	for(uint32_t i = state.world.province_land_construction_size(); i-- > 0;) {
 		auto c = fatten(state.world, dcon::province_land_construction_id{dcon::province_land_construction_id::value_base_t(i)});
 
@@ -4693,7 +4691,7 @@ void resolve_constructions(sys::state& state) {
 						text::add_line(state, contents, "amsg_army_built");
 					},
 					"amsg_army_built",
-					state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+					c.get_nation(), dcon::nation_id{ }, dcon::nation_id{ },
 					sys::message_base_type::army_built
 				});
 			}

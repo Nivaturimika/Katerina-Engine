@@ -982,9 +982,6 @@ void update_ai_econ_construction(sys::state& state) {
 		auto treasury = n.get_stockpiles(economy::money);
 		int32_t max_projects = std::max(8, int32_t(treasury / 64000.0f));
 		auto rules = n.get_combined_issue_rules();
-
-
-
 		if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
 			// prepare a list of states
 			static std::vector<dcon::state_instance_id> ordered_states;
@@ -3122,13 +3119,13 @@ void update_budget(sys::state& state) {
 		// and stabilize economy faster
 		// not to allow it to hoard money
 
-		float land_budget_ratio					= 0.15f;
-		float sea_budget_ratio					= 0.05f;
-		float education_budget_ratio			= 0.30f;
-		float investments_budget_ratio			= 0.05f;
-		float soldiers_budget_ratio				= 0.40f;
-		float construction_budget_ratio			= 0.50f;
-		float administration_budget_ratio		= 0.15f;
+		float land_budget_ratio = 0.15f;
+		float sea_budget_ratio = 0.05f;
+		float education_budget_ratio = 0.30f;
+		float investments_budget_ratio = 0.05f;
+		float soldiers_budget_ratio = 0.40f;
+		float construction_budget_ratio = 0.50f;
+		float administration_budget_ratio = 0.15f;
 		float overseas_maintenance_budget_ratio = 0.10f;
 
 		if(n.get_is_at_war()) {
@@ -5045,19 +5042,22 @@ void update_land_constructions(sys::state& state) {
 		if(disarm && state.current_date < disarm)
 			continue;
 
+		// TODO: Maybe make this a game rule?
+		// Causes issues with compactable, so we just change to erasable!
+		/*
 		static std::vector<dcon::province_land_construction_id> hopeless_construction;
 		hopeless_construction.clear();
-
 		state.world.nation_for_each_province_land_construction(n, [&](dcon::province_land_construction_id plcid) {
 			auto fat_plc = dcon::fatten(state.world, plcid);
 			auto prov = fat_plc.get_pop().get_province_from_pop_location();
-			if(prov.get_nation_from_province_control() != n)
+			if(prov.get_nation_from_province_control() != n) {
 				hopeless_construction.push_back(plcid);
+			}
 		});
-
 		for(auto item : hopeless_construction) {
 			state.world.delete_province_land_construction(item);
 		}
+		*/
 
 		auto constructions = state.world.nation_get_province_land_construction(n);
 		if(constructions.begin() != constructions.end())
@@ -5108,6 +5108,23 @@ void update_land_constructions(sys::state& state) {
 				}
 			}
 		}
+
+		for(auto ar : state.world.nation_get_army_control(n)) {
+			for(auto r : ar.get_army().get_army_membership()) {
+				auto type = r.get_regiment().get_type();
+				assert(type);
+				auto etype = state.military_definitions.unit_base_definitions[type].type;
+				bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
+				bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());
+				uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
+				if(etype == military::unit_type::support || etype == military::unit_type::special) {
+					++num_support;
+				} else {
+					++num_frontline;
+				}
+			}
+		}
+
 		auto const decide_type = [&](dcon::pop_id pop, bool overseas) {
 			bool is_pc = nations::nation_accepts_culture(state, n, state.world.pop_get_culture(pop));
 			uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
@@ -5115,28 +5132,6 @@ void update_land_constructions(sys::state& state) {
 				return best_art[index];
 			return best_inf[index] ? best_inf[index] : best_inf[3];
 		};
-
-		for(auto ar : state.world.nation_get_army_control(n)) {
-			for(auto r : ar.get_army().get_army_membership()) {
-				auto type = r.get_regiment().get_type();
-				auto etype = state.military_definitions.unit_base_definitions[type].type;
-				bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
-				bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());
-				uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
-				// NOTE: Free AI upgrades are OFF, and it also causes issues while in battle!
-				if(etype == military::unit_type::support || etype == military::unit_type::special) {
-					//if(best_art[index] && type != best_art[index]) { // free ai upgrades
-					//	r.get_regiment().set_type(best_art[index]);
-					//}
-					++num_support;
-				} else {
-					//if(best_inf[index] && etype == military::unit_type::infantry && type != best_inf[index]) { // free ai upgrades
-					//	r.get_regiment().set_type(best_inf[index]);
-					//}
-					++num_frontline;
-				}
-			}
-		}
 
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			if(p.get_province().get_nation_from_province_control() != n)
@@ -5150,6 +5145,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
+							assert(t);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
@@ -5171,6 +5167,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
+							assert(t);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
@@ -5192,6 +5189,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
+							assert(t);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
