@@ -69,7 +69,10 @@ std::vector<uint8_t> load_bmp(parsers::scenario_building_context& context, nativ
 		size_x = h->bcWidth;
 		size_y = h->bcHeight;
 	} else {
-		std::abort(); // unknown bitmap type
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "unknown map bitmap type", MB_OK);
+#endif
+		std::abort();
 	}
 
 	if(compression_type == 1) {

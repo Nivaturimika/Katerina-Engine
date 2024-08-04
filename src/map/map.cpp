@@ -1849,6 +1849,8 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 
 	const auto map_x_scaling = float(size_x) / float(size_y);
 	auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
+	if(!f.hb_buf)
+		return;
 
 	for(const auto& e : data) {
 		// omit invalid, nan or infinite coefficients
@@ -1864,7 +1866,7 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 		// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 		auto poly_fn = [&](float x) {
 			return e.coeff[0] + e.coeff[1] * x + e.coeff[2] * x * x + e.coeff[3] * x * x * x;
-			};
+		};
 		auto dpoly_fn = [&](float x) {
 			// y = a + 1bx^1 + 1cx^2 + 1dx^3
 			// y = 0 + 1bx^0 + 2cx^1 + 3dx^2
@@ -1894,11 +1896,8 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 			}
 		}
 
-
 		left = std::clamp(left, 0.f, 1.f);
 		right = std::clamp(right, 0.f, 1.f);
-
-
 		if(right <= left) {
 			continue;
 		}
@@ -2037,7 +2036,9 @@ void display_data::set_province_text_lines(sys::state& state, std::vector<text_l
 	province_text_line_texture_per_quad.clear();
 	const auto map_x_scaling = float(size_x) / float(size_y);
 	auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
-	
+	if(!f.hb_buf)
+		return;
+
 	for(const auto& e : data) {
 		// omit invalid, nan or infinite coefficients
 		if(!std::isfinite(e.coeff[0]) || !std::isfinite(e.coeff[1]) || !std::isfinite(e.coeff[2]) || !std::isfinite(e.coeff[3]))

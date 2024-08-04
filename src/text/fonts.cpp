@@ -309,16 +309,18 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 			auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 			auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
 			auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
-			if(!ff) {
-				std::abort();
+			if(ff) {
+				font_array.emplace_back();
+				auto content = simple_fs::view_contents(*ff);
+				load_font(font_array.back(), content.data, content.file_size);
+				font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
+				font_array.back().file_name = fname;
+				resolved = &(font_array.back());
+			} else {
+#ifdef _WIN64
+				OutputDebugStringA("locale body font not found");
+#endif
 			}
-
-			font_array.emplace_back();
-			auto content = simple_fs::view_contents(*ff);
-			load_font(font_array.back(), content.data, content.file_size);
-			font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
-			font_array.back().file_name = fname;
-			resolved = &(font_array.back());
 		}
 
 		state.world.locale_set_resolved_body_font(l, count);
@@ -342,16 +344,18 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 			auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 			auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
 			auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
-			if(!ff) {
-				std::abort();
+			if(ff) {
+				font_array.emplace_back();
+				auto content = simple_fs::view_contents(*ff);
+				load_font(font_array.back(), content.data, content.file_size);
+				font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
+				font_array.back().file_name = fname;
+				resolved = &(font_array.back());
+			} else {
+#ifdef _WIN64
+				OutputDebugStringA("locale header font not found");
+#endif
 			}
-
-			font_array.emplace_back();
-			auto content = simple_fs::view_contents(*ff);
-			load_font(font_array.back(), content.data, content.file_size);
-			font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
-			font_array.back().file_name = fname;
-			resolved = &(font_array.back());
 		}
 
 		state.world.locale_set_resolved_header_font(l, count);
@@ -375,16 +379,18 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 			auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 			auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
 			auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
-			if(!ff) {
-				std::abort();
+			if(ff) {
+				font_array.emplace_back();
+				auto content = simple_fs::view_contents(*ff);
+				load_font(font_array.back(), content.data, content.file_size);
+				font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
+				font_array.back().file_name = fname;
+				resolved = &(font_array.back());
+			} else {
+#ifdef _WIN64
+				OutputDebugStringA("locale map font not found");
+#endif
 			}
-
-			font_array.emplace_back();
-			auto content = simple_fs::view_contents(*ff);
-			load_font(font_array.back(), content.data, content.file_size);
-			font_array.back().only_raw_codepoints = state.user_settings.use_classic_fonts;
-			font_array.back().file_name = fname;
-			resolved = &(font_array.back());
 		}
 
 		state.world.locale_set_resolved_map_font(l, count);
@@ -401,10 +407,16 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 	UErrorCode errorCode = U_ZERO_ERROR;
 	UBreakIterator* lb_it = ubrk_open(UBreakIteratorType::UBRK_LINE, lang_str.c_str(), nullptr, 0, &errorCode);
 	if(!lb_it || !U_SUCCESS(errorCode)) {
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "cant create ubrk iterator", MB_OK);
+#endif
 		std::abort(); // couldn't create iterator
 	}
 	auto rule_size = ubrk_getBinaryRules(lb_it, nullptr, 0, &errorCode);
 	if(rule_size == 0 || !U_SUCCESS(errorCode)) {
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "cant create ubrk get_rules", MB_OK);
+#endif
 		std::abort(); // couldn't get_rules
 	}
 	
@@ -417,18 +429,29 @@ void font_manager::change_locale(sys::state& state, dcon::locale_id l) {
 }
 
 font& font_manager::get_font(sys::state& state, font_selection s) {
-	if(!current_locale)
-		std::abort();
+	static font dummy_font; //lifetime of program
+	if(!current_locale) {
+		dummy_font.only_raw_codepoints = true;
+		return dummy_font;
+	}
+	uint32_t index = 0;
 	switch(s) {
 	case font_selection::body_font:
 	default:
-		return font_array[state.world.locale_get_resolved_body_font(current_locale)];
+		index = state.world.locale_get_resolved_body_font(current_locale);
+		break;
 	case font_selection::header_font:
-		return font_array[state.world.locale_get_resolved_header_font(current_locale)];
+		index = state.world.locale_get_resolved_header_font(current_locale);
+		break;
 	case font_selection::map_font:
-		return font_array[state.world.locale_get_resolved_map_font(current_locale)];
+		index = state.world.locale_get_resolved_map_font(current_locale);
+		break;
 	}
-
+	if(index >= uint32_t(font_array.size())) {
+		dummy_font.only_raw_codepoints = true;
+		return dummy_font;
+	}
+	return font_array[index];
 }
 
 void font_manager::load_font(font& fnt, char const* file_data, uint32_t file_size) {
@@ -590,14 +613,20 @@ void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& t
 		return;
 	}
 
+	if(!hb_buf)
+		return; //dummy font, only classic will work
+
 	auto locale = state.font_collection.get_current_locale();
 	UBiDi* para;
 	UErrorCode errorCode = U_ZERO_ERROR;
 
 	para = ubidi_open();
-	//para = ubidi_openSized(int32_t(temp_text.size()), 64, pErrorCode);
-	if(!para)
+	if(!para) {
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "no ubidi parameter", MB_OK);
+#endif
 		std::abort();
+	}
 
 	hb_feature_t feature_buffer[10];
 	auto features = type == font_selection::body_font ? state.world.locale_get_body_font_features(locale)
@@ -641,11 +670,15 @@ void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& t
 				}
 			}
 		} else {
-			// failure to get number of runs
+#ifdef _WIN64
+			MessageBoxA(NULL, "Fatal assert", "failure to get number of runs", MB_OK);
+#endif
 			std::abort();
 		}
 	} else {
-		// failure to add text
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "failure to add text", MB_OK);
+#endif
 		std::abort();
 	}
 
@@ -666,6 +699,9 @@ void font::remake_bidiless_cache(sys::state& state, font_selection type, stored_
 		}
 		return;
 	}
+
+	if(!hb_buf)
+		return; //dummy font, only classic will work
 
 	auto locale = state.font_collection.get_current_locale();
 	
@@ -721,6 +757,9 @@ void font::remake_cache(stored_glyphs& txt, std::string const& s) {
 		return;
 	}
 
+	if(!hb_buf)
+		return; //dummy font, only classic will work
+
 	hb_buffer_clear_contents(hb_buf);
 	hb_buffer_add_utf8(hb_buf, s.c_str(), int(s.length()), 0, int(s.length()));
 
@@ -755,6 +794,9 @@ void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& t
 		}
 		return;
 	}
+
+	if(!hb_buf)
+		return; //dummy font, only classic will work
 
 	auto locale = state.font_collection.get_current_locale();
 	if(state.world.locale_get_native_rtl(locale) == false) {
@@ -810,8 +852,12 @@ void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& t
 		UErrorCode errorCode = U_ZERO_ERROR;
 		UBiDi* para = ubidi_open();
 		//para = ubidi_openSized(int32_t(temp_text.size()), 64, pErrorCode);
-		if(!para)
+		if(!para) {
+#ifdef _WIN64
+			OutputDebugStringA("failure to get para");
+#endif
 			std::abort();
+		}
 
 		hb_feature_t feature_buffer[10];
 		auto features = type == font_selection::body_font ? state.world.locale_get_body_font_features(locale)
@@ -856,11 +902,15 @@ void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& t
 					}
 				}
 			} else {
-				// failure to get number of runs
+#ifdef _WIN64
+				MessageBoxA(NULL, "Fatal assert", "failure to get number of runs", MB_OK);
+#endif
 				std::abort();
 			}
 		} else {
-			// failure to add text
+#ifdef _WIN64
+			MessageBoxA(NULL, "Fatal assert", "failure to add text", MB_OK);
+#endif
 			std::abort();
 		}
 

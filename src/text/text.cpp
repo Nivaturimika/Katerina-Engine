@@ -1272,6 +1272,9 @@ void add_to_layout_box(sys::state& state, layout_base& dest, layout_box& box, st
 	UBreakIterator* lb_it = ubrk_openBinaryRules(state.font_collection.compiled_ubrk_rules.data(), int32_t(state.font_collection.compiled_ubrk_rules.size()), (UChar const*)temp_text.data(), int32_t(temp_text.size()), &errorCode);
 
 	if(!lb_it || !U_SUCCESS(errorCode)) {
+#ifdef _WIN64
+		MessageBoxA(NULL, "Fatal assert", "ubidi iterator cant be made", MB_OK);
+#endif
 		std::abort(); // couldn't create iterator
 	}
 

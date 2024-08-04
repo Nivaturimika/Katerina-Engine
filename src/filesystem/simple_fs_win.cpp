@@ -348,8 +348,12 @@ native_string get_full_name(file const& f) {
 }
 
 void write_file(directory const& dir, native_string_view file_name, char const* file_data, uint32_t file_size) {
-	if(dir.parent_system)
+	if(dir.parent_system) {
+#ifdef WIN32
+		MessageBoxA(NULL, "Fatal assert", "undefined parent system", MB_OK);
+#endif
 		std::abort();
+	}
 
 	native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
 	HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,

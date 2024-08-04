@@ -284,6 +284,9 @@ void state::state_select(dcon::state_definition_id sdef) {
 			} else {
 				state.selected_states.erase(std::remove(state.selected_states.begin(), state.selected_states.end(), sdef), state.selected_states.end());
 			}*/
+#ifdef WIN32
+			MessageBoxA(NULL, "Fatal assert", "invalid state selector stat", MB_OK);
+#endif
 			std::abort();
 		}
 	}
