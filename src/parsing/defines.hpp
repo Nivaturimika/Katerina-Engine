@@ -657,11 +657,11 @@
 	LUA_DEFINES_LIST_ELEMENT(alice_full_reinforce, 1.000000)                                                             \
 	LUA_DEFINES_LIST_ELEMENT(alice_ai_offensive_strength_overestimate, 1.000000) \
 	LUA_DEFINES_LIST_ELEMENT(alice_military_score_leadership_factor, 1.000000) \
-	LUA_DEFINES_LIST_ELEMENT(alice_lf_needs_scale, 8.000000) \
-	LUA_DEFINES_LIST_ELEMENT(alice_ev_needs_scale, 2.000000) \
-	LUA_DEFINES_LIST_ELEMENT(alice_lx_needs_scale, 2.000000) \
-	LUA_DEFINES_LIST_ELEMENT(alice_max_event_iterations, 8.000000) \
-	LUA_DEFINES_LIST_ELEMENT(alice_needs_scaling_factor, 100000.000000) \
+	LUA_DEFINES_LIST_ELEMENT(alice_lf_needs_scale, 1.000000) \
+	LUA_DEFINES_LIST_ELEMENT(alice_ev_needs_scale, 1.000000) \
+	LUA_DEFINES_LIST_ELEMENT(alice_lx_needs_scale, 1.000000) \
+	LUA_DEFINES_LIST_ELEMENT(alice_max_event_iterations, 75000.0) \
+	LUA_DEFINES_LIST_ELEMENT(alice_needs_scaling_factor, 800000.000000) \
 	LUA_DEFINES_LIST_ELEMENT(alice_factory_per_level_employment, 10000.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_domestic_investment_multiplier, 2.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_rgo_boost, 1.25) \
@@ -672,12 +672,12 @@
 	LUA_DEFINES_LIST_ELEMENT(alice_inputs_base_factor, 1.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_rgo_overhire_multiplier, 10.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_rgo_production_scale_neg_delta, 0.001) \
-	LUA_DEFINES_LIST_ELEMENT(alice_invest_capitalist, 0.125) \
-	LUA_DEFINES_LIST_ELEMENT(alice_invest_aristocrat, 0.025) \
+	LUA_DEFINES_LIST_ELEMENT(alice_invest_capitalist, 0.33) \
+	LUA_DEFINES_LIST_ELEMENT(alice_invest_aristocrat, 0.15) \
 	LUA_DEFINES_LIST_ELEMENT(alice_needs_lf_spend, 0.20) \
 	LUA_DEFINES_LIST_ELEMENT(alice_needs_ev_spend, 0.40) \
 	LUA_DEFINES_LIST_ELEMENT(alice_needs_lx_spend, 0.40) \
-	LUA_DEFINES_LIST_ELEMENT(alice_sat_delay_factor, 0.95) \
+	LUA_DEFINES_LIST_ELEMENT(alice_sat_delay_factor, 0.75) \
 	LUA_DEFINES_LIST_ELEMENT(alice_need_drift_speed, 0.1) \
 	LUA_DEFINES_LIST_ELEMENT(alice_disable_divergent_any_country_effect, 0.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_unciv_civ_forbid_war, 0.0) \
