@@ -871,7 +871,6 @@ void send_and_receive_commands(sys::state& state) {
 
 	bool command_executed = false;
 	if(state.network_mode == sys::network_mode_type::host) {
-		accept_new_clients(state); // accept new connections
 		receive_from_clients(state); // receive new commands
 		// send the commands of the server to all the clients
 		auto* c = state.network_state.outgoing_commands.front();
@@ -894,6 +893,9 @@ void send_and_receive_commands(sys::state& state) {
 			c = state.network_state.outgoing_commands.front();
 		}
 
+		//accept should be after the commands are processed!
+		//otherwise someone joining fast enough will have the same nation!
+		accept_new_clients(state); // accept new connections
 		for(auto& client : state.network_state.clients) {
 			if(!client.is_active())
 				continue;
