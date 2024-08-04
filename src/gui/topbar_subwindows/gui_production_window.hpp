@@ -33,26 +33,20 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto fid = retrieve<dcon::factory_id>(state, parent);
-
 		auto max_emp = economy::factory_max_employment(state, fid);
-		{
-			auto box = text::open_layout_box(contents, 0);
-			text::add_to_layout_box(state, contents, box, state.world.pop_type_get_name(state.culture_definitions.primary_factory_worker));
-			text::add_to_layout_box(state, contents, box, std::string_view{": " });
-			text::add_to_layout_box(state, contents, box, int64_t(std::ceil(state.world.factory_get_primary_employment(fid) * max_emp * state.economy_definitions.craftsmen_fraction)));
-			text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-			text::add_to_layout_box(state, contents, box, int64_t(std::ceil(max_emp * state.economy_definitions.craftsmen_fraction)));
-			text::close_layout_box(contents, box);
-		}
-		{
-			auto box = text::open_layout_box(contents, 0);
-			text::add_to_layout_box(state, contents, box, state.world.pop_type_get_name(state.culture_definitions.secondary_factory_worker));
-			text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-			text::add_to_layout_box(state, contents, box, int64_t(std::ceil(state.world.factory_get_secondary_employment(fid) * max_emp * (1.0f -state.economy_definitions.craftsmen_fraction))));
-			text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-			text::add_to_layout_box(state, contents, box, int64_t(std::ceil(max_emp * (1.0f - state.economy_definitions.craftsmen_fraction))));
-			text::close_layout_box(contents, box);
-		}
+		auto box = text::open_layout_box(contents, 0);
+		text::add_to_layout_box(state, contents, box, state.world.pop_type_get_name(state.culture_definitions.primary_factory_worker));
+		text::add_to_layout_box(state, contents, box, std::string_view{": " });
+		text::add_to_layout_box(state, contents, box, int64_t(std::ceil(state.world.factory_get_primary_employment(fid) * max_emp * state.economy_definitions.craftsmen_fraction)));
+		text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+		text::add_to_layout_box(state, contents, box, int64_t(std::ceil(max_emp * state.economy_definitions.craftsmen_fraction)));
+		text::add_line_break_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, state.world.pop_type_get_name(state.culture_definitions.secondary_factory_worker));
+		text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
+		text::add_to_layout_box(state, contents, box, int64_t(std::ceil(state.world.factory_get_secondary_employment(fid) * max_emp * (1.0f -state.economy_definitions.craftsmen_fraction))));
+		text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+		text::add_to_layout_box(state, contents, box, int64_t(std::ceil(max_emp * (1.0f - state.economy_definitions.craftsmen_fraction))));
+		text::close_layout_box(contents, box);
 	}
 };
 
@@ -115,7 +109,6 @@ public:
 				break;
 			}
 		}
-		text::add_line_break_to_layout(state, contents); // TODO: Classic needs this as a divider
 		text::add_line(state, contents, "production_prio_factory_desc_tooltip");
 	}
 };
@@ -358,8 +351,7 @@ public:
 		auto fat = dcon::fatten(state.world, fid);
 		if(fat.get_subsidized()) {
 			if(command::can_change_factory_settings(state, state.local_player_nation, fid, uint8_t(economy::factory_priority(state, fid)), false)) {
-				command::change_factory_settings(state, state.local_player_nation, fid, uint8_t(economy::factory_priority(state, fid)),
-						false);
+				command::change_factory_settings(state, state.local_player_nation, fid, uint8_t(economy::factory_priority(state, fid)), false);
 			}
 		} else {
 			if(command::can_change_factory_settings(state, state.local_player_nation, fid, uint8_t(economy::factory_priority(state, fid)), true)) {

@@ -44,9 +44,13 @@ public:
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("subsidize_all_tooltip"));
-		text::close_layout_box(contents, box);
+		text::add_line(state, contents, "subsidize_all_tooltip");
+		if(disabled) {
+			text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
+			text::add_line(state, contents, "cant_subsidize_explanation");
+		} else {
+			text::add_line(state, contents, "production_allowed_to_subsidise_tooltip");
+		}
 	}
 };
 
@@ -62,10 +66,8 @@ public:
 					Cyto::Any payload = commodity_filter_query_data{fac.get_factory().get_building_type().get_output(), false};
 					parent->impl_get(state, payload);
 					bool is_set = any_cast<commodity_filter_query_data>(payload).filter;
-
 					if(is_set) {
-						command::change_factory_settings(state, state.local_player_nation, fac.get_factory(),
-								uint8_t(economy::factory_priority(state, fac.get_factory())), false);
+						command::change_factory_settings(state, state.local_player_nation, fac.get_factory(), uint8_t(economy::factory_priority(state, fac.get_factory())), false);
 					}
 				}
 			}
@@ -88,9 +90,13 @@ public:
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("unsubsidize_all_tooltip"));
-		text::close_layout_box(contents, box);
+		text::add_line(state, contents, "unsubsidize_all_tooltip");
+		if(disabled) {
+			text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
+			text::add_line(state, contents, "cant_subsidize_explanation");
+		} else {
+			text::add_line(state, contents, "production_allowed_to_subsidise_tooltip");
+		}
 	}
 };
 
