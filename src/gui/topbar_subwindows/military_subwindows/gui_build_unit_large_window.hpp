@@ -102,8 +102,9 @@ public:
 		if(!utid)
 			return;
 		dcon::province_id p = retrieve<dcon::province_id>(state, parent);
+
+		text::add_line(state, contents, "military_build_unit_tooltip", text::variable_type::name, state.military_definitions.unit_base_definitions[utid].name, text::variable_type::loc, p);
 		if(is_navy) {
-			text::add_line(state, contents, "military_build_unit_tooltip", text::variable_type::name, state.military_definitions.unit_base_definitions[utid].name, text::variable_type::loc, state.world.province_get_name(p));
 			//Any key starting with 'alice' has been added in \assets\alice.csv
 			text::add_line(state, contents, "unit_max_speed", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).maximum_speed, 2));
 			text::add_line(state, contents, "unit_attack", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).attack_or_gun_power, 2));
@@ -118,8 +119,6 @@ public:
 			text::add_line(state, contents, "unit_supply_consumption", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).supply_consumption * 100, 0));
 			text::add_line(state, contents, "unit_supply_load", text::variable_type::x, state.military_definitions.unit_base_definitions[utid].supply_consumption_score);
 		} else {
-			text::add_line(state, contents, "military_build_unit_tooltip", text::variable_type::name, state.military_definitions.unit_base_definitions[utid].name, text::variable_type::loc, state.world.province_get_name(p));
-
 			buildable_unit_entry_info info = retrieve< buildable_unit_entry_info>(state, parent);
 			if(std::max(state.defines.alice_full_reinforce, state.world.pop_get_size(info.pop_info) / state.defines.pop_size_per_regiment) < 1.f) {
 				text::add_line(state, contents, "understaffed_regiment", text::variable_type::value, text::format_wholenum(int32_t(state.world.pop_get_size(info.pop_info))));
@@ -168,12 +167,34 @@ public:
 		}
 	}
 
+	void button_shift_action(sys::state& state) noexcept override {
+		dcon::unit_type_id utid = retrieve<dcon::unit_type_id>(state, parent);
+		dcon::modifier_id con = retrieve<dcon::modifier_id>(state, parent);
+		for(auto po : state.world.nation_get_province_ownership_as_nation(state.local_player_nation)) {
+			auto p = po.get_province();
+			if(is_navy) {
+				if(command::can_start_naval_unit_construction(state, state.local_player_nation, p, utid)) {
+					command::start_naval_unit_construction(state, state.local_player_nation, p, utid);
+				}
+			} else {
+				state.world.for_each_culture([&](dcon::culture_id c) {
+					if(command::can_start_land_unit_construction(state, state.local_player_nation, p, c, utid)) {
+						command::start_land_unit_construction(state, state.local_player_nation, p, c, utid);
+					}
+				});
+			}
+		}
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-
+		dcon::unit_type_id utid = retrieve<dcon::unit_type_id>(state, parent);
+		dcon::modifier_id con = retrieve<dcon::modifier_id>(state, parent);
+		text::add_line(state, contents, "military_build_unit_tooltip", text::variable_type::name, state.military_definitions.unit_base_definitions[utid].name, text::variable_type::loc, state.world.modifier_get_name(con));
+		text::add_line(state, contents, "shift_to_build_all_continents");
 	}
 };
 
