@@ -1788,10 +1788,7 @@ public:
 			}
 		}
 		if(targets.empty()) {
-			if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
-				state.ui_state.diplomacy_subwindow->set_visible(state, false);
-				return;
-			}
+			state.open_diplomacy(dcon::nation_id{});
 		} else {
 			bool is_match = false;
 			for(const auto n1 : targets) {
