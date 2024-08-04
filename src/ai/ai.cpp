@@ -5067,16 +5067,16 @@ void update_land_constructions(sys::state& state) {
 		int32_t num_support = 0;
 
 		std::array<dcon::unit_type_id, 4> best_inf{
-			dcon::unit_type_id{ }, //normal
-			dcon::unit_type_id{ }, //build overseas
-			dcon::unit_type_id{ }, //non-accepted
-			dcon::unit_type_id{ }, //non-accepted + build overseas
+			state.military_definitions.irregular, //normal
+			state.military_definitions.irregular, //build overseas
+			state.military_definitions.irregular, //non-accepted
+			state.military_definitions.irregular, //non-accepted + build overseas
 		};
 		std::array<dcon::unit_type_id, 4> best_art{
-			dcon::unit_type_id{ }, //normal
-			dcon::unit_type_id{ }, //build overseas
-			dcon::unit_type_id{ }, //non-accepted
-			dcon::unit_type_id{ }, //non-accepted + build overseas
+			state.military_definitions.irregular, //normal
+			state.military_definitions.irregular, //build overseas
+			state.military_definitions.irregular, //non-accepted
+			state.military_definitions.irregular, //non-accepted + build overseas
 		};
 		for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
 			dcon::unit_type_id utid{ dcon::unit_type_id::value_base_t(i) };
