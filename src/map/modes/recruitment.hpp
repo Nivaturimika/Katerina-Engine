@@ -28,7 +28,11 @@ std::vector<uint32_t> recruitment_map_from(sys::state& state) {
 			auto i = province::to_map_id(prov_id);
 
 			prov_color[i] = color;
-			prov_color[i + texture_size] = color;
+			if(state.world.province_get_land_rally_point(prov_id) || state.world.province_get_naval_rally_point(prov_id)) {
+				prov_color[i + texture_size] = sys::pack_color(128, 128, 255);
+			} else {
+				prov_color[i + texture_size] = color;
+			}
 		}
 	});
 
