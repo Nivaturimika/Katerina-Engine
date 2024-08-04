@@ -1269,60 +1269,64 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
-		bool header = false;
-		std::array<dcon::pop_type_id, 2> factory_workers{
+		std::array<dcon::pop_type_id, 4> factory_workers{
 			state.culture_definitions.primary_factory_worker,
-			state.culture_definitions.secondary_factory_worker
-		};
-		for(auto pt : factory_workers) {
-			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
-				auto state_instance = si.get_state();
-				auto total = state_instance.get_demographics(demographics::to_key(state, pt));
-				auto unemployed = total - state_instance.get_demographics(demographics::to_employment_key(state, pt));
-				if(unemployed >= 1.f) {
-					if(!header) {
-						text::add_line(state, contents, "remove_countryalert_hasunemployedworkers");
-						header = true;
-					}
-					text::substitution_map sub;
-					text::add_to_substitution_map(sub, text::variable_type::num, int64_t(unemployed));
-					text::add_to_substitution_map(sub, text::variable_type::type, state.world.pop_type_get_name(pt));
-					auto state_name = text::get_dynamic_state_name(state, state_instance);
-					text::add_to_substitution_map(sub, text::variable_type::state, std::string_view{ state_name });
-					text::add_to_substitution_map(sub, text::variable_type::perc, text::fp_two_places{ (unemployed / total) * 100.f });
-					auto box = text::open_layout_box(contents);
-					text::localised_format_box(state, contents, box, "topbar_unemployed", sub);
-					text::close_layout_box(contents, box);
-				}
-			}
-		}
-		std::array<dcon::pop_type_id, 2> rgo_workers{
+			state.culture_definitions.secondary_factory_worker,
 			state.culture_definitions.farmers,
 			state.culture_definitions.laborers
 		};
-		for(auto pt : rgo_workers) {
-			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
-				auto state_instance = si.get_state();
-				auto total = state_instance.get_demographics(demographics::to_key(state, pt));
-				auto unemployed = total - state_instance.get_demographics(demographics::to_employment_key(state, pt));
+		struct unemployed_data {
+			float amount = 0.f;
+			float ratio = 0.f;
+			dcon::state_instance_id sid;
+			dcon::pop_type_id pt;
+		};
+		std::vector<unemployed_data> data;
+		float rem_unemp = 0.f;
+		for(auto si : state.world.nation_get_state_ownership(nation_id)) {
+			for(auto pt : factory_workers) {
+				auto total = si.get_state().get_demographics(demographics::to_key(state, pt));
+				auto unemployed = total - si.get_state().get_demographics(demographics::to_employment_key(state, pt));
 				if(unemployed >= 1.f) {
-					if(!header) {
-						text::add_line(state, contents, "alice_rgo_unemployment_country_alert");
-						header = true;
-					}
-					text::substitution_map sub;
-					text::add_to_substitution_map(sub, text::variable_type::num, int64_t(unemployed));
-					text::add_to_substitution_map(sub, text::variable_type::type, state.world.pop_type_get_name(pt));
-					auto state_name = text::get_dynamic_state_name(state, state_instance);
-					text::add_to_substitution_map(sub, text::variable_type::state, std::string_view{ state_name });
-					text::add_to_substitution_map(sub, text::variable_type::perc, text::fp_two_places{ (unemployed / total) * 100.f });
-					auto box = text::open_layout_box(contents);
-					text::localised_format_box(state, contents, box, "topbar_unemployed", sub);
-					text::close_layout_box(contents, box);
+					unemployed_data unemp;
+					unemp.amount = unemployed;
+					unemp.sid = si.get_state();
+					unemp.pt = pt;
+					unemp.ratio = (unemployed / total) * 100.f;
+					data.emplace_back(unemp);
+					rem_unemp += unemployed;
 				}
 			}
 		}
-		if(!header) {
+		if(!data.empty()) {
+			text::add_line(state, contents, "remove_countryalert_hasunemployedworkers");
+			std::sort(data.begin(), data.end(), [&](auto const& a, auto const& b) {
+				if(a.amount != b.amount)
+					return a.amount < b.amount;
+				if(a.sid.index() != b.sid.index())
+					return a.sid.index() < b.sid.index();
+				return a.pt.index() < b.pt.index();
+			});
+			for(uint32_t i = 0; i < uint32_t(data.size()) && i < 10; i++) {
+				text::substitution_map sub;
+				text::add_to_substitution_map(sub, text::variable_type::num, int64_t(data[i].amount));
+				text::add_to_substitution_map(sub, text::variable_type::type, state.world.pop_type_get_name(data[i].pt));
+				text::add_to_substitution_map(sub, text::variable_type::state, data[i].sid);
+				text::add_to_substitution_map(sub, text::variable_type::perc, text::fp_two_places{ data[i].ratio });
+				auto box = text::open_layout_box(contents);
+				text::localised_format_box(state, contents, box, "topbar_unemployed_pop", sub);
+				text::close_layout_box(contents, box);
+				rem_unemp -= data[i].amount;
+			}
+			if(rem_unemp > 0.f) {
+				text::substitution_map sub;
+				text::add_to_substitution_map(sub, text::variable_type::x, text::fp_two_places{ rem_unemp });
+				auto box = text::open_layout_box(contents);
+				text::localised_format_box(state, contents, box, "topbar_more_unemployed", sub);
+				text::close_layout_box(contents, box);
+			}
+		} else {
+			// TODO: remove alice_rgo_unemployment_country_alert
 			text::add_line(state, contents, "countryalert_no_hasunemployedworkers");
 		}
 	}
@@ -1342,8 +1346,7 @@ public:
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
 		if(!nations::has_reform_available(state, nation_id)) {
-			text::localised_format_box(state, contents, box, std::string_view("countryalert_no_candoreforms"),
-					text::substitution_map{});
+			text::localised_format_box(state, contents, box, std::string_view("countryalert_no_candoreforms"), text::substitution_map{});
 		} else if(nations::has_reform_available(state, nation_id)) {
 			text::localised_format_box(state, contents, box, std::string_view("countryalert_candoreforms"), text::substitution_map{});
 			text::add_divider_to_layout_box(state, contents, box);
