@@ -369,16 +369,12 @@ void convert_commodities_into_ingredients(
 
 void presimulate(sys::state& state) {
 	// economic updates without construction
-#ifdef NDEBUG
-	for(uint32_t i = 0; i < 365; i++) {
-#else
-	for(uint32_t i = 0; i < 20; i++) {
-#endif
-		update_rgo_employment(state);
-		update_factory_employment(state);
-		daily_update(state, false);
-		ai::update_budget(state);
-	}
+/*
+	update_rgo_employment(state);
+	update_factory_employment(state);
+	daily_update(state, false);
+	ai::update_budget(state);
+*/
 }
 
 bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::factory_type_id fac) {
