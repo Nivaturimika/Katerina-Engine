@@ -1058,7 +1058,7 @@ void update_rgo_employment(sys::state& state) {
 }
 
 float factory_max_employment(sys::state const& state, dcon::factory_id f) {
-	return state.defines.alice_factory_per_level_employment / state.defines.alice_needs_scaling_factor
+	return state.defines.alice_factory_per_level_employment
 		* state.world.factory_get_level(f);
 }
 
@@ -1117,7 +1117,7 @@ void update_factory_employment(sys::state& state) {
 					break;
 				}
 				total_workforce += factory_max_employment(state, ordered_factories[next_index]) *
-													 state.world.factory_get_production_scale(ordered_factories[next_index]);
+					state.world.factory_get_production_scale(ordered_factories[next_index]);
 			}
 
 			{
@@ -2098,7 +2098,7 @@ float full_pop_spending_cost(sys::state& state, dcon::nation_id n) {
 		}
 		assert(std::isfinite(total) && total >= 0.0f);
 	});
-	total *= (0.1f / state.defines.alice_needs_scaling_factor);
+	total *= (0.01f / state.defines.alice_needs_scaling_factor);
 	assert(std::isfinite(total) && total >= 0.0f);
 	return total;
 }
@@ -3042,7 +3042,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto owner_spending = state.world.nation_get_spending_level(owners);
 
 		auto pop_of_type = state.world.pop_get_size(ids);
-		auto adj_pop_of_type = pop_of_type * (0.1f / state.defines.alice_needs_scaling_factor);
+		auto adj_pop_of_type = pop_of_type * (0.01f / state.defines.alice_needs_scaling_factor);
 
 		auto const a_spending = owner_spending * ve::to_float(state.world.nation_get_administrative_spending(owners)) / 100.f;
 		auto const s_spending = owner_spending * state.world.nation_get_administrative_efficiency(owners) * ve::to_float(state.world.nation_get_social_spending(owners)) / 100.0f;
@@ -3093,7 +3093,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto employment = state.world.pop_get_employment(ids);
 
 		acc_u = acc_u + ve::select(none_of_above && state.world.pop_type_get_has_unemployment(types),
-			s_spending * (pop_of_type - employment) * (0.1f / state.defines.alice_needs_scaling_factor) * unemp_level * ln_costs, 0.0f);
+			s_spending * (pop_of_type - employment) * (0.01f / state.defines.alice_needs_scaling_factor) * unemp_level * ln_costs, 0.0f);
 
 		state.world.pop_set_savings(ids, state.world.pop_get_savings(ids) + ((acc_e + acc_m) + (acc_u + acc_a)));
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_e);
@@ -4072,7 +4072,7 @@ float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, 
 			total += adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 	});
-	return total * (0.1f / state.defines.alice_needs_scaling_factor);
+	return total * (0.01f / state.defines.alice_needs_scaling_factor);
 }
 
 float estimate_tax_income_by_strata(sys::state& state, dcon::nation_id n, culture::pop_strata ps) {
@@ -4160,7 +4160,8 @@ float estimate_domestic_investment(sys::state& state, dcon::nation_id n) {
 		state.world.nation_get_life_needs_costs(n, state.culture_definitions.capitalists)
 		+ state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.capitalists)
 		+ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists);
-	return (adj_pop_of_type_capis * capis_costs + adj_pop_of_type_arist * arist_costs);
+	return (adj_pop_of_type_capis * capis_costs + adj_pop_of_type_arist * arist_costs)
+		/ (0.01f / state.defines.alice_needs_scaling_factor);
 }
 
 float estimate_land_spending(sys::state& state, dcon::nation_id n) {
