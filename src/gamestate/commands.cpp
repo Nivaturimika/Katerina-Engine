@@ -4363,7 +4363,7 @@ void execute_use_nation_button(sys::state& state, dcon::nation_id source, dcon::
 		effect::execute(state, def.data.button.scriptable_effect, trigger::to_generic(n), trigger::to_generic(n), trigger::to_generic(source), uint32_t(state.current_date.value), uint32_t(n.index() ^ (d.index() << 4)));
 }
 
-static void post_chat_message(sys::state& state, ui::chat_message& m) {
+void post_chat_message(sys::state& state, ui::chat_message& m) {
 	// Private message
 	bool can_see = true;
 	if(bool(m.target)) {
@@ -4614,6 +4614,11 @@ void execute_notify_save_loaded(sys::state& state, dcon::nation_id source, sys::
 	state.network_state.is_new_game = false;
 	state.network_state.out_of_sync = false;
 	state.network_state.reported_oos = false;
+
+	ui::chat_message m;
+	m.source = source;
+	m.body = text::produce_simple_string(state, "save_transfer_begin");
+	post_chat_message(state, m);
 }
 
 void notify_reload(sys::state& state, dcon::nation_id source) {
@@ -4651,6 +4656,11 @@ void execute_notify_reload(sys::state& state, dcon::nation_id source, sys::check
 	assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 	state.fill_unsaved_data();
 	assert(state.session_host_checksum.is_equal(state.get_save_checksum()));
+
+	ui::chat_message m;
+	m.source = source;
+	m.body = text::produce_simple_string(state, "multiplayer_notify_reload");
+	post_chat_message(state, m);
 }
 
 void execute_notify_start_game(sys::state& state, dcon::nation_id source) {

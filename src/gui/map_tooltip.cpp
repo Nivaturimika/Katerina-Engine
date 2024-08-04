@@ -955,7 +955,7 @@ void employment_map_tt_box(sys::state& state, text::columnar_layout& contents, d
 				employed += pl.get_pop().get_employment();
 			}
 		}
-		float ratio = total == 0.f ? 0.f : total / employed;
+		float ratio = total == 0.f ? 0.f : employed / total;
 		text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_total_employment"));
 		text::add_to_layout_box(state, contents, box, text::fp_percentage_one_place{ ratio },
 			(ratio >= 0.75f ? text::text_color::green
