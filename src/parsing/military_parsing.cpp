@@ -112,6 +112,12 @@ void make_unit(std::string_view name, token_generator& gen, error_handler& err, 
 		context.state.military_definitions.artillery = new_id;
 	}
 
+	// BASE 10 STAT FOR ATTACK AND DEF
+	if(context.state.military_definitions.unit_base_definitions.back().is_land) {
+		context.state.military_definitions.unit_base_definitions.back().attack_or_gun_power += 10.f;
+		context.state.military_definitions.unit_base_definitions.back().defence_or_hull += 10.f;
+	}
+
 	// by name
 	if(!bool(context.state.military_definitions.irregular) && name == "irregular") {
 		context.state.military_definitions.irregular = new_id;
