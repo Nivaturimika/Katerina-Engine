@@ -382,8 +382,16 @@ std::vector<uint32_t> employment_map_from(sys::state& state) {
 	state.world.for_each_province([&](dcon::province_id prov_id) {
 		auto nation = state.world.province_get_nation_from_province_ownership(prov_id);
 		if((sel_nation && nation == sel_nation) || !sel_nation) {
-			auto value = state.world.province_get_demographics(prov_id, demographics::employed) / state.world.province_get_demographics(prov_id, demographics::employable);
-			uint32_t color = ogl::color_gradient(value,
+			float total = 0.f;
+			float employed = 0.f;
+			for(const auto pl : state.world.province_get_pop_location(prov_id)) {
+				if(pl.get_pop().get_poptype() == state.culture_definitions.primary_factory_worker
+				|| pl.get_pop().get_poptype() == state.culture_definitions.secondary_factory_worker) {
+					total += pl.get_pop().get_size();
+					employed += pl.get_pop().get_employment();
+				}
+			}
+			uint32_t color = ogl::color_gradient(employed / total,
 				sys::pack_color(46, 247, 15), // green
 				sys::pack_color(247, 15, 15) // red
 			);
