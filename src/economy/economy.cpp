@@ -826,7 +826,10 @@ float global_market_price_multiplier(sys::state& state, dcon::nation_id n) {
 	auto central_ports = state.world.nation_get_central_ports(n);
 	auto tariff = float(state.world.nation_get_tariffs(n)) / 100.0f;
 	if(central_ports > 0) {
-		return 1.f + tariff + float(state.world.nation_get_central_blockaded(n)) / float(central_ports);
+		if(float(state.world.nation_get_central_blockaded(n)) > 0) {
+			return 1.f + tariff + float(state.world.nation_get_central_blockaded(n)) / float(central_ports);
+		}
+		return std::max(0.5f, 1.f + tariff - std::min(1.f, float(central_ports) / 4.f));
 	}
 	return 1.5f + tariff; //x1.5 for landlocked nations or w/o ports
 }
@@ -1055,7 +1058,8 @@ void update_rgo_employment(sys::state& state) {
 }
 
 float factory_max_employment(sys::state const& state, dcon::factory_id f) {
-	return state.defines.alice_factory_per_level_employment * state.world.factory_get_level(f);
+	return state.defines.alice_factory_per_level_employment / state.defines.alice_needs_scaling_factor
+		* state.world.factory_get_level(f);
 }
 
 float factory_primary_employment(sys::state const& state, dcon::factory_id f) {
@@ -1321,7 +1325,8 @@ float factory_e_input_total_cost(sys::state& state, dcon::nation_id n, dcon::fac
 float factory_input_multiplier(sys::state& state, dcon::factory_fat_id fac, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id s) {
 	float total_workers = factory_max_employment(state, fac);
 	float small_size_effect = 1.f;
-	float small_bound = state.defines.alice_factory_per_level_employment * 5.f;
+	float small_bound = 5.f
+		* state.defines.alice_factory_per_level_employment / state.defines.alice_needs_scaling_factor;
 	if(total_workers < small_bound) {
 		small_size_effect = 0.5f + total_workers / small_bound * 0.5f;
 	}
@@ -1388,7 +1393,7 @@ float update_factory_scale(sys::state& state, dcon::factory_fat_id fac, float ma
 			+ 10.f
 		);
 
-	float relative_modifier = (1 / (relative_production_amount + 0.01f)) / 1000.f;
+	float relative_modifier = (1.f / (relative_production_amount + 0.01f)) / 1000.f;
 
 	float effective_production_scale = 0.0f;
 	if(state.world.factory_get_subsidized(fac)) {
@@ -1461,7 +1466,8 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 		* state.world.commodity_get_current_price(fac_type.get_output());
 
 	//this value represents spendings if 1 lvl of this factory is filled with workers
-	float spendings = expected_min_wage * state.defines.alice_factory_per_level_employment
+	float spendings = expected_min_wage
+		* state.defines.alice_factory_per_level_employment / state.defines.alice_needs_scaling_factor
 		+ input_multiplier * throughput_multiplier * input_total * min_input_available
 		+ input_multiplier * e_input_total * min_e_input_available * min_input_available;
 
@@ -1540,7 +1546,7 @@ void update_single_factory_production(sys::state& state, dcon::factory_id f, dco
 			state.world.factory_set_full_profit(f, money_made);
 		} else {
 			float min_wages = expected_min_wage * fac.get_level() * fac.get_primary_employment()
-				* state.defines.alice_factory_per_level_employment;
+				* state.defines.alice_factory_per_level_employment / state.defines.alice_needs_scaling_factor;
 			if(money_made < min_wages) {
 				auto diff = min_wages - money_made;
 				if(state.world.nation_get_stockpiles(n, economy::money) > diff || can_take_loans(state, n)) {
@@ -2092,7 +2098,7 @@ float full_pop_spending_cost(sys::state& state, dcon::nation_id n) {
 		}
 		assert(std::isfinite(total) && total >= 0.0f);
 	});
-	total *= 100.f / state.defines.alice_needs_scaling_factor;
+	total *= (0.1f / state.defines.alice_needs_scaling_factor);
 	assert(std::isfinite(total) && total >= 0.0f);
 	return total;
 }
@@ -2763,6 +2769,8 @@ profit_distribution distribute_factory_profit(sys::state const & state, dcon::st
 }
 
 void daily_update(sys::state& state, bool initiate_buildings) {
+	state.defines.alice_needs_scaling_factor = 20000.f;
+
 	/* initialization parallel block */
 	concurrency::parallel_for(0, 10, [&](int32_t index) {
 		switch(index) {
@@ -3034,7 +3042,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto owner_spending = state.world.nation_get_spending_level(owners);
 
 		auto pop_of_type = state.world.pop_get_size(ids);
-		auto adj_pop_of_type = pop_of_type * (1.f / state.defines.alice_needs_scaling_factor);
+		auto adj_pop_of_type = pop_of_type * (0.1f / state.defines.alice_needs_scaling_factor);
 
 		auto const a_spending = owner_spending * ve::to_float(state.world.nation_get_administrative_spending(owners)) / 100.f;
 		auto const s_spending = owner_spending * state.world.nation_get_administrative_efficiency(owners) * ve::to_float(state.world.nation_get_social_spending(owners)) / 100.0f;
@@ -3085,7 +3093,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto employment = state.world.pop_get_employment(ids);
 
 		acc_u = acc_u + ve::select(none_of_above && state.world.pop_type_get_has_unemployment(types),
-			s_spending * (pop_of_type - employment) * (1.f / state.defines.alice_needs_scaling_factor) * unemp_level * ln_costs, 0.0f);
+			s_spending * (pop_of_type - employment) * (0.1f / state.defines.alice_needs_scaling_factor) * unemp_level * ln_costs, 0.0f);
 
 		state.world.pop_set_savings(ids, state.world.pop_get_savings(ids) + ((acc_e + acc_m) + (acc_u + acc_a)));
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_e);
@@ -4064,7 +4072,7 @@ float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, 
 			total += adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 	});
-	return total * (1.f / state.defines.alice_needs_scaling_factor);
+	return total * (0.1f / state.defines.alice_needs_scaling_factor);
 }
 
 float estimate_tax_income_by_strata(sys::state& state, dcon::nation_id n, culture::pop_strata ps) {
