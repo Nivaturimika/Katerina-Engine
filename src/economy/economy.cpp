@@ -3462,24 +3462,22 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto const poor_effect = float(state.world.nation_get_poor_tax(n)) / 100.0f;
 		auto const middle_effect = float(state.world.nation_get_middle_tax(n)) / 100.0f;
 		auto const rich_effect = float(state.world.nation_get_rich_tax(n)) / 100.0f;
-		auto const p_effect = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::pension_level);
 		assert(poor_effect >= 0.f && middle_effect >= 0.f && rich_effect >= 0.f);
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			auto province = p.get_province();
 			if(state.world.province_get_nation_from_province_ownership(province) == state.world.province_get_nation_from_province_control(province)) {
 				for(auto pl : province.get_pop_location()) {
-					float divisor = 1.f;
 					// Money drain when admin effectiveness is <100%
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
 					if(strata == culture::pop_strata::poor) {
-						total_poor_tax_base += pop_money * tax_eff * poor_effect / divisor;
+						total_poor_tax_base += pop_money * tax_eff * poor_effect;
 						pop_money -= pop_money * poor_effect;
 					} else if(strata == culture::pop_strata::middle) {
-						total_mid_tax_base += pop_money * tax_eff * middle_effect / divisor;
+						total_mid_tax_base += pop_money * tax_eff * middle_effect;
 						pop_money -= pop_money * middle_effect;
 					} else if(strata == culture::pop_strata::rich) {
-						total_rich_tax_base += pop_money * tax_eff * rich_effect / divisor;
+						total_rich_tax_base += pop_money * tax_eff * rich_effect;
 						pop_money -= pop_money * rich_effect;
 					}
 				}
