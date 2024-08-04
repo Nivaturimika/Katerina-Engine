@@ -422,12 +422,13 @@ void cancel_factory_building_construction(sys::state& state, dcon::nation_id sou
 	add_to_command_queue(state, p);
 }
 bool can_cancel_factory_building_construction(sys::state& state, dcon::nation_id source, dcon::state_instance_id location, dcon::factory_type_id type) {
+	auto rules = state.world.nation_get_combined_issue_rules(source);
 	for(auto c : state.world.state_instance_get_state_building_construction(location)) {
 		if(c.get_type() == type) {
-			//if(c.get_is_pop_project())
-			//	return false;
 			if(c.get_nation() != source)
 				return false;
+			if(!c.get_is_upgrade())
+				return (rules & issue_rule::destroy_factory) != 0;
 			return true;
 		}
 	}
@@ -437,11 +438,8 @@ void execute_cancel_factory_building_construction(sys::state& state, dcon::natio
 	for(auto c : state.world.state_instance_get_state_building_construction(location)) {
 		if(c.get_type() == type) {
 			// TODO: do some shit when it's a pop project!
-			//if(c.get_is_pop_project())
-			//	return;
 			if(c.get_nation() != source)
 				return;
-
 			state.world.delete_state_building_construction(c);
 			return;
 		}
@@ -656,8 +654,7 @@ bool can_start_land_unit_construction(sys::state& state, dcon::nation_id source,
 		return false;
 	if(state.world.province_get_nation_from_province_control(location) != source)
 		return false;
-	if(state.world.nation_get_active_unit(source, type) == false &&
-			state.military_definitions.unit_base_definitions[type].active == false)
+	if(state.world.nation_get_active_unit(source, type) == false && state.military_definitions.unit_base_definitions[type].active == false)
 		return false;
 	if(state.military_definitions.unit_base_definitions[type].primary_culture && soldier_culture != state.world.nation_get_primary_culture(source) && state.world.nation_get_accepted_cultures(source, soldier_culture) == false) {
 		return false;

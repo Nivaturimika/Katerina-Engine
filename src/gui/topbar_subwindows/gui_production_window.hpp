@@ -910,8 +910,14 @@ public:
 		auto v = retrieve<economy::new_factory>(state, parent);
 		auto sid = retrieve<dcon::state_instance_id>(state, parent);
 		for(auto c : state.world.state_instance_get_state_building_construction(sid)) {
-			if(c.get_type() == v.type && c.get_nation() == state.local_player_nation && c.get_is_pop_project()) {
-				text::add_line(state, contents, "warn_pop_project_cancel");
+			if(c.get_type() == v.type && c.get_nation() == state.local_player_nation) {
+				if(c.get_is_pop_project()) {
+					text::add_line(state, contents, "warn_pop_project_cancel");
+				}
+				if(!c.get_is_upgrade()) {
+					auto rules = state.world.nation_get_combined_issue_rules(state.local_player_nation);
+					text::add_line_with_condition(state, contents, "rules_destroy_factory", (rules & issue_rule::destroy_factory) != 0);
+				}
 				break;
 			}
 		}
