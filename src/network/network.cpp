@@ -605,7 +605,7 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 			c.data.notify_save_loaded.target = client.playing_as;
 			network::broadcast_save_to_clients(state, c, state.network_state.current_save_buffer.get(), state.network_state.current_save_length, state.network_state.current_save_checksum);
 #ifndef NDEBUG
-			state.console_log("host:send:cmd: (new(2)->save_loaded)");
+			OutputDebugStringA("host:send:cmd: (new(2)->save_loaded)");
 #endif
 		}
 		{ /* Tell this client about every other client */
@@ -619,14 +619,15 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 					broadcast_to_clients(state, c);
 					command::execute_command(state, c);
 #ifndef NDEBUG
-					state.console_log("host:send:cmd: (new(2)->self_join)");
+					OutputDebugStringA("host:send:cmd: (new(2)->self_join)");
 #endif
 				} else if(n.get_is_player_controlled()) {
 					c.source = n;
 					c.data.player_name = state.network_state.map_of_player_names[n.id.index()];
 					socket_add_to_send_queue(client.send_buffer, &c, sizeof(c));
 #ifndef NDEBUG
-					state.console_log("host:send:cmd: (new(2)->others_join) " + std::to_string(n.id.index()));
+					auto msg = ("host:send:cmd: (new(2)->others_join) " + std::to_string(n.id.index()));
+					OutputDebugStringA(msg.c_str());
 #endif
 				}
 			}
@@ -643,14 +644,15 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 					broadcast_to_clients(state, c);
 					command::execute_command(state, c);
 #ifndef NDEBUG
-					state.console_log("host:send:cmd: (new->self_join)");
+					OutputDebugStringA("host:send:cmd: (new->self_join)");
 #endif
 				} else if(n.get_is_player_controlled()) {
 					c.source = n;
 					c.data.player_name = state.network_state.map_of_player_names[n.id.index()];
 					socket_add_to_send_queue(client.send_buffer, &c, sizeof(c));
 #ifndef NDEBUG
-					state.console_log("host:send:cmd: (new->others_join) " + std::to_string(n.id.index()));
+					auto msg = ("host:send:cmd: (new->others_join) " + std::to_string(n.id.index()));
+					OutputDebugStringA(msg.c_str());
 #endif
 				}
 			}
@@ -684,7 +686,7 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 					if(other_client.playing_as != client.playing_as) {
 						socket_add_to_send_queue(other_client.send_buffer, &c, sizeof(c));
 #ifndef NDEBUG
-						state.console_log("host:send:cmd: (new->reload)");
+						OutputDebugStringA("host:send:cmd: (new->reload)");
 #endif
 					}
 				}
@@ -697,7 +699,7 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 				c.data.notify_save_loaded.target = client.playing_as;
 				network::broadcast_save_to_clients(state, c, state.network_state.current_save_buffer.get(), state.network_state.current_save_length, state.network_state.current_save_checksum);
 #ifndef NDEBUG
-				state.console_log("host:send:cmd: (new->save_loaded)");
+				OutputDebugStringA("host:send:cmd: (new->save_loaded)");
 #endif
 			}
 		}
@@ -708,7 +710,7 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 			c.source = state.local_player_nation;
 			socket_add_to_send_queue(client.send_buffer, &c, sizeof(c));
 #ifndef NDEBUG
-			state.console_log("host:send:cmd: (new->start_game)");
+			OutputDebugStringA("host:send:cmd: (new->start_game)");
 #endif
 		}
 	}
@@ -758,13 +760,15 @@ static void receive_from_clients(sys::state& state) {
 					break;
 				}
 #ifndef NDEBUG
-				state.console_log("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer.type)));
+				auto msg = ("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer.type)));
+				OutputDebugStringA(msg.c_str());
 #endif
 			});
 		}
 		if(r != 0) { // error
 #if !defined(NDEBUG) && defined(_WIN32)
-			state.console_log("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+			auto msg = ("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+			OutputDebugStringA(msg.c_str());
 #endif
 			network::disconnect_client(state, client, false);
 		}
@@ -804,7 +808,8 @@ void broadcast_save_to_clients(sys::state& state, command::payload& c, uint8_t c
 			client.save_stream_offset = client.total_sent_bytes + client.send_buffer.size();
 			socket_add_to_send_queue(client.send_buffer, buffer, size_t(length));
 #ifndef NDEBUG
-			state.console_log("host:send:save: " + std::to_string(uint32_t(length)));
+			auto msg = ("host:send:save: " + std::to_string(uint32_t(length)));
+			OutputDebugStringA(msg.c_str());
 #endif
 		}
 	}
@@ -859,7 +864,8 @@ static void accept_new_clients(sys::state& state) {
 			socket_add_to_send_queue(client.early_send_buffer, &hshake, sizeof(hshake));
 		}
 #ifndef NDEBUG
-		state.console_log("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index()));
+		auto msg = ("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index()));
+		OutputDebugStringA(msg.c_str());
 #endif
 		return;
 	}
@@ -886,7 +892,8 @@ void send_and_receive_commands(sys::state& state) {
 				command::execute_command(state, *c);
 				command_executed = true;
 #ifndef NDEBUG
-				state.console_log("host:receive:cmd: " + std::to_string(uint32_t(c->type)));
+				auto msg = ("host:receive:cmd: " + std::to_string(uint32_t(c->type)));
+				OutputDebugStringA(msg.c_str());
 #endif
 			}
 			state.network_state.outgoing_commands.pop();
@@ -905,15 +912,18 @@ void send_and_receive_commands(sys::state& state) {
 					int r = socket_send(client.socket_fd, client.early_send_buffer);
 					if(r != 0) { // error
 #if !defined(NDEBUG) && defined(_WIN32)
-						state.console_log("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+						auto msg = ("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+						OutputDebugStringA(msg.c_str());
 #endif
 						disconnect_client(state, client, false);
 						continue;
 					}
 					client.total_sent_bytes += old_size - client.early_send_buffer.size();
 #ifndef NDEBUG
-					if(old_size != client.early_send_buffer.size())
-						state.console_log("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
+					if(old_size != client.early_send_buffer.size()) {
+						auto msg = ("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
+						OutputDebugStringA(msg.c_str());
+					}
 #endif
 				}
 			} else {
@@ -922,15 +932,18 @@ void send_and_receive_commands(sys::state& state) {
 					int r = socket_send(client.socket_fd, client.send_buffer);
 					if(r != 0) { // error
 #if !defined(NDEBUG) && defined(_WIN32)
-						state.console_log("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+						auto msg = ("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
+						OutputDebugStringA(msg.c_str());
 #endif
 						disconnect_client(state, client, false);
 						continue;
 					}
 					client.total_sent_bytes += old_size - client.send_buffer.size();
 #ifndef NDEBUG
-					if(old_size != client.send_buffer.size())
-						state.console_log("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
+					if(old_size != client.send_buffer.size()) {
+						auto msg = ("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
+						OutputDebugStringA(msg.c_str());
+					}
 #endif
 				}
 			}
@@ -940,7 +953,7 @@ void send_and_receive_commands(sys::state& state) {
 			/* Send our client's handshake */
 			int r = socket_recv(state.network_state.socket_fd, &state.network_state.s_hshake, sizeof(state.network_state.s_hshake), &state.network_state.recv_count, [&]() {
 #ifndef NDEBUG
-				state.console_log("client:recv:handshake: OK");
+				OutputDebugStringA("client:recv:handshake: OK");
 #endif
 				if(!state.scenario_checksum.is_equal(state.network_state.s_hshake.scenario_checksum)) {
 					bool found_match = false;
@@ -1001,7 +1014,8 @@ void send_and_receive_commands(sys::state& state) {
 		} else if(state.network_state.save_stream) {
 			int r = socket_recv(state.network_state.socket_fd, state.network_state.save_data.data(), state.network_state.save_data.size(), &state.network_state.recv_count, [&]() {
 #ifndef NDEBUG
-				state.console_log("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size())));
+				auto msg = ("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size())));
+				OutputDebugStringA(msg.c_str());
 #endif
 				std::vector<dcon::nation_id> players;
 				for(const auto n : state.world.in_nation)
@@ -1050,7 +1064,8 @@ void send_and_receive_commands(sys::state& state) {
 					state.network_state.save_data.resize(static_cast<size_t>(save_size));
 				}
 #ifndef NDEBUG
-				state.console_log("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer.type)));
+				auto msg = ("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer.type)));
+				OutputDebugStringA(msg.c_str());
 #endif
 			});
 			if(r != 0) { // error
@@ -1062,7 +1077,8 @@ void send_and_receive_commands(sys::state& state) {
 			auto* c = state.network_state.outgoing_commands.front();
 			while(c) {
 #ifndef NDEBUG
-				state.console_log("client:send:cmd: " + std::to_string(uint32_t(c->type)));
+				auto msg = ("client:send:cmd: " + std::to_string(uint32_t(c->type)));
+				OutputDebugStringA(msg.c_str());
 #endif
 				if(c->type == command::command_type::save_game) {
 					command::execute_command(state, *c);
