@@ -721,13 +721,44 @@ public:
 	}
 };
 
+class checksum_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		std::string s;
+		s += std::string(__TIME__);
+		s += "-";
+		uint32_t i_checksum = 0;
+		for(uint32_t i = 0; i < state.session_host_checksum.key_size; i++) {
+			i_checksum += state.session_host_checksum.key[i];
+		}
+		static const std::string_view alnum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		s += alnum[(i_checksum >> 0) % alnum.size()];
+		s += alnum[(i_checksum >> 2) % alnum.size()];
+		s += alnum[(i_checksum >> 4) % alnum.size()];
+		s += alnum[(i_checksum >> 6) % alnum.size()];
+		s += alnum[(i_checksum >> 8) % alnum.size()];
+		s += alnum[(i_checksum >> 10) % alnum.size()];
+		s += alnum[(i_checksum >> 12) % alnum.size()];
+		s += alnum[(i_checksum >> 14) % alnum.size()];
+		s += alnum[(i_checksum >> 16) % alnum.size()];
+		s += alnum[(i_checksum >> 18) % alnum.size()];
+		s += alnum[(i_checksum >> 20) % alnum.size()];
+		s += alnum[(i_checksum >> 22) % alnum.size()];
+		s += alnum[(i_checksum >> 24) % alnum.size()];
+		s += alnum[(i_checksum >> 26) % alnum.size()];
+		s += alnum[(i_checksum >> 28) % alnum.size()];
+		s += alnum[(i_checksum >> 30) % alnum.size()];
+		set_text(state, s);
+	}
+};
+
 class nation_picker_multiplayer_window : public window_element_base {
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "multiplayer_list") {
 			return make_element_by_type<nation_picker_multiplayer_listbox>(state, id);
 		} else if(name == "checksum") {
-			return make_element_by_type<simple_text_element_base>(state, id);
+			return make_element_by_type<checksum_text>(state, id);
 		} else if(name == "num_players") {
 			return make_element_by_type<number_of_players_text>(state, id);
 		}
