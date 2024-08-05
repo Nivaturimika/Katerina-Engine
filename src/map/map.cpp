@@ -23,6 +23,42 @@
 #include "province_templates.hpp"
 
 #include "xac.hpp"
+
+emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material const& mat) {
+	for(const auto& layer : mat.layers) {
+		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec") {
+			continue;
+		}
+		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse) {
+			return layer;
+		}
+	}
+	return mat.layers.empty()
+		? emfx::xac_pp_actor_material_layer{}
+	: mat.layers[0];
+}
+glm::mat4x4 get_matrix_from_properties(emfx::xac_vector3f const& vt, emfx::xac_vector3f const& vs, emfx::xac_vector4f const& vr, emfx::xac_vector4f const& vq) {
+	glm::vec3 gvt(vt.x, vt.y, vt.z);
+	glm::vec3 gvs(vs.x, vs.y, vs.z);
+	glm::quat gvr(vr.x, vr.y, vr.z, vr.w);
+	glm::mat4x4 basis = glm::translate(gvt);
+	basis = glm::scale(basis, gvs);
+	return basis;
+	//return glm::translate(glm::scale(glm::toMat4(gvr), gvs), gvt);
+}
+glm::mat4x4 get_matrix_from_node(emfx::xac_pp_actor_node const& node) {
+	return get_matrix_from_properties(node.position, node.scale, node.rotation, node.scale_rotation);
+}
+glm::mat4x4 get_upwards_hierachy_matrix(emfx::xac_context const& context, emfx::xac_pp_actor_node const& node) {
+	glm::mat4x4 m1 = get_matrix_from_node(node);
+	if(node.parent_id != -1) {
+		auto const& parent = context.nodes[node.parent_id];
+		glm::mat4x4 m2 = get_upwards_hierachy_matrix(context, parent);
+		return m1 * m2;
+	}
+	return m1;
+}
+
 namespace duplicates {
 glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
 	auto pt = state.world.province_get_port_to(p);
@@ -452,6 +488,13 @@ void display_data::load_shaders(simple_fs::directory& root) {
 }
 
 static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
+	glm::vec3 pose_pos(an.pose_position.x, an.pose_position.y, an.pose_position.z);
+	glm::vec3 pose_sca(an.pose_scale.x, an.pose_scale.y, an.pose_scale.z);
+	glm::quat pose_rot(an.pose_rotation.x, an.pose_rotation.y, an.pose_rotation.z, an.pose_rotation.w);
+	glm::quat pose_rsc(an.pose_scale_rotation.x, an.pose_scale_rotation.y, an.pose_scale_rotation.z, an.pose_scale_rotation.w);
+	glm::mat4x4 bone_basis = get_matrix_from_properties(an.pose_position, an.pose_scale, an.pose_rotation, an.pose_scale_rotation);
+	glm::mat4x4 basis = bone_basis * an.bone_matrix;
+
 	float anim_time = std::fmod(time_counter, an.total_anim_time);
 	//
 	auto pos_index = an.get_position_key_index(anim_time);
@@ -506,7 +549,8 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 		)
 	));
 	// Rotation is fine, the halo above units works kosher
-	return ms * mr * mt;
+	return ((mt * ms) * mr) * basis;
+	//return basis;
 }
 
 void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at, sys::projection_mode map_view_mode) {
@@ -555,8 +599,10 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-
 	glDepthRangef(0.f, 1.f);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if(ogl::msaa_enabled(state)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, state.open_gl.msaa_framebuffer);
@@ -947,48 +993,48 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				load_shader(shader_line_unit_arrow);
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_line_unit_arrow][uniform_border_width], 0.0035f); //width
 				glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_line_unit_arrow][uniform_unit_arrow], 0);
-			}
-			if(!unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_unit_arrow]);
-				glBindVertexArray(vao_array[vo_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, unit_arrow_starts.data(), unit_arrow_counts.data(), (GLsizei)unit_arrow_counts.size());
-			}
-			if(!attack_unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_attack_unit_arrow]);
-				glBindVertexArray(vao_array[vo_attack_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_attack_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, attack_unit_arrow_starts.data(), attack_unit_arrow_counts.data(), (GLsizei)attack_unit_arrow_counts.size());
-			}
-			if(!retreat_unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_retreat_unit_arrow]);
-				glBindVertexArray(vao_array[vo_retreat_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_retreat_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, retreat_unit_arrow_starts.data(), retreat_unit_arrow_counts.data(), (GLsizei)retreat_unit_arrow_counts.size());
-			}
-			if(!strategy_unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_strategy_unit_arrow]);
-				glBindVertexArray(vao_array[vo_strategy_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_strategy_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, strategy_unit_arrow_starts.data(), strategy_unit_arrow_counts.data(), (GLsizei)strategy_unit_arrow_counts.size());
-			}
-			if(!objective_unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_objective_unit_arrow]);
-				glBindVertexArray(vao_array[vo_objective_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_objective_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, objective_unit_arrow_starts.data(), objective_unit_arrow_counts.data(), (GLsizei)objective_unit_arrow_counts.size());
-			}
-			if(!other_objective_unit_arrow_vertices.empty()) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, textures[texture_other_objective_unit_arrow]);
-				glBindVertexArray(vao_array[vo_other_objective_unit_arrow]);
-				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_other_objective_unit_arrow]);
-				glMultiDrawArrays(GL_TRIANGLE_STRIP, other_objective_unit_arrow_starts.data(), other_objective_unit_arrow_counts.data(), (GLsizei)retreat_unit_arrow_counts.size());
+				if(!unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_unit_arrow]);
+					glBindVertexArray(vao_array[vo_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, unit_arrow_starts.data(), unit_arrow_counts.data(), (GLsizei)unit_arrow_counts.size());
+				}
+				if(!attack_unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_attack_unit_arrow]);
+					glBindVertexArray(vao_array[vo_attack_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_attack_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, attack_unit_arrow_starts.data(), attack_unit_arrow_counts.data(), (GLsizei)attack_unit_arrow_counts.size());
+				}
+				if(!retreat_unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_retreat_unit_arrow]);
+					glBindVertexArray(vao_array[vo_retreat_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_retreat_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, retreat_unit_arrow_starts.data(), retreat_unit_arrow_counts.data(), (GLsizei)retreat_unit_arrow_counts.size());
+				}
+				if(!strategy_unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_strategy_unit_arrow]);
+					glBindVertexArray(vao_array[vo_strategy_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_strategy_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, strategy_unit_arrow_starts.data(), strategy_unit_arrow_counts.data(), (GLsizei)strategy_unit_arrow_counts.size());
+				}
+				if(!objective_unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_objective_unit_arrow]);
+					glBindVertexArray(vao_array[vo_objective_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_objective_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, objective_unit_arrow_starts.data(), objective_unit_arrow_counts.data(), (GLsizei)objective_unit_arrow_counts.size());
+				}
+				if(!other_objective_unit_arrow_vertices.empty()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textures[texture_other_objective_unit_arrow]);
+					glBindVertexArray(vao_array[vo_other_objective_unit_arrow]);
+					glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_other_objective_unit_arrow]);
+					glMultiDrawArrays(GL_TRIANGLE_STRIP, other_objective_unit_arrow_starts.data(), other_objective_unit_arrow_counts.data(), (GLsizei)retreat_unit_arrow_counts.size());
+				}
 			}
 		}
 
@@ -1264,6 +1310,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 	}
 	glBindVertexArray(0);
 	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
 	if(ogl::msaa_enabled(state)) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, state.open_gl.msaa_framebuffer);
@@ -2168,20 +2215,6 @@ GLuint load_dds_texture(simple_fs::directory const& dir, native_string_view file
 	return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
 }
 
-emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material const& mat) {
-	for(const auto& layer : mat.layers) {
-		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec") {
-			continue;
-		}
-		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse) {
-			return layer;
-		}
-	}
-	return mat.layers.empty()
-		? emfx::xac_pp_actor_material_layer{}
-		: mat.layers[0];
-}
-
 void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
 	auto root = simple_fs::get_root(state.common_fs);
 	emfx::xsm_context anim_context{};
@@ -2213,11 +2246,10 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 			for(uint32_t i = 0; i < model_context.nodes.size(); i++) {
 				if(t_anim.node == model_context.nodes[i].name) {
 					t_anim.bone_id = int32_t(i);
+					t_anim.bone_matrix = get_upwards_hierachy_matrix(model_context, model_context.nodes[i]);
+					state.map_state.map_data.animations.push_back(t_anim);
 					break;
 				}
-			}
-			if(t_anim.bone_id != -1) {
-				state.map_state.map_data.animations.push_back(t_anim);
 			}
 		}
 		switch(at) {

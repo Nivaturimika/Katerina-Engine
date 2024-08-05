@@ -718,65 +718,37 @@ void finish(xac_context& context) {
 	// Post-proccessing step: Transform ALL vectors using the given matrices
 	// for rotation and position, and scale too!
 	for(auto& node : context.nodes) {
-		for(auto& o : node.meshes) {
-			/*glm::quat r(node.rotation.x, node.rotation.y, node.rotation.z, node.rotation.w);
-			glm::quat q(node.scale_rotation.x, node.scale_rotation.y, node.scale_rotation.z, node.scale_rotation.w);
-			glm::vec3 p(node.position.x, node.position.y, node.position.z);
-			glm::vec3 s(node.scale.x, node.scale.y, node.scale.z);
-
-			for(uint32_t i = 0; i < o.vertices.size(); i++) {
-				emfx::xac_vector3f v = o.vertices[i];
-
-				glm::vec3 t1(v.x, v.y, v.z);
-				auto t2 = glm::translate(glm::scale(glm::toMat4(q), s), p) * glm::vec4(t1, 1.f);
-				//
-				v.x = t2.x;
-				v.y = t2.y;
-				v.z = t2.z;
-
-				o.vertices[i] = v;
-			}*/
-			/*
-			const emfx::xac_vector4f q = node.rotation;
-			const emfx::xac_mat4x4 qm{
-				2.f * (q.x * q.x + q.y * q.y) - 1.f, //0 * 4 + 0 = 0
-				2.f * (q.y * q.z - q.x * q.w), //0 * 4 + 1 = 1
-				2.f * (q.y * q.w + q.x * q.z), //0 * 4 + 2 = 2
-				0.f, //0 * 4 + 3 = 3
-				2.f * (q.y * q.z + q.x * q.w), //1 * 4 + 0 = 4
-				2.f * (q.x * q.x + q.z * q.z) - 1.f, //1 * 4 + 1 = 5
-				2.f * (q.z * q.w - q.x * q.y), //1 * 4 + 2 = 6
-				0.f, //1 * 4 + 3 = 7
-				2.f * (q.y * q.w - q.x * q.z), //2 * 4 + 0 = 8
-				2.f * (q.z * q.w + q.x * q.y), //2 * 4 + 1 = 9
-				2.f * (q.x * q.x + q.w * q.w) - 1.f, //2 * 4 + 2 = 10
-				0.f, //2 * 4 + 3 = 11
-			};
-			const emfx::xac_mat4x4 tm{
-				qm.m[0][0] * node.scale.x, //0 * 4 + 0 = 0
-				qm.m[0][1] * node.scale.y, //0 * 4 + 1 = 1
-				qm.m[0][2] * node.scale.z, //0 * 4 + 2 = 2
-				node.position.x, //0 * 4 + 3 = 3
-				qm.m[1][0] * node.scale.x, //1 * 4 + 0 = 4
-				qm.m[1][1] * node.scale.y, //1 * 4 + 1 = 5
-				qm.m[1][2] * node.scale.z, //1 * 4 + 2 = 6
-				node.position.y, //1 * 4 + 3 = 7
-				qm.m[2][0] * node.scale.x, //2 * 4 + 0 = 8
-				qm.m[2][1] * node.scale.y, //2 * 4 + 1 = 9
-				qm.m[2][2] * node.scale.z, //2 * 4 + 2 = 10
-				node.position.z, //2 * 4 + 3 = 11
-			};
-			float w = 1.f;
-			for(uint32_t i = 0; i < o.vertices.size(); i++) {
-				emfx::xac_vector3f v = o.vertices[i];
-				v.x = tm.m[0][0] * v.x + tm.m[0][1] * v.y + tm.m[0][2] * v.z + tm.m[0][3] * w;
-				v.y = tm.m[1][0] * v.x + tm.m[1][1] * v.y + tm.m[1][2] * v.z + tm.m[1][3] * w;
-				v.z = tm.m[2][0] * v.x + tm.m[2][1] * v.y + tm.m[2][2] * v.z + tm.m[2][3] * w;
-				//v.w = tm.m[3][0] * v.x + tm.m[3][1] * v.y + tm.m[3][2] * v.z + tm.m[3][3] * w;
-				o.vertices[i] = v;
-			}
-			*/
-		}
+		/*
+		const emfx::xac_vector4f q = node.rotation;
+		const emfx::xac_mat4x4 qm{
+			2.f * (q.x * q.x + q.y * q.y) - 1.f, //0 * 4 + 0 = 0
+			2.f * (q.y * q.z - q.x * q.w), //0 * 4 + 1 = 1
+			2.f * (q.y * q.w + q.x * q.z), //0 * 4 + 2 = 2
+			0.f, //0 * 4 + 3 = 3
+			2.f * (q.y * q.z + q.x * q.w), //1 * 4 + 0 = 4
+			2.f * (q.x * q.x + q.z * q.z) - 1.f, //1 * 4 + 1 = 5
+			2.f * (q.z * q.w - q.x * q.y), //1 * 4 + 2 = 6
+			0.f, //1 * 4 + 3 = 7
+			2.f * (q.y * q.w - q.x * q.z), //2 * 4 + 0 = 8
+			2.f * (q.z * q.w + q.x * q.y), //2 * 4 + 1 = 9
+			2.f * (q.x * q.x + q.w * q.w) - 1.f, //2 * 4 + 2 = 10
+			0.f, //2 * 4 + 3 = 11
+		};
+		const emfx::xac_mat4x4 tm{
+			qm.m[0][0] * node.scale.x, //0 * 4 + 0 = 0
+			qm.m[0][1] * node.scale.y, //0 * 4 + 1 = 1
+			qm.m[0][2] * node.scale.z, //0 * 4 + 2 = 2
+			node.position.x, //0 * 4 + 3 = 3
+			qm.m[1][0] * node.scale.x, //1 * 4 + 0 = 4
+			qm.m[1][1] * node.scale.y, //1 * 4 + 1 = 5
+			qm.m[1][2] * node.scale.z, //1 * 4 + 2 = 6
+			node.position.y, //1 * 4 + 3 = 7
+			qm.m[2][0] * node.scale.x, //2 * 4 + 0 = 8
+			qm.m[2][1] * node.scale.y, //2 * 4 + 1 = 9
+			qm.m[2][2] * node.scale.z, //2 * 4 + 2 = 10
+			node.position.z, //2 * 4 + 3 = 11
+		};
+		*/
 	}
 }
 

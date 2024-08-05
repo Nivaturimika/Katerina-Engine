@@ -430,6 +430,9 @@ struct xsm_animation {
 	float max_error = 0.f;
 	int32_t bone_id = -1; //assigned by processer
 
+	glm::mat4x4 bone_matrix = glm::mat4x4(1.f);
+	glm::mat4x4 parent_matrix = glm::mat4x4(1.f);
+
 	float total_anim_time = 0.f;
 	float total_position_anim_time = 0.f;
 	float total_rotation_anim_time = 0.f;
