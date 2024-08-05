@@ -3041,7 +3041,7 @@ void country_file::graphical_culture(association_type, std::string_view value, e
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "generic")) {
 		t = ::culture::graphical_culture_type::generic;
 	} else {
-		err.accumulated_errors += "Unknown graphical culture " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+		err.accumulated_warnings += "Unknown graphical culture " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 	}
 	context.outer_context.state.world.national_identity_set_graphical_culture(context.id, uint8_t(t));
 }

@@ -6,121 +6,6 @@
 
 namespace command {
 
-#define GS_COMMAND_LIST \
-	GS_COMMAND_LIST_ENTRY(invalid, no_data) \
-	GS_COMMAND_LIST_ENTRY(set_rally_point, rally_point) \
-	GS_COMMAND_LIST_ENTRY(save_game, save_game) \
-	GS_COMMAND_LIST_ENTRY(change_nat_focus, change_nat_focus) \
-	GS_COMMAND_LIST_ENTRY(start_research, start_research) \
-	GS_COMMAND_LIST_ENTRY(make_leader, make_leader) \
-	GS_COMMAND_LIST_ENTRY(war_subsidies, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(cancel_war_subsidies, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(increase_relations, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(decrease_relations, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(begin_province_building_construction, start_province_building) \
-	GS_COMMAND_LIST_ENTRY(cancel_factory_building_construction, start_factory_building) \
-	GS_COMMAND_LIST_ENTRY(begin_factory_building_construction, start_factory_building) \
-	GS_COMMAND_LIST_ENTRY(begin_naval_unit_construction, naval_unit_construction) \
-	GS_COMMAND_LIST_ENTRY(begin_land_unit_construction, land_unit_construction) \
-	GS_COMMAND_LIST_ENTRY(cancel_naval_unit_construction, naval_unit_construction) \
-	GS_COMMAND_LIST_ENTRY(cancel_land_unit_construction, land_unit_construction) \
-	GS_COMMAND_LIST_ENTRY(delete_factory, factory) \
-	GS_COMMAND_LIST_ENTRY(change_factory_settings, factory) \
-	GS_COMMAND_LIST_ENTRY(make_vassal, tag_target) \
-	GS_COMMAND_LIST_ENTRY(release_and_play_nation, tag_target) \
-	GS_COMMAND_LIST_ENTRY(change_budget, budget_data) \
-	GS_COMMAND_LIST_ENTRY(start_election, no_data) \
-	GS_COMMAND_LIST_ENTRY(change_influence_priority, influence_priority) \
-	GS_COMMAND_LIST_ENTRY(discredit_advisors, influence_action) \
-	GS_COMMAND_LIST_ENTRY(expel_advisors, influence_action) \
-	GS_COMMAND_LIST_ENTRY(ban_embassy, influence_action) \
-	GS_COMMAND_LIST_ENTRY(increase_opinion, influence_action) \
-	GS_COMMAND_LIST_ENTRY(decrease_opinion, influence_action) \
-	GS_COMMAND_LIST_ENTRY(add_to_sphere, influence_action) \
-	GS_COMMAND_LIST_ENTRY(remove_from_sphere, influence_action) \
-	GS_COMMAND_LIST_ENTRY(upgrade_colony_to_state, generic_location) \
-	GS_COMMAND_LIST_ENTRY(invest_in_colony, generic_location) \
-	GS_COMMAND_LIST_ENTRY(abandon_colony, generic_location) \
-	GS_COMMAND_LIST_ENTRY(finish_colonization, generic_location) \
-	GS_COMMAND_LIST_ENTRY(intervene_in_war, war_target) \
-	GS_COMMAND_LIST_ENTRY(suppress_movement, movement) \
-	GS_COMMAND_LIST_ENTRY(civilize_nation, no_data) \
-	GS_COMMAND_LIST_ENTRY(appoint_ruling_party, political_party) \
-	GS_COMMAND_LIST_ENTRY(change_reform_option, reform_selection) \
-	GS_COMMAND_LIST_ENTRY(change_issue_option, issue_selection) \
-	GS_COMMAND_LIST_ENTRY(become_interested_in_crisis, no_data) \
-	GS_COMMAND_LIST_ENTRY(take_sides_in_crisis, crisis_join) \
-	GS_COMMAND_LIST_ENTRY(change_stockpile_settings, stockpile_settings) \
-	GS_COMMAND_LIST_ENTRY(take_decision, decision) \
-	GS_COMMAND_LIST_ENTRY(make_n_event_choice, pending_human_n_event) \
-	GS_COMMAND_LIST_ENTRY(make_f_n_event_choice, pending_human_f_n_event) \
-	GS_COMMAND_LIST_ENTRY(make_p_event_choice, pending_human_p_event) \
-	GS_COMMAND_LIST_ENTRY(make_f_p_event_choice, pending_human_f_p_event) \
-	GS_COMMAND_LIST_ENTRY(fabricate_cb, cb_fabrication) \
-	GS_COMMAND_LIST_ENTRY(cancel_cb_fabrication, no_data) \
-	GS_COMMAND_LIST_ENTRY(ask_for_military_access, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(give_military_access, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(ask_for_alliance, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(toggle_interested_in_alliance, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(state_transfer, state_transfer) \
-	GS_COMMAND_LIST_ENTRY(call_to_arms, call_to_arms) \
-	GS_COMMAND_LIST_ENTRY(respond_to_diplomatic_message, message) \
-	GS_COMMAND_LIST_ENTRY(cancel_military_access, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(cancel_given_military_access, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(cancel_alliance, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(declare_war, new_war) \
-	GS_COMMAND_LIST_ENTRY(add_war_goal, new_war_goal) \
-	GS_COMMAND_LIST_ENTRY(start_peace_offer, new_offer) \
-	GS_COMMAND_LIST_ENTRY(start_crisis_peace_offer, new_offer) \
-	GS_COMMAND_LIST_ENTRY(add_peace_offer_term, offer_wargoal) \
-	GS_COMMAND_LIST_ENTRY(add_wargoal_to_crisis_offer, crisis_invitation) \
-	GS_COMMAND_LIST_ENTRY(send_peace_offer, no_data) \
-	GS_COMMAND_LIST_ENTRY(send_crisis_peace_offer, no_data) \
-	GS_COMMAND_LIST_ENTRY(move_army, army_movement) \
-	GS_COMMAND_LIST_ENTRY(move_navy, navy_movement) \
-	GS_COMMAND_LIST_ENTRY(embark_army, army_movement) \
-	GS_COMMAND_LIST_ENTRY(merge_armies, merge_army) \
-	GS_COMMAND_LIST_ENTRY(merge_navies, merge_navy) \
-	GS_COMMAND_LIST_ENTRY(disband_undermanned, army_movement) \
-	GS_COMMAND_LIST_ENTRY(toggle_hunt_rebels, army_movement) \
-	GS_COMMAND_LIST_ENTRY(toggle_unit_ai_control, army_movement) \
-	GS_COMMAND_LIST_ENTRY(toggle_mobilized_is_ai_controlled, no_data) \
-	GS_COMMAND_LIST_ENTRY(toggle_select_province, generic_location) \
-	GS_COMMAND_LIST_ENTRY(toggle_immigrator_province, generic_location) \
-	GS_COMMAND_LIST_ENTRY(release_subject, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(even_split_army, army_movement) \
-	GS_COMMAND_LIST_ENTRY(even_split_navy, navy_movement) \
-	GS_COMMAND_LIST_ENTRY(split_army, army_movement) \
-	GS_COMMAND_LIST_ENTRY(split_navy, navy_movement) \
-	GS_COMMAND_LIST_ENTRY(delete_army, army_movement) \
-	GS_COMMAND_LIST_ENTRY(delete_navy, navy_movement) \
-	GS_COMMAND_LIST_ENTRY(change_general, new_general) \
-	GS_COMMAND_LIST_ENTRY(change_admiral, new_admiral) \
-	GS_COMMAND_LIST_ENTRY(designate_split_regiments, split_regiments) \
-	GS_COMMAND_LIST_ENTRY(designate_split_ships, split_ships) \
-	GS_COMMAND_LIST_ENTRY(naval_retreat, naval_battle) \
-	GS_COMMAND_LIST_ENTRY(land_retreat, land_battle) \
-	GS_COMMAND_LIST_ENTRY(invite_to_crisis, crisis_invitation) \
-	GS_COMMAND_LIST_ENTRY(toggle_mobilization, no_data) \
-	GS_COMMAND_LIST_ENTRY(enable_debt, no_data) \
-	GS_COMMAND_LIST_ENTRY(move_capital, generic_location) \
-	GS_COMMAND_LIST_ENTRY(pbutton_script, pbutton) \
-	GS_COMMAND_LIST_ENTRY(nbutton_script, nbutton) \
-	GS_COMMAND_LIST_ENTRY(chat_message, chat_message) \
-	GS_COMMAND_LIST_ENTRY(notify_player_joins, player_name) \
-	GS_COMMAND_LIST_ENTRY(notify_player_leaves, notify_leave) \
-	GS_COMMAND_LIST_ENTRY(notify_player_ban, nation_pick) \
-	GS_COMMAND_LIST_ENTRY(notify_player_kick, nation_pick) \
-	GS_COMMAND_LIST_ENTRY(notify_player_picks_nation, nation_pick) \
-	GS_COMMAND_LIST_ENTRY(notify_player_oos, no_data) \
-	GS_COMMAND_LIST_ENTRY(advance_tick, advance_tick) \
-	GS_COMMAND_LIST_ENTRY(notify_save_loaded, notify_save_loaded) \
-	GS_COMMAND_LIST_ENTRY(notify_reload, no_data) \
-	GS_COMMAND_LIST_ENTRY(notify_start_game, no_data) \
-	GS_COMMAND_LIST_ENTRY(notify_stop_game, no_data) \
-	GS_COMMAND_LIST_ENTRY(notify_pause_game, no_data) \
-	GS_COMMAND_LIST_ENTRY(notify_stop_game, no_data) \
-
 enum class command_type : uint8_t {
 	invalid = 0,
 	change_nat_focus = 1,
@@ -601,6 +486,9 @@ struct notify_leaves_data {
 };
 
 struct payload {
+	command_type type = command_type::invalid; //1
+	uint8_t padding = 0;
+	dcon::nation_id source; //2
 	union dtype {
 		national_focus_data nat_focus;
 		start_research_data start_research;
@@ -666,11 +554,15 @@ struct payload {
 		uint8_t no_data = 0;
 		dtype() { }
 	} data;
-	dcon::nation_id source;
-	command_type type = command_type::invalid;
-
 	payload() { }
 };
+static_assert(sizeof(payload) ==
+	sizeof(payload::type)
+	+ sizeof(payload::padding)
+	+ sizeof(payload::source)
+	+ sizeof(payload::dtype));
+
+uint32_t get_size(command_type t);
 
 void save_game(sys::state& state, dcon::nation_id source, bool and_quit);
 
