@@ -2844,15 +2844,15 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	{
 		auto pop_history = open_directory(history, NATIVE("pops"));
 		auto startdate = current_date.to_ymd(start_date);
-		auto start_dir_name = std::to_string(startdate.year) + "." + std::to_string(startdate.month) + "." + std::to_string(startdate.day);
-		auto date_directory = open_directory(pop_history, simple_fs::utf8_to_native(start_dir_name));
+		auto start_dir_name = to_native_string(startdate.year) + NATIVE(".") + to_native_string(startdate.month) + NATIVE(".") + to_native_string(startdate.day);
+		auto date_directory = open_directory(pop_history, start_dir_name);
 		// NICK: 
 		// Attempts to look through the start date as defined by the mod.
 		// If it does not find any pop files there, it defaults to looking through 1836.1.1
 		// This is to deal with mods that have their start date defined as something else, but have pop history within 1836.1.1 (converters).
 		auto directory_file_count = list_files(date_directory, NATIVE(".txt")).size();
 		if(directory_file_count == 0)
-			date_directory = open_directory(pop_history, simple_fs::utf8_to_native("1836.1.1"));
+			date_directory = open_directory(pop_history, NATIVE("1836.1.1"));
 		for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
 			auto opened_file = open_file(pop_file);
 			if(opened_file) {

@@ -477,14 +477,18 @@ native_string win1250_to_native(std::string_view data_in) {
 }
 
 native_string utf8_to_native(std::string_view str) {
+	if(str.empty())
+		return native_string(NATIVE(""));
 	auto buffer = std::unique_ptr<WCHAR[]>(new WCHAR[str.length() * 2]);
-	auto chars_written = MultiByteToWideChar(default_codepage, MB_PRECOMPOSED, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
+	auto chars_written = MultiByteToWideChar(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
 	return native_string(buffer.get(), size_t(chars_written));
 }
 
 std::string native_to_utf8(native_string_view str) {
+	if(str.empty())
+		return std::string("");
 	auto buffer = std::unique_ptr<char[]>(new char[str.length() * 4]);
-	auto chars_written = WideCharToMultiByte(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), nullptr, nullptr);
+	auto chars_written = WideCharToMultiByte(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), NULL, NULL);
 	return std::string(buffer.get(), size_t(chars_written));
 }
 
