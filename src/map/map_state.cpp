@@ -428,6 +428,24 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		if(name.empty())
 			continue;
 
+		// grammatical gender fix
+		switch(state.world.locale_get_grammatical_gender_mode(state.font_collection.get_current_locale())) {
+		case 1: { //spanish
+			auto sp = name.find_first_of(' ');
+			if(sp != std::string::npos && sp > 0) {
+				//yes, purpousefully lowercase
+				if(name[sp - 1] == 'o' && name[name.length() - 1] == 'a') {
+					name[name.length() - 1] = 'o';
+				} else if(name[sp - 1] == 'a' && name[name.length() - 1] == 'o') {
+					name[name.length() - 1] = 'a';
+				}
+			}
+			break;
+		}
+		default:
+			break; //no fix
+		}
+
 		float rough_box_left = std::numeric_limits<float>::max();
 		float rough_box_right = 0;
 		float rough_box_bottom = std::numeric_limits<float>::max();

@@ -7,5 +7,7 @@ header_font = STZHONGS.TTF
 
 map_font = STXINWEI.TTF
 
+fallback = en_US
+
 prevent_map_letterspacing = no
 rtl = no

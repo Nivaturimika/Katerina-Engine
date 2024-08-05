@@ -1,4 +1,4 @@
-display_name = Deutsch
+display_name = Magyar
 script = Latn
 
 body_font = LibreCaslonText_Regular.ttf

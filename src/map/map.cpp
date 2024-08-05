@@ -2112,7 +2112,9 @@ void display_data::set_province_text_lines(sys::state& state, std::vector<text_l
 		auto effective_ratio = e.ratio.x * map_x_scaling / e.ratio.y;
 
 		float text_length = f.text_extent(state, e.text, 0, uint32_t(e.text.glyph_info.size()), 1);
-		assert(std::isfinite(text_length) && text_length != 0.f);
+		if(!std::isfinite(text_length) || text_length == 0.f)
+			continue;
+
 		// y = a + bx + cx^2 + dx^3
 		// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 		auto poly_fn = [&](float x) {

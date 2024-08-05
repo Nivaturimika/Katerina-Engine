@@ -1,4 +1,4 @@
-display_name = Deutsch
+display_name = Italiano
 script = Latn
 
 body_font = LibreCaslonText_Regular.ttf
@@ -13,3 +13,6 @@ fallback = en_US
 
 prevent_map_letterspacing = no
 rtl = no
+
+#
+gender_mode = 1

@@ -9,7 +9,7 @@ header_feature = smcp
 map_font = NotoNaskhArabic_Regular.ttf
 map_feature = smcp
 
-fallback = en-US
+fallback = en_US
 
 prevent_map_letterspacing = yes
 rtl = yes
