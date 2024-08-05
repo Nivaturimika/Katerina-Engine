@@ -1790,7 +1790,7 @@ public:
 			disabled = true;
 	}
 	void button_action(sys::state& state) noexcept override {
-		command::enable_debt(state, state.local_player_nation, !state.world.nation_get_is_debt_spending(state.local_player_nation));
+		command::enable_debt(state, state.local_player_nation));
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;

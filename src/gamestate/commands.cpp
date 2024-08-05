@@ -2160,6 +2160,8 @@ void execute_fabricate_cb(sys::state& state, dcon::nation_id source, dcon::natio
 }
 
 bool can_cancel_cb_fabrication(sys::state& state, dcon::nation_id source) {
+	if(!state.world.nation_get_constructing_cb_target(source))
+		return false;
 	return true;
 }
 
@@ -2466,15 +2468,10 @@ void cancel_military_access(sys::state& state, dcon::nation_id source, dcon::nat
 bool can_cancel_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target, bool ignore_cost) {
 	if(source == target)
 		return false;
-
 	auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, source);
 	if(!ignore_cost && state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.cancelaskmilaccess_diplomatic_cost)
 		return false;
-
-	if(state.world.unilateral_relationship_get_military_access(rel))
-		return true;
-	else
-		return false;
+	return bool(state.world.unilateral_relationship_get_military_access(rel));
 }
 void execute_cancel_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 	auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, source);
@@ -2503,15 +2500,12 @@ void cancel_given_military_access(sys::state& state, dcon::nation_id source, dco
 	add_to_command_queue(state, p);
 }
 bool can_cancel_given_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target, bool ignore_cost) {
+	if(source == target)
+		return false;
 	auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(source, target);
-
 	if(!ignore_cost && state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.cancelgivemilaccess_diplomatic_cost)
 		return false;
-
-	if(state.world.unilateral_relationship_get_military_access(rel))
-		return true;
-	else
-		return false;
+	return bool(state.world.unilateral_relationship_get_military_access(rel));
 }
 void execute_cancel_given_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 	auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(source, target);
@@ -4261,17 +4255,16 @@ void execute_toggle_mobilization(sys::state& state, dcon::nation_id source) {
 	}
 }
 
-void enable_debt(sys::state& state, dcon::nation_id source, bool debt_is_enabled) {
+void enable_debt(sys::state& state, dcon::nation_id source) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::enable_debt;
 	p.source = source;
-	p.data.make_leader.is_general = debt_is_enabled;
 	add_to_command_queue(state, p);
 }
 
-void execute_enable_debt(sys::state& state, dcon::nation_id source, bool debt_is_enabled) {
-	state.world.nation_set_is_debt_spending(source, debt_is_enabled);
+void execute_enable_debt(sys::state& state, dcon::nation_id source) {
+	state.world.nation_set_is_debt_spending(source, !state.world.nation_get_is_debt_spending(source));
 }
 
 void move_capital(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
@@ -5397,7 +5390,7 @@ void execute_command(sys::state& state, payload& c) {
 		execute_release_subject(state, c.source, c.data.diplo_action.target);
 		break;
 	case command_type::enable_debt:
-		execute_enable_debt(state, c.source, c.data.make_leader.is_general);
+		execute_enable_debt(state, c.source);
 		break;
 	case command_type::move_capital:
 		execute_move_capital(state, c.source, c.data.generic_location.prov);
