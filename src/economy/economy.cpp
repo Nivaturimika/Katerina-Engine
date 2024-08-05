@@ -2763,7 +2763,7 @@ profit_distribution distribute_factory_profit(sys::state const & state, dcon::st
 }
 
 void daily_update(sys::state& state, bool initiate_buildings) {
-	state.defines.alice_needs_scaling_factor = 225000.f;
+	state.defines.alice_needs_scaling_factor = 125000.f;
 
 	/* initialization parallel block */
 	concurrency::parallel_for(0, 10, [&](int32_t index) {
