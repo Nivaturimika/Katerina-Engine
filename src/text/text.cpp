@@ -746,7 +746,7 @@ std::string prettify_currency(float num) {
 			} else if(std::abs(reduced) < 100.0) {
 				snprintf(buffer, sizeof(buffer), sufx_one[i], float(reduced));
 			} else {
-				snprintf(buffer, sizeof(buffer), sufx_zero[i], float(reduced));
+				snprintf(buffer, sizeof(buffer), sufx_one[i], float(reduced));
 			}
 			return std::string(buffer);
 		}
