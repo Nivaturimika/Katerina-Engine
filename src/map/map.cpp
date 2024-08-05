@@ -1032,6 +1032,18 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glBindVertexArray(vao_array[vo_static_mesh]);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
+			// Province flags
+			province::for_each_land_province(state, [&](dcon::province_id p) {
+				if(province_on_screen[p.index()]) {
+					for(uint32_t i = 0; i < uint32_t(state.province_definitions.num_allocated_provincial_flags); i++) {
+						dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
+						if(state.world.province_get_flag_variables(p, pfid)) {
+							auto center = state.world.province_get_mid_point(p);
+							render_model(model_province_flag[i], center, 0.f, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						}
+					}
+				}
+			});
 			// Train stations
 			province::for_each_land_province(state, [&](dcon::province_id p) {
 				if(province_on_screen[p.index()]) {
@@ -1039,7 +1051,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					if(level > 0) {
 						auto center = state.world.province_get_mid_point(p);
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
-						render_model(model_train_station, center, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
+						render_model(model_train_station, center, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
 					}
 				}
 			});
@@ -1077,7 +1090,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto center = state.world.province_get_mid_point(p);
 						auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
 						auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
-						render_model(model_fort[level], pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
+						render_model(model_fort[level], pos, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
 					}
 				}
 			});
@@ -1086,10 +1100,13 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				if(province_on_screen[p.index()]) {
 					auto factories = state.world.province_get_factory_location_as_province(p);
 					if(factories.begin() != factories.end()) {
+						auto fac = state.world.factory_location_get_factory(*factories.begin());
+						auto level = state.world.factory_get_level(fac);
 						auto center = state.world.province_get_mid_point(p);
 						auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
-						render_model(model_factory, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
+						render_model(model_factory, pos, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
 					}
 				}
 			});
@@ -1101,6 +1118,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto center = state.world.province_get_mid_point(p);
 						auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
+						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ int32_t(pos.x)) % 360) / 180.f - 1.f);
 						render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
 					}
 				}
@@ -1126,6 +1144,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 							auto center = state.world.province_get_mid_point(p);
 							auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
 							auto seed_r = pl.get_pop().id.index();
+							auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ int32_t(pos.x)) % 360) / 180.f - 1.f);
 							render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
 							break;
 						}
@@ -2239,12 +2258,26 @@ void load_static_meshes(sys::state& state) {
 		state.map_state.map_data.static_mesh_counts[i].clear();
 		state.map_state.map_data.static_mesh_starts[i].clear();
 	}
+
+	state.map_state.map_data.model_province_flag.resize(size_t(state.province_definitions.num_allocated_provincial_flags));
 	for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
 		auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
 		ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
 
 		auto name = state.to_string_view(emfx_obj.name);
-		if(name == "wake") {
+		bool is_province_flag_model = false;
+		for(uint32_t i = 0; i < uint32_t(state.province_definitions.num_allocated_provincial_flags); i++) {
+			dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
+			auto pf_name = text::produce_simple_string(state, state.province_definitions.flag_variable_names[pfid]);
+			if(parsers::lowercase_str(pf_name) == parsers::lowercase_str(name)) {
+				state.map_state.map_data.model_province_flag[i] = edef;
+				is_province_flag_model = true;
+				break;
+			}
+		}
+		if(is_province_flag_model) {
+			//dont execute the rest
+		} else if(name == "wake") {
 			state.map_state.map_data.model_wake = edef;
 			for(uint32_t l = 0; l < display_data::max_static_submeshes; l++) {
 				state.map_state.map_data.static_mesh_scrolling_factor[k][l] = 0.5f;
@@ -2263,6 +2296,10 @@ void load_static_meshes(sys::state& state) {
 			state.map_state.map_data.model_construction_military = edef;
 		} else if(name == "siege") {
 			state.map_state.map_data.model_siege = edef;
+		} else if(name == "flag") {
+			state.map_state.map_data.model_flag = edef;
+		} else if(name == "flagfloating") {
+			state.map_state.map_data.model_flag_floating = edef;
 		} else if(name.starts_with("building_naval_base")) {
 			uint32_t level = 0;
 			if(name.size() > 19) {
@@ -2275,9 +2312,9 @@ void load_static_meshes(sys::state& state) {
 				state.map_state.map_data.model_naval_base[level] = edef;
 			}
 		} else if(name.starts_with("building_fort")) {
-			uint32_t level = 0;
-			if(name.size() > 19) {
-				level = name.data()[19] - '0';
+			uint32_t level = 1; //yep, starts at 1, lovely
+			if(name.size() > 13) {
+				level = name.data()[13] - '0';
 			}
 			level = std::clamp<uint32_t>(level, 0, 6);
 			state.map_state.map_data.model_fort[level] = edef;

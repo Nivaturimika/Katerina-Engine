@@ -307,6 +307,9 @@ public:
 	dcon::emfx_object_id model_construction_naval;
 	dcon::emfx_object_id model_construction_military;
 	dcon::emfx_object_id model_siege;
+	dcon::emfx_object_id model_flag;
+	dcon::emfx_object_id model_flag_floating;
+	std::vector<dcon::emfx_object_id> model_province_flag;
 	std::vector<dcon::emfx_object_id> model_gc_unit[uint8_t(culture::graphical_culture_type::count)];
 	std::vector<emfx::xsm_animation> animations;
 

@@ -4573,6 +4573,8 @@ void state::game_loop() {
 	game_speed[3] = int32_t(defines.alice_speed_3);
 	game_speed[4] = int32_t(defines.alice_speed_4);
 
+	FILE* fp = fopen("eco_data.csv", "wt");
+	//
 	while(quit_signaled.load(std::memory_order::acquire) == false) {
 		/* An issue that arose in multiplayer is that the UI was loading the savefile
 		directly, while the game state loop was running, this was fine with the
@@ -4604,6 +4606,18 @@ void state::game_loop() {
 				auto ms_count = std::chrono::duration_cast<std::chrono::milliseconds>(entry_time - last_update).count();
 				if(speed >= 5 || ms_count >= game_speed[speed]) { /*enough time has passed*/
 					last_update = entry_time;
+
+					// DUMP FOR ANALYSIS
+					if(this->current_date.to_ymd(this->start_date).day == 1) {
+						fprintf(fp, "%d;", this->current_date.value);
+						for(uint32_t i = 0; i < 8; i++) {
+							auto money = world.nation_get_stockpiles(nations_by_rank[i], economy::money);
+							fprintf(fp, "%f;", money);
+						}
+						fprintf(fp, "\n");
+						fflush(fp);
+					}
+
 					if(network_mode == sys::network_mode_type::host) {
 						command::advance_tick(*this, local_player_nation);
 					} else {
@@ -4615,6 +4629,8 @@ void state::game_loop() {
 			}
 		}
 	}
+	//
+	fclose(fp);
 }
 
 void state::console_log(std::string_view message) {

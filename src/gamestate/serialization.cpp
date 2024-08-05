@@ -282,6 +282,7 @@ uint8_t const* read_scenario_section(uint8_t const* ptr_in, uint8_t const* secti
 	}
 	{ // provincial definitions
 		ptr_in = deserialize(ptr_in, state.province_definitions.flag_variable_names);
+		ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.num_allocated_provincial_flags);
 		ptr_in = deserialize(ptr_in, state.province_definitions.canals);
 		ptr_in = deserialize(ptr_in, state.province_definitions.canal_provinces);
 		ptr_in = deserialize(ptr_in, state.province_definitions.terrain_to_gfx_map);
@@ -469,6 +470,7 @@ uint8_t* write_scenario_section(uint8_t* ptr_in, sys::state& state) {
 	}
 	{ // provincial definitions
 		ptr_in = serialize(ptr_in, state.province_definitions.flag_variable_names);
+		ptr_in = memcpy_serialize(ptr_in, state.province_definitions.num_allocated_provincial_flags);
 		ptr_in = serialize(ptr_in, state.province_definitions.canals);
 		ptr_in = serialize(ptr_in, state.province_definitions.canal_provinces);
 		ptr_in = serialize(ptr_in, state.province_definitions.terrain_to_gfx_map);
@@ -650,6 +652,7 @@ scenario_size sizeof_scenario_section(sys::state& state) {
 	}
 	{ // provincial definitions
 		sz += serialize_size(state.province_definitions.flag_variable_names);
+		sz += sizeof(state.province_definitions.num_allocated_provincial_flags);
 		sz += serialize_size(state.province_definitions.canals);
 		sz += serialize_size(state.province_definitions.canal_provinces);
 		sz += serialize_size(state.province_definitions.terrain_to_gfx_map);
