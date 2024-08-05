@@ -3454,6 +3454,7 @@ void add_locale(sys::state& state, std::string_view locale_name, char const* dat
 	new_locale_obj.set_hb_script(hb_script_from_string(new_locale.script.c_str(), int(new_locale.script.length())));
 	new_locale_obj.set_native_rtl(new_locale.rtl);
 	new_locale_obj.set_prevent_letterspace(new_locale.prevent_map_letterspacing);
+	new_locale_obj.set_grammatical_gender_mode(new_locale.gender_mode);
 
 	{
 		auto f = new_locale_obj.get_body_font();

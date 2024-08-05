@@ -2904,11 +2904,12 @@ struct locale_parser {
 	std::vector<uint32_t> body_features;
 	std::vector<uint32_t> header_features;
 	std::vector<uint32_t> map_features;
+	uint32_t gender_mode = 0;
 
 	void body_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
 	void header_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
 	void map_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
-
+	
 	void finish(sys::state& context) { }
 };
 
