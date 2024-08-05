@@ -621,8 +621,7 @@ void initialize(sys::state& state) {
 		fp.set_life_needs_satisfaction(1.0f);
 		fp.set_everyday_needs_satisfaction(0.1f);
 		fp.set_luxury_needs_satisfaction(0.0f);
-		fp.set_savings(1.f); //1 dollar for everyone :D
-		//fp.set_savings(savings_buffer.get(fp.get_poptype()) * fp.get_size() / state.defines.alice_needs_scaling_factor);
+		fp.set_savings(savings_buffer.get(fp.get_poptype()) * fp.get_size() / state.defines.alice_needs_scaling_factor);
 	});
 
 	state.world.for_each_factory([&](dcon::factory_id f) {
