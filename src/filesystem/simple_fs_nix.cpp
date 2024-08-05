@@ -11,6 +11,11 @@
 #include "text.hpp"
 
 namespace simple_fs {
+
+void identify_global_system_properties() {
+	//no globals have to be set
+}
+
 file::~file() {
 #if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 	if(mapping_handle) {

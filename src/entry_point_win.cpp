@@ -170,7 +170,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		bool headless = false;
 
 		network::port_forwarder forwarding_apparatus;
-
+		simple_fs::identify_global_system_properties(); // -- globals startup
 		if(num_params < 2) {
 			add_root(game_state.common_fs, NATIVE(".")); // for the moment this lets us find the shader files
 			if(!sys::try_read_scenario_and_save_file(game_state, NATIVE("development_test_file.bin"))) {

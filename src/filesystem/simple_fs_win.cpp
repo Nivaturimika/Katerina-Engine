@@ -16,6 +16,15 @@
 #pragma comment(lib, "Shlwapi.lib")
 
 namespace simple_fs {
+
+static UINT default_codepage = CP_UTF8; // default is UTF8
+void identify_global_system_properties() {
+	CPINFO cp_info;
+	if(GetCPInfo(CP_UTF8, &cp_info) == FALSE) {
+		default_codepage = CP_ACP;
+	}
+}
+
 file::~file() {
 	if(mapping_handle) {
 		if(content.data)
@@ -469,13 +478,13 @@ native_string win1250_to_native(std::string_view data_in) {
 
 native_string utf8_to_native(std::string_view str) {
 	auto buffer = std::unique_ptr<WCHAR[]>(new WCHAR[str.length() * 2]);
-	auto chars_written = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
+	auto chars_written = MultiByteToWideChar(default_codepage, MB_PRECOMPOSED, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
 	return native_string(buffer.get(), size_t(chars_written));
 }
 
 std::string native_to_utf8(native_string_view str) {
 	auto buffer = std::unique_ptr<char[]>(new char[str.length() * 4]);
-	auto chars_written = WideCharToMultiByte(CP_UTF8, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), nullptr, nullptr);
+	auto chars_written = WideCharToMultiByte(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), nullptr, nullptr);
 	return std::string(buffer.get(), size_t(chars_written));
 }
 

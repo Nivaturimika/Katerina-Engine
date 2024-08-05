@@ -15,6 +15,8 @@
 #include <map>
 
 namespace simple_fs {
+void identify_global_system_properties(); // -- needed for startup
+
 class file;
 class directory;
 class unopened_file;

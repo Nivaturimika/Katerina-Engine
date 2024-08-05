@@ -1971,6 +1971,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		load_shaders();				// create shaders
 		load_global_squares();		// create various squares to drive the shaders with
 
+		//start globals
+		simple_fs::identify_global_system_properties();
 		simple_fs::file_system fs;
 		simple_fs::add_root(fs, NATIVE("."));
 		auto root = get_root(fs);

@@ -4,6 +4,7 @@
 static sys::state game_state; // too big for the stack
 
 int main(int argc, char **argv) {
+	simple_fs::identify_global_system_properties(); // -- globals startup
 	add_root(game_state.common_fs, NATIVE(".")); // will add the working directory as first root -- for the moment this lets us find the shader files
 
 	if(argc >= 2) {
