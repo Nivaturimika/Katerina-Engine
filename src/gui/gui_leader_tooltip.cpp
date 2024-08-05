@@ -2,8 +2,14 @@
 
 namespace ui {
 void display_leader_attributes(sys::state& state, dcon::leader_id lid, text::layout_base& contents, int32_t indent) {
+	if(!lid) {
+		text::add_line(state, contents, "no_leader");
+	}
+
 	auto leader_per = state.world.leader_get_personality(lid);
+	leader_per = bool(leader_per) ? leader_per : state.military_definitions.no_personality;
 	auto leader_bak = state.world.leader_get_background(lid);
+	leader_bak = bool(leader_bak) ? leader_bak : state.military_definitions.no_background;
 	auto attack = state.world.leader_trait_get_attack(leader_per) + state.world.leader_trait_get_attack(leader_bak);
 	auto organisation = state.world.leader_trait_get_organisation(leader_per) + state.world.leader_trait_get_organisation(leader_bak);
 	auto morale = state.world.leader_trait_get_morale(leader_per) + state.world.leader_trait_get_morale(leader_bak);
