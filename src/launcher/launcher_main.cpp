@@ -2090,12 +2090,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		if(font_set_load == 0) {
-			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/LibreCaslonText-Regular.ttf"));
+			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/LibreCaslonText_Regular.ttf"));
 			if(font_a) {
 				auto file_content = simple_fs::view_contents(*font_a);
 				font_collection.load_font(fonts[0], file_content.data, file_content.file_size);
 			}
-			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/LibreCaslonText-Italic.ttf"));
+			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/LibreCaslonText_Italic.ttf"));
 			if(font_b) {
 				auto file_content = simple_fs::view_contents(*font_b);
 				font_collection.load_font(fonts[1], file_content.data, file_content.file_size);
@@ -2112,23 +2112,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				font_collection.load_font(fonts[1], file_content.data, file_content.file_size);
 			}
 		} else if(font_set_load == 2) { //arabic
-			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/NotoNaskhArabic-Bold.ttf"));
+			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/NotoNaskhArabic_Bold.ttf"));
 			if(font_a) {
 				auto file_content = simple_fs::view_contents(*font_a);
 				font_collection.load_font(fonts[0], file_content.data, file_content.file_size);
 			}
-			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/NotoNaskhArabic-Regular.ttf"));
+			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/NotoNaskhArabic_Regular.ttf"));
 			if(font_b) {
 				auto file_content = simple_fs::view_contents(*font_b);
 				font_collection.load_font(fonts[1], file_content.data, file_content.file_size);
 			}
 		} else if(font_set_load == 3) { //cyrillic
-			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/NotoSerif-Regular.ttf"));
+			auto font_a = simple_fs::open_file(root, NATIVE("assets/fonts/NotoSerif_Regular.ttf"));
 			if(font_a) {
 				auto file_content = simple_fs::view_contents(*font_a);
 				font_collection.load_font(fonts[0], file_content.data, file_content.file_size);
 			}
-			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/NotoSerif-Regular.ttf"));
+			auto font_b = simple_fs::open_file(root, NATIVE("assets/fonts/NotoSerif_Regular.ttf"));
 			if(font_b) {
 				auto file_content = simple_fs::view_contents(*font_b);
 				font_collection.load_font(fonts[1], file_content.data, file_content.file_size);
