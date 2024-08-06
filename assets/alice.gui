@@ -4630,4 +4630,12 @@ guiTypes = {
 		quadTextureSprite = "GFX_sort_prestige_rank"
 		extends = "factory_buttons"
 	}
+	guiButtonType = {
+		name = "close_button"
+		quadTextureSprite = "GFX_main_close_button"
+		position = { -32 0 }
+		Orientation = "UPPER_RIGHT"
+		shortcut = "ESCAPE"
+		extends = "ingame_lobby_window"
+	}
 }
