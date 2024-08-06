@@ -608,28 +608,24 @@ public:
 		if(state.network_mode == sys::network_mode_type::host) {
 			// on render
 		} else {
-			set_text(state, text::produce_simple_string(state, "ready"));
+			set_visible(state, false);
 		}
 	}
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		if(state.network_mode == sys::network_mode_type::host) {
 			set_text(state, text::produce_simple_string(state, "ready")); // default
-			if(state.network_state.is_new_game == false) {
-				for(auto const& c : state.network_state.clients) {
-					if(c.is_active() && c.playing_as == n) {
-						auto completed = c.total_sent_bytes - c.save_stream_offset;
-						auto total = c.save_stream_size;
-						if(total > 0.f) {
-							float progress = float(completed) / float(total);
-							if(progress < 1.f) {
-								text::substitution_map sub{};
-								text::add_to_substitution_map(sub, text::variable_type::value, text::fp_percentage_one_place{ progress });
-								set_text(state, text::produce_simple_string(state, text::resolve_string_substitution(state, "save_progress", sub)));
-							}
+			for(auto const& c : state.network_state.clients) {
+				if(c.is_active() && c.playing_as == n) {
+					auto remaining = c.save_stream_offset - c.total_sent_bytes;
+					auto total = c.save_stream_size;
+					if(total > 0) {
+						float progress = float(remaining) / float(total);
+						if(progress < 1.f) {
+							set_text(state, text::format_percentage(progress));
 						}
-						break;
 					}
+					break;
 				}
 			}
 		}
