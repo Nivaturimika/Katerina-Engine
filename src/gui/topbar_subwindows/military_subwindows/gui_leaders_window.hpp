@@ -153,7 +153,7 @@ protected:
 	}
 
 	bool is_asc = false;
-	leader_sort sort = leader_sort::name;
+	leader_sort sort = leader_sort::army;
 public:
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
