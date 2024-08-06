@@ -70,9 +70,9 @@ public:
 		}
 	}
 
-    tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-        return tooltip_behavior::variable_tooltip;
-    }
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto m = retrieve<diplomatic_message::message>(state, parent);
@@ -84,7 +84,7 @@ public:
 		text::add_to_substitution_map(sub, text::variable_type::type, std::string_view(tstr.c_str()));
 		text::localised_format_box(state, contents, box, std::string_view("diploicon_tip"), sub);
 		text::close_layout_box(contents, box);
-    }
+	}
 
 	void button_action(sys::state& state) noexcept override;
 };
@@ -96,18 +96,18 @@ class diplomatic_message_topbar_entry_window : public listbox_row_element_base<d
 public:
 	diplomatic_message_topbar_button* btn = nullptr;
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-        if(name == "diplomessageicon_button") {
-            auto ptr = make_element_by_type<diplomatic_message_topbar_button>(state, id);
-	    btn = ptr.get();
-	    return ptr;
-        } else if(name == "flag") {
-            return make_element_by_type<diplomatic_message_topbar_flag_button>(state, id);
-        } else if(name == "messageicon_bg_overlay") {
-            return make_element_by_type<image_element_base>(state, id);
-        } else {
-            return nullptr;
-        }
-    }
+		if(name == "diplomessageicon_button") {
+			auto ptr = make_element_by_type<diplomatic_message_topbar_button>(state, id);
+			btn = ptr.get();
+			return ptr;
+		} else if(name == "flag") {
+			return make_element_by_type<diplomatic_message_topbar_flag_button>(state, id);
+		} else if(name == "messageicon_bg_overlay") {
+			return make_element_by_type<image_element_base>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<dcon::nation_id>()) {
 			payload.emplace<dcon::nation_id>(content.from);
@@ -148,10 +148,10 @@ void diplomatic_message_topbar_button::button_action(sys::state& state) noexcept
 	dpw->messages.push_back(m);
 	dpw->set_visible(state, true);
 	dpw->impl_on_update(state);
+	state.ui_state.root->move_child_to_front(dpw);
 	//Remove from listbox
 	auto dmtl = static_cast<diplomatic_message_topbar_listbox*>(state.ui_state.request_topbar_listbox);
-	auto it = std::remove_if(dmtl->messages.begin(), dmtl->messages.end(),
-			[&](auto& e) { return e.from == m.from && e.to == m.to && e.type == m.type && e.when == m.when; });
+	auto it = std::remove_if(dmtl->messages.begin(), dmtl->messages.end(), [&](auto& e) { return e.from == m.from && e.to == m.to && e.type == m.type && e.when == m.when; });
 	auto r = std::distance(it, dmtl->messages.end());
 	dmtl->messages.erase(it, dmtl->messages.end());
 	dmtl->impl_on_update(state);
