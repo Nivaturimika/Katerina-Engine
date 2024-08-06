@@ -78,12 +78,18 @@ void single_unit_tooltip(sys::state& state, text::columnar_layout& contents, dco
 		text::add_to_substitution_map(sub, text::variable_type::date, army.get_arrival_time());
 		auto box = text::open_layout_box(contents);
 		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id } );
+		if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
+			text::add_to_layout_box(state, contents, box, rebel::rebel_name(state, rf));
+		}
 		auto resolved = text::resolve_string_substitution(state, "unit_moving_text", sub);
 		text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
 		text::close_layout_box(contents, box);
 	} else {
 		auto box = text::open_layout_box(contents);
 		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
+		if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
+			text::add_to_layout_box(state, contents, box, rebel::rebel_name(state, rf));
+		}
 		auto resolved = text::resolve_string_substitution(state, "unit_standing_text", sub);
 		text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
 		text::close_layout_box(contents, box);

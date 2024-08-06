@@ -1020,8 +1020,7 @@ class small_top_unit_icon : public window_element_base {
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 		if(state.map_state.get_zoom() < big_counter_cutoff)
 			return window_element_base::impl_probe_mouse(state, x, y, type);
-		else
-			return mouse_probe{ nullptr, ui::xy_pair{0,0} };
+		return mouse_probe{ nullptr, ui::xy_pair{0,0} };
 	}
 	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		if(state.map_state.get_zoom() < big_counter_cutoff)
