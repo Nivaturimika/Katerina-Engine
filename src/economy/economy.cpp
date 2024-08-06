@@ -2247,7 +2247,8 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 	static auto lx_demand_vector = state.world.pop_type_make_vectorizable_float_buffer();
 	state.world.execute_serial_over_pop_type([&](auto ids) { lx_demand_vector.set(ids, ve::fp_vector{}); });
 
-	// state.defines.alice_needs_scaling_factor
+	const float consumption_factor = (1.5f / state.defines.alice_needs_scaling_factor);
+
 	auto nation_rules = state.world.nation_get_combined_issue_rules(n);
 	bool nation_allows_investment = state.world.nation_get_is_civilized(n) && (nation_rules & (issue_rule::pop_build_factory | issue_rule::pop_expand_factory)) != 0;
 	for(auto p : state.world.nation_get_province_ownership(n)) {
@@ -2275,9 +2276,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			float en_to_satisfy = std::max(1.f - subsistence_everyday, 0.f);
 			float xn_to_satisfy = std::max(1.f - subsistence_luxury, 0.f);
 
-			float ln_cost = ln_to_satisfy * state.world.nation_get_life_needs_costs(n, t) * total_pop / state.defines.alice_needs_scaling_factor;
-			float en_cost = en_to_satisfy * state.world.nation_get_everyday_needs_costs(n, t) * total_pop / state.defines.alice_needs_scaling_factor;
-			float xn_cost = xn_to_satisfy * state.world.nation_get_luxury_needs_costs(n, t) * total_pop / state.defines.alice_needs_scaling_factor;
+			float ln_cost = ln_to_satisfy * state.world.nation_get_life_needs_costs(n, t) * total_pop * consumption_factor;
+			float en_cost = en_to_satisfy * state.world.nation_get_everyday_needs_costs(n, t) * total_pop * consumption_factor;
+			float xn_cost = xn_to_satisfy * state.world.nation_get_luxury_needs_costs(n, t) * total_pop * consumption_factor;
 
 			float life_needs_fraction = (total_budget >= ln_cost ? ln_to_satisfy : total_budget / ln_cost);
 			total_budget -= ln_cost;
@@ -2351,9 +2352,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), std::clamp(old_everyday * 0.99f + final_everyday_needs_fraction * 0.01f, 0.f, 1.f));
 			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), std::clamp(old_luxury * 0.99f + final_luxury_needs_fraction * 0.01f, 0.f, 1.f));
 
-			ln_demand_vector.get(t) += result_life * total_pop / state.defines.alice_needs_scaling_factor;
-			en_demand_vector.get(t) += result_everyday * total_pop / state.defines.alice_needs_scaling_factor;
-			lx_demand_vector.get(t) += result_luxury * total_pop / state.defines.alice_needs_scaling_factor;
+			ln_demand_vector.get(t) += result_life * total_pop * consumption_factor;
+			en_demand_vector.get(t) += result_everyday * total_pop * consumption_factor;
+			lx_demand_vector.get(t) += result_luxury * total_pop * consumption_factor;
 
 			assert(std::isfinite(ln_demand_vector.get(t)));
 			assert(std::isfinite(en_demand_vector.get(t)));
@@ -3988,7 +3989,8 @@ float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodi
 			amount += needs * state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 		});
 	}
-	return amount / state.defines.alice_needs_scaling_factor;
+	const float consumption_factor = 1.5f / state.defines.alice_needs_scaling_factor;
+	return amount * consumption_factor;
 }
 
 float nation_total_imports(sys::state& state, dcon::nation_id n) {

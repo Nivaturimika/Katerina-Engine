@@ -555,6 +555,7 @@ public:
 			return make_element_by_type<nc_attacker_ts_txt>(state, id);
 		} else if(name == "modifiers") {
 			return make_element_by_type<nc_attacker_combat_modifiers>(state, id);
+		//slots_list
 		} else {
 			return nullptr;
 		}

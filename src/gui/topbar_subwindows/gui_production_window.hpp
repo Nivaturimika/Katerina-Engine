@@ -2012,6 +2012,7 @@ public:
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 		if(payload.holds_type<production_window_tab>()) {
 			auto enum_val = any_cast<production_window_tab>(payload);
+			active_tab = enum_val;
 			hide_sub_windows(state);
 			switch(enum_val) {
 			case production_window_tab::factories:
@@ -2028,7 +2029,6 @@ public:
 				set_visible_vector_elements(state, good_elements, true);
 				break;
 			}
-			active_tab = enum_val;
 			return message_result::consumed;
 		} else if(payload.holds_type<production_foreign_invest_target>()) {
 			payload.emplace<production_foreign_invest_target>(production_foreign_invest_target{foreign_invest_win->curr_nation});
