@@ -231,12 +231,29 @@ public:
 
 		size_t sent_len = 0;
 		while(sent_len < s.length()) {
-			char body[max_chat_message_len + 1];
-			size_t len = s.length() >= max_chat_message_len ? max_chat_message_len : s.length();
-			memcpy(body, s.data() + sent_len, len);
-			body[len] = '\0';
-			command::chat_message(state, state.local_player_nation, body, target);
-			sent_len += len;
+			char body[max_chat_message_len];
+			while(s.data()[sent_len] == ' ' && sent_len < s.length())
+				++sent_len; //skip space
+
+			size_t len = s.length() - sent_len;
+			if(s.length() - sent_len >= max_chat_message_len - 1) {
+				len = max_chat_message_len - 1;
+				size_t last_space_pos = std::string::npos;
+				for(size_t i = 0; i < max_chat_message_len - 1; i++) {
+					if(s.data()[sent_len + i] == ' ') {
+						last_space_pos = i;
+					}
+				}
+				if(last_space_pos != std::string::npos && s.length() >= max_chat_message_len - 1) {
+					len = last_space_pos;
+				}
+			}
+			if(len > 0) {
+				memcpy(body, s.data() + sent_len, len);
+				body[len] = '\0';
+				command::chat_message(state, state.local_player_nation, body, target);
+				sent_len += len;
+			}
 		}
 
 		Cyto::Any payload = this;
