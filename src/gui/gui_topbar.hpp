@@ -318,7 +318,7 @@ public:
 		values[uint8_t(budget_slider_target::poor_tax)] = economy::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::poor);
 		values[uint8_t(budget_slider_target::middle_tax)] = economy::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::middle);
 		values[uint8_t(budget_slider_target::rich_tax)] = economy::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::rich);
-		values[uint8_t(budget_slider_target::gold_income)] = economy::estimate_gold_income(state, state.local_player_nation);=
+		values[uint8_t(budget_slider_target::gold_income)] = economy::estimate_gold_income(state, state.local_player_nation);
 		// spend
 		values[uint8_t(budget_slider_target::construction_stock)] = -economy::estimate_construction_spending(state, state.local_player_nation);
 		values[uint8_t(budget_slider_target::army_stock)] = -economy::estimate_land_spending(state, state.local_player_nation);
@@ -349,8 +349,6 @@ public:
 		float total_inc = 0.f;
 		for(uint8_t i = 0; i < uint8_t(budget_slider_target::target_count); ++i) {
 			float v = values[i] * multipliers[i];
-			if(expense)
-				v = -v;
 			if(v < 0.f)
 				total_exp += v;
 			else
@@ -362,8 +360,6 @@ public:
 			text::add_line_break_to_layout_box(state, contents, box);
 			for(uint8_t i = 0; i < uint8_t(budget_slider_target::target_count); ++i) {
 				float v = values[i] * multipliers[i];
-				if(expense)
-					v = -v;
 				if(v > 0.f) {
 					switch(budget_slider_target(i)) {
 					case budget_slider_target::poor_tax:
@@ -396,8 +392,6 @@ public:
 			text::add_line_break_to_layout_box(state, contents, box);
 			for(uint8_t i = 0; i < uint8_t(budget_slider_target::target_count); ++i) {
 				float v = values[i] * multipliers[i];
-				if(expense)
-					v = -v;
 				if(v < 0.f) {
 					switch(budget_slider_target(i)) {
 					case budget_slider_target::army_stock:
