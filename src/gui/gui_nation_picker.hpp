@@ -584,7 +584,8 @@ public:
 			auto box = text::open_layout_box(contents, 0);
 			if(state.network_state.save_stream) {
 				text::localised_format_box(state, contents, box, std::string_view("host_is_streaming_save"));
-			} else if(!state.session_host_checksum.is_equal(state.get_save_checksum())) {
+			} else if(state.network_state.save_slock.load(std::memory_order::acquire) == false
+				&& !state.session_host_checksum.is_equal(state.get_save_checksum())) {
 				text::localised_format_box(state, contents, box, std::string_view("checksum_mismatch_with_host"));
 			}
 			for(auto const& client : state.network_state.clients) {
@@ -729,8 +730,11 @@ public:
 		s += std::string(__TIME__);
 		s += "-";
 		uint32_t i_checksum = 0;
-		for(uint32_t i = 0; i < state.session_host_checksum.key_size; i++) {
-			i_checksum += state.session_host_checksum.key[i];
+		auto const& k = state.network_mode == sys::network_mode_type::host
+			? state.network_state.current_save_checksum
+			: state.session_host_checksum;
+		for(uint32_t i = 0; i < k.key_size; i++) {
+			i_checksum += k.key[i];
 		}
 		static const std::string_view alnum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		s += alnum[(i_checksum >> 0) % alnum.size()];
