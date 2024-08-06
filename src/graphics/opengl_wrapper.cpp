@@ -993,6 +993,9 @@ void render_text_flag(sys::state& state, text::embedded_flag ico, float x, float
 
 
 void internal_text_render(sys::state& state, text::stored_glyphs const& txt, float x, float baseline_y, float size, text::font& f) {
+	if(f.textures.empty())
+		return; //edge case
+
 	GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
