@@ -79,7 +79,8 @@ void single_unit_tooltip(sys::state& state, text::columnar_layout& contents, dco
 		auto box = text::open_layout_box(contents);
 		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id } );
 		if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
-			text::add_to_layout_box(state, contents, box, rebel::rebel_name(state, rf));
+			std::string name = rebel::rebel_name(state, rf);
+			text::add_to_layout_box(state, contents, box, std::string_view(name));
 		}
 		auto resolved = text::resolve_string_substitution(state, "unit_moving_text", sub);
 		text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
@@ -88,7 +89,8 @@ void single_unit_tooltip(sys::state& state, text::columnar_layout& contents, dco
 		auto box = text::open_layout_box(contents);
 		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
 		if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
-			text::add_to_layout_box(state, contents, box, rebel::rebel_name(state, rf));
+			std::string name = rebel::rebel_name(state, rf);
+			text::add_to_layout_box(state, contents, box, std::string_view(name));
 		}
 		auto resolved = text::resolve_string_substitution(state, "unit_standing_text", sub);
 		text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
