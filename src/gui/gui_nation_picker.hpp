@@ -544,11 +544,6 @@ public:
 		if(state.network_mode == sys::network_mode_type::client) {
 			if(state.network_state.save_stream) { //in the middle of a save stream
 				disabled = true;
-			} else {
-				if(state.network_state.save_slock.load(std::memory_order::acquire) == false
-				&& !state.session_host_checksum.is_equal(state.get_save_checksum())) { //can't start if checksum doesn't match
-					disabled = true;
-				}
 			}
 		}
 	}
@@ -584,9 +579,6 @@ public:
 			auto box = text::open_layout_box(contents, 0);
 			if(state.network_state.save_stream) {
 				text::localised_format_box(state, contents, box, std::string_view("host_is_streaming_save"));
-			} else if(state.network_state.save_slock.load(std::memory_order::acquire) == false
-				&& !state.session_host_checksum.is_equal(state.get_save_checksum())) {
-				text::localised_format_box(state, contents, box, std::string_view("checksum_mismatch_with_host"));
 			}
 			for(auto const& client : state.network_state.clients) {
 				if(client.is_active()) {
