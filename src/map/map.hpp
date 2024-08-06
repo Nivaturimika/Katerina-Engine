@@ -21,29 +21,46 @@ struct scenario_building_context;
 namespace map {
 
 struct map_vertex {
-	map_vertex(float x, float y) : position_(x, y){};
-	glm::vec2 position_;
+	map_vertex(float x, float y)
+		: position_(uint16_t(x * 65535.f), uint16_t(y * 65535.f))
+	{
+	}
+	glm::u16vec2 position_;
 };
 struct screen_vertex {
-	screen_vertex(float x, float y) : position_(x, y){};
-	glm::vec2 position_;
+	screen_vertex(float x, float y)
+		: position_(uint16_t(x * 65535.f), uint16_t(y * 65535.f))
+	{
+	}
+	glm::u16vec2 position_;
 };
 
 struct textured_screen_vertex {
-	textured_screen_vertex(glm::vec2 position, glm::vec2 texcoord) : position_(position), texcoord_(texcoord) { };
-	glm::vec2 position_;
-	glm::vec2 texcoord_;
+	textured_screen_vertex(glm::vec2 position, glm::vec2 texcoord)
+		: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
+		texcoord_(uint16_t(texcoord.x * 65535.f), uint16_t(texcoord.y * 65535.f))
+	{
+	}
+	glm::u16vec2 position_;
+	glm::u16vec2 texcoord_;
 };
 
 struct curved_line_vertex {
-	curved_line_vertex(){};
+	curved_line_vertex() {
+	}
 	curved_line_vertex(glm::vec2 position, glm::vec2 normal_direction, glm::vec2 direction, glm::vec2 texture_coord, float type)
-			: position_(position), normal_direction_(normal_direction), direction_(direction), texture_coord_(texture_coord), type_{type} {};
-	glm::vec2 position_;
-	glm::vec2 normal_direction_;
-	glm::vec2 direction_;
-	glm::vec2 texture_coord_;
-	float type_ = 0.f;
+		: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
+		normal_direction_(uint16_t(normal_direction.x * 32767.f), uint16_t(normal_direction.y * 32767.f)),
+		direction_(uint16_t(direction.x * 32767.f), uint16_t(direction.y * 32767.f)),
+		texture_coord_(uint16_t(texture_coord.x * 65535.f), uint16_t(texture_coord.y * 65535.f)),
+		type_(type)
+	{
+	}
+	glm::u16vec2 position_;
+	glm::i16vec2 normal_direction_;
+	glm::i16vec2 direction_;
+	glm::u16vec2 texture_coord_;
+	uint8_t type_ = 0.f;
 };
 
 struct textured_line_vertex {
@@ -62,13 +79,25 @@ struct textured_line_vertex_b {
 };
 
 struct text_line_vertex {
-	text_line_vertex() { };
-	text_line_vertex(glm::vec2 position, glm::vec2 normal_direction, glm::vec2 direction, glm::vec3 texture_coord, float thickness)
-		: position_(position), normal_direction_(normal_direction), direction_(direction), texture_coord_(texture_coord), thickness_{ thickness }  { };
+	text_line_vertex() {
+	}
+	text_line_vertex(glm::vec2 position, glm::vec2 normal_direction, glm::vec2 direction, glm::vec2 texture_coord, float thickness)
+		/*: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
+		normal_direction_(uint16_t(normal_direction.x * 32767.f), uint16_t(normal_direction.y * 32767.f)),
+		direction_(uint16_t(direction.x * 32767.f), uint16_t(direction.y * 32767.f)),
+		texture_coord_(uint16_t(texture_coord.x * 65535.f), uint16_t(texture_coord.y * 65535.f)),
+		thickness_(thickness)*/
+		: position_(position),
+		normal_direction_(normal_direction),
+		direction_(direction),
+		texture_coord_(texture_coord),
+		thickness_(thickness)
+	{
+	}
 	glm::vec2 position_;
 	glm::vec2 normal_direction_;
 	glm::vec2 direction_;
-	glm::vec3 texture_coord_;
+	glm::vec2 texture_coord_;
 	float thickness_ = 0.f;
 };
 

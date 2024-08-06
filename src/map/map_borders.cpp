@@ -70,15 +70,15 @@ bool extend_if_possible(uint32_t x, int32_t border_id, direction dir, std::vecto
 	switch(dir) {
 		case direction::UP:
 		case direction::DOWN:
-			border_vertices[border_index + 2].position_.y += 0.5f / map_size.y;
-			border_vertices[border_index + 3].position_.y += 0.5f / map_size.y;
-			border_vertices[border_index + 4].position_.y += 0.5f / map_size.y;
+			border_vertices[border_index + 2].position_.y += uint16_t(65535.f * 0.5f / map_size.y);
+			border_vertices[border_index + 3].position_.y += uint16_t(65535.f * 0.5f / map_size.y);
+			border_vertices[border_index + 4].position_.y += uint16_t(65535.f * 0.5f / map_size.y);
 			break;
 		case direction::LEFT:
 		case direction::RIGHT:
-			border_vertices[border_index + 2].position_.x += 0.5f / map_size.x;
-			border_vertices[border_index + 3].position_.x += 0.5f / map_size.x;
-			border_vertices[border_index + 4].position_.x += 0.5f / map_size.x;
+			border_vertices[border_index + 2].position_.x += uint16_t(65535.f * 0.5f / map_size.x);
+			border_vertices[border_index + 3].position_.x += uint16_t(65535.f * 0.5f / map_size.x);
+			border_vertices[border_index + 4].position_.x += uint16_t(65535.f * 0.5f / map_size.x);
 			break;
 		default:
 			break;

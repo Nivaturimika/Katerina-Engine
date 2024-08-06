@@ -205,15 +205,15 @@ void create_unit_arrow_vbo(GLuint vbo, std::vector<curved_line_vertex>& data) {
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(curved_line_vertex));
 	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(curved_line_vertex, position_));
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, position_));
 	// Set up vertex attribute format for the normal direction
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(curved_line_vertex, normal_direction_));
+	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, normal_direction_));
 	// Set up vertex attribute format for the direction
-	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(curved_line_vertex, direction_));
+	glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, direction_));
 	// Set up vertex attribute format for the texture coordinates
-	glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, offsetof(curved_line_vertex, texture_coord_));
+	glVertexAttribFormat(3, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, texture_coord_));
 	// Set up vertex attribute format for the type
-	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(curved_line_vertex, type_));
+	glVertexAttribFormat(4, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(curved_line_vertex, type_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -231,27 +231,21 @@ void create_text_line_vbo(GLuint vbo) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(text_line_vertex));
-	// Set up vertex attribute format for the position
 	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, position_));
-	// Set up vertex attribute format for the normal direction
 	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, normal_direction_));
-	// Set up vertex attribute format for the direction
 	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, direction_));
-	// Set up vertex attribute format for the texture coordinates
-	glVertexAttribFormat(3, 3, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, texture_coord_));
+	glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, texture_coord_));
 	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, thickness_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 	glEnableVertexAttribArray(3);
 	glEnableVertexAttribArray(4);
-	glEnableVertexAttribArray(5);
 	glVertexAttribBinding(0, 0);
 	glVertexAttribBinding(1, 0);
 	glVertexAttribBinding(2, 0);
 	glVertexAttribBinding(3, 0);
 	glVertexAttribBinding(4, 0);
-	glVertexAttribBinding(5, 0);
 }
 
 void create_drag_box_vbo(GLuint vbo) {
@@ -260,7 +254,7 @@ void create_drag_box_vbo(GLuint vbo) {
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(screen_vertex));
 	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(screen_vertex, position_));
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(screen_vertex, position_));
 	glEnableVertexAttribArray(0);
 	glVertexAttribBinding(0, 0);
 }
@@ -271,8 +265,8 @@ void create_textured_quad_vbo(GLuint vbo) {
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(textured_screen_vertex));
 	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(textured_screen_vertex, position_));
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(textured_screen_vertex, texcoord_));
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_screen_vertex, position_));
+	glVertexAttribFormat(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_screen_vertex, texcoord_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribBinding(0, 0);
@@ -285,11 +279,9 @@ void display_data::create_border_ogl_objects() {
 
 void display_data::create_meshes() {
 	std::vector<map_vertex> land_vertices;
-
 	auto add_vertex = [map_size = glm::vec2(float(size_x), float(size_y))](std::vector<map_vertex>& vertices, glm::vec2 pos0) {
 		vertices.emplace_back(pos0.x, pos0.y);
 	};
-
 	glm::vec2 last_pos(0, 0);
 	glm::vec2 pos(0, 0);
 	glm::vec2 map_size(size_x, size_y);
@@ -301,7 +293,6 @@ void display_data::create_meshes() {
 			add_vertex(land_vertices, pos);
 		}
 	}
-
 	map_indices.clear();
 	for(int y = 0; y < sections.y; y++) {
 		auto top_row_start = y * (sections.x + 1);
@@ -314,9 +305,7 @@ void display_data::create_meshes() {
 		}
 		map_indices.push_back(std::numeric_limits<uint16_t>::max());
 	}
-
 	land_vertex_count = ((uint32_t)land_vertices.size());
-
 	// Fill and bind the VAO
 	glBindVertexArray(vao_array[vo_land]);
 	// Create and populate the VBO
@@ -325,7 +314,7 @@ void display_data::create_meshes() {
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo_array[vo_land], 0, sizeof(map_vertex));
 	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(map_vertex, position_));
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
 	glEnableVertexAttribArray(0);
 	glVertexAttribBinding(0, 0);
 
@@ -1473,9 +1462,9 @@ void make_selection_quad(sys::state& state, glm::vec2 p) {
 }
 
 void add_arrow_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 prev_normal_dir, glm::vec2 next_normal_dir, float fill_progress, bool end_arrow, float size_x, float size_y) {
-	constexpr float type_filled = 2.f;
-	constexpr float type_unfilled = 0.f;
-	constexpr float type_end = 3.f;
+	constexpr uint8_t type_unfilled = 0x0;//2;
+	constexpr uint8_t type_filled = 0x80;
+	constexpr uint8_t type_end = 0xC0;//3;
 	glm::vec2 curr_dir = glm::normalize(end - start);
 	start /= glm::vec2(size_x, size_y);
 	end /= glm::vec2(size_x, size_y);
@@ -1521,7 +1510,7 @@ void add_arrow_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2
 	}
 }
 
-constexpr inline uint32_t default_num_b_segments = 16;
+constexpr inline uint32_t default_num_b_segments = 12;
 constexpr inline float control_point_length_factor = 0.3f;
 
 void add_bezier_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 start_per, glm::vec2 end_per, float progress, bool last_curve, float size_x, float size_y, uint32_t num_b_segments) {
@@ -1696,7 +1685,7 @@ void make_navy_path(sys::state& state, std::vector<map::curved_line_vertex>& buf
 				glm::vec2 a_per = glm::normalize(next_pos - current_pos);
 				glm::vec2 b_per = glm::normalize(next_pos - next_next_pos);
 				glm::vec2 temp = a_per + b_per;
-				if(glm::length(temp) < 0.00001f) {
+				if(glm::length(temp) < 0.0001f) {
 					next_perpendicular = -a_per;
 				} else {
 					next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
@@ -2084,18 +2073,17 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 				p0 -= (1.5f - 2.f * glyph_positions.y) * curr_normal_dir * real_text_size;
 				p0 += (1.0f + 2.f * glyph_positions.x) * curr_dir * real_text_size;
 
-				float type = float((gso.texture_slot >> 6) % text::max_texture_layers);
 				float step = 1.f / 8.f;
 				float tx = float(gso.texture_slot & 7) * step;
 				float ty = float((gso.texture_slot & 63) >> 3) * step;
 
-				text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec3(tx, ty, type), real_text_size);
-				text_line_vertices.emplace_back(p0, glm::vec2(-1, -1), shader_direction, glm::vec3(tx, ty + step, type), real_text_size);
-				text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec3(tx + step, ty + step, type), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(-1, -1), shader_direction, glm::vec2(tx, ty + step), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
 
-				text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec3(tx + step, ty + step, type), real_text_size);
-				text_line_vertices.emplace_back(p0, glm::vec2(1, 1), shader_direction, glm::vec3(tx + step, ty, type), real_text_size);
-				text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec3(tx, ty, type), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(1, 1), shader_direction, glm::vec2(tx + step, ty), real_text_size);
+				text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
 				text_line_texture_per_quad.emplace_back(f.textures[gso.texture_slot >> 6]);
 			}
 			float glyph_advance = x_advance * size / 64.f;
@@ -2188,18 +2176,17 @@ void display_data::set_province_text_lines(sys::state& state, std::vector<text_l
 				p0 -= (1.5f - 2.f * glyph_positions.y) * curr_normal_dir * real_text_size;
 				p0 += (1.0f + 2.f * glyph_positions.x) * curr_dir * real_text_size;
 
-				float type = float((gso.texture_slot >> 6) % text::max_texture_layers);
 				float step = 1.f / 8.f;
 				float tx = float(gso.texture_slot & 7) * step;
 				float ty = float((gso.texture_slot & 63) >> 3) * step;
 
-				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec3(tx, ty, type), real_text_size);
-				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, -1), shader_direction, glm::vec3(tx, ty + step, type), real_text_size);
-				province_text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec3(tx + step, ty + step, type), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, -1), shader_direction, glm::vec2(tx, ty + step), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
 
-				province_text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec3(tx + step, ty + step, type), real_text_size);
-				province_text_line_vertices.emplace_back(p0, glm::vec2(1, 1), shader_direction, glm::vec3(tx + step, ty, type), real_text_size);
-				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec3(tx, ty, type), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(1, 1), shader_direction, glm::vec2(tx + step, ty), real_text_size);
+				province_text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
 				province_text_line_texture_per_quad.emplace_back(f.textures[gso.texture_slot >> 6]);
 			}
 			float glyph_advance = x_advance * size / 64.f;

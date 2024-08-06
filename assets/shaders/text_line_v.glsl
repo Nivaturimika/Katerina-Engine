@@ -2,10 +2,10 @@
 layout (location = 0) in vec2 vertex_position;
 layout (location = 1) in vec2 normal_direction;
 layout (location = 2) in vec2 direction;
-layout (location = 3) in vec3 texture_coord;
+layout (location = 3) in vec2 texture_coord;
 layout (location = 4) in float thickness;
 
-out vec3 tex_coord;
+out vec2 tex_coord;
 out float opacity;
 out float text_size;
 
@@ -24,12 +24,6 @@ vec4 calc_gl_position(in vec3 v);
 // Each triangle in the quad is made up by two vertices on the same position and
 // another one in the "direction" vector. Then all the vertices are offset in the "normal_direction".
 void main() {
-	//vec2 rot_direction = vec2(-direction.y, direction.x);
-	//vec2 normal_vector = normalize(normal_direction) * thickness;
-	//vec2 extend_vector = -normalize(direction) * thickness;
-
-	//vec2 world_pos = vertex_position;
-
 	vec2 unadj_direction = vec2(direction.x / 2.0f, direction.y);
 	vec2 unadj_normal = vec2(-direction.y / 2.0f, direction.x);
 
@@ -38,9 +32,6 @@ void main() {
 	vec4 right_point = thickness * 10000 * (calc_gl_position(vec3(v1.x, 0.f, v1.y)) - center_point);
 	vec2 v2 = vertex_position + unadj_normal * 0.0001f;
 	vec4 top_point = thickness * 10000 * (calc_gl_position(vec3(v2.x, 0.f, v2.y)) - center_point);
-
-	//vec2 offset = normal_vector + extend_vector;
-	//world_pos += offset * scale;
 
 	vec4 temp_result = center_point + (normal_direction.x * right_point + normal_direction.y * top_point);
     
