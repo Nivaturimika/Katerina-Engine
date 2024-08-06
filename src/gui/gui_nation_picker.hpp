@@ -545,7 +545,8 @@ public:
 			if(state.network_state.save_stream) { //in the middle of a save stream
 				disabled = true;
 			} else {
-				if(!state.session_host_checksum.is_equal(state.get_save_checksum())) { //can't start if checksum doesn't match
+				if(state.network_state.save_slock.load(std::memory_order::acquire) == false
+				&& !state.session_host_checksum.is_equal(state.get_save_checksum())) { //can't start if checksum doesn't match
 					disabled = true;
 				}
 			}
