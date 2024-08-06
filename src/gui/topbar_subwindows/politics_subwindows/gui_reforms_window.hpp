@@ -7,8 +7,7 @@
 namespace ui {
 
 void reform_rules_description(sys::state& state, text::columnar_layout& contents, uint32_t rules) {
-	if((rules & (issue_rule::primary_culture_voting | issue_rule::culture_voting | issue_rule::culture_voting | issue_rule::all_voting | issue_rule::largest_share | issue_rule::dhont | issue_rule::sainte_laque | issue_rule::same_as_ruling_party | issue_rule::rich_only | issue_rule::state_vote | issue_rule::population_vote)) !=
-			0) {
+	if((rules & (issue_rule::primary_culture_voting | issue_rule::culture_voting | issue_rule::culture_voting | issue_rule::all_voting | issue_rule::largest_share | issue_rule::dhont | issue_rule::sainte_laque | issue_rule::same_as_ruling_party | issue_rule::rich_only | issue_rule::state_vote | issue_rule::population_vote)) != 0) {
 		text::add_line(state, contents, "voting_rules");
 		if((rules & issue_rule::primary_culture_voting) != 0) {
 			text::add_line(state, contents, "rule_primary_culture_voting");
@@ -43,7 +42,6 @@ void reform_rules_description(sys::state& state, text::columnar_layout& contents
 	}
 
 	if((rules & (issue_rule::build_factory | issue_rule::expand_factory | issue_rule::open_factory | issue_rule::destroy_factory | issue_rule::factory_priority | issue_rule::can_subsidise | issue_rule::pop_build_factory | issue_rule::pop_expand_factory | issue_rule::pop_open_factory | issue_rule::delete_factory_if_no_input | issue_rule::allow_foreign_investment | issue_rule::slavery_allowed | issue_rule::build_railway | issue_rule::build_bank | issue_rule::build_university)) != 0) {
-
 		text::add_line(state, contents, "special_rules");
 		text::add_line_with_condition(state, contents, "rule_build_factory", (rules & issue_rule::build_factory) != 0);
 		text::add_line_with_condition(state, contents, "rule_expand_factory", (rules & issue_rule::expand_factory) != 0);

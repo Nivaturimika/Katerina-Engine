@@ -246,12 +246,11 @@ public:
 			text::add_to_layout_box(state, contents, box, std::string_view{ ")" });
 			text::close_layout_box(contents, box);
 		}
-
+		uint32_t rules = 0;
 		for(auto pi : state.culture_definitions.party_issues) {
-			reform_description(state, contents, state.world.political_party_get_party_issues(party, pi));
-			text::add_line_break_to_layout(state, contents);
+			rules |= state.world.issue_option_get_rules(state.world.political_party_get_party_issues(party, pi));
 		}
-
+		reform_rules_description(state, contents, rules);
 		if(state.world.political_party_get_trigger(party)) {
 			text::add_line(state, contents, "alice_political_party_trigger", text::variable_type::date_long_0, state.world.political_party_get_start_date(party),
 				text::variable_type::date_long_1, state.world.political_party_get_end_date(party));
@@ -355,10 +354,11 @@ public:
 			text::add_to_layout_box(state, contents, box, std::string_view{ ")" });
 			text::close_layout_box(contents, box);
 		}
+		uint32_t rules = 0;
 		for(auto pi : state.culture_definitions.party_issues) {
-			reform_description(state, contents, ruling_party.get_party_issues(pi));
-			text::add_line_break_to_layout(state, contents);
+			rules |= ruling_party.get_party_issues(pi).get_rules();
 		}
+		reform_rules_description(state, contents, rules);
 	}
 };
 

@@ -766,10 +766,11 @@ public:
 			text::add_divider_to_layout_box(state, contents, box);
 			text::close_layout_box(contents, box);
 		}
+		uint32_t rules = 0;
 		for(auto pi : state.culture_definitions.party_issues) {
-			reform_description(state, contents, state.world.political_party_get_party_issues(fat_id.get_ruling_party(), pi));
-			text::add_line_break_to_layout(state, contents);
+			rules |= fat_id.get_ruling_party().get_party_issues(pi).get_rules();
 		}
+		reform_rules_description(state, contents, rules);
 	}
 };
 

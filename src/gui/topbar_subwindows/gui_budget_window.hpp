@@ -847,8 +847,6 @@ class budget_construction_stockpile_slider : public budget_slider<budget_slider_
 		std::vector<float> total;
 		total.resize(size_t(state.world.commodity_size()), 0.0f);
 
-
-
 		float admin_eff = state.world.nation_get_administrative_efficiency(n);
 		float admin_cost_factor = 2.0f - admin_eff;
 		for(auto lc : state.world.nation_get_province_land_construction(n)) {
