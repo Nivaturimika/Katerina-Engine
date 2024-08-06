@@ -130,7 +130,6 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(notify_start_game, no_data) \
 	GS_COMMAND_LIST_ENTRY(notify_stop_game, no_data) \
 	GS_COMMAND_LIST_ENTRY(notify_pause_game, no_data) \
-	GS_COMMAND_LIST_ENTRY(notify_stop_game, no_data) \
 
 uint32_t get_size(command_type t) {
 	//return sizeof(command::payload);
@@ -4756,6 +4755,8 @@ void notify_reload(sys::state& state, dcon::nation_id source) {
 	add_to_command_queue(state, p);
 }
 void execute_notify_reload(sys::state& state, dcon::nation_id source, sys::checksum_key& k) {
+	state.network_state.save_slock.store(true, std::memory_order::release);
+
 	state.session_host_checksum = k;
 	/* Reset OOS state, and for host, advise new clients with a save stream so they can hotjoin!
 	   Additionally we will clear the new client sending queue, since the state is no longer
@@ -4788,6 +4789,10 @@ void execute_notify_reload(sys::state& state, dcon::nation_id source, sys::check
 	m.source = source;
 	m.body = text::produce_simple_string(state, "multiplayer_notify_reload");
 	post_chat_message(state, m);
+
+	// slock is unset BEFORE command queue is processed
+	assert(state.network_state.save_slock.load(std::memory_order::acquire) == true);
+	state.network_state.save_slock.store(false, std::memory_order::release);
 }
 
 void execute_notify_start_game(sys::state& state, dcon::nation_id source) {
@@ -4844,10 +4849,6 @@ void notify_pause_game(sys::state& state, dcon::nation_id source) {
 
 bool can_perform_command(sys::state& state, payload& c) {
 	switch(c.type) {
-	case command_type::invalid:
-		std::abort(); // invalid command
-		break;
-
 	case command_type::change_nat_focus:
 		return can_set_national_focus(state, c.source, c.data.nat_focus.target_state, c.data.nat_focus.focus);
 
@@ -5227,6 +5228,11 @@ bool can_perform_command(sys::state& state, payload& c) {
 	case command_type::c_always_potential_decisions:
 	case command_type::c_add_year:
 		return true;
+	//invalid commands
+	case command_type::invalid:
+	default:
+		assert(false); // invalid command
+		break;
 	}
 	return false;
 }
