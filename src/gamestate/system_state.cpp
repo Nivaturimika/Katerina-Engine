@@ -1394,30 +1394,6 @@ void state::render() { // called to render the frame may (and should) delay retu
 		}
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	if(ui_state.bg_gfx_id && current_scene.based_on_map) {
-		// Render default background
-		glUseProgram(open_gl.ui_shader_program);
-		glUniform1i(open_gl.ui_shader_texture_sampler_uniform, 0);
-		glUniform1i(open_gl.ui_shader_secondary_texture_sampler_uniform, 1);
-		glUniform1f(open_gl.ui_shader_screen_width_uniform, float(x_size));
-		glUniform1f(open_gl.ui_shader_screen_height_uniform, float(y_size));
-		glUniform1f(open_gl.ui_shader_gamma_uniform, user_settings.gamma);
-		glViewport(0, 0, x_size, y_size);
-		glDepthRange(-1.0f, 1.0f);
-		auto const& gfx_def = ui_defs.gfx[ui_state.bg_gfx_id];
-		if(gfx_def.primary_texture_handle) {
-			ogl::render_textured_rect(*this, ui::get_color_modification(false, false, false), 0.f, 0.f, float(x_size), float(y_size),
-				ogl::get_texture_handle(*this, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent()),
-				ui::rotation::upright, gfx_def.is_vertically_flipped(),
-				false);
-		}
-	}
-
 	current_scene.render_map(*this);
 
 	//UI rendering

@@ -21,6 +21,7 @@
 #include "texture.hpp"
 #include "province.hpp"
 #include "province_templates.hpp"
+#include "gui_element_types.hpp"
 
 #include "xac.hpp"
 
@@ -606,8 +607,27 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	if(ogl::msaa_enabled(state)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, state.open_gl.msaa_framebuffer);
-		glClearColor(1.f, 1.f, 1.f, 0.f);
+		glClearColor(0.f, 0.f, 0.f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+
+	if(state.ui_state.bg_gfx_id) {
+		// Render default background
+		glUseProgram(state.open_gl.ui_shader_program);
+		glUniform1i(state.open_gl.ui_shader_texture_sampler_uniform, 0);
+		glUniform1i(state.open_gl.ui_shader_secondary_texture_sampler_uniform, 1);
+		glUniform1f(state.open_gl.ui_shader_screen_width_uniform, float(state.x_size));
+		glUniform1f(state.open_gl.ui_shader_screen_height_uniform, float(state.y_size));
+		glUniform1f(state.open_gl.ui_shader_gamma_uniform, state.user_settings.gamma);
+		glViewport(0, 0, state.x_size, state.y_size);
+		glDepthRange(-1.0f, 1.0f);
+		auto const& gfx_def = state.ui_defs.gfx[state.ui_state.bg_gfx_id];
+		if(gfx_def.primary_texture_handle) {
+			ogl::render_textured_rect(state, ui::get_color_modification(false, false, false), 0.f, 0.f, float(state.x_size), float(state.y_size),
+				ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent()),
+				ui::rotation::upright, gfx_def.is_vertically_flipped(),
+				false);
+		}
 	}
 
 	// Load general shader stuff, used by both land and borders
