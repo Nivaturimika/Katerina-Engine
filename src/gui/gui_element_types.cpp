@@ -994,11 +994,11 @@ message_result multiline_text_element_base::on_rbutton_down(sys::state& state, i
 }
 
 message_result multiline_text_element_base::test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept {
-	if(line_height == 0.f)
-		return message_result::unseen;
 	switch(type) {
 	case mouse_probe_type::click:
 	{
+		if(line_height == 0.f)
+			return message_result::unseen;
 		auto chunk = internal_layout.get_chunk_from_position(x, y + int32_t(line_height * float(current_line)));
 		if(!chunk)
 			return message_result::unseen;

@@ -314,6 +314,48 @@ public:
 		text::add_to_layout_box(state, layout, box, std::string(")"));
 		text::close_layout_box(layout, box);
 
+		for(uint32_t i = 0; i < uint32_t(budget_slider_target::target_count); i++) {
+			multipliers[i] = 1.f;
+			switch(budget_slider_target(i)) {
+			case budget_slider_target::poor_tax:
+				multipliers[i] = float(state.world.nation_get_poor_tax(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::middle_tax:
+				multipliers[i] = float(state.world.nation_get_middle_tax(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::rich_tax:
+				multipliers[i] = float(state.world.nation_get_rich_tax(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::construction_stock:
+				multipliers[i] = float(state.world.nation_get_construction_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::social:
+				multipliers[i] = float(state.world.nation_get_social_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::military:
+				multipliers[i] = float(state.world.nation_get_military_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::education:
+				multipliers[i] = float(state.world.nation_get_education_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::tariffs:
+				multipliers[i] = float(state.world.nation_get_tariffs(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::admin:
+				multipliers[i] = float(state.world.nation_get_administrative_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::domestic_investment:
+				multipliers[i] = float(state.world.nation_get_domestic_investment_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::army_stock:
+				multipliers[i] = float(state.world.nation_get_land_spending(state.local_player_nation)) / 100.f;
+				break;
+			case budget_slider_target::navy_stock:
+				multipliers[i] = float(state.world.nation_get_naval_spending(state.local_player_nation)) / 100.f;
+				break;
+			}
+		}
+
 		// income
 		values[uint8_t(budget_slider_target::poor_tax)] = economy::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::poor);
 		values[uint8_t(budget_slider_target::middle_tax)] = economy::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::middle);
@@ -348,7 +390,7 @@ public:
 		float total_exp = 0.f;
 		float total_inc = 0.f;
 		for(uint8_t i = 0; i < uint8_t(budget_slider_target::target_count); ++i) {
-			float v = values[i] * multipliers[i];
+			float v = values[i];
 			if(v < 0.f)
 				total_exp += v;
 			else
