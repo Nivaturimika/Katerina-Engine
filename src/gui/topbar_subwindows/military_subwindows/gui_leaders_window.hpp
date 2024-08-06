@@ -120,7 +120,7 @@ public:
 		auto army_id = state.world.leader_get_army_from_army_leadership(content);
 		if(army_id.value == 0) {
 			if(army) {
-				army->set_text(state, text::produce_simple_string(state, "unassigned"));
+				army->set_text(state, "");
 			}
 			if(location) {
 				location->set_text(state, "");
