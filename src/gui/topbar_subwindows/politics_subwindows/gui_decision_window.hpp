@@ -232,7 +232,7 @@ private:
 
 public:
 	void on_create(sys::state& state) noexcept override {
-		base_data.size.y = 76;
+		base_data.size.y = 74; //-2
 		scrollable_text::on_create(state);
 	}
 
