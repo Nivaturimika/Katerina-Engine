@@ -268,9 +268,12 @@ public:
 	void on_create(sys::state& state) noexcept override {
 		button_element_base::on_create(state);
 		set_button_text(state, text::produce_simple_string(state, "alice_lobby_back"));
+		if(state.network_mode == sys::network_mode_type::client) {
+			set_visible(state, false);
+		}
 	}
 	void on_update(sys::state& state) noexcept override {
-		disabled = (state.network_mode == sys::network_mode_type::client) || (state.current_scene.is_lobby);
+		disabled = state.current_scene.is_lobby;
 	}
 	void button_action(sys::state& state) noexcept override {
 		map_mode::set_map_mode(state, map_mode::mode::political);
