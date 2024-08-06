@@ -278,6 +278,10 @@ public:
 		button_element_base::on_create(state);
 		set_button_text(state, text::produce_simple_string(state, "close"));
 	}
+	void button_action(sys::state& state) noexcept override {
+		state.ui_state.edit_target = nullptr;
+		generic_close_button::button_action(state);
+	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
