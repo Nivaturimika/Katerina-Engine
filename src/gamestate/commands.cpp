@@ -4548,6 +4548,9 @@ bool can_notify_player_joins(sys::state& state, dcon::nation_id source, sys::pla
 void execute_notify_player_joins(sys::state& state, dcon::nation_id source, sys::player_name& name) {
 	state.world.nation_set_is_player_controlled(source, true);
 	state.network_state.map_of_player_names.insert_or_assign(source.index(), name);
+	/* Hotjoin */
+	if(state.current_scene.game_in_progress)
+		ai::remove_ai_data(state, source);
 
 	ui::chat_message m{};
 	m.source = source;
@@ -4555,10 +4558,6 @@ void execute_notify_player_joins(sys::state& state, dcon::nation_id source, sys:
 	text::add_to_substitution_map(sub, text::variable_type::playername, name.to_string_view());
 	m.body = text::resolve_string_substitution(state, "chat_player_joins", sub);
 	post_chat_message(state, m);
-
-	/* Hotjoin */
-	if(state.current_scene.game_in_progress)
-		ai::remove_ai_data(state, source);
 }
 
 void notify_player_leaves(sys::state& state, dcon::nation_id source, bool make_ai) {
@@ -4770,6 +4769,7 @@ void execute_notify_reload(sys::state& state, dcon::nation_id source, sys::check
 		if(state.world.nation_get_is_player_controlled(n))
 			players.push_back(n);
 	dcon::nation_id old_local_player_nation = state.local_player_nation;
+	state.local_player_nation = dcon::nation_id{ };
 	/* Save the buffer before we fill the unsaved data */
 	size_t length = sizeof_save_section(state);
 	auto save_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[length]);
@@ -4777,22 +4777,20 @@ void execute_notify_reload(sys::state& state, dcon::nation_id source, sys::check
 	/* Then reload as if we loaded the save data */
 	state.preload();
 	sys::read_save_section(save_buffer.get(), save_buffer.get() + length, state);
-	state.local_player_nation = dcon::nation_id{ };
 	for(const auto n : players)
 		state.world.nation_set_is_player_controlled(n, true);
 	state.local_player_nation = old_local_player_nation;
 	assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 	state.fill_unsaved_data();
+	assert(state.network_state.save_slock.load(std::memory_order::acquire) == true);
+	state.network_state.save_slock.store(false, std::memory_order::release);
+	//
 	assert(state.session_host_checksum.is_equal(state.get_save_checksum()));
 
 	ui::chat_message m;
 	m.source = source;
 	m.body = text::produce_simple_string(state, "multiplayer_notify_reload");
 	post_chat_message(state, m);
-
-	// slock is unset BEFORE command queue is processed
-	assert(state.network_state.save_slock.load(std::memory_order::acquire) == true);
-	state.network_state.save_slock.store(false, std::memory_order::release);
 }
 
 void execute_notify_start_game(sys::state& state, dcon::nation_id source) {

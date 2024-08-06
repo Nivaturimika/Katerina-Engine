@@ -51,7 +51,15 @@ struct client_data {
 	struct sockaddr_storage address;
 
 	client_handshake_data hshake_buffer;
-	command::payload recv_buffer;
+
+	bool wait_for_header = true;
+	struct { //Keep in sync with commands.cpp
+		command::command_type type = command::command_type::invalid; //1
+		uint8_t padding = 0;
+		dcon::nation_id source; //2
+	} recv_buffer_header;
+	command::payload::dtype recv_buffer_body;
+
 	size_t recv_count = 0;
 	std::vector<char> send_buffer;
 	std::vector<char> early_send_buffer;
@@ -80,7 +88,15 @@ struct network_state {
 	std::string ip_address = "127.0.0.1";
 	std::vector<char> send_buffer;
 	std::vector<char> early_send_buffer;
-	command::payload recv_buffer;
+	//
+	bool wait_for_header = true;
+	struct { //Keep in sync with commands.cpp
+		command::command_type type = command::command_type::invalid; //1
+		uint8_t padding = 0;
+		dcon::nation_id source; //2
+	} recv_buffer_header;
+	command::payload::dtype recv_buffer_body;
+	//
 	std::vector<uint8_t> save_data; //client
 	ankerl::unordered_dense::map<int32_t, sys::player_name> map_of_player_names;
 	std::unique_ptr<uint8_t[]> current_save_buffer;
