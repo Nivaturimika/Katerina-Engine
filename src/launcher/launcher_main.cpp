@@ -198,10 +198,10 @@ static std::string_view es_localised_strings[uint8_t(string_index::count)] = {
 };
 //italian
 static std::string_view it_localised_strings[uint8_t(string_index::count)] = {
-	"Crea esenario",
-	"Ricreare esenario",
+	"Crea scenario",
+	"Ricreare scenario",
 	"Lavorando...",
-	"Crea un nuovo esenario",
+	"Crea un nuovo scenario",
 	"per i mod selezionati",
 	"Scenario non trovato",
 	"Indirizzo IP",
@@ -416,7 +416,7 @@ static std::string_view bg_localised_strings[uint8_t(string_index::count)] = {
 static std::string_view ca_localised_strings[uint8_t(string_index::count)] = {
 	"Crea un escenari",
 	"Recrea l'escenari",
-	"Treball...",
+	"Treballant...",
 	"Creeu un nou escenari",
 	"per als mods seleccionats",
 	"No s'ha trobat cap escenari",
@@ -427,7 +427,7 @@ static std::string_view ca_localised_strings[uint8_t(string_index::count)] = {
 	"Multijugador",
 	"Començar el joc",
 	"Amfitrió",
-	"Uneix - te",
+	"Uneixis",
 	"Llista de modificacions",
 };
 //czech
