@@ -53,14 +53,14 @@ struct curved_line_vertex {
 		normal_direction_(uint16_t(normal_direction.x * 32767.f), uint16_t(normal_direction.y * 32767.f)),
 		direction_(uint16_t(direction.x * 32767.f), uint16_t(direction.y * 32767.f)),
 		texture_coord_(uint16_t(texture_coord.x * 65535.f), uint16_t(texture_coord.y * 65535.f)),
-		type_(type)
+		type_(uint8_t(type))
 	{
 	}
 	glm::u16vec2 position_;
 	glm::i16vec2 normal_direction_;
 	glm::i16vec2 direction_;
 	glm::u16vec2 texture_coord_;
-	uint8_t type_ = 0.f;
+	uint8_t type_ = 0;
 };
 
 struct textured_line_vertex {
