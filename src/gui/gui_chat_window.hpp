@@ -268,9 +268,6 @@ public:
 	void on_create(sys::state& state) noexcept override {
 		button_element_base::on_create(state);
 		set_button_text(state, text::produce_simple_string(state, "alice_lobby_back"));
-		if(state.network_mode == sys::network_mode_type::client) {
-			set_visible(state, false);
-		}
 	}
 	void on_update(sys::state& state) noexcept override {
 		disabled = state.current_scene.is_lobby;
@@ -292,6 +289,20 @@ public:
 	}
 };
 
+class chat_close_button : public generic_close_button {
+public:
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		set_button_text(state, text::produce_simple_string(state, "close"));
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "reopen_with_tab");
+	}
+};
+
 class chat_window : public window_element_base {
 private:
 	chat_message_listbox<true>* chat_message_box = nullptr;
@@ -299,7 +310,7 @@ public:
 	chat_edit_box* chat_edit = nullptr;
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "start_button") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<chat_close_button>(state, id);
 		} else if(name == "background") {
 			return make_element_by_type<draggable_target>(state, id);
 		} else if(name == "chatlog") {
