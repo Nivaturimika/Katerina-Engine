@@ -896,7 +896,9 @@ void send_and_receive_commands(sys::state& state) {
 		// send the commands of the server to all the clients
 		auto* c = state.network_state.outgoing_commands.front();
 		while(c) {
-			if(!command::is_console_command(c->type)) {
+			// Clients can't send console commands, but we can
+			if(!command::is_console_command(c->type)
+			|| c->source == state.local_player_nation) {
 				// Generate checksum on the spot
 				if(c->type == command::command_type::advance_tick) {
 					if(state.current_date.to_ymd(state.start_date).day == 1 || state.cheat_data.daily_oos_check) {
