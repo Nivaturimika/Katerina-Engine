@@ -8,6 +8,7 @@
 #include "unit_tooltip.hpp"
 #include "gui_land_combat.hpp"
 #include "gui_naval_combat.hpp"
+#include "map_state.hpp"
 
 namespace ui {
 
@@ -151,15 +152,10 @@ public:
 
 	void set_province(sys::state& state, dcon::province_id p) {
 		port_for = p;
-
-		auto adj = state.world.get_province_adjacency_by_province_pair(p, state.world.province_get_port_to(p));
-		assert(adj);
-		auto id = adj.index();
-		auto& border = state.map_state.map_data.borders[id];
-		auto& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
-
-		map_x = vertex.position.x;
-		map_y = vertex.position.y;
+		glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
+		glm::vec2 v = map::get_port_location(state, p) / map_size;
+		map_x = v.x;
+		map_y = v.y;
 	}
 
 	void on_update(sys::state& state) noexcept override {

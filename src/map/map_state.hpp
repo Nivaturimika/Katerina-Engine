@@ -100,6 +100,10 @@ public:
 	glm::mat4x4 get_mvp_matrix(sys::projection_mode mode, glm::mat4x4 globe_rot4x4, glm::vec2 offset, float aspect_ratio, float counter_factor) const;
 };
 
+glm::vec2 get_port_location(sys::state& state, dcon::province_id p);
+bool is_sea_province(sys::state& state, dcon::province_id prov_id);
+glm::vec2 get_navy_location(sys::state& state, dcon::province_id prov_id);
+glm::vec2 get_army_location(sys::state& state, dcon::province_id prov_id);
 void update_text_lines(sys::state& state, display_data& map_data);
 void update_province_text_lines(sys::state& state, display_data& map_data);
 

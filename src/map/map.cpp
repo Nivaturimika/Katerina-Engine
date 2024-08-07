@@ -74,7 +74,9 @@ glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
 	auto& vertex = map_data.border_vertices[border.start_index + border.count / 2];
 	glm::vec2 map_size = glm::vec2(map_data.size_x, map_data.size_y);
 
-	return vertex.position * map_size;
+	glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
+	v1 /= 65535.f;
+	return v1 * map_size;
 }
 
 bool is_sea_province(sys::state& state, dcon::province_id prov_id) {
@@ -145,7 +147,7 @@ void display_data::update_fog_of_war(sys::state& state) {
 	} else {
 		state.map_state.visible_provinces.resize(state.world.province_size() + 1, true);
 	}
-	gen_prov_color_texture(textures[texture_province_fow], province_fows);
+	gen_prov_color_texture(textures[texture_province_fow], province_fows, 1);
 }
 
 void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& data) {
@@ -153,15 +155,10 @@ void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& dat
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	if(!data.empty())
 		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
-	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex));
-	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex, position_));
-	// Set up vertex attribute format for the normal direction
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex, normal_direction_));
-	// Set up vertex attribute format for the direction
-	glVertexAttribFormat(2, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex, texture_coordinate_));
-	// Set up vertex attribute format for the texture coordinates
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, position_));
+	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex, normal_direction_));
+	glVertexAttribFormat(2, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex, texture_coord_));
 	glVertexAttribFormat(3, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex, distance_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -180,11 +177,11 @@ void create_textured_line_b_vbo(GLuint vbo, std::vector<textured_line_vertex_b>&
 		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex_b) * data.size(), data.data(), GL_STATIC_DRAW);
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex_b));
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, position));
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, previous_point));
-	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, next_point));
-	glVertexAttribFormat(3, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, texture_coordinate));
-	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, distance));
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, position_));
+	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, previous_point_));
+	glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, next_point_));
+	glVertexAttribFormat(3, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex_b, texture_coord_));
+	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, distance_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -589,8 +586,6 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glDepthRangef(0.f, 1.f);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -609,7 +604,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1f(state.open_gl.ui_shader_screen_height_uniform, float(state.y_size));
 		glUniform1f(state.open_gl.ui_shader_gamma_uniform, state.user_settings.gamma);
 		glViewport(0, 0, state.x_size, state.y_size);
-		glDepthRange(-1.0f, 1.0f);
 		auto const& gfx_def = state.ui_defs.gfx[state.ui_state.bg_gfx_id];
 		if(gfx_def.primary_texture_handle) {
 			ogl::render_textured_rect(state, ui::get_color_modification(false, false, false), 0.f, 0.f, float(state.x_size), float(state.y_size),
@@ -1395,7 +1389,7 @@ void display_data::gen_prov_color_texture(GLuint texture_handle, std::vector<uin
 void display_data::set_selected_province(sys::state& state, dcon::province_id prov_id) {
 	std::vector<uint32_t> province_highlights(state.world.province_size() + 1, 0);
 	state.current_scene.update_highlight_texture(state, province_highlights, prov_id);
-	gen_prov_color_texture(textures[texture_province_highlight], province_highlights);
+	gen_prov_color_texture(textures[texture_province_highlight], province_highlights, 1);
 }
 
 void display_data::set_province_color(std::vector<uint32_t> const& prov_color) {
@@ -2695,7 +2689,7 @@ void display_data::load_map(sys::state& state) {
 	province_size += 256 - province_size % 256;
 
 	std::vector<uint32_t> test_highlight(province_size);
-	gen_prov_color_texture(textures[texture_province_highlight], test_highlight);
+	gen_prov_color_texture(textures[texture_province_highlight], test_highlight, 1);
 	for(uint32_t i = 0; i < test_highlight.size(); ++i) {
 		test_highlight[i] = 255;
 	}

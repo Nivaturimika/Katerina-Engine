@@ -1334,21 +1334,10 @@ void state::render() { // called to render the frame may (and should) delay retu
 
 	// Have to have the map tooltip down here, and we must check both of the probes
 	// Not doing this causes the map tooltip to override some of the regular tooltips (namely the score tooltips)
-	if(current_scene.based_on_map
-		&& !mouse_probe.under_mouse
-		&& !tooltip_probe.under_mouse
-	) {
+	if(current_scene.based_on_map && !mouse_probe.under_mouse && !tooltip_probe.under_mouse) {
 		dcon::province_id prov = map_state.get_province_under_mouse(*this, int32_t(mouse_x_position), int32_t(mouse_y_position), x_size, y_size);
-		if(
-			(
-				(
-					map_state.active_map_mode == map_mode::mode::political
-					&& !current_scene.overwrite_map_tooltip
-				)
-				|| map_state.active_map_mode == map_mode::mode::terrain
-			)
-			&& map_state.get_zoom() <= map::zoom_close
-		) {
+		if(((map_state.active_map_mode == map_mode::mode::political && !current_scene.overwrite_map_tooltip)
+		|| map_state.active_map_mode == map_mode::mode::terrain) && map_state.get_zoom() <= map::zoom_close) {
 			prov = dcon::province_id{};
 		}
 		if(prov) {
@@ -1459,6 +1448,7 @@ void state::render() { // called to render the frame may (and should) delay retu
 	} else { //if there is no tooltip to display, reset tooltip_timer
 		tooltip_timer = std::chrono::steady_clock::now();
 	}
+	glDisable(GL_BLEND);
 }
 
 void state::on_create() {

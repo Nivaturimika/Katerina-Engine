@@ -53,7 +53,9 @@ glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
 	auto& vertex = map_data.border_vertices[border.start_index + border.count / 2];
 	glm::vec2 map_size = glm::vec2(map_data.size_x, map_data.size_y);
 
-	return vertex.position * map_size;
+	glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
+	v1 /= 65535.f;
+	return v1 * map_size;
 }
 
 bool is_sea_province(sys::state& state, dcon::province_id prov_id) {
@@ -63,8 +65,7 @@ bool is_sea_province(sys::state& state, dcon::province_id prov_id) {
 glm::vec2 get_navy_location(sys::state& state, dcon::province_id prov_id) {
 	if(is_sea_province(state, prov_id))
 		return state.world.province_get_mid_point(prov_id);
-	else
-		return get_port_location(state, prov_id);
+	return get_port_location(state, prov_id);
 }
 
 glm::vec2 get_army_location(sys::state& state, dcon::province_id prov_id) {

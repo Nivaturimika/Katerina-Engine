@@ -356,22 +356,19 @@ bool province_port_is_in_selection(sys::state& state, int32_t x, int32_t y, dcon
 	auto port_to = state.world.province_get_port_to(province);
 	auto adj = state.world.get_province_adjacency_by_province_pair(province, port_to);
 	if(adj) {
-		auto id = adj.index();
-		auto& border = state.map_state.map_data.borders[id];
-		auto& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
-
-		auto map_x = vertex.position.x;
-		auto map_y = vertex.position.y;
+		glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
+		glm::vec2 v = map::get_port_location(state, province) / map_size;
+		auto map_x = v.x;
+		auto map_y = v.y;
 
 		glm::vec2 map_pos(map_x, 1.0f - map_y);
 		auto screen_size = glm::vec2{ float(state.x_size), float(state.y_size) };
 		glm::vec2 screen_pos;
 		if(state.map_state.map_to_screen(state, map_pos, screen_size, screen_pos)) {
 			if(state.x_drag_start <= int32_t(screen_pos.x)
-				&& int32_t(screen_pos.x) <= x
-				&& state.y_drag_start <= int32_t(screen_pos.y)
-				&& int32_t(screen_pos.y) <= y
-			) {
+			&& int32_t(screen_pos.x) <= x
+			&& state.y_drag_start <= int32_t(screen_pos.y)
+			&& int32_t(screen_pos.y) <= y) {
 				return true;
 			}
 		}

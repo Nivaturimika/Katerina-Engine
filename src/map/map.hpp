@@ -64,18 +64,36 @@ struct curved_line_vertex {
 };
 
 struct textured_line_vertex {
-	glm::vec2 position_;
-	glm::vec2 normal_direction_;
-	float texture_coordinate_ = 0.f;
+	textured_line_vertex() { }
+	textured_line_vertex(glm::vec2 position, glm::vec2 normal_direction, float texture_coord, float distance)
+		: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
+		normal_direction_(uint16_t(normal_direction.x * 32767.f), uint16_t(normal_direction.y * 32767.f)),
+		texture_coord_(uint16_t(texture_coord * 255.f)),
+		distance_(distance)
+	{
+	}
+	glm::u16vec2 position_;
+	glm::i16vec2 normal_direction_;
+	uint8_t texture_coord_ = 0;
 	float distance_ = 0.f;
 };
 
 struct textured_line_vertex_b {
-	glm::vec2 position;
-	glm::vec2 previous_point;
-	glm::vec2 next_point;
-	float texture_coordinate = 0.f;
-	float distance = 0.f;
+	textured_line_vertex_b() {
+	}
+	textured_line_vertex_b(glm::vec2 position, glm::vec2 previous_point, glm::vec2 next_point, float texture_coord, float distance)
+		: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
+		previous_point_(uint16_t(previous_point.x * 32767.f), uint16_t(previous_point.y * 32767.f)),
+		next_point_(uint16_t(next_point.x * 32767.f), uint16_t(next_point.y * 32767.f)),
+		texture_coord_(uint8_t(texture_coord * 255.f)),
+		distance_(distance)
+	{
+	}
+	glm::u16vec2 position_;
+	glm::i16vec2 previous_point_;
+	glm::i16vec2 next_point_;
+	uint8_t texture_coord_ = 0;
+	float distance_ = 0.f;
 };
 
 struct text_line_vertex {
