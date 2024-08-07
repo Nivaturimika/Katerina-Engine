@@ -275,7 +275,7 @@ void display_data::create_meshes() {
 		glm::vec2 last_pos(0, 0);
 		glm::vec2 pos(0, 0);
 		glm::vec2 map_size(size_x, size_y);
-		glm::ivec2 sections(48, 4);
+		glm::ivec2 sections(42, 1);
 		for(int y = 0; y <= sections.y; y++) {
 			pos.y = float(y) / float(sections.y);
 			for(int x = 0; x <= sections.x; x++) {
