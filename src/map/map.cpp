@@ -69,10 +69,9 @@ glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
 	auto adj = state.world.get_province_adjacency_by_province_pair(p, pt);
 	assert(adj);
 	auto id = adj.index();
-	auto& map_data = state.map_state.map_data;
-	auto& border = map_data.borders[id];
-	auto& vertex = map_data.border_vertices[border.start_index + border.count / 2];
-	glm::vec2 map_size = glm::vec2(map_data.size_x, map_data.size_y);
+	auto const& border = state.map_state.map_data.borders[id];
+	auto const& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
+	glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 
 	glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
 	v1 /= 65535.f;
@@ -606,6 +605,9 @@ void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float 
 }
 
 void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
+	if(!loaded_map)
+		return;
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
@@ -814,28 +816,25 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			return province_on_screen[p1.index()] || province_on_screen[p2.index()];
 		};
 
-		if(shaders[uint8_t(map_view_mode)][shader_borders]) {
+		if(vao_array[vo_border] && shaders[uint8_t(map_view_mode)][shader_borders]) {
 			// Default border parameters
 			constexpr float border_type_national = 0.f;
 			constexpr float border_type_provincial = 1.f;
 			constexpr float border_type_regional = 2.f;
 			constexpr float border_type_coastal = 3.f;
-
-			// NORMAL BORDERS
-			load_shader(shader_borders);
-			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_time], 0.f); //no scrolling
-			glBindVertexArray(vao_array[vo_border]);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
-			//glMultiDrawArrays(GL_TRIANGLE_STRIP, coastal_starts.data(), coastal_counts.data(), GLsizei(coastal_starts.size()));
-			// impassible borders
-
-			static std::vector<GLint> b_starts;
+			static std::vector<GLint> b_starts; //data sensitive
 			static std::vector<GLint> b_counts;
 			static uint32_t b_index = 0;
 			if(b_starts.size() < borders.size()) {
 				b_starts.resize(borders.size());
 				b_counts.resize(borders.size());
 			}
+			// NORMAL BORDERS
+			load_shader(shader_borders);
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_time], 0.f); //no scrolling
+			glBindVertexArray(vao_array[vo_border]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_border]);
+			//impassible borders
 			if(zoom > map::zoom_close) {
 				if(zoom > map::zoom_very_close) { // Render province borders
 					b_index = 0; //reset index
@@ -1184,24 +1183,53 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			load_shader(shader_text_line);
 			glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_texture_sampler], 0);
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_is_black], state.user_settings.black_map_font ? 1.f : 0.f);
-			if(!text_line_vertices.empty()) {
+			glActiveTexture(GL_TEXTURE0);
+			if(vao_array[vo_text_line] && !text_line_vertices.empty()) {
+				uint32_t index = 0;
+				uint32_t last_texture = 0;
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_opaque], 0.f);
 				glBindVertexArray(vao_array[vo_text_line]);
 				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_text_line]);
 				for(uint32_t i = 0; i < uint32_t(text_line_texture_per_quad.size()); i++) {
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, text_line_texture_per_quad[i]);
-					glDrawArrays(GL_TRIANGLES, i * 6, 6);
+					if(last_texture != text_line_texture_per_quad[i]) {
+						if(index > 0) {
+							glBindTexture(GL_TEXTURE_2D, last_texture);
+							glMultiDrawArrays(GL_TRIANGLES, dyn_text_line_starts.data(), dyn_text_line_counts.data(), GLsizei(index));
+						}
+						last_texture = text_line_texture_per_quad[i];
+						index = 0;
+					}
+					dyn_text_line_starts[index] = GLint(i * 6);
+					dyn_text_line_counts[index] = 6;
+					++index;
+				}
+				if(index > 0) {
+					glBindTexture(GL_TEXTURE_2D, last_texture);
+					glMultiDrawArrays(GL_TRIANGLES, dyn_text_line_starts.data(), dyn_text_line_counts.data(), GLsizei(index));
 				}
 			}
 			if(zoom >= map::zoom_very_close && !province_text_line_vertices.empty()) {
+				uint32_t index = 0;
+				uint32_t last_texture = 0;
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_opaque], 1.f);
 				glBindVertexArray(vao_array[vo_province_text_line]);
 				glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_province_text_line]);
 				for(uint32_t i = 0; i < uint32_t(province_text_line_texture_per_quad.size()); i++) {
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, province_text_line_texture_per_quad[i]);
-					glDrawArrays(GL_TRIANGLES, i * 6, 6);
+					if(last_texture != province_text_line_texture_per_quad[i]) {
+						if(index > 0) {
+							glBindTexture(GL_TEXTURE_2D, last_texture);
+							glMultiDrawArrays(GL_TRIANGLES, dyn_province_text_line_starts.data(), dyn_province_text_line_counts.data(), GLsizei(index));
+						}
+						last_texture = province_text_line_texture_per_quad[i];
+						index = 0;
+					}
+					dyn_province_text_line_starts[index] = GLint(i * 6);
+					dyn_province_text_line_counts[index] = 6;
+					++index;
+				}
+				if(index > 0) {
+					glBindTexture(GL_TEXTURE_2D, last_texture);
+					glMultiDrawArrays(GL_TRIANGLES, dyn_province_text_line_starts.data(), dyn_province_text_line_counts.data(), GLsizei(index));
 				}
 			}
 		}
@@ -2230,6 +2258,23 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 		}
 	}
 	if(text_line_vertices.size() > 0) {
+		for(uint32_t i = 0; i < uint32_t(text_line_texture_per_quad.size()); i++) {
+			bool swapped = false;
+			for(uint32_t j = 0; j < uint32_t(text_line_texture_per_quad.size()); j++) {
+				if(text_line_texture_per_quad[i] < text_line_texture_per_quad[j]) {
+					std::swap(text_line_texture_per_quad[i], text_line_texture_per_quad[j]);
+					map::text_line_vertex tmp[6];
+					std::memcpy(tmp, &text_line_vertices[i * 6], sizeof(tmp));
+					std::memcpy(&text_line_vertices[i * 6], &text_line_vertices[j * 6], sizeof(tmp));
+					std::memcpy(&text_line_vertices[j * 6], tmp, sizeof(tmp));
+					swapped = true;
+				}
+			}
+			if(!swapped)
+				break;
+		}
+		dyn_text_line_starts.resize(text_line_texture_per_quad.size());
+		dyn_text_line_counts.resize(text_line_texture_per_quad.size());
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_text_line]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * text_line_vertices.size(), &text_line_vertices[0], GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -2333,6 +2378,23 @@ void display_data::set_province_text_lines(sys::state& state, std::vector<text_l
 		}
 	}
 	if(province_text_line_vertices.size() > 0) {
+		for(uint32_t i = 0; i < uint32_t(province_text_line_texture_per_quad.size()); i++) {
+			bool swapped = false;
+			for(uint32_t j = 0; j < uint32_t(province_text_line_texture_per_quad.size()); j++) {
+				if(province_text_line_texture_per_quad[i] < province_text_line_texture_per_quad[j]) {
+					std::swap(province_text_line_texture_per_quad[i], province_text_line_texture_per_quad[j]);
+					map::text_line_vertex tmp[6];
+					std::memcpy(tmp, &province_text_line_vertices[i * 6], sizeof(tmp));
+					std::memcpy(&province_text_line_vertices[i * 6], &province_text_line_vertices[j * 6], sizeof(tmp));
+					std::memcpy(&province_text_line_vertices[j * 6], tmp, sizeof(tmp));
+					swapped = true;
+				}
+			}
+			if(!swapped)
+				break;
+		}
+		dyn_province_text_line_starts.resize(province_text_line_texture_per_quad.size());
+		dyn_province_text_line_counts.resize(province_text_line_texture_per_quad.size());
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_province_text_line]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * province_text_line_vertices.size(), &province_text_line_vertices[0], GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

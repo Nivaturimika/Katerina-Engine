@@ -35,9 +35,10 @@ void map_state::set_selected_province(dcon::province_id prov_id) {
 }
 
 void map_state::render(sys::state& state, uint32_t screen_x, uint32_t screen_y) {
+	assert(&state.map_state == this);
 	update(state);
 	glm::vec2 offset = glm::vec2(glm::mod(pos.x, 1.f) - 0.5f, pos.y - 0.5f);
-	map_data.render(state, glm::vec2(screen_x, screen_y), offset, zoom, current_view(state), active_map_mode, globe_rotation, time_counter);
+	state.map_state.map_data.render(state, glm::vec2(screen_x, screen_y), offset, zoom, current_view(state), active_map_mode, globe_rotation, time_counter);
 }
 
 glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
@@ -48,10 +49,9 @@ glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
 	auto adj = state.world.get_province_adjacency_by_province_pair(p, pt);
 	assert(adj);
 	auto id = adj.index();
-	auto& map_data = state.map_state.map_data;
-	auto& border = map_data.borders[id];
-	auto& vertex = map_data.border_vertices[border.start_index + border.count / 2];
-	glm::vec2 map_size = glm::vec2(map_data.size_x, map_data.size_y);
+	auto const& border = state.map_state.map_data.borders[id];
+	auto const& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
+	glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 
 	glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
 	v1 /= 65535.f;

@@ -171,6 +171,11 @@ public:
 	std::vector<std::vector<GLint>> static_mesh_starts;
 	std::vector<std::vector<GLsizei>> static_mesh_counts;
 	//
+	std::vector<GLint> dyn_text_line_starts;
+	std::vector<GLint> dyn_text_line_counts;
+	std::vector<GLint> dyn_province_text_line_starts;
+	std::vector<GLint> dyn_province_text_line_counts;
+	//
 	std::vector<curved_line_vertex> unit_arrow_vertices;
 	std::vector<GLint> unit_arrow_starts;
 	std::vector<GLsizei> unit_arrow_counts;
