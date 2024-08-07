@@ -1837,6 +1837,7 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 	case command_info::type::win_wars:
 		break;
 	case command_info::type::toggle_ai:
+	{
 		auto tag = std::get<std::string>(pstate.arg_slots[0]);
 		auto nid = smart_get_national_identity_from_tag(state, parent, tag);
 		if(nid) {
@@ -1849,6 +1850,7 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 			command::c_toggle_ai(state, state.local_player_nation, n);
 		}
 		break;
+	}
 	case command_info::type::always_allow_wargoals:
 		log_to_console(state, parent, state.cheat_data.always_allow_wargoals ? "@(T)" : "@(F)");
 		command::c_always_allow_wargoals(state, state.local_player_nation);
