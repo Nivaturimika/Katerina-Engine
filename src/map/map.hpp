@@ -68,14 +68,14 @@ struct textured_line_vertex {
 	textured_line_vertex(glm::vec2 position, glm::vec2 normal_direction, float texture_coord, float distance)
 		: position_(uint16_t(position.x * 65535.f), uint16_t(position.y * 65535.f)),
 		normal_direction_(uint16_t(normal_direction.x * 32767.f), uint16_t(normal_direction.y * 32767.f)),
-		texture_coord_(uint16_t(texture_coord * 255.f)),
-		distance_(distance)
+		texture_coord_(uint8_t(texture_coord * 255.f)),
+		distance_(uint16_t(distance * 65535.f))
 	{
 	}
 	glm::u16vec2 position_;
 	glm::i16vec2 normal_direction_;
 	uint8_t texture_coord_ = 0;
-	float distance_ = 0.f;
+	uint16_t distance_ = 0;
 };
 
 struct textured_line_vertex_b {
@@ -86,14 +86,14 @@ struct textured_line_vertex_b {
 		previous_point_(uint16_t(previous_point.x * 32767.f), uint16_t(previous_point.y * 32767.f)),
 		next_point_(uint16_t(next_point.x * 32767.f), uint16_t(next_point.y * 32767.f)),
 		texture_coord_(uint8_t(texture_coord * 255.f)),
-		distance_(distance)
+		distance_(uint16_t(distance * 65535.f))
 	{
 	}
 	glm::u16vec2 position_;
 	glm::i16vec2 previous_point_;
 	glm::i16vec2 next_point_;
 	uint8_t texture_coord_ = 0;
-	float distance_ = 0.f;
+	uint16_t distance_ = 0;
 };
 
 struct text_line_vertex {

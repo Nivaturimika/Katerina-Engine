@@ -159,7 +159,7 @@ void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& dat
 	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, position_));
 	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex, normal_direction_));
 	glVertexAttribFormat(2, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex, texture_coord_));
-	glVertexAttribFormat(3, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex, distance_));
+	glVertexAttribFormat(3, 1, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, distance_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -181,7 +181,7 @@ void create_textured_line_b_vbo(GLuint vbo, std::vector<textured_line_vertex_b>&
 	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, previous_point_));
 	glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, next_point_));
 	glVertexAttribFormat(3, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex_b, texture_coord_));
-	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(textured_line_vertex_b, distance_));
+	glVertexAttribFormat(4, 1, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, distance_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -201,15 +201,10 @@ void create_unit_arrow_vbo(GLuint vbo, std::vector<curved_line_vertex>& data) {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(curved_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
 	// Bind the VBO to 0 of the VAO
 	glBindVertexBuffer(0, vbo, 0, sizeof(curved_line_vertex));
-	// Set up vertex attribute format for the position
 	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, position_));
-	// Set up vertex attribute format for the normal direction
 	glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, normal_direction_));
-	// Set up vertex attribute format for the direction
 	glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, direction_));
-	// Set up vertex attribute format for the texture coordinates
 	glVertexAttribFormat(3, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, texture_coord_));
-	// Set up vertex attribute format for the type
 	glVertexAttribFormat(4, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(curved_line_vertex, type_));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
