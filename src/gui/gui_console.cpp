@@ -174,8 +174,8 @@ inline constexpr command_info possible_commands[] = {
 		command_info{"ww", command_info::type::win_wars, "Win all current wars youre involved at",
 				{command_info::argument_info{}, command_info::argument_info{},
 						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"tai", command_info::type::toggle_ai, "Toggles ON/OFF AI for countries",
-				{command_info::argument_info{}, command_info::argument_info{},
+		command_info{"toggle_ai", command_info::type::toggle_ai, "Toggles ON/OFF AI for countries",
+				{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		/* doesn't work, removed until someone fixes it
 		command_info{ "aw", command_info::type::always_allow_wargoals, "Always allow adding wargoals",
@@ -1837,8 +1837,17 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 	case command_info::type::win_wars:
 		break;
 	case command_info::type::toggle_ai:
-		for(auto n : state.world.in_nation)
+		auto tag = std::get<std::string>(pstate.arg_slots[0]);
+		auto nid = smart_get_national_identity_from_tag(state, parent, tag);
+		if(nid) {
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			if(state.world.nation_get_is_player_controlled(n)) {
+				log_to_console(state, parent, "@(T) AI");
+			} else {
+				log_to_console(state, parent, "@(F) AI");
+			}
 			command::c_toggle_ai(state, state.local_player_nation, n);
+		}
 		break;
 	case command_info::type::always_allow_wargoals:
 		log_to_console(state, parent, state.cheat_data.always_allow_wargoals ? "@(T)" : "@(F)");
