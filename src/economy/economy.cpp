@@ -3496,8 +3496,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		if(!state.world.commodity_get_money_rgo(c))
 			return;
 
-		float luxury_costs_laborer = 0.f;
+		const float speed_factor = 0.1f;
 		const float base_demand = state.defines.base_goods_demand;
+		float luxury_costs_laborer = 0.f;
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id _cid{ dcon::commodity_id::value_base_t(i) };
 			if(state.world.commodity_get_is_available_from_start(_cid)) {
@@ -3506,9 +3507,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				float base_life = state.world.pop_type_get_life_needs(t, _cid);
 				float base_everyday = state.world.pop_type_get_everyday_needs(t, _cid);
 				float base_luxury = state.world.pop_type_get_luxury_needs(t, _cid);
-				luxury_costs_laborer += base_life * base_demand * state.defines.alice_lf_needs_scale * price;
-				luxury_costs_laborer += base_everyday * base_demand * state.defines.alice_ev_needs_scale * price;
-				luxury_costs_laborer += base_luxury * base_demand * state.defines.alice_lx_needs_scale * price;
+				luxury_costs_laborer += base_life * base_demand * speed_factor * price;
+				luxury_costs_laborer += base_everyday * base_demand * speed_factor * price;
+				luxury_costs_laborer += base_luxury * base_demand * speed_factor * price;
 			}
 		}
 		state.world.commodity_set_current_price(c, std::clamp(luxury_costs_laborer, 0.01f, 100000.0f));
