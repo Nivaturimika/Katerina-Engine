@@ -715,11 +715,13 @@ void state::update_render() {
 				naval_battle_reports.pop();
 				c7 = naval_battle_reports.front();
 			}
-			if(!static_cast<ui::diplomacy_request_window*>(ui_state.request_window)->messages.empty()) {
+			if(ui_state.request_window
+			&& !static_cast<ui::diplomacy_request_window*>(ui_state.request_window)->messages.empty()) {
 				ui_state.request_window->set_visible(*this, true);
 				ui_state.root->move_child_to_front(ui_state.request_window);
 			}
-			if(!static_cast<ui::message_window*>(ui_state.msg_window)->messages.empty()) {
+			if(ui_state.msg_window
+			&& !static_cast<ui::message_window*>(ui_state.msg_window)->messages.empty()) {
 				ui_state.msg_window->set_visible(*this, true);
 				ui_state.root->move_child_to_front(ui_state.msg_window);
 			}
