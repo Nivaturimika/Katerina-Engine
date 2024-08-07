@@ -1396,12 +1396,13 @@ void state::render() { // called to render the frame may (and should) delay retu
 	glUniform1f(open_gl.ui_shader_gamma_uniform, user_settings.gamma);
 	glViewport(0, 0, x_size, y_size);
 	glDepthRange(-1.0f, 1.0f);
+	//consistently kept state throughought the entire UI rendering
+	glBindVertexArray(open_gl.global_square_vao);
+	glActiveTexture(GL_TEXTURE0);
 
 	ui_state.under_mouse = mouse_probe.under_mouse;
 	ui_state.relative_mouse_location = mouse_probe.relative_location;
-
 	current_scene.render_ui(*this);
-
 	root_elm->impl_render(*this, 0, 0);
 
 	if(ui_state.tooltip->is_visible()) {

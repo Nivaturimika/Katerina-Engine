@@ -561,46 +561,47 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 	//return basis;
 }
 
-void display_data::render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at, sys::projection_mode map_view_mode) {
-	if(!emfx)
-		return;
-	auto index = emfx.index();
-	std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
-	if(at == emfx::animation_type::idle) {
-		for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
-			auto const& an = animations[k + static_mesh_idle_animation_start[index]];
-			assert(an.bone_id != -1);
-			assert(an.bone_id < int32_t(ar_matrices.size()));
-			// Rotation is fine, the halo above units works kosher
-			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+void display_data::render_models(std::vector<model_render_command>& info, float time_counter, sys::projection_mode map_view_mode) {
+	glActiveTexture(GL_TEXTURE0);
+	for(const auto& obj : info) {
+		if(!obj.emfx)
+			return;
+		auto index = obj.emfx.index();
+		std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
+		if(obj.anim == emfx::animation_type::idle) {
+			for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
+				auto const& an = animations[k + static_mesh_idle_animation_start[index]];
+				assert(an.bone_id != -1);
+				assert(an.bone_id < int32_t(ar_matrices.size()));
+				// Rotation is fine, the halo above units works kosher
+				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+			}
+		} else if(obj.anim == emfx::animation_type::move) {
+			for(uint32_t k = 0; k < static_mesh_move_animation_count[index]; k++) {
+				auto const& an = animations[k + static_mesh_move_animation_start[index]];
+				assert(an.bone_id != -1);
+				assert(an.bone_id < int32_t(ar_matrices.size()));
+				// Rotation is fine, the halo above units works kosher
+				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+			}
+		} else if(obj.anim == emfx::animation_type::attack) {
+			for(uint32_t k = 0; k < static_mesh_attack_animation_count[index]; k++) {
+				auto const& an = animations[k + static_mesh_attack_animation_start[index]];
+				assert(an.bone_id != -1);
+				assert(an.bone_id < int32_t(ar_matrices.size()));
+				// Rotation is fine, the halo above units works kosher
+				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+			}
 		}
-	} else if(at == emfx::animation_type::move) {
-		for(uint32_t k = 0; k < static_mesh_move_animation_count[index]; k++) {
-			auto const& an = animations[k + static_mesh_move_animation_start[index]];
-			assert(an.bone_id != -1);
-			assert(an.bone_id < int32_t(ar_matrices.size()));
-			// Rotation is fine, the halo above units works kosher
-			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+		glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
+		glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
+		glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
+		//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
+		for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
+			glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
+			glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 		}
-	} else if(at == emfx::animation_type::attack) {
-		for(uint32_t k = 0; k < static_mesh_attack_animation_count[index]; k++) {
-			auto const& an = animations[k + static_mesh_attack_animation_start[index]];
-			assert(an.bone_id != -1);
-			assert(an.bone_id < int32_t(ar_matrices.size()));
-			// Rotation is fine, the halo above units works kosher
-			ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
-		}
-	}
-	glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
-
-	glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], pos.x, pos.y);
-	glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], facing);
-	glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], topview_fixup);
-	for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
-		glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
-		glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 	}
 }
 
@@ -1247,6 +1248,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glBindVertexArray(vao_array[vo_static_mesh]);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
+			std::vector<model_render_command> list;
+
 			// Province flags
 			province::for_each_land_province(state, [&](dcon::province_id p) {
 				if(province_on_screen[p.index()]) {
@@ -1254,7 +1257,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
 						if(state.world.province_get_flag_variables(p, pfid)) {
 							auto center = state.world.province_get_mid_point(p);
-							render_model(model_province_flag[i], center, 0.f, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+							list.emplace_back(model_province_flag[i], center, 0.f, emfx::animation_type::idle);
 						}
 					}
 				}
@@ -1267,7 +1270,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto center = state.world.province_get_mid_point(p);
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
 						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-						render_model(model_train_station, center, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_train_station, center, theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1280,7 +1283,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto p1 = duplicates::get_navy_location(state, p);
 						auto p2 = state.world.province_get_mid_point(p);
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-						render_model(model_naval_base[level], p1, -theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_naval_base[level], p1, -theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1293,7 +1296,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto p1 = duplicates::get_navy_location(state, p);
 						auto p2 = state.world.province_get_mid_point(p);
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-						render_model(model_naval_base_ships[level], p1, -theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_naval_base_ships[level], p1, -theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1306,7 +1309,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
 						auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
 						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-						render_model(model_fort[level], pos, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_fort[level], pos, theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1321,7 +1324,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
 						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-						render_model(model_factory, pos, theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_factory, pos, theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1334,7 +1337,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto pos = center + glm::vec2(dist_step, dist_step); //top left (from center)
 						auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
 						auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ int32_t(pos.x)) % 360) / 180.f - 1.f);
-						render_model(model_construction, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_construction, pos, float(rng::reduce(seed_r, 180)), emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1346,7 +1349,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 						auto p1 = duplicates::get_navy_location(state, p);
 						auto p2 = state.world.province_get_mid_point(p);
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-						render_model(model_construction_naval, p1, -theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+						list.emplace_back(model_construction_naval, p1, -theta, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1360,7 +1363,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 							auto pos = center + glm::vec2(-dist_step, -dist_step); //top left (from center)
 							auto seed_r = pl.get_pop().id.index();
 							auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ int32_t(pos.x)) % 360) / 180.f - 1.f);
-							render_model(model_construction_military, pos, float(rng::reduce(seed_r, 180)), 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+							list.emplace_back(model_construction_military, pos, float(rng::reduce(seed_r, 180)), emfx::animation_type::idle);
 							break;
 						}
 					}
@@ -1372,14 +1375,14 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto p1 = duplicates::get_navy_location(state, p);
 					auto p2 = state.world.province_get_mid_point(p);
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-					render_model(model_blockaded, p1, -theta, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+					list.emplace_back(model_blockaded, p1, -theta, emfx::animation_type::idle);
 				}
 			});
 			// Siege
 			province::for_each_land_province(state, [&](dcon::province_id p) {
 				if(province_on_screen[p.index()] && state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 					auto center = state.world.province_get_mid_point(p);
-					render_model(model_siege, center, 0.f, 0.f, time_counter, emfx::animation_type::idle, map_view_mode);
+					list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle);
 				}
 			});
 
@@ -1428,11 +1431,11 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto lb = state.world.province_get_land_battle_location(p);
 					if(lb.begin() != lb.end()) {
 						emfx::animation_type at = emfx::animation_type::attack;
-						render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, 0.f, time_counter, at, map_view_mode);
-						render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), 0.f, time_counter, at, map_view_mode);
+						list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, at);
+						list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), at);
 					} else {
 						emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
-						render_model(unit_model, glm::vec2(p1.x, p1.y), -theta, 0.f, time_counter, at, map_view_mode);
+						list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
 					}
 				}
 			});
@@ -1466,14 +1469,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					auto lb = state.world.province_get_naval_battle_location(p);
 					if(lb.begin() != lb.end()) {
 						emfx::animation_type at = emfx::animation_type::attack;
-						render_model(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, 0.f, time_counter, at, map_view_mode);
-						render_model(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, 0.f, time_counter, at, map_view_mode);
+						list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, at);
+						list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, at);
 					} else {
 						emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
-						render_model(unit_model, glm::vec2(p1.x, p1.y), -theta, 0.f, time_counter, at, map_view_mode);
+						list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
 					}
 				}
 			});
+			render_models(list, time_counter, map_view_mode);
 			glDisable(GL_DEPTH_TEST);
 		}
 	}

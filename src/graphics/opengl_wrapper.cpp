@@ -649,9 +649,6 @@ void render_textured_rect(sys::state const& state, color_modification enabled, f
 	bind_vertices_by_rotation(state, r, flipped, rtl);
 
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-	// glUniform4f(state.open_gl.ui_shader_d_rect_uniform, 0, 0, width, height);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::no_filter};
@@ -665,13 +662,10 @@ void render_textured_rect_direct(sys::state const& state, float x, float y, floa
 	glBindVertexArray(state.open_gl.global_square_vao);
 	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, handle);
 
 	GLuint subroutines[2] = {parameters::enabled, parameters::no_filter};
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
@@ -730,18 +724,12 @@ void render_linegraph(sys::state const& state, color_modification enabled, float
 void render_barchart(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
 		data_texture& t, ui::rotation r, bool flipped, bool rtl) {
 	glBindVertexArray(state.open_gl.global_square_vao);
-
 	bind_vertices_by_rotation(state, r, flipped, rtl);
-
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.handle());
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::barchart};
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
@@ -749,7 +737,6 @@ void render_piechart(sys::state const& state, color_modification enabled, float 
 	glBindVertexArray(state.open_gl.global_square_vao);
 	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.handle());
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::piechart};
@@ -762,19 +749,14 @@ void render_piechart(sys::state const& state, color_modification enabled, float 
 void render_bordered_rect(sys::state const& state, color_modification enabled, float border_size, float x, float y, float width,
 		float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
 	glBindVertexArray(state.open_gl.global_square_vao);
-
 	bind_vertices_by_rotation(state, r, flipped, rtl);
 
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 	glUniform1f(state.open_gl.ui_shader_border_size_uniform, border_size);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::frame_stretch};
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
@@ -786,10 +768,10 @@ void render_masked_rect(sys::state const& state, color_modification enabled, flo
 
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, mask_texture_handle);
+	glActiveTexture(GL_TEXTURE0);
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::use_mask};
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
@@ -807,10 +789,10 @@ void render_progress_bar(sys::state const& state, color_modification enabled, fl
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 	glUniform1f(state.open_gl.ui_shader_border_size_uniform, progress);
 
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, left_texture_handle);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, right_texture_handle);
+	glActiveTexture(GL_TEXTURE0);
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::progress_bar};
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
@@ -827,8 +809,6 @@ void render_tinted_textured_rect(sys::state const& state, float x, float y, floa
 
 	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, r, g, b);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 
 	GLuint subroutines[2] = {parameters::tint, parameters::no_filter};
@@ -849,8 +829,6 @@ void render_tinted_subsprite(sys::state const& state, int frame, int total_frame
 	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, static_cast<float>(frame) * scale, scale, 0.0f);
 	glUniform4f(state.open_gl.ui_shader_subrect_uniform, r, g, b, 0);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 
 	GLuint subroutines[2] = { parameters::alternate_tint, parameters::sub_sprite };
@@ -866,11 +844,9 @@ void render_subsprite(sys::state const& state, color_modification enabled, int f
 
 	bind_vertices_by_rotation(state, r, flipped, rtl);
 
-	auto const scale = 1.0f / static_cast<float>(total_frames);
-	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, static_cast<float>(frame) * scale, scale, 0.0f);
+	auto const scale = 1.0f / float(total_frames);
+	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, float(frame) * scale, scale, 0.0f);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 
 	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::sub_sprite};
@@ -926,8 +902,6 @@ void render_text_icon(sys::state& state, text::embedded_icon ico, float x, float
 	float icon_baseline = baseline_y + (f.internal_ascender / 64.f * font_size) - font_size;
 
 	bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
-	glActiveTexture(GL_TEXTURE0);
-	
 	switch(ico) {
 	case text::embedded_icon::army:
 		scale = 1.3f;
@@ -977,7 +951,6 @@ void render_text_flag(sys::state& state, text::embedded_flag ico, float x, float
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, icon_subroutines[0], icon_subroutines[1]);
 	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, icon_subroutines); // must set all subroutines in one call
 	bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, flag_texture_handle);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, icon_baseline + font_size * 0.15f, 1.5f * font_size * 0.9f,  font_size * 0.9f);
 	glUniform4f(state.open_gl.ui_shader_subrect_uniform, 0.f, 1.f, 0.f, 1.f);
@@ -991,8 +964,6 @@ void internal_text_render(sys::state& state, text::stored_glyphs const& txt, flo
 
 	GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-	glActiveTexture(GL_TEXTURE0);
 
 	unsigned int glyph_count = static_cast<unsigned int>(txt.glyph_info.size());
 	for(unsigned int i = 0; i < glyph_count; i++) {
@@ -1037,7 +1008,6 @@ void render_classic_text(sys::state& state, text::stored_glyphs const& txt, floa
 	// Spacing, kearning, etc. are already applied.
 	// Scaling (unintentionally) is also applied (by whatever part of KatEngine scales the normal fonts).
 
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, font.ftexid);
 	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, c.r, c.g, c.b);
 	for(uint32_t i = 0; i < count; ++i) {

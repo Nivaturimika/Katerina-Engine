@@ -135,6 +135,13 @@ struct border {
 	uint16_t padding = 0;
 };
 
+struct model_render_command {
+	dcon::emfx_object_id emfx;
+	glm::vec2 pos = glm::vec2(0.f, 0.f);
+	float facing = 0.f;
+	emfx::animation_type anim;
+};
+
 class display_data {
 	bool loaded_map = false;
 public:
@@ -377,7 +384,7 @@ public:
 	void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 	void make_borders(sys::state& state, std::vector<bool>& visited);
 
-	void render_model(dcon::emfx_object_id emfx, glm::vec2 pos, float facing, float topview_fixup, float time_counter, emfx::animation_type at, sys::projection_mode map_view_mode);
+	void render_models(std::vector<model_render_command>& info, float time_counter, sys::projection_mode map_view_mode);
 	void load_shaders(simple_fs::directory& root);
 	void create_meshes();
 	void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);
