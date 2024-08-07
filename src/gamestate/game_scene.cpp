@@ -919,36 +919,52 @@ void update_army_group_selection_ui(sys::state& state) {
 
 void update_unit_selection_ui(sys::state& state) {
 	if(state.selected_armies.size() + state.selected_navies.size() > 1) {
-		state.ui_state.multi_unit_selection_window->set_visible(state, true);
-		state.ui_state.army_status_window->set_visible(state, false);
-		state.ui_state.navy_status_window->set_visible(state, false);
+		if(state.ui_state.multi_unit_selection_window)
+			state.ui_state.multi_unit_selection_window->set_visible(state, true);
+		if(state.ui_state.army_status_window)
+			state.ui_state.army_status_window->set_visible(state, false);
+		if(state.ui_state.navy_status_window)
+			state.ui_state.navy_status_window->set_visible(state, false);
 	} else if(state.selected_armies.size() == 1) {
-		state.ui_state.multi_unit_selection_window->set_visible(state, false);
-		if(state.ui_state.army_status_window->is_visible() && state.ui_state.army_status_window->unit_id != state.selected_armies[0]) {
-			state.ui_state.army_status_window->unit_id = state.selected_armies[0];
-			state.ui_state.army_status_window->impl_on_update(state);
-		} else {
-			state.ui_state.army_status_window->unit_id = state.selected_armies[0];
-			state.ui_state.army_status_window->set_visible(state, true);
+		if(state.ui_state.multi_unit_selection_window)
+			state.ui_state.multi_unit_selection_window->set_visible(state, false);
+		if(state.ui_state.army_status_window) {
+			if(state.ui_state.army_status_window->is_visible() && state.ui_state.army_status_window->unit_id != state.selected_armies[0]) {
+				state.ui_state.army_status_window->unit_id = state.selected_armies[0];
+				state.ui_state.army_status_window->impl_on_update(state);
+			} else {
+				state.ui_state.army_status_window->unit_id = state.selected_armies[0];
+				state.ui_state.army_status_window->set_visible(state, true);
+			}
 		}
-		state.ui_state.navy_status_window->set_visible(state, false);
+		if(state.ui_state.navy_status_window)
+			state.ui_state.navy_status_window->set_visible(state, false);
 	} else if(state.selected_navies.size() == 1) {
-		state.ui_state.multi_unit_selection_window->set_visible(state, false);
-		state.ui_state.army_status_window->set_visible(state, false);
-		if(state.ui_state.navy_status_window->is_visible() && state.ui_state.navy_status_window->unit_id != state.selected_navies[0]) {
-			state.ui_state.navy_status_window->unit_id = state.selected_navies[0];
-			state.ui_state.navy_status_window->impl_on_update(state);
-		} else {
-			state.ui_state.navy_status_window->unit_id = state.selected_navies[0];
-			state.ui_state.navy_status_window->set_visible(state, true);
+		if(state.ui_state.multi_unit_selection_window)
+			state.ui_state.multi_unit_selection_window->set_visible(state, false);
+		if(state.ui_state.army_status_window)
+			state.ui_state.army_status_window->set_visible(state, false);
+		if(state.ui_state.navy_status_window) {
+			if(state.ui_state.navy_status_window->is_visible() && state.ui_state.navy_status_window->unit_id != state.selected_navies[0]) {
+				state.ui_state.navy_status_window->unit_id = state.selected_navies[0];
+				state.ui_state.navy_status_window->impl_on_update(state);
+			} else {
+				state.ui_state.navy_status_window->unit_id = state.selected_navies[0];
+				state.ui_state.navy_status_window->set_visible(state, true);
+			}
 		}
 	} else {
-		state.ui_state.multi_unit_selection_window->set_visible(state, false);
-		state.ui_state.army_status_window->set_visible(state, false);
-		state.ui_state.navy_status_window->set_visible(state, false);
+		if(state.ui_state.multi_unit_selection_window)
+			state.ui_state.multi_unit_selection_window->set_visible(state, false);
+		if(state.ui_state.army_status_window)
+			state.ui_state.army_status_window->set_visible(state, false);
+		if(state.ui_state.navy_status_window)
+			state.ui_state.navy_status_window->set_visible(state, false);
 		//?
-		state.ui_state.army_reorg_window->set_visible(state, false);
-		state.ui_state.navy_reorg_window->set_visible(state, false);
+		if(state.ui_state.army_reorg_window)
+			state.ui_state.army_reorg_window->set_visible(state, false);
+		if(state.ui_state.navy_reorg_window)
+			state.ui_state.navy_reorg_window->set_visible(state, false);
 	}
 }
 
