@@ -5128,10 +5128,10 @@ void update_land_constructions(sys::state& state) {
 
 		auto const decide_type = [&](dcon::pop_id pop, bool overseas) {
 			bool is_pc = nations::nation_accepts_culture(state, n, state.world.pop_get_culture(pop));
-			uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
+			uint32_t index = (overseas ? 1 : 0) + (!is_pc ? 2 : 0);
 			if(num_frontline > num_support && best_art[index])
 				return best_art[index];
-			return best_inf[index] ? best_inf[index] : best_inf[3];
+			return best_inf[index];
 		};
 
 		for(auto p : state.world.nation_get_province_ownership(n)) {
@@ -5146,7 +5146,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
-							assert(t);
+							assert(t && state.military_definitions.unit_base_definitions[t].is_land);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
@@ -5168,7 +5168,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
-							assert(t);
+							assert(t && state.military_definitions.unit_base_definitions[t].is_land);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();
@@ -5190,7 +5190,7 @@ void update_land_constructions(sys::state& state) {
 					if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
 						if(pop.get_pop().get_size() >= minimum) {
 							auto t = decide_type(pop.get_pop(), overseas);
-							assert(t);
+							assert(t && state.military_definitions.unit_base_definitions[t].is_land);
 							auto amount = int32_t((pop.get_pop().get_size() / divisor) + 1);
 							auto regs = pop.get_pop().get_regiment_source();
 							auto building = pop.get_pop().get_province_land_construction();

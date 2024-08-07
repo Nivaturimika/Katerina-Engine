@@ -2169,16 +2169,16 @@ public:
 			if(!state.ui_state.national_focus_overwrite_window) {
 				auto win = make_element_by_type<national_focus_overwrite_window>(state, "nf_overwrite_window");
 				state.ui_state.national_focus_overwrite_window = win.get();
-				state.ui_state.national_focus_overwrite_window->base_data.position = get_absolute_non_mirror_location(state, *this);
-				state.ui_state.national_focus_overwrite_window->base_data.position.y += base_data.size.y;
-				state.ui_state.root->add_child_to_front(std::move(win));
-			} else {
-				state.ui_state.national_focus_overwrite_window->set_visible(state, true);
-				state.ui_state.national_focus_overwrite_window->base_data.position = get_absolute_non_mirror_location(state, *this);
-				state.ui_state.national_focus_overwrite_window->base_data.position.y += base_data.size.y;
-				state.ui_state.root->move_child_to_front(state.ui_state.national_focus_overwrite_window);
 			}
 			if(state.ui_state.national_focus_overwrite_window) {
+				state.ui_state.national_focus_overwrite_window->set_visible(state, true);
+				state.ui_state.national_focus_overwrite_window->base_data.position = get_absolute_non_mirror_location(state, *this);
+				if(state.ui_state.national_focus_overwrite_window->base_data.position.y + state.ui_state.national_focus_overwrite_window->base_data.size.y > state.y_size) {
+					state.ui_state.national_focus_overwrite_window->base_data.position.y -= state.ui_state.national_focus_overwrite_window->base_data.size.y;
+				} else {
+					state.ui_state.national_focus_overwrite_window->base_data.position.y += base_data.size.y;
+				}
+				state.ui_state.root->move_child_to_front(state.ui_state.national_focus_overwrite_window);
 				static_cast<national_focus_overwrite_window*>(state.ui_state.national_focus_overwrite_window)->target = national_focus_overwrite_target{ content, nat_focus };
 				state.ui_state.national_focus_overwrite_window->impl_on_update(state);
 			}
