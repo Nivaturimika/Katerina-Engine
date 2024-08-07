@@ -1374,7 +1374,7 @@ public:
 					unemp.amount = unemployed;
 					unemp.sid = si.get_state();
 					unemp.pt = pt;
-					unemp.ratio = (unemployed / total) * 100.f;
+					unemp.ratio = unemployed / total;
 					data.emplace_back(unemp);
 					rem_unemp += unemployed;
 				}
@@ -1403,7 +1403,7 @@ public:
 			}
 			if(rem_unemp > 0.f) {
 				text::substitution_map sub;
-				text::add_to_substitution_map(sub, text::variable_type::x, text::fp_two_places{ rem_unemp });
+				text::add_to_substitution_map(sub, text::variable_type::x, text::int_wholenum{ int32_t(rem_unemp) });
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "topbar_more_unemployed", sub);
 				text::close_layout_box(contents, box);
