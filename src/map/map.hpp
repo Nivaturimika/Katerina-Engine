@@ -209,10 +209,10 @@ public:
 	// map pixel -> province id
 	std::vector<uint16_t> province_id_map;
 	std::vector<uint16_t> map_indices;
+	std::vector<uint16_t> map_globe_indices;
 
 	uint32_t size_x;
 	uint32_t size_y;
-	uint32_t land_vertex_count = 0;
 
 	// Meshes
 	static constexpr uint32_t vo_land = 0;
@@ -231,7 +231,8 @@ public:
 	static constexpr uint32_t vo_objective_unit_arrow = 13;
 	static constexpr uint32_t vo_other_objective_unit_arrow = 14;
 	static constexpr uint32_t vo_selection = 15;
-	static constexpr uint32_t vo_count = 16;
+	static constexpr uint32_t vo_land_globe = 16;
+	static constexpr uint32_t vo_count = 17;
 	GLuint vao_array[vo_count] = { 0 };
 	GLuint vbo_array[vo_count] = { 0 };
 	// Textures

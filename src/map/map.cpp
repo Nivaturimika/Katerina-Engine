@@ -270,45 +270,72 @@ void display_data::create_border_ogl_objects() {
 }
 
 void display_data::create_meshes() {
-	std::vector<map_vertex> land_vertices;
-	auto add_vertex = [map_size = glm::vec2(float(size_x), float(size_y))](std::vector<map_vertex>& vertices, glm::vec2 pos0) {
-		vertices.emplace_back(pos0.x, pos0.y);
-	};
-	glm::vec2 last_pos(0, 0);
-	glm::vec2 pos(0, 0);
-	glm::vec2 map_size(size_x, size_y);
-	glm::ivec2 sections(200, 200);
-	for(int y = 0; y <= sections.y; y++) {
-		pos.y = float(y) / float(sections.y);
-		for(int x = 0; x <= sections.x; x++) {
-			pos.x = float(x) / float(sections.x);
-			add_vertex(land_vertices, pos);
+	{
+		std::vector<map_vertex> land_vertices;
+		glm::vec2 last_pos(0, 0);
+		glm::vec2 pos(0, 0);
+		glm::vec2 map_size(size_x, size_y);
+		glm::ivec2 sections(48, 4);
+		for(int y = 0; y <= sections.y; y++) {
+			pos.y = float(y) / float(sections.y);
+			for(int x = 0; x <= sections.x; x++) {
+				pos.x = float(x) / float(sections.x);
+				land_vertices.emplace_back(pos.x, pos.y);
+			}
 		}
-	}
-	map_indices.clear();
-	for(int y = 0; y < sections.y; y++) {
-		auto top_row_start = y * (sections.x + 1);
-		auto bottom_row_start = (y + 1) * (sections.x + 1);
-		map_indices.push_back(uint16_t(bottom_row_start + 0));
-		map_indices.push_back(uint16_t(top_row_start + 0));
-		for(int x = 0; x < sections.x; x++) {
-			map_indices.push_back(uint16_t(bottom_row_start + 1 + x));
-			map_indices.push_back(uint16_t(top_row_start + 1 + x));
+		map_indices.clear();
+		for(int y = 0; y < sections.y; y++) {
+			auto top_row_start = y * (sections.x + 1);
+			auto bottom_row_start = (y + 1) * (sections.x + 1);
+			map_indices.push_back(uint16_t(bottom_row_start + 0));
+			map_indices.push_back(uint16_t(top_row_start + 0));
+			for(int x = 0; x < sections.x; x++) {
+				map_indices.push_back(uint16_t(bottom_row_start + 1 + x));
+				map_indices.push_back(uint16_t(top_row_start + 1 + x));
+			}
+			map_indices.push_back(std::numeric_limits<uint16_t>::max());
 		}
-		map_indices.push_back(std::numeric_limits<uint16_t>::max());
+		glBindVertexArray(vao_array[vo_land]);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_land]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(map_vertex) * land_vertices.size(), land_vertices.data(), GL_STATIC_DRAW);
+		glBindVertexBuffer(0, vbo_array[vo_land], 0, sizeof(map_vertex));
+		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
+		glEnableVertexAttribArray(0);
+		glVertexAttribBinding(0, 0);
 	}
-	land_vertex_count = ((uint32_t)land_vertices.size());
-	// Fill and bind the VAO
-	glBindVertexArray(vao_array[vo_land]);
-	// Create and populate the VBO
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_land]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(map_vertex) * land_vertices.size(), land_vertices.data(), GL_STATIC_DRAW);
-	// Bind the VBO to 0 of the VAO
-	glBindVertexBuffer(0, vbo_array[vo_land], 0, sizeof(map_vertex));
-	// Set up vertex attribute format for the position
-	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
-	glEnableVertexAttribArray(0);
-	glVertexAttribBinding(0, 0);
+	{
+		std::vector<map_vertex> land_vertices;
+		glm::vec2 last_pos(0, 0);
+		glm::vec2 pos(0, 0);
+		glm::vec2 map_size(size_x, size_y);
+		glm::ivec2 sections(200, 200);
+		for(int y = 0; y <= sections.y; y++) {
+			pos.y = float(y) / float(sections.y);
+			for(int x = 0; x <= sections.x; x++) {
+				pos.x = float(x) / float(sections.x);
+				land_vertices.emplace_back(pos.x, pos.y);
+			}
+		}
+		map_globe_indices.clear();
+		for(int y = 0; y < sections.y; y++) {
+			auto top_row_start = y * (sections.x + 1);
+			auto bottom_row_start = (y + 1) * (sections.x + 1);
+			map_globe_indices.push_back(uint16_t(bottom_row_start + 0));
+			map_globe_indices.push_back(uint16_t(top_row_start + 0));
+			for(int x = 0; x < sections.x; x++) {
+				map_globe_indices.push_back(uint16_t(bottom_row_start + 1 + x));
+				map_globe_indices.push_back(uint16_t(top_row_start + 1 + x));
+			}
+			map_globe_indices.push_back(std::numeric_limits<uint16_t>::max());
+		}
+		glBindVertexArray(vao_array[vo_land_globe]);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_land_globe]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(map_vertex) * land_vertices.size(), land_vertices.data(), GL_STATIC_DRAW);
+		glBindVertexBuffer(0, vbo_array[vo_land_globe], 0, sizeof(map_vertex));
+		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
+		glEnableVertexAttribArray(0);
+		glVertexAttribBinding(0, 0);
+	}
 
 	// Fill and bind the VAOs and VBOs
 	glBindVertexArray(vao_array[vo_border]);
@@ -632,8 +659,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1f(shader_uniforms[uint8_t(map_view_mode)][program][uniform_gamma], state.user_settings.gamma);
 	};
 
-	glEnable(GL_PRIMITIVE_RESTART);
-	glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
 	if(shaders[uint8_t(map_view_mode)][shader_close_terrain] && active_map_mode == map_mode::mode::terrain || zoom > map::zoom_close) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
@@ -687,8 +712,19 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				fragment_subroutines = 1; // get_land_political_close/get_water_terrain()
 			glUniform1ui(shader_uniforms[uint8_t(map_view_mode)][shader_close_terrain][uniform_subroutines_index_2], fragment_subroutines);
 		}
-		glBindVertexArray(vao_array[vo_land]);
-		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
+		if(map_view_mode == sys::projection_mode::flat) {
+			glEnable(GL_PRIMITIVE_RESTART);
+			glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
+			glBindVertexArray(vao_array[vo_land]);
+			glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
+			glDisable(GL_PRIMITIVE_RESTART);
+		} else {
+			glEnable(GL_PRIMITIVE_RESTART);
+			glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
+			glBindVertexArray(vao_array[vo_land_globe]);
+			glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_globe_indices.size()), GL_UNSIGNED_SHORT, map_globe_indices.data());
+			glDisable(GL_PRIMITIVE_RESTART);
+		}
 	} else if(shaders[uint8_t(map_view_mode)][shader_far_terrain]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
@@ -715,10 +751,20 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_colormap_political], 5);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_province_highlight], 6);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_stripes_texture], 7);
-		glBindVertexArray(vao_array[vo_land]);
-		glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
+		if(map_view_mode == sys::projection_mode::flat) {
+			glEnable(GL_PRIMITIVE_RESTART);
+			glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
+			glBindVertexArray(vao_array[vo_land]);
+			glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_indices.size()), GL_UNSIGNED_SHORT, map_indices.data());
+			glDisable(GL_PRIMITIVE_RESTART);
+		} else {
+			glEnable(GL_PRIMITIVE_RESTART);
+			glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
+			glBindVertexArray(vao_array[vo_land_globe]);
+			glDrawElements(GL_TRIANGLE_STRIP, GLsizei(map_globe_indices.size()), GL_UNSIGNED_SHORT, map_globe_indices.data());
+			glDisable(GL_PRIMITIVE_RESTART);
+		}
 	}
-	glDisable(GL_PRIMITIVE_RESTART);
 
 	// Draw the rivers
 	if(shaders[uint8_t(map_view_mode)][shader_textured_line] && state.user_settings.rivers_enabled) {
