@@ -1117,7 +1117,7 @@ console_button_tooltip;Open the command console
 demobilize;Demobilize
 mobilize;Mobilize
 cb_creation_detail_none;Please select a casus belli to start fabricating against $country$.
-cb_creation_detail;We can fabricate a casus belli against $country$ with the reason of ?Y$type$?W. This process may take roughly about ?Y$days$?W, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
+cb_creation_detail;We can fabricate a ?Y$type$?W casus belli against $country$. This process may take ?Y$days$?W days, and the potential costs from being discovered will give us ?R$badboy$?W infamy.
 alice_mob_controls;?YRight-click?! to remobilize
 alice_mw_create_1;Add general
 alice_mw_create_2;Add admiral
