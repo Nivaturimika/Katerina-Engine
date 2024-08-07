@@ -1470,7 +1470,6 @@ public:
 class province_army_progress : public progress_bar {
 public:
 	void on_update(sys::state& state) noexcept override {
-		progress = 0.f;
 		float amount = 0.f;
 		float total = 0.f;
 		auto p = retrieve<dcon::province_id>(state, parent);
@@ -1482,7 +1481,7 @@ public:
 					auto& current_purchased = lc.get_purchased_goods();
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(base_cost.commodity_type[i]) {
-							amount += current_purchased.commodity_amounts[i];
+							amount += std::min(base_cost.commodity_amounts[i], current_purchased.commodity_amounts[i]);
 							total += base_cost.commodity_amounts[i];
 						} else {
 							break;
@@ -1491,15 +1490,12 @@ public:
 				}
 			}
 		}
-		if(total > 0.f) {
-			progress = amount / total;
-		}
+		progress = total > 0.f ? amount / total : 0.f;
 	}
 };
 class province_navy_progress : public progress_bar {
 public:
 	void on_update(sys::state& state) noexcept override {
-		progress = 0.f;
 		float amount = 0.f;
 		float total = 0.f;
 		auto p = retrieve<dcon::province_id>(state, parent);
@@ -1509,16 +1505,14 @@ public:
 			auto& current_purchased = nc.get_purchased_goods();
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					amount += current_purchased.commodity_amounts[i];
+					amount += std::min(base_cost.commodity_amounts[i], current_purchased.commodity_amounts[i]);
 					total += base_cost.commodity_amounts[i];
 				} else {
 					break;
 				}
 			}
 		}
-		if(total > 0.f) {
-			progress = amount / total;
-		}
+		progress = total > 0.f ? amount / total : 0.f;
 	}
 };
 
@@ -1536,7 +1530,7 @@ public:
 					auto& current_purchased = lc.get_purchased_goods();
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(base_cost.commodity_type[i]) {
-							amount += current_purchased.commodity_amounts[i];
+							amount += std::min(base_cost.commodity_amounts[i], current_purchased.commodity_amounts[i]);
 							total += base_cost.commodity_amounts[i];
 						} else {
 							break;
@@ -1560,7 +1554,7 @@ public:
 			auto& current_purchased = nc.get_purchased_goods();
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					amount += current_purchased.commodity_amounts[i];
+					amount += std::min(base_cost.commodity_amounts[i], current_purchased.commodity_amounts[i]);
 					total += base_cost.commodity_amounts[i];
 				} else {
 					break;
