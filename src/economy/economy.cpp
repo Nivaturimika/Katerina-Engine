@@ -2496,7 +2496,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] / construction_time));
+							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2520,8 +2520,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] / construction_time));
-
+							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2549,8 +2548,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] / construction_time));
-
+							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2568,8 +2566,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i]) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] / construction_time));
-
+							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2582,46 +2579,24 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 	}
 
 	for(auto c : state.world.nation_get_state_building_construction(n)) {
-		if(!c.get_is_pop_project()) {
-			auto& base_cost = c.get_type().get_construction_costs();
-			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
-			float factory_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_cost) + 1.0f;
-
-			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * factory_mod * admin_cost_factor) {
-						auto amount = base_cost.commodity_amounts[i] / construction_time;
-						auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-						auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] * factory_mod / construction_time));
-
-						current_purchased.commodity_amounts[i] += delta;
-						source -= delta;
-					}
-				} else {
-					break;
+		auto& base_cost = c.get_type().get_construction_costs();
+		auto& current_purchased = c.get_purchased_goods();
+		float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
+		float factory_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_cost) + 1.0f;
+		if(c.get_is_pop_project()) {
+			factory_mod *= std::max(0.1f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_owner_cost));
+		}
+		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+			if(base_cost.commodity_type[i]) {
+				if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * factory_mod * admin_cost_factor) {
+					auto amount = base_cost.commodity_amounts[i] / construction_time;
+					auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
+					auto delta = std::clamp(base_cost.commodity_amounts[i] * factory_mod * admin_cost_factor / construction_time, 0.f, source);
+					current_purchased.commodity_amounts[i] += delta;
+					source -= delta;
 				}
-			}
-		} else {
-			auto& base_cost = c.get_type().get_construction_costs();
-			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
-			float factory_mod = (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_cost) + 1.0f) *
-													std::max(0.1f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_owner_cost));
-
-			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * factory_mod) {
-						auto amount = base_cost.commodity_amounts[i] / construction_time;
-						auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-						auto delta = std::max(0.0f, std::min(source, base_cost.commodity_amounts[i] * factory_mod / construction_time));
-
-						current_purchased.commodity_amounts[i] += delta;
-						source -= delta;
-					}
-				} else {
-					break;
-				}
+			} else {
+				break;
 			}
 		}
 	}
