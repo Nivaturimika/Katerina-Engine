@@ -414,79 +414,79 @@ void initialize_opengl(sys::state& state) {
 	initialize_msaa(state, window::creation_parameters().size_x, window::creation_parameters().size_y);
 }
 
-static const GLfloat global_square_data[] = {
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 1.0f, 0.0f
+static const GLushort global_square_data[] = {
+	0, 0, 0, 0,
+	0, 65535, 0, 65535,
+	65535, 65535, 65535, 65535,
+	65535, 0, 65535, 0
 };
-static const GLfloat global_square_right_data[] = {
-	0.0f, 0.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 0.0f
+static const GLushort global_square_right_data[] = {
+	0, 0, 0, 65535,
+	0, 65535, 65535, 65535,
+	65535, 65535, 65535, 0,
+	65535, 0, 0, 0
 };
-static const GLfloat global_square_left_data[] = {
-	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f, 1.0f
+static const GLushort global_square_left_data[] = {
+	0, 0, 65535, 0,
+	0, 65535, 0, 0,
+	65535, 65535, 0, 65535,
+	65535, 0, 65535, 65535
 };
-static const GLfloat global_square_flipped_data[] = {
-	0.0f, 0.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 0.0f, 1.0f, 1.0f
+static const GLushort global_square_flipped_data[] = {
+	0, 0, 0, 65535,
+	0, 65535, 0, 0,
+	65535, 65535, 65535, 0,
+	65535, 0, 65535, 65535
 };
-static const GLfloat global_square_right_flipped_data[] = {
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f
+static const GLushort global_square_right_flipped_data[] = {
+	0, 0, 0, 0,
+	0, 65535, 65535, 0,
+	65535, 65535, 65535, 65535,
+	65535, 0, 0, 65535
 };
-static const GLfloat global_square_left_flipped_data[] = {
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 0.0f, 1.0f, 0.0f
+static const GLushort global_square_left_flipped_data[] = {
+	0, 0, 65535, 65535,
+	0, 65535, 0, 65535,
+	65535, 65535, 0, 0,
+	65535, 0, 65535, 0
 };
 
 //RTL squares
-static const GLfloat global_rtl_square_data[] = {
-	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 0.0f
+static const GLushort global_rtl_square_data[] = {
+	0, 0, 65535, 0,
+	0, 65535, 65535, 65535,
+	65535, 65535, 0, 65535,
+	65535, 0, 0, 0
 };
-static const GLfloat global_rtl_square_right_data[] = {
-	0.0f, 1.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f
+static const GLushort global_rtl_square_right_data[] = {
+	0, 65535, 65535, 0,
+	0, 0, 0, 0,
+	65535, 0, 0, 65535,
+	65535, 65535, 65535, 65535
 };
-static const GLfloat global_rtl_square_left_data[] = {
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f
+static const GLushort global_rtl_square_left_data[] = {
+	0, 0, 0, 0,
+	0, 65535, 65535, 0,
+	65535, 65535, 65535, 65535,
+	65535, 0, 0, 65535
 };
-static const GLfloat global_rtl_square_flipped_data[] = {
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 1.0f
+static const GLushort global_rtl_square_flipped_data[] = {
+	0, 0, 65535, 65535,
+	0, 65535, 65535, 0,
+	65535, 65535, 0, 0,
+	65535, 0, 0, 65535
 };
-static const GLfloat global_rtl_square_right_flipped_data[] = {
-	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f, 1.0f
+static const GLushort global_rtl_square_right_flipped_data[] = {
+	0, 0, 65535, 0,
+	0, 65535, 0, 0,
+	65535, 65535, 0, 65535,
+	65535, 0, 65535, 65535
 };
-static const GLfloat global_rtl_square_left_flipped_data[] = {
-	0.0f, 0.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 0.0f
+static const GLushort global_rtl_square_left_flipped_data[] = {
+	0, 0, 0, 65535,
+	0, 65535, 65535, 65535,
+	65535, 65535, 65535, 0,
+	65535, 0, 0, 0
 };
 
 void load_shaders(sys::state& state) {
@@ -521,76 +521,75 @@ void load_global_squares(sys::state& state) {
 	// Populate the position buffer
 	glGenBuffers(1, &state.open_gl.global_square_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 16, global_square_data, GL_STATIC_DRAW);
 	//RTL version
 	glGenBuffers(1, &state.open_gl.global_rtl_square_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 16, global_rtl_square_data, GL_STATIC_DRAW);
 
 	glGenVertexArrays(1, &state.open_gl.global_square_vao);
 	glBindVertexArray(state.open_gl.global_square_vao);
 	glEnableVertexAttribArray(0); // position
 	glEnableVertexAttribArray(1); // texture coordinates
-
-	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLfloat) * 4);
-
-	glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, 0);									 // position
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2); // texture coordinates
+	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLshort) * 4);
+	glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, 0); // position
+	glVertexAttribFormat(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 2); // texture coordinates
 	glVertexAttribBinding(0, 0);																				 // position -> to array zero
 	glVertexAttribBinding(1, 0);																				 // texture coordinates -> to array zero
 
 	glGenBuffers(1, &state.open_gl.global_square_left_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_left_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_square_right_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_right_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_square_right_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_right_flipped_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_square_left_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_left_flipped_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_square_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_flipped_data, GL_STATIC_DRAW);
 
 	//RTL mode squares
 	glGenBuffers(1, &state.open_gl.global_rtl_square_left_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_left_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_left_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_rtl_square_right_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_right_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_right_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_rtl_square_right_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_right_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_right_flipped_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_rtl_square_left_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_left_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_left_flipped_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &state.open_gl.global_rtl_square_flipped_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_flipped_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_rtl_square_flipped_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_flipped_data, GL_STATIC_DRAW);
 
 	glGenBuffers(64, state.open_gl.sub_square_buffers);
 	for(uint32_t i = 0; i < 64; ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[i]);
-
 		float const cell_x = static_cast<float>(i & 7) / 8.0f;
 		float const cell_y = static_cast<float>((i >> 3) & 7) / 8.0f;
-
-		GLfloat global_sub_square_data[] = {0.0f, 0.0f, cell_x, cell_y, 0.0f, 1.0f, cell_x, cell_y + 1.0f / 8.0f, 1.0f, 1.0f,
-				cell_x + 1.0f / 8.0f, cell_y + 1.0f / 8.0f, 1.0f, 0.0f, cell_x + 1.0f / 8.0f, cell_y};
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_sub_square_data, GL_STATIC_DRAW);
+		GLushort global_sub_square_data[] = {
+			0, 0, uint16_t((cell_x) * 65535.f), uint16_t((cell_y) * 65535.f),
+			0, 65535, uint16_t((cell_x) * 65535.f), uint16_t((cell_y + 1.0f / 8.0f) * 65535.f),
+			65535, 65535, uint16_t((cell_x + 1.0f / 8.0f) * 65535.f), uint16_t((cell_y + 1.0f / 8.0f) * 65535.f),
+			65535, 0, uint16_t((cell_x + 1.0f / 8.0f) * 65535.f), uint16_t((cell_y) * 65535.f)
+		};
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_sub_square_data, GL_STATIC_DRAW);
 	}
 }
 
@@ -612,21 +611,21 @@ void bind_vertices_by_rotation(sys::state const& state, ui::rotation r, bool fli
 	switch(r) {
 	case ui::rotation::upright:
 		if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 		else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer, 0, sizeof(GLushort) * 4);
 		break;
 	case ui::rotation::r90_left:
 		if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_buffer: state.open_gl.global_square_left_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_buffer: state.open_gl.global_square_left_buffer, 0, sizeof(GLushort) * 4);
 		else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer, 0, sizeof(GLushort) * 4);
 		break;
 	case ui::rotation::r90_right:
 		if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer, 0, sizeof(GLushort) * 4);
 		else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer, 0, sizeof(GLfloat) * 4);
+			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer, 0, sizeof(GLushort) * 4);
 		break;
 	}
 }
@@ -664,11 +663,8 @@ void render_textured_rect(sys::state const& state, color_modification enabled, f
 
 void render_textured_rect_direct(sys::state const& state, float x, float y, float width, float height, uint32_t handle) {
 	glBindVertexArray(state.open_gl.global_square_vao);
-
-	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLfloat) * 4);
-
+	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, handle);
 
@@ -751,11 +747,8 @@ void render_barchart(sys::state const& state, color_modification enabled, float 
 
 void render_piechart(sys::state const& state, color_modification enabled, float x, float y, float size, data_texture& t) {
 	glBindVertexArray(state.open_gl.global_square_vao);
-
-	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLfloat) * 4);
-
+	glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 	glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.handle());
 
@@ -999,6 +992,7 @@ void internal_text_render(sys::state& state, text::stored_glyphs const& txt, flo
 	GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 	glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 	//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
+	glActiveTexture(GL_TEXTURE0);
 
 	unsigned int glyph_count = static_cast<unsigned int>(txt.glyph_info.size());
 	for(unsigned int i = 0; i < glyph_count; i++) {
@@ -1007,10 +1001,9 @@ void internal_text_render(sys::state& state, text::stored_glyphs const& txt, flo
 		float x_advance = float(txt.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 		float x_offset = float(txt.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
 		float y_offset = float(gso.y) - float(txt.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-		glBindVertexBuffer(0, state.open_gl.sub_square_buffers[gso.texture_slot & 63], 0, sizeof(GLfloat) * 4);
+		glBindVertexBuffer(0, state.open_gl.sub_square_buffers[gso.texture_slot & 63], 0, sizeof(GLushort) * 4);
 		assert(uint32_t(gso.texture_slot >> 6) < f.textures.size());
 		assert(f.textures[gso.texture_slot >> 6]);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, f.textures[gso.texture_slot >> 6]);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x + x_offset * size / 64.f, baseline_y + y_offset * size / 64.f, size, size);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -1046,7 +1039,7 @@ void render_classic_text(sys::state& state, text::stored_glyphs const& txt, floa
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, font.ftexid);
-
+	glUniform3f(state.open_gl.ui_shader_inner_color_uniform, c.r, c.g, c.b);
 	for(uint32_t i = 0; i < count; ++i) {
 		uint8_t ch = uint8_t(codepoints[i]);
 		if(i != 0 && i < count - 1 && ch == 0xC2 && uint8_t(codepoints[i + 1]) == 0xA3) {
@@ -1059,13 +1052,13 @@ void render_classic_text(sys::state& state, text::stored_glyphs const& txt, floa
 		float CurX = x + f.x_offset;
 		float CurY = y + f.y_offset;
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, CurX, CurY, float(f.width), float(f.height));
-		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, c.r, c.g, c.b);
-		glUniform4f(state.open_gl.ui_shader_subrect_uniform, float(f.x) / float(font.width) /* x offset */,
-				float(f.width) / float(font.width) /* x width */, float(f.y) / float(font.width) /* y offset */,
-				float(f.height) / float(font.width) /* y height */
+		glUniform4f(state.open_gl.ui_shader_subrect_uniform,
+			float(f.x) / float(font.width) /* x offset */,
+			float(f.width) / float(font.width) /* x width */,
+			float(f.y) / float(font.width) /* y offset */,
+			float(f.height) / float(font.width) /* y height */
 		);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-		//float x_advance = float(txt.glyph_pos[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 		x += f.x_advance;
 	}
 }
@@ -1108,17 +1101,19 @@ void lines::set_default_y() {
 void lines::bind_buffer() {
 	if(buffer_handle == 0) {
 		glGenBuffers(1, &buffer_handle);
-
 		glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * count * 4, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * count * 4, nullptr, GL_DYNAMIC_DRAW);
 	}
 	if(buffer && pending_data_update) {
+		std::vector<GLushort> tmp_buffer(count * 4);
+		for(uint32_t i = 0; i < count * 4; i++) {
+			tmp_buffer[i] = GLushort(buffer[i] * 65535.f);
+		}
 		glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * count * 4, buffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLushort) * count * 4, tmp_buffer.data());
 		pending_data_update = false;
 	}
-
-	glBindVertexBuffer(0, buffer_handle, 0, sizeof(GLfloat) * 4);
+	glBindVertexBuffer(0, buffer_handle, 0, sizeof(GLushort) * 4);
 }
 
 bool msaa_enabled(sys::state const& state) {
