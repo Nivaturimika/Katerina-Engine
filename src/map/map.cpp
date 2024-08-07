@@ -2260,12 +2260,12 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 	if(text_line_vertices.size() > 0) {
 		for(uint32_t i = 0; i < uint32_t(text_line_texture_per_quad.size()); i++) {
 			bool swapped = false;
-			for(uint32_t j = 0; j < uint32_t(text_line_texture_per_quad.size()); j++) {
-				if(text_line_texture_per_quad[i] < text_line_texture_per_quad[j]) {
-					std::swap(text_line_texture_per_quad[i], text_line_texture_per_quad[j]);
+			for(uint32_t j = 0; j < uint32_t(text_line_texture_per_quad.size() - i - 1); j++) {
+				if(text_line_texture_per_quad[j] < text_line_texture_per_quad[j + 1]) {
+					std::swap(text_line_texture_per_quad[j], text_line_texture_per_quad[j + 1]);
 					map::text_line_vertex tmp[6];
-					std::memcpy(tmp, &text_line_vertices[i * 6], sizeof(tmp));
-					std::memcpy(&text_line_vertices[i * 6], &text_line_vertices[j * 6], sizeof(tmp));
+					std::memcpy(tmp, &text_line_vertices[(j + 1) * 6], sizeof(tmp));
+					std::memcpy(&text_line_vertices[(j + 1) * 6], &text_line_vertices[j * 6], sizeof(tmp));
 					std::memcpy(&text_line_vertices[j * 6], tmp, sizeof(tmp));
 					swapped = true;
 				}
@@ -2378,14 +2378,14 @@ void display_data::set_province_text_lines(sys::state& state, std::vector<text_l
 		}
 	}
 	if(province_text_line_vertices.size() > 0) {
-		for(uint32_t i = 0; i < uint32_t(province_text_line_texture_per_quad.size()); i++) {
+		for(uint32_t i = 0; i < uint32_t(province_text_line_texture_per_quad.size() - 1); i++) {
 			bool swapped = false;
-			for(uint32_t j = 0; j < uint32_t(province_text_line_texture_per_quad.size()); j++) {
-				if(province_text_line_texture_per_quad[i] < province_text_line_texture_per_quad[j]) {
-					std::swap(province_text_line_texture_per_quad[i], province_text_line_texture_per_quad[j]);
+			for(uint32_t j = 0; j < uint32_t(province_text_line_texture_per_quad.size() - i - 1); j++) {
+				if(province_text_line_texture_per_quad[j] < province_text_line_texture_per_quad[j + 1]) {
+					std::swap(province_text_line_texture_per_quad[j], province_text_line_texture_per_quad[j + 1]);
 					map::text_line_vertex tmp[6];
-					std::memcpy(tmp, &province_text_line_vertices[i * 6], sizeof(tmp));
-					std::memcpy(&province_text_line_vertices[i * 6], &province_text_line_vertices[j * 6], sizeof(tmp));
+					std::memcpy(tmp, &province_text_line_vertices[(j + 1) * 6], sizeof(tmp));
+					std::memcpy(&province_text_line_vertices[(j + 1) * 6], &province_text_line_vertices[j * 6], sizeof(tmp));
 					std::memcpy(&province_text_line_vertices[j * 6], tmp, sizeof(tmp));
 					swapped = true;
 				}
