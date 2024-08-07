@@ -2437,8 +2437,7 @@ void oob_regiment::type(association_type, std::string_view value, error_handler&
 
 void oob_regiment::home(association_type, int32_t value, error_handler& err, int32_t line, oob_file_regiment_context& context) {
 	if(size_t(value) >= context.outer_context.original_id_to_prov_id_map.size()) {
-		err.accumulated_errors +=
-				"Province id " + std::to_string(value) + " is too large (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += "Province id " + std::to_string(value) + " is too large (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	} else {
 		auto province_id = context.outer_context.original_id_to_prov_id_map[value];
 		for(auto pl : context.outer_context.state.world.province_get_pop_location(province_id)) {
@@ -2448,12 +2447,16 @@ void oob_regiment::home(association_type, int32_t value, error_handler& err, int
 				return;
 			}
 		}
-		err.accumulated_warnings +=
-				"No soldiers in province regiment comes from (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_warnings += "No soldiers in province regiment comes from (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 }
 
 void oob_relationship::value(association_type, int32_t v, error_handler& err, int32_t line, oob_file_relation_context& context) {
+	if(context.nation_with == context.nation_for) {
+		err.accumulated_warnings += "Relation with self (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+
 	if(v < -200 || v > 200) {
 		err.accumulated_warnings += "Relation value " + std::to_string(v) + " is not between [-200,-200] (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		v = std::clamp(v, -200, 200);
@@ -2470,6 +2473,11 @@ void oob_relationship::value(association_type, int32_t v, error_handler& err, in
 }
 
 void oob_relationship::level(association_type, int32_t v, error_handler& err, int32_t line, oob_file_relation_context& context) {
+	if(context.nation_with == context.nation_for) {
+		err.accumulated_warnings += "Influence level with self (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+
 	auto rel = context.outer_context.state.world.get_gp_relationship_by_gp_influence_pair(context.nation_with, context.nation_for);
 	auto status_level = [&]() {
 		switch(v) {
@@ -2501,6 +2509,11 @@ void oob_relationship::level(association_type, int32_t v, error_handler& err, in
 }
 
 void oob_relationship::influence_value(association_type, float v, error_handler& err, int32_t line, oob_file_relation_context& context) {
+	if(context.nation_with == context.nation_for) {
+		err.accumulated_warnings += "Influence with self (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+
 	auto rel = context.outer_context.state.world.get_gp_relationship_by_gp_influence_pair(context.nation_with, context.nation_for);
 	if(rel) {
 		context.outer_context.state.world.gp_relationship_set_influence(rel, v);
@@ -2514,6 +2527,11 @@ void oob_relationship::influence_value(association_type, float v, error_handler&
 }
 
 void oob_relationship::truce_until(association_type, sys::year_month_day v, error_handler& err, int32_t line, oob_file_relation_context& context) {
+	if(context.nation_with == context.nation_for) {
+		err.accumulated_warnings += "Truce with self (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
+
 	auto rel = context.outer_context.state.world.get_diplomatic_relation_by_diplomatic_pair(context.nation_with, context.nation_for);
 	if(rel) {
 		context.outer_context.state.world.diplomatic_relation_set_truce_until(rel, sys::date(v, context.outer_context.state.start_date));
