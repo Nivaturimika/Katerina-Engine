@@ -561,9 +561,19 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 	//return basis;
 }
 
-void display_data::render_models(std::vector<model_render_command>& info, float time_counter, sys::projection_mode map_view_mode) {
+void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode) {
+	if(list.empty())
+		return;
+
+	glBindVertexArray(vao_array[vo_static_mesh]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearDepth(1.f);
+	glDepthFunc(GL_LESS);
+	//glCullFace(GL_FRONT);
 	glActiveTexture(GL_TEXTURE0);
-	for(const auto& obj : info) {
+	for(const auto& obj : list) {
 		if(!obj.emfx)
 			return;
 		auto index = obj.emfx.index();
@@ -603,6 +613,7 @@ void display_data::render_models(std::vector<model_render_command>& info, float 
 			glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 		}
 	}
+	glDisable(GL_DEPTH_TEST);
 }
 
 void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
@@ -1238,15 +1249,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		if(shaders[uint8_t(map_view_mode)][shader_map_standing_object] && zoom > map::zoom_very_close && state.user_settings.render_models) {
 			constexpr float dist_step = 1.77777f;
 			// Render standing objects
-			glEnable(GL_DEPTH_TEST);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glClearDepth(1.f);
-			glDepthFunc(GL_LESS);
-			//glCullFace(GL_FRONT);
 
 			load_shader(shader_map_standing_object);
-			glBindVertexArray(vao_array[vo_static_mesh]);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 
 			std::vector<model_render_command> list;
 
@@ -1478,7 +1482,6 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 				}
 			});
 			render_models(list, time_counter, map_view_mode);
-			glDisable(GL_DEPTH_TEST);
 		}
 	}
 	glBindVertexArray(0);
@@ -2476,9 +2479,9 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 void load_static_meshes(sys::state& state) {
 	struct static_mesh_vertex {
 		glm::vec3 position_;
-		glm::vec2 normal_;
-		glm::vec2 texture_coord_;
-		int bone_ids[4] = { -1, -1, -1, -1 };
+		glm::u8vec2 normal_;
+		glm::u16vec2 texture_coord_;
+		int8_t bone_ids[4] = { -1, -1, -1, -1 };
 		float bone_weights[4] = { 0.f, 0.f, 0.f, 0.f };
 	};
 	std::vector<static_mesh_vertex> static_mesh_vertices;
@@ -2681,8 +2684,8 @@ void load_static_meshes(sys::state& state) {
 									? emfx::xac_vector2f{ vv.x, vv.y }
 								: mesh.texcoords[index % mesh.texcoords.size()];
 								smv.position_ = glm::vec3(vv.x, vv.y, vv.z);
-								smv.normal_ = glm::vec3(vn.x, vn.y, vn.z);
-								smv.texture_coord_ = glm::vec2(vt.x, vt.y);
+								smv.normal_ = glm::u8vec3(vn.x * 255.f, vn.y * 255.f, vn.z * 255.f);
+								smv.texture_coord_ = glm::u16vec2(vt.x * 65535.f / 4.f, vt.y * 65535.f / 4.f);
 								//
 								assert(mesh.influence_indices[index] < mesh.influence_starts.size());
 								assert(mesh.influence_indices[index] < mesh.influence_starts.size());
@@ -2690,8 +2693,8 @@ void load_static_meshes(sys::state& state) {
 								uint32_t i_count = mesh.influence_counts[mesh.influence_indices[index]];
 								assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
 								for(uint32_t l = 0; l < i_count; l++) {
-									smv.bone_ids[l] = mesh.influences[l + i_start].bone_id;
-									assert(smv.bone_ids[l] < state.map_state.map_data.max_bone_matrices);
+									assert(mesh.influences[l + i_start].bone_id < state.map_state.map_data.max_bone_matrices);
+									smv.bone_ids[l] = int8_t(mesh.influences[l + i_start].bone_id);
 									smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 								}
 							}
@@ -2762,9 +2765,9 @@ void load_static_meshes(sys::state& state) {
 	glBindVertexArray(state.map_state.map_data.vao_array[state.map_state.map_data.vo_static_mesh]);
 	glBindVertexBuffer(0, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh], 0, sizeof(static_mesh_vertex)); // Bind the VBO to 0 of the VAO
 	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, position_)); // Set up vertex attribute format for the position
-	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
-	glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
-	glVertexAttribIPointer(3, 4, GL_INT, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_ids));
+	glVertexAttribFormat(1, 2, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
+	glVertexAttribFormat(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
+	glVertexAttribIPointer(3, 4, GL_BYTE, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_ids));
 	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_weights));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
