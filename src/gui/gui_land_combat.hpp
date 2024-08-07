@@ -1578,8 +1578,10 @@ inline void lc_close_button::button_action(sys::state& state) noexcept  {
 	parent->set_visible(state, false);
 	auto uptr = state.ui_state.root->remove_child(parent);
 	assert(uptr);
-	std::unique_ptr<land_combat_end_popup> ptr(static_cast<land_combat_end_popup*>(uptr.release()));
-	land_combat_end_popup::land_reports_pool.push_back(std::move(ptr));
+	if(uptr) { //prevent crash
+		std::unique_ptr<land_combat_end_popup> ptr(static_cast<land_combat_end_popup*>(uptr.release()));
+		land_combat_end_popup::land_reports_pool.push_back(std::move(ptr));
+	}
 }
 
 
