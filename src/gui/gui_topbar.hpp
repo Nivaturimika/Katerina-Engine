@@ -1890,9 +1890,7 @@ public:
 				}
 			}
 			if(is_match) {
-				if(state.ui_state.diplomacy_subwindow && state.ui_state.diplomacy_subwindow->is_visible()) {
-					state.ui_state.diplomacy_subwindow->set_visible(state, false);
-				}
+				state.open_diplomacy(dcon::nation_id{});
 				visited_nations.clear();
 			}
 		}
