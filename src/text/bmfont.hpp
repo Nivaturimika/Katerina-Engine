@@ -54,34 +54,9 @@ struct char_descriptor {
 class bm_font {
 public:
 	bm_font() { }
-	bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image) {
-		auto font_result = ogl::make_font_texture(font_image);
-		ftexid = font_result.handle;
-		parse_font(state, font_metrics);
-		assert(ftexid != 0);
-		width = int16_t(font_result.size);
-	};
-	bm_font(bm_font&& src) noexcept {
-		ftexid = src.ftexid;
-		chars = src.chars;
-		kernings = std::move(src.kernings);
-		width = src.width;
-		height = src.height;
-		base = src.base;
-		line_height = src.line_height;
-		src.ftexid = 0;
-	}
-	bm_font& operator=(bm_font&& src) noexcept {
-		ftexid = src.ftexid;
-		chars = src.chars;
-		kernings = std::move(src.kernings);
-		width = src.width;
-		height = src.height;
-		base = src.base;
-		line_height = src.line_height;
-		src.ftexid = 0;
-		return *this;
-	}
+	bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image);
+	bm_font(bm_font&& src) noexcept;
+	bm_font& operator=(bm_font&& src) noexcept;
 	~bm_font();
 
 	std::array<char_descriptor, 256> chars;

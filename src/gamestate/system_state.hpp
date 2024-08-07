@@ -774,6 +774,7 @@ struct alignas(64) state {
 	void deselect(dcon::army_id a);
 	void deselect(dcon::navy_id a);
 
+	void update_battle_planner(army_group& group, std::vector<dcon::province_id>& province_queue, std::vector<dcon::province_id>& provinces_to_reduce_weight, std::vector<dcon::province_id>& provinces_to_maintain);
 	void new_army_group(dcon::province_id hq);
 	void toggle_ferry_origin_position(army_group* group, dcon::province_id position);
 	void toggle_ferry_target_position(army_group* group, dcon::province_id position);
