@@ -565,6 +565,15 @@ void display_data::render_models(std::vector<model_render_command>& list, float 
 	if(list.empty())
 		return;
 
+	//remove dead
+	for(uint32_t i = 0; i < uint32_t(list.size()); i++) {
+		if(!list[i].emfx) {
+			list[i] = list.back();
+			list.pop_back();
+			--i;
+		}
+	}
+
 	glBindVertexArray(vao_array[vo_static_mesh]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 	glEnable(GL_DEPTH_TEST);
@@ -574,8 +583,6 @@ void display_data::render_models(std::vector<model_render_command>& list, float 
 	//glCullFace(GL_FRONT);
 	glActiveTexture(GL_TEXTURE0);
 	for(const auto& obj : list) {
-		if(!obj.emfx)
-			return;
 		auto index = obj.emfx.index();
 		std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
 		if(obj.anim == emfx::animation_type::idle) {
