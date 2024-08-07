@@ -3124,24 +3124,15 @@ void add_truce_between_sides(sys::state& state, dcon::war_id w, int32_t months) 
 	for(int32_t i = 0; i < num_par; ++i) {
 		auto this_par = *(wpar.begin() + i);
 		auto this_nation = this_par.get_nation();
-
 		if(this_nation.get_overlord_as_subject().get_ruler())
 			continue;
 
 		auto attacker = this_par.get_is_attacker();
-
 		for(int32_t j = i + 1; j < num_par; ++j) {
 			auto other_par = *(wpar.begin() + j);
 			auto other_nation = other_par.get_nation();
-
-			if(!other_nation.get_overlord_as_subject().get_ruler() && attacker != other_par.get_is_attacker()) {
-				auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(this_nation, other_nation);
-				if(!rel) {
-					rel = state.world.force_create_diplomatic_relation(this_nation, other_nation);
-				}
-				auto& current_truce = state.world.diplomatic_relation_get_truce_until(rel);
-				if(!current_truce || current_truce < end_truce)
-					current_truce = end_truce;
+			if(this_nation != other_nation && !other_nation.get_overlord_as_subject().get_ruler() && attacker != other_par.get_is_attacker()) {
+				military::add_truce(state, this_nation, other_nation, months * 31);
 			}
 		}
 	}
@@ -3154,21 +3145,12 @@ void add_truce_from_nation(sys::state& state, dcon::war_id w, dcon::nation_id n,
 		auto other_nation = par.get_nation();
 		if(other_nation.get_overlord_as_subject().get_ruler())
 			continue;
-
-
-		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(n, other_nation);
-		if(!rel) {
-			rel = state.world.force_create_diplomatic_relation(n, other_nation);
-		}
-		auto& current_truce = state.world.diplomatic_relation_get_truce_until(rel);
-		if(!current_truce || current_truce < end_truce)
-			current_truce = end_truce;
+		military::add_truce(state, n, other_nation, months * 31);
 	}
 }
 
 void add_truce(sys::state& state, dcon::nation_id a, dcon::nation_id b, int32_t days) {
 	auto end_truce = state.current_date + days;
-
 	auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(a, b);
 	if(!rel) {
 		rel = state.world.force_create_diplomatic_relation(a, b);
