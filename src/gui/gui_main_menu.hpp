@@ -290,8 +290,8 @@ class music_player_display : public simple_text_element_base {
 
 struct notify_setting_update { };
 
-class options_menu_window : public window_element_base {
-	bool setting_changed = false;
+class settings_submenu_window : public window_element_base {
+public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "close_button") {
 			return make_element_by_type<generic_close_button>(state, id);
@@ -419,12 +419,76 @@ class options_menu_window : public window_element_base {
 			return nullptr;
 		}
 	}
+};
+
+enum class settings_submenu_tab : uint8_t {
+	graphics,
+	controls,
+	sounds,
+	other
+};
+class settings_menu_window : public generic_tabbed_window<settings_submenu_tab> {
+	std::array<settings_submenu_window*, 4> submenu_windows;
+public:
+	bool setting_changed = false;
+	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+		if(name == "sub_menu_1") {
+			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+			submenu_windows[0] = ptr.get();
+			return ptr;
+		} else if(name == "sub_menu_2") {
+			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+			submenu_windows[1] = ptr.get();
+			ptr->set_visible(state, false);
+			return ptr;
+		} else if(name == "sub_menu_3") {
+			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+			submenu_windows[2] = ptr.get();
+			ptr->set_visible(state, false);
+			return ptr;
+		} else if(name == "sub_menu_4") {
+			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+			submenu_windows[3] = ptr.get();
+			ptr->set_visible(state, false);
+			return ptr;
+		} else if(name == "sub_menu_tab_1") {
+			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+			ptr->target = settings_submenu_tab::graphics;
+			return ptr;
+		} else if(name == "sub_menu_tab_2") {
+			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+			ptr->target = settings_submenu_tab::controls;
+			return ptr;
+		} else if(name == "sub_menu_tab_3") {
+			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+			ptr->target = settings_submenu_tab::sounds;
+			return ptr;
+		} else if(name == "sub_menu_tab_4") {
+			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+			ptr->target = settings_submenu_tab::other;
+			return ptr;
+		} else if(name == "close_button") {
+			return make_element_by_type<generic_close_button>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
 	void on_hide(sys::state& state) noexcept override {
 		if(setting_changed)
 			state.save_user_settings();
 	}
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-		if(payload.holds_type<notify_setting_update>()) {
+		if(payload.holds_type<settings_submenu_tab>()) {
+			auto enum_val = any_cast<settings_submenu_tab>(payload);
+			active_tab = enum_val;
+			for(auto const win : submenu_windows) {
+				if(win)
+					win->set_visible(state, false);
+			}
+			if(submenu_windows[uint8_t(active_tab)])
+				submenu_windows[uint8_t(active_tab)]->set_visible(state, true);
+			return message_result::consumed;
+		} else if(payload.holds_type<notify_setting_update>()) {
 			setting_changed = true;
 			impl_on_update(state);
 			return message_result::consumed;
@@ -434,7 +498,7 @@ class options_menu_window : public window_element_base {
 };
 
 enum class main_menu_sub_window {
-	controls, audio, graphics, message_settings
+	settings, message_settings
 };
 
 class close_application_button : public button_element_base {
@@ -467,24 +531,14 @@ public:
 };
 
 class restricted_main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
-	options_menu_window* controls_menu = nullptr;
-	options_menu_window* graphics_menu = nullptr;
-	options_menu_window* audio_menu = nullptr;
+	settings_menu_window* settings_menu = nullptr;
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "close_button") {
 			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "graphics") {
+		} else if(name == "settings") {
 			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::graphics;
-			return ptr;
-		} else if(name == "sound") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::audio;
-			return ptr;
-		} else if(name == "controls") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::controls;
+			ptr->target = main_menu_sub_window::settings;
 			return ptr;
 		} else if(name == "message_settings") {
 			return make_element_by_type<mm_disabled_button>(state, id);
@@ -496,19 +550,9 @@ public:
 			return make_element_by_type<draggable_target>(state, id);
 		} else if(name == "exit") {
 			return make_element_by_type<close_application_button>(state, id);
-		} else if(name == "alice_graphics_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			graphics_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "alice_controls_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			controls_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "alice_audio_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			audio_menu = ptr.get();
+		} else if(name == "settings_menu") {
+			auto ptr = make_element_by_type<settings_menu_window>(state, id);
+			settings_menu = ptr.get();
 			ptr->set_visible(state, false);
 			return ptr;
 		} else {
@@ -517,12 +561,8 @@ public:
 	}
 
 	void hide_subwindows(sys::state& state) {
-		if(controls_menu)
-			controls_menu->set_visible(state, false);
-		if(graphics_menu)
-			graphics_menu->set_visible(state, false);
-		if(audio_menu)
-			audio_menu->set_visible(state, false);
+		if(settings_menu)
+			settings_menu->set_visible(state, false);
 	}
 
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
@@ -530,14 +570,8 @@ public:
 			auto enum_val = any_cast<main_menu_sub_window>(payload);
 			hide_subwindows(state);
 			switch(enum_val) {
-			case main_menu_sub_window::controls:
-				controls_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::audio:
-				audio_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::graphics:
-				graphics_menu->set_visible(state, true);
+			case main_menu_sub_window::settings:
+				settings_menu->set_visible(state, true);
 				break;
 			case main_menu_sub_window::message_settings:
 				break;
@@ -549,11 +583,8 @@ public:
 };
 
 class main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
-	options_menu_window* controls_menu = nullptr;
-	options_menu_window* graphics_menu = nullptr;
-	options_menu_window* audio_menu = nullptr;
+	settings_menu_window* settings_menu = nullptr;
 	element_base* message_settings_menu = nullptr;
-
 public:
 	void on_create(sys::state& state) noexcept override {
 		window_element_base::on_create(state);
@@ -567,17 +598,9 @@ public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "close_button") {
 			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "graphics") {
+		} else if(name == "settings") {
 			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::graphics;
-			return ptr;
-		} else if(name == "sound") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::audio;
-			return ptr;
-		} else if(name == "controls") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::controls;
+			ptr->target = main_menu_sub_window::settings;
 			return ptr;
 		} else if(name == "message_settings") {
 			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
@@ -591,19 +614,9 @@ public:
 			return make_element_by_type<save_button>(state, id);
 		} else if(name == "save_and_exit") {
 			return make_element_by_type<save_and_quit_button>(state, id);
-		} else if(name == "alice_graphics_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			graphics_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "alice_controls_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			controls_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "alice_audio_menu") {
-			auto ptr = make_element_by_type<options_menu_window>(state, id);
-			audio_menu = ptr.get();
+		} else if(name == "settings_menu") {
+			auto ptr = make_element_by_type<settings_menu_window>(state, id);
+			settings_menu = ptr.get();
 			ptr->set_visible(state, false);
 			return ptr;
 		} else {
@@ -612,12 +625,8 @@ public:
 	}
 
 	void hide_subwindows(sys::state& state) {
-		if(controls_menu)
-			controls_menu->set_visible(state, false);
-		if(graphics_menu)
-			graphics_menu->set_visible(state, false);
-		if(audio_menu)
-			audio_menu->set_visible(state, false);
+		if(settings_menu)
+			settings_menu->set_visible(state, false);
 		if(message_settings_menu)
 			message_settings_menu->set_visible(state, false);
 	}
@@ -627,14 +636,8 @@ public:
 			auto enum_val = any_cast<main_menu_sub_window>(payload);
 			hide_subwindows(state);
 			switch(enum_val) {
-			case main_menu_sub_window::controls:
-				controls_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::audio:
-				audio_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::graphics:
-				graphics_menu->set_visible(state, true);
+			case main_menu_sub_window::settings:
+				settings_menu->set_visible(state, true);
 				break;
 			case main_menu_sub_window::message_settings:
 				message_settings_menu->set_visible(state, true);
