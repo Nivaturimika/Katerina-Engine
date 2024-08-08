@@ -129,11 +129,8 @@ public:
 	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 		return state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
 	}
-	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return tooltip_behavior::variable_tooltip;
-	}
 	void button_action(sys::state& state) noexcept override {
-		send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::player_investment) | rank)});
+		send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::player_investment))});
 	}
 };
 
