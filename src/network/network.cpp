@@ -593,8 +593,8 @@ bool client_data::is_banned(sys::state& state) const {
 }
 
 static void send_post_handshake_commands(sys::state& state, network::client_data& client) {
-	//std::vector<char> tmp = client.send_buffer;
-	//client.send_buffer.clear();
+	std::vector<char> tmp = client.send_buffer;
+	client.send_buffer.clear();
 	if(state.current_scene.starting_scene) {
 		/* Send the savefile to the newly connected client (if not a new game) */
 		if(!state.network_state.is_new_game) {
@@ -714,9 +714,9 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 		assert(state.network_state.save_slock.load(std::memory_order::acquire) == true);
 		state.network_state.save_slock.store(false, std::memory_order::release);
 	}
-	//auto old_size = client.send_buffer.size();
-	//client.send_buffer.resize(old_size + tmp.size());
-	//std::memcpy(client.send_buffer.data() + old_size, tmp.data(), tmp.size());
+	auto old_size = client.send_buffer.size();
+	client.send_buffer.resize(old_size + tmp.size());
+	std::memcpy(client.send_buffer.data() + old_size, tmp.data(), tmp.size());
 }
 
 static void receive_from_clients(sys::state& state) {
