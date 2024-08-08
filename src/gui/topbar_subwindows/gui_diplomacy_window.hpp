@@ -2039,14 +2039,6 @@ public:
 	}
 };
 
-class gp_tab_text : public simple_text_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		simple_text_element_base::on_create(state);
-		set_text(state, text::produce_simple_string(state, "tut_8c_3"));
-	}
-};
-
 class diplomacy_window : public generic_tabbed_window<diplomacy_window_tab> {
 private:
 	diplomacy_country_listbox* country_listbox = nullptr;
@@ -2062,14 +2054,12 @@ private:
 	diplomacy_casus_belli_window* casus_belli_window = nullptr;
 	// element_base* casus_belli_window = nullptr;
 	diplomacy_crisis_info_window* crisis_window = nullptr;
-
 	std::vector<diplomacy_greatpower_info*> gp_infos{};
 	std::vector<element_base*> action_buttons{};
-
 	dcon::nation_id facts_nation_id{};
-
 	country_filter_setting filter = country_filter_setting{};
 	country_sort_setting sort = country_sort_setting{};
+	uint16_t default_button_font_handle = 0;
 
 	template<typename T>
 	void add_action_button(sys::state& state, xy_pair offset) noexcept {
@@ -2081,6 +2071,7 @@ private:
 
 public:
 	void on_create(sys::state& state) noexcept override {
+		default_button_font_handle = text::name_into_font_id(state, "vic_22_black");
 		generic_tabbed_window::on_create(state);
 
 		xy_pair base_gp_info_offset =
@@ -2212,19 +2203,32 @@ public:
 		} else if(name == "gp_info") {
 			auto ptr = make_element_by_type<generic_tab_button<diplomacy_window_tab>>(state, id);
 			ptr->target = diplomacy_window_tab::great_powers;
+			ptr->base_data.data.button.font_handle = default_button_font_handle;
+			ptr->impl_on_reset_text(state);
+			ptr->set_button_text(state, text::produce_simple_string(state, "tut_8c_3"));
 			return ptr;
-		} else if(name == "gp_info_text") {
-			return make_element_by_type<gp_tab_text>(state, id);
 		} else if(name == "war_info") {
 			auto ptr = make_element_by_type<generic_tab_button<diplomacy_window_tab>>(state, id);
 			ptr->target = diplomacy_window_tab::wars;
+			ptr->base_data.data.button.font_handle = default_button_font_handle;
+			ptr->impl_on_reset_text(state);
+			ptr->set_button_text(state, text::produce_simple_string(state, "diplomacy_war_info"));
 			return ptr;
 		} else if(name == "cb_info") {
 			auto ptr = make_element_by_type<generic_tab_button<diplomacy_window_tab>>(state, id);
 			ptr->target = diplomacy_window_tab::casus_belli;
+			ptr->base_data.data.button.font_handle = default_button_font_handle;
+			ptr->impl_on_reset_text(state);
+			ptr->set_button_text(state, text::produce_simple_string(state, "diplomacy_cb_info"));
 			return ptr;
 		} else if(name == "crisis_info") {
-			return make_element_by_type<crisis_tab_button>(state, id);
+			auto ptr = make_element_by_type<crisis_tab_button>(state, id);
+			ptr->base_data.data.button.font_handle = default_button_font_handle;
+			ptr->impl_on_reset_text(state);
+			ptr->set_button_text(state, text::produce_simple_string(state, "diplomacy_crisis_info"));
+			return ptr;
+		} else if(name == "gp_info_text" || name == "war_info_text" || name == "cb_info_text" || name == "crisis_info_text") {
+			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "filter_all") {
 			return make_element_by_type<category_filter_button<country_list_filter::all>>(state, id);
 		} else if(name == "filter_enemies") {
