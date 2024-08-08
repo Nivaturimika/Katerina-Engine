@@ -132,7 +132,9 @@ public:
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
-	void button_action(sys::state& state) noexcept override { }
+	void button_action(sys::state& state) noexcept override {
+		send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::player_investment) | rank)});
+	}
 };
 
 class invest_brow_window : public window_element_base {
