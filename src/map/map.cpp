@@ -27,25 +27,23 @@
 
 emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material const& mat) {
 	for(const auto& layer : mat.layers) {
-		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec") {
+		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec")
 			continue;
-		}
-		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse) {
+		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse)
 			return layer;
-		}
 	}
-	return mat.layers.empty()
-		? emfx::xac_pp_actor_material_layer{}
-	: mat.layers[0];
+	return mat.layers.empty() ? emfx::xac_pp_actor_material_layer{} : mat.layers[0];
 }
 glm::mat4x4 get_matrix_from_properties(emfx::xac_vector3f const& vt, emfx::xac_vector3f const& vs, emfx::xac_vector4f const& vr, emfx::xac_vector4f const& vq) {
 	glm::vec3 gvt(vt.x, vt.y, vt.z);
 	glm::vec3 gvs(vs.x, vs.y, vs.z);
 	glm::quat gvr(vr.x, vr.y, vr.z, vr.w);
-	glm::mat4x4 basis = glm::translate(gvt);
-	basis = glm::scale(basis, gvs);
-	return basis;
-	//return glm::translate(glm::scale(glm::toMat4(gvr), gvs), gvt);
+	glm::quat gvq(vq.x, vq.y, vq.z, vq.w);
+	auto mt = glm::translate(glm::mat4x4(1.f), gvt);
+	auto ms = glm::scale(glm::mat4x4(1.f), gvs);
+	auto mr = glm::toMat4(gvr);
+	auto mu = glm::toMat4(gvq);
+	return mt * ms * mr * mu;
 }
 glm::mat4x4 get_matrix_from_node(emfx::xac_pp_actor_node const& node) {
 	return get_matrix_from_properties(node.position, node.scale, node.rotation, node.scale_rotation);
@@ -53,9 +51,8 @@ glm::mat4x4 get_matrix_from_node(emfx::xac_pp_actor_node const& node) {
 glm::mat4x4 get_upwards_hierachy_matrix(emfx::xac_context const& context, emfx::xac_pp_actor_node const& node) {
 	glm::mat4x4 m1 = get_matrix_from_node(node);
 	if(node.parent_id != -1) {
-		auto const& parent = context.nodes[node.parent_id];
-		glm::mat4x4 m2 = get_upwards_hierachy_matrix(context, parent);
-		return m1 * m2;
+		auto m2 = get_upwards_hierachy_matrix(context, context.nodes[node.parent_id]);
+		return m2 * m1;
 	}
 	return m1;
 }
@@ -495,14 +492,7 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	}
 }
 
-static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
-	glm::vec3 pose_pos(an.pose_position.x, an.pose_position.y, an.pose_position.z);
-	glm::vec3 pose_sca(an.pose_scale.x, an.pose_scale.y, an.pose_scale.z);
-	glm::quat pose_rot(an.pose_rotation.x, an.pose_rotation.y, an.pose_rotation.z, an.pose_rotation.w);
-	glm::quat pose_rsc(an.pose_scale_rotation.x, an.pose_scale_rotation.y, an.pose_scale_rotation.z, an.pose_scale_rotation.w);
-	glm::mat4x4 bone_basis = get_matrix_from_properties(an.pose_position, an.pose_scale, an.pose_rotation, an.pose_scale_rotation);
-	glm::mat4x4 basis = bone_basis * an.bone_matrix;
-
+glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
 	float anim_time = std::fmod(time_counter, an.total_anim_time);
 	//
 	auto pos_index = an.get_position_key_index(anim_time);
@@ -556,9 +546,24 @@ static glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, floa
 			an.get_player_scale_factor(rsc1_time, rsc2_time, anim_time)
 		)
 	));
-	// Rotation is fine, the halo above units works kosher
-	return ((mt * ms) * mr) * basis;
-	//return basis;
+	return mr * mu;
+}
+
+glm::mat4x4 get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, emfx::xsm_animation const& current, float time_counter) {
+	if(current.parent_id == -1) {
+		return get_animation_bone_matrix(current, time_counter);
+	}
+	for(uint32_t i = start; i < start + count; i++) {
+		auto const& an = list[i];
+		assert(an.bone_id != -1);
+		if(an.bone_id == current.parent_id) {
+			auto mp = get_hierachical_animation_bone(list, start, count, an, time_counter);
+			auto mc = get_animation_bone_matrix(current, time_counter);
+			//return mc;
+			return mp * mc;
+		}
+	}
+	return get_animation_bone_matrix(current, time_counter);
 }
 
 void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode) {
@@ -591,7 +596,8 @@ void display_data::render_models(std::vector<model_render_command>& list, float 
 				assert(an.bone_id != -1);
 				assert(an.bone_id < int32_t(ar_matrices.size()));
 				// Rotation is fine, the halo above units works kosher
-				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+				ar_matrices[an.bone_id] = get_hierachical_animation_bone(animations, static_mesh_idle_animation_start[index], static_mesh_idle_animation_count[index], an, time_counter);
+				ar_matrices[an.bone_id] = ar_matrices[an.bone_id] * an.bone_matrix;
 			}
 		} else if(obj.anim == emfx::animation_type::move) {
 			for(uint32_t k = 0; k < static_mesh_move_animation_count[index]; k++) {
@@ -599,7 +605,8 @@ void display_data::render_models(std::vector<model_render_command>& list, float 
 				assert(an.bone_id != -1);
 				assert(an.bone_id < int32_t(ar_matrices.size()));
 				// Rotation is fine, the halo above units works kosher
-				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+				ar_matrices[an.bone_id] = get_hierachical_animation_bone(animations, static_mesh_move_animation_start[index], static_mesh_move_animation_count[index], an, time_counter);
+				ar_matrices[an.bone_id] = ar_matrices[an.bone_id] * an.bone_matrix;
 			}
 		} else if(obj.anim == emfx::animation_type::attack) {
 			for(uint32_t k = 0; k < static_mesh_attack_animation_count[index]; k++) {
@@ -607,7 +614,8 @@ void display_data::render_models(std::vector<model_render_command>& list, float 
 				assert(an.bone_id != -1);
 				assert(an.bone_id < int32_t(ar_matrices.size()));
 				// Rotation is fine, the halo above units works kosher
-				ar_matrices[an.bone_id] = get_animation_bone_matrix(an, time_counter);
+				ar_matrices[an.bone_id] = get_hierachical_animation_bone(animations, static_mesh_attack_animation_start[index], static_mesh_attack_animation_count[index], an, time_counter);
+				ar_matrices[an.bone_id] = ar_matrices[an.bone_id] * an.bone_matrix;
 			}
 		}
 		glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
@@ -1447,6 +1455,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					} else {
 						emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 						list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
+						list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), 0.f, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -1485,6 +1494,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					} else {
 						emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 						list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
+						list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), 0.f, emfx::animation_type::idle);
 					}
 				}
 			});
@@ -2463,7 +2473,9 @@ void load_animation(sys::state& state, std::string_view filename, uint32_t index
 			for(uint32_t i = 0; i < model_context.nodes.size(); i++) {
 				if(t_anim.node == model_context.nodes[i].name) {
 					t_anim.bone_id = int32_t(i);
-					t_anim.bone_matrix = get_upwards_hierachy_matrix(model_context, model_context.nodes[i]);
+					t_anim.parent_id = model_context.nodes[i].parent_id;
+					//t_anim.bone_matrix = get_upwards_hierachy_matrix(model_context, model_context.nodes[i]);
+					t_anim.bone_matrix = glm::mat4x4(1.f);//get_matrix_from_node(model_context.nodes[i]);
 					state.map_state.map_data.animations.push_back(t_anim);
 					break;
 				}

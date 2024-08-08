@@ -130,16 +130,16 @@ struct xac_color_rgb {
 	float b = 0.f;
 };
 struct xac_vector4u16 {
-	float x = 0.f;
-	float y = 0.f;
-	float z = 0.f;
-	float w = 0.f;
+	int16_t x = 0;
+	int16_t y = 0;
+	int16_t z = 0;
+	int16_t w = 0;
 	xac_vector4f to_vector4f() {
 		return xac_vector4f{
-			float(this->x) / 32767.f,
-			float(this->y) / 32767.f,
-			float(this->z) / 32767.f,
-			float(this->w) / 32767.f,
+			float(x) / 32767.f,
+			float(y) / 32767.f,
+			float(z) / 32767.f,
+			float(w) / 32767.f,
 		};
 	}
 };
@@ -429,6 +429,7 @@ struct xsm_animation {
 	std::vector<xsm_animation_key<emfx::xac_vector4f>> scale_rotation_keys;
 	float max_error = 0.f;
 	int32_t bone_id = -1; //assigned by processer
+	int32_t parent_id = -1;
 
 	glm::mat4x4 bone_matrix = glm::mat4x4(1.f);
 	glm::mat4x4 parent_matrix = glm::mat4x4(1.f);

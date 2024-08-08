@@ -384,6 +384,7 @@ const char* parse_xac_node_hierachy_v1(xac_context& context, const char* start, 
 		xac_pp_actor_node node;
 		node.name = name;
 		node.position = mh.position;
+		node.position.x = -node.position.x; //OpenGL fixup
 		node.rotation = mh.rotation;
 		node.scale_rotation = mh.scale_rotation;
 		node.scale = mh.scale;
@@ -428,7 +429,8 @@ const char* parse_xac_mesh_v1(xac_context& context, const char* start, const cha
 					err.accumulated_errors += "Attribute size doesn't match! [normal] (" + err.file_name + ")\n";
 					start += vbh.size;
 				} else {
-					auto const normal = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+					auto normal = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+					normal.x = -normal.x;
 					obj.normals.push_back(normal);
 				}
 				break;
@@ -437,7 +439,8 @@ const char* parse_xac_mesh_v1(xac_context& context, const char* start, const cha
 					err.accumulated_errors += "Attribute size doesn't match! [vertex] (" + err.file_name + ")\n";
 					start += vbh.size;
 				} else {
-					auto const vertex = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+					auto vertex = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+					vertex.x = -vertex.x;
 					obj.vertices.push_back(vertex);
 				}
 				break;
@@ -754,12 +757,16 @@ void finish(xac_context& context) {
 
 xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err, bool as_16b) {
 	// can be either 16 or 32 bit
+	xac_vector4f nkf;
 	if(as_16b) {
 		auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
-		return kf.to_vector4f();
+		nkf = kf.to_vector4f();
+	} else {
+		nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 	}
-	auto kf = parse_xac_any_binary<xac_vector4f>(start, end, err);
-	return kf;
+	nkf.y = -nkf.y;
+	nkf.z = -nkf.z;
+	return nkf;
 }
 
 const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
@@ -773,8 +780,10 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 		anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
 		//
 		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
 		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
 		anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+		anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
 		anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
 		//
 		uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
@@ -785,31 +794,22 @@ const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start,
 		start = parse_xac_cstring_nodiscard(anim.node, start, end, err);
 		for(uint32_t j = 0; j < num_pos_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
+			kf.value.x = -kf.value.x;
 			anim.position_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_rot_keys; j++) {
-			emfx::xac_vector4f nkf;
-			if(context.use_quat_16) {
-				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
-				anim.rotation_keys.push_back(xsm_animation_key{ kf.value.to_vector4f(), kf.time });
-			} else {
-				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f>>(&start, end, err);
-				anim.rotation_keys.push_back(xsm_animation_key{ kf.value, kf.time });
-			}
+			auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
+			auto time = parse_xac_any_binary<float>(&start, end, err);
+			anim.rotation_keys.push_back(xsm_animation_key{ kf, time });
 		}
 		for(uint32_t j = 0; j < num_scale_keys; j++) {
 			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
 			anim.scale_keys.push_back(kf);
 		}
 		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
-			emfx::xac_vector4f nkf;
-			if(context.use_quat_16) {
-				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4u16>>(&start, end, err);
-				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf.value.to_vector4f(), kf.time });
-			} else {
-				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector4f>>(&start, end, err);
-				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf.value, kf.time });
-			}
+			auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
+			auto time = parse_xac_any_binary<float>(&start, end, err);
+			anim.scale_rotation_keys.push_back(xsm_animation_key{ kf, time });
 		}
 	}
 	return nullptr;
@@ -822,7 +822,7 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 		err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
 		return;
 	}
-	context.use_quat_16 = h.multiply_order == 0;
+	//context.use_quat_16 = h.multiply_order == 0;
 #ifdef XAC_DEBUG
 	std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
 #endif
@@ -842,6 +842,19 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 			}
 			break;
 		default:
+			if(ch.ident == 0xc9) {
+				parse_xac_any_binary<float>(&start, end, err);
+				parse_xac_any_binary<float>(&start, end, err);
+				parse_xac_any_binary<uint32_t>(&start, end, err);
+				parse_xac_any_binary<uint8_t>(&start, end, err);
+				parse_xac_any_binary<uint8_t>(&start, end, err);
+				uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
+				context.use_quat_16 = (pad == 0);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+			}
 #ifdef XAC_DEBUG
 			std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
 #endif
@@ -926,7 +939,7 @@ float xsm_animation::get_player_scale_factor(float t1, float t2, float time) con
 	float frames_diff = t2 - t1;
 	float factor = mid_len / frames_diff;
 	//assert(factor >= 0.f && factor <= 1.f);
-	return std::fmod(factor, 1.f);
+	return std::clamp(factor, 0.f, 1.f);
 }
 
 void finish(xsm_context& context) {
@@ -935,17 +948,32 @@ void finish(xsm_context& context) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 			anim.total_position_anim_time = std::max(anim.total_position_anim_time, s.time);
 		}
+		if(anim.position_keys.empty()) {
+			anim.position_keys.emplace_back(anim.pose_position, 0.f);
+		}
+		//
 		for(auto& s : anim.rotation_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 			anim.total_rotation_anim_time = std::max(anim.total_rotation_anim_time, s.time);
 		}
+		if(anim.rotation_keys.empty()) {
+			anim.rotation_keys.emplace_back(anim.pose_rotation, 0.f);
+		}
+		//
 		for(auto& s : anim.scale_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 			anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
 		}
+		if(anim.scale_keys.empty()) {
+			anim.scale_keys.emplace_back(anim.pose_scale, 0.f);
+		}
+		//
 		for(auto& s : anim.scale_rotation_keys) {
 			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 			anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
+		}
+		if(anim.scale_rotation_keys.empty()) {
+			anim.scale_rotation_keys.emplace_back(anim.pose_scale_rotation, 0.f);
 		}
 	}
 }
