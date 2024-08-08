@@ -55,27 +55,12 @@ guiTypes = {
 			buttonFont = "vic_22_black"
 		}
 		guiButtonType = {
-			name = "sound"
-			position = { 58 256 }
-			quadTextureSprite ="GFX_frontend_button_236"
-			buttonText = "sound_options"
-			buttonFont = "vic_22_black"
-		}
-		guiButtonType = {
-			name = "controls"
-			position = { 58 294 }
-			quadTextureSprite ="GFX_frontend_button_236"
-			buttonText = "controls_options"
-			buttonFont = "vic_22_black"
-		}
-		guiButtonType = {
 			name = "message_settings"
-			position = { 58 332 }
+			position = { 58 256 }
 			quadTextureSprite ="GFX_frontend_button_236"
 			buttonText = "message_settings_options"
 			buttonFont = "vic_22_black"
 		}
-
 		# Please follow the following guidelines:
 		# 32 units of spacing between fields with values
 		# 24 units of spacing between boolean checkbox fields
