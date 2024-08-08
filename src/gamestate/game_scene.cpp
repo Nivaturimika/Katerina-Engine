@@ -58,12 +58,17 @@ void switch_scene(sys::state& state, scene_id ui_scene) {
 	state.game_state_updated.store(true, std::memory_order_release);
 }
 
-void do_nothing_province_target(sys::state& state,
-		dcon::nation_id nation,
-		dcon::province_id target,
-		sys::key_modifiers mod) { }
-void do_nothing(sys::state& state) { }
-void do_nothing_screen(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod) { }
+void do_nothing_province_target(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod) {
+
+}
+
+void do_nothing(sys::state& state) {
+
+}
+
+void do_nothing_screen(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mod) {
+
+}
 
 bool belongs_on_map(sys::state& state, ui::element_base* checked_element) {
 	while(checked_element != nullptr) {
@@ -83,7 +88,6 @@ sys::projection_mode get_view(sys::state& state) {
 	} else if(state.user_settings.map_is_globe == sys::projection_mode::globe_perspect) {
 		current_view = sys::projection_mode::globe_perspect;
 	}
-
 	return current_view;
 }
 
@@ -91,12 +95,7 @@ float get_effects_volume(sys::state& state) {
 	return state.user_settings.effects_volume * state.user_settings.master_volume;
 }
 
-void selected_units_control(
-	sys::state& state,
-	dcon::nation_id nation,
-	dcon::province_id target,
-	sys::key_modifiers mod
-) {
+void selected_units_control(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod) {
 	bool army_moved = false;
 	bool navy_moved = false;
 	bool army_play = false;

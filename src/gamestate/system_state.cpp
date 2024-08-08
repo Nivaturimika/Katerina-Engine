@@ -996,6 +996,10 @@ void state::render() { // called to render the frame may (and should) delay retu
 		}
 	}
 
+	if(!current_scene.based_on_map) {
+		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 	current_scene.render_map(*this);
 
 	//UI rendering
