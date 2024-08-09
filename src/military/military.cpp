@@ -5038,7 +5038,6 @@ void apply_regiment_damage(sys::state& state) {
 					}
 				}
 
-#ifndef NDEBUG
 				if(auto b = state.world.army_get_battle_from_army_battle_participation(army); b) {
 					for(auto e : state.world.land_battle_get_attacker_back_line(b))
 						assert(e != s);
@@ -5049,11 +5048,20 @@ void apply_regiment_damage(sys::state& state) {
 					for(auto e : state.world.land_battle_get_defender_front_line(b))
 						assert(e != s);
 					auto reserves = state.world.land_battle_get_reserves(b);
-					for(uint32_t j = 0; j < reserves.size(); j++)
+					// failsafe, some conditions can lead to this invalid state
+					// where a rebel stack/stack has 0 strength but is still on a battle
+					// (damage could've been dealt by attrition for ex.)
+					// so prevent OOS by removing them from reserves!
+					for(uint32_t j = reserves.size(); j-- > 0;) {
 						assert(reserves[j].regiment != s);
+						if(reserves[j].regiment == s) {
+							std::swap(reserves[j], reserves[reserves.size() - 1]);
+							reserves.pop_back();
+							break;
+						}
+					}
 				}
-#endif
-				if(!controller || state.world.pop_get_size(pop_backer) < 1000.0f)
+				if(!controller || state.world.pop_get_size(pop_backer) < state.defines.pop_min_size_for_regiment)
 					state.world.delete_regiment(s);
 				else
 					current_strength = 0.0f;
