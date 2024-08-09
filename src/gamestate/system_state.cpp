@@ -726,6 +726,17 @@ void state::update_render() {
 				ui_state.root->move_child_to_front(ui_state.msg_window);
 			}
 		}
+
+		ui::element_base* root_elm = current_scene.get_root(*this);
+		auto mouse_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
+			int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::click);
+		auto tooltip_probe = root_elm->impl_probe_mouse(*this, int32_t(mouse_x_position / user_settings.ui_scale),
+			int32_t(mouse_y_position / user_settings.ui_scale), ui::mouse_probe_type::tooltip);
+		if(!mouse_probe.under_mouse && map_state.get_zoom() > map::zoom_close) {
+			mouse_probe = current_scene.recalculate_mouse_probe(*this, mouse_probe, tooltip_probe);
+			tooltip_probe = current_scene.recalculate_tooltip_probe(*this, mouse_probe, tooltip_probe);
+		}
+
 		root_elm->impl_on_update(*this);
 		current_scene.on_game_state_update_update_ui(*this);
 		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
