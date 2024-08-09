@@ -3100,9 +3100,9 @@ void make_war_decs(sys::state& state) {
 					}
 				}
 			}
-			if(will_mob && !n.get_is_mobilized(n)) {
+			if(will_mob && !n.get_is_mobilized()) {
 				military::start_mobilization(state, n);
-			} else if(!will_mob && n.get_is_mobilized(n)) {
+			} else if(!will_mob && n.get_is_mobilized()) {
 				military::end_mobilization(state, n);
 			}
 		}
