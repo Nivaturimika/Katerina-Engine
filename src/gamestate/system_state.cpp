@@ -448,6 +448,10 @@ void state::update_render() {
 	}
 
 	if(game_state_was_updated) {
+		ui::element_base* root_elm = current_scene.get_root(*this);
+		root_elm->impl_on_update(*this);
+		current_scene.on_game_state_update_update_ui(*this);
+
 		if(!ui_state.tech_queue.empty()) {
 			if(!world.nation_get_current_research(local_player_nation)) {
 				for(auto it = ui_state.tech_queue.begin(); it != ui_state.tech_queue.end(); it++) {
@@ -777,11 +781,10 @@ void state::render() { // called to render the frame may (and should) delay retu
 	ui::display_pending_error_window(*this);
 
 	// Do not update state sensitive updates!
-	if(network_state.save_slock.load(std::memory_order::acquire) == false) {
+	if(network_state.save_slock.load(std::memory_order::acquire) == false
+	&& game_state_updated.load(std::memory_order::acquire) == true) {
 		update_render();
 
-		root_elm->impl_on_update(*this);
-		current_scene.on_game_state_update_update_ui(*this);
 		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
 			auto type = ui_state.last_tooltip->has_tooltip(*this);
 			if(type == ui::tooltip_behavior::variable_tooltip || type == ui::tooltip_behavior::position_sensitive_tooltip) {

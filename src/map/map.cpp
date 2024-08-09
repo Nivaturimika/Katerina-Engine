@@ -2690,6 +2690,8 @@ void load_static_meshes(sys::state& state) {
 					uint32_t vertex_offset = 0;
 					for(auto const& sub : mesh.submeshes) {
 						auto old_size = static_mesh_vertices.size();
+
+						bool has_invalid_bone_ids = false;
 						for(uint32_t i = 0; i < uint32_t(sub.indices.size()); i += 3) {
 							static_mesh_vertex triangle_vertices[3];
 							for(uint32_t j = 0; j < 3; j++) {
@@ -2712,7 +2714,10 @@ void load_static_meshes(sys::state& state) {
 								uint32_t i_count = mesh.influence_counts[mesh.influence_indices[index]];
 								assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
 								for(uint32_t l = 0; l < i_count; l++) {
-									assert(mesh.influences[l + i_start].bone_id < state.map_state.map_data.max_bone_matrices);
+									if(mesh.influences[l + i_start].bone_id >= state.map_state.map_data.max_bone_matrices) {
+										has_invalid_bone_ids = true;
+										continue;
+									}
 									smv.bone_ids[l] = int8_t(mesh.influences[l + i_start].bone_id);
 									smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 								}
@@ -2724,6 +2729,11 @@ void load_static_meshes(sys::state& state) {
 									static_mesh_vertices.push_back(tmp);
 								}
 							}
+						}
+						if(has_invalid_bone_ids) {
+#ifdef WIN32
+							OutputDebugStringA("Invalid bone ID");
+#endif
 						}
 						vertex_offset += sub.num_vertices;
 
