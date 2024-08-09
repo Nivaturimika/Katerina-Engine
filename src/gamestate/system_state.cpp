@@ -3506,7 +3506,6 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	military_definitions.pending_blackflag_update = true;
 	military::update_blackflag_status(*this);
 
-#ifndef NDEBUG
 	for(auto p : world.in_pop) {
 		float total = 0.0f;
 		for(auto i : world.in_ideology) {
@@ -3528,6 +3527,13 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	for(auto a : world.in_army) {
 		if(a.get_arrival_time() && a.get_arrival_time() <= current_date) {
 			a.set_arrival_time(current_date + 1);
+		}
+	}
+	for(auto reg : world.in_regiment) {
+		assert(reg.get_army_from_army_membership());
+		assert(reg.get_type());
+		if(!reg.get_type()) { //correct invalid units
+			reg.set_type(military_definitions.irregular);
 		}
 	}
 	for(auto a : world.in_navy) {
@@ -3552,8 +3558,6 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 			}
 		}
 	}
-
-#endif // ! NDEBUG
 
 	game_state_updated.store(true, std::memory_order::release);
 }
