@@ -1061,6 +1061,8 @@ void send_and_receive_commands(sys::state& state) {
 #endif
 				state.railroad_built.store(true, std::memory_order::release);
 				state.game_state_updated.store(true, std::memory_order::release);
+				state.province_ownership_changed.store(true, std::memory_order::release);
+				state.province_name_changed.store(true, std::memory_order::release);
 				state.network_state.save_data.clear();
 				state.network_state.save_stream = false; // go back to normal command loop stuff
 			});

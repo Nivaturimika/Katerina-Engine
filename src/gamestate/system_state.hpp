@@ -630,6 +630,7 @@ struct alignas(64) state {
 	// synchronization data (between main update logic and ui thread)
 	std::atomic<bool> game_state_updated = false;                    // game state -> ui signal
 	std::atomic<bool> province_ownership_changed = true;                    // game state -> ui signal
+	std::atomic<bool> province_name_changed = true;					// game state -> ui signal
 	std::atomic<bool> save_list_updated = false;                     // game state -> ui signal
 	std::atomic<bool> quit_signaled = false;                         // ui -> game state signal
 	std::atomic<int32_t> actual_game_speed = 0;                      // ui -> game state message

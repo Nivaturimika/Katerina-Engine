@@ -2765,6 +2765,7 @@ uint32_t ef_release_vassal_province_random(EFFECT_PARAMTERS) {
 uint32_t ef_change_province_name(EFFECT_PARAMTERS) {
 	dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 	ws.world.province_set_name(trigger::to_prov(primary_slot), name);
+	ws.province_name_changed.store(true, std::memory_order::release); //update names
 	return 0;
 }
 uint32_t ef_enable_canal(EFFECT_PARAMTERS) {
@@ -5060,6 +5061,7 @@ uint32_t ef_fop_clr_global_flag_12(EFFECT_PARAMTERS) {
 uint32_t ef_fop_change_province_name(EFFECT_PARAMTERS) {
 	dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 	ws.world.province_set_name(trigger::payload(tval[3]).prov_id, name);
+	ws.province_name_changed.store(true, std::memory_order::release); //update names
 	return 0;
 }
 uint32_t ef_change_terrain_province(EFFECT_PARAMTERS) {

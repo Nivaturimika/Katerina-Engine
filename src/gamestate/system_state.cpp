@@ -439,6 +439,11 @@ void state::update_render() {
 	if(ownership_update) {
 		if(user_settings.map_label != sys::map_label_mode::none) {
 			map::update_text_lines(*this, map_state.map_data);
+		}
+	}
+	auto name_change_update = province_name_changed.exchange(false, std::memory_order::acq_rel);
+	if(name_change_update) {
+		if(user_settings.map_label != sys::map_label_mode::none) {
 			map::update_province_text_lines(*this, map_state.map_data);
 		}
 	}

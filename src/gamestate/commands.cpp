@@ -5818,6 +5818,8 @@ void load_savefile(sys::state& state, native_string file_name, bool is_new_game)
 	state.map_state.set_selected_province(dcon::province_id{});
 	state.map_state.unhandled_province_selection = true;
 	state.railroad_built.store(true, std::memory_order::release);
+	state.province_ownership_changed.store(true, std::memory_order::release);
+	state.province_name_changed.store(true, std::memory_order::release);
 	state.game_state_updated.store(true, std::memory_order_release);
 
 	window::change_cursor(state, window::cursor_type::normal); //normal cursor now

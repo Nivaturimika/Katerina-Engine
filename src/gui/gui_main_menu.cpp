@@ -146,6 +146,7 @@ void language_left::button_action(sys::state& state) noexcept {
 	if(state.ui_state.end_screen)
 		state.ui_state.end_screen->impl_on_reset_text(state);
 	state.province_ownership_changed.store(true, std::memory_order::release); //update map
+	state.province_name_changed.store(true, std::memory_order::release);
 	state.game_state_updated.store(true, std::memory_order::release); //update ui
 	//
 	send(state, parent, notify_setting_update{});
@@ -196,6 +197,7 @@ void language_right::button_action(sys::state& state) noexcept {
 	if(state.ui_state.end_screen)
 		state.ui_state.end_screen->impl_on_reset_text(state);
 	state.province_ownership_changed.store(true, std::memory_order::release); //update map
+	state.province_name_changed.store(true, std::memory_order::release);
 	state.game_state_updated.store(true, std::memory_order::release); //update ui
 	//
 	send(state, parent, notify_setting_update{});
@@ -355,6 +357,7 @@ void map_label_left::button_action(sys::state& state) noexcept {
 	if(scale_index > 0) {
 		state.user_settings.map_label = sys::map_label_mode(scale_index - 1);
 		state.province_ownership_changed.store(true, std::memory_order::release);
+		state.province_name_changed.store(true, std::memory_order::release);
 		send(state, parent, notify_setting_update{});
 	}
 }
@@ -367,6 +370,7 @@ void map_label_right::button_action(sys::state& state) noexcept {
 	if(scale_index < 3) {
 		state.user_settings.map_label = sys::map_label_mode(scale_index + 1);
 		state.province_ownership_changed.store(true, std::memory_order::release);
+		state.province_name_changed.store(true, std::memory_order::release);
 		send(state, parent, notify_setting_update{});
 	}
 }
@@ -634,6 +638,7 @@ void fonts_mode_checkbox::button_action(sys::state& state) noexcept {
 	if(state.ui_state.end_screen)
 		state.ui_state.end_screen->impl_on_reset_text(state);
 	state.province_ownership_changed.store(true, std::memory_order::release); //update map
+	state.province_name_changed.store(true, std::memory_order::release);
 	state.game_state_updated.store(true, std::memory_order::release); //update ui
 	state.ui_state.tooltip->set_visible(state, false);
 	state.ui_state.last_tooltip = nullptr;
