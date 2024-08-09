@@ -2566,8 +2566,8 @@ int WINAPI wWinMain(
 			NULL,
 			NULL,
 			NULL,
-			static_cast<int>(launcher::scaling_factor * launcher::base_width),
-			static_cast<int>(launcher::scaling_factor * launcher::base_height),
+			int(launcher::scaling_factor * launcher::base_width),
+			int(launcher::scaling_factor * launcher::base_height),
 			SWP_NOMOVE | SWP_FRAMECHANGED);
 
 
