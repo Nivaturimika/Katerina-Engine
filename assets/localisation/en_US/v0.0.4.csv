@@ -77,3 +77,5 @@ save_transfer_end;?YSave transfer finished
 multiplayer_notify_reload;?YState reloaded
 settings;Options
 settings_label;Engine Options
+military_autocreate;Auto-create admirals
+military_autocreate_2;Auto-create generals

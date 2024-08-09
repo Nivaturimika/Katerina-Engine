@@ -360,6 +360,16 @@ public:
 	}
 };
 
+class military_auto_assign_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		if(state.world.nation_get_auto_create_generals(state.local_player_nation)) {
+			set_text(state, text::produce_simple_string(state, "military_autocreate_2"));
+		} else {
+			set_text(state, text::produce_simple_string(state, "military_autocreate"));
+		}
+	}
+};
 class military_auto_create_button : public checkbox_button {
 public:
 	bool is_active(sys::state& state) noexcept override {
@@ -408,15 +418,11 @@ public:
 		} else if(name == "auto_create") {
 			return make_element_by_type<military_auto_create_button>(state, id);
 		} else if(name == "auto_create_text") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-
-			return ptr;
+			return make_element_by_type<military_auto_assign_text>(state, id);
 		} else if(name == "auto_assign") {
 			return make_element_by_type<military_auto_assign_button>(state, id);
 		} else if(name == "auto_assign_text") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-
-			return ptr;
+			return make_element_by_type<simple_text_element_base>(state, id);
 		} else {
 			return nullptr;
 		}
