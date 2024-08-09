@@ -1614,7 +1614,10 @@ public:
 					++ucount;
 					float str = 0.0f;
 					for(auto m : state.world.army_get_army_membership(a.get_army())) {
-						auto icon = state.military_definitions.unit_base_definitions[m.get_regiment().get_type()].icon - 1;
+						auto utid = m.get_regiment().get_type();
+						auto icon = utid
+							? (state.military_definitions.unit_base_definitions[utid].icon - 1)
+							: 0;
 						icon = std::max(icon, 0);
 						if(uint32_t(icon) >= by_icon_count.size()) {
 							by_icon_count.resize(icon + 1, 0);

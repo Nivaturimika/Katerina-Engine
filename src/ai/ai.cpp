@@ -5114,6 +5114,8 @@ void update_land_constructions(sys::state& state) {
 			for(auto r : ar.get_army().get_army_membership()) {
 				auto type = r.get_regiment().get_type();
 				assert(type);
+				if(!type)
+					continue;
 				auto etype = state.military_definitions.unit_base_definitions[type].type;
 				bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
 				bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());

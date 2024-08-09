@@ -302,7 +302,7 @@ public:
 		auto content = retrieve<dcon::state_instance_id>(state, parent);
 		disabled = true;
 		for(auto nfid : state.world.in_national_focus) {
-			disabled = !nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
+			disabled = nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
 		}
 		if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation)
 			disabled = false;
