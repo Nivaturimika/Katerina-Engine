@@ -3105,7 +3105,7 @@ void run_gc(sys::state& state) {
 			}
 		}
 		if(!non_sq_war_goal) {
-			//cleanup_war(state, w, military::war_result::draw);
+			cleanup_war(state, w, military::war_result::draw);
 		}
 	}
 
