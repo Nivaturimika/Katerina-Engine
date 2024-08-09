@@ -106,6 +106,8 @@ enum class command_type : uint8_t {
 	toggle_interested_in_alliance = 97,
 	pbutton_script = 98,
 	nbutton_script = 99,
+	toggle_auto_create_generals = 100,
+	toggle_auto_assign_leaders = 101,
 
 	// network
 	notify_player_ban = 106,
@@ -824,14 +826,18 @@ bool can_retreat_from_land_battle(sys::state& state, dcon::nation_id source, dco
 
 void change_general(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::leader_id l);
 bool can_change_general(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::leader_id l);
+void execute_change_general(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::leader_id l);
 
 void change_admiral(sys::state& state, dcon::nation_id source, dcon::navy_id a, dcon::leader_id l);
 bool can_change_admiral(sys::state& state, dcon::nation_id source, dcon::navy_id a, dcon::leader_id l);
+void execute_change_admiral(sys::state& state, dcon::nation_id source, dcon::navy_id a, dcon::leader_id l);
 
 void invite_to_crisis(sys::state& state, dcon::nation_id source, dcon::nation_id invitation_to, dcon::nation_id target, dcon::cb_type_id primary_cb, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation);
 bool can_invite_to_crisis(sys::state& state, dcon::nation_id source, dcon::nation_id invitation_to, dcon::nation_id target, dcon::cb_type_id primary_cb, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation);
 
 void toggle_mobilization(sys::state& state, dcon::nation_id source);
+void toggle_auto_create_generals(sys::state& state, dcon::nation_id source);
+void toggle_auto_assign_leaders(sys::state& state, dcon::nation_id source);
 
 void enable_debt(sys::state& state, dcon::nation_id source);
 

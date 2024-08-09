@@ -130,6 +130,8 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(notify_start_game, no_data) \
 	GS_COMMAND_LIST_ENTRY(notify_stop_game, no_data) \
 	GS_COMMAND_LIST_ENTRY(notify_pause_game, no_data) \
+	GS_COMMAND_LIST_ENTRY(toggle_auto_create_generals, no_data) \
+	GS_COMMAND_LIST_ENTRY(toggle_auto_assign_leaders, no_data) \
 
 uint32_t get_size(command_type t) {
 	//return sizeof(command::payload);
@@ -4388,6 +4390,29 @@ void execute_toggle_mobilization(sys::state& state, dcon::nation_id source) {
 	}
 }
 
+void toggle_auto_create_generals(sys::state& state, dcon::nation_id source) {
+	payload p;
+	memset(&p, 0, sizeof(payload));
+	p.type = command_type::toggle_auto_create_generals;
+	p.source = source;
+	add_to_command_queue(state, p);
+}
+
+void execute_toggle_auto_create_generals(sys::state& state, dcon::nation_id source) {
+	state.world.nation_set_auto_create_generals(source, !state.world.nation_get_auto_create_generals(source));
+}
+
+void toggle_auto_assign_leaders(sys::state& state, dcon::nation_id source) {
+	payload p;
+	memset(&p, 0, sizeof(payload));
+	p.type = command_type::toggle_auto_assign_leaders;
+	p.source = source;
+	add_to_command_queue(state, p);
+}
+void execute_toggle_auto_assign_leaders(sys::state& state, dcon::nation_id source) {
+	state.world.nation_set_auto_assign_leaders(source, !state.world.nation_get_auto_assign_leaders(source));
+}
+
 void enable_debt(sys::state& state, dcon::nation_id source) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
@@ -5094,7 +5119,10 @@ bool can_perform_command(sys::state& state, payload& c) {
 
 	case command_type::toggle_mobilization:
 		return true; //can_toggle_mobilization(state, c.source);
-
+	case command_type::toggle_auto_create_generals:
+		return true;
+	case command_type::toggle_auto_assign_leaders:
+		return true;
 	case command_type::give_military_access:
 		return can_give_military_access(state, c.source, c.data.diplo_action.target);
 
@@ -5490,6 +5518,12 @@ void execute_command(sys::state& state, payload& c) {
 		break;
 	case command_type::toggle_mobilization:
 		execute_toggle_mobilization(state, c.source);
+		break;
+	case command_type::toggle_auto_create_generals:
+		execute_toggle_auto_create_generals(state, c.source);
+		break;
+	case command_type::toggle_auto_assign_leaders:
+		execute_toggle_auto_assign_leaders(state, c.source);
 		break;
 	case command_type::give_military_access:
 		execute_give_military_access(state, c.source, c.data.diplo_action.target);

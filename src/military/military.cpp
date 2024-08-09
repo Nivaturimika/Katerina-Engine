@@ -1943,21 +1943,51 @@ void monthly_leaders_update(sys::state& state) {
 	national-modifier-to-leadership x (national-modifier-to-leadership-modifier + 1) leadership points per month.
 	*/
 
-	state.world.execute_serial_over_nation(
-			[&, optimum_officers = state.world.pop_type_get_research_optimum(state.culture_definitions.officers)](auto ids) {
-				auto ofrac = state.world.nation_get_demographics(ids, demographics::to_key(state, state.culture_definitions.officers)) /
-										 ve::max(state.world.nation_get_demographics(ids, demographics::total), 1.0f);
-				auto omod = ve::min(1.0f, ofrac / optimum_officers) * float(state.culture_definitions.officer_leadership_points);
-				auto nmod = (state.world.nation_get_modifier_values(ids, sys::national_mod_offsets::leadership_modifier) + 1.0f) *
-										state.world.nation_get_modifier_values(ids, sys::national_mod_offsets::leadership);
+	state.world.execute_serial_over_nation([&, optimum_officers = state.world.pop_type_get_research_optimum(state.culture_definitions.officers)](auto ids) {
+		auto ofrac = state.world.nation_get_demographics(ids, demographics::to_key(state, state.culture_definitions.officers)) /
+			ve::max(state.world.nation_get_demographics(ids, demographics::total), 1.0f);
+		auto omod = ve::min(1.0f, ofrac / optimum_officers) * float(state.culture_definitions.officer_leadership_points);
+		auto nmod = (state.world.nation_get_modifier_values(ids, sys::national_mod_offsets::leadership_modifier) + 1.0f) *
+			state.world.nation_get_modifier_values(ids, sys::national_mod_offsets::leadership);
+		state.world.nation_set_leadership_points(ids, ve::select(state.world.nation_get_owned_province_count(ids) != 0, state.world.nation_get_leadership_points(ids) + omod + nmod, 0.0f));
+	});
 
-				state.world.nation_set_leadership_points(ids, ve::select(state.world.nation_get_owned_province_count(ids) != 0, state.world.nation_get_leadership_points(ids) + omod + nmod, 0.0f));
-			});
+	//auto assign leaders?
+	for(auto n : state.world.in_nation) {
+		if(n.get_is_player_controlled() && n.get_auto_assign_leaders()) {
+			for(auto l : n.get_leader_loyalty()) {
+				if(!l.get_leader().get_army_from_army_leadership()
+				&& !l.get_leader().get_navy_from_navy_leadership()) {
+					if(l.get_leader().get_is_admiral()) {
+						for(auto nc : n.get_navy_control()) {
+							if(!nc.get_navy().get_admiral_from_navy_leadership()
+							&& command::can_change_admiral(state, n, nc.get_navy(), dcon::leader_id{})) {
+								command::execute_change_admiral(state, n, nc.get_navy(), l.get_leader());
+								break;
+							}
+						}
+					} else {
+						for(auto ac : n.get_army_control()) {
+							if(!ac.get_army().get_general_from_army_leadership()
+							&& command::can_change_general(state, n, ac.get_army(), dcon::leader_id{})) {
+								command::execute_change_general(state, n, ac.get_army(), l.get_leader());
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	for(auto n : state.world.in_nation) {
+		// monthly leader creation
 		if(n.get_leadership_points() > state.defines.leader_recruit_cost * 3.0f) {
 			// automatically make new leader
 			auto new_l = [&]() {
+				if(n.get_is_player_controlled()) { //player specified...
+					return make_new_leader(state, n, n.get_auto_create_generals());
+				}
 				auto existing_leaders = count_leaders(state, n);
 				auto army_count = count_armies(state, n);
 				auto navy_count = count_navies(state, n);
@@ -1967,9 +1997,9 @@ void monthly_leaders_update(sys::state& state) {
 					return make_new_leader(state, n, false);
 				} else {
 					auto too_many_generals =
-							(existing_leaders.admirals > 0 && navy_count > 0)
-									? float(existing_leaders.generals) / float(existing_leaders.admirals) > float(army_count) / float(navy_count)
-									: false;
+						(existing_leaders.admirals > 0 && navy_count > 0)
+						? float(existing_leaders.generals) / float(existing_leaders.admirals) > float(army_count) / float(navy_count)
+						: false;
 					return make_new_leader(state, n, !too_many_generals);
 				}
 			}();

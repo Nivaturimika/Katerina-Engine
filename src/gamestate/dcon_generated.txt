@@ -3860,6 +3860,16 @@ object {
 		type{ bitfield }
 		tag{ save }
 	}
+	property {
+		name{ auto_create_generals }
+		type{ bitfield }
+		tag{ save }
+	}
+	property {
+		name{ auto_assign_leaders }
+		type{ bitfield }
+		tag{ save }
+	}
 }
 
 

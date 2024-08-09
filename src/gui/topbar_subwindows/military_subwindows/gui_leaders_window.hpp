@@ -229,16 +229,15 @@ public:
 template<bool B>
 class military_make_leader_button : public right_click_button_element_base {
 public:
-	void on_create(sys::state& state) noexcept override {
-		right_click_button_element_base::on_create(state);
-		if(B) {
-			set_button_text(state, text::produce_simple_string(state, "alice_mw_create_1"));
-		} else {
-			set_button_text(state, text::produce_simple_string(state, "alice_mw_create_2"));
-		}
-	}
 	void on_update(sys::state& state) noexcept override {
 		disabled = !command::can_make_leader(state, state.local_player_nation, B);
+		auto lp = state.world.nation_get_leadership_points(state.local_player_nation);
+		int32_t count = int32_t(lp / state.defines.leader_recruit_cost);
+		if(B) {
+			set_button_text(state, text::produce_simple_string(state, "alice_mw_create_1") + " (" + std::to_string(count) + ")");
+		} else {
+			set_button_text(state, text::produce_simple_string(state, "alice_mw_create_2") + " (" + std::to_string(count) + ")");
+		}
 	}
 	void button_action(sys::state& state) noexcept override {
 		command::make_leader(state, state.local_player_nation, B);
@@ -361,6 +360,25 @@ public:
 	}
 };
 
+class military_auto_create_button : public checkbox_button {
+public:
+	bool is_active(sys::state& state) noexcept override {
+		return state.world.nation_get_auto_create_generals(state.local_player_nation);
+	}
+	void button_action(sys::state& state) noexcept override {
+		command::toggle_auto_create_generals(state, state.local_player_nation);
+	}
+};
+class military_auto_assign_button : public checkbox_button {
+public:
+	bool is_active(sys::state& state) noexcept override {
+		return state.world.nation_get_auto_assign_leaders(state.local_player_nation);
+	}
+	void button_action(sys::state& state) noexcept override {
+		command::toggle_auto_assign_leaders(state, state.local_player_nation);
+	}
+};
+
 class leaders_window : public window_element_base {
 	military_leaders_listbox* listbox = nullptr;
 public:
@@ -388,13 +406,17 @@ public:
 		} else if(name == "admirals") {
 			return make_element_by_type<military_admiral_count>(state, id);
 		} else if(name == "auto_create") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<military_auto_create_button>(state, id);
 		} else if(name == "auto_create_text") {
-			return make_element_by_type<invisible_element>(state, id);
+			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
+
+			return ptr;
 		} else if(name == "auto_assign") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<military_auto_assign_button>(state, id);
 		} else if(name == "auto_assign_text") {
-			return make_element_by_type<invisible_element>(state, id);
+			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
+
+			return ptr;
 		} else {
 			return nullptr;
 		}
