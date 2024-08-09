@@ -6907,7 +6907,7 @@ void advance_mobilizations(sys::state& state) {
 									}();
 
 									while(available > 0 && to_mobilize > 0) {
-										auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ?state.military_definitions.infantry : state.military_definitions.irregular);
+										auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ? state.military_definitions.infantry : state.military_definitions.irregular);
 										state.world.regiment_set_org(new_reg, 0.1f);
 										state.world.try_create_army_membership(new_reg, a);
 										auto p = pop.get_pop();

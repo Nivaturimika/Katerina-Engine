@@ -3529,6 +3529,7 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 			a.set_arrival_time(current_date + 1);
 		}
 	}
+	// fix invalid unit types
 	for(auto reg : world.in_regiment) {
 		assert(reg.get_army_from_army_membership());
 		assert(reg.get_type());
@@ -3536,6 +3537,13 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 			reg.set_type(military_definitions.irregular);
 		}
 	}
+	for(auto plc : world.in_province_land_construction) {
+		assert(plc.get_type());
+		if(!plc.get_type()) { //correct invalid units
+			plc.set_type(military_definitions.irregular);
+		}
+	}
+	//
 	for(auto a : world.in_navy) {
 		if(a.get_arrival_time() && a.get_arrival_time() <= current_date) {
 			a.set_arrival_time(current_date + 1);
