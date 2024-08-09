@@ -75,3 +75,5 @@ shift_to_build_all_continents;?YSHIFT?! to build in all continents
 save_transfer_begin;?YSave transfer started, see bottom right
 save_transfer_end;?YSave transfer finished
 multiplayer_notify_reload;?YState reloaded
+settings;Options
+settings_label;Engine Options
