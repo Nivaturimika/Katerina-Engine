@@ -3104,8 +3104,9 @@ void run_gc(sys::state& state) {
 				break;
 			}
 		}
-		if(!non_sq_war_goal)
+		if(!non_sq_war_goal) {
 			cleanup_war(state, w, military::war_result::draw);
+		}
 	}
 
 
@@ -6880,6 +6881,13 @@ void start_mobilization(sys::state& state, dcon::nation_id n) {
 				state.crisis_temperature += state.defines.crisis_temperature_on_mobilize;
 		}
 	}
+	notification::post(state, notification::message{ [n = n](sys::state& state, text::layout_base& contents) {
+			text::add_line(state, contents, "msg_mobilize_start_1", text::variable_type::x, n);
+		},
+		"msg_mobilize_start_title",
+		n, dcon::nation_id{}, dcon::nation_id{},
+		sys::message_base_type::mobilization_start
+	});
 }
 void end_mobilization(sys::state& state, dcon::nation_id n) {
 	if(!state.world.nation_get_is_mobilized(n))
@@ -6899,6 +6907,13 @@ void end_mobilization(sys::state& state, dcon::nation_id n) {
 			}
 		}
 	}
+	notification::post(state, notification::message{ [n = n](sys::state& state, text::layout_base& contents) {
+			text::add_line(state, contents, "msg_mobilize_end_1", text::variable_type::x, n);
+		},
+		"msg_mobilize_end_title",
+		n, dcon::nation_id{}, dcon::nation_id{},
+		sys::message_base_type::mobilization_end
+	});
 }
 void advance_mobilizations(sys::state& state) {
 	for(auto n : state.world.in_nation) {
