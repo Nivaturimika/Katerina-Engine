@@ -448,10 +448,6 @@ void state::update_render() {
 	}
 
 	if(game_state_was_updated) {
-		ui::element_base* root_elm = current_scene.get_root(*this);
-		root_elm->impl_on_update(*this);
-		current_scene.on_game_state_update_update_ui(*this);
-
 		if(!ui_state.tech_queue.empty()) {
 			if(!world.nation_get_current_research(local_player_nation)) {
 				for(auto it = ui_state.tech_queue.begin(); it != ui_state.tech_queue.end(); it++) {
@@ -730,6 +726,39 @@ void state::update_render() {
 				ui_state.root->move_child_to_front(ui_state.msg_window);
 			}
 		}
+		root_elm->impl_on_update(*this);
+		current_scene.on_game_state_update_update_ui(*this);
+		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
+			auto type = ui_state.last_tooltip->has_tooltip(*this);
+			if(type == ui::tooltip_behavior::variable_tooltip || type == ui::tooltip_behavior::position_sensitive_tooltip) {
+				auto container = text::create_columnar_layout(*this, ui_state.tooltip->internal_layout,
+						text::layout_parameters{ 0, 0, tooltip_width, int16_t(root_elm->base_data.size.y - 20), ui_state.tooltip_font, 0,
+								text::alignment::left,
+								text::text_color::white, true },
+							10);
+				ui_state.last_tooltip->update_tooltip(*this, tooltip_probe.relative_location.x, tooltip_probe.relative_location.y,
+						container);
+				populate_shortcut_tooltip(*this, *ui_state.last_tooltip, container);
+				if(container.native_rtl == text::layout_base::rtl_status::rtl) {
+					container.used_width = -container.used_width;
+					for(auto& t : container.base_layout.contents) {
+						t.x += 16 + container.used_width;
+						t.y += 16;
+					}
+				} else {
+					for(auto& t : container.base_layout.contents) {
+						t.x += 16;
+						t.y += 16;
+					}
+				}
+				ui_state.tooltip->base_data.size.x = int16_t(container.used_width + 32);
+				ui_state.tooltip->base_data.size.y = int16_t(container.used_height + 32);
+				if(container.used_width > 0)
+					ui_state.tooltip->set_visible(*this, true);
+				else
+					ui_state.tooltip->set_visible(*this, false);
+			}
+		}
 	}
 }
 
@@ -784,38 +813,6 @@ void state::render() { // called to render the frame may (and should) delay retu
 	if(network_state.save_slock.load(std::memory_order::acquire) == false
 	&& game_state_updated.load(std::memory_order::acquire) == true) {
 		update_render();
-
-		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
-			auto type = ui_state.last_tooltip->has_tooltip(*this);
-			if(type == ui::tooltip_behavior::variable_tooltip || type == ui::tooltip_behavior::position_sensitive_tooltip) {
-				auto container = text::create_columnar_layout(*this, ui_state.tooltip->internal_layout,
-						text::layout_parameters{ 0, 0, tooltip_width, int16_t(root_elm->base_data.size.y - 20), ui_state.tooltip_font, 0,
-								text::alignment::left,
-								text::text_color::white, true },
-							10);
-				ui_state.last_tooltip->update_tooltip(*this, tooltip_probe.relative_location.x, tooltip_probe.relative_location.y,
-						container);
-				populate_shortcut_tooltip(*this, *ui_state.last_tooltip, container);
-				if(container.native_rtl == text::layout_base::rtl_status::rtl) {
-					container.used_width = -container.used_width;
-					for(auto& t : container.base_layout.contents) {
-						t.x += 16 + container.used_width;
-						t.y += 16;
-					}
-				} else {
-					for(auto& t : container.base_layout.contents) {
-						t.x += 16;
-						t.y += 16;
-					}
-				}
-				ui_state.tooltip->base_data.size.x = int16_t(container.used_width + 32);
-				ui_state.tooltip->base_data.size.y = int16_t(container.used_height + 32);
-				if(container.used_width > 0)
-					ui_state.tooltip->set_visible(*this, true);
-				else
-					ui_state.tooltip->set_visible(*this, false);
-			}
-		}
 	}
 
 	if(ui_state.last_tooltip != tooltip_probe.under_mouse) {
