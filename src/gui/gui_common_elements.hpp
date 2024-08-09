@@ -2169,6 +2169,7 @@ public:
 			if(!state.ui_state.national_focus_overwrite_window) {
 				auto win = make_element_by_type<national_focus_overwrite_window>(state, "nf_overwrite_window");
 				state.ui_state.national_focus_overwrite_window = win.get();
+				state.ui_state.root->add_child_to_front(std::move(win));
 			}
 			if(state.ui_state.national_focus_overwrite_window) {
 				state.ui_state.national_focus_overwrite_window->set_visible(state, true);
