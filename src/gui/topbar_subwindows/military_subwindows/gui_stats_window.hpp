@@ -30,8 +30,7 @@ public:
 class statswin_supplyconsumption : public simple_text_element_base {
 protected:
 	std::string get_text(sys::state& state, dcon::nation_id n) noexcept {
-		return text::format_percentage(
-				state.world.nation_get_modifier_values(n, sys::national_mod_offsets::supply_consumption) + 1.0f);
+		return text::format_percentage(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::supply_consumption) + 1.0f);
 	}
 
 public:
@@ -45,7 +44,9 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
-		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::supply_consumption, false);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::supply_consumption, true);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::supply_limit, true);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::supply_range, true);
 	}
 };
 
