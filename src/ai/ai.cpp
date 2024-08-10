@@ -3087,9 +3087,9 @@ void make_war_decs(sys::state& state) {
 	}
 
 	for(auto n : state.world.in_nation) {
-		if(!n.get_is_player_controlled()) {
-			bool will_mob = n.get_ai_is_threatened(); //threatened
-			if(!will_mob) {
+		if(!n.get_is_player_controlled() && n.get_owned_province_count() > 0) {
+			bool will_mob = false;
+			if(n.get_ai_is_threatened()) { //threatened -- someone can use cb against us
 				for(auto other : state.world.in_nation) {
 					if(other.get_is_mobilized() && military::can_use_cb_against(state, other, n)) {
 						will_mob = true;
@@ -3097,9 +3097,23 @@ void make_war_decs(sys::state& state) {
 					}
 				}
 			}
+			if(n.get_is_at_war()) {
+				will_mob = n.get_ai_is_threatened(); //is our existence threatened?
+			}
 			if(!will_mob && n.get_is_at_war() && n.get_is_mobilized()) {
 				will_mob = true; //don't demob while at war -- we already mobilized for a reason
 			}
+			// can we even mob? (mobbing in some mods causes debuffs)
+			int32_t possible_sum = 0;
+			for(auto po : n.get_province_ownership_as_nation()) {
+				possible_sum += military::mobilized_regiments_possible_from_province(state, po.get_province());
+				if(possible_sum > 0)
+					break;
+			}
+			if(possible_sum == 0) {
+				will_mob = false;
+			}
+
 			if(will_mob && !n.get_is_mobilized()) {
 				military::start_mobilization(state, n);
 			} else if(!will_mob && n.get_is_mobilized()) {
@@ -3124,37 +3138,31 @@ void update_budget(sys::state& state) {
 		// and stabilize economy faster
 		// not to allow it to hoard money
 
-		float land_budget_ratio = 0.15f;
-		float sea_budget_ratio = 0.05f;
-		float education_budget_ratio = 0.30f;
+		float land_budget_ratio = 0.50f;
+		float sea_budget_ratio = 0.25f;
+		float education_budget_ratio = 0.10f;
 		float investments_budget_ratio = 0.05f;
-		float soldiers_budget_ratio = 0.40f;
-		float construction_budget_ratio = 0.50f;
-		float administration_budget_ratio = 0.15f;
-		float overseas_maintenance_budget_ratio = 0.10f;
-
+		float soldiers_budget_ratio = 0.05f;
+		float construction_budget_ratio = 0.05f;
+		float administration_budget_ratio = 0.50f;
+		float overseas_maintenance_budget_ratio = 0.025f;
 		if(n.get_is_at_war()) {
-			land_budget_ratio = 2.f;
-			sea_budget_ratio = 2.f;
-
-			administration_budget_ratio *= 0.15f;
-			education_budget_ratio *= 0.15f;
-			overseas_maintenance_budget_ratio *= 0.15f;
-			//n.set_land_spending(int8_t(100));
-			//n.set_naval_spending(int8_t(100));
-		} else if(n.get_ai_is_threatened()) {
-			land_budget_ratio = 0.5f;
-			sea_budget_ratio = 0.25f;
-
+			land_budget_ratio += 0.5f;
+			sea_budget_ratio += 0.25f;
+			administration_budget_ratio *= 0.25f;
+			education_budget_ratio *= 0.25f;
+			overseas_maintenance_budget_ratio *= 0.25f;
+		}
+		if(n.get_ai_is_threatened()) {
+			land_budget_ratio += 0.25f;
+			sea_budget_ratio += 0.125f;
 			administration_budget_ratio *= 0.75f;
 			education_budget_ratio *= 0.75f;
 			overseas_maintenance_budget_ratio *= 0.75f;
-			//n.set_land_spending(int8_t(50));
-			//n.set_naval_spending(int8_t(50));
-		} else {
-			//n.set_land_spending(int8_t(25));
-			//n.set_naval_spending(int8_t(25));
 		}
+
+		administration_budget_ratio *= std::max(0.25f, 1.f - std::clamp(n.get_administrative_efficiency(), 0.01f, 1.f));
+
 		float land_budget = land_budget_ratio * base_income;
 		float naval_budget = sea_budget_ratio * base_income;
 		float education_budget = education_budget_ratio * base_income;
@@ -3171,11 +3179,9 @@ void update_budget(sys::state& state) {
 		n.set_land_spending(int8_t(ratio_land));
 		n.set_naval_spending(int8_t(ratio_naval));
 
-
 		float ratio_construction = 100.f * construction_budget / (1.f + economy::estimate_construction_spending(state, n));
 		ratio_construction = std::clamp(ratio_construction, 1.f, 100.f);
 		n.set_construction_spending(int8_t(ratio_construction));
-
 		
 		float max_education_budget = 1.f + economy::estimate_pop_payouts_by_income_type(state, n, culture::income_type::education);
 		float max_soldiers_budget = 1.f + economy::estimate_pop_payouts_by_income_type(state, n, culture::income_type::military);
@@ -3205,8 +3211,6 @@ void update_budget(sys::state& state) {
 
 		float overseas_max_ratio = std::clamp(100.f * overseas_budget / max_overseas_budget, 0.f, 100.f);
 
-		n.set_tariffs(int8_t(0));
-
 		float poor_militancy = (state.world.nation_get_demographics(n, demographics::poor_militancy) / std::max(1.0f, state.world.nation_get_demographics(n, demographics::poor_total))) / 10.f;
 		float mid_militancy = (state.world.nation_get_demographics(n, demographics::middle_militancy) / std::max(1.0f, state.world.nation_get_demographics(n, demographics::middle_total))) / 10.f;
 		float rich_militancy = (state.world.nation_get_demographics(n, demographics::rich_militancy) / std::max(1.0f, state.world.nation_get_demographics(n, demographics::rich_total))) / 10.f;
@@ -3214,9 +3218,9 @@ void update_budget(sys::state& state) {
 		auto rules = n.get_combined_issue_rules();
 		if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
 			// Non-lf prioritize poor people
-			int max_poor_tax = int(10.f + 70.f * (1.f - poor_militancy));
-			int max_mid_tax = int(10.f + 80.f * (1.f - mid_militancy));
-			int max_rich_tax = int(10.f + 90.f * (1.f - rich_militancy));
+			int max_poor_tax = int(10.f + 20.f * (1.f - poor_militancy));
+			int max_mid_tax = int(10.f + 50.f * (1.f - mid_militancy));
+			int max_rich_tax = int(10.f + 80.f * (1.f - rich_militancy));
 			int max_social = int(100.f * poor_militancy);
 
 			// enough tax?
@@ -3258,9 +3262,9 @@ void update_budget(sys::state& state) {
 				}
 			}
 		} else {
-			int max_poor_tax = int(10.f + 90.f * (1.f - poor_militancy));
-			int max_mid_tax = int(10.f + 90.f * (1.f - mid_militancy));
-			int max_rich_tax = int(10.f + 40.f * (1.f - rich_militancy));
+			int max_poor_tax = int(10.f + 80.f * (1.f - poor_militancy));
+			int max_mid_tax = int(10.f + 50.f * (1.f - mid_militancy));
+			int max_rich_tax = int(10.f + 20.f * (1.f - rich_militancy));
 			int max_social = int(100.f * poor_militancy);
 
 			// enough tax?
@@ -3301,6 +3305,15 @@ void update_budget(sys::state& state) {
 					n.set_middle_tax(int8_t(std::clamp(n.get_middle_tax() - 3, 10, std::max(10, max_mid_tax))));
 					n.set_rich_tax(int8_t(std::clamp(n.get_rich_tax() - 2, 10, std::max(10, max_rich_tax))));
 				}
+			}
+		}
+
+		if(n.get_last_treasury() < n.get_stockpiles(economy::money)) { // gaining money
+			n.set_tariffs(int8_t(0));
+		} else {
+			n.set_tariffs(int8_t(25)); //25% is a good ratio
+			if(n.get_is_great_power()) {
+				n.set_tariffs(int8_t(15)); //don't kill the world economy
 			}
 		}
 
@@ -3954,7 +3967,9 @@ enum class province_class : uint8_t {
 	border = 3,
 	threat_border = 4,
 	hostile_border = 5,
-	count = 6
+	medium_priority_hostile_border = 6,
+	high_priority_hostile_border = 7,
+	count = 8
 };
 
 struct classified_province {
@@ -4023,6 +4038,14 @@ void distribute_guards(sys::state& state, dcon::nation_id n) {
 					if(uint8_t(cls) < uint8_t(province_class::border)) {
 						cls = province_class::border;
 					}
+				}
+			}
+			if(cls == province_class::hostile_border) {
+				auto dkey = demographics::to_key(state, state.culture_definitions.soldiers);
+				if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment) {
+					cls = province_class::medium_priority_hostile_border;
+				} else if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment * 5.f) {
+					cls = province_class::high_priority_hostile_border;
 				}
 			}
 		}

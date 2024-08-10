@@ -4666,11 +4666,17 @@ void resolve_constructions(sys::state& state) {
  */
 float estimate_daily_income(sys::state& state, dcon::nation_id n) {
 	auto const tax_eff = nations::tax_efficiency(state, n);
-	return (
-		state.world.nation_get_total_poor_income(n) * state.world.nation_get_poor_tax(n) / 100.f
-		+ state.world.nation_get_total_middle_income(n) * state.world.nation_get_middle_tax(n) / 100.f
-		+ state.world.nation_get_total_rich_income(n) * state.world.nation_get_rich_tax(n) / 100.f
-	) * tax_eff;
+	auto const tariff_rate = effective_tariff_rate(state, n);
+	float s_total =
+		state.world.nation_get_total_poor_income(n)* tax_eff * float(state.world.nation_get_poor_tax(n)) / 100.0f
+		+ state.world.nation_get_total_middle_income(n) * tax_eff * float(state.world.nation_get_middle_tax(n)) / 100.0f
+		+ state.world.nation_get_total_rich_income(n) * tax_eff * float(state.world.nation_get_rich_tax(n)) / 100.0f;
+	float t_total = 0.0f;
+	for(uint32_t k = 1; k < uint32_t(state.world.commodity_size()); ++k) {
+		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(k) };
+		t_total += state.world.commodity_get_current_price(cid) * tariff_rate * state.world.nation_get_imports(n, cid);
+	}
+	return s_total + t_total;
 }
 
 void try_add_factory_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t) {
