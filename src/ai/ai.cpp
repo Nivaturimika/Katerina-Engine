@@ -3088,17 +3088,17 @@ void make_war_decs(sys::state& state) {
 
 	for(auto n : state.world.in_nation) {
 		if(!n.get_is_player_controlled()) {
-			bool will_mob = n.get_ai_is_threatened();
-			if(n.get_ai_is_threatened()) {
-				will_mob = n.get_is_at_war();
-				if(!will_mob) {
-					for(auto other : state.world.in_nation) {
-						if(other.get_is_mobilized() && military::can_use_cb_against(state, other, n)) {
-							will_mob = true;
-							break;
-						}
+			bool will_mob = n.get_ai_is_threatened(); //threatened
+			if(!will_mob) {
+				for(auto other : state.world.in_nation) {
+					if(other.get_is_mobilized() && military::can_use_cb_against(state, other, n)) {
+						will_mob = true;
+						break;
 					}
 				}
+			}
+			if(!will_mob && n.get_is_at_war() && n.get_is_mobilized()) {
+				will_mob = true; //don't demob while at war -- we already mobilized for a reason
 			}
 			if(will_mob && !n.get_is_mobilized()) {
 				military::start_mobilization(state, n);
