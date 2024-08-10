@@ -30,5 +30,23 @@ vec4 gaussian_colour() {
 }
 
 void main() {
-	out_color = gaussian_colour();
+	const float contrast = 1.f;
+	const float luminance = 0.f;
+	const float sat = 1.f;
+//	const float contrast = 0.5f;
+//	const float luminance = 0.f;
+//	const float sat = 1.5f;
+
+	vec4 colour = gaussian_colour();
+	colour = contrast * (colour - 0.5f) + 0.5f + luminance;
+	colour.r = clamp(colour.r, 0.f, 1.f);
+	colour.g = clamp(colour.g, 0.f, 1.f);
+	colour.b = clamp(colour.b, 0.f, 1.f);
+
+	colour = mix(colour * vec4(0.299f, 0.587f, 0.114f, 1.f), colour, sat);
+	colour.r = clamp(colour.r, 0.f, 1.f);
+	colour.g = clamp(colour.g, 0.f, 1.f);
+	colour.b = clamp(colour.b, 0.f, 1.f);
+
+	out_color = colour;
 }
