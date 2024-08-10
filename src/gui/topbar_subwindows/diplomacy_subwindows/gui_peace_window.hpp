@@ -258,6 +258,12 @@ struct send_offer { };
 
 class diplomacy_peace_send : public button_element_base {
 public:
+	void on_update(sys::state& state) noexcept override {
+		auto is_concession = retrieve<bool>(state, parent);
+		auto target = retrieve<dcon::nation_id>(state, parent);
+		auto war = military::find_war_between(state, target, state.local_player_nation);
+		disabled = !command::can_start_peace_offer(state, state.local_player_nation, target, war, is_concession);
+	}
 	void button_action(sys::state& state) noexcept override {
 		send(state, parent, send_offer{});
 	}
