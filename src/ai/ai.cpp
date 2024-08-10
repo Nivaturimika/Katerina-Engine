@@ -5438,7 +5438,7 @@ void new_units_and_merging(sys::state& state) {
 
 							int32_t num_support = 0;
 							int32_t num_frontline = 0;
-							int32_t num_cavalry;
+							int32_t num_cavalry = 0;
 							for(auto r : o.get_army().get_army_membership()) {
 								auto type = r.get_regiment().get_type();
 								auto etype = state.military_definitions.unit_base_definitions[type].type;
