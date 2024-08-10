@@ -16,13 +16,13 @@ enum class economy_reason {
 	pop, factory, rgo, artisan, construction, nation, stockpile, overseas_penalty
 };
 
-void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
+static inline void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
 	state.world.nation_get_real_demand(n, commodity_type) += amount;
 	state.world.commodity_get_demand_by_category(commodity_type, (int)reason) += amount;
 	assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
 }
 
-void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
+static inline void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
 	register_demand(state, n, commodity_type, amount, reason);
 	state.world.nation_get_intermediate_demand(n, commodity_type) += amount;
 
@@ -1570,7 +1570,6 @@ rgo_workers_breakdown rgo_relevant_population(sys::state& state, dcon::province_
 		.slaves = slaves,
 		.total = relevant_paid_population + slaves
 	};
-
 	return result;
 }
 
@@ -1587,7 +1586,8 @@ float rgo_desired_worker_norm_profit(sys::state& state, dcon::province_id p, dco
 	float aristo_burden_per_worker = aristos_desired_cut / (total_relevant_population + 1);
 
 	float subsistence = adjusted_subsistence_score(state, p);
-	if (subsistence == 0) subsistence = state.world.province_get_subsistence_score(p);
+	if(subsistence == 0.f)
+		subsistence = state.world.province_get_subsistence_score(p);
 	float subsistence_life = std::clamp(subsistence, 0.f, subsistence_score_life);
 	subsistence -= subsistence_life;
 	float subsistence_everyday = std::clamp(subsistence, 0.f, subsistence_score_everyday);
@@ -1616,11 +1616,8 @@ float rgo_desired_worker_norm_profit(sys::state& state, dcon::province_id p, dco
 	// not exactly an ideal solution but it works and doesn't create goods or wealth out of thin air
 	float employment_ratio = state.world.province_get_rgo_employment(p);
 	desired_profit_by_worker = desired_profit_by_worker * employment_ratio * employment_ratio;
-
 	assert(std::isfinite(desired_profit_by_worker));
-
 	return desired_profit_by_worker;
-
 	//return (aristos_desired_cut + min_wage / state.defines.alice_needs_scaling_factor * (current_employment + 1));// / total_relevant_population; //* total_relevant_population;
 }
 
@@ -1631,26 +1628,14 @@ float rgo_expected_worker_norm_profit(sys::state& state, dcon::province_id p, dc
 	if(state.world.commodity_get_money_rgo(c)) {
 		consumed_ratio = 1.f;
 	}
-
-	return
-		consumed_ratio
-		* efficiency
-		* current_price
-		/ state.defines.alice_rgo_per_size_employment;
+	return consumed_ratio * efficiency * current_price / state.defines.alice_rgo_per_size_employment;
 }
 
 float convex_function(float x) {
 	return 1.f - (1.f - x) * (1.f - x);
 }
 
-void update_province_rgo_consumption(
-	sys::state& state,
-	dcon::province_id p,
-	dcon::nation_id n,
-	float mobilization_impact,
-	float expected_min_wage,
-	bool occupied
-) {
+void update_province_rgo_consumption(sys::state& state, dcon::province_id p, dcon::nation_id n, float mobilization_impact, float expected_min_wage, bool occupied) {
 	auto rgo_pops = rgo_relevant_population(state, p, n);
 	float desired_profit = rgo_desired_worker_norm_profit(state, p, n, expected_min_wage, rgo_pops.total);
 
@@ -2362,12 +2347,16 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 		}
 	}
 
-	float ln_mul[] = {state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f,
+	float ln_mul[] = {
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f,
 		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f};
-	float en_mul[] = {state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f
+	};
+	float en_mul[] = {
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f,
 		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f};
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f
+	};
 	float lx_mul[] = {
 		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f,
 		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f,
