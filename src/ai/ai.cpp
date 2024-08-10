@@ -4180,8 +4180,8 @@ void distribute_guards(sys::state& state, dcon::nation_id n) {
 				} else if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment) {
 					cls = province_class::medium_priority_hostile_border;
 				}
-				if(c.get_province().get_siege_progress() > 0.f
-				&& c.get_province().get_nation_from_province_control() != n) {
+				if((c.get_province().get_siege_progress() > 0.f && n_controller == n)
+				|| n_controller != n) {
 					if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment * 5.f
 					|| other.get_is_coast()) {
 						cls = province_class::high_priority_hostile_border;
