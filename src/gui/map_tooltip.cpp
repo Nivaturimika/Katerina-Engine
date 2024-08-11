@@ -433,14 +433,25 @@ void sphere_map_tt_box(sys::state& state, text::columnar_layout& contents, dcon:
 				}
 				text::add_to_layout_box(state, contents, box, gpr.get_great_power().id, text::text_color::yellow);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				if(state.world.nation_get_is_great_power(state.local_player_nation)) {
-					if(gpr.get_great_power() != state.local_player_nation) {
-						text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::green);
-					} else {
-						text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::red);
-					}
-				} else { //not a gp -- show as neutral
+				switch(gpr.get_status() & nations::influence::level_mask) {
+				case nations::influence::level_in_sphere:
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::light_blue);
+					break;
+				case nations::influence::level_friendly:
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::green);
+					break;
+				case nations::influence::level_cordial:
 					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::white);
+					break;
+				case nations::influence::level_neutral:
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::yellow);
+					break;
+				case nations::influence::level_opposed:
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::orange);
+					break;
+				case nations::influence::level_hostile:
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::red);
+					break;
 				}
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 				text::add_line_break_to_layout_box(state, contents, box);
