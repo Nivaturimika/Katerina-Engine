@@ -404,7 +404,10 @@ void nationality_map_tt_box(sys::state& state, text::columnar_layout& contents, 
 		for(; i < cultures.size(); i++) {
 			m_total += fat.get_demographics(demographics::to_key(state, cultures[i].id));
 		}
-		text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_culture_minorities"), text::variable_type::x, text::fp_percentage{ m_total / p_total });
+		if(m_total > 1.f) {
+			text::add_line_break_to_layout_box(state, contents, box);
+			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_culture_minorities"), text::variable_type::x, text::fp_percentage{ m_total / p_total });
+		}
 		text::close_layout_box(contents, box);
 	}
 }
