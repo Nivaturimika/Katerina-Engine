@@ -441,12 +441,12 @@ ogl::color3f get_text_color(sys::state& state, text::text_color text_color) {
 		return ogl::color3f{0.5f, 0.5f, 0.5f};
 	case text::text_color::dark_red:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
-			return ogl::color3f{ 0.42f, 0.42f, 1.f }; //Remap to blue
+			return ogl::color3f{ 0.32f, 0.32f, 1.f }; //Remap to blue
 		}
 		return ogl::color3f{0.5f, 0.f, 0.f};
 	case text::text_color::dark_green:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
-			return ogl::color3f{ 0.5f, 0.5f, 0.f }; //Remap to yellow
+			return ogl::color3f{ 0.25f, 0.25f, 0.f }; //Remap to yellow
 		}
 		return ogl::color3f{0.f, 0.5f, 0.f};
 	case text::text_color::gold:
