@@ -2,6 +2,7 @@
 #include "demographics.hpp"
 #include "rebels.hpp"
 #include "unit_tooltip.hpp"
+#include "nations_templates.hpp"
 
 namespace ui {
 
@@ -395,7 +396,7 @@ void nationality_map_tt_box(sys::state& state, text::columnar_layout& contents, 
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
 			float c_total = fat.get_demographics(demographics::to_key(state, cultures[i].id));
-			bool is_accepted = nations::nation_accepts_culture(state, fat.get_nation_from_province_ownership(), cultures[i].id);
+			bool is_accepted = nations::nation_accepts_culture(state, fat.get_nation_from_province_ownership().id, cultures[i].id);
 			text::add_to_layout_box(state, contents, box, text::format_percentage(c_total / p_total), is_accepted ? text::text_color::green : text::text_color::white);
 			text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 		}

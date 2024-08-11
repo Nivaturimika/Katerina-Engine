@@ -965,7 +965,9 @@ public:
 		if(tech_id) {
 			return text::get_name_as_string(state, dcon::fatten(state.world, tech_id));
 		}
-		return "?R" + text::produce_simple_string(state, "tb_tech_no_current");
+		// Red is not very contrast
+		return (state.user_settings.color_blind_mode == sys::color_blind_mode::none ? "?R" : "")
+			+ text::produce_simple_string(state, "tb_tech_no_current");
 	}
 };
 

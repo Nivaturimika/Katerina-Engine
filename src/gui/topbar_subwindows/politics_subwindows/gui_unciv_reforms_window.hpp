@@ -122,13 +122,24 @@ public:
 	}
 };
 
+class unciv_reform_name : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<dcon::reform_option_id>(state, parent);
+		//Black on black is hard to see - so paint it white
+		std::string txt = politics::reform_is_selected(state, state.local_player_nation, content) ? "" : "?W";
+		txt += text::produce_simple_string(state, state.world.reform_option_get_name(content));
+		set_text(state, txt);
+	}
+};
+
 class unciv_reforms_option : public listbox_row_element_base<dcon::reform_option_id> {
 	image_element_base* selected_icon = nullptr;
 
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "reform_name") {
-			return make_element_by_type<generic_name_text<dcon::reform_option_id>>(state, id);
+			return make_element_by_type<unciv_reform_name>(state, id);
 		} else if(name == "selected") {
 			auto ptr = make_element_by_type<image_element_base>(state, id);
 			selected_icon = ptr.get();
