@@ -423,21 +423,26 @@ void sphere_map_tt_box(sys::state& state, text::columnar_layout& contents, dcon:
 				text::add_to_substitution_map(sub, text::variable_type::country2, fat.get_nation_from_province_ownership().get_in_sphere_of());
 				text::localised_format_box(state, contents, box, std::string_view("sphere_of_infl_is_in_sphere"), sub);
 			}
-
-			bool bHasDisplayedHeader = false;
+			bool has_header = false;
 			for(auto gpr : fat.get_nation_from_province_ownership().get_gp_relationship_as_influence_target()) {
-				if(!bHasDisplayedHeader) {
+				if(!has_header) {
 					text::add_line_break_to_layout_box(state, contents, box);
 					text::localised_single_sub_box(state, contents, box, std::string_view("sphere_of_infl_is_infl_by"), text::variable_type::country, fat.get_nation_from_province_ownership());
 					text::add_line_break_to_layout_box(state, contents, box);
-					bHasDisplayedHeader = true;
+					has_header = true;
 				}
 				text::add_to_layout_box(state, contents, box, gpr.get_great_power().id, text::text_color::yellow);
-				text::add_to_layout_box(state, contents, box, (
-					" (" +
-					text::format_float(gpr.get_influence(), 0) +
-					")"
-					), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
+				if(state.world.nation_get_is_great_power(state.local_player_nation)) {
+					if(gpr.get_great_power() != state.local_player_nation) {
+						text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::green);
+					} else {
+						text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::red);
+					}
+				} else { //not a gp -- show as neutral
+					text::add_to_layout_box(state, contents, box, text::format_float(gpr.get_influence(), 0), text::text_color::white);
+				}
+				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 				text::add_line_break_to_layout_box(state, contents, box);
 			}
 		}
