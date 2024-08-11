@@ -385,16 +385,25 @@ void nationality_map_tt_box(sys::state& state, text::columnar_layout& contents, 
 			}
 		}
 		std::sort(cultures.begin(), cultures.end(), [&](auto a, auto b) {return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id)); });
-		for(size_t i = 0; i < cultures.size(); i++) {
+
+		float p_total = fat.get_demographics(demographics::total);
+		uint32_t i = 0;
+		for(i = 0; i < cultures.size() && i < 10; i++) {
 			text::add_line_break_to_layout_box(state, contents, box);
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, cultures[i].get_name(), text::text_color::yellow);
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-			text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, cultures[i].id)) / fat.get_demographics(demographics::total)), text::text_color::white);
+			float c_total = fat.get_demographics(demographics::to_key(state, cultures[i].id));
+			bool is_accepted = nations::nation_accepts_culture(state, fat.get_nation_from_province_ownership(), cultures[i].id);
+			text::add_to_layout_box(state, contents, box, text::format_percentage(c_total / p_total), is_accepted ? text::text_color::green : text::text_color::white);
 			text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 		}
-
+		float m_total = 0.f;
+		for(; i < cultures.size(); i++) {
+			m_total += fat.get_demographics(demographics::to_key(state, cultures[i].id));
+		}
+		text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_culture_minorities"), text::variable_type::x, text::fp_percentage{ m_total / p_total });
 		text::close_layout_box(contents, box);
 	}
 }
