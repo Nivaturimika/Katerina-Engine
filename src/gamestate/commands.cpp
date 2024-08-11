@@ -157,7 +157,7 @@ bool is_console_command(command_type t) {
 }
 
 void add_to_command_queue(sys::state& state, payload& p) {
-	assert(command::can_perform_command(state, p));
+	//assert(command::can_perform_command(state, p));
 
 	switch(p.type) {
 	case command_type::notify_player_joins:
@@ -3030,22 +3030,18 @@ bool can_add_to_peace_offer(sys::state& state, dcon::nation_id source, dcon::war
 
 	if(!war)
 		return false;
-
 	if(wg.get_war_from_wargoals_attached() != war)
 		return false;
 
 	//int32_t total = military::cost_of_peace_offer(state, pending);
 	//int32_t new_wg_cost = military::peace_cost(state, war, wg.get_type(), wg.get_added_by(), wg.get_target_nation(), wg.get_secondary_nation(), wg.get_associated_state(), wg.get_associated_tag());
-
 	//if(total + new_wg_cost > 100)
 	//	return false;
 
-	if(state.world.war_get_primary_attacker(war) == source && state.world.war_get_primary_defender(war) == target) {
+	if(state.world.war_get_primary_attacker(war) == source && state.world.war_get_primary_defender(war) == target)
 		return true;
-	}
-	if(state.world.war_get_primary_attacker(war) == target && state.world.war_get_primary_defender(war) == source) {
+	if(state.world.war_get_primary_attacker(war) == target && state.world.war_get_primary_defender(war) == source)
 		return true;
-	}
 
 	if(state.world.peace_offer_get_is_concession(pending)) {
 		if(state.world.war_get_primary_attacker(war) == source || state.world.war_get_primary_defender(war) == source) {
@@ -3053,13 +3049,11 @@ bool can_add_to_peace_offer(sys::state& state, dcon::nation_id source, dcon::war
 				return true;
 			if(wg.get_added_by().get_overlord_as_subject().get_ruler() == target)
 				return true;
-			return false;
 		} else {
 			if(wg.get_target_nation() == source)
 				return true;
 			if(wg.get_target_nation().get_overlord_as_subject().get_ruler() == source)
 				return true;
-			return false;
 		}
 	} else {
 		if(state.world.war_get_primary_attacker(war) == source || state.world.war_get_primary_defender(war) == source) {
@@ -3067,15 +3061,14 @@ bool can_add_to_peace_offer(sys::state& state, dcon::nation_id source, dcon::war
 				return true;
 			if(wg.get_target_nation().get_overlord_as_subject().get_ruler() == target)
 				return true;
-			return false;
 		} else {
 			if(wg.get_added_by() == target)
 				return true;
 			if(wg.get_added_by().get_overlord_as_subject().get_ruler() == target)
 				return true;
-			return false;
 		}
 	}
+	return false;
 }
 void execute_add_to_peace_offer(sys::state& state, dcon::nation_id source, dcon::wargoal_id goal) {
 	auto pending = state.world.nation_get_peace_offer_from_pending_peace_offer(source);
