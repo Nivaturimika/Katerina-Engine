@@ -3339,8 +3339,6 @@ void state::preload() {
 		p.set_state_membership(dcon::state_instance_id{});
 		p.set_is_owner_core(false);
 		p.set_is_blockaded(false);
-		p.set_daily_net_immigration(0.f);
-		p.set_daily_net_migration(0.f);
 	}
 	for(auto m : world.in_movement) {
 		m.set_pop_support(0.0f);
@@ -3355,6 +3353,9 @@ void state::preload() {
 }
 
 void state::fill_unsaved_data() { // reconstructs derived values that are not directly saved after a save has been loaded
+#ifndef NDEBUG
+	trigger_eval_is_ub = true;
+#endif
 	great_nations.reserve(int32_t(defines.great_nations_count));
 
 	world.nation_resize_modifier_values(sys::national_mod_offsets::count);
@@ -3447,7 +3448,15 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	nations::update_rankings(*this);
 	nations::update_ui_rankings(*this);
 
+	province::update_cached_values(*this);
+	diplomatic_cached_values_out_of_date = true;
+	nations::update_cached_values(*this);
+#ifndef NDEBUG
+	trigger_eval_is_ub = false; //done, triggers can now be evaluated
+#endif
 	nations::monthly_flashpoint_update(*this);
+	military_definitions.pending_blackflag_update = true;
+	military::update_blackflag_status(*this);
 
 	//
 	// clear any pending messages from previously loaded saves
@@ -3512,16 +3521,10 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	}
 	ui_date = current_date;
 
-	province::update_cached_values(*this);
-	nations::update_cached_values(*this);
-
 	ai::identify_focuses(*this);
 	ai::initialize_ai_tech_weights(*this);
 	ai::update_ai_general_status(*this);
 	ai::refresh_home_ports(*this);
-
-	military_definitions.pending_blackflag_update = true;
-	military::update_blackflag_status(*this);
 
 	for(auto p : world.in_pop) {
 		float total = 0.0f;

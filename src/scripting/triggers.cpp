@@ -5746,6 +5746,7 @@ struct trigger_container {
 template<typename return_type, typename primary_type, typename this_type, typename from_type>
 return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot,
 		from_type from_slot) {
+	assert(!ws.trigger_eval_is_ub);
 	return trigger_container<return_type, primary_type, this_type, from_type>::trigger_functions[*tval & trigger::code_mask](tval,
 			ws, primary_slot, this_slot, from_slot);
 }
