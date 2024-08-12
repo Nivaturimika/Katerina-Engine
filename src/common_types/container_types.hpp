@@ -305,7 +305,7 @@ struct macro_builder_template {
 	static constexpr uint32_t max_types = 48;
 	sys::checksum_key scenario_checksum;
 	dcon::nation_id source;
-	char name[8] = { 0 };
+	char name[20] = { 0 };
 	uint8_t amounts[max_types] = { 0 };
 
 	bool operator!=(macro_builder_template& o) {
