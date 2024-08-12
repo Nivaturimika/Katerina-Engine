@@ -481,4 +481,9 @@ spriteTypes = {
 		name = "GFX_move_capital"
 		texturefile = "assets\\move_cap.png"
 	}
+	
+	spriteType = {
+		name = "GFX_bg_macro_builder"
+		texturefile = "assets\\bg_macro_builder.png"
+	}
 }
