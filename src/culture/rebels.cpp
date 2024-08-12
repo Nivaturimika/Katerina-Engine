@@ -46,13 +46,11 @@ void update_movement_values(sys::state& state) { // simply updates cached values
 
 	static ve::vectorizable_buffer<float, dcon::nation_id> nation_reform_count(uint32_t(1));
 	static uint32_t old_count = 1;
-
 	auto new_count = state.world.nation_size();
 	if(new_count > old_count) {
 		nation_reform_count = state.world.nation_make_vectorizable_float_buffer();
 		old_count = new_count;
 	}
-
 	state.world.execute_serial_over_nation([&](auto host_nations) {
 		nation_reform_count.set(host_nations, 0.0f);
 	});

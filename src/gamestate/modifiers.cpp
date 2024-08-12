@@ -125,8 +125,7 @@ void bulk_apply_masked_modifier_to_nations(sys::state& state, dcon::modifier_id 
 	for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
 		if(!(nat_values.offsets[i]))
 			break; // no more modifier values attached
-		state.world.execute_serial_over_nation(
-		[&, fixed_offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto nation_indices) {
+		state.world.execute_serial_over_nation([&, fixed_offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto nation_indices) {
 			auto has_mod_mask = mask_functor(nation_indices);
 			auto old_mod_value = state.world.nation_get_modifier_values(nation_indices, fixed_offset);
 			state.world.nation_set_modifier_values(nation_indices, fixed_offset,

@@ -149,9 +149,9 @@ static void internal_get_alliance_targets(sys::state& state, dcon::nation_id n, 
 }
 
 void form_alliances(sys::state& state) {
-	static std::vector<dcon::nation_id> alliance_targets;
 	for(auto n : state.world.in_nation) {
 		if(!n.get_is_player_controlled() && n.get_ai_is_threatened() && !(n.get_overlord_as_subject().get_ruler())) {
+			static std::vector<dcon::nation_id> alliance_targets;
 			alliance_targets.clear();
 			internal_get_alliance_targets(state, n, alliance_targets);
 			if(!alliance_targets.empty()) {
@@ -178,11 +178,11 @@ void form_alliances(sys::state& state) {
 }
 
 void prune_alliances(sys::state& state) {
-	static std::vector<dcon::nation_id> prune_targets;
 	for(auto n : state.world.in_nation) {
 		if(!n.get_is_player_controlled()
 		&& !n.get_ai_is_threatened()
 		&& !(n.get_overlord_as_subject().get_ruler())) {
+			static std::vector<dcon::nation_id> prune_targets;
 			prune_targets.clear();
 			for(auto dr : n.get_diplomatic_relation()) {
 				if(dr.get_are_allied()) {
@@ -469,7 +469,6 @@ void update_influence_priorities(sys::state& state) {
 		dcon::nation_id id;
 		float weight = 0.0f;
 	};
-	static std::vector<weighted_nation> targets;
 
 	for(auto gprl : state.world.in_gp_relationship) {
 		if(gprl.get_great_power().get_is_player_controlled()) {
@@ -487,6 +486,7 @@ void update_influence_priorities(sys::state& state) {
 		if(state.world.nation_get_is_player_controlled(n.nation))
 			continue;
 
+		static std::vector<weighted_nation> targets;
 		targets.clear();
 		for(auto t : state.world.in_nation) {
 			if(t.get_is_great_power())
@@ -1273,11 +1273,10 @@ void update_ai_econ_construction(sys::state& state) {
 
 void update_ai_colonial_investment(sys::state& state) {
 	static std::vector<dcon::state_definition_id> investments;
-	static std::vector<int32_t> free_points;
-
 	investments.clear();
 	investments.resize(uint32_t(state.defines.colonial_rank));
 
+	static std::vector<int32_t> free_points;
 	free_points.clear();
 	free_points.resize(uint32_t(state.defines.colonial_rank), -1);
 
@@ -2316,6 +2315,7 @@ void sort_avilable_cbs(std::vector<possible_cb>& result, sys::state& state, dcon
 	for(auto par : state.world.war_get_war_participant(w)) {
 		if(par.get_is_attacker() != is_attacker) {
 			static std::vector<dcon::state_instance_id> target_states;
+			target_states.clear();
 			state_target_list(target_states, state, n, par.get_nation());
 			for(auto& cb : state.world.nation_get_available_cbs(n)) {
 				if(cb.target == par.get_nation())
@@ -2448,6 +2448,7 @@ void sort_avilable_declaration_cbs(std::vector<possible_cb>& result, sys::state&
 	result.clear();
 
 	static std::vector<dcon::state_instance_id> target_states;
+	target_states.clear();
 	state_target_list(target_states, state, n, target);
 
 	auto other_cbs = state.world.nation_get_available_cbs(n);
@@ -2552,6 +2553,7 @@ void add_free_ai_cbs_to_war(sys::state& state, dcon::nation_id n, dcon::war_id w
 	do {
 		added = false;
 		static std::vector<possible_cb> potential;
+		potential.clear();
 		sort_avilable_cbs(potential, state, n, w);
 		for(auto& p : potential) {
 			if(!military::war_goal_would_be_duplicate(state, n, w, p.target, p.cb, p.state_def, p.associated_tag, p.secondary_nation)) {
@@ -2578,6 +2580,7 @@ void add_free_ai_cbs_to_war_winning(sys::state& state, dcon::nation_id n, dcon::
 	do {
 		added = false;
 		static std::vector<possible_cb> potential;
+		potential.clear();
 		sort_avilable_cbs(potential, state, n, w);
 		for(auto& p : potential) {
 			if(!military::war_goal_would_be_duplicate(state, n, w, p.target, p.cb, p.state_def, p.associated_tag, p.secondary_nation)) {
@@ -2656,6 +2659,7 @@ int32_t attacker_peace_cost_plus_potential(sys::state& state, dcon::nation_id n,
 		return cost;
 	//
 	static std::vector<possible_cb> potential;
+	potential.clear();
 	sort_avilable_cbs(potential, state, n, w);
 	for(auto& p : potential) {
 		if(!military::war_goal_would_be_duplicate(state, n, w, p.target, p.cb, p.state_def, p.associated_tag, p.secondary_nation)) {
@@ -2673,6 +2677,7 @@ int32_t defender_peace_cost_plus_potential(sys::state& state, dcon::nation_id n,
 		return cost;
 	//
 	static std::vector<possible_cb> potential;
+	potential.clear();
 	sort_avilable_cbs(potential, state, n, w);
 	for(auto& p : potential) {
 		if(!military::war_goal_would_be_duplicate(state, n, w, p.target, p.cb, p.state_def, p.associated_tag, p.secondary_nation)) {
@@ -2713,6 +2718,7 @@ void add_wg_to_great_war(sys::state& state, dcon::nation_id n, dcon::war_id w) {
 		return;
 
 	static std::vector<dcon::state_instance_id> target_states;
+	target_states.clear();
 	state_target_list(target_states, state, n, target);
 	static std::vector<possible_cb> result;
 	result.clear();
@@ -3210,6 +3216,7 @@ void make_war_decs(sys::state& state) {
 	for(auto n : state.world.in_nation) {
 		if(n.get_is_at_war() == false && targets.get(n)) {
 			static std::vector<possible_cb> potential;
+			potential.clear();
 			sort_avilable_declaration_cbs(potential, state, n, targets.get(n));
 			if(!potential.empty()) {
 				assert(command::can_declare_war(state, n, targets.get(n), potential[0].cb, potential[0].state_def, potential[0].associated_tag, potential[0].secondary_nation));

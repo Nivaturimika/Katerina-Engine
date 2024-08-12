@@ -309,11 +309,9 @@ void update_administrative_efficiency(sys::state& state) {
 			issue_sum = issue_sum + state.world.issue_option_get_administrative_multiplier(state.world.nation_get_issues(ids, i));
 		}
 		auto from_issues = issue_sum * state.defines.bureaucracy_percentage_increment + state.defines.max_bureaucracy_percentage;
-
 		auto non_colonial = state.world.nation_get_non_colonial_population(ids);
 		auto total = ve::select(non_colonial > 0.0f,
-				(admin_mod + 1.0f) * state.world.nation_get_non_colonial_bureaucrats(ids) / (non_colonial * from_issues), 0.0f);
-
+			(admin_mod + 1.0f) * state.world.nation_get_non_colonial_bureaucrats(ids) / (non_colonial * from_issues), 0.0f);
 		state.world.nation_set_administrative_efficiency(ids, ve::min(total, 1.0f));
 	});
 }
@@ -1891,10 +1889,16 @@ void daily_update_flashpoint_tension(sys::state& state) {
 			*/
 			if(auto rank = si.get_nation_from_state_ownership().get_rank();
 					uint16_t(1) <= rank && rank <= uint16_t(int32_t(state.defines.great_nations_count))) {
-				static float rank_amounts[8] = {state.defines.rank_1_tension_decay, state.defines.rank_2_tension_decay,
-						state.defines.rank_3_tension_decay, state.defines.rank_4_tension_decay, state.defines.rank_5_tension_decay,
-						state.defines.rank_6_tension_decay, state.defines.rank_7_tension_decay, state.defines.rank_8_tension_decay};
-
+				const float rank_amounts[8] = {
+					state.defines.rank_1_tension_decay,
+					state.defines.rank_2_tension_decay,
+					state.defines.rank_3_tension_decay,
+					state.defines.rank_4_tension_decay,
+					state.defines.rank_5_tension_decay,
+					state.defines.rank_6_tension_decay,
+					state.defines.rank_7_tension_decay,
+					state.defines.rank_8_tension_decay
+				};
 				total_increase += rank_amounts[rank - 1];
 			}
 

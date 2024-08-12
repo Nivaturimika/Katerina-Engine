@@ -36,21 +36,18 @@ void update_connected_regions(sys::state& state) {
 
 	state.world.for_each_province([&](dcon::province_id id) { state.world.province_set_connected_region_id(id, 0); });
 	// TODO get a better allocator
-	static std::vector<dcon::province_id> to_fill_list;
 	uint16_t current_fill_id = 0;
 	state.province_definitions.connected_region_is_coastal.clear();
-
-	to_fill_list.reserve(state.world.province_size());
-
 	for(int32_t i = state.province_definitions.first_sea_province.index(); i-- > 0;) {
 		dcon::province_id id{dcon::province_id::value_base_t(i)};
 		if(state.world.province_get_connected_region_id(id) == 0) {
 			++current_fill_id;
 
+			static std::vector<dcon::province_id> to_fill_list;
+			to_fill_list.clear();
+
 			bool found_coast = false;
-
 			to_fill_list.push_back(id);
-
 			while(!to_fill_list.empty()) {
 				auto current_id = to_fill_list.back();
 				to_fill_list.pop_back();
@@ -74,9 +71,7 @@ void update_connected_regions(sys::state& state) {
 					}
 				}
 			}
-
 			state.province_definitions.connected_region_is_coastal.push_back(found_coast);
-			to_fill_list.clear();
 		}
 	}
 
@@ -156,11 +151,9 @@ void set_province_controller(sys::state& state, dcon::province_id p, dcon::rebel
 }
 
 void restore_cached_values(sys::state& state) {
-	
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_central_province_count(ids, ve::int_vector()); });
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_central_blockaded(ids, ve::int_vector()); });
-	state.world.execute_serial_over_nation(
-			[&](auto ids) { state.world.nation_set_central_rebel_controlled(ids, ve::int_vector()); });
+	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_central_rebel_controlled(ids, ve::int_vector()); });
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_rebel_controlled_count(ids, ve::int_vector()); });
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_central_ports(ids, ve::int_vector()); });
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_central_crime_count(ids, ve::int_vector()); });
@@ -257,7 +250,6 @@ void update_cached_values(sys::state& state) {
 		return;
 
 	state.national_cached_values_out_of_date = false;
-
 	restore_cached_values(state);
 }
 
@@ -282,8 +274,8 @@ void restore_unsaved_values(sys::state& state) {
 		dcon::province_id pid{dcon::province_id::value_base_t(i)};
 
 		for(auto adj : state.world.province_get_province_adjacency(pid)) {
-			if((state.world.province_adjacency_get_type(adj) & province::border::coastal_bit) != 0 &&
-					(state.world.province_adjacency_get_type(adj) & province::border::impassible_bit) == 0) {
+			if((state.world.province_adjacency_get_type(adj) & province::border::coastal_bit) != 0
+			&& (state.world.province_adjacency_get_type(adj) & province::border::impassible_bit) == 0) {
 				state.world.province_set_is_coast(pid, true);
 				break;
 			}

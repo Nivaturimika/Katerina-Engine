@@ -501,8 +501,6 @@ void recalculate_upper_house(sys::state& state, dcon::nation_id n) {
 	just the rich ones for "rich only") is distributed proportionally to its ideological support, with the sum for all eligible
 	pops forming the distribution for the upper house.
 	*/
-	static std::vector<float> accumulated_in_state;
-	accumulated_in_state.resize(state.world.ideology_size());
 
 	auto rules = state.world.nation_get_combined_issue_rules(n);
 	auto allowed_ideo = state.world.nation_get_government_type(n).get_ideologies_allowed();
@@ -521,6 +519,8 @@ void recalculate_upper_house(sys::state& state, dcon::nation_id n) {
 		}
 		float state_total = 0.0f;
 
+		static std::vector<float> accumulated_in_state;
+		accumulated_in_state.resize(state.world.ideology_size());
 		for(auto si : state.world.nation_get_state_ownership(n)) {
 			if(si.get_state().get_capital().get_is_colonial())
 				continue; // skip colonial states
