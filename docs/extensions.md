@@ -473,6 +473,7 @@ KatEngine adds a handful of new defines:
 - `alice_rename_dont_use_localisation`: Keys specified on `change_region_name` or `change_province_name` will be treated as CSV keys, otherwise they will define in-line.
 - `alice_spherelings_only_ally_sphere`: Spherelings will only ally their spherelord.
 - `alice_overseas_mil`: Militancy increase in overseas provinces when overseas maintenance is at zero.
+- `ke_needs_scaling_factor`: Scaling factor for needs
 
 ### Support for reforms based on party issues
 

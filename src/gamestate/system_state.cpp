@@ -3339,6 +3339,8 @@ void state::preload() {
 		p.set_state_membership(dcon::state_instance_id{});
 		p.set_is_owner_core(false);
 		p.set_is_blockaded(false);
+		p.set_daily_net_immigration(0.f);
+		p.set_daily_net_migration(0.f);
 	}
 	for(auto m : world.in_movement) {
 		m.set_pop_support(0.0f);
@@ -3462,7 +3464,6 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 
 	new_requests.~SPSCQueue();
 	new (&new_requests) rigtorp::SPSCQueue<diplomatic_message::message>(256);
-
 
 	if(local_player_nation) {
 		world.nation_set_is_player_controlled(local_player_nation, true);
@@ -3739,11 +3740,11 @@ void state::single_game_tick() {
 		}
 		case 6:
 			province::ve_for_each_land_province(*this,
-					[&](auto ids) { world.province_set_daily_net_migration(ids, ve::fp_vector{}); });
+				[&](auto ids) { world.province_set_daily_net_migration(ids, ve::fp_vector{}); });
 			break;
 		case 7:
 			province::ve_for_each_land_province(*this,
-					[&](auto ids) { world.province_set_daily_net_immigration(ids, ve::fp_vector{}); });
+				[&](auto ids) { world.province_set_daily_net_immigration(ids, ve::fp_vector{}); });
 			break;
 		}
 	});
@@ -3790,6 +3791,9 @@ void state::single_game_tick() {
 
 	// basic repopulation of demographics derived values
 	demographics::regenerate_from_pop_data_daily(*this);
+
+	economy::update_land_ownership(*this);
+	economy::update_local_subsistence_factor(*this);
 
 	// values updates pass 1 (mostly trivial things, can be done in parallel)
 	concurrency::parallel_for(0, 17, [&](int32_t index) {
@@ -3895,7 +3899,7 @@ void state::single_game_tick() {
 	switch(ymd_date.day) {
 		case 1:
 			nations::update_monthly_points(*this);
-			economy::prune_factories(*this);
+			//economy::prune_factories(*this);
 			break;
 		case 2:
 			province::update_blockaded_cache(*this);
@@ -4169,6 +4173,19 @@ void state::debug_scenario_oos_dump() {
 		auto buffer_position = sys::write_scenario_section(buffer.get(), *this);
 		size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - buffer.get();
 		simple_fs::write_file(sdir, NATIVE("all_scen.bin"), reinterpret_cast<char*>(buffer.get()), uint32_t(total_size_used));
+	}
+}
+
+void state::debug_unsaved_oos_dump() {
+	auto sdir = simple_fs::get_or_create_oos_directory();
+	{
+		// save for further inspection
+		dcon::load_record loaded = world.make_serialize_record_store_unsaved();
+		auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[world.serialize_size(loaded)]);
+		auto buffer_position = reinterpret_cast<std::byte*>(buffer.get());
+		world.serialize(buffer_position, loaded);
+		size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - buffer.get();
+		simple_fs::write_file(sdir, NATIVE("unsaved.bin"), reinterpret_cast<char*>(buffer.get()), uint32_t(total_size_used));
 	}
 }
 

@@ -711,6 +711,7 @@ struct alignas(64) state {
 	sys::checksum_key get_save_checksum();
 	void debug_save_oos_dump();
 	void debug_scenario_oos_dump();
+	void debug_unsaved_oos_dump();
 
 	void start_state_selection(state_selection_data& data);
 	void finish_state_selection();

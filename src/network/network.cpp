@@ -679,6 +679,7 @@ static void send_post_handshake_commands(sys::state& state, network::client_data
 		with_network_decompressed_section(state.network_state.current_save_buffer.get(), [&state](uint8_t const* ptr_in, uint32_t length) {
 			read_save_section(ptr_in, ptr_in + length, state);
 		});
+		//network::write_network_save(state);
 		state.fill_unsaved_data();
 		for(const auto n : players)
 			state.world.nation_set_is_player_controlled(n, true);

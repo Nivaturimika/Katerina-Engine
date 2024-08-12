@@ -125,14 +125,13 @@ void bulk_apply_masked_modifier_to_nations(sys::state& state, dcon::modifier_id 
 	for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
 		if(!(nat_values.offsets[i]))
 			break; // no more modifier values attached
-
 		state.world.execute_serial_over_nation(
-				[&, fixed_offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto nation_indices) {
-					auto has_mod_mask = mask_functor(nation_indices);
-					auto old_mod_value = state.world.nation_get_modifier_values(nation_indices, fixed_offset);
-					state.world.nation_set_modifier_values(nation_indices, fixed_offset,
-							ve::select(has_mod_mask, old_mod_value + modifier_amount, old_mod_value));
-				});
+		[&, fixed_offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto nation_indices) {
+			auto has_mod_mask = mask_functor(nation_indices);
+			auto old_mod_value = state.world.nation_get_modifier_values(nation_indices, fixed_offset);
+			state.world.nation_set_modifier_values(nation_indices, fixed_offset,
+				ve::select(has_mod_mask, old_mod_value + modifier_amount, old_mod_value));
+		});
 	}
 }
 
@@ -245,14 +244,15 @@ void bulk_apply_scaled_modifier_to_provinces(sys::state& state, dcon::modifier_i
 	}
 }
 
-void recreate_national_modifiers(sys::state& state) {
-
-	// purge expired triggered modifiers
-	for(auto n : state.world.in_nation) {
-		auto timed_modifiers = n.get_current_modifiers();
-		for(uint32_t i = timed_modifiers.size(); i-- > 0;) {
-			if(bool(timed_modifiers[i].expiration) && timed_modifiers[i].expiration < state.current_date) {
-				timed_modifiers.remove_at(i);
+void recreate_national_modifiers(sys::state& state, bool update_tm) {
+	if(update_tm) {
+		// purge expired triggered modifiers
+		for(auto n : state.world.in_nation) {
+			auto timed_modifiers = n.get_current_modifiers();
+			for(uint32_t i = timed_modifiers.size(); i-- > 0;) {
+				if(bool(timed_modifiers[i].expiration) && timed_modifiers[i].expiration < state.current_date) {
+					timed_modifiers.remove_at(i);
+				}
 			}
 		}
 	}
@@ -395,30 +395,32 @@ void recreate_national_modifiers(sys::state& state) {
 	}
 	// TODO: debt
 
-	for(auto tm : state.national_definitions.triggered_modifiers) {
-		if(tm.trigger_condition && tm.linked_modifier) {
-			auto& nat_values = state.world.modifier_get_national_values(tm.linked_modifier);
-			auto size_used = state.world.nation_size();
-			ve::execute_serial_fast<dcon::nation_id>(size_used, [&](auto nids) {
-				auto trigger_condition_satisfied =
+	if(update_tm) {
+		for(auto tm : state.national_definitions.triggered_modifiers) {
+			if(tm.trigger_condition && tm.linked_modifier) {
+				auto& nat_values = state.world.modifier_get_national_values(tm.linked_modifier);
+				auto size_used = state.world.nation_size();
+				ve::execute_serial_fast<dcon::nation_id>(size_used, [&](auto nids) {
+					auto trigger_condition_satisfied =
 						trigger::evaluate(state, tm.trigger_condition, trigger::to_generic(nids), trigger::to_generic(nids), 0) &&
 						ve::apply([size_used](auto n) { return n.index() < int32_t(size_used); }, nids);
-				auto compressed_res = ve::compress_mask(trigger_condition_satisfied);
-				if(compressed_res.v == ve::vbitfield_type::storage(0)) {
-					return;
-				} else {
-					for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
-						if(!(nat_values.offsets[i]))
-							break; // no more modifier values attached
+					auto compressed_res = ve::compress_mask(trigger_condition_satisfied);
+					if(compressed_res.v == ve::vbitfield_type::storage(0)) {
+						return;
+					} else {
+						for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
+							if(!(nat_values.offsets[i]))
+								break; // no more modifier values attached
 
-						auto fixed_offset = nat_values.offsets[i];
-						auto modifier_amount = nat_values.values[i];
-						auto old_mod_value = state.world.nation_get_modifier_values(nids, fixed_offset);
-						state.world.nation_set_modifier_values(nids, fixed_offset,
-								ve::select(trigger_condition_satisfied, old_mod_value + modifier_amount, old_mod_value));
+							auto fixed_offset = nat_values.offsets[i];
+							auto modifier_amount = nat_values.values[i];
+							auto old_mod_value = state.world.nation_get_modifier_values(nids, fixed_offset);
+							state.world.nation_set_modifier_values(nids, fixed_offset,
+									ve::select(trigger_condition_satisfied, old_mod_value + modifier_amount, old_mod_value));
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 }
@@ -557,16 +559,18 @@ void update_single_nation_modifiers(sys::state& state, dcon::nation_id n) {
 	}
 }
 
-void recreate_province_modifiers(sys::state& state) {
-	// purge expired triggered modifiers
-	province::for_each_land_province(state, [&](dcon::province_id p) {
-		auto timed_modifiers = state.world.province_get_current_modifiers(p);
-		for(uint32_t i = timed_modifiers.size(); i-- > 0;) {
-			if(bool(timed_modifiers[i].expiration) && timed_modifiers[i].expiration < state.current_date) {
-				timed_modifiers.remove_at(i);
+void recreate_province_modifiers(sys::state& state, bool update_tm) {
+	if(update_tm) {
+		// purge expired triggered modifiers
+		province::for_each_land_province(state, [&](dcon::province_id p) {
+			auto timed_modifiers = state.world.province_get_current_modifiers(p);
+			for(uint32_t i = timed_modifiers.size(); i-- > 0;) {
+				if(bool(timed_modifiers[i].expiration) && timed_modifiers[i].expiration < state.current_date) {
+					timed_modifiers.remove_at(i);
+				}
 			}
-		}
-	});
+		});
+	}
 
 	concurrency::parallel_for(uint32_t(0), sys::provincial_mod_offsets::count, [&](uint32_t i) {
 		dcon::provincial_modifier_value mid{dcon::provincial_modifier_value::value_base_t(i)};
@@ -651,16 +655,16 @@ void recreate_province_modifiers(sys::state& state) {
 
 // restores values after loading a save
 void repopulate_modifier_effects(sys::state& state) {
-	recreate_national_modifiers(state);
-	recreate_province_modifiers(state);
+	recreate_national_modifiers(state, false);
+	recreate_province_modifiers(state, false);
 	for(auto n : state.world.in_nation) {
 		economy::bound_budget_settings(state, n);
 	}
 }
 
 void update_modifier_effects(sys::state& state) {
-	recreate_national_modifiers(state);
-	recreate_province_modifiers(state);
+	recreate_national_modifiers(state, true);
+	recreate_province_modifiers(state, true);
 	for(auto n : state.world.in_nation) {
 		economy::bound_budget_settings(state, n);
 	}

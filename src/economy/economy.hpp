@@ -268,4 +268,7 @@ float max_loan(sys::state& state, dcon::nation_id n);
 
 commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c);
 
+void update_land_ownership(sys::state& state);
+void update_local_subsistence_factor(sys::state& state);
+
 } // namespace economy
