@@ -383,9 +383,13 @@ public:
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		if(state.network_mode == sys::network_mode_type::single_player) {
+			state.world.nation_set_is_player_controlled(state.local_player_nation, false);
 			state.local_player_nation = n;
-			state.ui_state.nation_picker->impl_on_update(state);
-		} else {
+			state.world.nation_set_is_player_controlled(state.local_player_nation, true);
+			if(state.ui_state.nation_picker) {
+				state.ui_state.nation_picker->impl_on_update(state);
+			}
+		} else if(command::can_notify_player_picks_nation(state, state.local_player_nation, n)) {
 			command::notify_player_picks_nation(state, state.local_player_nation, n);
 		}
 	}
