@@ -4285,13 +4285,13 @@ guiTypes = {
 	windowType = {
 		name = "alice_macro_builder"
 		orientation = "CENTER"
-		position = { -222 -367 }
-		size = {  455 735  }
+		position = { -222 -267 }
+		size = { 455 735 }
 		moveable = 1
 		iconType = {
-			name ="main_bg"
+			name = "background"
 			spriteType = "GFX_bg_macro_builder"
-			position = { x= -70 y = -70 }
+			position = { -70 -70 }
 			Orientation = "UPPER_LEFT"
 		}
 		guiButtonType = {
@@ -4299,6 +4299,7 @@ guiTypes = {
 			position = { -25 -10 }
 			orientation = "UPPER_RIGHT"
 			quadTextureSprite = "GFX_main_close_button"
+			shortcut = "ESCAPE"
 		}
 		instantTextBoxType = {
 			name = "title"
