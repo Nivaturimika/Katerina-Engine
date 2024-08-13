@@ -3339,6 +3339,9 @@ void state::preload() {
 		p.set_state_membership(dcon::state_instance_id{});
 		p.set_is_owner_core(false);
 		p.set_is_blockaded(false);
+		p.set_landowners_share(0.f);
+		p.set_capitalists_share(0.f);
+		p.set_subsistence_score(0.f);
 	}
 	for(auto m : world.in_movement) {
 		m.set_pop_support(0.0f);
@@ -3435,10 +3438,11 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	nations::restore_unsaved_values(*this);
 
 	pop_demographics::regenerate_is_primary_or_accepted(*this);
-
 	nations::update_administrative_efficiency(*this);
 	rebel::update_movement_values(*this);
 
+	economy::update_land_ownership(*this);
+	economy::update_local_subsistence_factor(*this);
 	economy::regenerate_unsaved_values(*this);
 
 	military::regenerate_land_unit_average(*this);

@@ -913,14 +913,12 @@ float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::provi
 
 void update_local_subsistence_factor(sys::state& state) {
 	auto const max_subsistence_factor = subsistence_factor / state.defines.alice_rgo_per_size_employment;
-	state.world.execute_parallel_over_province([&](auto ids) {
-		auto max_subsistence = ve::apply([&](dcon::province_id p) {
-			return subsistence_max_pseudoemployment(state, state.world.province_get_nation_from_province_ownership(p), p);
-		}, ids);
+	province::for_each_land_province(state, [&](dcon::province_id ids) {
+		auto max_subsistence = subsistence_max_pseudoemployment(state, state.world.province_get_nation_from_province_ownership(ids), ids);
 		auto score = max_subsistence * max_subsistence_factor;
 		auto saturation = state.world.province_get_subsistence_employment(ids) / (max_subsistence + 1.f);
 		auto quality = (ve::to_float(state.world.province_get_life_rating(ids)) - 10.f) / 10.f;
-		quality = ve::max(quality, 0.f) + 0.01f;
+		quality = std::max(quality, 0.f) + 0.01f;
 		score = (score * quality) + (subsistence_score_everyday * 0.7f);
 		auto saturation_inv = (1.0f - saturation);
 		score = (score * saturation_inv) * saturation_inv * saturation_inv;
@@ -940,7 +938,7 @@ void update_land_ownership(sys::state& state) {
 	auto const dkey_ca = demographics::to_key(state, state.culture_definitions.capitalists);
 	auto const dkey_fa = demographics::to_key(state, state.culture_definitions.farmers);
 	auto const dkey_la = demographics::to_key(state, state.culture_definitions.laborers);
-	state.world.execute_parallel_over_province([&](auto ids) {
+	province::for_each_land_province(state, [&](dcon::province_id ids) {
 		auto local_states = state.world.province_get_state_membership(ids);
 		auto weight_at = state.world.state_instance_get_demographics(local_states, dkey_at)
 			+ state.world.state_instance_get_demographics(local_states, dkey_sl);
@@ -3893,7 +3891,6 @@ void regenerate_unsaved_values(sys::state& state) {
 	state.world.commodity_resize_demand_by_category(8);
 
 	state.world.nation_resize_intermediate_demand(state.world.commodity_size());
-
 	state.world.nation_resize_life_needs_costs(state.world.pop_type_size());
 	state.world.nation_resize_everyday_needs_costs(state.world.pop_type_size());
 	state.world.nation_resize_luxury_needs_costs(state.world.pop_type_size());
