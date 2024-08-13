@@ -499,11 +499,34 @@ void update_influence_priorities(sys::state& state) {
 				continue;
 
 			float weight = 0.0f;
-
 			for(auto c : state.world.in_commodity) {
 				if(auto d = state.world.nation_get_real_demand(n.nation, c); d > 0.001f) {
 					auto cweight = std::min(1.0f, t.get_domestic_market_pool(c) / d) * (1.0f - state.world.nation_get_demand_satisfaction(n.nation, c));
 					weight += cweight;
+				}
+			}
+			// focus on contested spheres a bit more!
+			for(auto gprl : state.world.nation_get_gp_relationship_as_influence_target(t.id)) {
+				auto clevel = (nations::influence::level_mask & gprl.get_status());
+				if(gprl.get_influence() >= 1.f && gprl.get_great_power() != n.nation) {
+					auto clevel_weight = 0.f;
+					switch(clevel) {
+					case nations::influence::level_hostile:
+					case nations::influence::level_opposed:
+					case nations::influence::level_neutral:
+						clevel_weight = 0.f;
+						break;
+					case nations::influence::level_cordial:
+						clevel_weight = 50.f;
+						break;
+					case nations::influence::level_friendly:
+						clevel_weight = 75.f;
+						break;
+					default:
+						clevel_weight = 1.f;
+						break;
+					}
+					weight += std::max(1.f, gprl.get_influence()) * clevel_weight;
 				}
 			}
 
@@ -515,16 +538,14 @@ void update_influence_priorities(sys::state& state) {
 			//Prioritize primary culture before culture groups; should ensure Prussia spheres all of the NGF first before trying to contest Austria
 			if(t.get_primary_culture() == state.world.nation_get_primary_culture(n.nation)) {
 				weight += 1.0f;
-				weight *= 4000.0f;
-			}
-
-			else if(t.get_primary_culture().get_group_from_culture_group_membership() == state.world.nation_get_primary_culture(n.nation).get_group_from_culture_group_membership()) {
+				weight *= 400.0f;
+			} else if(t.get_primary_culture().get_group_from_culture_group_membership() == state.world.nation_get_primary_culture(n.nation).get_group_from_culture_group_membership()) {
 				weight *= 4.0f;
 			}
 			//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
 			if(military::can_use_cb_against(state, n.nation, t) && t.get_in_sphere_of()) {
 				weight += 1.0f;
-				weight *= 1000.0f;
+				weight *= 100.0f;
 			}
 			//If it doesn't neighbor us or a friendly sphere and isn't coastal, please don't sphere it, we don't want sphere gore
 			bool is_reachable = false;
@@ -544,25 +565,21 @@ void update_influence_priorities(sys::state& state) {
 			if(state.world.nation_get_central_ports(t) > 0) {
 				is_reachable = true;
 			}
-
 			//Prefer neighbors
 			if(state.world.get_nation_adjacency_by_nation_adjacency_pair(n.nation, t.id)) {
 				weight *= 10.0f;
 				is_reachable = true;
 			}
-
 			if(!is_reachable) {
-				weight *= 0.0f;
+				weight *= 0.25f;
 			}
-
 			targets.push_back(weighted_nation{ t.id, weight });
 		}
 
 		std::sort(targets.begin(), targets.end(), [](weighted_nation const& a, weighted_nation const& b) {
 			if(a.weight != b.weight)
 				return a.weight > b.weight;
-			else
-				return a.id.index() < b.id.index();
+			return a.id.index() < b.id.index();
 		});
 
 		uint32_t i = 0;
@@ -598,12 +615,21 @@ void perform_influence_actions(sys::state& state) {
 			if(military::are_at_war(state, gprl.get_great_power(), gprl.get_influence_target()))
 				continue; // can't do anything while at war
 
-			auto clevel = (nations::influence::level_mask & gprl.get_status());
-			if(clevel == nations::influence::level_in_sphere)
-				continue; // already in sphere
-
 			auto current_sphere = gprl.get_influence_target().get_in_sphere_of();
-
+			auto clevel = (nations::influence::level_mask & gprl.get_status());
+			if(clevel == nations::influence::level_in_sphere) {
+				// annoy the shit out of other gps that are messing with our spheres
+				// so prussia wants to fucking murder austria
+				for(auto other_gprl : gprl.get_influence_target().get_gp_relationship_as_influence_target()) {
+					if(clevel == nations::influence::level_in_sphere && current_sphere
+					&& state.defines.decreaseopinion_influence_cost <= gprl.get_influence()
+					&& other_gprl.get_influence() >= state.defines.removefromsphere_influence_cost * 0.75f) {
+						assert(command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
+						command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
+					}
+				}
+				continue; // already in sphere
+			}
 			if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
 				assert(command::can_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target()));
 				command::execute_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target());
