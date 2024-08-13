@@ -1353,7 +1353,7 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
-		std::array<dcon::pop_type_id, 4> factory_workers{
+		std::array<dcon::pop_type_id, 2> factory_workers{
 			state.culture_definitions.primary_factory_worker,
 			state.culture_definitions.secondary_factory_worker
 		};
