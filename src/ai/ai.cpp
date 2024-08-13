@@ -621,7 +621,9 @@ void perform_influence_actions(sys::state& state) {
 				// annoy the shit out of other gps that are messing with our spheres
 				// so prussia wants to fucking murder austria
 				for(auto other_gprl : gprl.get_influence_target().get_gp_relationship_as_influence_target()) {
-					if(clevel == nations::influence::level_in_sphere && current_sphere
+					if(clevel == nations::influence::level_in_sphere
+					&& current_sphere
+					&& other_gprl.get_great_power() != gprl.get_great_power()
 					&& state.defines.decreaseopinion_influence_cost <= gprl.get_influence()
 					&& other_gprl.get_influence() >= state.defines.removefromsphere_influence_cost * 0.75f) {
 						assert(command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_great_power()));
