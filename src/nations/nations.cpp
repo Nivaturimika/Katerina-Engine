@@ -1388,7 +1388,7 @@ void cleanup_nation(sys::state& state, dcon::nation_id n) {
 	state.diplomatic_cached_values_out_of_date = true; // refresh stored counts of allies, vassals, etc
 	politics::update_displayed_identity(state, n);
 
-	if(n == state.local_player_nation) {
+	if(n == state.local_player_nation && state.network_mode == sys::network_mode_type::single_player) {
 		// Player was defeated, show end screen
 		game_scene::switch_scene(state, game_scene::scene_id::end_screen);
 	}
