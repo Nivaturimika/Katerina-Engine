@@ -4693,6 +4693,9 @@ void execute_notify_player_picks_nation(sys::state& state, dcon::nation_id sourc
 	for(auto& msg : state.ui_state.chat_messages)
 		if(bool(msg.source) && msg.source == source)
 			msg.source = target;
+
+	// Update map
+	state.map_state.unhandled_province_selection = true;
 }
 
 void notify_player_oos(sys::state& state, dcon::nation_id source) {
