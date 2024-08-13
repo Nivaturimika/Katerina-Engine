@@ -435,7 +435,8 @@ parser_state parse_command(sys::state& state, std::string_view text) {
 		}
 		case command_info::argument_info::type::numeric:
 			if(isdigit(ident[0]) || ident[0] == '-') {
-				pstate.arg_slots[i] = int32_t(std::stoi(std::string(ident)));
+				pstate.arg_slots[i] = int32_t(atoi(ident.data()));
+				//pstate.arg_slots[i] = int32_t(std::stoi(std::string(ident)));
 			} else {
 				pstate.arg_slots[i] = int32_t(0);
 			}
