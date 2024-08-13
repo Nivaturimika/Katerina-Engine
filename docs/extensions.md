@@ -78,6 +78,8 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `add_country_modifier = modifier`: Shorthand for `add_country_modifier = { name = modifier duration = -1 }`
 - `add_province_modifier = modifier`: Shorthand for `add_province_modifier = { name = modifier duration = -1 }`
 - `masquerade_as_nation = THIS/FROM`: Use the visual flag of `THIS/FROM` as the flag of the nation, most useful for dynamic rebellions for example.
+- `set_province_flag = flag`: Didn't work in the original but now it does
+- `clr_province_flag = flag`: Didn't work in the original but now it does
 
 As for `build_xxx_in_capital`, the game doesn't allow custom defined buildings to be used in this mode as an effect.
 
@@ -116,6 +118,7 @@ build_bank_in_capital = {
 - `has_national_focus = focus`: Checks if a state (or province) in scope has a focus `focus`.
 - `have_core_in = THIS/FROM/TAG`: Doesn't work in vanilla, but will work here.
 - `treasury = x`: Alias of `money`.
+- `has_province_flag = flag`: Didn't work in the original but now it does
 
 ### FROM bounce
 FROM bouncing is a technique where before, modders would do:
