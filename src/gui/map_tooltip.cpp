@@ -982,12 +982,16 @@ void employment_map_tt_box(sys::state& state, text::columnar_layout& contents, d
 				employed += pl.get_pop().get_employment();
 			}
 		}
-		float ratio = total == 0.f ? 0.f : employed / total;
-		text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_total_employment"));
-		text::add_to_layout_box(state, contents, box, text::fp_percentage_one_place{ ratio },
-			(ratio >= 0.75f ? text::text_color::green
-			: (ratio >= 0.25 ? text::text_color::orange
-			: text::text_color::red)));
+		if(total == 0.f) {
+			float ratio = employed / total;
+			text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_total_employment"));
+			text::add_to_layout_box(state, contents, box, text::fp_percentage_one_place{ ratio },
+				(ratio >= 0.75f ? text::text_color::green
+					: (ratio >= 0.25 ? text::text_color::orange
+						: text::text_color::red)));
+		} else {
+			text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_employment_none"));
+		}
 		text::close_layout_box(contents, box);
 	}
 }
