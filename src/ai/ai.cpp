@@ -624,8 +624,8 @@ void perform_influence_actions(sys::state& state) {
 					if(clevel == nations::influence::level_in_sphere && current_sphere
 					&& state.defines.decreaseopinion_influence_cost <= gprl.get_influence()
 					&& other_gprl.get_influence() >= state.defines.removefromsphere_influence_cost * 0.75f) {
-						assert(command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
-						command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
+						assert(command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_great_power()));
+						command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power());
 					}
 				}
 				continue; // already in sphere
