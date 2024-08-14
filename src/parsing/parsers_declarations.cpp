@@ -2462,13 +2462,14 @@ void oob_relationship::value(association_type, int32_t v, error_handler& err, in
 		v = std::clamp(v, -200, 200);
 	}
 
-	auto rel =
-			context.outer_context.state.world.get_diplomatic_relation_by_diplomatic_pair(context.nation_for, context.nation_with);
-	if(rel) {
-		context.outer_context.state.world.diplomatic_relation_set_value(rel, float(v));
-	} else {
-		auto new_rel = context.outer_context.state.world.force_create_diplomatic_relation(context.nation_for, context.nation_with);
-		context.outer_context.state.world.diplomatic_relation_set_value(new_rel, float(v));
+	if(v != 0) {
+		auto rel = context.outer_context.state.world.get_diplomatic_relation_by_diplomatic_pair(context.nation_for, context.nation_with);
+		if(rel) {
+			context.outer_context.state.world.diplomatic_relation_set_value(rel, float(v));
+		} else {
+			auto new_rel = context.outer_context.state.world.force_create_diplomatic_relation(context.nation_for, context.nation_with);
+			context.outer_context.state.world.diplomatic_relation_set_value(new_rel, float(v));
+		}
 	}
 }
 
@@ -2497,11 +2498,13 @@ void oob_relationship::level(association_type, int32_t v, error_handler& err, in
 			return nations::influence::level_neutral;
 		}
 	}();
-	if(rel) {
-		context.outer_context.state.world.gp_relationship_set_status(rel, status_level);
-	} else {
-		auto new_rel = context.outer_context.state.world.force_create_gp_relationship(context.nation_with, context.nation_for);
-		context.outer_context.state.world.gp_relationship_set_status(new_rel, status_level);
+	if(status_level != nations::influence::level_neutral) {
+		if(rel) {
+			context.outer_context.state.world.gp_relationship_set_status(rel, status_level);
+		} else {
+			auto new_rel = context.outer_context.state.world.force_create_gp_relationship(context.nation_with, context.nation_for);
+			context.outer_context.state.world.gp_relationship_set_status(new_rel, status_level);
+		}
 	}
 	if(uint32_t(v) > 5) {
 		err.accumulated_warnings += "Influence level " + std::to_string(v) + " defaults to 'neutral' (" + err.file_name + " line " + std::to_string(line) + ")\n";
@@ -2514,12 +2517,14 @@ void oob_relationship::influence_value(association_type, float v, error_handler&
 		return;
 	}
 
-	auto rel = context.outer_context.state.world.get_gp_relationship_by_gp_influence_pair(context.nation_with, context.nation_for);
-	if(rel) {
-		context.outer_context.state.world.gp_relationship_set_influence(rel, v);
-	} else {
-		auto new_rel = context.outer_context.state.world.force_create_gp_relationship(context.nation_with, context.nation_for);
-		context.outer_context.state.world.gp_relationship_set_influence(new_rel, v);
+	if(v != 0.f) {
+		auto rel = context.outer_context.state.world.get_gp_relationship_by_gp_influence_pair(context.nation_with, context.nation_for);
+		if(rel) {
+			context.outer_context.state.world.gp_relationship_set_influence(rel, v);
+		} else {
+			auto new_rel = context.outer_context.state.world.force_create_gp_relationship(context.nation_with, context.nation_for);
+			context.outer_context.state.world.gp_relationship_set_influence(new_rel, v);
+		}
 	}
 	if(v < 0.f || v > 100.f) {
 		err.accumulated_warnings += "Influence value " + std::to_string(v) + " is not between [0,100] (" + err.file_name + " line " + std::to_string(line) + ")\n";

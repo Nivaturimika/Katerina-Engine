@@ -4080,7 +4080,7 @@ relationship{
 relationship{
 	name{ gp_relationship }
 	storage_type{ compactable }
-	size{ 50000 }
+	size{ 8000 }
 	tag{ save }
 
 	link{
