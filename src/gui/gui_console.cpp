@@ -238,8 +238,8 @@ inline constexpr command_info possible_commands[] = {
 		command_info{ "instant_industry", command_info::type::instant_industry, "Instantly builds all industries",
 				{command_info::argument_info{}, command_info::argument_info{},
 						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "add_year", command_info::type::add_year, "Add year",
-				{command_info::argument_info{}, command_info::argument_info{},
+		command_info{ "add_year", command_info::type::add_year, "Add years to date",
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
 						command_info::argument_info{}, command_info::argument_info{}} },
 		command_info{ "doos", command_info::type::daily_oos_check, "Toggle daily OOS check",
 				{command_info::argument_info{}, command_info::argument_info{},
@@ -1621,23 +1621,23 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		break;
 	}
 	case command_info::type::always_allow_wargoals:
-		log_to_console(state, parent, state.cheat_data.always_allow_wargoals ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !state.cheat_data.always_allow_wargoals ? "@(T)" : "@(F)");
 		command::c_always_allow_wargoals(state, state.local_player_nation);
 		break;
 	case command_info::type::always_allow_reforms:
-		log_to_console(state, parent, state.cheat_data.always_allow_reforms ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !state.cheat_data.always_allow_reforms ? "@(T)" : "@(F)");
 		command::c_always_allow_reforms(state, state.local_player_nation);
 		break;
 	case command_info::type::always_allow_decisions:
-		log_to_console(state, parent, state.cheat_data.always_allow_decisions? "@(T)" : "@(F)" );
+		log_to_console(state, parent, !state.cheat_data.always_allow_decisions? "@(T)" : "@(F)" );
 		command::c_always_allow_decisions(state, state.local_player_nation);
 		break;
 	case command_info::type::always_potential_decisions:
-		log_to_console(state, parent, state.cheat_data.always_potential_decisions ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !state.cheat_data.always_potential_decisions ? "@(T)" : "@(F)");
 		command::c_always_potential_decisions(state, state.local_player_nation);
 		break;
 	case command_info::type::always_accept_deals:
-		log_to_console(state, parent, state.cheat_data.always_accept_deals ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !state.cheat_data.always_accept_deals ? "@(T)" : "@(F)");
 		command::c_always_accept_deals(state, state.local_player_nation);
 		break;
 	case command_info::type::set_auto_choice_all:
