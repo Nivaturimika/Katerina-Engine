@@ -1668,7 +1668,7 @@ void update_province_rgo_consumption(sys::state& state, dcon::province_id p, dco
 
 		float discrete_step = (((expected_profit - desired_profit) > 0.f) ? 1.f : -1.f) * 20.f;
 
-		change = change * max_production * pops_max / 100.f + discrete_step;
+		change = change / max_production * pops_max / 100.f + discrete_step;
 
 		//change = std::clamp(change, -relative_modifier, relative_modifier);
 		assert(std::isfinite(current_employment + change));
