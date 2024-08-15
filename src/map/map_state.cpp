@@ -410,7 +410,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 									}
 									break;
 								}
-							} else {
+							} else if(!has_tag || !state.world.cultural_union_of_get_culture_group(state.world.national_identity_get_cultural_union_of(nid))) {
 								std::string tag_name = text::produce_simple_string(state, state.world.national_identity_get_name(nid));
 								tag_name = nation_name_prettify_for_map(state, tag_name);
 								text::add_to_substitution_map(sub, text::variable_type::tag, std::string_view(tag_name));
