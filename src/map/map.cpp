@@ -1404,22 +1404,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle);
 				}
 			});
-
-			/*
-			auto render_canal = [&](uint32_t index, uint32_t canal_id, float theta) {
-				if(canal_id >= uint32_t(state.province_definitions.canals.size())
-				&& canal_id >= uint32_t(state.province_definitions.canal_provinces.size()))
-					return;
-				auto const adj = state.province_definitions.canals[canal_id];
-				if((state.world.province_adjacency_get_type(adj) & province::border::impassible_bit) != 0)
-					return;
-				glm::vec2 pos = state.world.province_get_mid_point(state.province_definitions.canal_provinces[canal_id]);
-				render_model(index, pos, theta, 0.f);
-			};
-			render_canal(3, 0, 0.f); //Kiel
-			render_canal(4, 1, glm::pi<float>() / 2.f), //Suez
-			render_canal(2, 2, 0.f); //Panama
-			*/
+#if 0
 			// Render armies
 			province::for_each_land_province(state, [&](dcon::province_id p) {
 				auto units = state.world.province_get_army_location_as_location(p);
@@ -1459,6 +1444,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 			});
+#endif
 			// Render navies
 			province::for_each_sea_province(state, [&](dcon::province_id p) {
 				auto units = state.world.province_get_navy_location_as_location(p);
@@ -2658,7 +2644,8 @@ void load_static_meshes(sys::state& state) {
 					auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(i));
 					auto const& udef = state.military_definitions.unit_base_definitions[utid];
 					auto sprite = state.to_string_view(udef.sprite_type);
-					if(type_name == parsers::lowercase_str(sprite)) {
+					if(!state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()]
+					&& type_name == parsers::lowercase_str(sprite)) {
 						state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()] = edef;
 					}
 				}
