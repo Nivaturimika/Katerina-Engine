@@ -1315,31 +1315,35 @@ TRIGGER_FUNCTION(tf_cash_reserves) {
 TRIGGER_FUNCTION(tf_unemployment_nation) {
 	auto total_employable = ws.world.nation_get_demographics(to_nation(primary_slot), demographics::employable);
 	auto total_employed = ws.world.nation_get_demographics(to_nation(primary_slot), demographics::employed);
-	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - (total_employed / total_employable), 0.0f),
+	auto ratio = total_employed / total_employable;
+	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - ratio, 0.0f),
 			read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_unemployment_state) {
 	auto total_employable = ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::employable);
 	auto total_employed = ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::employed);
-	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - (total_employed / total_employable), 0.0f),
+	auto ratio = total_employed / total_employable;
+	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - ratio, 0.0f),
 			read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_unemployment_province) {
 	auto total_employable = ws.world.province_get_demographics(to_prov(primary_slot), demographics::employable);
 	auto total_employed = ws.world.province_get_demographics(to_prov(primary_slot), demographics::employed);
-	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - (total_employed / total_employable), 0.0f),
-			read_float_from_payload(tval + 1));
+	auto ratio = total_employed / total_employable;
+	return compare_values(tval[0], ve::select(total_employable > 0.0f, 1.0f - ratio, 0.0f),
+		read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_unemployment_pop) {
-	auto employed = ws.world.pop_get_employment(to_pop(primary_slot));
-	auto total_pop = ws.world.pop_get_size(to_pop(primary_slot));
+	auto total_employed = ws.world.pop_get_employment(to_pop(primary_slot));
+	auto total_employable = ws.world.pop_get_size(to_pop(primary_slot));
 	auto ptype = ws.world.pop_get_poptype(to_pop(primary_slot));
-	return compare_values(tval[0], ve::select(ws.world.pop_type_get_has_unemployment(ptype), 1.0f - (employed / total_pop), 0.0f),
-			read_float_from_payload(tval + 1));
+	auto ratio = total_employed / total_employable;
+	return compare_values(tval[0], ve::select(ws.world.pop_type_get_has_unemployment(ptype), 1.0f - ratio, 0.0f),
+		read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_is_slave_nation) {
-	return compare_to_true(tval[0], (ws.world.nation_get_combined_issue_rules(to_nation(primary_slot)) &
-																			issue_rule::slavery_allowed) == issue_rule::slavery_allowed);
+	return compare_to_true(tval[0], (ws.world.nation_get_combined_issue_rules(to_nation(primary_slot))
+		& issue_rule::slavery_allowed) == issue_rule::slavery_allowed);
 }
 TRIGGER_FUNCTION(tf_is_slave_state) {
 	return compare_to_true(tval[0], ws.world.province_get_is_slave(ws.world.state_instance_get_capital(to_state(primary_slot))));
