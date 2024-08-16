@@ -3346,9 +3346,6 @@ void state::preload() {
 		p.set_state_membership(dcon::state_instance_id{});
 		p.set_is_owner_core(false);
 		p.set_is_blockaded(false);
-		p.set_landowners_share(0.f);
-		p.set_capitalists_share(0.f);
-		p.set_subsistence_score(0.f);
 	}
 	for(auto m : world.in_movement) {
 		m.set_pop_support(0.0f);
@@ -3806,9 +3803,6 @@ void state::single_game_tick() {
 	// basic repopulation of demographics derived values
 	demographics::regenerate_from_pop_data_daily(*this);
 
-	economy::update_land_ownership(*this);
-	economy::update_local_subsistence_factor(*this);
-
 	// values updates pass 1 (mostly trivial things, can be done in parallel)
 	concurrency::parallel_for(0, 17, [&](int32_t index) {
 		switch(index) {
@@ -3875,6 +3869,8 @@ void state::single_game_tick() {
 		}
 	});
 
+	economy::update_land_ownership(*this);
+	economy::update_local_subsistence_factor(*this);
 	economy::daily_update(*this, true);
 
 	military::recover_org(*this);
@@ -3913,7 +3909,7 @@ void state::single_game_tick() {
 	switch(ymd_date.day) {
 		case 1:
 			nations::update_monthly_points(*this);
-			//economy::prune_factories(*this);
+			economy::prune_factories(*this);
 			break;
 		case 2:
 			province::update_blockaded_cache(*this);
