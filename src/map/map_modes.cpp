@@ -396,14 +396,14 @@ std::vector<uint32_t> employment_map_from(sys::state& state) {
 				}
 			}
 			auto i = province::to_map_id(prov_id);
-			if(pw_total > 0.f && pw_employed > 0.f) {
+			if(pw_total > 0.f) {
 				uint32_t color = ogl::color_gradient(pw_employed / pw_total,
 					sys::pack_color(46, 247, 15), // green
 					sys::pack_color(247, 15, 15) // red
 				);
 				prov_color[i] = color;
 			}
-			if(sw_total > 0.f && sw_employed > 0.f) {
+			if(sw_total > 0.f) {
 				uint32_t color = ogl::color_gradient(sw_employed / sw_total,
 					sys::pack_color(46, 247, 15), // green
 					sys::pack_color(247, 15, 15) // red

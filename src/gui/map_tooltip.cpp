@@ -959,7 +959,9 @@ void con_map_tt_box(sys::state& state, text::columnar_layout& contents, dcon::pr
 	country_name_box(state, contents, prov);
 
 	if(prov.value < state.province_definitions.first_sea_province.value) {
-		float average_con = (fat.get_demographics(demographics::total) == 0.f ? 0.f : fat.get_demographics(demographics::consciousness) / fat.get_demographics(demographics::total));
+		auto value = fat.get_demographics(demographics::consciousness);
+		auto total = fat.get_demographics(demographics::total);
+		float average_con = total == 0.f ? 0.f : value / total;
 		text::add_line(state, contents, "mapmode_tooltip_con_average", text::variable_type::val, text::fp_one_place{ average_con });
 		ui::active_modifiers_description(state, contents, prov, 0, sys::provincial_mod_offsets::pop_consciousness_modifier, true);
 		ui::active_modifiers_description(state, contents, state.world.province_control_get_nation(state.world.province_get_province_control_as_province(prov)), 0, sys::national_mod_offsets::core_pop_consciousness_modifier, true);
