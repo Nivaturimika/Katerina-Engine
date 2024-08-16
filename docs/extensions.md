@@ -679,3 +679,194 @@ This created the `chechen`, `turkish` and `maghrebi` cultures as part of the `tu
 ## `tag = XXX` is equal to an `always = no`
 
 Triggers for tags that don't exist have the same behaviour of `always = no`.
+
+## Logical compounds
+
+Suppose the following trigger:
+
+```
+any_core = {
+	has_province_flag = XXX
+}
+```
+
+This returns false when there is no core that has this province flag.
+
+```
+all_core = {
+	has_province_flag = XXX
+}
+```
+
+This returns false when there is also no core that has this p-rovince flag.
+
+In KE, `NOT` logical statments are pushed down the logical tree, for example:
+
+```
+NOT = {
+	all_core = {
+		has_province_flag = XXX
+		owned_by = THIS
+	}
+}
+```
+
+Is internally converted into
+```
+all_core = {
+	NOT = {
+		has_province_flag = XXX
+		owned_by = THIS
+	}
+}
+```
+
+The `NOT = { all_core = { ... } }` can be read as "No core satisfies P" (where P is the predicament).
+
+The `all_core = { NOT = { ... } }` can be read as "In all cores, none satisfied P" (where P is the predicament).
+
+### Scope overview and optimizations
+
+To optimize we must first know our systems, hence, let's start with the basics:
+
+What's the similarity between `AND` and `OR`?
+
+`AND = { ... }` encapsulates all members and asks "All of the conditions within, satisfy all their predicaments?" - in plain English: "Does all the triggers inside the AND evaluate to `True`?"
+
+Whereas `OR = { ... }` asks "All of the conditions within, there is atleast one who satisfy their predicaments" - or "Atleast one trigger inside evaluates to `True`".
+
+If you look closely, you may notice a relationship between the negative versions of the scopes:
+
+| Statment | Some `F`/`T` | All `F` | All `T`
+|---|---|---|---|
+| `AND = { ... }` | `F` | `F` | `T` |
+| `OR = { ... }` | `T` | `F` | `T` |
+| `NOT = { AND = { ... } }` | `T` | `T` | `F` |
+| `NOT = { OR = { ... } }` | `F` | `T` | `F` |
+
+It's important to realize the properties of All `F`/`T` are applied to everry case, including the case with a single element (as some of one, is all - can you take "some" of one? No!).
+
+For the case of no elements however, none of the properties apply, and an implicit `T` is given (as opposed to iterative scopes such as `any_core`/`all_core` - who give a `F` when there are no elements).
+
+Let's now insert a predicate `P`, assume `P = { exists = yes tag = PRU }` for example, so wehn we say `AND = { P }`. It's interpreted as `AND = { exists = yes tag = PRU }`
+
+With that said, let's now begin using this imaginary predicate to uncover the relationships and convergences of logical statments:
+
+### Double negation (`NOT NOT`)
+
+First off, `NOT = { P }` is the same as `NOT = { NOT = { P } }`, double negation cancels out.
+
+### Logical scopes
+
+Now let's use the table above and insert a `NOT = { P }` in the `...` part of the scopes:
+
+| Statment | Some `F`/`T` | All `F` | All `T`
+|---|---|---|---|
+| `AND = { NOT = { P } }` | `F` | `F` | `T` |
+| `OR = { NOT = { P } }` | `T` | `F` | `T` |
+| `NOT = { AND = { NOT = { P } } }` | `T` | `T` | `F` |
+| `NOT = { OR = { NOT = { P } } }` | `F` | `T` | `F` |
+
+Huh? This is still true, but we might have forgotten that we're asking the final predicament results, rather than the internal composition.
+
+| Statment | P is `F` | P is `T`
+|---|---|---|
+| `AND = { P }` | `F` | `T` |
+| `OR = { P }` | `F` | `T` |
+| `NOT = { AND = { P }` | `T` | `F` |
+| `NOT = { OR = { P }` | `T` | `F` |
+
+As discussed above, properties of All `T`/`F` converge with a single element. Let's add another predicate, call it `P1` and `P2`.
+
+We'll denote `P1` and `P2` with a slash, first is `P1`, second is `P2`.
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+
+With careful observation, we can observe that double negating the results gives us back the original. This once again proves that double negation in our system will cancel itself out.
+
+When the predicaments are inverted, denoted with `!P1` and `!P2`:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+Remember, the header row is "inverted" too (and denotes the result of `P1` and `P2`), this then gets "inverted".
+
+The complete table looks as follows:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+We can notice a few similar cases:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+
+We have that `AND = { P1 P2 }` is the same as `NOT = { OR = { !P1 !P2 } }`, let's see if that's true:
+
+### Verifying
+
+Assume `P1 = { exists = yes }` and `P2 = { tag = PRU }`, hence, let's construct the `OR` logical scope:
+
+```
+NOT = {
+	OR = {
+		NOT = { exists = yes }
+		NOT = { tag = PRU }
+	}
+}
+```
+
+And for the `AND` scope:
+
+```
+AND = { exists = yes tag = PRU }
+```
+
+Let's do some induction then (`T` if the trigger returned `True`, `F` if it returned `False`):
+```
+NOT = { OR = { NOT = { F } NOT = { F } } -> NOT = { OR = { T T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { F } NOT = { T } } -> NOT = { OR = { T F } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { F } } -> NOT = { OR = { F T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { T } } -> NOT = { OR = { F F } } -> NOT = { F } -> T
+
+AND = { F F } -> F
+AND = { F T } -> F
+AND = { T F } -> F
+AND = { T T } -> T
+```
+
+Shocker! We were right, those are logically equivalent scopes!
