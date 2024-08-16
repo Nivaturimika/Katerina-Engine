@@ -2639,6 +2639,13 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 				err.fatal = true;
 				err.accumulated_errors += "Unable to identify factory worker types from production_types.txt\n";
 			}
+			if(!culture_definitions.primary_factory_worker) {
+				err.fatal = true;
+				err.accumulated_errors += "No primary factory worker!\n";
+			}
+			if(!culture_definitions.secondary_factory_worker) {
+				err.accumulated_errors += "No primary factory worker!\n";
+			}
 		} else {
 			err.fatal = true;
 			err.accumulated_errors += "File common/production_types.txt could not be opened\n";

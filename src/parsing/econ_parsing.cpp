@@ -154,10 +154,22 @@ void make_production_type(std::string_view name, token_generator& gen, error_han
 	auto pt = parse_production_type(gen, err, context);
 
 	if(!bool(pt.output_goods_)) { // must be a template
-		if(pt.type_ == production_type_enum::factory && !context.found_worker_types && pt.employees.employees.size() >= 2) {
-			context.outer_context.state.culture_definitions.primary_factory_worker = pt.employees.employees[0].type;
-			context.outer_context.state.culture_definitions.secondary_factory_worker = pt.employees.employees[1].type;
-			context.outer_context.state.economy_definitions.craftsmen_fraction = pt.employees.employees[0].amount;
+		if(pt.type_ == production_type_enum::factory && !pt.employees.employees.empty()) {
+			if(!context.outer_context.state.culture_definitions.primary_factory_worker) {
+				context.outer_context.state.culture_definitions.primary_factory_worker = pt.employees.employees[0].type;
+			}
+			if(!context.outer_context.state.culture_definitions.secondary_factory_worker) {
+				if(pt.employees.employees.size() >= 2) {
+					context.outer_context.state.culture_definitions.secondary_factory_worker = pt.employees.employees[1].type;
+					//override, likely 2 worker types at once, amount should've been >0.1?
+					context.outer_context.state.economy_definitions.craftsmen_fraction = std::clamp(pt.employees.employees[0].amount, 0.f, 1.f);
+				} else if(pt.employees.employees[0].type != context.outer_context.state.culture_definitions.primary_factory_worker) {
+					context.outer_context.state.culture_definitions.secondary_factory_worker = pt.employees.employees[0].type;
+				}
+			}
+			if(!context.found_worker_types) {
+				context.outer_context.state.economy_definitions.craftsmen_fraction = std::clamp(pt.employees.employees[0].amount, 0.f, 1.f);
+			}
 			context.found_worker_types = true;
 		}
 		if(pt.type_ == production_type_enum::rgo && bool(pt.owner.type)) {
