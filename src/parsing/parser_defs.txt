@@ -23,6 +23,7 @@ names_list
 	#free          value      text             member_fn
 
 culture
+	#any           extern     make_culture     discard
 	color          group      color_from_3i    member_fn
 	radicalism     value      int              member_fn
 	primary        value      none             discard

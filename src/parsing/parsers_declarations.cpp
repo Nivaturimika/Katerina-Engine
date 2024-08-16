@@ -470,24 +470,23 @@ void pop_history_definition::rebel_type(association_type, std::string_view value
 			it != context.outer_context.map_of_rebeltypes.end()) {
 		reb_id = it->second.id;
 	} else {
-		err.accumulated_errors +=
-				"Invalid rebel type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += "Invalid rebel type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 }
 
-void pop_province_list::any_group(std::string_view type, pop_history_definition const& def, error_handler& err, int32_t line,
-		pop_history_province_context& context) {
+void pop_province_list::any_group(std::string_view type, pop_history_definition const& def, error_handler& err, int32_t line, pop_history_province_context& context) {
 	dcon::pop_type_id ptype;
 	if(auto it = context.outer_context.map_of_poptypes.find(std::string(type)); it != context.outer_context.map_of_poptypes.end()) {
 		ptype = it->second;
 	} else {
 		err.accumulated_errors += "Invalid pop type " + std::string(type) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
 	}
 
 	if(float(def.size) == 0.f) {
 		err.accumulated_warnings += "Pop with zero size (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		return;
-	} else if(!(std::isfinite(float(def.size)) || float(def.size) >= 0.f)) {
+	} else if(!std::isfinite(float(def.size)) || def.size < 0) {
 		err.accumulated_errors += "Pop with invalid size " + std::to_string(float(def.size)) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		return;
 	}
@@ -499,15 +498,18 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 		err.accumulated_errors += "Pop with no religion (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		return;
 	}
+	auto final_militancy = def.militancy;
 	if(def.militancy < 0.f || def.militancy > 10.f) {
-		err.accumulated_errors += "Pop with too much militancy " + std::to_string(def.militancy) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
-		return;
+		err.accumulated_warnings += "Pop with too much militancy " + std::to_string(def.militancy) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		final_militancy = std::clamp(def.militancy, 0.f, 10.f);
+		//return;
 	}
 
 	for(auto pops_by_location : context.outer_context.state.world.province_get_pop_location(context.id)) {
 		auto pop_id = pops_by_location.get_pop();
 		if(pop_id.get_culture() == def.cul_id && pop_id.get_poptype() == ptype && pop_id.get_religion() == def.rel_id) {
-			pop_id.get_size() += float(def.size);
+			pop_id.set_size(float(def.size));
+			pop_id.set_militancy(final_militancy);
 			return; // done with this pop
 		}
 	}
@@ -517,7 +519,7 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 	new_pop.set_religion(def.rel_id);
 	new_pop.set_size(float(def.size));
 	new_pop.set_poptype(ptype);
-	new_pop.set_militancy(def.militancy);
+	new_pop.set_militancy(final_militancy);
 	// new_pop.set_rebel_group(def.reb_id);
 
 	auto pop_owner = context.outer_context.state.world.province_get_nation_from_province_ownership(context.id);

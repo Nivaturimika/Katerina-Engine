@@ -38,6 +38,20 @@ void make_culture(std::string_view name, token_generator& gen, error_handler& er
 	parse_culture(gen, err, new_context);
 }
 
+//recursive version
+void make_culture(std::string_view name, token_generator& gen, error_handler& err, culture_context& context) {
+	auto parent_group_id = context.outer_context.state.world.culture_get_group_from_culture_group_membership(context.id);
+
+	dcon::culture_id new_id = context.outer_context.state.world.create_culture();
+	auto name_id = text::find_or_add_key(context.outer_context.state, name, false);
+	context.outer_context.state.world.culture_set_name(new_id, name_id);
+	context.outer_context.state.world.force_create_culture_group_membership(new_id, parent_group_id);
+
+	context.outer_context.map_of_culture_names.insert_or_assign(std::string(name), new_id);
+	culture_context new_context{ new_id, context.outer_context };
+	parse_culture(gen, err, new_context);
+}
+
 void make_fn_list(token_generator& gen, error_handler& err, culture_context& context) {
 	names_context new_context{context.id, true, context.outer_context};
 	parse_names_list(gen, err, new_context);

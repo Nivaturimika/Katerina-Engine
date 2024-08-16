@@ -531,6 +531,7 @@ struct names_context {
 
 void make_culture_group(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context);
 void make_culture(std::string_view name, token_generator& gen, error_handler& err, culture_group_context& context);
+void make_culture(std::string_view name, token_generator& gen, error_handler& err, culture_context& context);
 void make_fn_list(token_generator& gen, error_handler& err, culture_context& context);
 void make_ln_list(token_generator& gen, error_handler& err, culture_context& context);
 
@@ -1601,8 +1602,7 @@ struct pop_history_definition {
 };
 
 struct pop_province_list {
-	void any_group(std::string_view type, pop_history_definition const& def, error_handler& err, int32_t line,
-			pop_history_province_context& context);
+	void any_group(std::string_view type, pop_history_definition const& def, error_handler& err, int32_t line, pop_history_province_context& context);
 	void finish(pop_history_province_context&) { }
 };
 
