@@ -552,10 +552,8 @@ float crime_fighting_efficiency(sys::state& state, dcon::province_id id) {
 }
 float revolt_risk(sys::state& state, dcon::province_id id) {
 	auto total_pop = state.world.province_get_demographics(id, demographics::total);
-	if(total_pop == 0) {
-		return 0;
-	}
-
+	if(total_pop == 0.f)
+		return 0.f;
 	auto militancy = state.world.province_get_demographics(id, demographics::militancy);
 	return militancy / total_pop;
 }

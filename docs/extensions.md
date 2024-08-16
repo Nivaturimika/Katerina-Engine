@@ -660,3 +660,22 @@ You can now define modular definitions, as if you "modified" the main file:
 
 - `common/event_modifiers`: Appends to `event_modifiers.txt`
 - `common/extra_countries`: Appends to `countries.txt`
+
+## Hierachical cultures
+
+This is half an extension and half a compatibility kludge. Due to a parser bug in the original game, the following was valid:
+
+```
+turko_semitic = {
+	chechen = { ... }
+	turkish = {
+		maghrebi = { ... }
+	}
+}
+```
+
+This created the `chechen`, `turkish` and `maghrebi` cultures as part of the `turko_semitic` culture group. This behaviour is replicated for compatibility purpouses.
+
+## `tag = XXX` is equal to an `always = no`
+
+Triggers for tags that don't exist have the same behaviour of `always = no`.
