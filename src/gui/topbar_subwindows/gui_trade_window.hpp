@@ -1251,10 +1251,17 @@ public:
 	}
 	void on_update(sys::state& state) noexcept override {
 		for(const auto& e : entries_element) {
-			dcon::comodity_id c = e->commodity_id;
+			dcon::commodity_id c = e->commodity_id ;
 			auto kf = state.world.commodity_get_key_factory(c);
-			if((state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(c, kf)) &&
-				(state.world.commodity_get_is_life_need(c) || state.world.commodity_get_is_everyday_need(c) || state.world.commodity_get_is_luxury_need(c)))){
+			bool is_active_globally = false;
+			for(const auto n : state.world.in_nation) {
+				if(n.get_active_building(kf)) {
+					is_active_globally = true;
+					break;
+				}
+			}
+			if((state.world.commodity_get_is_available_from_start(c) || is_active_globally) &&
+				(state.world.commodity_get_is_life_need(c) || state.world.commodity_get_is_everyday_need(c) || state.world.commodity_get_is_luxury_need(c))){
 				e->set_visible(state, true);
 			} else {
 				e->set_visible(state, false);
