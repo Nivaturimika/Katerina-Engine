@@ -448,9 +448,12 @@ struct split_ships_data {
 
 struct cheat_data {
 	float value;
+	dcon::nation_id target;
 };
 struct cheat_data_int {
 	int32_t value;
+	dcon::nation_id target;
+
 };
 struct cheat_event_data {
 	int32_t value;

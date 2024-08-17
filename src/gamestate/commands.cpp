@@ -5631,10 +5631,10 @@ void execute_command(sys::state& state, payload& c) {
 		execute_c_switch_nation(state, c.source, c.data.tag_target.ident);
 		break;
 	case command_type::c_change_diplo_points:
-		execute_c_change_diplo_points(state, c.source, c.data.cheat.value);
+		execute_c_change_diplo_points(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_change_money:
-		execute_c_change_money(state, c.source, c.data.cheat.value);
+		execute_c_change_money(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_westernize:
 		execute_c_westernize(state, c.source);
@@ -5649,13 +5649,13 @@ void execute_command(sys::state& state, payload& c) {
 		execute_c_change_controller(state, c.source, c.data.cheat_location.prov, c.data.cheat_location.n);
 		break;
 	case command_type::c_change_research_points:
-		execute_c_change_research_points(state, c.source, c.data.cheat.value);
+		execute_c_change_research_points(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_change_cb_progress:
-		execute_c_change_cb_progress(state, c.source, c.data.cheat.value);
+		execute_c_change_cb_progress(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_change_infamy:
-		execute_c_change_infamy(state, c.source, c.data.cheat.value);
+		execute_c_change_infamy(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_force_crisis:
 		execute_c_force_crisis(state, c.source);
@@ -5664,7 +5664,7 @@ void execute_command(sys::state& state, payload& c) {
 		execute_c_change_national_militancy(state, c.source, c.data.cheat.value);
 		break;
 	case command_type::c_change_prestige:
-		execute_c_change_prestige(state, c.source, c.data.cheat.value);
+		execute_c_change_prestige(state, c.source, c.data.cheat.value, c.data.cheat.target);
 		break;
 	case command_type::c_end_game:
 		execute_c_end_game(state, c.source);

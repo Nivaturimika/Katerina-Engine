@@ -38,27 +38,29 @@ void execute_c_switch_nation(sys::state& state, dcon::nation_id source, dcon::na
 	}
 }
 
-void c_change_diplo_points(sys::state& state, dcon::nation_id source, float value) {
+void c_change_diplo_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_diplo_points;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_diplo_points(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_diplomatic_points(source) += value;
+void execute_c_change_diplo_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_diplomatic_points(n ? n : source) += value;
 }
-void c_change_money(sys::state& state, dcon::nation_id source, float value) {
+void c_change_money(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_money;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_money(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_stockpiles(source, economy::money) += value;
+void execute_c_change_money(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_stockpiles(n ? n : source, economy::money) += value;
 }
 void c_westernize(sys::state& state, dcon::nation_id source) {
 	payload p;
@@ -80,38 +82,41 @@ void c_unwesternize(sys::state& state, dcon::nation_id source) {
 void execute_c_unwesternize(sys::state& state, dcon::nation_id source) {
 	state.world.nation_set_is_civilized(source, false);
 }
-void c_change_research_points(sys::state& state, dcon::nation_id source, float value) {
+void c_change_research_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_research_points;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_research_points(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_research_points(source) += value;
+void execute_c_change_research_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_research_points(n ? n : source) += value;
 }
-void c_change_cb_progress(sys::state& state, dcon::nation_id source, float value) {
+void c_change_cb_progress(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_cb_progress;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_cb_progress(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_constructing_cb_progress(source) += value;
+void execute_c_change_cb_progress(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_constructing_cb_progress(n ? n : source) += value;
 }
-void c_change_infamy(sys::state& state, dcon::nation_id source, float value) {
+void c_change_infamy(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_infamy;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_infamy(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_infamy(source) += value;
+void execute_c_change_infamy(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_infamy(n ? n : source) += value;
 }
 void c_end_game(sys::state& state, dcon::nation_id source) {
 	payload p;
@@ -254,16 +259,17 @@ void execute_c_force_ally(sys::state& state, dcon::nation_id source, dcon::natio
 	nations::make_alliance(state, source, target);
 }
 
-void c_change_prestige(sys::state& state, dcon::nation_id source, float value) {
+void c_change_prestige(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
 	p.type = command_type::c_change_prestige;
 	p.source = source;
 	p.data.cheat.value = value;
+	p.data.cheat.target = n;
 	add_to_command_queue(state, p);
 }
-void execute_c_change_prestige(sys::state& state, dcon::nation_id source, float value) {
-	state.world.nation_get_prestige(source) += value;
+void execute_c_change_prestige(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
+	state.world.nation_get_prestige(n ? n : source) += value;
 }
 
 void c_toggle_ai(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
