@@ -116,19 +116,19 @@ inline constexpr command_info possible_commands[] = {
 				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
 						command_info::argument_info{}}},
 		command_info{"dp", command_info::type::diplomacy_points, "Adds the specified number of diplo points",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		command_info{"rp", command_info::type::research_points, "Adds the specified number of research points",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		command_info{"inf", command_info::type::infamy, "Adds the specified number of infamy",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		command_info{"cbp", command_info::type::cb_progress, "Adds the specified % of progress towards CB fabrication",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		command_info{"money", command_info::type::money, "Adds the specified amount of money to the national treasury",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}, command_info::argument_info{}}},
 		command_info{"west", command_info::type::westernize, "Westernizes",
 				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
@@ -151,7 +151,7 @@ inline constexpr command_info possible_commands[] = {
 				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
 						command_info::argument_info{}}},
 		command_info{"pr", command_info::type::prestige, "Increases prestige by amount",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
 						command_info::argument_info{}}},
 		command_info{"oos", command_info::type::dump_out_of_sync, "Dump an OOS save",
 				{command_info::argument_info{}, command_info::argument_info{},
@@ -1078,19 +1078,49 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 				"Blue");
 		break;
 	case command_info::type::diplomacy_points:
-		command::c_change_diplo_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_diplo_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_diplo_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{ });
+		}
 		break;
 	case command_info::type::research_points:
-		command::c_change_research_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_research_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_research_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+		}
 		break;
 	case command_info::type::money:
-		command::c_change_money(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_money(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_money(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{ });
+		}
 		break;
 	case command_info::type::infamy:
-		command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+		}
 		break;
 	case command_info::type::cb_progress:
-		command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+		}
 		break;
 	case command_info::type::westernize:
 		command::c_westernize(state, state.local_player_nation);
@@ -1127,7 +1157,13 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		command::c_change_national_militancy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
 		break;
 	case command_info::type::prestige:
-		command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+		} else {
+			command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+		}
 		break;
 	case command_info::type::force_ally:
 	{
