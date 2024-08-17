@@ -1775,8 +1775,8 @@ struct trigger_body {
 
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors +=
-					"primary_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
+			err.accumulated_errors += "primary_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void total_sunk_by_us(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
@@ -1816,8 +1816,8 @@ struct trigger_body {
 
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors += "accepted_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
+			err.accumulated_errors += "accepted_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void pop_majority_religion(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
@@ -1862,8 +1862,8 @@ struct trigger_body {
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors += "pop_majority_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
+			err.accumulated_errors += "pop_majority_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void pop_majority_issue(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
@@ -2021,8 +2021,8 @@ struct trigger_body {
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors +=
-					"culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
+			err.accumulated_errors += "culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void has_pop_culture(association_type a, std::string_view value, error_handler& err, int32_t line,
@@ -2030,27 +2030,23 @@ struct trigger_body {
 		if(is_this(value)) {
 			if(context.this_slot == trigger::slot_contents::pop) {
 				if(context.main_slot == trigger::slot_contents::nation)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_culture_nation_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_culture_nation_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::pop)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_culture_pop_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_culture_pop_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::state)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_culture_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_culture_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::province)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_culture_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_culture_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else {
 					err.accumulated_errors += "has_pop_culture = this trigger used in an incorrect scope type " +
-																		slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																		std::to_string(line) + ")\n";
+						slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+						std::to_string(line) + ")\n";
 					return;
 				}
 			} else {
 				err.accumulated_errors += "has_pop_culture = this trigger used in an incorrect scope type " +
-																	slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+					std::to_string(line) + ")\n";
 				return;
 			}
 		} else if(auto it = context.outer_context.map_of_culture_names.find(std::string(value));
@@ -2065,14 +2061,14 @@ struct trigger_body {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_pop_culture_pop | association_to_bool_code(a)));
 			} else {
 				err.accumulated_errors += "has_pop_culture trigger used in an incorrect scope type " +
-																	slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+					std::to_string(line) + ")\n";
 				return;
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors +=
-					"has_pop_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
+			err.accumulated_errors += "has_pop_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void has_pop_religion(association_type a, std::string_view value, error_handler& err, int32_t line,
@@ -2245,8 +2241,9 @@ struct trigger_body {
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors += "culture_group trigger supplied with an invalid culture group \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+				std::to_string(line) + ")\n";
 		}
 	}
 
@@ -2482,10 +2479,12 @@ struct trigger_body {
 				}
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"have_core_in trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 				"have_core_in trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
@@ -2559,10 +2558,12 @@ struct trigger_body {
 				}
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"is_cultural_union trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 					"is_cultural_union trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
@@ -2766,6 +2767,7 @@ struct trigger_body {
 				context.compiled_trigger.push_back(uint16_t(trigger::is_core_tag | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"is_core trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
@@ -2774,6 +2776,7 @@ struct trigger_body {
 				context.compiled_trigger.push_back(uint16_t(trigger::is_core_state_tag | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"is_core trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
@@ -2782,10 +2785,12 @@ struct trigger_body {
 				context.compiled_trigger.push_back(uint16_t(trigger::is_core_pop_tag | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"is_core trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 					"is_core trigger supplied with an invalid argument \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
@@ -2923,10 +2928,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::owned_by_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"owned_by trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"owned_by trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -2967,10 +2974,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::owned_by_state_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"owned_by trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"owned_by trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -3000,11 +3009,13 @@ struct trigger_body {
 				context.compiled_trigger.push_back(uint16_t(trigger::exists_tag | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"exists trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 					"exists trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
@@ -3217,10 +3228,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::casus_belli_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"casus_belli trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"casus_belli trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -3271,10 +3284,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::military_access_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"military_access trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"military_access trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -3669,10 +3684,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::stronger_army_than_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"stronger_army_than trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"stronger_army_than trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -3717,10 +3734,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::neighbour_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"neighbour trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"neighbour trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -3769,10 +3788,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"country_units_in_state trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"country_units_in_state trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
@@ -3823,10 +3844,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"units_in_province trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"units_in_province trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
@@ -3874,10 +3897,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::war_with_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"war_with trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"war_with trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4364,10 +4389,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::in_sphere_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"in_sphere trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"in_sphere trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4631,10 +4658,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::controlled_by_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"controlled_by trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"controlled_by trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4684,10 +4713,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::truce_with_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"truce_with trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"truce_with trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4737,10 +4768,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::is_sphere_leader_of_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "is_sphere_leader_of trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " +
 																		std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "is_sphere_leader_of trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " +
 																	std::to_string(line) + ")\n";
 				return;
@@ -4790,10 +4823,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::constructing_cb_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"constructing_cb trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"constructing_cb trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4835,9 +4870,11 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::vassal_of_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "vassal_of trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "vassal_of trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
@@ -4870,9 +4907,11 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::vassal_of_province_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "vassal_of trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "vassal_of trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
@@ -4920,10 +4959,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::substate_of_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"substate_of trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"substate_of trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -4973,10 +5014,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::is_our_vassal_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"is_our_vassal trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"is_our_vassal trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -5017,10 +5060,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::is_our_vassal_province_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 						"is_our_vassal trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 					"is_our_vassal trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -5089,10 +5134,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::this_culture_union_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "this_culture_union trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " +
 																		std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "this_culture_union trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " +
 																	std::to_string(line) + ")\n";
 				return;
@@ -5142,10 +5189,12 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::alliance_with_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors +=
 							"alliance_with trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"alliance_with trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
@@ -5195,9 +5244,11 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::in_default_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "in_default trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "in_default trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
@@ -5245,6 +5296,7 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::industrial_score_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "industrial_score trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
@@ -5296,6 +5348,7 @@ struct trigger_body {
 					context.compiled_trigger.push_back(uint16_t(trigger::military_score_tag | association_to_bool_code(a)));
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
+					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "military_score trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
@@ -5351,10 +5404,12 @@ struct trigger_body {
 				}
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "is_possible_vassal trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " +
 																	std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 					"is_possible_vassal trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
@@ -5402,10 +5457,12 @@ struct trigger_body {
 				context.compiled_trigger.push_back(trigger::payload(uint16_t(value.value_)).value);
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors += "diplomatic_influence trigger supplied with an invalid tag \"" + std::string(value.who) + "\" (" + err.file_name + ", line " +
 																	std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors += "diplomatic_influence trigger supplied with an invalid tag \"" + std::string(value.who) + "\" (" + err.file_name + ", line " +
 																std::to_string(line) + ")\n";
 			return;
@@ -5512,10 +5569,12 @@ struct trigger_body {
 				context.compiled_trigger.push_back(trigger::payload(int16_t(value.value_)).value);
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 				err.accumulated_errors +=
 						"relation trigger supplied with an invalid tag \"" + std::string(value.who) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 		} else {
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			err.accumulated_errors +=
 					"relation trigger supplied with an invalid tag \"" + std::string(value.who) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;

@@ -2217,8 +2217,7 @@ struct effect_body {
 	}
 	void reduce_pop(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(value < 0.f) {
-			err.accumulated_warnings +=
-				"reduce_pop effect with a negative value (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_warnings += "reduce_pop effect with a negative value (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 		value = std::max(0.0f, value);
 		if(context.main_slot == trigger::slot_contents::pop) {
@@ -2234,8 +2233,7 @@ struct effect_body {
 			context.compiled_effect.push_back(uint16_t(effect::reduce_pop_state));
 			context.add_float_to_payload(value);
 		} else {
-			err.accumulated_errors +=
-					"reduce_pop effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "reduce_pop effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
