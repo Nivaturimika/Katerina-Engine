@@ -2443,34 +2443,41 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	// load pop history files
 	{
 		auto pop_history = open_directory(history, NATIVE("pops"));
-		auto startdate = current_date.to_ymd(start_date);
-		auto start_dir_name = to_native_string(startdate.year) + NATIVE(".") + to_native_string(startdate.month) + NATIVE(".") + to_native_string(startdate.day);
-		auto date_directory = open_directory(pop_history, start_dir_name);
-		// NICK: 
-		// Attempts to look through the start date as defined by the mod.
-		// If it does not find any pop files there, it defaults to looking through 1836.1.1
-		// This is to deal with mods that have their start date defined as something else, but have pop history within 1836.1.1 (converters).
-		auto directory_file_count = list_files(date_directory, NATIVE(".txt")).size();
-		if(directory_file_count == 0)
-			date_directory = open_directory(pop_history, NATIVE("1836.1.1"));
-		for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
-			auto opened_file = open_file(pop_file);
-			if(opened_file) {
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
-				auto content = view_contents(*opened_file);
-				parsers::token_generator gen(content.data, content.data + content.file_size);
-				parsers::parse_pop_history_file(gen, err, context);
+		//
+		std::vector<native_string> date_directories;
+		//
+		auto ymd = current_date.to_ymd(start_date);
+		auto start_dir_name = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
+		date_directories.emplace_back(start_dir_name);
+		//
+		date_directories.emplace_back(NATIVE("1836.1.1"));
+		//
+		for(const auto& dir_name : date_directories) {
+			auto date_directory = open_directory(pop_history, dir_name);
+			// NICK: 
+			// Attempts to look through the start date as defined by the mod.
+			// If it does not find any pop files there, it defaults to looking through 1836.1.1
+			// This is to deal with mods that have their start date defined as something else
+			// But have pop history within 1836.1.1 (converters).
+			for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
+				auto opened_file = open_file(pop_file);
+				if(opened_file) {
+					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					auto content = view_contents(*opened_file);
+					parsers::token_generator gen(content.data, content.data + content.file_size);
+					parsers::parse_pop_history_file(gen, err, context);
+				}
 			}
-		}
-		// Modding extension:
-		// Support loading pops from a CSV file, this to condense them better and allow
-		// for them to load faster and better ordered, editable with a spreadsheet program
-		for(auto pop_file : list_files(date_directory, NATIVE(".csv"))) {
-			auto opened_file = open_file(pop_file);
-			if(opened_file) {
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
-				auto content = view_contents(*opened_file);
-				parsers::parse_csv_pop_history_file(*this, content.data, content.data + content.file_size, err, context);
+			// Modding extension:
+			// Support loading pops from a CSV file, this to condense them better and allow
+			// for them to load faster and better ordered, editable with a spreadsheet program
+			for(auto pop_file : list_files(date_directory, NATIVE(".csv"))) {
+				auto opened_file = open_file(pop_file);
+				if(opened_file) {
+					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					auto content = view_contents(*opened_file);
+					parsers::parse_csv_pop_history_file(*this, content.data, content.data + content.file_size, err, context);
+				}
 			}
 		}
 	}
