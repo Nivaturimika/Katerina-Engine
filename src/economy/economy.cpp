@@ -3551,7 +3551,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		} else {
 			price_speed *= math::sqrt(current_price);
 		}
-		if (demand > 0.1f)
+		if (demand > 0.1f && supply > 0.1f)
 			current_price += price_speed;
 		state.world.commodity_set_current_price(cid, std::clamp(current_price, 0.01f, 1000.0f));
 	});
