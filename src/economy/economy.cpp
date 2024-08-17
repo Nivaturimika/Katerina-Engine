@@ -822,15 +822,8 @@ float effective_tariff_rate(sys::state& state, dcon::nation_id n) {
 }
 
 float global_market_price_multiplier(sys::state& state, dcon::nation_id n) {
-	auto central_ports = state.world.nation_get_central_ports(n);
-	auto tariff = float(state.world.nation_get_tariffs(n)) / 100.0f;
-	if(central_ports > 0) {
-		if(float(state.world.nation_get_central_blockaded(n)) > 0) {
-			return 1.f + tariff + float(state.world.nation_get_central_blockaded(n)) / float(central_ports);
-		}
-		return std::max(0.5f, 1.f + tariff - std::min(1.f, float(central_ports) / 4.f));
-	}
-	return 1.5f + tariff; //x1.5 for landlocked nations or w/o ports
+	float i_mod = std::clamp(1.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::import_cost), 0.01f, 1.f);
+	return effective_tariff_rate(state, n) * i_mod;
 }
 
 void update_factory_triggered_modifiers(sys::state& state) {
@@ -1317,7 +1310,6 @@ float factory_e_input_total_cost(sys::state& state, dcon::nation_id n, dcon::fac
 			break;
 		}
 	}
-
 	return e_input_total;
 }
 
@@ -3469,15 +3461,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		state.world.nation_get_stockpiles(n, economy::money) += collected_tax;
 		{
 			/* collect tariffs */
-			auto tariff_rate = effective_tariff_rate(state, n);
-			assert(tariff_rate >= -1.f && tariff_rate <= 1.f);
-			float t_total = 0.0f;
-			for(uint32_t k = 1; k < total_commodities; ++k) {
-				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(k) };
-				t_total += state.world.commodity_get_current_price(cid) * tariff_rate * state.world.nation_get_imports(n, cid);
-			}
+			float t_total = effective_tariff_rate(state, n) * nation_total_imports(state, n);
 			assert(std::isfinite(t_total));
-			assert(t_total >= 0);
+			assert(t_total >= 0.f);
 			state.world.nation_get_stockpiles(n, economy::money) += t_total;
 		}
 
