@@ -1228,28 +1228,18 @@ class trade_commodity_group_window : public window_element_base {
 public:
 	void on_create(sys::state& state) noexcept override {
 		window_element_base::on_create(state);
-		xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("goods_entry_offset"))->second.definition].position;
-		xy_pair offset{0, 0};
 		state.world.for_each_commodity([&](dcon::commodity_id id) {			
 			if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != Group)
 				return;
 			auto ptr = make_element_by_type<trade_commodity_entry>(state, state.ui_state.defs_by_name.find(state.lookup_key("goods_entry"))->second.definition);
 			ptr->commodity_id = id;
-			ptr->base_data.position = offset;
-			offset.x += cell_size.x;
-			if(offset.x + cell_size.x - 1 >= base_data.size.x) {
-				offset.x = 0;
-				offset.y += cell_size.y;
-				if(offset.y + cell_size.y >= base_data.size.y) {
-					offset.x += cell_size.x;
-					offset.y = 0;
-				}
-			}
 			entries_element.push_back(ptr.get());
 			add_child_to_front(std::move(ptr));
 		});
 	}
 	void on_update(sys::state& state) noexcept override {
+		xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("goods_entry_offset"))->second.definition].position;
+		xy_pair offset{ 0, 0 };
 		for(const auto& e : entries_element) {
 			dcon::commodity_id c = e->commodity_id ;
 			auto kf = state.world.commodity_get_key_factory(c);
@@ -1260,13 +1250,22 @@ public:
 					break;
 				}
 			}
-			if((state.world.commodity_get_is_available_from_start(c) || is_active_globally) &&
-				(state.world.commodity_get_is_life_need(c) || state.world.commodity_get_is_everyday_need(c) || state.world.commodity_get_is_luxury_need(c))){
+			if((state.world.commodity_get_is_available_from_start(c) || is_active_globally)
+			&& (state.world.commodity_get_is_life_need(c) || state.world.commodity_get_is_everyday_need(c) || state.world.commodity_get_is_luxury_need(c))){
+				e->base_data.position = offset;
+				offset.x += cell_size.x;
+				if(offset.x + cell_size.x - 1 >= base_data.size.x) {
+					offset.x = 0;
+					offset.y += cell_size.y;
+					if(offset.y + cell_size.y >= base_data.size.y) {
+						offset.x += cell_size.x;
+						offset.y = 0;
+					}
+				}
 				e->set_visible(state, true);
 			} else {
 				e->set_visible(state, false);
 			}
-
 		}
 	}
 };
