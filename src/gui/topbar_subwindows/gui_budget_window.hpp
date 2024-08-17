@@ -583,10 +583,8 @@ public:
 			change_settings(state, new_settings);
 		} break;
 		case budget_slider_target::tariffs: {
-			auto min_tariff = int32_t(
-					100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tariff));
-			auto max_tariff = int32_t(
-					100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tariff));
+			auto min_tariff = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tariff));
+			auto max_tariff = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tariff));
 			max_tariff = std::max(min_tariff, max_tariff);
 
 			mutable_scrollbar_settings new_settings;
