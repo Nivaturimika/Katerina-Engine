@@ -1255,8 +1255,8 @@ public:
 			for(const auto ft : state.world.in_factory_type) {
 				auto cset = ft.get_inputs();
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
-					if(cset[i].type) {
-						if(cset[i].type == c) {
+					if(cset.commodity_type[i]) {
+						if(cset.commodity_type[i] == c) {
 							is_used_as_input = true;
 							break;
 						}
