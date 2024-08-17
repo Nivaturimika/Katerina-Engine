@@ -3876,8 +3876,6 @@ void state::single_game_tick() {
 		}
 	});
 
-	economy::update_land_ownership(*this);
-	economy::update_local_subsistence_factor(*this);
 	economy::daily_update(*this, true);
 
 	military::recover_org(*this);
