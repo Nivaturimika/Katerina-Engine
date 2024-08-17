@@ -483,7 +483,7 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 		return;
 	}
 	if(!std::isfinite(float(def.size)) || def.size <= 0) {
-		err.accumulated_errors += "Pop with invalid size " + std::to_string(float(def.size)) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_warnings += "Pop with invalid size " + std::to_string(float(def.size)) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		return;
 	}
 	auto final_cul_id = def.cul_id;
