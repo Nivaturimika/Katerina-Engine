@@ -1037,66 +1037,13 @@ public:
 };
 
 class diplomacy_action_justify_war_button : public button_element_base {
-	bool has_any_usable_cb(sys::state& state, dcon::nation_id target) noexcept {
-		dcon::nation_id content = target;
-		auto w = military::find_war_between(state, state.local_player_nation, content);
-		if(w) { // war is ongoing
-			for(auto cb_type : state.world.in_cb_type) {
-				// prevent duplicate war goals
-				if(!military::cb_requires_selection_of_a_liberatable_tag(state, cb_type) && !military::cb_requires_selection_of_a_state(state, cb_type) && !military::cb_requires_selection_of_a_valid_nation(state, cb_type)) {
-					if(military::war_goal_would_be_duplicate(state, state.local_player_nation, w, content, cb_type, dcon::state_definition_id{}, dcon::national_identity_id{}, dcon::nation_id{}))
-						continue;
-				}
-				if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::always) == 0 && military::cb_conditions_satisfied(state, state.local_player_nation, content, cb_type)) {
-					bool cb_fabbed = false;
-					for(auto& fab_cb : state.world.nation_get_available_cbs(state.local_player_nation)) {
-						if(fab_cb.cb_type == cb_type && fab_cb.target == content) {
-							cb_fabbed = true;
-							break;
-						}
-					}
-					if(!cb_fabbed) {
-						if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::is_not_constructing_cb) != 0)
-							continue; // can only add a constructable cb this way
-						auto totalpop = state.world.nation_get_demographics(state.local_player_nation, demographics::total);
-						auto jingoism_perc = totalpop > 0 ? state.world.nation_get_demographics(state.local_player_nation, demographics::to_key(state, state.culture_definitions.jingoism)) / totalpop : 0.0f;
-						if(state.world.war_get_is_great(w)) {
-							if(jingoism_perc >= state.defines.wargoal_jingoism_requirement * state.defines.gw_wargoal_jingoism_requirement_mod) {
-								return true;
-							}
-						} else {
-							if(jingoism_perc >= state.defines.wargoal_jingoism_requirement) {
-								return true;
-							}
-						}
-					} else {
-						return true;
-					}
-				} else { // this is an always CB
-					if(military::cb_conditions_satisfied(state, state.local_player_nation, content, cb_type) && military::can_add_always_cb_to_war(state, state.local_player_nation, content, cb_type, w)) {
-						return true;
-					}
-				}
-			}
-		} else { // this is a declare war action
-			auto other_cbs = state.world.nation_get_available_cbs(state.local_player_nation);
-			for(auto cb : state.world.in_cb_type) {
-				bool can_use = military::cb_conditions_satisfied(state, state.local_player_nation, content, cb) || [&]() {
-					if((cb.get_type_bits() & military::cb_flag::always) != 0) {
-						return true;
-					}
-					for(auto& fabbed : other_cbs) {
-						if(fabbed.cb_type == cb && fabbed.target == content)
-							return true;
-					}
-					return false;
-				}();
-				if(can_use) {
-					return true;
-				}
-			}
-		}
-		return false;
+	bool has_any_usable_cb(sys::state& state, dcon::nation_id source, dcon::nation_id target) noexcept {
+		auto res = false;
+		state.world.for_each_cb_type([&](dcon::cb_type_id cb) {
+			if(command::can_fabricate_cb(state, source, target, cb))
+				res = true;
+		});
+		return res;
 	}
 public:
 	void on_create(sys::state& state) noexcept override {
@@ -1124,7 +1071,7 @@ public:
 			disabled = true;
 		else if(military::has_truce_with(state, target, source))
 			disabled = true;
-		else if(!has_any_usable_cb(state, target))
+		else if(!has_any_usable_cb(state, source, target))
 			disabled = true;
 	}
 
@@ -1155,7 +1102,7 @@ public:
 		text::add_line_with_condition(state, contents, "fab_explain_4", !state.world.overlord_get_ruler(ol) || state.world.overlord_get_ruler(ol) == target);
 		text::add_line_with_condition(state, contents, "fab_explain_5", state.world.nation_get_in_sphere_of(target) != source);
 		text::add_line_with_condition(state, contents, "fab_explain_6", !military::are_at_war(state, target, source));
-		text::add_line_with_condition(state, contents, "fab_explain_7", has_any_usable_cb(state, target));
+		text::add_line_with_condition(state, contents, "fab_explain_7", has_any_usable_cb(state, source, target));
 		text::add_line_with_condition(state, contents, "fab_explain_8", !military::has_truce_with(state, target, source));
 	}
 };
