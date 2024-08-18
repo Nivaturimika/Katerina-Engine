@@ -823,7 +823,7 @@ float effective_tariff_rate(sys::state& state, dcon::nation_id n) {
 
 float global_market_price_multiplier(sys::state& state, dcon::nation_id n) {
 	float i_mod = std::clamp(1.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::import_cost), 0.01f, 1.f);
-	return effective_tariff_rate(state, n) * i_mod;
+	return effective_tariff_rate(state, n) + i_mod;
 }
 
 void update_factory_triggered_modifiers(sys::state& state) {
