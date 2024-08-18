@@ -3267,10 +3267,16 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		if(!p.get_state_membership()
 		&& (p.get_nation_from_province_ownership() || p.get_nation_from_province_control())) {
 			err.accumulated_errors += "Ownership of a province " + std::to_string(context.prov_id_to_original_id_map[p].id) + " without an assigned state\n";
+			auto sdef = world.create_state_definition();
+			auto sid = world.create_state_instance();
+			world.state_instance_set_definition(sid, sdef);
+			auto smb = world.try_create_abstract_state_membership(p, sdef);
+			/*
 			world.delete_province_ownership(p.get_province_ownership());
 			if(p.get_province_control()) {
 				world.delete_province_control(p.get_province_control());
 			}
+			*/
 		}
 	}
 

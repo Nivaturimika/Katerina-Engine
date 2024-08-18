@@ -163,11 +163,11 @@ void restore_cached_values(sys::state& state) {
 	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_is_colonial_nation(ids, ve::mask_vector()); });
 
 	// need to set owner cores first because capital selection depends on them
-
 	for(auto n : state.world.in_nation) {
-		auto orange = n.get_province_ownership();
-		n.set_owned_province_count(uint16_t(orange.end() - orange.begin()));
+		auto po = n.get_province_ownership();
+		n.set_owned_province_count(uint16_t(po.end() - po.begin()));
 	}
+
 
 	for(int32_t i = 0; i < state.province_definitions.first_sea_province.index(); ++i) {
 		dcon::province_id pid{dcon::province_id::value_base_t(i)};
@@ -195,12 +195,9 @@ void restore_cached_values(sys::state& state) {
 
 	for(int32_t i = 0; i < state.province_definitions.first_sea_province.index(); ++i) {
 		dcon::province_id pid{dcon::province_id::value_base_t(i)};
-
 		auto owner = state.world.province_get_nation_from_province_ownership(pid);
 		if(owner) {
-
 			bool reb_controlled = bool(state.world.province_get_rebel_faction_from_province_rebel_control(pid));
-
 			if(reb_controlled) {
 				state.world.nation_get_rebel_controlled_count(owner) += uint16_t(1);
 			}
