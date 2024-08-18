@@ -1388,8 +1388,7 @@ struct effect_body {
 				else if(context.this_slot == trigger::slot_contents::pop)
 					context.compiled_effect.push_back(uint16_t(effect::annex_to_this_pop | effect::no_payload));
 				else {
-					err.accumulated_errors += "annex_to = this effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-						std::to_string(line) + ")\n";
+					err.accumulated_errors += "annex_to = this effect used in an incorrect scope type " + slot_contents_to_string(context.this_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(is_from(value)) {
@@ -1398,8 +1397,8 @@ struct effect_body {
 				else if(context.from_slot == trigger::slot_contents::province)
 					context.compiled_effect.push_back(uint16_t(effect::annex_to_from_province | effect::no_payload));
 				else {
-					err.accumulated_errors += "annex_to = from effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-						std::to_string(line) + ")\n";
+					context.compiled_effect.push_back(uint16_t(effect::annex_to_null_nation | effect::no_payload));
+					err.accumulated_errors += "annex_to = from effect used in an incorrect scope type - will assume null " + slot_contents_to_string(context.from_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(value.length() == 3) {
