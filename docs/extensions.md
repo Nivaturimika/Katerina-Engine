@@ -718,6 +718,11 @@ List of triggers that get materialized into `always = no` when invalid:
 - `diplomatic_influence`
 - `relation`
 
+Note that the following have special behaviour:
+
+- `has_province_modifier`: Behaves as `always = no`
+- `has_country_modifier`: Behaves as `always = yes`
+
 ## Logical compounds
 
 Suppose the following trigger:

@@ -3416,8 +3416,7 @@ struct trigger_body {
 	}
 	void is_blockaded(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_trigger.push_back(
-					uint16_t(trigger::is_blockaded | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::is_blockaded | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
 			err.accumulated_errors += "is_blockaded trigger used in an incorrect scope type " +
 																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
@@ -3442,8 +3441,7 @@ struct trigger_body {
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors += "has_country_modifier trigger supplied with an invalid modifier \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_country_modifier trigger supplied with an invalid modifier \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void has_province_modifier(association_type a, std::string_view value, error_handler& err, int32_t line,
@@ -3460,8 +3458,8 @@ struct trigger_body {
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors += "has_province_modifier trigger supplied with an invalid modifier \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_province_modifier trigger supplied with an invalid modifier \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 		}
 	}
 	void nationalvalue(association_type a, std::string_view value, error_handler& err, int32_t line,
