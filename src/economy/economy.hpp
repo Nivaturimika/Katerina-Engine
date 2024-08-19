@@ -22,7 +22,7 @@ struct building_information {
 	dcon::text_key name;
 	dcon::modifier_id province_modifier;
 	uint16_t padding2 = 0;
-	uint8_t defined = false;
+	bool defined = false;
 	uint8_t padding[3] = { 0 };
 };
 
