@@ -561,8 +561,7 @@ void poptype_file::strata(association_type, std::string_view value, error_handle
 	else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "poor"))
 		context.outer_context.state.world.pop_type_set_strata(context.id, uint8_t(::culture::pop_strata::poor));
 	else {
-		err.accumulated_errors +=
-				"Invalid pop strata " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += "Invalid pop strata " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 }
 
@@ -643,22 +642,40 @@ void poptype_file::equivalent(association_type, std::string_view value, error_ha
 
 void poptype_file::life_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-		if(cid.index() < value.data.ssize())
-			context.outer_context.state.world.pop_type_set_life_needs(context.id, cid, value.data[cid]);
+		if(cid.index() < value.data.ssize()) {
+			auto v = value.data[cid];
+			if(v > 1000.f) {
+				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+				v = 1000.f;
+			}
+			context.outer_context.state.world.pop_type_set_life_needs(context.id, cid, v);
+		}
 	});
 }
 
 void poptype_file::everyday_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-		if(cid.index() < value.data.ssize())
-			context.outer_context.state.world.pop_type_set_everyday_needs(context.id, cid, value.data[cid]);
+		if(cid.index() < value.data.ssize()) {
+			auto v = value.data[cid];
+			if(v > 1000.f) {
+				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+				v = 1000.f;
+			}
+			context.outer_context.state.world.pop_type_set_everyday_needs(context.id, cid, v);
+		}
 	});
 }
 
 void poptype_file::luxury_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-		if(cid.index() < value.data.ssize())
-			context.outer_context.state.world.pop_type_set_luxury_needs(context.id, cid, value.data[cid]);
+		if(cid.index() < value.data.ssize()) {
+			auto v = value.data[cid];
+			if(v > 1000.f) {
+				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+				v = 1000.f;
+			}
+			context.outer_context.state.world.pop_type_set_luxury_needs(context.id, cid, v);
+		}
 	});
 }
 
