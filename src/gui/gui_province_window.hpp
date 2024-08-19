@@ -716,9 +716,13 @@ class province_building_window : public window_element_base {
 		case economy::province_building_type::railroad:
 			return "build_icon2";
 		case economy::province_building_type::bank:
+		case economy::province_building_type::urban_center:
 			return "build_icon3";
 		case economy::province_building_type::university:
+		case economy::province_building_type::farmland:
 			return "build_icon4";
+		case economy::province_building_type::mine:
+			return "build_icon5";
 		default:
 			return "build_icon0";
 		}
@@ -1107,6 +1111,12 @@ public:
 			return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::bank>>(state, id);
 		} else if(name == "build_icon_university") {
 			return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::university>>(state, id);
+		} else if(name == "build_icon_urban_center") {
+			return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::urban_center>>(state, id);
+		} else if(name == "build_icon_farmland") {
+			return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::farmland>>(state, id);
+		} else if(name == "build_icon_mine") {
+			return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::mine>>(state, id);
 		} else if(name == "infra_progress_win") {
 			return make_element_by_type<rr_invest_inwdow>(state, id);
 		} else if(name == "invest_build_infra") {
