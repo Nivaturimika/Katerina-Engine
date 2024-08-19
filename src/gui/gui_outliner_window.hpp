@@ -441,22 +441,30 @@ public:
 		} else if(std::holds_alternative<dcon::province_land_construction_id>(content)) {
 			auto plcid = std::get<dcon::province_land_construction_id>(content);
 			auto utid = state.world.province_land_construction_get_type(plcid);
-			auto name = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
-			float progress = economy::unit_construction_progress(state, plcid);
-
-			auto full_str = text::produce_simple_string(state, name) + " (" + text::format_percentage(progress, 0) + ")";
-
-			color = text::text_color::white;
-			set_text(state, full_str);
+			if(utid) {
+				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+				float progress = economy::unit_construction_progress(state, plcid);
+				auto pop = state.world.province_land_construction_get_pop(plcid);
+				auto province = state.world.pop_get_province_from_pop_location(pop);
+				auto full_str = text::produce_simple_string(state, unitname)
+					+ " - " + text::produce_simple_string(state, state.world.province_get_name(province))
+					+ " (" + text::format_percentage(progress, 0) + ")";
+				color = text::text_color::white;
+				set_text(state, full_str);
+			}
 		} else if(std::holds_alternative<dcon::province_naval_construction_id>(content)) {
 			auto pncid = std::get<dcon::province_naval_construction_id>(content);
 			auto utid = state.world.province_naval_construction_get_type(pncid);
-			auto name = state.military_definitions.unit_base_definitions[utid].name;
-			float progress = economy::unit_construction_progress(state, pncid);
-
-			auto full_str = text::produce_simple_string(state, name) + " (" + text::format_percentage(progress, 0) + ")";
-			color = text::text_color::white;
-			set_text(state, full_str);
+			if(utid) {
+				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+				float progress = economy::unit_construction_progress(state, pncid);
+				auto province = state.world.province_naval_construction_get_province(pncid);
+				auto full_str = text::produce_simple_string(state, unitname)
+					+ " - " + text::produce_simple_string(state, state.world.province_get_name(province))
+					+ " (" + text::format_percentage(progress, 0) + ")";
+				color = text::text_color::white;
+				set_text(state, full_str);
+			}
 		} else if(std::holds_alternative<dcon::state_instance_id>(content)) {
 			auto siid = std::get<dcon::state_instance_id>(content);
 			auto fat_si = dcon::fatten(state.world, siid);

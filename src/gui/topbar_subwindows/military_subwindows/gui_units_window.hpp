@@ -12,8 +12,23 @@ class military_unit_name_text : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<military_unit_info<T>>(state, parent);
-		if(std::holds_alternative<T>(content)) {
+		if(std::holds_alternative<dcon::province_land_construction_id>(content)) {
+			auto c = std::get<dcon::province_land_construction_id>(content);
+			auto utid = state.world.province_land_construction_get_type(c);
+			if(utid) {
+				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+				set_text(state, text::produce_simple_string(state, unitname));
+			}
+		} else if(std::holds_alternative<dcon::province_naval_construction_id>(content)) {
+			auto c = std::get<dcon::province_naval_construction_id>(content);
+			auto utid = state.world.province_naval_construction_get_type(c);
+			if(utid) {
+				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+				set_text(state, text::produce_simple_string(state, unitname));
+			}
+		} else if(std::holds_alternative<T>(content)) {
 			auto fat_id = dcon::fatten(state.world, std::get<T>(content));
+			auto unit_name = std::string{ state.to_string_view(fat_id.get_name()) };
 			set_text(state, std::string{ state.to_string_view(fat_id.get_name()) });
 		}
 	}
@@ -388,7 +403,6 @@ public:
 		if(location_text) location_text->set_visible(state, is_building);
 		if(unit_building_progress) unit_building_progress->set_visible(state, is_building);
 
-		if(unit_name) unit_name->set_visible(state, !is_building);
 		if(leader_icon) leader_icon->set_visible(state, !is_building);
 		if(unit_regiments_text) unit_regiments_text->set_visible(state, !is_building);
 		if(unit_men_text) unit_men_text->set_visible(state, !is_building);
