@@ -516,6 +516,9 @@ bool can_begin_province_building_construction(sys::state& state, dcon::nation_id
 		return province::can_build_naval_base(state, p, source);
 	case economy::province_building_type::bank:
 	case economy::province_building_type::university:
+	case economy::province_building_type::urban_center:
+	case economy::province_building_type::farmland:
+	case economy::province_building_type::mine:
 		return province::can_build_province_building(state, p, source, type);
 	default:
 		return false;

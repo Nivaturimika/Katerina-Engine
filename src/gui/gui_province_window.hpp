@@ -1656,6 +1656,24 @@ public:
 			y_offset += 35;
 			add_child_to_front(std::move(ptr));
 		}
+		if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::urban_center)].defined) {
+			auto ptr = make_element_by_type<province_building_window<economy::province_building_type::urban_center>>(state, "building");
+			ptr->base_data.position.y = y_offset;
+			y_offset += 35;
+			add_child_to_front(std::move(ptr));
+		}
+		if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::farmland)].defined) {
+			auto ptr = make_element_by_type<province_building_window<economy::province_building_type::farmland>>(state, "building");
+			ptr->base_data.position.y = y_offset;
+			y_offset += 35;
+			add_child_to_front(std::move(ptr));
+		}
+		if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::mine)].defined) {
+			auto ptr = make_element_by_type<province_building_window<economy::province_building_type::mine>>(state, "building");
+			ptr->base_data.position.y = y_offset;
+			y_offset += 35;
+			add_child_to_front(std::move(ptr));
+		}
 		if(bool(state.economy_definitions.selector_modifier)) {
 			auto ptr = make_element_by_type<province_selector_window>(state, "building");
 			ptr->base_data.position.y = y_offset;

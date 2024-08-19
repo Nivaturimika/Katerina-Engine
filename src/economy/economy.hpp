@@ -22,7 +22,7 @@ struct building_information {
 	dcon::text_key name;
 	dcon::modifier_id province_modifier;
 	uint16_t padding2 = 0;
-	bool defined = false;
+	uint8_t defined = false;
 	uint8_t padding[3] = { 0 };
 };
 
@@ -65,6 +65,12 @@ inline std::string_view province_building_type_get_name(economy::province_buildi
 		return "bank";
 	case economy::province_building_type::university:
 		return "university";
+	case economy::province_building_type::urban_center:
+		return "urban_center";
+	case economy::province_building_type::farmland:
+		return "farmland";
+	case economy::province_building_type::mine:
+		return "mine";
 	default:
 		return "???";
 	}
@@ -81,6 +87,12 @@ inline std::string_view province_building_type_get_level_text(economy::province_
 		return "bank_level";
 	case economy::province_building_type::university:
 		return "university_level";
+	case economy::province_building_type::urban_center:
+		return "urban_center_level";
+	case economy::province_building_type::farmland:
+		return "farmland_level";
+	case economy::province_building_type::mine:
+		return "mine_level";
 	default:
 		return "???";
 	}
