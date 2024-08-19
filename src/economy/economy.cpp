@@ -4355,7 +4355,7 @@ float unit_construction_progress(sys::state& state, dcon::province_land_construc
 
 	for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 		total += goods.commodity_amounts[i] * admin_cost_factor;
-		purchased += cgoods.commodity_amounts[i];
+		purchased += std::clamp(cgoods.commodity_amounts[i],0.0f, goods.commodity_amounts[i] * admin_cost_factor);
 	}
 
 	return total > 0.0f ? purchased / total : 0.0f;
@@ -4373,7 +4373,7 @@ float unit_construction_progress(sys::state& state, dcon::province_naval_constru
 
 	for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 		total += goods.commodity_amounts[i] * admin_cost_factor;
-		purchased += cgoods.commodity_amounts[i];
+		purchased += std::clamp(cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * admin_cost_factor);
 	}
 
 	return total > 0.0f ? purchased / total : 0.0f;
