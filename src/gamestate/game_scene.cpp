@@ -414,6 +414,7 @@ void select_units(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mo
 			}
 		}
 	}
+	// Prefer armies over navies
 	if(!state.selected_armies.empty() && !state.selected_navies.empty()) {
 		state.selected_navies.clear();
 	}
