@@ -400,7 +400,6 @@ public:
 		if(unit_icon) unit_icon->set_visible(state, is_building);
 		if(cancel_button) cancel_button->set_visible(state, is_building);
 		if(eta_date_text) eta_date_text->set_visible(state, is_building);
-		if(location_text) location_text->set_visible(state, is_building);
 		if(unit_building_progress) unit_building_progress->set_visible(state, is_building);
 
 		if(leader_icon) leader_icon->set_visible(state, !is_building);
