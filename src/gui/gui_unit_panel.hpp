@@ -1571,6 +1571,28 @@ public:
 			}
 		}
 	}
+
+	void on_update(sys::state& state) noexcept override {
+		disabled = true;
+		if(state.selected_armies.size() > 0) {
+			auto first = state.selected_armies[0];
+			for(uint32_t i = 1; i < state.selected_armies.size(); ++i) {
+				if(command::can_merge_armies(state, state.local_player_nation, first, state.selected_armies[i])) {
+					disabled = false;
+					break;
+				}
+			}
+		}
+		if(state.selected_navies.size() > 0) {
+			auto first = state.selected_navies[0];
+			for(uint32_t i = 1; i < state.selected_navies.size(); ++i) {
+				if(command::can_merge_navies(state, state.local_player_nation, first, state.selected_navies[i])) {
+					disabled = false;
+					break;
+				}
+			}
+		}
+	}
 };
 
 class deselect_all_button : public button_element_base {
@@ -1592,6 +1614,27 @@ public:
 			command::delete_navy(state, state.local_player_nation, a);
 		}	
 	}
+
+	void on_update(sys::state& state) noexcept override {
+		disabled = true;
+		if(state.selected_armies.size() > 0) {
+			for(uint32_t i = 1; i < state.selected_armies.size(); ++i) {
+				if(command::can_delete_army(state, state.local_player_nation, state.selected_armies[i])) {
+					disabled = false;
+					break;
+				}
+			}
+		}
+		if(state.selected_navies.size() > 0) {
+			for(uint32_t i = 1; i < state.selected_navies.size(); ++i) {
+				if(command::can_delete_navy(state, state.local_player_nation, state.selected_navies[i])) {
+					disabled = false;
+					break;
+				}
+			}
+		}
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::tooltip;
 	}
