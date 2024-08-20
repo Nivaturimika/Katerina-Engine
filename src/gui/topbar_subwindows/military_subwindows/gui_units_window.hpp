@@ -425,12 +425,13 @@ public:
 				auto c = std::get<dcon::province_naval_construction_id>(content);
 				p = state.world.province_naval_construction_get_province(c);
 			}
-			if constexpr(std::same_as_v<T, dcon::army_id>()) {
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
 				if(std::holds_alternative<dcon::army_id>(content)) {
 					auto c = std::get<dcon::army_id>(content);
 					p = state.world.army_get_location_from_army_location(c);
 				}
-			} else {
+			}
+			if constexpr(std::is_same_v<T, dcon::navy_id>) {
 				if(std::holds_alternative<dcon::navy_id>(content)) {
 					auto c = std::get<dcon::navy_id>(content);
 					p = state.world.navy_get_location_from_navy_location(c);
