@@ -400,7 +400,7 @@ void select_units(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mo
 	}
 	if((int32_t(sys::key_modifiers::modifiers_ctrl) & int32_t(mod)) == 0) {
 		for(auto a : state.world.nation_get_army_control(state.local_player_nation)) {
-			if(!a.get_army().get_navy_from_army_transport() && !a.get_army().get_battle_from_army_battle_participation() && !a.get_army().get_is_retreating()) {
+			if(!a.get_army().get_navy_from_army_transport() && !a.get_army().get_is_retreating()) {
 				if(army_is_in_selection(state, x, y, a.get_army())) {
 					state.select(a.get_army());
 				}
@@ -408,7 +408,7 @@ void select_units(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mo
 		}
 	}
 	for(auto a : state.world.nation_get_navy_control(state.local_player_nation)) {
-		if(!a.get_navy().get_battle_from_navy_battle_participation() && !a.get_navy().get_is_retreating()) {
+		if(!a.get_navy().get_is_retreating()) {
 			if(navy_is_in_selection(state, x, y, a.get_navy())) {
 				state.select(a.get_navy());
 			}
