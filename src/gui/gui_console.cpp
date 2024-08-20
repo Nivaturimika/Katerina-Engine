@@ -652,6 +652,10 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		return;
 	}
 
+	if(state.network_mode != sys::network_mode_type::single_player) {
+		command::chat_message(state, state.local_player_nation, s, dcon::nation_id{});
+	}
+
 	log_to_console(state, parent, s);
 	for(uint32_t i = 0; i < command_info::max_arg_slots; ++i) {
 		if(pstate.cmd.args[i].optional)
