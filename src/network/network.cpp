@@ -81,14 +81,14 @@ void port_forwarder::start_forwarding() {
 				assert(adapter_addresses);
 
 				DWORD error = GetAdaptersAddresses(
-				  AF_UNSPEC,
-				  GAA_FLAG_SKIP_ANYCAST |
-				    GAA_FLAG_SKIP_MULTICAST |
-				    GAA_FLAG_SKIP_DNS_SERVER |
-				    GAA_FLAG_SKIP_FRIENDLY_NAME,
-				  NULL,
-				  adapter_addresses,
-				  &adapter_addresses_buffer_size);
+					AF_UNSPEC,
+					GAA_FLAG_SKIP_ANYCAST |
+					GAA_FLAG_SKIP_MULTICAST |
+					GAA_FLAG_SKIP_DNS_SERVER |
+					GAA_FLAG_SKIP_FRIENDLY_NAME,
+					NULL,
+					adapter_addresses,
+					&adapter_addresses_buffer_size);
 
 				if(ERROR_SUCCESS == error) {
 					// We're done here, people!
@@ -97,13 +97,11 @@ void port_forwarder::start_forwarding() {
 					// Try again with the new size
 					free(adapter_addresses);
 					adapter_addresses = NULL;
-
 					continue;
 				} else {
 					// Unexpected error code - log and throw
 					free(adapter_addresses);
 					adapter_addresses = NULL;
-
 					// @todo
 				}
 			}
@@ -278,17 +276,17 @@ std::string get_last_error_msg() {
 
 	std::string err_msg;
 	if(err == WSAECONNRESET) {
-		err_msg += "Host game was lost";
+		err_msg += "Host game was lost! ";
 	} else if(err == WSAEHOSTDOWN) {
-		err_msg += "Host game is down";
+		err_msg += "Host game is down! ";
 	} else if(err == WSAEHOSTUNREACH) {
-		err_msg += "Host game is unreachable";
+		err_msg += "Host game is unreachable! ";
 	} else {
-		err_msg += "A network issue ocurred";
+		err_msg += "A network issue ocurred! ";
 	}
-	err_msg += "\nTechnical details: ";
+	err_msg += "Technical details: ";
 	err_msg += std::to_string(err);
-	err_msg += "=";
+	err_msg += " => ";
 	err_msg += simple_fs::native_to_utf8(err_text);
 	return err_msg;
 #else
