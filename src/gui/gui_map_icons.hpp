@@ -1439,6 +1439,8 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+			new_position.x += 49 + 15;
+			new_position.y += 20 - 22;
 			window_element_base::base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
@@ -1729,8 +1731,8 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+			new_position.x += 20 - 57; //114/2 = 57
 			new_position.y -= 16;
-			new_position.x -= 20;
 			window_element_base::base_data.position = new_position;
 			window_element_base::base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
 			window_element_base::impl_render(state, new_position.x, new_position.y);
