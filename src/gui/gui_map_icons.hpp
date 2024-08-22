@@ -1533,11 +1533,11 @@ public:
 			auto w = state.world.land_battle_get_war_from_land_battle_in_war(lbattle);
 			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
-				auto const role = military::get_role(state, w, a.get_army().get_army_control().get_controller());
-				auto const rf = a.get_army().get_army_rebel_control().get_controller();
+				auto const controller = a.get_army().get_army_control().get_controller();
+				auto const role = military::get_role(state, w, controller);
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
 				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(rf))) {
+				|| (!w && IsAttacker == bool(controller))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_strength() * 3.f;
 					}
@@ -1575,11 +1575,11 @@ public:
 			auto w = state.world.land_battle_get_war_from_land_battle_in_war(lbattle);
 			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
-				auto const role = military::get_role(state, w, a.get_army().get_army_control().get_controller());
-				auto const rf = a.get_army().get_army_rebel_control().get_controller();
+				auto const controller = a.get_army().get_army_control().get_controller();
+				auto const role = military::get_role(state, w, controller);
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
 				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(rf))) {
+				|| (!w && IsAttacker == bool(controller))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_org();
 						total += 1.f;
@@ -1624,12 +1624,9 @@ public:
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
 				auto const controller = a.get_army().get_army_control().get_controller();
 				auto const role = military::get_role(state, w, controller);
-				auto const rf = a.get_army().get_army_rebel_control().get_controller();
-				if(!w && IsAttacker != bool(rf)) {
-					return state.national_definitions.rebel_id;
-				}
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
+				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
+				|| (!w && IsAttacker == bool(controller))) {
 					return state.world.nation_get_identity_from_identity_holder(controller);
 				}
 			}
