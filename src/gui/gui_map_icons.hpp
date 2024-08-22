@@ -231,7 +231,7 @@ public:
 			visible = true;
 			//
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			window_element_base::base_data.position = new_position;
+			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
 	}
@@ -303,8 +303,7 @@ public:
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 		if(state.map_state.get_zoom() >= big_counter_cutoff)
 			return window_element_base::impl_probe_mouse(state, x, y, type);
-		else
-			return window_element_base::impl_probe_mouse(state, x, y + 23, type);
+		return window_element_base::impl_probe_mouse(state, x, y + 23, type);
 	}
 	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		if(state.map_state.get_zoom() >= big_counter_cutoff)
@@ -535,8 +534,7 @@ public:
 	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 		if(state.map_state.get_zoom() >= big_counter_cutoff)
 			return window_element_base::impl_probe_mouse(state, x, y, type);
-		else
-			return window_element_base::impl_probe_mouse(state, x, y + 23, type);
+		return window_element_base::impl_probe_mouse(state, x, y + 23, type);
 	}
 	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 		if(state.map_state.get_zoom() >= big_counter_cutoff)
@@ -1094,7 +1092,7 @@ public:
 			visible = true;
 
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			window_element_base::base_data.position = new_position;
+			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
 	}
@@ -1348,10 +1346,10 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			new_position.x += 15;
+			new_position.x += 7 - base_data.size.x / 2;
 			new_position.y -= 22;
-			window_element_base::base_data.position = new_position;
-			window_element_base::base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
+			base_data.position = new_position;
+			base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
 	}
@@ -1439,9 +1437,9 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			new_position.x += 49 + 15;
-			new_position.y += 20 - 22;
-			window_element_base::base_data.position = new_position;
+			new_position.x += 7 - base_data.size.x / 2;
+			new_position.y += -4;
+			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
 	}
@@ -1616,7 +1614,10 @@ public:
 			if(auto leader = IsAttacker
 				? state.world.land_battle_get_general_from_attacking_general(lbattle)
 				: state.world.land_battle_get_general_from_defending_general(lbattle); leader) {
-				return state.world.nation_get_identity_from_identity_holder(state.world.leader_get_nation_from_leader_loyalty(leader));
+				auto const controller = state.world.leader_get_nation_from_leader_loyalty(leader);
+				if(!controller)
+					return state.national_definitions.rebel_id;
+				return state.world.nation_get_identity_from_identity_holder(controller);
 			}
 			auto w = state.world.land_battle_get_war_from_land_battle_in_war(lbattle);
 			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
@@ -1731,10 +1732,10 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			new_position.x += 20 - 57; //114/2 = 57
-			new_position.y -= 16;
-			window_element_base::base_data.position = new_position;
-			window_element_base::base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
+			new_position.x += 7 - base_data.size.x / 2; //114/2 = 57
+			new_position.y -= 24;
+			base_data.position = new_position;
+			base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
 	}
@@ -1974,8 +1975,7 @@ public:
 			
 
 		auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-		window_element_base::base_data.position = new_position;
-
+		base_data.position = new_position;
 		window_element_base::impl_render(state, new_position.x, new_position.y);
 	}
 
