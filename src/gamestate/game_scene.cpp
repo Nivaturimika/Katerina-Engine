@@ -1,4 +1,3 @@
-#include "gui_unit_grid_box.hpp"
 #include "gui_unit_panel.hpp"
 #include "gui_province_window.hpp"
 #include "gui_land_combat.hpp"
@@ -6,7 +5,6 @@
 #include "gui_chat_window.hpp"
 #include "gui_event.hpp"
 #include "gui_map_icons.hpp"
-
 
 namespace game_scene {
 
@@ -73,8 +71,6 @@ void do_nothing_screen(sys::state& state, int32_t x, int32_t y, sys::key_modifie
 bool belongs_on_map(sys::state& state, ui::element_base* checked_element) {
 	while(checked_element != nullptr) {
 		if(checked_element == state.ui_state.units_root.get())
-			return true;
-		if(checked_element == state.ui_state.unit_details_box.get())
 			return true;
 		checked_element = checked_element->parent;
 	}
@@ -718,19 +714,12 @@ void render_units(sys::state& state) {
 	}
 }
 
-void render_units_info_box(sys::state& state) {
-	if(state.ui_state.unit_details_box && state.ui_state.unit_details_box->is_visible()) {
-		state.ui_state.unit_details_box->impl_render(state, state.ui_state.unit_details_box->base_data.position.x, state.ui_state.unit_details_box->base_data.position.y);
-	}
-}
-
 void render_ui_military(sys::state& state) {
 	render_units(state);
 }
 
 void render_ui_selection_screen(sys::state& state) {
 	render_units(state);
-	render_units_info_box(state);
 }
 
 void render_ui_ingame(sys::state& state) {
@@ -743,7 +732,6 @@ void render_ui_ingame(sys::state& state) {
 				state.ui_state.rgos_root->impl_render(state, 0, 0);
 			} else {
 				render_units(state);
-				render_units_info_box(state);
 			}
 		} else if(state.map_state.get_zoom() >= ui::big_counter_cutoff && state.ui_state.province_details_root) {
 			state.ui_state.province_details_root->impl_render(state, 0, 0);
@@ -755,40 +743,16 @@ ui::mouse_probe recalculate_mouse_probe_identity(sys::state& state, ui::mouse_pr
 	return mouse_probe;
 }
 
-ui::mouse_probe recalculate_mouse_probe_units_details(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
-	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
-	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
-	float pos_x = state.ui_state.unit_details_box->base_data.position.x;
-	float pos_y = state.ui_state.unit_details_box->base_data.position.y;
-
-	return state.ui_state.unit_details_box->impl_probe_mouse(
-			state,
-			int32_t(scaled_mouse_x - pos_x),
-			int32_t(scaled_mouse_y - pos_y),
-			ui::mouse_probe_type::click
-	);
-}
-
 ui::mouse_probe recalculate_mouse_probe_units(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
 	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
 	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
-
-	return state.ui_state.units_root->impl_probe_mouse(
-			state,
-			int32_t(scaled_mouse_x),
-			int32_t(scaled_mouse_y),
-			ui::mouse_probe_type::click
-	);
+	return state.ui_state.units_root->impl_probe_mouse(state, int32_t(scaled_mouse_x), int32_t(scaled_mouse_y), ui::mouse_probe_type::click);
 }
 
 ui::mouse_probe recalculate_mouse_probe_units_and_details(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
-	if(state.ui_state.unit_details_box && state.ui_state.unit_details_box->is_visible()) {
-		mouse_probe = recalculate_mouse_probe_units_details(state, mouse_probe, tooltip_probe);
-	}
 	if(!mouse_probe.under_mouse) {
 		mouse_probe = recalculate_mouse_probe_units(state, mouse_probe, tooltip_probe);
 	}
-
 	return mouse_probe;
 }
 
@@ -825,23 +789,10 @@ ui::mouse_probe recalculate_mouse_probe_military(sys::state& state, ui::mouse_pr
 ui::mouse_probe recalculate_tooltip_probe_units_and_details(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
 	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
 	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
-	if(state.ui_state.unit_details_box && state.ui_state.unit_details_box->is_visible()) {
-		float pos_x = state.ui_state.unit_details_box->base_data.position.x;
-		float pos_y = state.ui_state.unit_details_box->base_data.position.y;
-		mouse_probe = state.ui_state.unit_details_box->impl_probe_mouse(state,
-			int32_t(scaled_mouse_x - pos_x),
-			int32_t(scaled_mouse_y - pos_y),
-			ui::mouse_probe_type::click);
-		tooltip_probe = state.ui_state.unit_details_box->impl_probe_mouse(state,
-			int32_t(scaled_mouse_x - pos_x),
-			int32_t(scaled_mouse_y - pos_y),
-			ui::mouse_probe_type::tooltip);
-	} else {
-		tooltip_probe = state.ui_state.units_root->impl_probe_mouse(state,
-			int32_t(scaled_mouse_x),
-			int32_t(scaled_mouse_y),
-			ui::mouse_probe_type::tooltip);
-	}
+	tooltip_probe = state.ui_state.units_root->impl_probe_mouse(state,
+		int32_t(scaled_mouse_x),
+		int32_t(scaled_mouse_y),
+		ui::mouse_probe_type::tooltip);
 	if(!mouse_probe.under_mouse) {
 		tooltip_probe = state.ui_state.units_root->impl_probe_mouse(state,
 			int32_t(scaled_mouse_x),
@@ -969,9 +920,6 @@ void update_unit_selection_ui(sys::state& state) {
 }
 
 void update_ui_unit_details(sys::state& state) {
-	if(state.ui_state.unit_details_box && state.ui_state.unit_details_box->is_visible()) {
-		state.ui_state.unit_details_box->impl_on_update(state);
-	}
 	if(state.ui_state.units_root) {
 		state.ui_state.units_root->impl_on_update(state);
 	}

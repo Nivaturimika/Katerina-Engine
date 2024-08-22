@@ -375,7 +375,6 @@ struct element_target {
 };
 
 class tool_tip;
-class grid_box;
 
 template<class T>
 class unit_details_window;
@@ -443,7 +442,6 @@ struct state {
 	std::unique_ptr<element_base> army_group_deselector_root;
 
 	std::unique_ptr<tool_tip> tooltip;
-	std::unique_ptr<grid_box> unit_details_box;
 
 	ankerl::unordered_dense::map<dcon::text_key, element_target, hash_text_key> defs_by_name;
 

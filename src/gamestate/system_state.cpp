@@ -35,7 +35,6 @@
 #include "gui_nation_picker.hpp"
 #include "gui_end_window.hpp"
 #include "gui_map_legend.hpp"
-#include "gui_unit_grid_box.hpp"
 #include "blake2.h"
 
 #include "gui_production_window.hpp"
@@ -51,9 +50,6 @@ namespace ui {
 
 void create_in_game_windows(sys::state& state) {
 	state.ui_state.lazy_load_in_game = true;
-
-	state.ui_state.unit_details_box = ui::make_element_by_type<ui::grid_box>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_grid_panel"))->second.definition);
-	state.ui_state.unit_details_box->set_visible(state, false);
 	//
 	state.ui_state.select_states_legend = ui::make_element_by_type<ui::map_state_select_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_select_legend_window"))->second.definition);
 
@@ -114,6 +110,8 @@ void create_in_game_windows(sys::state& state) {
 		auto ewin = ui::make_element_by_type<ui::end_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("back_end"))->second.definition);
 		state.ui_state.end_screen->add_child_to_front(std::move(ewin));
 	}
+
+	/*
 	state.world.for_each_province([&](dcon::province_id id) {
 		if(state.world.province_get_port_to(id)) {
 			auto ptr = ui::make_element_by_type<ui::port_window>(state, "alice_port_icon");
@@ -121,12 +119,30 @@ void create_in_game_windows(sys::state& state) {
 			state.ui_state.units_root->add_child_to_front(std::move(ptr));
 		}
 	});
-	
+	*/
 	state.world.for_each_province([&](dcon::province_id id) {
-		auto ptr = ui::make_element_by_type<ui::unit_counter_window>(state, "alice_map_unit");
-		static_cast<ui::unit_counter_window*>(ptr.get())->prov = id;
+		auto ptr = ui::make_element_by_type<ui::unit_counter_window<false>>(state, "unit_mapicon");
+		static_cast<ui::unit_counter_window<false>*>(ptr.get())->prov = id;
 		state.ui_state.units_root->add_child_to_front(std::move(ptr));
-	});	
+	});
+	state.world.for_each_province([&](dcon::province_id id) {
+		if(state.world.province_get_port_to(id)) {
+			auto ptr = ui::make_element_by_type<ui::unit_counter_window<true>>(state, "unit_mapicon");
+			static_cast<ui::unit_counter_window<true>*>(ptr.get())->prov = id;
+			state.ui_state.units_root->add_child_to_front(std::move(ptr));
+		}
+	});
+	province::for_each_land_province(state, [&](dcon::province_id id) {
+		auto ptr = ui::make_element_by_type<ui::siege_counter_window>(state, "siege_mapicon");
+		static_cast<ui::siege_counter_window*>(ptr.get())->prov = id;
+		state.ui_state.units_root->add_child_to_front(std::move(ptr));
+	});
+	state.world.for_each_province([&](dcon::province_id id) {
+		auto ptr = ui::make_element_by_type<ui::battle_counter_window>(state, "combat_mapicon");
+		static_cast<ui::battle_counter_window*>(ptr.get())->prov = id;
+		state.ui_state.units_root->add_child_to_front(std::move(ptr));
+	});
+
 	province::for_each_land_province(state, [&](dcon::province_id id) {
 		auto ptr = ui::make_element_by_type<ui::rgo_icon>(state, "alice_rgo_mapicon");
 		static_cast<ui::rgo_icon*>(ptr.get())->content = id;
@@ -377,8 +393,6 @@ void state::on_mouse_wheel(int32_t x, int32_t y, key_modifiers mod, float amount
 	auto belongs_on_map = [&](ui::element_base* b) {
 		while(b != nullptr) {
 			if(b == ui_state.units_root.get())
-				return true;
-			if(b == ui_state.unit_details_box.get())
 				return true;
 			b = b->parent;
 		}
