@@ -1139,20 +1139,21 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			}
 		}
 
+		if(shaders[uint8_t(map_view_mode)][shader_selection] && !selection_vertices.empty() && zoom > map::zoom_very_close) { //only render if close enough
+			load_shader(shader_selection);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textures[texture_selection]);
+			glBindVertexArray(vao_array[vo_selection]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_selection]);
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)selection_vertices.size());
+		}
+
 		if(shaders[uint8_t(map_view_mode)][shader_drag_box] && !drag_box_vertices.empty()) {
 			glUseProgram(shaders[uint8_t(map_view_mode)][shader_drag_box]);
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_drag_box][uniform_gamma], state.user_settings.gamma);
 			glBindVertexArray(vao_array[vo_drag_box]);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_drag_box]);
 			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)drag_box_vertices.size());
-		}
-
-		if(shaders[uint8_t(map_view_mode)][shader_selection] && !selection_vertices.empty()) {
-			glUseProgram(shaders[uint8_t(map_view_mode)][shader_selection]);
-			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_selection][uniform_gamma], state.user_settings.gamma);
-			glBindVertexArray(vao_array[vo_selection]);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_selection]);
-			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)selection_vertices.size());
 		}
 
 		if(shaders[uint8_t(map_view_mode)][shader_line_unit_arrow] && zoom > map::zoom_close) { //only render if close enough
@@ -1619,17 +1620,23 @@ void display_data::set_drag_box(bool draw_box, glm::vec2 pos1, glm::vec2 pos2, g
 
 void make_selection_quad(sys::state& state, glm::vec2 p) {
 	glm::vec2 map_size(float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y));
-	glm::vec2 size = glm::vec2(8.f, 8.f);
-	p /= map_size;
-	size /= map_size;
-	//
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x, p.y), glm::vec2(0.f, 0.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y), glm::vec2(1.f, 0.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y + size.y), glm::vec2(1.f, 1.f));
-	//
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y + size.y), glm::vec2(1.f, 1.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x + size.x, p.y), glm::vec2(1.f, 0.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p.x, p.y + size.x), glm::vec2(0.f, 1.f));
+	glm::vec2 size = glm::vec2(4.f, 4.f);
+	auto p1 = (p - size) / map_size;
+	auto p2 = (p + size) / map_size;
+	// 1--3
+	// | /
+	// |/
+	// 2
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p1.y), glm::vec2(1.f, 0.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
+	//    3
+	//   /|
+	//  / |
+	// 2--1
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p2.y), glm::vec2(0.f, 1.f));
+	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
 }
 
 void add_arrow_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 prev_normal_dir, glm::vec2 next_normal_dir, float fill_progress, bool end_arrow, float size_x, float size_y) {
@@ -2816,6 +2823,7 @@ void display_data::load_map(sys::state& state) {
 	auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
 	auto map_items_dir = simple_fs::open_directory(gfx_dir, NATIVE("mapitems"));
 	auto gfx_anims_dir = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
+	auto test_dir = simple_fs::open_directory(gfx_dir, NATIVE("test"));
 
 	glGenTextures(1, &textures[texture_diag_border_identifier]);
 	if(textures[texture_diag_border_identifier]) {
@@ -2865,6 +2873,9 @@ void display_data::load_map(sys::state& state) {
 	ogl::set_gltex_parameters(textures[texture_coastal_border], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
 	textures[texture_railroad] = load_dds_texture(gfx_anims_dir, NATIVE("railroad.dds"));
+	ogl::set_gltex_parameters(textures[texture_railroad], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+
+	textures[texture_selection] = load_dds_texture(test_dir, NATIVE("selection.dds"));
 	ogl::set_gltex_parameters(textures[texture_railroad], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
 	textures[texture_unit_arrow] = ogl::make_gl_texture(map_items_dir, NATIVE("movearrow.tga"));
