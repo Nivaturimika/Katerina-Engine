@@ -1625,11 +1625,11 @@ public:
 				auto const controller = a.get_army().get_army_control().get_controller();
 				auto const role = military::get_role(state, w, controller);
 				auto const rf = a.get_army().get_army_rebel_control().get_controller();
+				if(!w && IsAttacker != bool(rf)) {
+					return state.national_definitions.rebel_id;
+				}
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(rf))) {
-					if(rf)
-						return state.national_definitions.rebel_id;
+				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
 					return state.world.nation_get_identity_from_identity_holder(controller);
 				}
 			}
