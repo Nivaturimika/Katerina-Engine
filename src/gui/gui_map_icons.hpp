@@ -1135,16 +1135,12 @@ public:
 	}
 };
 
-class unit_counter_flag : public flag_button {
+class unit_counter_flag : public flag_button2 {
 public:
-	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
-		auto n = retrieve<dcon::navy_id>(state, parent);
-		if(n) {
-			return state.world.nation_get_identity_from_identity_holder(state.world.navy_get_controller_from_navy_control(n));
-		}
-		auto a = retrieve<dcon::army_id>(state, parent);
-		auto c = state.world.nation_get_identity_from_identity_holder(state.world.army_get_controller_from_army_control(a));
-		return c ? c : state.national_definitions.rebel_id;
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(type == mouse_probe_type::tooltip)
+			return flag_button2::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
 	}
 };
 
@@ -1210,7 +1206,8 @@ public:
 		auto a = retrieve<dcon::army_id>(state, parent);
 		if(state.world.army_get_controller_from_army_control(a) != state.local_player_nation) {
 			frame = 2;
-			if(military::are_at_war(state, state.world.army_get_controller_from_army_control(a), state.local_player_nation)) {
+			if(military::are_at_war(state, state.world.army_get_controller_from_army_control(a), state.local_player_nation)
+			|| state.world.army_get_controller_from_army_rebel_control(a)) {
 				frame = 1;
 			} else if(military::are_allied_in_war(state, state.world.army_get_controller_from_army_control(a), state.local_player_nation)) {
 				frame = 3;
@@ -1243,6 +1240,13 @@ public:
 					state.select(al.get_army());
 			}
 		}
+	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		populate_unit_tooltip(state, contents, retrieve<dcon::province_id>(state, parent));
 	}
 };
 
@@ -1344,7 +1348,7 @@ public:
 			}
 			visible = true;
 			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
-			new_position.x += 10;
+			new_position.x += 15;
 			new_position.y -= 22;
 			window_element_base::base_data.position = new_position;
 			window_element_base::base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
@@ -1361,6 +1365,12 @@ public:
 			return message_result::consumed;
 		} else if(payload.holds_type<dcon::navy_id>()) {
 			payload.emplace<dcon::navy_id>(navy);
+			return message_result::consumed;
+		} else if(payload.holds_type<dcon::rebel_faction_id>()) {
+			payload.emplace<dcon::rebel_faction_id>(state.world.army_get_controller_from_army_rebel_control(army));
+			return message_result::consumed;
+		} else if(payload.holds_type<dcon::nation_id>()) {
+			payload.emplace<dcon::nation_id>(state.world.army_get_controller_from_army_control(army));
 			return message_result::consumed;
 		}
 		return message_result::unseen;
@@ -1390,7 +1400,7 @@ public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "siege_progress_bar") {
 			auto ptr = make_element_by_type<siege_counter_progress>(state, id);
-			ptr->base_data.position.y -= 2;
+			ptr->base_data.position.y -= 1;
 			return ptr;
 		} else {
 			return nullptr;
@@ -1524,8 +1534,10 @@ public:
 			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
 				auto const role = military::get_role(state, w, a.get_army().get_army_control().get_controller());
+				auto const rf = a.get_army().get_army_rebel_control().get_controller();
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
+				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
+				|| (!w && IsAttacker == bool(rf))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_strength() * 3.f;
 					}
@@ -1564,8 +1576,10 @@ public:
 			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
 				auto const role = military::get_role(state, w, a.get_army().get_army_control().get_controller());
+				auto const rf = a.get_army().get_army_rebel_control().get_controller();
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
+				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
+				|| (!w && IsAttacker == bool(rf))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_org();
 						total += 1.f;
@@ -1607,11 +1621,13 @@ public:
 			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
 				auto const controller = a.get_army().get_army_control().get_controller();
 				auto const role = military::get_role(state, w, controller);
+				auto const rf = a.get_army().get_army_rebel_control().get_controller();
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
-					for(const auto memb : a.get_army().get_army_membership()) {
-						return state.world.nation_get_identity_from_identity_holder(controller);
-					}
+				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
+				|| (!w && IsAttacker == bool(rf))) {
+					if(rf)
+						return state.national_definitions.rebel_id;
+					return state.world.nation_get_identity_from_identity_holder(controller);
 				}
 			}
 		} else {
@@ -1634,6 +1650,11 @@ public:
 		}
 		return state.national_definitions.rebel_id;
 	}
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(type == mouse_probe_type::tooltip)
+			return flag_button::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
+	}
 };
 
 class battle_counter_window : public window_element_base {
@@ -1652,9 +1673,13 @@ public:
 		} else if(name == "unit_strengthr") {
 			return make_element_by_type<battle_counter_strength<true>>(state, id);
 		} else if(name == "combat_country_flagl") {
-			return make_element_by_type<battle_counter_flag<false>>(state, id);
+			auto ptr = make_element_by_type<battle_counter_flag<false>>(state, id);
+			ptr->base_data.position.y -= 1; //nudge
+			return ptr;
 		} else if(name == "combat_country_flagr") {
-			return make_element_by_type<battle_counter_flag<true>>(state, id);
+			auto ptr = make_element_by_type<battle_counter_flag<true>>(state, id);
+			ptr->base_data.position.y -= 1; //nudge
+			return ptr;
 		} else if(name == "unit_panel_org_barl") {
 			return make_element_by_type<battle_counter_org_bar<false>>(state, id);
 		} else if(name == "unit_panel_org_barr") {
