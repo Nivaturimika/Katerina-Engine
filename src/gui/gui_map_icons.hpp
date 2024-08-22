@@ -1756,6 +1756,109 @@ public:
 	}
 };
 
+class mobilization_progress_bar : public vertical_progress_bar {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto prov = retrieve<dcon::province_id>(state, parent);
+		int32_t remaining = 0;
+		for(const auto p : state.world.nation_get_mobilization_schedule(state.local_player_nation)) {
+			if(p.where == prov) {
+				remaining++;
+			}
+		}
+		int32_t total = military::mobilized_regiments_possible_from_province(state, prov);
+		progress = (total == 0) ? 0 : float(remaining) / float(total);
+	}
+};
+
+class mobilization_units_left : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto prov = retrieve<dcon::province_id>(state, parent);
+		int32_t remaining = 0;
+		for(const auto p : state.world.nation_get_mobilization_schedule(state.local_player_nation)) {
+			if(p.where == prov) {
+				remaining++;
+			}
+		}
+		set_text(state, text::prettify(remaining));
+	}
+};
+
+class mobilization_counter_window : public window_element_base {
+public:
+	bool visible = true;
+	bool populated = false;
+	dcon::province_id prov;
+	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+		if(name == "mobilization_progress_bar") {
+			return make_element_by_type<mobilization_progress_bar>(state, id);
+		} else if(name == "units_left") {
+			return make_element_by_type<mobilization_units_left>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
+
+	void impl_on_update(sys::state& state) noexcept override {
+		on_update(state);
+		if(!populated)
+			return;
+
+		for(auto& c : children) {
+			if(c->is_visible()) {
+				c->impl_on_update(state);
+			}
+		}
+	}
+
+	void on_update(sys::state& state) noexcept override {
+		populated = false;
+		for(const auto p : state.world.nation_get_mobilization_schedule(state.local_player_nation)) {
+			if(p.where == prov) {
+				populated = true;
+				break;
+			}
+		}
+	}
+
+	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+		if(populated) {
+			auto mid_point = state.world.province_get_mid_point(prov);
+			auto map_pos = state.map_state.normalize_map_coord(mid_point);
+			auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
+			glm::vec2 screen_pos;
+			if(!state.map_state.map_to_screen(state, map_pos, screen_size, screen_pos)) {
+				visible = false;
+				return;
+			}
+			if(!state.map_state.visible_provinces[province::to_map_id(prov)]) {
+				visible = false;
+				return;
+			}
+			visible = true;
+			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+			new_position.x += 7 - base_data.size.x / 2; //114/2 = 57
+			new_position.y -= 24 * 3;
+			base_data.position = new_position;
+			base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
+			window_element_base::impl_render(state, new_position.x, new_position.y);
+		}
+	}
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+		if(payload.holds_type<dcon::province_id>()) {
+			payload.emplace<dcon::province_id>(prov);
+			return message_result::consumed;
+		}
+		return message_result::unseen;
+	}
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(visible && populated)
+			return window_element_base::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
+	}
+};
+
 class map_pv_rail_dots : public image_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {

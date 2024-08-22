@@ -121,6 +121,11 @@ void create_in_game_windows(sys::state& state) {
 	});
 	*/
 	state.world.for_each_province([&](dcon::province_id id) {
+		auto ptr = ui::make_element_by_type<ui::mobilization_counter_window>(state, "mobilization_mapicon");
+		static_cast<ui::mobilization_counter_window*>(ptr.get())->prov = id;
+		state.ui_state.units_root->add_child_to_front(std::move(ptr));
+	});
+	state.world.for_each_province([&](dcon::province_id id) {
 		auto ptr = ui::make_element_by_type<ui::unit_counter_window<false>>(state, "unit_mapicon");
 		static_cast<ui::unit_counter_window<false>*>(ptr.get())->prov = id;
 		state.ui_state.units_root->add_child_to_front(std::move(ptr));
