@@ -1537,7 +1537,7 @@ public:
 				auto const role = military::get_role(state, w, controller);
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
 				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(controller))) {
+				|| (!w && IsAttacker == !bool(controller))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_strength() * 3.f;
 					}
@@ -1579,7 +1579,7 @@ public:
 				auto const role = military::get_role(state, w, controller);
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
 				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(controller))) {
+				|| (!w && IsAttacker == !bool(controller))) {
 					for(const auto memb : a.get_army().get_army_membership()) {
 						value += memb.get_regiment().get_org();
 						total += 1.f;
@@ -1626,7 +1626,7 @@ public:
 				auto const role = military::get_role(state, w, controller);
 				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
 				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(controller))) {
+				|| (!w && IsAttacker == !bool(controller))) {
 					return state.world.nation_get_identity_from_identity_holder(controller);
 				}
 			}
