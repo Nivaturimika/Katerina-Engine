@@ -1108,6 +1108,25 @@ public:
 	}
 };
 
+class unit_details_select_loaded_army : public button_element_base {
+public:
+	void button_action(sys::state& state) noexcept override {
+		auto n = retrieve<dcon::navy_id>(state, parent);
+		auto tprted = state.world.navy_get_army_transport(n);
+
+		state.selected_armies.clear();
+		state.selected_navies.clear();
+		for(auto t : tprted)
+			state.select(t.get_army());
+	}
+
+	void on_update(sys::state& state) noexcept override {
+		auto n = retrieve<dcon::navy_id>(state, parent);
+		auto tprted = state.world.navy_get_army_transport(n);
+		disabled = tprted.begin() == tprted.end();
+	}
+};
+
 class navy_transport_text : public simple_text_element_base {
 public:
 	void on_create(sys::state& state) noexcept override {
@@ -1351,16 +1370,21 @@ public:
 			} else {
 				return make_element_by_type<invisible_element>(state, id);
 			}
-		} else if(name == "attach_unit_button"
-			|| name == "detach_unit_button"
-			|| name == "select_land") {
-
+		} else if(name == "select_land") {
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				return make_element_by_type<invisible_element>(state, id);
+			} else {
+				auto ptr = make_element_by_type<unit_details_select_loaded_army>(state, id);
+				ptr->base_data.position.x -= 48;
+				return ptr;
+			}
+		} else if(name == "attach_unit_button" || name == "detach_unit_button") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "header") {
 			if constexpr(std::is_same_v<T, dcon::army_id>) {
 				return make_element_by_type<invisible_element>(state, id);
 			} else {
-				return make_element_by_type< navy_transport_text>(state, id);
+				return make_element_by_type<navy_transport_text>(state, id);
 			}
 		} else {
 			return nullptr;
