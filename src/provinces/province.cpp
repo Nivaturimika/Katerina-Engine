@@ -1433,8 +1433,7 @@ void update_colonization(sys::state& state) {
 			If you leave a colony in phase 3 for define:COLONIZATION_MONTHS_TO_COLONIZE months, the colonization will reset to
 			phase 0 (no colonization in progress).
 			*/
-			if((*colonizers.begin()).get_last_investment() + 31 * int32_t(state.defines.colonization_months_to_colonize) <=
-					state.current_date) {
+			if((*colonizers.begin()).get_last_investment() + 31 * int32_t(state.defines.colonization_months_to_colonize) <= state.current_date) {
 
 				d.set_colonization_stage(uint8_t(0));
 				do {

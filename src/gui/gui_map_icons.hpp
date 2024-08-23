@@ -1368,7 +1368,11 @@ public:
 			payload.emplace<dcon::rebel_faction_id>(state.world.army_get_controller_from_army_rebel_control(army));
 			return message_result::consumed;
 		} else if(payload.holds_type<dcon::nation_id>()) {
-			payload.emplace<dcon::nation_id>(state.world.army_get_controller_from_army_control(army));
+			if(navy) {
+				payload.emplace<dcon::nation_id>(state.world.navy_get_controller_from_navy_control(navy));
+			} else {
+				payload.emplace<dcon::nation_id>(state.world.army_get_controller_from_army_control(army));
+			}
 			return message_result::consumed;
 		}
 		return message_result::unseen;
