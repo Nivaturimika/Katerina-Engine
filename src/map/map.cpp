@@ -833,10 +833,18 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 
 	if(state.network_state.save_slock.load(std::memory_order::acquire) == false) {
 		// a constant, as to not depend on a scenario/save being reloaded
-		std::vector<bool> province_on_screen(state.world.province_size(), false);
+		std::vector<bool> greedy_matches(state.world.province_size(), false);
 		for(const auto p : state.world.in_province) {
 			glm::vec2 tmp;
-			province_on_screen[p.id.index()] = state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(p.get_mid_point()), screen_size, tmp);
+			greedy_matches[p.id.index()] = state.map_state.map_to_screen(state, state.map_state.normalize_map_coord(p.get_mid_point()), screen_size, tmp);
+		}
+		std::vector<bool> province_on_screen(state.world.province_size(), false);
+		for(const auto adj : state.world.in_province_adjacency) {
+			auto p1 = adj.get_connected_provinces(0);
+			auto p2 = adj.get_connected_provinces(1);
+			auto b = greedy_matches[p1.id.index()] || greedy_matches[p2.id.index()];
+			province_on_screen[p1.id.index()] = b;
+			province_on_screen[p2.id.index()] = b;
 		}
 		auto const border_is_visible = [&](dcon::province_adjacency_id adj) {
 			auto p1 = state.world.province_adjacency_get_connected_provinces(adj, 0);

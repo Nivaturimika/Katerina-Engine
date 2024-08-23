@@ -134,7 +134,12 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 		}
 	}
 	for(auto selected_navy : state.selected_navies) {
-		map::make_selection_quad(state, state.world.province_get_mid_point(state.world.navy_get_location_from_navy_location(selected_navy)));
+		auto prov = state.world.navy_get_location_from_navy_location(selected_navy);
+		if(is_sea_province(state, prov)) {
+			map::make_selection_quad(state, state.world.province_get_mid_point(prov));
+		} else {
+			map::make_selection_quad(state, get_port_location(state, prov));
+		}
 		if(state.world.navy_get_is_retreating(selected_navy)) {
 			auto old_size = map_data.retreat_unit_arrow_vertices.size();
 			map_data.retreat_unit_arrow_starts.push_back(GLint(old_size));
