@@ -155,8 +155,7 @@ struct user_settings_s {
 		message_response::standard_log,//army_built = 98,
 		message_response::standard_log,//navy_built = 99,
 		message_response::standard_popup,//bankruptcy = 100,
-		message_response::standard_popup,//entered_automatic_alliance = 101,
-		message_response::standard_log,//chat_message = 102,
+		message_response::standard_log,//chat_message = 101,
 	};
 	uint8_t interesting_message_settings[int32_t(sys::message_setting_type::count)] = {
 		message_response::standard_log,//revolt = 0,
@@ -260,8 +259,7 @@ struct user_settings_s {
 		message_response::ignore,//army_built = 98,
 		message_response::ignore,//navy_built = 99,
 		message_response::standard_popup,//bankruptcy = 100,
-		message_response::ignore,//entered_automatic_alliance = 101,
-		message_response::standard_log,//chat_message = 102,
+		message_response::standard_log,//chat_message = 101,
 	};
 	uint8_t other_message_settings[int32_t(sys::message_setting_type::count)] = {
 		message_response::ignore,//revolt = 0,
@@ -365,8 +363,7 @@ struct user_settings_s {
 		message_response::ignore,//army_built = 98,
 		message_response::ignore,//navy_built = 99,
 		message_response::standard_popup,//bankruptcy = 100,
-		message_response::ignore,//entered_automatic_alliance = 101,
-		message_response::standard_log,//chat_message = 102,
+		message_response::standard_log,//chat_message = 101,
 	};
 	bool fow_enabled = false;
 	map_label_mode map_label = map_label_mode::quadratic;

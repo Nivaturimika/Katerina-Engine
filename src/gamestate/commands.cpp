@@ -72,7 +72,6 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(ask_for_military_access, diplo_action) \
 	GS_COMMAND_LIST_ENTRY(give_military_access, diplo_action) \
 	GS_COMMAND_LIST_ENTRY(ask_for_alliance, diplo_action) \
-	GS_COMMAND_LIST_ENTRY(toggle_interested_in_alliance, diplo_action) \
 	GS_COMMAND_LIST_ENTRY(state_transfer, state_transfer) \
 	GS_COMMAND_LIST_ENTRY(call_to_arms, call_to_arms) \
 	GS_COMMAND_LIST_ENTRY(respond_to_diplomatic_message, message) \
@@ -2445,28 +2444,6 @@ void execute_ask_for_alliance(sys::state& state, dcon::nation_id asker, dcon::na
 	m.type = diplomatic_message::type::alliance_request;
 
 	diplomatic_message::post(state, m);
-}
-
-void toggle_interested_in_alliance(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
-	payload p;
-	memset(&p, 0, sizeof(payload));
-	p.type = command_type::toggle_interested_in_alliance;
-	p.source = asker;
-	p.data.diplo_action.target = target;
-	add_to_command_queue(state, p);
-}
-bool can_toggle_interested_in_alliance(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
-	if(asker == target)
-		return false;
-	return true;
-}
-void execute_toggle_interested_in_alliance(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
-	if(!can_toggle_interested_in_alliance(state, asker, target))
-		return;
-	auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, asker);
-	if(!rel)
-		rel = state.world.force_create_unilateral_relationship(target, asker);
-	state.world.unilateral_relationship_set_interested_in_alliance(rel, !state.world.unilateral_relationship_get_interested_in_alliance(rel));
 }
 
 void state_transfer(sys::state& state, dcon::nation_id asker, dcon::nation_id target, dcon::state_definition_id sid) {
@@ -5165,8 +5142,6 @@ bool can_perform_command(sys::state& state, payload& c) {
 		return true;
 	case command_type::toggle_mobilized_is_ai_controlled:
 		return true;
-	case command_type::toggle_interested_in_alliance:
-		return can_toggle_interested_in_alliance(state, c.source, c.data.diplo_action.target);
 	case command_type::pbutton_script:
 		return can_use_province_button(state, c.source, c.data.pbutton.button, c.data.pbutton.id);
 	case command_type::nbutton_script:
@@ -5571,9 +5546,6 @@ void execute_command(sys::state& state, payload& c) {
 		break;
 	case command_type::toggle_mobilized_is_ai_controlled:
 		execute_toggle_mobilized_is_ai_controlled(state, c.source);
-		break;
-	case command_type::toggle_interested_in_alliance:
-		execute_toggle_interested_in_alliance(state, c.source, c.data.diplo_action.target);
 		break;
 	case command_type::pbutton_script:
 		execute_use_province_button(state, c.source, c.data.pbutton.button, c.data.pbutton.id);

@@ -4480,11 +4480,6 @@ guiTypes = {
 		quadTextureSprite = "GFX_checkbox_default"
 	}
 	guiButtonType = {
-		name = "alice_interested_in_alliance"
-		position = { 0 0 }
-		quadTextureSprite = "GFX_checkbox_default"	
-	}
-	guiButtonType = {
 		name = "alice_move_capital"
 		extends = "province_view_header"
 		position = { x= 180 y = 3 }

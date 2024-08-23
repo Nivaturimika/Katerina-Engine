@@ -114,10 +114,7 @@ void update_ai_general_status(sys::state& state) {
 static void internal_get_alliance_targets_by_adjacency(sys::state& state, dcon::nation_id n, dcon::nation_id adj, std::vector<dcon::nation_id>& alliance_targets) {
 	for(auto nb : state.world.nation_get_nation_adjacency(adj)) {
 		auto other = nb.get_connected_nations(0) != adj ? nb.get_connected_nations(0) : nb.get_connected_nations(1);
-
-		bool b = other.get_is_player_controlled()
-			? state.world.unilateral_relationship_get_interested_in_alliance(state.world.get_unilateral_relationship_by_unilateral_pair(n, other))
-			: ai_will_accept_alliance(state, other, n);
+		bool b = other.get_is_player_controlled() ? true : ai_will_accept_alliance(state, other, n);
 		if(other != n && !(other.get_overlord_as_subject().get_ruler()) && !nations::are_allied(state, n, other) && !military::are_at_war(state, other, n) && b) {
 			alliance_targets.push_back(other.id);
 		}
@@ -162,16 +159,11 @@ void form_alliances(sys::state& state) {
 						return a.index() > b.index();
 				});
 				if(state.world.nation_get_is_player_controlled(alliance_targets[0])) {
-					notification::post(state, notification::message{
-						[source = n](sys::state& state, text::layout_base& contents) {
-							text::add_line(state, contents, "msg_entered_automatic_alliance_1", text::variable_type::x, source);
-						},
-						"msg_entered_automatic_alliance_title",
-						n, dcon::nation_id{}, dcon::nation_id{},
-						sys::message_base_type::entered_automatic_alliance
-					});
+					assert(command::can_ask_for_alliance(state, n, alliance_targets[0], true));
+					command::execute_ask_for_alliance(state, n, alliance_targets[0]);
+				} else {
+					nations::make_alliance(state, n, alliance_targets[0]);
 				}
-				nations::make_alliance(state, n, alliance_targets[0]);
 			}
 		}
 	}
