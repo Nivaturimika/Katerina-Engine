@@ -540,7 +540,7 @@
 	LUA_DEFINES_LIST_ELEMENT(assimilation_scale, 0.004000)                                                                         \
 	LUA_DEFINES_LIST_ELEMENT(conversion_scale, 0.010000)                                                                           \
 	LUA_DEFINES_LIST_ELEMENT(immigration_scale, 0.005000)                                                                          \
-	LUA_DEFINES_LIST_ELEMENT(promotion_scale, 0.002000)                                                                            \
+	LUA_DEFINES_LIST_ELEMENT(promotion_scale, 0.000500)                                                                            \
 	LUA_DEFINES_LIST_ELEMENT(promotion_assimilation_chance, 0.000000)                                                              \
 	LUA_DEFINES_LIST_ELEMENT(luxury_threshold, 500.000000)                                                                         \
 	LUA_DEFINES_LIST_ELEMENT(base_goods_demand, 0.800000)                                                                          \
