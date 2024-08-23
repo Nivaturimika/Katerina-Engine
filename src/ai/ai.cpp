@@ -85,7 +85,7 @@ void update_ai_general_status(sys::state& state) {
 			for(auto adj : n.get_nation_adjacency()) {
 				auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
 				auto ol = other.get_overlord_as_subject().get_ruler();
-				if(!ol && other.get_in_sphere_of() != n && (!threatened || !nations::are_allied(state, n, other))) {
+				if(!ol && other.get_in_sphere_of() != n && n.get_in_sphere_of() != other && (!threatened || !nations::are_allied(state, n, other))) {
 					auto other_str = estimate_strength(state, other);
 					if(self_str * 0.5f < other_str && other_str <= self_str * 1.5f && min_str > self_str) {
 						min_str = other_str;
@@ -155,8 +155,7 @@ void form_alliances(sys::state& state) {
 				std::sort(alliance_targets.begin(), alliance_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					if(estimate_strength(state, a) != estimate_strength(state, b))
 						return estimate_strength(state, a) > estimate_strength(state, b);
-					else
-						return a.index() > b.index();
+					return a.index() > b.index();
 				});
 				if(state.world.nation_get_is_player_controlled(alliance_targets[0])) {
 					assert(command::can_ask_for_alliance(state, n, alliance_targets[0], true));
