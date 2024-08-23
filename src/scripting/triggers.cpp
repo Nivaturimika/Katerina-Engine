@@ -261,7 +261,7 @@ private:
 	ve::tagged_vector<int32_t> value;
 	uint32_t index = 0;
 	int32_t accumulated_mask = 0;
-
+	bool fixup_kludge = false;
 public:
 	bool result = false;
 
@@ -277,11 +277,12 @@ public:
 				value = ve::tagged_vector<int32_t>();
 				index = 0;
 				accumulated_mask = 0;
+				fixup_kludge = true;
 			}
 		}
 	}
 	void flush() {
-		if(index == 0) {
+		if(!fixup_kludge && index == 0) {
 			result = false;
 		} else if(!result) {
 			result = (ve::compress_mask(F::operator()(value)).v & accumulated_mask) != 0;
@@ -296,7 +297,7 @@ private:
 	ve::tagged_vector<int32_t> value;
 	uint32_t index = 0;
 	int32_t accumulated_mask = 0;
-
+	bool fixup_kludge = false;
 public:
 	bool result = true;
 
@@ -312,11 +313,12 @@ public:
 				value = ve::tagged_vector<int32_t>();
 				index = 0;
 				accumulated_mask = 0;
+				fixup_kludge = true;
 			}
 		}
 	}
 	void flush() {
-		if(index == 0) {
+		if(!fixup_kludge && index == 0) {
 			result = false;
 		} else if(result) {
 			result = (ve::compress_mask(F::operator()(value)).v & accumulated_mask) == accumulated_mask;
