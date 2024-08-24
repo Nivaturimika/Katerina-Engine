@@ -3067,6 +3067,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		float total_poor_tax_base = 0.0f;
 		float total_mid_tax_base = 0.0f;
 		float total_rich_tax_base = 0.0f;
+		auto admin_efficiency = state.world.nation_get_administrative_efficiency(n);
 		auto const poor_effect = float(state.world.nation_get_poor_tax(n)) / 100.0f;
 		auto const middle_effect = float(state.world.nation_get_middle_tax(n)) / 100.0f;
 		auto const rich_effect = float(state.world.nation_get_rich_tax(n)) / 100.0f;
@@ -3091,10 +3092,10 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				}
 			}
 		}
-		state.world.nation_set_total_rich_income(n, total_rich_tax_base);
-		state.world.nation_set_total_middle_income(n, total_mid_tax_base);
-		state.world.nation_set_total_poor_income(n, total_poor_tax_base);
-		auto collected_tax = tax_eff * (
+		state.world.nation_set_total_rich_income(n, total_rich_tax_base * admin_efficiency);
+		state.world.nation_set_total_middle_income(n, total_mid_tax_base * admin_efficiency);
+		state.world.nation_set_total_poor_income(n, total_poor_tax_base * admin_efficiency);
+		auto collected_tax = tax_eff * admin_efficiency * (
 			total_poor_tax_base * poor_effect +
 			total_mid_tax_base * middle_effect +
 			total_rich_tax_base * rich_effect);
