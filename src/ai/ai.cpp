@@ -615,7 +615,7 @@ void perform_influence_actions(sys::state& state) {
 					if(current_sphere
 					&& other_gprl.get_great_power() != gprl.get_great_power()
 					&& other_gprl.get_influence() >= state.defines.removefromsphere_influence_cost * 0.75f
-					&& command::can_decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_great_power())) {
+					&& command::can_decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power())) {
 						command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power());
 					}
 				}
