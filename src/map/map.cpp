@@ -2196,32 +2196,9 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 
 		size = std::pow(1.618034f, font_size_index / 5.f);
 
-		// fixed step
-
-		/*
-		float size_step = 30.f;
-
-		if(size > size_step * 6.f) {
-			size = size_step * 6.f; //+ (size - 200.0f) * 0.5f;
-		}
-
-		if(size > ratio.x / 2.f) {
-			size = ratio.x / 2.f;
-		}
-		if(size > ratio.y / 2.f) {
-			size = ratio.y / 2.f;
-		}
-		
-		size = std::round(size / size_step) * size_step;
-
-		if(size < size_step) {
-			continue;
-		}
-		*/
-
 		auto real_text_size = size / (size_x * 2.0f);
 
-		float letter_spacing_map = std::clamp((0.8f * curve_length / text_length - size) / 2.f, 0.f, size * 2.f);
+		float letter_spacing_map = std::clamp((curve_length / text_length - size) / 2.f, 0.f, size * 2.f);
 		if(state.world.locale_get_prevent_letterspace(state.font_collection.get_current_locale())) {
 			letter_spacing_map = 0.f;
 		}

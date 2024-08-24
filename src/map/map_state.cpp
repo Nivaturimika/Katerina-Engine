@@ -263,8 +263,8 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 
 	std::unordered_map<uint16_t, std::set<uint16_t>> regions_graph;
 
-	int samples_N = 200;
-	int samples_M = 100;
+	int samples_N = 100;
+	int samples_M = 50;
 	float step_x = float(map_data.size_x) / float(samples_N);
 	float step_y = float(map_data.size_y) / float(samples_M);
 
@@ -277,26 +277,8 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		for(auto adj : candidate.get_province_adjacency()) {
 			auto indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
 			auto neighbor = adj.get_connected_provinces(indx);
-
 			// if sea, try to jump to the next province
-			if(neighbor.id.index() >= state.province_definitions.first_sea_province.index()) {
-				for(auto adj_of_neighbor : neighbor.get_province_adjacency()) {
-					auto indx2 = adj_of_neighbor.get_connected_provinces(0) != neighbor.id ? 0 : 1;
-					auto neighbor_of_neighbor = adj_of_neighbor.get_connected_provinces(indx2);
-
-					// check for a "cut line"
-					glm::vec2 point_candidate = candidate.get_mid_point();
-					glm::vec2 point_potential_friend = neighbor_of_neighbor.get_mid_point();
-
-					if(glm::distance(point_candidate, point_potential_friend) > map_data.size_x * 0.5f) {
-						// do nothing
-					} else if(neighbor_of_neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
-						auto nation_2 = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(neighbor_of_neighbor));
-						if(nation == nation_2)
-							regions_graph[rid].insert(neighbor_of_neighbor.get_connected_region_id());
-					}
-				}
-			} else {
+			if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
 				auto nation_2 = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(neighbor));
 				if(nation == nation_2)
 					regions_graph[rid].insert(neighbor.get_connected_region_id());
@@ -314,7 +296,7 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		auto n = p.get_nation_from_province_ownership();
 		n = get_top_overlord(state, n.id);
 
-		//flood fill regions
+		//Flood fill regions
 		group_of_regions.clear();
 		group_of_regions.push_back(rid);
 		int first_index = 0;
@@ -504,11 +486,9 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		float counter_from_the_bottom = 0.f;
 		float best_y_length_real = 0.f;
 		float best_y_left_x = 0.f;
-
 		// prepare points for a local grid
 		for(int j = 0; j < height_steps; j++) {
 			float y = rough_box_bottom + j * local_step.y;
-
 			for(int i = 0; i < width_steps; i++) {
 				float x = rough_box_left + float(i) * local_step.x;
 				glm::vec2 candidate = { x, y };
@@ -525,18 +505,13 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		}
 
 		float points_above = 0.f;
-
 		for(int j = 0; j < height_steps; j++) {
 			float y = rough_box_bottom + j * local_step.y;
-
 			float current_length = 0.f;
 			float left_x = (float)(map_data.size_x);
-
 			for(int i = 0; i < width_steps; i++) {
 				float x = rough_box_left + float(i) * local_step.x;
-
 				glm::vec2 candidate = { x, y };
-
 				auto idx = int32_t(y) * int32_t(map_data.size_x) + int32_t(x);
 				if(0 <= idx && size_t(idx) < map_data.province_id_map.size()) {
 					auto fat_id = dcon::fatten(state.world, province::from_map_id(map_data.province_id_map[idx]));
@@ -550,7 +525,6 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 						}
 				}
 			}
-
 			if(points_above * 2.f > points.size()) {
 				//best_y_length = current_length_adjusted;
 				best_y_length_real = current_length;
@@ -574,17 +548,13 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 		}
 		size_t num_of_clusters = std::max(min_amount, (size_t)(points.size() / 40));
 		size_t neighbours_requirement = std::clamp(int(std::log(num_of_clusters + 1)), 1, 3);
-
 		if(points.size() < num_of_clusters) {
 			num_of_clusters = points.size();
 		}
-
 		std::vector<glm::vec2> centroids;
-
 		for(size_t i = 0; i < num_of_clusters; i++) {
 			centroids.push_back(points[i]);
 		}
-
 		for(int step = 0; step < 100; step++) {
 			std::vector<glm::vec2> new_centroids;
 			std::vector<int> counters;
@@ -592,12 +562,9 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 				new_centroids.push_back(glm::vec2(0, 0));
 				counters.push_back(0);
 			}
-
-
 			for(size_t i = 0; i < points.size(); i++) {
 				size_t closest = 0;
 				float best_dist = std::numeric_limits<float>::max();
-
 				//finding the closest centroid
 				for(size_t cluster = 0; cluster < num_of_clusters; cluster++) {
 					if(best_dist > glm::distance(centroids[cluster], points[i])) {
@@ -605,23 +572,18 @@ void update_text_lines(sys::state& state, display_data& map_data) {
 						best_dist = glm::distance(centroids[cluster], points[i]);
 					}
 				}
-
 				new_centroids[closest] += points[i];
 				counters[closest] += 1;
 			}
-
 			for(size_t i = 0; i < num_of_clusters; i++) {
 				new_centroids[i] /= counters[i];
 			}
-
 			centroids = new_centroids;
 		}
 
 		std::vector<size_t> good_centroids;
-		float min_cross = 1;
-
+		float min_cross = 1.f;
 		std::vector<glm::vec2> final_points;
-
 		for(size_t i = 0; i < num_of_clusters; i++) {
 			float locally_good_distance = std::numeric_limits<float>::max();
 			for(size_t j = 0; j < num_of_clusters; j++) {
