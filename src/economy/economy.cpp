@@ -3996,22 +3996,24 @@ float estimate_tariff_income(sys::state& state, dcon::nation_id n) {
 
 float estimate_social_spending(sys::state& state, dcon::nation_id n) {
 	auto total = 0.f;
+	auto const s_spending = state.world.nation_get_administrative_efficiency(n) * float(state.world.nation_get_social_spending(n)) / 100.0f;
 	auto const p_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::pension_level);
 	auto const unemp_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::unemployment_benefit);
-
 	state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
 		auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt)) / state.defines.ke_needs_scaling_factor;
 		if(adj_pop_of_type <= 0)
 			return;
-
 		auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
 		if(ln_type == culture::income_type::administration || ln_type == culture::income_type::education || ln_type == culture::income_type::military) {
 			//nothing
 		} else { // unemployment, pensions
-			total += adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
+			total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
 			if(state.world.pop_type_get_has_unemployment(pt)) {
-				auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt)) / state.defines.ke_needs_scaling_factor;
-				total += (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+				auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
+				//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
+				//after the employment one?
+				emp = std::min(emp, adj_pop_of_type);
+				total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
 			}
 		}
 	});
