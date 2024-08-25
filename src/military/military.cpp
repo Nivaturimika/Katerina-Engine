@@ -3868,6 +3868,10 @@ float effective_army_speed(sys::state& state, dcon::army_id a) {
 	auto leader = state.world.army_get_general_from_army_leadership(a);
 	auto bg = state.world.leader_get_background(leader);
 	auto per = state.world.leader_get_personality(leader);
+
+	bg = bool(bg) ? bg : state.military_definitions.no_background;
+	per = bool(per) ? per : state.military_definitions.no_personality;
+
 	auto leader_move = state.world.leader_trait_get_speed(bg) + state.world.leader_trait_get_speed(per);
 	return min_speed * (state.world.army_get_is_retreating(a) ? 2.0f : 1.0f) *
 				 (1.0f + state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), economy::province_building_type::railroad) *
@@ -3886,6 +3890,10 @@ float effective_navy_speed(sys::state& state, dcon::navy_id n) {
 	auto leader = state.world.navy_get_admiral_from_navy_leadership(n);
 	auto bg = state.world.leader_get_background(leader);
 	auto per = state.world.leader_get_personality(leader);
+
+	bg = bool(bg) ? bg : state.military_definitions.no_background;
+	per = bool(per) ? per : state.military_definitions.no_personality;
+
 	auto leader_move = state.world.leader_trait_get_speed(bg) + state.world.leader_trait_get_speed(per);
 	return min_speed * (state.world.navy_get_is_retreating(n) ? 2.0f : 1.0f) * (leader_move + 1.0f);
 }
@@ -4941,7 +4949,7 @@ float relative_attrition_amount(sys::state& state, dcon::army_id a, dcon::provin
 		}
 	}
 
-	auto value = std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition))
+	auto value = std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, std::max(0.001f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition)))
 		+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.0f;
 	return value * 0.01f;
 }
@@ -4999,7 +5007,7 @@ void apply_attrition(sys::state& state) {
 				*/
 
 				float attrition_value =
-					std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition))
+					std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, std::max(0.001f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition)))
 					+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.0f;
 
 				for(auto rg : ar.get_army().get_army_membership()) {
@@ -5145,6 +5153,8 @@ void update_land_battles(sys::state& state) {
 
 		auto attacker_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_attacking_general(b));
 		auto attacker_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_attacking_general(b));
+		attacker_per = bool(attacker_per) ? attacker_per : state.military_definitions.no_personality;
+		attacker_bg = bool(attacker_bg) ? attacker_bg : state.military_definitions.no_background;
 
 		auto attack_bonus =
 				int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
@@ -5153,6 +5163,8 @@ void update_land_battles(sys::state& state) {
 
 		auto defender_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_defending_general(b));
 		auto defender_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_defending_general(b));
+		defender_per = bool(defender_per) ? defender_per : state.military_definitions.no_personality;
+		defender_bg = bool(defender_bg) ? defender_bg : state.military_definitions.no_background;
 
 		auto defence_bonus =
 				int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
