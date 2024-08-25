@@ -3749,41 +3749,39 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 										return true;
 								}
 								return false;
-								}();
+							}();
+							if(already_in_progress)
+								continue;
 
-								if(already_in_progress)
-									continue;
-
-
-								bool present_in_location = false;
-								province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
-									for(auto fac : state.world.province_get_factory_location(p)) {
-										auto type = fac.get_factory().get_building_type();
-										if(selected == type) {
-											present_in_location = true;
-											return;
-										}
-									}
-								});
-
-								if(present_in_location)
-									continue;
-
-								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
-								new_up.set_is_pop_project(true);
-								new_up.set_is_upgrade(false);
-								new_up.set_type(selected);
-
-								auto costs = new_up.get_type().get_construction_costs();
-
-								for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-									if(costs.commodity_type[i]) {
-										total_cost_added += state.world.nation_get_effective_prices(n, costs.commodity_type[i]) * costs.commodity_amounts[i];
-									} else {
-										break;
+							bool present_in_location = false;
+							province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
+								for(auto fac : state.world.province_get_factory_location(p)) {
+									auto type = fac.get_factory().get_building_type();
+									if(selected == type) {
+										present_in_location = true;
+										return;
 									}
 								}
-								//found_investment = true;
+							});
+
+							if(present_in_location)
+								continue;
+
+							auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
+							new_up.set_is_pop_project(true);
+							new_up.set_is_upgrade(false);
+							new_up.set_type(selected);
+
+							auto costs = new_up.get_type().get_construction_costs();
+
+							for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+								if(costs.commodity_type[i]) {
+									total_cost_added += state.world.nation_get_effective_prices(n, costs.commodity_type[i]) * costs.commodity_amounts[i];
+								} else {
+									break;
+								}
+							}
+							//found_investment = true;
 						}
 					}
 				}
