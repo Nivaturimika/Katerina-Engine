@@ -3067,6 +3067,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		float total_poor_tax_base = 0.0f;
 		float total_mid_tax_base = 0.0f;
 		float total_rich_tax_base = 0.0f;
+		auto admin_efficiency = state.world.nation_get_administrative_efficiency(n);
 		auto const poor_effect = float(state.world.nation_get_poor_tax(n)) / 100.0f;
 		auto const middle_effect = float(state.world.nation_get_middle_tax(n)) / 100.0f;
 		auto const rich_effect = float(state.world.nation_get_rich_tax(n)) / 100.0f;
@@ -3079,25 +3080,25 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
 					if(strata == culture::pop_strata::poor) {
-						total_poor_tax_base += pop_money * tax_eff * poor_effect;
-						pop_money -= pop_money * poor_effect;
+						total_poor_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * poor_effect;
 					} else if(strata == culture::pop_strata::middle) {
-						total_mid_tax_base += pop_money * tax_eff * middle_effect;
-						pop_money -= pop_money * middle_effect;
+						total_mid_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * middle_effect;
 					} else if(strata == culture::pop_strata::rich) {
-						total_rich_tax_base += pop_money * tax_eff * rich_effect;
-						pop_money -= pop_money * rich_effect;
+						total_rich_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * rich_effect;
 					}
 				}
 			}
 		}
-		state.world.nation_set_total_rich_income(n, total_rich_tax_base);
-		state.world.nation_set_total_middle_income(n, total_mid_tax_base);
-		state.world.nation_set_total_poor_income(n, total_poor_tax_base);
-		auto collected_tax =
-			total_poor_tax_base * tax_eff * float(state.world.nation_get_poor_tax(n)) / 100.0f +
-			total_mid_tax_base * tax_eff * float(state.world.nation_get_middle_tax(n)) / 100.0f +
-			total_rich_tax_base * tax_eff * float(state.world.nation_get_rich_tax(n)) / 100.0f;
+		state.world.nation_set_total_rich_income(n, total_rich_tax_base * admin_efficiency);
+		state.world.nation_set_total_middle_income(n, total_mid_tax_base * admin_efficiency);
+		state.world.nation_set_total_poor_income(n, total_poor_tax_base * admin_efficiency);
+		auto collected_tax = tax_eff * admin_efficiency * (
+			total_poor_tax_base * poor_effect +
+			total_mid_tax_base * middle_effect +
+			total_rich_tax_base * rich_effect);
 		assert(std::isfinite(collected_tax) && collected_tax >= 0.f);
 		state.world.nation_get_stockpiles(n, economy::money) += collected_tax;
 		{
