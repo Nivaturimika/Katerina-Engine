@@ -233,7 +233,7 @@ public:
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::issue_option_id>(state, parent);
 		//Black on black is hard to see - so paint it white
-		std::string txt = politics::issue_is_selected(state, state.local_player_nation, content) ? "" : "?W";
+		std::string txt = politics::issue_is_selected(state, state.local_player_nation, content) || command::can_enact_issue(state, state.local_player_nation, content) ? "" : "?W";
 		txt += text::produce_simple_string(state, state.world.issue_option_get_name(content));
 		set_text(state, txt);
 	}
