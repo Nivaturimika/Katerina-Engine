@@ -4259,7 +4259,7 @@ construction_status province_building_construction(sys::state& state, dcon::prov
 			float purchased = 0.0f;
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				total += state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor;
-				purchased += pb_con.get_purchased_goods().commodity_amounts[i];
+				purchased += std::clamp(pb_con.get_purchased_goods().commodity_amounts[i],0.0f, state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor);
 			}
 			return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
 		}
