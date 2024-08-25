@@ -497,7 +497,7 @@ public:
 						auto box = text::open_layout_box(contents, 0);
 						text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
 						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp( cgoods.commodity_amounts[i],0.0f,goods.commodity_amounts[i] * admin_cost_factor) });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp( cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * admin_cost_factor) });
 						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
 						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
 						text::close_layout_box(contents, box);

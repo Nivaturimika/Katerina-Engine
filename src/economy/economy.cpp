@@ -2110,7 +2110,7 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 
 	for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-		total += state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.nation_get_effective_prices(n, cid);
+		total += state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.nation_get_effective_prices(n, cid) * 10.0f;
 	}
 	for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
@@ -4241,7 +4241,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 		}
 	}
 
-	return total;
+	return total * 8.0f;
 }
 
 float estimate_war_subsidies(sys::state& state, dcon::nation_id n) {
@@ -4259,7 +4259,7 @@ construction_status province_building_construction(sys::state& state, dcon::prov
 			float purchased = 0.0f;
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				total += state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor;
-				purchased += std::clamp(pb_con.get_purchased_goods().commodity_amounts[i],0.0f, state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor);
+				purchased += std::clamp(pb_con.get_purchased_goods().commodity_amounts[i], 0.0f, state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor);
 			}
 			return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
 		}
