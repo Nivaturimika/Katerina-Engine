@@ -3677,10 +3677,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				//upgrading only one per run is too slow and leads to massive unemployment!!!
 
 				for(auto s : states_in_order) {
-					auto pw_num = state.world.state_instance_get_demographics(s,
-							demographics::to_key(state, state.culture_definitions.primary_factory_worker));
-					auto pw_employed = state.world.state_instance_get_demographics(s,
-							demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
+					auto pw_num = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
+					auto pw_employed = state.world.state_instance_get_demographics(s, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
 
 					if(pw_employed >= pw_num && pw_num > 0.0f)
 						continue; // no spare workers
@@ -3695,13 +3693,10 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 						if(p.get_province().get_nation_from_province_ownership() == n) {
 							for(auto f : p.get_province().get_factory_location()) {
 								++num_factories;
-
-								if(
-									(nation_rules & issue_rule::pop_expand_factory) != 0
-									&& f.get_factory().get_production_scale() >= 0.9f
-									&& f.get_factory().get_primary_employment() >= 0.9f
+								if((nation_rules & issue_rule::pop_expand_factory) != 0
+									&& f.get_factory().get_production_scale() >= 0.9985f
+									&& f.get_factory().get_primary_employment() >= 0.9985f
 									&& f.get_factory().get_level() < uint8_t(255)) {
-
 									auto type = f.get_factory().get_building_type();
 									auto ug_in_progress = false;
 									for(auto c : state.world.state_instance_get_state_building_construction(s)) {
@@ -3723,7 +3718,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 							}
 						}
 					}
-					if(selected_factory && profit > 0.f) {
+					if(selected_factory && profit > 1.f) {
 						auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
 						new_up.set_is_pop_project(true);
 						new_up.set_is_upgrade(true);
@@ -3736,7 +3731,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					if(existing_constructions.begin() != existing_constructions.end())
 						continue; // already building
 
-					if(n.get_private_investment() * 0.1f < total_cost + total_cost_added) {
+					if(n.get_private_investment() * 0.01f < total_cost + total_cost_added) {
 						continue;
 					}
 
