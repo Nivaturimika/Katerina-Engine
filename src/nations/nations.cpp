@@ -1669,35 +1669,33 @@ void update_influence(sys::state& state) {
 					auto gp_invest = state.world.unilateral_relationship_get_foreign_investment(
 						state.world.get_unilateral_relationship_by_unilateral_pair(rel.get_influence_target(), n));
 
-					float discredit_factor =
-							(rel.get_status() & influence::is_discredited) != 0 ? state.defines.discredit_influence_gain_factor : 0.0f;
+					float discredit_factor = (rel.get_status() & influence::is_discredited) != 0 ? state.defines.discredit_influence_gain_factor : 0.0f;
 					float neighbor_factor = bool(state.world.get_nation_adjacency_by_nation_adjacency_pair(n, rel.get_influence_target()))
-																			? state.defines.neighbour_bonus_influence_percent
-																			: 0.0f;
+						? state.defines.neighbour_bonus_influence_percent
+						: 0.0f;
 					float sphere_neighbor_factor = nations::has_sphere_neighbour(state, n, rel.get_influence_target())
 						? state.defines.sphere_neighbour_bonus_influence_percent
 						: 0.0f;
 					float continent_factor = n.get_capital().get_continent() != rel.get_influence_target().get_capital().get_continent()
-																			 ? state.defines.other_continent_bonus_influence_percent
-																			 : 0.0f;
+						? state.defines.other_continent_bonus_influence_percent
+						: 0.0f;
 					float puppet_factor = rel.get_influence_target().get_overlord_as_subject().get_ruler() == n
-																		? state.defines.puppet_bonus_influence_percent
-																		: 0.0f;
+						? state.defines.puppet_bonus_influence_percent
+						: 0.0f;
 					float relationship_factor = state.world.diplomatic_relation_get_value(state.world.get_diplomatic_relation_by_diplomatic_pair(n, rel.get_influence_target())) / state.defines.relation_influence_modifier;
 
 					float investment_factor = total_fi > 0.0f ? state.defines.investment_influence_defense * gp_invest / total_fi : 0.0f;
 					float pop_factor =
-							rel.get_influence_target().get_demographics(demographics::total) > state.defines.large_population_limit
-									? state.defines.large_population_influence_penalty *
-												rel.get_influence_target().get_demographics(demographics::total) /
-												state.defines.large_population_influence_penalty_chunk
-									: 0.0f;
+						rel.get_influence_target().get_demographics(demographics::total) > state.defines.large_population_limit
+						? state.defines.large_population_influence_penalty
+						* rel.get_influence_target().get_demographics(demographics::total)
+						/ state.defines.large_population_influence_penalty_chunk
+						: 0.0f;
 					float score_factor = gp_score > 0.0f
 						? std::max(1.0f - (rel.get_influence_target().get_industrial_score() + rel.get_influence_target().get_military_score() + prestige_score(state, rel.get_influence_target())) / gp_score,  0.0f)
 						: 0.0f;
 
 					float total_multiplier = 1.0f + discredit_factor + neighbor_factor + sphere_neighbor_factor + continent_factor + puppet_factor + relationship_factor + investment_factor + pop_factor + score_factor;
-
 					auto gain_amount = base_shares * total_multiplier;
 
 					/*

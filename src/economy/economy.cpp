@@ -1812,7 +1812,7 @@ void populate_army_consumption(sys::state& state) {
 				if(supply_cost.commodity_type[i]) {
 					state.world.nation_get_army_demand(owner, supply_cost.commodity_type[i]) +=
 						supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption *
-						o_sc_mod * 6.0f;
+						o_sc_mod;
 				} else {
 					break;
 				}
@@ -1839,7 +1839,7 @@ void populate_navy_consumption(sys::state& state) {
 				if(supply_cost.commodity_type[i]) {
 					state.world.nation_get_navy_demand(owner, supply_cost.commodity_type[i]) +=
 						supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption *
-						o_sc_mod * 6.0f;
+						o_sc_mod;
 				} else {
 					break;
 				}
@@ -2110,7 +2110,7 @@ float full_spending_cost(sys::state& state, dcon::nation_id n) {
 
 	for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-		total += state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.nation_get_effective_prices(n, cid) * 10.0f;
+		total += state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.nation_get_effective_prices(n, cid);
 	}
 	for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
@@ -3092,13 +3092,13 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				}
 			}
 		}
-		state.world.nation_set_total_rich_income(n, total_rich_tax_base * admin_efficiency * 0.07f);
-		state.world.nation_set_total_middle_income(n, total_mid_tax_base * admin_efficiency * 0.5f);
-		state.world.nation_set_total_poor_income(n, total_poor_tax_base * admin_efficiency * 1.4f);
+		state.world.nation_set_total_rich_income(n, total_rich_tax_base * admin_efficiency);
+		state.world.nation_set_total_middle_income(n, total_mid_tax_base * admin_efficiency);
+		state.world.nation_set_total_poor_income(n, total_poor_tax_base * admin_efficiency);
 		auto collected_tax = tax_eff * admin_efficiency * (
-			total_rich_tax_base * rich_effect * 0.07f +
-			total_mid_tax_base * middle_effect * 0.5f +
-			total_poor_tax_base * poor_effect * 1.4f);
+			total_rich_tax_base * rich_effect +
+			total_mid_tax_base * middle_effect +
+			total_poor_tax_base * poor_effect);
 		assert(std::isfinite(collected_tax) && collected_tax >= 0.f);
 		state.world.nation_get_stockpiles(n, economy::money) += collected_tax;
 		{
@@ -4035,16 +4035,6 @@ float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, 
 			total += adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 	});
-	auto multiplier = 1.0f;
-	if(in == culture::income_type::education) {
-		multiplier = 4.0f;
-	}
-	if(in == culture::income_type::administration) {
-		multiplier = 6.0f;
-	}
-	if(in == culture::income_type::military) {
-		multiplier = 6.2f;
-	}
 	return total * state.defines.ke_pop_payout_factor;
 }
 
@@ -4236,7 +4226,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 		}
 	}
 
-	return total * 8.0f;
+	return total;
 }
 
 float estimate_war_subsidies(sys::state& state, dcon::nation_id n) {
