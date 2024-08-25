@@ -3395,7 +3395,7 @@ void update_budget(sys::state& state) {
 				//	n.set_administrative_spending(int8_t(std::max(0, n.get_administrative_spending() - 2)));
 				//}
 				if(!n.get_ai_is_threatened()) {
-					n.set_military_spending(int8_t(std::max(50, n.get_military_spending() - 5)));
+					n.set_military_spending(int8_t(std::min(75, n.get_military_spending() - 5)));
 				}
 				n.set_social_spending(int8_t(std::max(0, n.get_social_spending() - 2)));
 
@@ -3407,9 +3407,9 @@ void update_budget(sys::state& state) {
 				//	n.set_administrative_spending(int8_t(std::min(100, n.get_administrative_spending() + 2)));
 				//}
 				if(n.get_ai_is_threatened()) {
-					n.set_military_spending(int8_t(std::min(100, n.get_military_spending() + 10)));
+					n.set_military_spending(int8_t(std::min(50, n.get_military_spending() + 10)));
 				} else {
-					n.set_military_spending(int8_t(std::min(75, n.get_military_spending() + 10)));
+					n.set_military_spending(int8_t(std::min(15, n.get_military_spending() + 10)));
 				}
 				n.set_social_spending(int8_t(std::min(max_social, n.get_social_spending() + 2)));
 
@@ -3452,9 +3452,9 @@ void update_budget(sys::state& state) {
 				//	n.set_administrative_spending(int8_t(std::min(100, n.get_administrative_spending() + 2)));
 				//}
 				if(n.get_ai_is_threatened()) {
-					n.set_military_spending(int8_t(std::min(100, n.get_military_spending() + 10)));
+					n.set_military_spending(int8_t(std::min(50, n.get_military_spending() + 10)));
 				} else {
-					n.set_military_spending(int8_t(std::min(75, n.get_military_spending() + 10)));
+					n.set_military_spending(int8_t(std::min(15, n.get_military_spending() + 10)));
 				}
 				n.set_social_spending(int8_t(std::min(max_social, n.get_social_spending() + 2)));
 
