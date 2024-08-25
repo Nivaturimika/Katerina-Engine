@@ -1115,9 +1115,11 @@ public:
 		auto prov = retrieve<dcon::province_id>(state, parent);
 		if(bool(retrieve<dcon::army_id>(state, parent))) {
 			for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-				for(const auto memb : al.get_army().get_army_membership()) {
-					value += memb.get_regiment().get_org();
-					total += 1.f;
+				if(!al.get_army().get_navy_from_army_transport()) {
+					for(const auto memb : al.get_army().get_army_membership()) {
+						value += memb.get_regiment().get_org();
+						total += 1.f;
+					}
 				}
 			}
 		}
@@ -1149,8 +1151,10 @@ class unit_counter_strength : public simple_text_element_base {
 		bool has_navy = bool(retrieve<dcon::navy_id>(state, parent));
 		if(!has_navy) {
 			for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-				for(const auto memb : al.get_army().get_army_membership()) {
-					value += memb.get_regiment().get_strength() * 3.f;
+				if(!al.get_army().get_navy_from_army_transport()) {
+					for(const auto memb : al.get_army().get_army_membership()) {
+						value += memb.get_regiment().get_strength() * 3.f;
+					}
 				}
 			}
 		} else {
@@ -1234,7 +1238,7 @@ public:
 		}
 		if(state.selected_navies.empty() && bool(retrieve<dcon::army_id>(state, parent))) {
 			for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-				if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
+				if(!al.get_army().get_navy_from_army_transport() && al.get_army().get_controller_from_army_control() == state.local_player_nation)
 					state.select(al.get_army());
 			}
 		}
@@ -1303,7 +1307,7 @@ public:
 		} else {
 			army = dcon::army_id{};
 			for(auto al : state.world.province_get_army_location_as_location(prov)) {
-				if(al.get_army()) {
+				if(!al.get_army().get_navy_from_army_transport() && al.get_army()) {
 					army = al.get_army();
 					if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
 						break;
