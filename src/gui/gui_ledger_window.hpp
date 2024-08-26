@@ -336,22 +336,19 @@ public:
 				break;
 			case ledger_sort_type::gdp_capita:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					float a_population = state.world.nation_get_demographics(a, demographics::total);
-					float b_population = state.world.nation_get_demographics(b, demographics::total);
-
 					if(lsort.reversed) {
-						return economy::gdp_adjusted(state, a) / a_population < economy::gdp_adjusted(state, b) / b_population;
+						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 					} else {
-						return economy::gdp_adjusted(state, a) / a_population > economy::gdp_adjusted(state, b) / b_population;
+						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) > state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 					}
 				});
 				break;
 			case ledger_sort_type::gdp:	
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					if(lsort.reversed) {
-						return economy::gdp_adjusted(state, a) < economy::gdp_adjusted(state, b);
+						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 					} else {
-						return economy::gdp_adjusted(state, a) > economy::gdp_adjusted(state, b);
+						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) > state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 					}
 				});
 				break;

@@ -3657,16 +3657,6 @@ object {
 		tag{ unsaved }
 	}
 	property {
-		name{ gdp }
-		type{ float }
-		tag{ save }
-	}
-	property {
-		name { gdp_record }
-		type{ array{int32_t}{float} }
-		tag{ save }
-	}
-	property {
 		name{ effective_prices }
 		type{ array{commodity_id}{float} }
 		tag{ save }
