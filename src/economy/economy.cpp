@@ -152,9 +152,7 @@ void initialize_artisan_distribution(sys::state& state) {
 		for(uint32_t i = 1; i < csize; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto kf = state.world.commodity_get_key_factory(cid);
-
 			if(state.world.commodity_get_artisan_output_amount(cid) > 0.0f && (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf)))) {
-
 				n.set_artisan_distribution(cid, 0.f);
 			}
 		}
@@ -481,8 +479,8 @@ float pseudo_exp_for_negative(float f) {
 }
 
 float get_artisans_multiplier(sys::state& state, dcon::nation_id n) {
-	float multiplier = 0.000001f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
-	return 1.f / (multiplier + 1.f);
+	float multiplier = 0.1f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
+	return (multiplier + 1.f);
 }
 
 constexpr float artisan_baseline_score = 5.f;
@@ -4844,14 +4842,12 @@ void go_bankrupt(sys::state& state, dcon::nation_id n) {
 
 commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c) {
 	auto commodity = dcon::fatten(state.world, c);
-	if(commodity.get_rgo_amount() > 0 && (commodity.get_artisan_output_amount() > 0 || commodity.get_key_factory()))
+	if(commodity.get_rgo_amount() > 0.f && (commodity.get_artisan_output_amount() > 0.f || commodity.get_key_factory()))
 		return commodity_production_type::both;
 	else if(commodity.get_key_factory())
 		return commodity_production_type::derivative;
 	else
 		return commodity_production_type::primary;
-
-
 }
 
 } // namespace economy
