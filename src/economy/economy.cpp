@@ -2819,8 +2819,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			state.defines.base_goods_demand + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand);
 
 		int32_t num_inventions = 0;
-		state.world.for_each_invention(
-				[&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
+		state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
 		float invention_factor = float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f;
 
 		populate_needs_costs(state, n, base_demand, invention_factor);
