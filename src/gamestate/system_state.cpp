@@ -3485,8 +3485,6 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	nations::update_administrative_efficiency(*this);
 	rebel::update_movement_values(*this);
 
-	economy::update_land_ownership(*this);
-	economy::update_local_subsistence_factor(*this);
 	economy::regenerate_unsaved_values(*this);
 
 	military::regenerate_land_unit_average(*this);

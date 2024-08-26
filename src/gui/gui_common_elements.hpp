@@ -1705,9 +1705,9 @@ public:
 			text::close_layout_box(contents, base_box);
 		});
 
-		auto rgo_employment = state.world.province_get_subsistence_employment(p);
+		auto rgo_employment = economy::rgo_total_employment(state, n, p);
 		auto current_employment = int64_t(rgo_employment);
-		auto max_employment = int64_t(economy::subsistence_max_pseudoemployment(state, n, p));
+		auto max_employment = int64_t(economy::rgo_total_max_employment(state, n, p));
 		auto expected_profit = 0.f;
 
 		auto base_box = text::open_layout_box(contents);
