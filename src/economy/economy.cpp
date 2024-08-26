@@ -1702,16 +1702,12 @@ void update_national_artisan_consumption(sys::state& state, dcon::nation_id n, f
 			}
 
 			float output_total = state.world.commodity_get_artisan_output_amount(cid) * state.world.commodity_get_current_price(cid);
-
-			float input_multiplier = std::max(0.1f, state.defines.alice_inputs_base_factor_artisans
-				+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
-			float throughput_multiplier = std::max(0.1f, 1.0f
-				+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_throughput));
-			float output_multiplier = std::max(0.1f, state.defines.alice_output_base_factor_artisans
-				+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
+			float input_multiplier = std::max(0.1f, 1.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
+			float throughput_multiplier = std::max(0.1f, 2.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_throughput));
+			float output_multiplier = std::max(0.1f, 4.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
 
 			float distribution = get_artisan_distribution_fast(state, n, cid, max_score, total_score, multiplier);
-			float max_production_scale = num_artisans * distribution / 10'000.0f * std::max(0.0f, mobilization_impact);
+			float max_production_scale = num_artisans * distribution / 1000.0f * std::max(0.0f, mobilization_impact);
 
 			auto profitability_factor = (output_total * output_multiplier * throughput_multiplier * min_available - input_multiplier * input_total * throughput_multiplier * min_available) / (expected_min_wage * state.defines.ke_profitability_factor);
 			bool profitable = (output_total * output_multiplier - input_multiplier * input_total) >= 0.0f;
