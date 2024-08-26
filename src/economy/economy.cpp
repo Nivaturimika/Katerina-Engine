@@ -411,7 +411,7 @@ bool nation_has_closed_factories(sys::state& state, dcon::nation_id n) { // TODO
 	return false;
 }
 
-constexpr float artisan_buff_factor = 3.5f;
+constexpr float artisan_buff_factor = 1.25f;
 
 float base_artisan_profit(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 	auto const& inputs = state.world.commodity_get_artisan_inputs(c);
@@ -2457,7 +2457,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
+							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2481,7 +2481,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto amount = base_cost.commodity_amounts[i] / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
+							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2507,9 +2507,8 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							auto amount = base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(amount, 0.f, source);
+							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2525,9 +2524,8 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							auto amount = base_cost.commodity_amounts[i] * admin_cost_factor  / construction_time;
 							auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(amount, 0.f, source);
+							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2552,7 +2550,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * factory_mod * admin_cost_factor) {
 					auto amount = base_cost.commodity_amounts[i] / construction_time;
 					auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-					auto delta = std::clamp(base_cost.commodity_amounts[i] * factory_mod * admin_cost_factor / construction_time, 0.f, source);
+					auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 					current_purchased.commodity_amounts[i] += delta;
 					source -= delta;
 				}
