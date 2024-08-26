@@ -3332,8 +3332,8 @@ void update_budget(sys::state& state) {
 		float ratio_land = 100.f * land_budget / (1.f + economy::estimate_land_spending(state, n));
 		float ratio_naval = 100.f * naval_budget / (1.f + economy::estimate_naval_spending(state, n));
 
-		ratio_land = std::clamp(ratio_land, 0.f, 100.f);
-		ratio_naval = std::clamp(ratio_naval, 0.f, 100.f);
+		ratio_land = n.get_is_at_war() && n.get_ai_is_threatened() ? 100.f : std::clamp(ratio_land * 0.5f, 0.f, 25.f);
+		ratio_naval = n.get_is_at_war() && n.get_ai_is_threatened() ? 75.f : std::clamp(ratio_naval * 0.5f, 0.f, 25.f);
 		n.set_land_spending(int8_t(ratio_land));
 		n.set_naval_spending(int8_t(ratio_naval));
 

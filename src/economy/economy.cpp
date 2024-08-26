@@ -424,9 +424,8 @@ float base_artisan_profit(sys::state& state, dcon::nation_id n, dcon::commodity_
 
 	float output_total = state.world.commodity_get_artisan_output_amount(c) * state.world.commodity_get_current_price(c);
 
-	float input_multiplier = std::max(0.1f, state.defines.alice_inputs_base_factor_artisans + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
-	float output_multiplier = std::max(0.1f, state.defines.alice_output_base_factor_artisans + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
-
+	float input_multiplier = std::max(0.1f, 1.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
+	float output_multiplier = std::max(0.1f, 2.f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
 	return output_total * output_multiplier - input_multiplier * input_total;
 }
 float artisan_scale_limit(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
@@ -463,10 +462,8 @@ float pseudo_exp_for_negative(float f) {
 	if(f < -128.f) {
 		return 0.f;
 	}
-
 	f = f / 128.f;
 	f = 1 + f + f * f / 2 + f * f * f / 6;
-
 	f = f * f; // 2
 	f = f * f; // 4
 	f = f * f; // 8
@@ -474,23 +471,20 @@ float pseudo_exp_for_negative(float f) {
 	f = f * f; // 32
 	f = f * f; // 64
 	f = f * f; // 128
-
 	return f;
 }
 
 float get_artisans_multiplier(sys::state& state, dcon::nation_id n) {
-	float multiplier = 0.1f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
-	return (multiplier + 1.f);
+	float multiplier = 0.000001f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
+	return 1.f / (multiplier + 1.f);
 }
 
-constexpr float artisan_baseline_score = 5.f;
+constexpr float artisan_baseline_score = 6.25f;
 
 float max_artisan_score(sys::state& state, dcon::nation_id n, float multiplier) {
 	auto const csize = state.world.commodity_size();
-
 	float baseline = artisan_baseline_score / multiplier;
 	float max_score = std::numeric_limits<float>::lowest();
-
 	for(uint32_t i = 1; i < csize; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 		float score = state.world.nation_get_artisan_distribution(n, cid);
@@ -501,16 +495,13 @@ float max_artisan_score(sys::state& state, dcon::nation_id n, float multiplier) 
 	if(baseline > max_score) {
 		max_score = baseline;
 	}
-
 	return max_score;
 }
 
 float total_artisan_exp_score(sys::state& state, dcon::nation_id n, float multiplier, float max_score) {
 	auto const csize = state.world.commodity_size();
-
 	float total = 0.f;
 	float baseline = artisan_baseline_score / multiplier;
-
 	// crude approximation of softmax
 	for(uint32_t i = 1; i < csize; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
@@ -519,29 +510,19 @@ float total_artisan_exp_score(sys::state& state, dcon::nation_id n, float multip
 		total += dist;
 	}
 	total += pseudo_exp_for_negative((baseline - max_score) * multiplier);
-
 	return total;
 }
 
-float get_artisan_distribution_fast(
-	sys::state& state,
-	dcon::nation_id n,
-	dcon::commodity_id c,
-	float max_score,
-	float total_score,
-	float multiplier
-) {
+float get_artisan_distribution_fast(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float max_score, float total_score, float multiplier) {
 	float score = state.world.nation_get_artisan_distribution(n, c);
 	return pseudo_exp_for_negative((score - max_score) * multiplier) / (total_score + 0.001f);
 }
 
 float get_artisan_distribution_slow(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 	auto const csize = state.world.commodity_size();
-
 	float multiplier = get_artisans_multiplier(state, n);
 	float max_score = max_artisan_score(state, n, multiplier);
 	float total_score = total_artisan_exp_score(state, n, multiplier, max_score);
-
 	return get_artisan_distribution_fast(state, n, c, max_score, total_score, multiplier);
 }
 
@@ -730,14 +711,14 @@ void initialize(sys::state& state) {
 		initialize_needs_weights(state, n);
 
 		auto fn = fatten(state.world, n);
-		fn.set_administrative_spending(int8_t(80));
-		fn.set_military_spending(int8_t(60));
-		fn.set_education_spending(int8_t(100));
-		fn.set_social_spending(int8_t(100));
-		fn.set_land_spending(int8_t(100));
-		fn.set_naval_spending(int8_t(100));
-		fn.set_construction_spending(int8_t(100));
-		fn.set_overseas_spending(int8_t(100));
+		fn.set_administrative_spending(int8_t(50));
+		fn.set_military_spending(int8_t(25));
+		fn.set_education_spending(int8_t(25));
+		fn.set_social_spending(int8_t(25));
+		fn.set_land_spending(int8_t(25));
+		fn.set_naval_spending(int8_t(25));
+		fn.set_construction_spending(int8_t(25));
+		fn.set_overseas_spending(int8_t(25));
 
 		fn.set_poor_tax(int8_t(75));
 		fn.set_middle_tax(int8_t(75));
@@ -1922,9 +1903,7 @@ void populate_construction_consumption(sys::state& state) {
 
 			auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) *
-				float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-
+			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -1939,11 +1918,11 @@ void populate_construction_consumption(sys::state& state) {
 		auto owner = c.get_nation().id;
 		if(owner && c.get_province().get_nation_from_province_ownership() == c.get_province().get_nation_from_province_control() && !c.get_is_pop_project()) {
 			auto t = economy::province_building_type(c.get_type());
+			float admin_eff = state.world.nation_get_administrative_efficiency(owner);
+			float admin_cost_factor = 2.0f - admin_eff;
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
-			float admin_eff = state.world.nation_get_administrative_efficiency(owner);
-			float admin_cost_factor = 2.0f - admin_eff;
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -2530,9 +2509,9 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							auto amount = base_cost.commodity_amounts[i] / construction_time;
+							auto amount = base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
+							auto delta = std::clamp(amount, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -2547,10 +2526,10 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i]) {
-							auto amount = base_cost.commodity_amounts[i] / construction_time;
+						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+							auto amount = base_cost.commodity_amounts[i] * admin_cost_factor  / construction_time;
 							auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
+							auto delta = std::clamp(amount, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
 						}
@@ -4154,7 +4133,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] / construction_time;
+						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 				} else {
 					break;
 				}
@@ -4177,7 +4156,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] / construction_time;
+						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 				} else {
 					break;
 				}
@@ -4195,7 +4174,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] / construction_time;
+						total += state.world.nation_get_effective_prices(n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 				} else {
 					break;
 				}
