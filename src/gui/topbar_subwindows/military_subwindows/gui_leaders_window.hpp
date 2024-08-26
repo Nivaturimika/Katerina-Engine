@@ -53,92 +53,105 @@ class leader_portrait : public button_element_base {
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		display_leader_attributes(state, retrieve<dcon::leader_id>(state, parent), contents, 0);
 	}
- };
+};
+
+class leader_personality_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		auto name = state.world.leader_get_personality(l).get_name();
+		set_text(state, text::produce_simple_string(state, name));
+	}
+};
+class leader_background_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		auto name = state.world.leader_get_background(l).get_name();
+		set_text(state, text::produce_simple_string(state, name));
+	}
+};
+class leader_name_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		auto name = state.world.leader_get_name(l);
+		set_text(state, std::string(state.to_string_view(name)));
+	}
+};
+class leader_location_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		auto a = state.world.leader_get_army_from_army_leadership(l);
+		dcon::province_id location{};
+		if(a) {
+			location = state.world.army_get_location_from_army_location(a);
+		} else {
+			auto n = state.world.leader_get_navy_from_navy_leadership(l);
+			if(n) {
+				location = state.world.navy_get_location_from_navy_location(n);
+			}
+		}
+		set_text(state, text::produce_simple_string(state, state.world.province_get_name(location)));
+	}
+};
+class leader_unit_name_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		auto a = state.world.leader_get_army_from_army_leadership(l);
+		dcon::unit_name_id unit_name{};
+		if(a) {
+			unit_name = state.world.army_get_name(a);
+		} else {
+			auto n = state.world.leader_get_navy_from_navy_leadership(l);
+			if(n) {
+				unit_name = state.world.navy_get_name(n);
+			}
+		}
+		set_text(state, text::produce_simple_string(state, std::string(state.to_string_view(unit_name))));
+	}
+};
+class leader_prestige_bar : public vertical_progress_bar {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		progress = state.world.leader_get_prestige(l);
+	}
+};
 
 class military_leaders : public listbox_row_element_base<dcon::leader_id> {
 public:
 	ui::simple_text_element_base* leader_name = nullptr;
-	ui::simple_text_element_base* background = nullptr;
-	ui::simple_text_element_base* personality = nullptr;
 	ui::simple_text_element_base* army = nullptr;
 	ui::simple_text_element_base* location = nullptr;
 
 	void on_create(sys::state& state) noexcept override {
 		listbox_row_element_base::on_create(state);
-		base_data.position.y = base_data.position.x = 0;
+		base_data.position = xy_pair{ 0, 0 };
 	}
 
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "name") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			leader_name = ptr.get();
-			return ptr;
+			return make_element_by_type<leader_name_text>(state, id);
 		} else if (name == "leader") {
 			return make_element_by_type<leader_portrait>(state, id);
 		} else if(name == "background") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			background = ptr.get();
-			return ptr;
+			return make_element_by_type<leader_background_text>(state, id);
 		} else if(name == "personality") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			personality = ptr.get();
-			return ptr;
+			return make_element_by_type<leader_personality_text>(state, id);
 		} else if(name == "use_leader") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "army") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			army = ptr.get();
-			return ptr;
+			return make_element_by_type<leader_unit_name_text>(state, id);
 		} else if(name == "location") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			location = ptr.get();
-			return ptr;
+			return make_element_by_type<leader_location_text>(state, id);
+		} else if(name == "leader_prestige_bar") {
+			return make_element_by_type<leader_prestige_bar>(state, id);
 		} else {
 			return nullptr;
 		}
-	}
-
-	void on_update(sys::state& state) noexcept override {
-		if(leader_name) {
-			auto name_id = state.world.leader_get_name(content);
-			auto name_content = state.to_string_view(name_id);
-			leader_name->set_text(state, std::string(name_content));
-		}
-
-		if(background) {
-			auto background_id = state.world.leader_get_background(content).get_name();
-			auto background_content = text::produce_simple_string(state, background_id);
-			background->set_text(state, background_content);
-		}
-
-		if(personality) {
-			auto personality_id = state.world.leader_get_personality(content).get_name();
-			auto personality_content = text::produce_simple_string(state, personality_id);
-			personality->set_text(state, personality_content);
-		}
-
-		auto army_id = state.world.leader_get_army_from_army_leadership(content);
-		if(army_id.value == 0) {
-			if(army) {
-				army->set_text(state, "");
-			}
-			if(location) {
-				location->set_text(state, "");
-			}
-		} else {
-			if(army) {
-				auto army_content = state.to_string_view(state.world.army_get_name(army_id));
-				army->set_text(state, std::string(army_content));
-				//army->set_text(state, "");
-			}
-			if(location) {
-				auto location_content = text::produce_simple_string(state, state.world.province_get_name(state.world.army_location_get_location(state.world.army_get_army_location(army_id))));
-				location->set_text(state, std::string(location_content));
-			}
-		}
-
-		Cyto::Any payload = content;
-		impl_set(state, payload);
 	}
 };
 
