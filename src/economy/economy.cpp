@@ -281,101 +281,8 @@ void rebalance_needs_weights(sys::state& state, dcon::nation_id n) {
 	}
 }
 
-
-void convert_commodities_into_ingredients(
-	sys::state& state,
-	std::vector<float>& buffer_commodities,
-	std::vector<float>& buffer_ingredients,
-	std::vector<float>& buffer_weights
-) {
-	state.world.for_each_commodity([&](dcon::commodity_id c) {
-		float amount = buffer_commodities[c.index()];
-
-		if(state.world.commodity_get_rgo_amount(c) > 0.f) {
-			buffer_ingredients[c.index()] += amount;
-		} else {
-			//calculate input vectors weights:
-			std::vector<float> weights;
-			float total_weight = 0.f;
-			float non_zero_count = 0.f;
-
-			state.world.for_each_factory_type([&](dcon::factory_type_id t) {
-				auto o = state.world.factory_type_get_output(t);
-				if(o == c) {
-					auto& inputs = state.world.factory_type_get_inputs(t);
-
-					float weight_current = 0;
-
-					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-						if(inputs.commodity_type[i]) {
-							float weight_input = buffer_weights[inputs.commodity_type[i].index()];
-							total_weight += weight_input;
-							weight_current += weight_input;
-						} else {
-							break;
-						}
-					}
-
-					if(weight_current > 0.f)
-						non_zero_count++;
-
-					weights.push_back(weight_current);
-				}
-			});
-
-			if(total_weight == 0) {
-				for(size_t i = 0; i < weights.size(); i++) {
-					weights[i] = 1.f;
-					total_weight++;
-				}
-			} else {
-				float average_weight = total_weight / non_zero_count;
-				for(size_t i = 0; i < weights.size(); i++) {
-					if(weights[i] == 0.f) {
-						weights[i] = average_weight;
-						total_weight += average_weight;
-					}
-				}
-			}
-
-			//now we have weights and can use them for transformation of output into ingredients:
-			size_t index = 0;
-
-			state.world.for_each_factory_type([&](dcon::factory_type_id t) {
-				auto o = state.world.factory_type_get_output(t);
-				if(o == c) {
-					auto& inputs = state.world.factory_type_get_inputs(t);
-					float output_power = state.world.factory_type_get_output_amount(t);
-
-					float weight_current = weights[index] / total_weight;
-					index++;
-
-					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-						if(inputs.commodity_type[i]) {
-
-							buffer_ingredients[inputs.commodity_type[i].index()] += inputs.commodity_amounts[i] * amount / output_power * weight_current;
-
-							float weight_input = buffer_weights[inputs.commodity_type[i].index()];
-							total_weight += weight_input;
-							weight_current += weight_input;
-						} else {
-							break;
-						}
-					}
-				}
-			});
-		}
-	});
-}
-
 void presimulate(sys::state& state) {
 	// economic updates without construction
-/*
-	update_rgo_employment(state);
-	update_factory_employment(state);
-	daily_update(state, false);
-	ai::update_budget(state);
-*/
 }
 
 bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::factory_type_id fac) {
@@ -394,8 +301,7 @@ bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::fac
 
 bool is_bankrupt_debtor_to(sys::state& state, dcon::nation_id debt_holder, dcon::nation_id debtor) {
 	return state.world.nation_get_is_bankrupt(debt_holder) &&
-		state.world.unilateral_relationship_get_owns_debt_of(
-				state.world.get_unilateral_relationship_by_unilateral_pair(debtor, debt_holder)) > 0.1f;
+		state.world.unilateral_relationship_get_owns_debt_of(state.world.get_unilateral_relationship_by_unilateral_pair(debtor, debt_holder)) > 0.1f;
 }
 
 bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n) {
@@ -430,7 +336,6 @@ float base_artisan_profit(sys::state& state, dcon::nation_id n, dcon::commodity_
 	}
 
 	float output_total = state.world.commodity_get_artisan_output_amount(c) * state.world.commodity_get_current_price(c);
-
 	float input_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
 	float output_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
 	return output_total * output_multiplier - input_multiplier * input_total;
@@ -451,15 +356,8 @@ float artisan_scale_limit(sys::state& state, dcon::nation_id n, dcon::commodity_
 
 bool valid_artisan_good(sys::state& state, dcon::nation_id n, dcon::commodity_id cid) {
 	auto kf = state.world.commodity_get_key_factory(cid);
-	return (
-		state.world.commodity_get_artisan_output_amount(cid) > 0.0f
-		&& (
-			state.world.commodity_get_is_available_from_start(cid)
-			|| (
-				kf && state.world.nation_get_active_building(n, kf)
-				)
-			)
-		);
+	return (state.world.commodity_get_artisan_output_amount(cid) > 0.0f
+		&& (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))));
 }
 
 inline constexpr float ln_2 = 0.30103f;
@@ -579,15 +477,12 @@ void initialize(sys::state& state) {
 		fc.set_total_consumption(0.0f);
 		fc.set_total_production(0.0f);
 		fc.set_total_real_demand(0.0f);
-
 		for(int i = 0; i < 8; i++) {
 			fc.set_demand_by_category(i, 0.f);
 		}
-
 		for(uint32_t i = 0; i < price_history_length; ++i) {
 			fc.set_price_record(i, fc.get_cost());
 		}
-		// fc.set_global_market_pool();
 	});
 
 	auto savings_buffer = state.world.pop_type_make_vectorizable_float_buffer();
@@ -616,101 +511,17 @@ void initialize(sys::state& state) {
 	});
 
 	// learn some weights for rgo from initial territories:
-	auto csize = state.world.commodity_size();
-	std::vector<std::vector<float>> per_climate_distribution_buffer(state.world.modifier_size() + 1, std::vector<float>(csize + 1, 0.f));
-	std::vector<std::vector<float>> per_terrain_distribution_buffer(state.world.modifier_size() + 1, std::vector<float>(csize + 1, 0.f));
-	std::vector<std::vector<float>> per_continent_distribution_buffer(state.world.modifier_size() + 1, std::vector<float>(csize + 1, 0.f));
-
-	// init the map for climates
 	province::for_each_land_province(state, [&](dcon::province_id p) {
 		auto fp = fatten(state.world, p);
-		dcon::commodity_id main_trade_good = state.world.province_get_rgo(p);
-		dcon::modifier_id climate = fp.get_climate();
-		dcon::modifier_id terrain = fp.get_terrain();
-		dcon::modifier_id continent = fp.get_continent();
-		per_climate_distribution_buffer[climate.value][main_trade_good.value] += 1.f;
-		per_terrain_distribution_buffer[terrain.value][main_trade_good.value] += 1.f;
-		per_continent_distribution_buffer[continent.value][main_trade_good.value] += 1.f;
-	});
-
-	// normalisation
-	for(uint32_t i = 0; i < uint32_t(state.world.modifier_size()); i++) {
-		float climate_sum = 0.f;
-		float terrain_sum = 0.f;
-		float continent_sum = 0.f;
-		for(uint32_t j = 0; j < csize; j++) {
-			climate_sum += per_climate_distribution_buffer[i][j];
-			terrain_sum += per_terrain_distribution_buffer[i][j];
-			continent_sum += per_continent_distribution_buffer[i][j];
-		}
-		for(uint32_t j = 0; j < csize; j++) {
-			per_climate_distribution_buffer[i][j] *= climate_sum == 0.f ? 1.f : 1.f / climate_sum;
-			per_terrain_distribution_buffer[i][j] *= terrain_sum == 0.f ? 1.f : 1.f / terrain_sum;
-			per_continent_distribution_buffer[i][j] *= continent_sum == 0.f ? 1.f : 1.f / continent_sum;
-		}
-	}
-
-	province::for_each_land_province(state, [&](dcon::province_id p) {
-		if(state.world.province_get_rgo_was_set_during_scenario_creation(p)) {
+		if(fp.get_rgo_was_set_during_scenario_creation())
 			return;
-		}
-
-		auto fp = fatten(state.world, p);
-		dcon::modifier_id climate = fp.get_climate();
-		dcon::modifier_id terrain = fp.get_terrain();
-		dcon::modifier_id continent = fp.get_continent();
-
-		dcon::commodity_id main_trade_good = state.world.province_get_rgo(p);
-		bool is_mine = state.world.commodity_get_is_mine(main_trade_good);
-
-		//max size of exploitable land:
-		auto max_rgo_size = std::ceil(2000.f / state.defines.alice_rgo_per_size_employment
-			* state.map_state.map_data.province_area[province::to_map_id(p)]);
-
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
 			fp.set_rgo_employment_per_good(c, 0.f);
 			fp.set_rgo_target_employment_per_good(c, 0.f);
 		});
-
-		// currently exploited land
-		float pop_amount = 0.0f;
-		for(auto pt : state.world.in_pop_type) {
-			if(pt == state.culture_definitions.slaves) {
-				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, state.culture_definitions.slaves));
-			} else if(pt.get_is_paid_rgo_worker()) {
-				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, pt));
-			}
-		}
-
-		auto size_at_the_start_of_the_game = std::ceil(pop_amount / state.defines.alice_rgo_per_size_employment);
-		auto real_size = std::min(size_at_the_start_of_the_game * 1.5f, max_rgo_size);
-
-		assert(std::isfinite(real_size));
-		fp.set_rgo_size(real_size);
-
-		static std::vector<float> true_distribution;
-		true_distribution.resize(state.world.commodity_size());
-
-		float total = 0.f;
+		fp.set_rgo_size(0.f);	
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			float climate_d = per_climate_distribution_buffer[climate.value][c.value];
-			float terrain_d = per_terrain_distribution_buffer[terrain.value][c.value];
-			float continent_d = per_continent_distribution_buffer[continent.value][c.value];
-			float current = (climate_d + terrain_d) * (climate_d + terrain_d) * continent_d;
-			true_distribution[c.index()] = current;
-			total += current;
-		});
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			assert(total > 0.f && std::isfinite(total));
-			true_distribution[c.index()] /= total;
-		});
-
-		// distribution of rgo land per good		
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto fc = fatten(state.world, c);
-			assert(std::isfinite(true_distribution[c.index()]));
-			state.world.province_get_rgo_max_size_per_good(fp, c) += real_size * true_distribution[c.index()];
+			fp.set_rgo_max_size_per_good(c, 0.f);
 		});
 	});
 
@@ -747,9 +558,9 @@ void initialize(sys::state& state) {
 	populate_construction_consumption(state);
 
 	state.world.for_each_nation([&](dcon::nation_id n) { populate_effective_prices(state, n); });
-	state.world.for_each_nation([&](dcon::nation_id n) {
-		state.world.nation_set_stockpiles(n, economy::money, 2.0f * full_spending_cost(state, n));
-	});
+	//state.world.for_each_nation([&](dcon::nation_id n) {
+	//	state.world.nation_set_stockpiles(n, economy::money, 1000.0f);
+	//});
 }
 
 float sphere_leader_share_factor(sys::state& state, dcon::nation_id sphere_leader, dcon::nation_id sphere_member) {
@@ -833,12 +644,16 @@ void update_factory_triggered_modifiers(sys::state& state) {
 }
 
 float rgo_effective_size(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
+	/*
+	effective size = base size x (technology-bonus-to-specific-rgo-good-size
+	+ technology-general-farm-or-mine-size-bonus + provincial-mine-or-farm-size-modifier + 1)
+	*/
 	bool is_mine = state.world.commodity_get_is_mine(c);
 	auto rgo = state.world.province_get_rgo(p);
-	float base = (rgo == c) ? state.defines.alice_base_rgo_employment_bonus / state.defines.alice_rgo_per_size_employment : 0.f;
-	// - We calculate its effective size which is its base size x (technology-bonus-to-specific-rgo-good-size +
-	// technology-general-farm-or-mine-size-bonus + provincial-mine-or-farm-size-modifier + 1)
-	auto sz = state.world.province_get_rgo_max_size_per_good(p, c) + base;
+	if(rgo != c) {
+		return 0.f;
+	}
+	auto sz = state.world.province_get_rgo_max_size_per_good(p, c);
 	assert(sz >= 0.f && std::isfinite(sz));
 	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_size : sys::provincial_mod_offsets::farm_rgo_size);
 	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_size : sys::national_mod_offsets::farm_rgo_size);
@@ -1543,10 +1358,6 @@ float rgo_expected_worker_norm_profit(sys::state& state, dcon::province_id p, dc
 		* efficiency
 		* current_price
 		/ state.defines.alice_rgo_per_size_employment;
-}
-
-float convex_function(float x) {
-	return 1.f - (1.f - x) * (1.f - x);
 }
 
 void update_province_rgo_consumption(
