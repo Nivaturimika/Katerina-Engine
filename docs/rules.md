@@ -833,6 +833,8 @@ Units in combat gain experience. The exact formula is somewhat opaque to me, but
 
 Units that are not in combat and not embarked recover organization daily at: (national-organization-regeneration-modifier + morale-from-tech + leader-morale-trait + 1) x the-unit's-supply-factor / 5 up to the maximum organization possible for the unit times (0.25 + 0.75 x effective land or naval spending).
 
+Additionally, the prestige of the leader factors in morale as unit-morale + (leader-prestige x defines:LEADER_PRESTIGE_TO_MORALE_FACTOR). Similarly, unit-max-org + (leader-prestige x defines:LEADER_PRESTIGE_TO_MAX_ORG_FACTOR) allows for maximum org.
+
 Units that are moving lose any dig-in bonus they have acquired. A unit that is not moving gets one point of dig-in per define:DIG_IN_INCREASE_EACH_DAYS days.
 
 Units backed by pops with define:MIL_TO_AUTORISE militancy or greater that are in a rebel faction, and which have organization at least 0.75 will become rebel units.
