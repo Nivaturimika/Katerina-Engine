@@ -2013,33 +2013,6 @@ public:
 		auto ptr = retrieve< nation_toggle_list*>(state, parent);
 		if(!ptr)
 			return;
-
-		state.world.for_each_nation([&](dcon::nation_id nation) {
-			auto newest_index = economy::most_recent_gdp_record_index(state);
-			if((*ptr).data[nation.index()]) {
-				for(uint32_t i = 0; i < graph_length; ++i) {
-					auto record = state.world.nation_get_gdp_record(nation, (newest_index + economy::gdp_history_length - graph_length + i + 1) % economy::gdp_history_length);
-					if(record > max) {
-						max = record;
-					}
-				}
-			}
-		});
-
-		state.world.for_each_nation([&](dcon::nation_id nation) {
-			if(!((*ptr).data[nation.index()])) {
-				graph_per_nation[nation.index()]->set_visible(state, false);
-			} else {
-				graph_per_nation[nation.index()]->set_visible(state, true);
-				std::vector<float> datapoints(graph_length);
-				auto newest_index = economy::most_recent_gdp_record_index(state);
-
-				for(uint32_t i = 0; i < graph_length; ++i) {
-					datapoints[i] = state.world.nation_get_gdp_record(nation, (newest_index + economy::gdp_history_length - graph_length + i + 1) % economy::gdp_history_length);
-				}
-				graph_per_nation[nation.index()]->set_data_points(state, datapoints, min, max);
-			}
-		});
 	}
 };
 

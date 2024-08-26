@@ -30,11 +30,6 @@ void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id co
 void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
 	register_demand(state, n, commodity_type, amount, reason);
 	state.world.nation_get_intermediate_demand(n, commodity_type) += amount;
-
-	float price = state.world.commodity_get_current_price(commodity_type);
-	float sat = state.world.nation_get_demand_satisfaction(n, commodity_type);
-
-	state.world.nation_get_gdp(n) -= amount * price * sat;
 }
 
 // it's registered as a demand separately
@@ -44,7 +39,6 @@ void register_construction_demand(sys::state& state, dcon::nation_id n, dcon::co
 
 void register_domestic_supply(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount, economy_reason reason) {
 	state.world.nation_get_domestic_market_pool(n, commodity_type) += amount;
-	state.world.nation_get_gdp(n) += amount * state.world.commodity_get_current_price(commodity_type);
 }
 
 template void for_each_new_factory<std::function<void(new_factory)>>(sys::state&, dcon::state_instance_id, std::function<void(new_factory)>&&);
@@ -126,8 +120,6 @@ bool has_factory(sys::state const& state, dcon::state_instance_id si) {
 	return false;
 }
 
-
-
 void initialize_artisan_distribution(sys::state& state) {
 	state.world.nation_resize_artisan_distribution(state.world.commodity_size());
 	state.world.nation_resize_artisan_actual_production(state.world.commodity_size());
@@ -173,6 +165,25 @@ void initialize_needs_weights(sys::state& state, dcon::nation_id n) {
 			}
 		});
 	}
+}
+
+float pop_needs_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float need, bool is_life_need) {
+	/*
+For each pop
+Each pop strata and needs type has its own demand modifier, calculated as follows:
+(national-modifier-to-goods-demand + define:BASE_GOODS_DEMAND) x (national-modifier-to-specific-strata-and-needs-type + 1) x (define:INVENTION_IMPACT_ON_DEMAND x number-of-unlocked-inventions + 1, but for non-life-needs only)
+Each needs demand is also multiplied by 2 - the nation's administrative efficiency if the pop has education / admin / military income for that need category
+We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 + national-plurality (as a fraction of 100)) x pop-size
+Each of the pop's needs for life/everyday/luxury are multiplied by the appropriate modifier and added to domestic demand
+	*/
+	float num_inventions = 0.f;
+	for(const auto i : state.world.in_invention)
+		if(state.world.nation_get_active_inventions(n, i))
+			num_inventions += 1.f;
+	auto inv_impact = (is_life_need ? 1.f + +state.defines.invention_impact_on_demand * num_inventions : 1.f);
+	return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand)
+		+ state.defines.base_goods_demand * (need + 1.f)
+		* inv_impact;
 }
 
 float need_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
@@ -2495,9 +2506,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		if(!n) // test for running out of sorted nations
 			break;
 
-		// reset gdp
-		state.world.nation_set_gdp(n, 0.f);
-
 		/*
 		### Calculate effective prices
 		We will use the real demand from the *previous* day to determine how much of the purchasing will be done from the domestic
@@ -3408,25 +3416,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				}
 			}
 			n.set_private_investment(0.0f);
-		}
-	}
-
-	//write gdp to file
-	if(state.cheat_data.ecodump) {
-		for(auto n : state.world.in_nation) {
-			auto life_costs =
-				state.world.nation_get_life_needs_costs(n, state.culture_definitions.primary_factory_worker)
-				+ state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.primary_factory_worker)
-				+ state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.primary_factory_worker);
-			auto tag = nations::int_to_tag(state.world.national_identity_get_identifying_int(state.world.nation_get_identity_from_identity_holder(n)));
-			auto name = text::produce_simple_string(state, text::get_name(state, n));
-			state.cheat_data.national_economy_dump_buffer +=
-				tag + ","
-				+ name + ","
-				+ std::to_string(state.world.nation_get_gdp(n)) + ","
-				+ std::to_string(life_costs) + ","
-				+ std::to_string(state.world.nation_get_demographics(n, demographics::total)) + ","
-				+ std::to_string(state.current_date.value) + "\n";
 		}
 	}
 }
