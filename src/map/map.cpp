@@ -119,6 +119,10 @@ void display_data::update_fog_of_war(sys::state& state) {
 				add_nation_visible_provinces(state, direct_provinces, urel.get_subject());
 		}
 	}
+	for(auto n : state.world.in_nation) {
+		if(n != state.local_player_nation && military::are_allied_in_war(state, n, state.local_player_nation))
+			add_nation_visible_provinces(state, direct_provinces, n);
+	}
 
 	// update fog of war too
 	std::vector<uint32_t> province_fows(state.world.province_size() + 1, 0xFFFFFFFF);
