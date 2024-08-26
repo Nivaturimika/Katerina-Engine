@@ -1447,7 +1447,7 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 
 void update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage) {
 	auto production = state.world.factory_get_actual_production(f);
-	if(production > 0) {
+	if(production > 0.f) {
 		auto fac = fatten(state.world, f);
 		auto fac_type = fac.get_building_type();
 
@@ -1476,7 +1476,6 @@ void update_single_factory_production(sys::state& state, dcon::factory_id f, dco
 				state.world.factory_set_full_profit(f, money_made);
 			}
 		}
-	} else {
 	}
 }
 

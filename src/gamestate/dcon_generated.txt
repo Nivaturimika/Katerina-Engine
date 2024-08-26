@@ -1534,11 +1534,6 @@ object {
 		tag{ save }
 	}
 	property{
-		name{ subsistence_score }
-		type{ float }
-		tag{ save }
-	}
-	property{
 		name{ rgo_was_set_during_scenario_creation }
 		type{ bitfield }
 		tag{ unsaved }
@@ -1556,21 +1551,6 @@ object {
 	property{
 		name{ rgo_employment_per_good }
 		type{ array{commodity_id}{float} }
-		tag{ save }
-	}
-	property{
-		name{ landowners_share }
-		type{ float }
-		tag{ save }
-	}
-	property{
-		name{ capitalists_share }
-		type{ float }
-		tag{ save }
-	}
-	property{
-		name{ subsistence_employment }
-		type{ float }
 		tag{ save }
 	}
 	property{
