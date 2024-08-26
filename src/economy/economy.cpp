@@ -3448,29 +3448,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 	adjust prices based on global production & consumption
 	*/
 
-	state.world.for_each_commodity([&](dcon::commodity_id c) {
-		if(!state.world.commodity_get_money_rgo(c))
-			return;
-
-		float luxury_costs_laborer = 0.f;
-		const float speed_factor = 0.000017f;
-		const float base_demand = state.defines.base_goods_demand;
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id _cid{ dcon::commodity_id::value_base_t(i) };
-			if(state.world.commodity_get_is_available_from_start(_cid)) {
-				float price = state.world.commodity_get_current_price(_cid);
-				auto t = state.culture_definitions.laborers;
-				float base_life = state.world.pop_type_get_life_needs(t, _cid);
-				float base_everyday = state.world.pop_type_get_everyday_needs(t, _cid);
-				float base_luxury = state.world.pop_type_get_luxury_needs(t, _cid);
-				luxury_costs_laborer += base_life * base_demand * speed_factor * price;
-				luxury_costs_laborer += base_everyday * base_demand * speed_factor * price;
-				luxury_costs_laborer += base_luxury * base_demand * speed_factor * price;
-			}
-		}
-		state.world.commodity_set_current_price(c, std::clamp(luxury_costs_laborer, 0.01f, 1000.0f));
-	});
-
 	concurrency::parallel_for(uint32_t(0), total_commodities, [&](uint32_t k) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(k) };
 
@@ -3494,25 +3471,29 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto prior_production = state.world.commodity_get_total_production(cid);
 		state.world.commodity_set_total_production(cid, total_production);
 
-		float supply = prior_production + state.world.commodity_get_global_market_pool(cid) / 12.f;
+		/*
+		- price of money remains the price defined by the commodities file
+		- for each other commodity, check its real demand (see below for what real demand is), and if its real demand is positive,
+		check its supply. If its supply is also positive, we then take the square root of real-demand / supply and multiply that
+		result by the base price of the commodity. Let us call this the ratio-adjusted-price.
+		- If the ratio-adjusted-price is less than the current price - 0.01, then the price decreases by 0.01.
+		- If the ratio-adjusted-price is greater than the current price + 0.01, then the price increases by 0.01.
+		- Prices are then limited to being within 1/5th to 5x the base price of the commodity.
+		- Unadjusted supply and demand: While most of what goes on below is expressed directly in terms of adding to
+		domestic supply or demand, unless noted otherwise, it should be taken as given that the same is added to world
+		supply or demand. Also, world supply and demand for all commodities should be treated as at least 1.
+		*/
+		float supply = prior_production + state.world.commodity_get_global_market_pool(cid);
 		float demand = total_r_demand;
 		auto base_price = state.world.commodity_get_cost(cid);
 		auto current_price = state.world.commodity_get_current_price(cid);
-		float market_balance = demand - supply;
-		float max_slope = math::sqrt(abs(market_balance)) + 20.f;
-		float oversupply_factor = std::clamp(((supply + 0.001f) / (demand + 0.001f) - 1.f), 0.f, max_slope);
-		float overdemand_factor = std::clamp(((demand + 0.001f) / (supply + 0.001f) - 1.f), 0.f, max_slope);
-		float speed_modifer = (overdemand_factor - oversupply_factor);
-		float price_speed = 0.00043f * speed_modifer;
-		if(current_price < 1.f) {
-			price_speed *= current_price;
-		} else {
-			price_speed *= math::sqrt(current_price);
+		float ratio_adjusted_price = math::sqrt(std::max(demand, 0.001f) / std::max(supply, 0.001f)) * base_price;
+		if(ratio_adjusted_price < current_price - 0.01f) {
+			current_price -= 0.01f;
+		} else if(ratio_adjusted_price > current_price + 0.01f) {
+			current_price += 0.01f;
 		}
-		price_speed = std::clamp(price_speed, -0.11f, 0.11f);
-		if (demand > 0.1f && supply > 0.1f)
-			current_price += price_speed;
-		state.world.commodity_set_current_price(cid, std::clamp(current_price, 0.01f, 1000.0f));
+		state.world.commodity_set_current_price(cid, std::clamp(current_price, base_price / 5.f, base_price * 5.f));
 	});
 
 	if(state.cheat_data.ecodump) {
