@@ -3487,7 +3487,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		float demand = total_r_demand;
 		auto base_price = state.world.commodity_get_cost(cid);
 		auto current_price = state.world.commodity_get_current_price(cid);
-		float ratio_adjusted_price = math::sqrt(std::max(demand, 0.001f) / std::max(supply, 0.001f)) * base_price;
+		float ratio_adjusted_price = math::sqrt(std::max(demand, 1.f) / std::max(supply, 1.f)) * base_price;
 		if(ratio_adjusted_price < current_price - 0.01f) {
 			current_price -= 0.01f;
 		} else if(ratio_adjusted_price > current_price + 0.01f) {
