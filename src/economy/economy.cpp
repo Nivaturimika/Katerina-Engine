@@ -2314,9 +2314,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			auto result_everyday = std::clamp(old_everyday_to_use_in_demand_calculation * 0.9f + everyday_needs_fraction * 0.1f, 0.f, 1.f);
 			auto result_luxury = std::clamp(old_luxury_to_use_in_demand_calculation * 0.9f + luxury_needs_fraction * 0.1f, 0.f, 1.f);
 
-			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), std::clamp(old_life * 0.125f + final_life_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), std::clamp(old_everyday * 0.25f + final_everyday_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), std::clamp(old_luxury * 0.5f + final_luxury_needs_fraction * 0.01f, 0.f, 1.f));
+			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), std::clamp(old_life * 0.75f + final_life_needs_fraction * 0.01f, 0.f, 1.f));
+			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), std::clamp(old_everyday * 0.75f + final_everyday_needs_fraction * 0.01f, 0.f, 1.f));
+			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), std::clamp(old_luxury * 0.75f + final_luxury_needs_fraction * 0.01f, 0.f, 1.f));
 
 			ln_demand_vector.get(t) += result_life * total_pop * consumption_factor;
 			en_demand_vector.get(t) += result_everyday * total_pop * consumption_factor;
