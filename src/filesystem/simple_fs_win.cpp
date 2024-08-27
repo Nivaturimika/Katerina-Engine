@@ -166,7 +166,7 @@ bool list_files_compare_func(native_char const& char1, native_char const& char2)
 			auto digit = ch - NATIVE('0');
 			return (10 - digit) + 'Z';
 		}
-		return tolower(ch);
+		return ch;
 	};
 	return to_alpha_prec(char1) < to_alpha_prec(char2);
 }
