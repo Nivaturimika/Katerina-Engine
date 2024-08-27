@@ -158,10 +158,11 @@ void form_alliances(sys::state& state) {
 						return estimate_strength(state, a) > estimate_strength(state, b);
 					return a.index() > b.index();
 				});
-				if(state.world.nation_get_is_player_controlled(alliance_targets[0])
-				&& ymd.day == 1 && ymd.month == 1) {
-					assert(command::can_ask_for_alliance(state, n, alliance_targets[0], true));
-					command::execute_ask_for_alliance(state, n, alliance_targets[0]);
+				if(state.world.nation_get_is_player_controlled(alliance_targets[0])) {
+					if(ymd.day == 1 && ymd.month == 1) {
+						assert(command::can_ask_for_alliance(state, n, alliance_targets[0], true));
+						command::execute_ask_for_alliance(state, n, alliance_targets[0]);
+					}
 				} else {
 					nations::make_alliance(state, n, alliance_targets[0]);
 				}
