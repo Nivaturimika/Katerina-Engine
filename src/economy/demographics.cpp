@@ -1219,7 +1219,7 @@ void apply_issues(sys::state& state, uint32_t offset, uint32_t divisions, issues
 	});
 }
 
-constexpr float max_pop_size = 2000000.f;
+constexpr float max_pop_size = 4000000.f;
 
 void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 	/*
@@ -1255,7 +1255,7 @@ void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 		auto old_size = state.world.pop_get_size(ids);
 		// growth is capped at max_pop_size, however only natural growth, if the pop is already defined as more than that
 		// then it doesn't get capped, only when they die however
-		auto new_size = ve::max(ve::max(old_size, ve::min(old_size * total_factor + old_size, max_pop_size)), 0.f);
+		auto new_size = ve::max(ve::min(old_size * total_factor + old_size, max_pop_size), 0.f);
 
 		auto type = state.world.pop_get_poptype(ids);
 
