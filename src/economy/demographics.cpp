@@ -1251,7 +1251,7 @@ void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 
 		auto total_factor = ln_factor * province_factor * 4.0f + mod_sum * 0.1f;
 		auto old_size = state.world.pop_get_size(ids);
-		auto new_size = old_size * total_factor + old_size;
+		auto new_size = ve::clamp(old_size * total_factor + old_size, 0.f, state.defines.large_population_limit);
 
 		auto type = state.world.pop_get_poptype(ids);
 
