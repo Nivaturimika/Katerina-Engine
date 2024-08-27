@@ -171,7 +171,8 @@ dcon::effect_key cb_on_po_accepted(token_generator& gen, error_handler& err, ind
 	return make_effect(gen, err, t_context);
 }
 
-void make_oob_army(token_generator& gen, error_handler& err, oob_file_context& context) {
+template<typename C>
+void make_oob_army_helper(token_generator& gen, error_handler& err, C& context) {
 	auto id = context.outer_context.state.world.create_army();
 	context.outer_context.state.world.force_create_army_control(id, context.nation_for);
 	oob_file_army_context new_context{context.outer_context, id, context.nation_for};
@@ -186,7 +187,9 @@ void make_oob_army(token_generator& gen, error_handler& err, oob_file_context& c
 		}
 	}
 }
-void make_oob_navy(token_generator& gen, error_handler& err, oob_file_context& context) {
+
+template<typename C>
+void make_oob_navy_helper(token_generator& gen, error_handler& err, C& context) {
 	auto id = context.outer_context.state.world.create_navy();
 	context.outer_context.state.world.force_create_navy_control(id, context.nation_for);
 	oob_file_navy_context new_context{context.outer_context, id, context.nation_for};
@@ -201,6 +204,26 @@ void make_oob_navy(token_generator& gen, error_handler& err, oob_file_context& c
 		}
 	}
 }
+
+void make_oob_army(token_generator& gen, error_handler& err, oob_file_context& context) {
+	make_oob_army_helper(gen, err, context);
+}
+void make_oob_navy(token_generator& gen, error_handler& err, oob_file_context& context) {
+	make_oob_navy_helper(gen, err, context);
+}
+void make_oob_army(token_generator& gen, error_handler& err, oob_file_army_context& context) {
+	make_oob_army_helper(gen, err, context);
+}
+void make_oob_navy(token_generator& gen, error_handler& err, oob_file_army_context& context) {
+	make_oob_navy_helper(gen, err, context);
+}
+void make_oob_army(token_generator& gen, error_handler& err, oob_file_navy_context& context) {
+	make_oob_army_helper(gen, err, context);
+}
+void make_oob_navy(token_generator& gen, error_handler& err, oob_file_navy_context& context) {
+	make_oob_navy_helper(gen, err, context);
+}
+
 void make_oob_regiment(token_generator& gen, error_handler& err, oob_file_army_context& context) {
 	auto id = context.outer_context.state.world.create_regiment();
 	context.outer_context.state.world.regiment_set_strength(id, 1.0f);

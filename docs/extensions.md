@@ -676,6 +676,22 @@ turko_semitic = {
 
 This created the `chechen`, `turkish` and `maghrebi` cultures as part of the `turko_semitic` culture group. This behaviour is replicated for compatibility purpouses.
 
+## Hierachical OOB
+
+Same as above, in OOB:
+```
+army = { #or navy
+	#...
+	regiment = { ... } #or ship
+	army = { #or navy
+		#...
+		regiment = { ... } #or ship
+	}
+}
+```
+
+Is valid syntax.
+
 ## Compatibility default `always = no` for dynamic triggers
 
 Triggers for tags, cultures, governments, ideologies, pop types, satates, inventions, culture groups, or technologies that don't exist have the same behaviour of `always = no`. For example if a trigger `culture = FROMpashtun` was found, then it was a) likely a typo, but b) the game tries to find the `FROMpashtun` culture, finds none, returns false. For performance reasons we already know the result beforehand so we can just materialize it into a `always = no`.

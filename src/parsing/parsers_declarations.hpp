@@ -2455,8 +2455,14 @@ struct oob_file {
 oob_leader make_army_leader(token_generator& gen, error_handler& err, oob_file_army_context& context);
 oob_leader make_navy_leader(token_generator& gen, error_handler& err, oob_file_navy_context& context);
 void make_oob_relationship(std::string_view tag, token_generator& gen, error_handler& err, oob_file_context& context);
+//
 void make_oob_army(token_generator& gen, error_handler& err, oob_file_context& context);
 void make_oob_navy(token_generator& gen, error_handler& err, oob_file_context& context);
+void make_oob_army(token_generator& gen, error_handler& err, oob_file_army_context& context);
+void make_oob_navy(token_generator& gen, error_handler& err, oob_file_army_context& context);
+void make_oob_army(token_generator& gen, error_handler& err, oob_file_navy_context& context);
+void make_oob_navy(token_generator& gen, error_handler& err, oob_file_navy_context& context);
+//
 void make_oob_regiment(token_generator& gen, error_handler& err, oob_file_army_context& context);
 void make_oob_ship(token_generator& gen, error_handler& err, oob_file_navy_context& context);
 
