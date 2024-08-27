@@ -16,6 +16,8 @@
 
 namespace nations {
 
+constexpr float max_prestige = 2147483648.f;
+
 bool national_focus_is_unoptimal(sys::state& state, dcon::nation_id source, dcon::state_instance_id target_state, dcon::national_focus_id nfid) {
 	//Is the NF not optimal? Recolor it
 	auto ideal_pwfrac = state.economy_definitions.craftsmen_fraction;
@@ -463,8 +465,8 @@ void update_military_scores(sys::state& state) {
 }
 
 float prestige_score(sys::state const& state, dcon::nation_id n) {
-	return std::max(0.0f, state.world.nation_get_prestige(n) +
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::permanent_prestige));
+	auto v = state.world.nation_get_prestige(n) + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::permanent_prestige);
+	return std::clamp(v, 0.f, max_prestige);
 }
 
 void update_rankings(sys::state& state) {
@@ -1399,8 +1401,9 @@ void cleanup_nation(sys::state& state, dcon::nation_id n) {
 }
 
 void adjust_prestige(sys::state& state, dcon::nation_id n, float delta) {
-	auto prestige_multiplier = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::prestige);
-	auto new_prestige = std::max(0.0f, state.world.nation_get_prestige(n) + (delta > 0 ? (delta * prestige_multiplier) : delta));
+	float prestige_multiplier = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::prestige);
+	float v = state.world.nation_get_prestige(n) + (delta > 0 ? (delta * prestige_multiplier) : delta);
+	float new_prestige = std::clamp(v, 0.f, max_prestige);
 	state.world.nation_set_prestige(n, new_prestige);
 }
 
