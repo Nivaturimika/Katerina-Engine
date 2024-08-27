@@ -5254,12 +5254,14 @@ void update_land_battles(sys::state& state) {
 				auto& def_stats = state.world.nation_get_unit_stats(tech_def_nation, state.world.regiment_get_type(def_front[i]));
 
 				auto str_damage = str_dam_mul *
-						(att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
-						(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)));
+					(att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
+					(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
+					* (state.world.regiment_get_experience(att_back[i]) * 0.1f + 1.f);
 				auto org_damage = org_dam_mul *
-						(att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
-						(defender_fort * defender_org_bonus * def_stats.discipline_or_evasion *
-								(1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)));
+					(att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
+					(defender_fort * defender_org_bonus * def_stats.discipline_or_evasion *
+					(1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
+					* (state.world.regiment_get_experience(att_back[i]) * 0.1f + 1.f);
 
 				auto& cstr = state.world.regiment_get_strength(def_front[i]);
 				str_damage = std::min(str_damage, cstr);
@@ -5295,8 +5297,14 @@ void update_land_battles(sys::state& state) {
 				auto& def_stats = state.world.nation_get_unit_stats(tech_def_nation, state.world.regiment_get_type(def_back[i]));
 				auto& att_stats = state.world.nation_get_unit_stats(tech_att_nation, state.world.regiment_get_type(att_front[i]));
 
-				auto str_damage = str_dam_mul * (def_stats.attack_or_gun_power * 0.1f + 1.0f) * def_stats.support * defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)));
-				auto org_damage = org_dam_mul * (def_stats.attack_or_gun_power * 0.1f + 1.0f) * def_stats.support * defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)));
+				auto str_damage = str_dam_mul
+					* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+					* def_stats.support * defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
+					* (state.world.regiment_get_experience(def_back[i]) * 0.1f + 1.f);
+				auto org_damage = org_dam_mul
+					* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+					* def_stats.support * defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
+					* (state.world.regiment_get_experience(def_back[i]) * 0.1f + 1.f);
 
 				auto& cstr = state.world.regiment_get_strength(att_front[i]);
 				str_damage = std::min(str_damage, cstr);
@@ -5347,10 +5355,12 @@ void update_land_battles(sys::state& state) {
 
 					auto str_damage = str_dam_mul *
 						(att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
-						(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)));
+						(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
+						* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
 					auto org_damage = org_dam_mul *
 						(att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
-						(defender_fort * def_stats.discipline_or_evasion * defender_org_bonus * (1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)));
+						(defender_fort * def_stats.discipline_or_evasion * defender_org_bonus * (1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
+						* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
 
 					auto& cstr = state.world.regiment_get_strength(att_front_target);
 					str_damage = std::min(str_damage, cstr);
@@ -5401,8 +5411,14 @@ void update_land_battles(sys::state& state) {
 					auto tech_att_nation = tech_nation_for_regiment(state, def_front_target);
 					auto& att_stats = state.world.nation_get_unit_stats(tech_att_nation, state.world.regiment_get_type(def_front_target));
 
-					auto str_damage = str_dam_mul * (def_stats.attack_or_gun_power * 0.1f + 1.0f) * defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)));
-					auto org_damage = org_dam_mul * (def_stats.attack_or_gun_power * 0.1f + 1.0f) * defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)));
+					auto str_damage = str_dam_mul
+						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+						* defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
+						* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
+					auto org_damage = org_dam_mul
+						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+						* defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
+						* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
 
 					auto& cstr = state.world.regiment_get_strength(def_front_target);
 					str_damage = std::min(str_damage, cstr);
