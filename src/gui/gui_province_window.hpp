@@ -471,6 +471,88 @@ public:
 	}
 };
 
+class province_siege_progress : public progress_bar {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		progress = state.world.province_get_siege_progress(p);
+	}
+	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			progress_bar::impl_render(state, x, y);
+	}
+	message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			return progress_bar::test_mouse(state, x, y, type);
+		return message_result::unseen;
+	}
+};
+class province_siege_flag : public flag_button {
+public:
+	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		dcon::army_id first_army;
+		auto controller = state.world.province_get_nation_from_province_control(p);
+		for(auto ar : state.world.province_get_army_location(p)) {
+			// Only stationary, non black flagged regiments with at least 0.001 strength contribute to a siege.
+			if(ar.get_army().get_battle_from_army_battle_participation()
+			|| ar.get_army().get_black_flag()
+			|| ar.get_army().get_navy_from_army_transport()
+			|| ar.get_army().get_arrival_time()) {
+				// skip -- blackflag or embarked or moving or fighting
+			} else {
+				bool will_siege = false;
+
+				auto army_controller = ar.get_army().get_controller_from_army_control();
+				if(!army_controller) {					 // rebel army
+					will_siege = bool(controller); // siege anything not rebel controlled
+				} else {
+					if(!controller) {
+						will_siege = true; // siege anything rebel controlled
+					} else if(military::are_at_war(state, controller, army_controller)) {
+						will_siege = true;
+					}
+				}
+				if(will_siege && !first_army) {
+					first_army = ar.get_army();
+					break;
+				}
+			}
+		}
+		auto army_owner = state.world.army_get_controller_from_army_control(first_army);
+		return army_owner
+			? state.world.nation_get_identity_from_identity_holder(army_owner)
+			: state.national_definitions.rebel_id;
+	}
+	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			flag_button::impl_render(state, x, y);
+	}
+	message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			return flag_button::test_mouse(state, x, y, type);
+		return message_result::unseen;
+	}
+};
+class province_siege_icon : public image_element_base {
+public:
+	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			image_element_base::impl_render(state, x, y);
+	}
+	message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		auto p = retrieve<dcon::province_id>(state, parent);
+		if(state.world.province_get_siege_progress(p) > 0.f)
+			return image_element_base::test_mouse(state, x, y, type);
+		return message_result::unseen;
+	}
+};
+
 class province_window_header : public window_element_base {
 private:
 	fixed_pop_type_icon* slave_icon = nullptr;
@@ -504,11 +586,11 @@ public:
 		} else if(name == "flashpoint_indicator") {
 			return make_element_by_type<province_flashpoint_indicator>(state, id);
 		} else if(name == "occupation_progress") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<province_siege_progress>(state, id);
 		} else if(name == "occupation_icon") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<province_siege_icon>(state, id);
 		} else if(name == "occupation_flag") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<province_siege_flag>(state, id);
 		} else if(name == "colony_button") {
 			auto btn = make_element_by_type<province_colony_button>(state, id);
 			colony_button = btn.get();

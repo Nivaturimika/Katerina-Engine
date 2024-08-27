@@ -6414,8 +6414,10 @@ void update_siege_progress(sys::state& state) {
 		for(auto ar : state.world.province_get_army_location(prov)) {
 			// Only stationary, non black flagged regiments with at least 0.001 strength contribute to a siege.
 
-			if(ar.get_army().get_battle_from_army_battle_participation() || ar.get_army().get_black_flag() ||
-					ar.get_army().get_navy_from_army_transport() || ar.get_army().get_arrival_time()) {
+			if(ar.get_army().get_battle_from_army_battle_participation()
+			|| ar.get_army().get_black_flag()
+			|| ar.get_army().get_navy_from_army_transport()
+			|| ar.get_army().get_arrival_time()) {
 
 				// skip -- blackflag or embarked or moving or fighting
 			} else {
