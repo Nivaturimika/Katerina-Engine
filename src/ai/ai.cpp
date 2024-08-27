@@ -279,8 +279,14 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 	if(state.world.nation_get_ai_rival(target) == from || state.world.nation_get_ai_rival(from) == target)
 		return false;
 
+	// AI's ignore relations with other AI's, but with player
+	auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, from);
+	if(state.world.diplomatic_relation_get_value(rel) >= state.defines.relation_limit_no_alliance_offer
+	&& state.world.nation_get_is_player_controlled(from))
+		return false;
+
 	//until great wars
-	if(bool(state.defines.alice_artificial_gp_limitant) && state.world.nation_get_is_great_power(target) && !state.military_definitions.great_wars_enabled) {
+	if(state.world.nation_get_is_great_power(target) && !state.military_definitions.great_wars_enabled) {
 		int32_t gp_count = 0;
 		for(const auto rel : state.world.nation_get_diplomatic_relation(from)) {
 			auto n = rel.get_related_nations(rel.get_related_nations(0) == from ? 1 : 0);
@@ -292,15 +298,14 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 			}
 		}
 	}
-	if(bool(state.defines.alice_spherelings_only_ally_sphere)) {
-		auto spherelord = state.world.nation_get_in_sphere_of(from);
-		//If no spherelord -> Then must not ally spherelings
-		//If spherelord -> Then must not ally non-spherelings
-		if(state.world.nation_get_in_sphere_of(target) != spherelord && target != spherelord)
-			return false;
-		if(target == spherelord)
-			return true; //always ally spherelord
-	}
+
+	auto spherelord = state.world.nation_get_in_sphere_of(from);
+	//If no spherelord -> Then must not ally spherelings
+	//If spherelord -> Then must not ally non-spherelings
+	if(state.world.nation_get_in_sphere_of(target) != spherelord && target != spherelord)
+		return false;
+	if(target == spherelord)
+		return true; //always ally spherelord
 
 	if(ai_has_mutual_enemy(state, from, target))
 		return true;
