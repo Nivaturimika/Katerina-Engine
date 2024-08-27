@@ -279,12 +279,6 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 	if(state.world.nation_get_ai_rival(target) == from || state.world.nation_get_ai_rival(from) == target)
 		return false;
 
-	// AI's ignore relations with other AI's, but with player
-	auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, from);
-	if(state.world.diplomatic_relation_get_value(rel) >= state.defines.relation_limit_no_alliance_offer
-	&& state.world.nation_get_is_player_controlled(from))
-		return false;
-
 	//until great wars
 	if(state.world.nation_get_is_great_power(target) && !state.military_definitions.great_wars_enabled) {
 		int32_t gp_count = 0;
@@ -298,6 +292,12 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 			}
 		}
 	}
+
+	// AI's ignore relations with other AI's, but with player
+	auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, from);
+	if(state.world.diplomatic_relation_get_value(rel) >= state.defines.relation_limit_no_alliance_offer
+	&& state.world.nation_get_is_player_controlled(from))
+		return false;
 
 	auto spherelord = state.world.nation_get_in_sphere_of(from);
 	if(spherelord) {
@@ -4749,7 +4749,7 @@ float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target
 			}
 		}
 	}
-	return state.defines.alice_ai_offensive_strength_overestimate * strength_total;
+	return 0.75f * state.defines.alice_ai_offensive_strength_overestimate * strength_total;
 }
 
 void assign_targets(sys::state& state, dcon::nation_id n) {
