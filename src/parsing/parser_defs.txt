@@ -1105,12 +1105,16 @@ oob_army
 	location                        value      int                               member_fn
 	regiment                        extern     make_oob_regiment                 discard
 	leader                          extern     make_army_leader                  member_fn
+	army                            extern     make_oob_army                     discard
+	navy                            extern     make_oob_navy                     discard
 
 oob_navy
 	name                            value      text                              member_fn
 	location                        value      int                               member_fn
 	ship                            extern     make_oob_ship                     discard
 	leader                          extern     make_navy_leader                  member_fn
+	army                            extern     make_oob_army                     discard
+	navy                            extern     make_oob_navy                     discard
 
 oob_file
 	#any                            extern     make_oob_relationship             discard
