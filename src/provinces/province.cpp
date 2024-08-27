@@ -1058,8 +1058,8 @@ bool can_invest_in_colony(sys::state& state, dcon::nation_id n, dcon::state_defi
 		return free_points >= int32_t(state.defines.colonization_influence_cost);
 	} else {
 		return free_points >=
-					 int32_t(state.defines.colonization_extra_guard_cost * (state.world.colonization_get_level(colony_status) - 4) +
-									 state.defines.colonization_influence_cost);
+			int32_t(state.defines.colonization_extra_guard_cost * (state.world.colonization_get_level(colony_status) - 4) +
+							state.defines.colonization_influence_cost);
 	}
 }
 
@@ -1077,6 +1077,14 @@ bool state_borders_nation(sys::state& state, dcon::nation_id n, dcon::state_inst
 					return true;
 			}
 		}
+	}
+	return false;
+}
+
+bool has_core(sys::state& state, dcon::province_id p, dcon::national_identity_id n) {
+	for(auto core : state.world.province_get_core(p)) {
+		if(core.get_identity() == n)
+			return true;
 	}
 	return false;
 }

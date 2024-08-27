@@ -63,6 +63,7 @@ bool has_an_owner(sys::state& state, dcon::province_id id);
 bool state_is_coastal(sys::state& state, dcon::state_instance_id s);
 bool state_is_coastal_non_core_nb(sys::state& state, dcon::state_instance_id s);
 bool state_borders_nation(sys::state& state, dcon::nation_id n, dcon::state_instance_id si);
+bool has_core(sys::state& atate, dcon::province_id p, dcon::national_identity_id n);
 
 dcon::province_id pick_capital(sys::state& state, dcon::nation_id n);
 
