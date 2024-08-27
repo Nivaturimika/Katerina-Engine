@@ -1219,6 +1219,8 @@ void apply_issues(sys::state& state, uint32_t offset, uint32_t divisions, issues
 	});
 }
 
+constexpr float max_pop_size = 2000000.f;
+
 void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 	/*
 	Province pop-growth factor: Only owned provinces grow. To calculate the pop growth in a province: First, calculate the
@@ -1251,7 +1253,9 @@ void update_growth(sys::state& state, uint32_t offset, uint32_t divisions) {
 
 		auto total_factor = ln_factor * province_factor * 4.0f + mod_sum * 0.1f;
 		auto old_size = state.world.pop_get_size(ids);
-		auto new_size = ve::clamp(old_size * total_factor + old_size, 0.f, state.defines.large_population_limit);
+		// growth is capped at max_pop_size, however only natural growth, if the pop is already defined as more than that
+		// then it doesn't get capped, only when they die however
+		auto new_size = ve::max(ve::max(old_size, ve::min(old_size * total_factor + old_size, max_pop_size)), 0.f);
 
 		auto type = state.world.pop_get_poptype(ids);
 
