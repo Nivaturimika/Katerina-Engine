@@ -1684,6 +1684,11 @@ object {
 		type{ float }
 		tag{ save }
 	}
+	property{	
+		name{ experience }
+		type{ float }
+		tag{ save }
+	}
 	property{
 		name{ pending_split }
 		type{ bitfield }
@@ -1715,6 +1720,11 @@ object {
 	}
 	property{	
 		name{ org }
+		type{ float }
+		tag{ save }
+	}
+	property{	
+		name{ experience }
 		type{ float }
 		tag{ save }
 	}

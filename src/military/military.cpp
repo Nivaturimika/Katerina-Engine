@@ -2827,7 +2827,7 @@ void implement_war_goal(sys::state& state, dcon::war_id war, dcon::cb_type_id wa
 	if((bits & cb_flag::po_remove_prestige) != 0) {
 		if(state.world.nation_get_owned_province_count(target) > 0) {
 			nations::adjust_prestige(state, target,
-					-(state.defines.prestige_reduction * nations::prestige_score(state, target) + state.defines.prestige_reduction_base));
+				-(state.defines.prestige_reduction * nations::prestige_score(state, target) + state.defines.prestige_reduction_base));
 		}
 	}
 
