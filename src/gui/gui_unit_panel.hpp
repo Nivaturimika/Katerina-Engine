@@ -806,6 +806,19 @@ public:
 	}
 };
 
+template<typename T>
+class subunit_experience_bar : public progress_bar {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<T>(state, parent);
+		if constexpr(std::is_same_v<T, dcon::regiment_id>) {
+			progress = 1.f - state.world.regiment_get_experience(content);
+		} else {
+			progress = 1.f - state.world.ship_get_experience(content);
+		}
+	}
+};
+
 class subunit_details_entry_regiment : public listbox_row_element_base<dcon::regiment_id> {
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
@@ -828,7 +841,7 @@ public:
 		} else if(name == "rebel_faction") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "unit_experience") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<subunit_experience_bar<dcon::regiment_id>>(state, id);
 		} else if(name == "org_bar") {
 			return make_element_by_type<subunit_organisation_progress_bar<dcon::regiment_id>>(state, id);
 		} else if(name == "str_bar") {
@@ -861,7 +874,7 @@ public:
 		} else if(name == "rebel_faction") {
 			return make_element_by_type<invisible_element>(state, id);
 		} else if(name == "unit_experience") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<subunit_experience_bar<dcon::ship_id>>(state, id);
 		} else if(name == "org_bar") {
 			return make_element_by_type<subunit_organisation_progress_bar<dcon::ship_id>>(state, id);
 		} else if(name == "str_bar") {
