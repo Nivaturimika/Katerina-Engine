@@ -23,21 +23,18 @@ float vote_total(sys::state& state, dcon::nation_id nation) {
 
 float get_popular_support(sys::state& state, dcon::nation_id nation, dcon::issue_option_id issue_option) {
 	auto total = state.world.nation_get_demographics(nation, demographics::total);
-	if(total <= 0.f) {
+	if(total <= 0.f)
 		return 0.f;
-	}
 	auto dkey = demographics::to_key(state, issue_option);
 	return state.world.nation_get_demographics(nation, dkey) / total;
 }
 
 float get_voter_support(sys::state& state, dcon::nation_id nation, dcon::issue_option_id issue_option) {
 	auto total = vote_total(state, nation);
-	if(total <= 0.f) {
+	if(total <= 0.f)
 		return 0.f;
-	}
 	auto support = 0.f;
 	auto dkey = pop_demographics::to_key(state, issue_option);
-
 	for(auto province : state.world.nation_get_province_ownership(nation)) {
 		for(auto pop_loc : province.get_province().get_pop_location()) {
 			auto pop_id = pop_loc.get_pop();
@@ -45,7 +42,7 @@ float get_voter_support(sys::state& state, dcon::nation_id nation, dcon::issue_o
 			support += vote_size * state.world.pop_get_demographics(pop_id.id, dkey);
 		}
 	}
-	return support / total;
+	return support > 0.f ? support / total : 0.f;
 }
 
 bool can_appoint_ruling_party(sys::state& state, dcon::nation_id nation) {
@@ -58,7 +55,7 @@ bool is_election_ongoing(sys::state& state, dcon::nation_id nation) {
 }
 
 bool has_elections(sys::state& state, dcon::nation_id nation) {
-	return  dcon::fatten(state.world, nation).get_government_type().get_has_elections();
+	return dcon::fatten(state.world, nation).get_government_type().get_has_elections();
 }
 
 sys::date next_election_date(sys::state& state, dcon::nation_id nation) {
