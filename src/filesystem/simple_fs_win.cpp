@@ -161,10 +161,10 @@ bool contains_non_ascii(native_char const* str) {
 } // namespace impl
 
 bool list_files_compare_func(native_char const& char1, native_char const& char2) {
-	auto const to_alpha_prec = [](native_char const& ch) {
+	auto const to_alpha_prec = [](native_char const& ch) -> native_char {
 		if(isdigit(ch)) {
 			auto digit = ch - NATIVE('0');
-			return (10 - digit) + 'Z';
+			return native_char((10 - digit) + NATIVE('Z'));
 		}
 		return ch;
 	};
