@@ -1897,7 +1897,38 @@ public:
 class u_row_new : public button_element_base {
 public:
 	void button_action(sys::state& state) noexcept override {
-		// TODO
+		auto foru = retrieve<unit_var>(state, parent);
+		auto* reorg_window = std::holds_alternative<dcon::army_id>(foru)
+			? state.ui_state.army_reorg_window
+			: state.ui_state.navy_reorg_window;
+		bool keep_shown = false;
+		if(std::holds_alternative<dcon::army_id>(foru)) {
+			auto u = std::get<dcon::army_id>(foru);
+			auto* win = static_cast<unit_reorg_window<dcon::army_id, dcon::regiment_id>*>(state.ui_state.army_reorg_window);
+			keep_shown = win->unit_to_reorg != u && win->is_visible();
+			win->unit_to_reorg = u;
+			if(u) {
+				reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
+				reorg_window->impl_on_update(state);
+			}
+		} else {
+			auto u = std::get<dcon::navy_id>(foru);
+			auto* win = static_cast<unit_reorg_window<dcon::navy_id, dcon::ship_id>*>(state.ui_state.navy_reorg_window);
+			keep_shown = win->unit_to_reorg != u && win->is_visible();
+			win->unit_to_reorg = u;
+			if(u) {
+				reorg_window->set_visible(state, !reorg_window->is_visible() || keep_shown);
+				reorg_window->impl_on_update(state);
+			}
+		}
+	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		text::add_line(state, contents, "new_unit");
 	}
 };
 
