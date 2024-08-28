@@ -506,10 +506,9 @@ void initialize(sys::state& state) {
 		auto fp = dcon::fatten(state.world, p);
 		bool is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(p));
 		float pop_amount = 0.0f;
+		pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, state.culture_definitions.slaves));
 		for(auto pt : state.world.in_pop_type) {
-			if(pt == state.culture_definitions.slaves) {
-				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, state.culture_definitions.slaves));
-			} else if(pt.get_is_paid_rgo_worker()) {
+			if(pt.get_is_paid_rgo_worker()) {
 				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, pt));
 			}
 		}
