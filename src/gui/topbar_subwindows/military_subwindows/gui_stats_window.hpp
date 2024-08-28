@@ -116,7 +116,9 @@ public:
 class statswin_unitexperience : public simple_text_element_base {
 protected:
 	std::string get_text(sys::state& state, dcon::nation_id n) noexcept {
-		return (text::format_float(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level)) + "/" + text::format_float(69.0f));
+		auto l_exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience);
+		auto n_exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience);
+		return (text::format_float(l_exp) + "/" + text::format_float(n_exp));
 	}
 public:
 	void on_update(sys::state& state) noexcept override {
@@ -129,7 +131,9 @@ public:
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto n = retrieve<dcon::nation_id>(state, parent);
-		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::regular_experience_level, false);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::land_unit_start_experience, true);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::naval_unit_start_experience, true);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::regular_experience_level, true);
 	}
 };
 

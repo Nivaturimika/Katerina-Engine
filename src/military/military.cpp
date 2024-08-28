@@ -6877,7 +6877,9 @@ void reinforce_regiments(sys::state& state) {
 			auto new_str = std::min(reg.get_regiment().get_strength() + combined, limit_fraction);
 			auto old_str = reg.get_regiment().get_strength();
 			/* experience = old experience / (amount - reinforced / 3 + 1) */
-			reg.get_regiment().set_experience(reg.get_regiment().get_experience() / ((new_str - old_str) / 3.f + 1.f));
+			auto new_exp = reg.get_regiment().get_experience() / ((new_str - old_str) / 3.f + 1.f);
+			auto min_exp = ar.get_controller_from_army_control().get_modifier_values(sys::national_mod_offsets::land_unit_start_experience);
+			reg.get_regiment().set_experience(std::max(min_exp, new_exp));
 			reg.get_regiment().set_strength(new_str);
 		}
 	}
@@ -6910,7 +6912,9 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 				auto new_str = std::min(reg.get_ship().get_strength() + repair_val, 1.0f);
 				auto old_str = reg.get_ship().get_strength();
 				/* experience = old experience / (amount - reinforced / 3 + 1) */
-				reg.get_ship().set_experience(reg.get_ship().get_experience() / ((new_str - old_str) / 3.f + 1.f));
+				auto new_exp = reg.get_ship().get_experience() / ((new_str - old_str) / 3.f + 1.f);
+				auto min_exp = n.get_controller_from_navy_control().get_modifier_values(sys::national_mod_offsets::naval_unit_start_experience);
+				reg.get_ship().set_experience(std::max(min_exp, new_exp));
 				reg.get_ship().set_strength(new_str);
 			}
 		}
