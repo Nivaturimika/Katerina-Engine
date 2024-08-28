@@ -77,11 +77,13 @@ save_transfer_end;?YSave transfer finished
 multiplayer_notify_reload;?YState reloaded
 settings;Options
 settings_label;Engine Options
-military_autocreate;Auto-create admirals
-military_autocreate_2;Auto-create generals
+military_autocreate;Auto-create Admirals
+military_autocreate_2;Auto-create Generals
 msg_mobilize_start_title;Mobilizing
 msg_mobilize_start_1;$x$ has started mobilizing
 msg_mobilize_end_title;Demobilizing
 msg_mobilize_end_1;$x$ has demobilized
 mapmode_tooltip_culture_minorities;And $x$ other minorities
 mapmode_tooltip_employment_none;No factory workers here
+unit_experience;Experience: $x$
+unit_select_only;Select

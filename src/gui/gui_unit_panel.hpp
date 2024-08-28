@@ -819,6 +819,19 @@ public:
 		}
 		frame = int32_t(std::ceil(exp * 10.f));
 	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto content = retrieve<T>(state, parent);
+		float exp = 0.f;
+		if constexpr(std::is_same_v<T, dcon::regiment_id>) {
+			exp = state.world.regiment_get_experience(content);
+		} else {
+			exp = state.world.ship_get_experience(content);
+		}
+		text::add_line(state, contents, "unit_experience", text::variable_type::x, text::fp_two_places{ exp });
+	}
 };
 
 class subunit_details_entry_regiment : public listbox_row_element_base<dcon::regiment_id> {
@@ -2102,6 +2115,9 @@ public:
 
 class unit_row_select_only : public button_element_base {
 public:
+	void on_update(sys::state& state) noexcept override {
+		set_button_text(state, text::produce_simple_string(state, "unit_select_only"));
+	}
 	void button_action(sys::state& state) noexcept override {
 		auto content = retrieve<unit_var>(state, parent);
 		state.selected_armies.clear();
