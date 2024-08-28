@@ -2076,16 +2076,18 @@ dcon::regiment_id create_new_regiment(sys::state& state, dcon::nation_id n, dcon
 	auto reg = fatten(state.world, state.world.create_regiment());
 	reg.set_type(t);
 	// TODO make name
-	reg.set_strength(1.0f);
-	reg.set_org(1.0f);
+	reg.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience), 0.f, 1.f));
+	reg.set_strength(1.f);
+	reg.set_org(1.f);
 	return reg.id;
 }
 dcon::ship_id create_new_ship(sys::state& state, dcon::nation_id n, dcon::unit_type_id t) {
 	auto shp = fatten(state.world, state.world.create_ship());
 	shp.set_type(t);
 	// TODO make name
-	shp.set_strength(1.0f);
-	shp.set_org(1.0f);
+	shp.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience), 0.f, 1.f));
+	shp.set_strength(1.f);
+	shp.set_org(1.f);
 	return shp.id;
 }
 
@@ -4442,6 +4444,17 @@ void adjust_leader_prestige(sys::state& state, dcon::leader_id l, float value) {
 	state.world.leader_set_prestige(l, v);
 }
 
+void adjust_experience_gain(sys::state& state, dcon::regiment_id r, float value) {
+	auto v = state.world.regiment_get_experience(r);
+	v = std::clamp(v + value * state.defines.exp_gain_div, 0.f, 1.f);
+	state.world.regiment_set_experience(r, v);
+}
+void adjust_experience_gain(sys::state& state, dcon::ship_id r, float value) {
+	auto v = state.world.ship_get_experience(r);
+	v = std::clamp(v + value * state.defines.exp_gain_div, 0.f, 1.f);
+	state.world.ship_set_experience(r, v);
+}
+
 void end_battle(sys::state& state, dcon::land_battle_id b, battle_result result) {
 	auto war = state.world.land_battle_get_war_from_land_battle_in_war(b);
 	auto location = state.world.land_battle_get_location_from_land_battle_location(b);
@@ -4465,8 +4478,6 @@ void end_battle(sys::state& state, dcon::land_battle_id b, battle_result result)
 			: (bool(nation_owner) ? war_role::defender : war_role::attacker);
 
 		bool battle_attacker = (role_in_war == war_role::attacker) == state.world.land_battle_get_war_attacker_is_attacker(b);
-
-
 		if(battle_attacker && result == battle_result::defender_won) {
 			if(!can_retreat_from_battle(state, b)) {
 				make_leaderless(n.get_army());
@@ -4511,8 +4522,7 @@ void end_battle(sys::state& state, dcon::land_battle_id b, battle_result result)
 		if(result == battle_result::attacker_won) {
 			auto total_def_loss = state.world.land_battle_get_defender_cav_lost(b) + state.world.land_battle_get_defender_infantry_lost(b) + state.world.land_battle_get_defender_support_lost(b);
 			auto total_att_loss = state.world.land_battle_get_attacker_cav_lost(b) + state.world.land_battle_get_attacker_infantry_lost(b) + state.world.land_battle_get_attacker_support_lost(b);
-			auto score = std::max(0.0f, 3.0f * (total_def_loss - total_att_loss) / 10.0f);
-
+			auto score = std::max(0.0f, 3.f * (total_def_loss - total_att_loss) / 10.0f);
 			if(war) {
 				if(state.world.land_battle_get_war_attacker_is_attacker(b)) {
 					state.world.war_get_attacker_battle_score(war) += score;
@@ -4520,7 +4530,6 @@ void end_battle(sys::state& state, dcon::land_battle_id b, battle_result result)
 					state.world.war_get_defender_battle_score(war) += score;
 				}
 			}
-
 
 			if(a_nation && d_nation) { // no prestige for beating up rebels
 				nations::adjust_prestige(state, a_nation, score / 50.0f);
@@ -7040,6 +7049,7 @@ void advance_mobilizations(sys::state& state) {
 
 									while(available > 0 && to_mobilize > 0) {
 										auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ? state.military_definitions.infantry : state.military_definitions.irregular);
+										state.world.regiment_set_experience(new_reg, std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience), 0.f, 1.f));
 										state.world.regiment_set_org(new_reg, 0.1f);
 										state.world.try_create_army_membership(new_reg, a);
 										auto p = pop.get_pop();
