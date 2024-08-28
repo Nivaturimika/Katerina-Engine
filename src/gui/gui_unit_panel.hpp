@@ -1417,9 +1417,6 @@ class unit_details_window : public window_element_base {
 	progress_bar* unitsupply_bar = nullptr;
 	image_element_base* unitdugin_icon = nullptr;
 	unit_selection_panel<T>* unit_selection_win = nullptr;
-
-	
-
 public:
 	T unit_id;
 
@@ -1476,8 +1473,7 @@ public:
 		}
 
 		{
-			auto ptr =
-					make_element_by_type<unit_selection_panel<T>>(state, state.ui_state.defs_by_name.find(state.lookup_key("unitpanel"))->second.definition);
+			auto ptr = make_element_by_type<unit_selection_panel<T>>(state, state.ui_state.defs_by_name.find(state.lookup_key("unitpanel"))->second.definition);
 			unit_selection_win = ptr.get();
 			ptr->base_data.position.y = -80;
 			add_child_to_front(std::move(ptr));
@@ -2018,7 +2014,6 @@ public:
 	}
 };
 
-
 class multi_selection_leader_image : public button_element_base {
 public:
 	dcon::gfx_object_id default_img;
@@ -2032,12 +2027,10 @@ public:
 		}
 
 		auto foru = retrieve<unit_var>(state, parent);
-		dcon::leader_id lid;
+		dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
 		if(std::holds_alternative<dcon::army_id>(foru)) {
-			lid = state.world.army_get_general_from_army_leadership(std::get<dcon::army_id>(foru));
 			disabled = !command::can_change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
 		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
-			lid = state.world.navy_get_admiral_from_navy_leadership(std::get<dcon::navy_id>(foru));
 			disabled = !command::can_change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
 		}
 
@@ -2078,17 +2071,47 @@ public:
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-		return  tooltip_behavior::variable_tooltip;
+		return tooltip_behavior::variable_tooltip;
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto foru = retrieve<unit_var>(state, parent);
-		dcon::leader_id lid;
+		dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
+		if(lid)
+			display_leader_full(state, lid, contents, 0);
+	}
+
+	void button_action(sys::state& state) noexcept override {
+		auto foru = retrieve<unit_var>(state, parent);
+		auto location = get_absolute_non_mirror_location(state, *this);
 		if(std::holds_alternative<dcon::army_id>(foru)) {
-			lid = state.world.army_get_general_from_army_leadership(std::get<dcon::army_id>(foru));
-		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
-			lid = state.world.navy_get_admiral_from_navy_leadership(std::get<dcon::navy_id>(foru));
+			open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
+		} else {
+			open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
 		}
+	}
+};
+
+class multi_selection_leader_button : public button_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto foru = retrieve<unit_var>(state, parent);
+		dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
+		if(std::holds_alternative<dcon::army_id>(foru)) {
+			disabled = !command::can_change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
+		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
+			disabled = !command::can_change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
+		}
+		auto name = state.to_string_view(state.world.leader_get_name(lid));
+		set_button_text(state, std::string(name));
+	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
 		if(lid)
 			display_leader_full(state, lid, contents, 0);
 	}
@@ -2105,6 +2128,44 @@ public:
 	}
 };
 
+class u_row_select_only : public button_element_base {
+public:
+	void button_action(sys::state& state) noexcept override {
+		auto content = retrieve<unit_var>(state, parent);
+		state.selected_armies.clear();
+		state.selected_navies.clear();
+		if(std::holds_alternative<dcon::army_id>(content)) {
+			state.select(std::get<dcon::army_id>(content));
+		} else if(std::holds_alternative<dcon::navy_id>(content)) {
+			state.select(std::get<dcon::navy_id>(content));
+		}
+	}
+};
+
+class multi_selection_leader_prestige : public vertical_progress_bar {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<dcon::leader_id>(state, parent);
+		progress = state.world.leader_get_prestige(content);
+	}
+};
+
+class u_row_name : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto foru = retrieve<unit_var>(state, parent);
+		if(std::holds_alternative<dcon::army_id>(foru)) {
+			auto a = std::get<dcon::army_id>(foru);
+			auto name = state.to_string_view(state.world.army_get_name(a));
+			set_text(state, std::string(name));
+		} else {
+			auto a = std::get<dcon::navy_id>(foru);
+			auto name = state.to_string_view(state.world.navy_get_name(a));
+			set_text(state, std::string(name));
+		}
+	}
+};
+
 class selected_unit_item : public listbox_row_element_base<unit_var> {
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
@@ -2112,8 +2173,12 @@ public:
 			return make_element_by_type<whole_panel_button>(state, id);
 		} else if(name == "leader_photo") {
 			return make_element_by_type<multi_selection_leader_image>(state, id);
+		} else if(name == "leader_button") {
+			return make_element_by_type<multi_selection_leader_button>(state, id);
+		} else if(name == "leader_prestige_bar") {
+			return make_element_by_type<multi_selection_leader_prestige>(state, id);
 		} else if(name == "unitstrength") {
-			return make_element_by_type <u_row_strength> (state, id);
+			return make_element_by_type<u_row_strength>(state, id);
 		} else if(name == "unitattrition_icon") {
 			return make_element_by_type<u_row_attrit_icon>(state, id);
 		} else if(name == "org_bar") {
@@ -2126,6 +2191,8 @@ public:
 			return make_element_by_type<u_row_split>(state, id);
 		} else if(name == "newunitbutton") {
 			return make_element_by_type<u_row_new>(state, id);
+		} else if(name == "only_unit_from_selection_button") {
+			return make_element_by_type<u_row_select_only>(state, id);
 		} else if(name == "remove_unit_from_selection_button") {
 			return make_element_by_type<u_row_remove>(state, id);
 		} else if(name == "unit_inf") {
@@ -2142,16 +2209,31 @@ public:
 			return make_element_by_type<u_row_art_count>(state, id);
 		} else if(name == "location") {
 			return make_element_by_type<u_row_location>(state, id);
+		} else if(name == "unitname") {
+			return make_element_by_type<u_row_name>(state, id);
 		} else {
 			return nullptr;
 		}
+	}
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+		if(payload.holds_type<dcon::leader_id>()) {
+			dcon::leader_id lid;
+			if(std::holds_alternative<dcon::army_id>(content)) {
+				lid = state.world.army_get_general_from_army_leadership(std::get<dcon::army_id>(content));
+			} else if(std::holds_alternative<dcon::navy_id>(content)) {
+				lid = state.world.navy_get_admiral_from_navy_leadership(std::get<dcon::navy_id>(content));
+			}
+			payload.emplace<dcon::leader_id>(lid);
+			return message_result::consumed;
+		}
+		return listbox_row_element_base<unit_var>::get(state, payload);
 	}
 };
 
 class selected_unit_list : public listbox_element_base<selected_unit_item, unit_var> {
 public:
 	std::string_view get_row_element_name() override {
-		return "alice_unit_row";
+		return "unitpanel";
 	}
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
@@ -2213,6 +2295,8 @@ public:
 		window_element_base::on_create(state);
 		auto ptr = make_element_by_type<multi_unit_details_ai_controlled>(state, "alice_enable_ai_controlled_multi");
 		add_child_to_front(std::move(ptr));
+		auto lb = make_element_by_type<selected_unit_list>(state, "unit_listbox");
+		add_child_to_front(std::move(lb));
 	}
 
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
@@ -2224,136 +2308,11 @@ public:
 			return make_element_by_type<deselect_all_button> (state, id);
 		} else if(name == "disband_multiunit") {
 			return make_element_by_type<disband_all_button>(state, id);
-		} else if(name == "unit_listbox") {
-			return make_element_by_type<selected_unit_list>(state, id);
+		} else if(name == "multiunit_slider") {
+			return make_element_by_type<invisible_element>(state, id);
 		} else {
 			return nullptr;
 		}
-	}
-};
-
-
-class selected_army_group_land_units_list : public listbox_element_base<selected_unit_item, unit_var> {
-public:
-	std::string_view get_row_element_name() override {
-		return "alice_unit_row";
-	}
-	void on_update(sys::state& state) noexcept override {
-		row_contents.clear();
-		if(state.selected_army_group != nullptr) {
-			for(auto i : state.selected_army_group->land_forces)
-				row_contents.push_back(i);
-		}
-		update(state);
-	}
-};
-
-class selected_army_group_sea_units_list : public listbox_element_base<selected_unit_item, unit_var> {
-public:
-	std::string_view get_row_element_name() override {
-		return "alice_unit_row";
-	}
-	void on_update(sys::state& state) noexcept override {
-		row_contents.clear();
-		if(state.selected_army_group != nullptr) {
-			for(auto i : state.selected_army_group->naval_forces)
-				row_contents.push_back(i);
-		}
-		update(state);
-	}
-};
-
-class army_group_details_window_land : public window_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		window_element_base::on_create(state);
-		base_data.position.y = 50;
-		base_data.position.x = 50;
-
-		xy_pair base_position = { 20,
-				0 }; // state.ui_defs.gui[state.ui_state.defs_by_name.find("unittype_item_start")->second.definition].position;
-		xy_pair base_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item_offset"))->second.definition].position;
-
-		{
-			auto win = make_element_by_type<selected_army_group_land_details_item<0>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (0 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (0 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-		{
-			auto win = make_element_by_type<selected_army_group_land_details_item<1>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (1 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (1 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-		{
-			auto win = make_element_by_type<selected_army_group_land_details_item<2>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (2 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (2 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-
-		const xy_pair item_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition].position;
-
-		auto ptr = make_element_by_type<selected_army_group_land_units_list>(
-			state,
-			state.ui_state.defs_by_name.find(
-				state.lookup_key("alice_unit_listbox")
-			)->second.definition
-		);
-		ptr->base_data.position.y = base_position.y + item_offset.y + (3 * base_offset.y) + 72 - 32;
-		ptr->base_data.size.y += 32;
-		add_child_to_front(std::move(ptr));
-	}
-};
-
-class army_group_details_window_sea : public window_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		window_element_base::on_create(state);
-		base_data.position.y = 550;
-		base_data.position.x = 50;
-
-		xy_pair base_position = { 20,
-				0 }; // state.ui_defs.gui[state.ui_state.defs_by_name.find("unittype_item_start")->second.definition].position;
-		xy_pair base_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item_offset"))->second.definition].position;
-
-		{
-			auto win = make_element_by_type<selected_army_group_sea_details_item<0>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (0 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (0 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-		{
-			auto win = make_element_by_type<selected_army_group_sea_details_item<1>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (1 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (1 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-		{
-			auto win = make_element_by_type<selected_army_group_sea_details_item<2>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
-			win->base_data.position.x = base_position.x + (2 * base_offset.x); // Flexnudge
-			win->base_data.position.y = base_position.y + (2 * base_offset.y); // Flexnudge
-			add_child_to_front(std::move(win));
-		}
-
-		const xy_pair item_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition].position;
-
-		auto ptr = make_element_by_type<selected_army_group_sea_units_list>(
-			state,
-			state.ui_state.defs_by_name.find(
-				state.lookup_key("alice_unit_listbox")
-			)->second.definition
-		);
-		ptr->base_data.position.y = base_position.y + item_offset.y + (3 * base_offset.y) + 72 - 32;
-		ptr->base_data.size.y += 32;
-		add_child_to_front(std::move(ptr));
 	}
 };
 

@@ -433,13 +433,9 @@ struct state {
 	std::unique_ptr<element_base> rgos_root;
 	std::unique_ptr<element_base> province_details_root;
 	std::unique_ptr<element_base> root;
-	std::unique_ptr<element_base> military_root;
 	std::unique_ptr<element_base> nation_picker;
 	std::unique_ptr<element_base> end_screen;
 	std::unique_ptr<element_base> select_states_legend;
-
-	std::unique_ptr<element_base> army_group_selector_root;
-	std::unique_ptr<element_base> army_group_deselector_root;
 
 	std::unique_ptr<tool_tip> tooltip;
 
@@ -475,8 +471,6 @@ struct state {
 	element_base* request_window = nullptr;
 	unit_details_window<dcon::army_id>* army_status_window = nullptr;
 	unit_details_window<dcon::navy_id>* navy_status_window = nullptr;
-	element_base* army_group_window_land = nullptr;
-	element_base* army_group_window_sea = nullptr;
 	element_base* multi_unit_selection_window = nullptr;
 	element_base* msg_log_window = nullptr;
 	element_base* msg_window = nullptr;

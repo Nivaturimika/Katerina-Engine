@@ -37,17 +37,11 @@ void switch_scene(sys::state& state, scene_id ui_scene) {
 		}
 		state.current_scene = basic_game();
 		return;
-	case scene_id::in_game_military:
-		state.current_scene = battleplan_editor();
-		return;
 	case scene_id::end_screen:
 		state.current_scene = end_screen();
 		return;
 	case scene_id::pick_nation:
 		state.current_scene = nation_picker();
-		return;
-	case scene_id::in_game_military_selector:
-		state.current_scene = battleplan_editor_add_army();
 		return;
 	case scene_id::count: // this should never happen
 		assert(false);
@@ -519,60 +513,6 @@ void state_selector_hotkeys(sys::state& state, sys::virtual_key keycode, sys::ke
 	}
 }
 
-void military_screen_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
-	auto selected_group = state.selected_army_group;
-	auto selected_province = state.map_state.selected_province;
-
-	if(state.ui_state.root->impl_on_key_down(state, keycode, mod) != ui::message_result::consumed) {
-		if(keycode == sys::virtual_key::ESCAPE) {
-			if(selected_group == nullptr) {
-				game_scene::switch_scene(state, scene_id::in_game_basic);
-			} else {
-				state.deselect_army_group();
-			}
-		}
-	} if(state.map_state.selected_province) {
-		if(keycode == sys::virtual_key::Z) {
-			//create HQ
-			if(selected_group == nullptr) {
-				state.new_army_group(state.map_state.selected_province);
-			}
-		} else if(selected_group != nullptr) {
-			if(keycode == sys::virtual_key::X) {
-				if(state.ui_state.ctrl_held_down) {
-					selected_group->naval_travel_origin.clear();
-				} else {
-					selected_group->naval_travel_origin.push_back(selected_province);
-				}
-			} else if(keycode == sys::virtual_key::C) {
-				if(state.ui_state.ctrl_held_down) {
-					selected_group->naval_travel_target.clear();
-				} else {
-					selected_group->naval_travel_target.push_back(selected_province);
-				}
-			} else if(keycode == sys::virtual_key::V) {
-				if(state.ui_state.ctrl_held_down) {
-					// TODO: removal of defensive position
-				} else {
-					state.new_defensive_position(selected_group, selected_province);
-				}
-			} else if(keycode == sys::virtual_key::B) {
-				for(auto item : state.selected_armies) {
-					state.remove_army_from_all_army_groups_clean(item);
-					state.add_army_to_army_group(state.selected_army_group, item);
-				}
-				for(auto item : state.selected_navies) {
-					state.remove_navy_from_all_army_groups_clean(item);
-					state.add_navy_to_army_group(state.selected_army_group, item);
-				}
-				state.update_regiments_and_ships(state.selected_army_group);
-			} else if(keycode == sys::virtual_key::N) {
-				switch_scene(state, scene_id::in_game_military_selector);
-			}
-		}
-	}
-}
-
 void handle_escape_basic(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
 	if(state.ui_state.console_window && state.ui_state.console_window->is_visible()) {
 		ui::console_window::show_toggle(state);
@@ -603,8 +543,6 @@ void in_game_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modif
 			center_on_capital(state, state.local_player_nation);
 		} else if(keycode == sys::virtual_key::TAB) {
 			ui::open_chat_window(state);
-		} else if(keycode == sys::virtual_key::Z && state.ui_state.ctrl_held_down) {
-			switch_scene(state, scene_id::in_game_military);
 		} else if(keycode == sys::virtual_key::NUMPAD1 || keycode == sys::virtual_key::NUM_1) {
 			ctrl_group = 1;
 		} else if(keycode == sys::virtual_key::NUMPAD2 || keycode == sys::virtual_key::NUM_2) {
@@ -770,22 +708,6 @@ ui::mouse_probe recalculate_mouse_probe_basic(sys::state& state, ui::mouse_probe
 	return recalculate_mouse_probe_units_and_details(state, mouse_probe, tooltip_probe);
 }
 
-ui::mouse_probe recalculate_mouse_probe_military(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
-	if(!state.ui_state.military_root) {
-		return mouse_probe;
-	}
-
-	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
-	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
-
-	return state.ui_state.military_root->impl_probe_mouse(
-		state,
-		int32_t(scaled_mouse_x),
-		int32_t(scaled_mouse_y),
-		ui::mouse_probe_type::click
-	);
-}
-
 ui::mouse_probe recalculate_tooltip_probe_units_and_details(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
 	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
 	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
@@ -855,16 +777,6 @@ void clean_up_basic_game_scene(sys::state& state) {
 				v.pop_back();
 			}
 		}
-	}
-}
-
-void update_army_group_selection_ui(sys::state& state) {
-	if(state.selected_army_group != nullptr) {
-		state.ui_state.army_group_window_sea->set_visible(state, true);
-		state.ui_state.army_group_window_land->set_visible(state, true);
-	} else {
-		state.ui_state.army_group_window_sea->set_visible(state, false);
-		state.ui_state.army_group_window_land->set_visible(state, false);
 	}
 }
 
@@ -962,11 +874,6 @@ void update_basic_game_scene(sys::state& state) {
 	state.map_state.map_data.update_borders(state);
 }
 
-void update_military_game_scene(sys::state& state) {
-	update_army_group_selection_ui(state);
-	state.map_state.map_data.update_borders(state);
-}
-
 void update_add_units_game_scene(sys::state& state) {
 	update_unit_selection_ui(state);
 	state.map_state.map_data.update_borders(state);
@@ -1023,18 +930,6 @@ ui::element_base* root_game_basic(sys::state& state) {
 	return state.ui_state.root.get();
 }
 
-ui::element_base* root_game_battleplanner(sys::state& state) {
-	return state.ui_state.military_root.get();
-}
-
-ui::element_base* root_game_battleplanner_add_army(sys::state& state) {
-	return state.ui_state.army_group_selector_root.get();
-}
-
-ui::element_base* root_game_battleplanner_unit_selection(sys::state& state) {
-	return state.ui_state.army_group_selector_root.get();
-}
-
 ui::element_base* root_game_wargoal_state_selection(sys::state& state) {
 	return state.ui_state.select_states_legend.get();
 }
@@ -1084,50 +979,6 @@ scene_properties basic_game() {
 		.clean_up = clean_up_basic_game_scene,
 		.on_game_state_update = update_basic_game_scene,
 		.on_game_state_update_update_ui = update_ui_state_basic,
-	};
-	return cached_scene;
-}
-
-scene_properties battleplan_editor() {
-	static scene_properties cached_scene{
-		.id = scene_id::in_game_military,
-		.get_root = root_game_battleplanner,
-		.rbutton_selected_units = do_nothing_province_target,
-		.rbutton_province = do_nothing_province_target,
-		.allow_drag_selection = false,
-		.on_drag_start = do_nothing_screen,
-		.drag_selection = do_nothing_screen,
-		.lbutton_up = do_nothing,
-		.keycode_mapping = replace_keycodes_map_movement,
-		.handle_hotkeys = military_screen_hotkeys,
-		.console_log = console_log_other,
-		.render_ui = render_ui_military,
-		.recalculate_mouse_probe = recalculate_mouse_probe_military,
-		.on_game_state_update = update_military_game_scene,
-		.update_highlight_texture = highlight_defensive_positions
-	};
-	return cached_scene;
-}
-
-scene_properties battleplan_editor_add_army() {
-	static scene_properties cached_scene{
-		.id = scene_id::in_game_military_selector,
-		.get_root = root_game_battleplanner_add_army,
-		.rbutton_selected_units = do_nothing_province_target,
-		.rbutton_province = do_nothing_province_target,
-		.allow_drag_selection = true,
-		.on_drag_start = start_dragging,
-		.drag_selection = select_units,
-		.lbutton_up = do_nothing,
-		.keycode_mapping = replace_keycodes_map_movement,
-		.handle_hotkeys = military_screen_hotkeys,
-		.console_log = console_log_other,
-		.render_ui = render_ui_selection_screen,
-		.recalculate_mouse_probe = recalculate_mouse_probe_units_and_details,
-		.recalculate_tooltip_probe = recalculate_tooltip_probe_units_and_details,
-		.on_game_state_update = update_add_units_game_scene,
-		.on_game_state_update_update_ui = update_ui_unit_details,
-		.update_highlight_texture = highlight_defensive_positions
 	};
 	return cached_scene;
 }

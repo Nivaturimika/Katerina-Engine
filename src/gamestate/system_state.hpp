@@ -775,31 +775,5 @@ struct alignas(64) state {
 	void select(dcon::navy_id a);
 	void deselect(dcon::army_id a);
 	void deselect(dcon::navy_id a);
-
-	void update_battle_planner(army_group& group, std::vector<dcon::province_id>& province_queue, std::vector<dcon::province_id>& provinces_to_reduce_weight, std::vector<dcon::province_id>& provinces_to_maintain);
-	void new_army_group(dcon::province_id hq);
-	void toggle_ferry_origin_position(army_group* group, dcon::province_id position);
-	void toggle_ferry_target_position(army_group* group, dcon::province_id position);
-	void toggle_defensive_position(army_group* group, dcon::province_id position);
-	void new_defensive_position(army_group* group, dcon::province_id position);
-	void update_regiments_and_ships(army_group* group);
-	void update_armies_and_fleets(army_group* group);
-	void remove_army_from_army_group(army_group* selected_group, dcon::army_id selected_army);
-	void remove_navy_from_army_group(army_group* selected_group, dcon::navy_id navy_to_delete);
-	void remove_regiment_from_army_group(army_group* selected_group, dcon::regiment_id selected_regiment);
-	void remove_ship_from_army_group(army_group* selected_group, dcon::ship_id ship_to_delete);
-	void remove_regiment_from_all_army_groups(dcon::regiment_id regiment_to_delete);
-	void remove_ship_from_all_army_groups(dcon::ship_id ship_to_delete);
-	void remove_army_from_all_army_groups_clean(dcon::army_id army_to_delete);
-	void remove_navy_from_all_army_groups_clean(dcon::navy_id navy_to_delete);
-	void remove_army_from_all_army_groups_dirty(dcon::army_id army_to_delete);
-	void remove_navy_from_all_army_groups_dirty(dcon::navy_id navy_to_delete);
-	void add_army_to_army_group(army_group* selected_group, dcon::army_id selected_army);
-	void add_navy_to_army_group(army_group* selected_group, dcon::navy_id selected_navy);
-	void smart_select_army_group(army_group* selected_group);
-	void select_army_group(army_group* selected_group);
-	void deselect_army_group();
-	bool fill_province_up_to_supply_limit(army_group* group, dcon::province_id target, std::vector<float>& regiments_distribution, army_group_regiment_status initial_status, army_group_regiment_status final_status);
-	bool fill_province(army_group* group, dcon::province_id target, std::vector<float>& regiments_expectation_ideal, army_group_regiment_status initial_status);
 };
 } // namespace sys

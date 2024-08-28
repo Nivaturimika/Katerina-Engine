@@ -6,9 +6,7 @@ namespace game_scene {
 enum class scene_id : uint8_t {
 	pick_nation,
 	in_game_basic,
-	in_game_military,
 	in_game_state_selector,
-	in_game_military_selector,
 	end_screen,
 	count
 };
@@ -133,8 +131,6 @@ struct scene_properties {
 
 scene_properties nation_picker();
 scene_properties basic_game();
-scene_properties battleplan_editor();
-scene_properties battleplan_editor_add_army();
 scene_properties state_wargoal_selector();
 scene_properties end_screen();
 

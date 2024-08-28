@@ -2074,6 +2074,7 @@ bool has_truce_with(sys::state& state, dcon::nation_id attacker, dcon::nation_id
 
 dcon::regiment_id create_new_regiment(sys::state& state, dcon::nation_id n, dcon::unit_type_id t) {
 	auto reg = fatten(state.world, state.world.create_regiment());
+	assert(t);
 	reg.set_type(t);
 	// TODO make name
 	reg.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience), 0.f, 1.f));
@@ -2083,6 +2084,7 @@ dcon::regiment_id create_new_regiment(sys::state& state, dcon::nation_id n, dcon
 }
 dcon::ship_id create_new_ship(sys::state& state, dcon::nation_id n, dcon::unit_type_id t) {
 	auto shp = fatten(state.world, state.world.create_ship());
+	assert(t);
 	shp.set_type(t);
 	// TODO make name
 	shp.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience), 0.f, 1.f));
@@ -7057,7 +7059,6 @@ void advance_mobilizations(sys::state& state) {
 
 									while(available > 0 && to_mobilize > 0) {
 										auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ? state.military_definitions.infantry : state.military_definitions.irregular);
-										state.world.regiment_set_experience(new_reg, std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience), 0.f, 1.f));
 										state.world.regiment_set_org(new_reg, 0.1f);
 										state.world.try_create_army_membership(new_reg, a);
 										auto p = pop.get_pop();
