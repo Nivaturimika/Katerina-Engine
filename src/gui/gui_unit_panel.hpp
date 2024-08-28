@@ -817,7 +817,7 @@ public:
 		} else {
 			exp = state.world.ship_get_experience(content);
 		}
-		frame = int32_t(std::ceil(exp * 100.f / 10.f));
+		frame = int32_t(std::ceil(exp * 10.f));
 	}
 };
 

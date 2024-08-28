@@ -6870,6 +6870,9 @@ void reinforce_regiments(sys::state& state) {
 			location_modifier = 0.1f;
 		}
 
+		auto min_exp = tech_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
+			+ tech_nation.get_modifier_values(sys::national_mod_offsets::land_unit_start_experience);
+
 		auto combined = state.defines.reinforce_speed * spending_level * location_modifier *
 			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
 			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
@@ -6882,7 +6885,6 @@ void reinforce_regiments(sys::state& state) {
 			auto old_str = reg.get_regiment().get_strength();
 			/* experience = old experience / (amount - reinforced / 3 + 1) */
 			auto new_exp = reg.get_regiment().get_experience() / ((new_str - old_str) / 3.f + 1.f);
-			auto min_exp = ar.get_controller_from_army_control().get_modifier_values(sys::national_mod_offsets::regular_experience_level);
 			reg.get_regiment().set_experience(std::max(min_exp, new_exp));
 			reg.get_regiment().set_strength(new_str);
 		}
@@ -6901,10 +6903,9 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 
 			auto in_nation = n.get_controller_from_navy_control();
 
-			float oversize_amount =
-					in_nation.get_naval_supply_points() > 0
-							? std::min(float(in_nation.get_used_naval_supply_points()) / float(in_nation.get_naval_supply_points()), 1.75f)
-							: 1.75f;
+			float oversize_amount = in_nation.get_naval_supply_points() > 0
+				? std::min(float(in_nation.get_used_naval_supply_points()) / float(in_nation.get_naval_supply_points()), 1.75f)
+				: 1.75f;
 			float over_size_penalty = oversize_amount > 1.0f ? 2.0f - oversize_amount : 1.0f;
 			auto spending_level = in_nation.get_effective_naval_spending() * over_size_penalty;
 
@@ -6912,12 +6913,14 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 			auto reinf_mod = in_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed) + 1.0f;
 			auto repair_val = rr_mod * reinf_mod * spending_level;
 
+			auto min_exp = in_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
+				+ in_nation.get_modifier_values(sys::national_mod_offsets::naval_unit_start_experience);
+
 			for(auto reg : n.get_navy_membership()) {
 				auto new_str = std::min(reg.get_ship().get_strength() + repair_val, 1.0f);
 				auto old_str = reg.get_ship().get_strength();
 				/* experience = old experience / (amount - reinforced / 3 + 1) */
 				auto new_exp = reg.get_ship().get_experience() / ((new_str - old_str) / 3.f + 1.f);
-				auto min_exp = n.get_controller_from_navy_control().get_modifier_values(sys::national_mod_offsets::regular_experience_level);
 				reg.get_ship().set_experience(std::max(min_exp, new_exp));
 				reg.get_ship().set_strength(new_str);
 			}
