@@ -807,15 +807,17 @@ public:
 };
 
 template<typename T>
-class subunit_experience_bar : public progress_bar {
+class subunit_experience_bar : public image_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<T>(state, parent);
+		float exp = 0.f;
 		if constexpr(std::is_same_v<T, dcon::regiment_id>) {
-			progress = 1.f - state.world.regiment_get_experience(content);
+			exp = state.world.regiment_get_experience(content);
 		} else {
-			progress = 1.f - state.world.ship_get_experience(content);
+			exp = state.world.ship_get_experience(content);
 		}
+		frame = int32_t(exp * 100.f / 11.f);
 	}
 };
 
