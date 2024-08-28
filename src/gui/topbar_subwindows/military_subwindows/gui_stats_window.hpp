@@ -116,9 +116,10 @@ public:
 class statswin_unitexperience : public simple_text_element_base {
 protected:
 	std::string get_text(sys::state& state, dcon::nation_id n) noexcept {
+		auto r_exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level);
 		auto l_exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience);
 		auto n_exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience);
-		return (text::format_float(l_exp) + "/" + text::format_float(n_exp));
+		return text::format_float(r_exp) + "/" + text::format_float(l_exp) + "/" + text::format_float(n_exp);
 	}
 public:
 	void on_update(sys::state& state) noexcept override {

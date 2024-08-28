@@ -2077,7 +2077,9 @@ dcon::regiment_id create_new_regiment(sys::state& state, dcon::nation_id n, dcon
 	assert(t);
 	reg.set_type(t);
 	// TODO make name
-	reg.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience), 0.f, 1.f));
+	auto exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience);
+	exp += state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level);
+	reg.set_experience(std::clamp(exp, 0.f, 1.f));
 	reg.set_strength(1.f);
 	reg.set_org(1.f);
 	return reg.id;
@@ -2087,7 +2089,9 @@ dcon::ship_id create_new_ship(sys::state& state, dcon::nation_id n, dcon::unit_t
 	assert(t);
 	shp.set_type(t);
 	// TODO make name
-	shp.set_experience(std::clamp(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience), 0.f, 1.f));
+	auto exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience);
+	exp += state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level);
+	shp.set_experience(std::clamp(exp, 0.f, 1.f));
 	shp.set_strength(1.f);
 	shp.set_org(1.f);
 	return shp.id;
@@ -6878,7 +6882,7 @@ void reinforce_regiments(sys::state& state) {
 			auto old_str = reg.get_regiment().get_strength();
 			/* experience = old experience / (amount - reinforced / 3 + 1) */
 			auto new_exp = reg.get_regiment().get_experience() / ((new_str - old_str) / 3.f + 1.f);
-			auto min_exp = ar.get_controller_from_army_control().get_modifier_values(sys::national_mod_offsets::land_unit_start_experience);
+			auto min_exp = ar.get_controller_from_army_control().get_modifier_values(sys::national_mod_offsets::regular_experience_level);
 			reg.get_regiment().set_experience(std::max(min_exp, new_exp));
 			reg.get_regiment().set_strength(new_str);
 		}
@@ -6913,7 +6917,7 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 				auto old_str = reg.get_ship().get_strength();
 				/* experience = old experience / (amount - reinforced / 3 + 1) */
 				auto new_exp = reg.get_ship().get_experience() / ((new_str - old_str) / 3.f + 1.f);
-				auto min_exp = n.get_controller_from_navy_control().get_modifier_values(sys::national_mod_offsets::naval_unit_start_experience);
+				auto min_exp = n.get_controller_from_navy_control().get_modifier_values(sys::national_mod_offsets::regular_experience_level);
 				reg.get_ship().set_experience(std::max(min_exp, new_exp));
 				reg.get_ship().set_strength(new_str);
 			}

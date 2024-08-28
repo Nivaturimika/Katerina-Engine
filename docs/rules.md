@@ -846,8 +846,10 @@ Navies with supplies less than define:NAVAL_LOW_SUPPLY_DAMAGE_SUPPLY_STATUS may 
 ### Monthly reinforcement
 
 A unit that is not retreating, not embarked, not in combat is reinforced (has its strength increased) by:
-define:REINFORCE_SPEED x (technology-reinforcement-modifier + 1.0) x (2 if in owned province, 0.1 in an unowned port province, 1 in a controlled province, 0.5 if in a province adjacent to a province with military access, 0.25 in a hostile, unblockaded port, and 0.1 in any other hostile province) x (national-reinforce-speed-modifier + 1) x army-supplies x (number of actual regiments / max possible regiments (feels like a bug to me) or 0.5 if mobilized)
-The units experience is also reduced s.t. its new experience = old experience / (amount-reinforced / 3 + 1)
+`define:REINFORCE_SPEED x (technology-reinforcement-modifier + 1.0) x (2 if in owned province, 0.1 in an unowned port province, 1 in a controlled province, 0.5 if in a province adjacent to a province with military access, 0.25 in a hostile, unblockaded port, and 0.1 in any other hostile province) x (national-reinforce-speed-modifier + 1) x army-supplies x (number of actual regiments / max possible regiments (feels like a bug to me) or 0.5 if mobilized)`
+The units experience is also reduced s.t. it's `new experience = old experience / (amount-reinforced / 3 + 1)`
+
+Experience will not decrease beyond `national-regiment-experience-level`.
 
 ### Monthly ship repair / update
 
