@@ -2155,10 +2155,10 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 			}
 		} else {
 			while(((poly_fn(left) < 0.f) || (poly_fn(left) > 1.f)) && (left < 1.f)) {
-				left += 1.f / 300.f;
+				left += 1.f / 200.f;
 			}
 			while(((poly_fn(right) < 0.f) || (poly_fn(right) > 1.f)) && (right > 0.f)) {
-				right -= 1.f / 300.f;
+				right -= 1.f / 200.f;
 			}
 		}
 
@@ -2183,8 +2183,10 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 		if(is_linear) {
 			float height = poly_fn(right) - poly_fn(left);
 			curve_length = 2.f * glm::length(glm::vec2(height * ratio.y, result_interval * ratio.x));
-		} else for(float x = left; x <= right; x += x_step) {
-			curve_length += 2.0f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
+		} else {
+			for(float x = left; x <= right; x += x_step) {
+				curve_length += 2.0f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
+			}
 		}
 		float size = (curve_length / text_length) * 0.8f; //* 0.66f;
 
@@ -2202,7 +2204,7 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 
 		auto real_text_size = size / (size_x * 2.0f);
 
-		float letter_spacing_map = std::clamp((curve_length / text_length - size) / 2.f, 0.f, size * 2.f);
+		float letter_spacing_map = std::clamp(0.75f * (curve_length / text_length - size) / 2.f, 0.f, size * 2.f);
 		if(state.world.locale_get_prevent_letterspace(state.font_collection.get_current_locale())) {
 			letter_spacing_map = 0.f;
 		}
@@ -2217,7 +2219,6 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 			}
 			accumulated_length += added_distance;
 		}
-
 
 		unsigned int glyph_count = static_cast<unsigned int>(e.text.glyph_info.size());
 		for(unsigned int i = 0; i < glyph_count; i++) {
