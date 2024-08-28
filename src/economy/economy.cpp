@@ -548,9 +548,11 @@ void initialize(sys::state& state) {
 	populate_construction_consumption(state);
 
 	state.world.for_each_nation([&](dcon::nation_id n) { populate_effective_prices(state, n); });
-	//state.world.for_each_nation([&](dcon::nation_id n) {
-	//	state.world.nation_set_stockpiles(n, economy::money, 1000.0f);
-	//});
+	for(const auto gp : state.great_nations) {
+		/* The banks of great powers start with (8 - rank) x 20 + 100 in them. */
+		auto t = (state.defines.great_nations_count - state.world.nation_get_rank(gp.nation)) * 20.f + 100.f;
+		state.world.nation_set_stockpiles(gp.nation, economy::money, t);
+	}
 }
 
 float sphere_leader_share_factor(sys::state& state, dcon::nation_id sphere_leader, dcon::nation_id sphere_member) {
