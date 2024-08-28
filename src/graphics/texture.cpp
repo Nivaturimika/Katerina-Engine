@@ -571,6 +571,8 @@ GLuint get_flag_handle(sys::state& state, dcon::national_identity_id nat_id, cul
 }
 
 GLuint get_texture_handle(sys::state& state, dcon::texture_id id, bool keep_data) {
+	if(!id)
+		return 0;
 	if(state.open_gl.asset_textures[id].loaded) {
 		return state.open_gl.asset_textures[id].texture_handle;
 	} else { // load from file
