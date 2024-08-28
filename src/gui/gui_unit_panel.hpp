@@ -1408,12 +1408,54 @@ public:
 };
 
 template<class T>
+class unit_speed_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<T>(state, parent);
+		text::substitution_map sub;
+		if constexpr(std::is_same_v<T, dcon::navy_id>) {
+			text::add_to_substitution_map(sub, text::variable_type::val, uint16_t(military::effective_navy_speed(state, content)));
+		} else if constexpr(std::is_same_v<T, dcon::army_id>) {
+			text::add_to_substitution_map(sub, text::variable_type::val, uint16_t(military::effective_army_speed(state, content)));
+		}
+		set_text(state, text::resolve_string_substitution(state, std::string_view("speed"), sub));
+	}
+};
+
+class unit_recon_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<dcon::army_id>(state, parent);
+		float max_recon = 0.f;
+		for(const auto r : state.world.army_get_army_membership(content)) {
+			auto type = r.get_regiment().get_type();
+			if(!type)
+				continue;
+			auto value = state.military_definitions.unit_base_definitions[type].reconnaissance_or_fire_range;
+			max_recon = std::max(value, max_recon);
+		}
+		set_text(state, text::format_percentage(max_recon));
+	}
+};
+
+class unit_siege_text : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<dcon::army_id>(state, parent);
+		float max_siege = 0.f;
+		for(const auto r : state.world.army_get_army_membership(content)) {
+			auto type = r.get_regiment().get_type();
+			if(!type)
+				continue;
+			auto value = state.military_definitions.unit_base_definitions[type].siege_or_torpedo_attack;
+			max_siege = std::max(value, max_siege);
+		}
+		set_text(state, text::format_percentage(max_siege));
+	}
+};
+
+template<class T>
 class unit_details_window : public window_element_base {
-	simple_text_element_base* unitspeed_text = nullptr;
-	image_element_base* unitrecon_icon = nullptr;
-	simple_text_element_base* unitrecon_text = nullptr;
-	image_element_base* unitengineer_icon = nullptr;
-	simple_text_element_base* unitengineer_text = nullptr;
 	progress_bar* unitsupply_bar = nullptr;
 	image_element_base* unitdugin_icon = nullptr;
 	unit_selection_panel<T>* unit_selection_win = nullptr;
@@ -1429,22 +1471,19 @@ public:
 		xy_pair base_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item_offset"))->second.definition].position;
 
 		{
-			auto win = make_element_by_type<unit_details_type_item<T, 0>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
+			auto win = make_element_by_type<unit_details_type_item<T, 0>>(state, state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
 			win->base_data.position.x = base_position.x + (0 * base_offset.x); // Flexnudge
 			win->base_data.position.y = base_position.y + (0 * base_offset.y); // Flexnudge
 			add_child_to_front(std::move(win));
 		}
 		{
-			auto win = make_element_by_type<unit_details_type_item<T, 1>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
+			auto win = make_element_by_type<unit_details_type_item<T, 1>>(state, state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
 			win->base_data.position.x = base_position.x + (1 * base_offset.x); // Flexnudge
 			win->base_data.position.y = base_position.y + (1 * base_offset.y); // Flexnudge
 			add_child_to_front(std::move(win));
 		}
 		{
-			auto win = make_element_by_type<unit_details_type_item<T, 2>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
+			auto win = make_element_by_type<unit_details_type_item<T, 2>>(state, state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition);
 			win->base_data.position.x = base_position.x + (2 * base_offset.x); // Flexnudge
 			win->base_data.position.y = base_position.y + (2 * base_offset.y); // Flexnudge
 			add_child_to_front(std::move(win));
@@ -1452,14 +1491,12 @@ public:
 
 		const xy_pair item_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("unittype_item"))->second.definition].position;
 		if constexpr(std::is_same_v<T, dcon::army_id>) {
-			auto ptr = make_element_by_type<unit_details_army_listbox>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("sup_subunits"))->second.definition);
+			auto ptr = make_element_by_type<unit_details_army_listbox>(state, state.ui_state.defs_by_name.find(state.lookup_key("sup_subunits"))->second.definition);
 			ptr->base_data.position.y = base_position.y + item_offset.y + (3 * base_offset.y) + 72 - 32;
 			ptr->base_data.size.y += 32;
 			add_child_to_front(std::move(ptr));
 		} else {
-			auto ptr = make_element_by_type<unit_details_navy_listbox>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("sup_subunits"))->second.definition);
+			auto ptr = make_element_by_type<unit_details_navy_listbox>(state, state.ui_state.defs_by_name.find(state.lookup_key("sup_subunits"))->second.definition);
 			ptr->base_data.position.y = base_position.y + item_offset.y + (3 * base_offset.y) + 72 - 32;
 			ptr->base_data.size.y += 32;
 			add_child_to_front(std::move(ptr));
@@ -1486,25 +1523,31 @@ public:
 		} else if(name == "icon_speed") {
 			return make_element_by_type<image_element_base>(state, id);
 		} else if(name == "speed") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			unitspeed_text = ptr.get();
-			return ptr;
+			return make_element_by_type<unit_speed_text<T>>(state, id);
 		} else if(name == "icon_recon") {
-			auto ptr = make_element_by_type<image_element_base>(state, id);
-			unitrecon_icon = ptr.get();
-			return ptr;
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				return make_element_by_type<image_element_base>(state, id);
+			} else {
+				return make_element_by_type<invisible_element>(state, id);
+			}
 		} else if(name == "recon") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			unitrecon_text = ptr.get();
-			return ptr;
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				return make_element_by_type<unit_recon_text>(state, id);
+			} else {
+				return make_element_by_type<invisible_element>(state, id);
+			}
 		} else if(name == "icon_engineer") {
-			auto ptr = make_element_by_type<image_element_base>(state, id);
-			unitengineer_icon = ptr.get();
-			return ptr;
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				return make_element_by_type<image_element_base>(state, id);
+			} else {
+				return make_element_by_type<invisible_element>(state, id);
+			}
 		} else if(name == "engineer") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			unitengineer_text = ptr.get();
-			return ptr;
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				return make_element_by_type<unit_siege_text>(state, id);
+			} else {
+				return make_element_by_type<invisible_element>(state, id);
+			}
 		} else if(name == "icon_supplies_small") {
 			return make_element_by_type<image_element_base>(state, id);
 		} else if(name == "supply_status") {
@@ -1517,28 +1560,6 @@ public:
 			return ptr;
 		} else {
 			return nullptr;
-		}
-	}
-
-	void on_update(sys::state& state) noexcept override {
-		if constexpr(std::is_same_v<T, dcon::navy_id>) {
-			unitengineer_icon->set_visible(state, false);
-			unitengineer_text->set_visible(state, false);
-			unitrecon_icon->set_visible(state, false);
-			unitrecon_text->set_visible(state, false);
-
-			text::substitution_map sub;
-			text::add_to_substitution_map(sub, text::variable_type::val, uint16_t(military::effective_navy_speed(state, unit_id)));
-			unitspeed_text->set_text(state, text::resolve_string_substitution(state, std::string_view("speed"), sub));
-		} else if constexpr(std::is_same_v<T, dcon::army_id>) {
-			unitengineer_icon->set_visible(state, true);
-			unitengineer_text->set_visible(state, true);
-			unitrecon_icon->set_visible(state, true);
-			unitrecon_text->set_visible(state, true);
-
-			text::substitution_map sub;
-			text::add_to_substitution_map(sub, text::variable_type::val, uint16_t(military::effective_army_speed(state, unit_id)));
-			unitspeed_text->set_text(state, text::resolve_string_substitution(state, std::string_view("speed"), sub));
 		}
 	}
 
@@ -1919,7 +1940,6 @@ public:
 				}
 			}
 		}
-
 		set_text(state, std::to_string(total));
 	}
 };
@@ -1936,11 +1956,9 @@ public:
 			auto a = std::get<dcon::navy_id>(foru);
 			loc = state.world.navy_get_location_from_navy_location(a);
 		}
-
 		set_text(state, text::produce_simple_string(state, state.world.province_get_name(loc)));
 	}
 };
-
 
 class unit_row_location_button : public button_element_base {
 public:
