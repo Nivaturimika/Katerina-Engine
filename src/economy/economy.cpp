@@ -513,7 +513,7 @@ void initialize(sys::state& state) {
 				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, pt));
 			}
 		}
-		fp.set_rgo_size(std::max(0.001f, 0.0000001f * pop_amount));
+		fp.set_rgo_size(std::max(0.001f, 0.75f * pop_amount));
 	});
 
 	state.world.for_each_nation([&](dcon::nation_id n) {
@@ -621,7 +621,6 @@ void update_factory_triggered_modifiers(sys::state& state) {
 		auto prov = state.world.factory_get_province_from_factory_location(f);
 		auto pstate = state.world.province_get_state_membership(prov);
 		auto powner = state.world.province_get_nation_from_province_ownership(prov);
-
 		if(powner && pstate) {
 			for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
 				if(auto mod_a = fac_type.get_bonus_trigger()[i]; mod_a && trigger::evaluate(state, mod_a, trigger::to_generic(pstate), trigger::to_generic(powner), 0)) {
@@ -629,7 +628,6 @@ void update_factory_triggered_modifiers(sys::state& state) {
 				}
 			}
 		}
-
 		state.world.factory_set_triggered_modifiers(f, sum);
 	});
 }
@@ -668,9 +666,7 @@ float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_
 }
 
 float rgo_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
-	auto emp = rgo_effective_size(state, n, p, c);
-	assert(emp >= 0.f && std::isfinite(emp));
-	return emp;
+	return rgo_effective_size(state, n, p, c);
 }
 
 float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p) {
@@ -1284,16 +1280,11 @@ float rgo_desired_worker_norm_profit(sys::state& state, dcon::province_id p, dco
 	// not exactly an ideal solution but it works and doesn't create goods or wealth out of thin air
 	float employment_ratio = state.world.province_get_rgo_employment(p);
 	desired_profit_by_worker = desired_profit_by_worker * employment_ratio * employment_ratio;
-
 	assert(std::isfinite(desired_profit_by_worker));
-
 	return desired_profit_by_worker;
 }
 
 void update_province_rgo_consumption(sys::state& state, dcon::province_id p, dcon::nation_id n, float mobilization_impact, float expected_min_wage, bool occupied) {
-	auto rgo_pops = rgo_relevant_population(state, p, n);
-	float desired_profit = rgo_desired_worker_norm_profit(state, p, n, expected_min_wage, rgo_pops.total);
-
 	state.world.for_each_commodity([&](dcon::commodity_id c) {
 		auto max_production = rgo_full_production_quantity(state, n, p, c);
 		state.world.province_set_rgo_actual_production_per_good(p, c, max_production);
