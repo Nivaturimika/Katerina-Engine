@@ -6840,10 +6840,10 @@ float reinforce_amount(sys::state& state, dcon::army_id a) {
 void reinforce_regiments(sys::state& state) {
 	/*
 	A unit that is not retreating, not embarked, not in combat is reinforced (has its strength increased) by:
-define:REINFORCE_SPEED x (technology-reinforcement-modifier + 1.0) x (2 if in owned province, 0.1 in an unowned port province, 1
-in a controlled province, 0.5 if in a province adjacent to a province with military access, 0.25 in a hostile, unblockaded port,
-and 0.1 in any other hostile province) x (national-reinforce-speed-modifier + 1) x army-supplies x (number of actual regiments /
-max possible regiments (feels like a bug to me) or 0.5 if mobilized)
+	define:REINFORCE_SPEED x (technology-reinforcement-modifier + 1.0) x (2 if in owned province, 0.1 in an unowned port province, 1
+	in a controlled province, 0.5 if in a province adjacent to a province with military access, 0.25 in a hostile, unblockaded port,
+	and 0.1 in any other hostile province) x (national-reinforce-speed-modifier + 1) x army-supplies x (number of actual regiments /
+	max possible regiments (feels like a bug to me) or 0.5 if mobilized)
 	*/
 
 	for(auto ar : state.world.in_army) {
@@ -6865,14 +6865,18 @@ max possible regiments (feels like a bug to me) or 0.5 if mobilized)
 		}
 
 		auto combined = state.defines.reinforce_speed * spending_level * location_modifier *
-										(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
-										(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
+			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
+			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
 
 		for(auto reg : ar.get_army_membership()) {
 			auto pop = reg.get_regiment().get_pop_from_regiment_source();
 			auto pop_size = pop.get_size();
 			auto limit_fraction = std::max(state.defines.alice_full_reinforce, std::min(1.0f, pop_size / state.defines.pop_size_per_regiment));
-			reg.get_regiment().set_strength(std::min(reg.get_regiment().get_strength() + combined, limit_fraction));
+			auto new_str = std::min(reg.get_regiment().get_strength() + combined, limit_fraction);
+			auto old_str = reg.get_regiment().get_strength();
+			/* experience = old experience / (amount - reinforced / 3 + 1) */
+			reg.get_regiment().set_experience(reg.get_regiment().get_experience() / ((new_str - old_str) / 3.f + 1.f));
+			reg.get_regiment().set_strength(new_str);
 		}
 	}
 }
@@ -6901,7 +6905,11 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 			auto repair_val = rr_mod * reinf_mod * spending_level;
 
 			for(auto reg : n.get_navy_membership()) {
-				reg.get_ship().set_strength(std::min(reg.get_ship().get_strength() + repair_val, 1.0f));
+				auto new_str = std::min(reg.get_ship().get_strength() + repair_val, 1.0f);
+				auto old_str = reg.get_ship().get_strength();
+				/* experience = old experience / (amount - reinforced / 3 + 1) */
+				reg.get_ship().set_experience(reg.get_ship().get_experience() / ((new_str - old_str) / 3.f + 1.f));
+				reg.get_ship().set_strength(new_str);
 			}
 		}
 	}
