@@ -318,8 +318,7 @@ void province_history_file::trade_goods(association_type, std::string_view text,
 			it != context.outer_context.map_of_commodity_names.end()) {
 		context.outer_context.state.world.province_set_rgo(context.id, it->second);
 	} else {
-		err.accumulated_errors +=
-				std::string(text) + " is not a valid commodity name (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += std::string(text) + " is not a valid commodity name (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 }
 

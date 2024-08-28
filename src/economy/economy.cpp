@@ -502,19 +502,18 @@ void initialize(sys::state& state) {
 		ff.set_production_scale(1.0f);
 	});
 
-	// learn some weights for rgo from initial territories:
 	province::for_each_land_province(state, [&](dcon::province_id p) {
-		auto fp = fatten(state.world, p);
-		if(fp.get_rgo_was_set_during_scenario_creation())
-			return;
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			fp.set_rgo_employment_per_good(c, 0.f);
-			fp.set_rgo_target_employment_per_good(c, 0.f);
-		});
-		fp.set_rgo_size(0.f);	
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			fp.set_rgo_max_size_per_good(c, 0.f);
-		});
+		auto fp = dcon::fatten(state.world, p);
+		bool is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(p));
+		float pop_amount = 0.0f;
+		for(auto pt : state.world.in_pop_type) {
+			if(pt == state.culture_definitions.slaves) {
+				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, state.culture_definitions.slaves));
+			} else if(pt.get_is_paid_rgo_worker()) {
+				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, pt));
+			}
+		}
+		fp.set_rgo_size(std::max(0.001f, 0.0000001f * pop_amount));
 	});
 
 	state.world.for_each_nation([&](dcon::nation_id n) {
@@ -642,15 +641,13 @@ float rgo_effective_size(sys::state const& state, dcon::nation_id n, dcon::provi
 	*/
 	bool is_mine = state.world.commodity_get_is_mine(c);
 	auto rgo = state.world.province_get_rgo(p);
-	if(rgo != c) {
+	if(rgo != c)
 		return 0.f;
-	}
-	auto sz = state.world.province_get_rgo_max_size_per_good(p, c);
-	assert(sz >= 0.f && std::isfinite(sz));
+	auto sz = state.world.province_get_rgo_size(p);
 	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_size : sys::provincial_mod_offsets::farm_rgo_size);
 	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_size : sys::national_mod_offsets::farm_rgo_size);
 	auto specific_pmod = state.world.nation_get_rgo_size(n, c);
-	auto bonus = std::max(0.f, pmod + nmod + specific_pmod + 1.0f);
+	auto bonus = std::max(0.001f, pmod + nmod + specific_pmod + 1.0f);
 	return sz * bonus;
 }
 
@@ -671,7 +668,7 @@ float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_
 }
 
 float rgo_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
-	auto emp = state.defines.alice_rgo_per_size_employment * rgo_effective_size(state, n, p, c);
+	auto emp = rgo_effective_size(state, n, p, c);
 	assert(emp >= 0.f && std::isfinite(emp));
 	return emp;
 }
@@ -715,15 +712,10 @@ void update_rgo_employment(sys::state& state) {
 		float labor_pool = worker_pool + slave_pool;
 
 		float total_population = state.world.province_get_demographics(p, demographics::total);
-		//TODO: floating point errors!!!!
-		//assert(labor_pool <= total_population);
-
-		// update rgo employment per good:
 
 		//sorting goods by profitability
 		static std::vector<dcon::commodity_id> ordered_rgo_goods;
 		ordered_rgo_goods.clear();
-
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
 			if(rgo_max_employment(state, owner, p, c) > 0.f) {
 				ordered_rgo_goods.push_back(c);
@@ -732,32 +724,21 @@ void update_rgo_employment(sys::state& state) {
 			}
 		});
 
-		std::sort(ordered_rgo_goods.begin(), ordered_rgo_goods.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-			float profit_a = rgo_expected_worker_norm_profit(state, p, owner, a);
-			float profit_b = rgo_expected_worker_norm_profit(state, p, owner, b);
-			return (profit_a > profit_b);
-		});
-
 		// distributing workers in almost the same way as factories:
-		float speed = 0.20f;
-
+		constexpr float speed = 0.125f;
 		float total_workforce = labor_pool;
 		float max_employment_total = 0.f;
 		float total_employed = 0.f;
-
 		for(uint32_t i = 0; i < ordered_rgo_goods.size(); ++i) {
 			auto c = ordered_rgo_goods[i];
 			float max_employment = rgo_max_employment(state, owner, p, c);
 			max_employment_total += max_employment;
-			float target_workforce = std::min(state.world.province_get_rgo_target_employment_per_good(p, c), total_workforce);
-
 			float current_workforce = state.world.province_get_rgo_employment_per_good(p, c);
-			float new_employment = std::min(current_workforce * (1 - speed) + target_workforce * speed, total_workforce);
+			float new_employment = std::min(current_workforce * (1.f - speed) + max_employment * speed, total_workforce);
+			//
 			total_workforce -= new_employment;
-
 			new_employment = std::clamp(new_employment, 0.f, max_employment);
 			total_employed += new_employment;
-
 			state.world.province_set_rgo_employment_per_good(p, c, new_employment);
 		}
 		assert(total_employed <= total_population + 1.f);
@@ -790,8 +771,7 @@ void update_rgo_employment(sys::state& state) {
 }
 
 float factory_max_employment(sys::state const& state, dcon::factory_id f) {
-	return state.defines.alice_factory_per_level_employment
-		* state.world.factory_get_level(f);
+	return state.defines.alice_factory_per_level_employment * state.world.factory_get_level(f);
 }
 
 float factory_primary_employment(sys::state const& state, dcon::factory_id f) {
@@ -925,18 +905,9 @@ efficiency consumption scale)
 
 */
 
-float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n,
-		float mobilization_impact) {
+float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n, float mobilization_impact) {
 	auto fac = fatten(state.world, f);
 	auto fac_type = fac.get_building_type();
-
-	/*
-	float total_state_pop = std::max(0.01f, state.world.state_instance_get_demographics(s, demographics::total));
-	float owner_fraction = std::min(0.05f, state.world.state_instance_get_demographics(s, demographics::to_key(state,
-	state.culture_definitions.capitalists)) / total_state_pop); float input_multiplier = fac.get_triggered_modifiers() * (1.0f +
-	owner_fraction * -2.5f);
-	*/
-
 	float throughput_multiplier = (state.world.nation_get_factory_goods_throughput(n, fac_type.get_output()) + 1.0f);
 	float output_multiplier = state.world.nation_get_factory_goods_output(n, fac_type.get_output())
 		+ 1.0f
@@ -944,34 +915,17 @@ float factory_full_production_quantity(sys::state const& state, dcon::factory_id
 		* (1.0f - state.economy_definitions.craftsmen_fraction)
 		* 1.5f
 		* 2.f; // additional multiplier to give advantage to "old industrial giants" which have a bunch of clerks already
-
 	float max_production_scale = fac.get_primary_employment()
 		* fac.get_level()
 		* std::max(0.0f, mobilization_impact);
-
 	return throughput_multiplier * output_multiplier * max_production_scale;
 }
 
 float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 	bool is_mine = state.world.commodity_get_is_mine(c);
-	auto rgo = state.world.province_get_rgo(p);
-	float main_rgo = (rgo == c) ? 1.f : state.defines.alice_base_rgo_efficiency_bonus;
-	float base_amount = state.world.commodity_get_rgo_amount(c);
-	float throughput = std::max(0.f, 1.0f
-		+ state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_rgo_throughput)
-		+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rgo_throughput)
-		+ state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_eff : sys::provincial_mod_offsets::farm_rgo_eff)
-		+ state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff));
-	float saturation = state.world.province_get_rgo_employment_per_good(p, c) / (rgo_max_employment(state, n, p, c) + 1.f);
-	float result = base_amount * main_rgo
-		* (1.f + 1.0f * (1.f - saturation))
-		* std::max(0.5f, throughput)
-		* state.defines.alice_rgo_boost
-		* std::max(0.5f, (1.0f + state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_rgo_output) + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rgo_output) + state.world.nation_get_rgo_goods_output(n, c)));
-	// TODO: Saturation is doing some funny business, specifically, rgo_employment_per_good
-	result = std::max(0.f, result);
-	assert(result >= 0.f && std::isfinite(result));
-	return result;
+	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff);
+	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_eff : sys::provincial_mod_offsets::farm_rgo_eff);
+	return std::max(0.f, 1.f + nmod + pmod);
 }
 
 float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
@@ -982,10 +936,9 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	computing RGO-throughput x RGO-output x RGO-size x base-commodity-production-quantity, except that it is affected by different
 	modifiers.
 	*/
-	auto eff_size = rgo_effective_size(state, n, p, c);
-	auto val = eff_size * rgo_efficiency(state, n, p, c);
-	assert(val >= 0.0f && std::isfinite(val));
-	return val;
+	auto sz = rgo_effective_size(state, n, p, c);
+	auto ef = rgo_efficiency(state, n, p, c);
+	return sz * ef * 0.00001f;
 }
 
 float factory_min_input_available(
@@ -1337,62 +1290,13 @@ float rgo_desired_worker_norm_profit(sys::state& state, dcon::province_id p, dco
 	return desired_profit_by_worker;
 }
 
-float rgo_expected_worker_norm_profit(sys::state& state, dcon::province_id p, dcon::nation_id n, dcon::commodity_id c) {
-	auto efficiency = rgo_efficiency(state, n, p, c);
-	auto current_price = state.world.commodity_get_current_price(c);
-	auto consumed_ratio = std::min(1.f, (state.world.commodity_get_total_consumption(c) + 0.0001f) / (state.world.commodity_get_total_production(c) + 0.0001f));
-	if(state.world.commodity_get_money_rgo(c)) {
-		consumed_ratio = 1.f;
-	}
-
-	return
-		consumed_ratio
-		* efficiency
-		* current_price
-		/ state.defines.alice_rgo_per_size_employment;
-}
-
-void update_province_rgo_consumption(
-	sys::state& state,
-	dcon::province_id p,
-	dcon::nation_id n,
-	float mobilization_impact,
-	float expected_min_wage,
-	bool occupied
-) {
+void update_province_rgo_consumption(sys::state& state, dcon::province_id p, dcon::nation_id n, float mobilization_impact, float expected_min_wage, bool occupied) {
 	auto rgo_pops = rgo_relevant_population(state, p, n);
 	float desired_profit = rgo_desired_worker_norm_profit(state, p, n, expected_min_wage, rgo_pops.total);
 
 	state.world.for_each_commodity([&](dcon::commodity_id c) {
 		auto max_production = rgo_full_production_quantity(state, n, p, c);
-		if(max_production < 0.001f) {
-			return;
-		}
-
-		auto pops_max = rgo_max_employment(state, n, p, c); // maximal amount of workers which rgo could potentially employ
-		auto current_employment = state.world.province_get_rgo_employment_per_good(p, c);
-		float expected_profit = rgo_expected_worker_norm_profit(state, p, n, c);
-
-		float market_size = state.world.commodity_get_total_production(c) + state.world.commodity_get_total_real_demand(c);
-
-		float positive_speed = (expected_profit + 0.00000001f) / (desired_profit + 0.00000001f) - 1.f;
-		float negative_speed = (desired_profit + 0.00000001f) / (expected_profit + 0.00000001f) - 1.f;
-
-		float change = (positive_speed - negative_speed) / rgo_effective_size(state, n, p, c);
-
-		float discrete_step = (((expected_profit - desired_profit) > 0.f) ? 1.f : -1.f) * 20.f;
-
-		change = change / max_production * pops_max / 100.f + discrete_step;
-
-		//change = std::clamp(change, -relative_modifier, relative_modifier);
-		assert(std::isfinite(current_employment + change));
-		auto new_employment = std::clamp(current_employment + change, 0.0f, pops_max);
-		state.world.province_set_rgo_target_employment_per_good(p, c, new_employment);
-
-		// rgos produce all the way down
-		float employment_ratio = current_employment / pops_max;
-		assert(max_production * employment_ratio >= 0);
-		state.world.province_set_rgo_actual_production_per_good(p, c, max_production * employment_ratio);
+		state.world.province_set_rgo_actual_production_per_good(p, c, max_production);
 	});
 }
 
