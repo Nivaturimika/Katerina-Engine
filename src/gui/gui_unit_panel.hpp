@@ -1724,6 +1724,21 @@ public:
 	}
 };
 
+class u_row_attrit_text : public simple_text_element_base {
+	void on_update(sys::state& state) noexcept override {
+		auto foru = retrieve<unit_var>(state, parent);
+		float value = 0.f;
+		if(std::holds_alternative<dcon::army_id>(foru)) {
+			auto a = std::get<dcon::army_id>(foru);
+			value = military::attrition_amount(state, a);
+		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
+			auto a = std::get<dcon::navy_id>(foru);
+			value = military::attrition_amount(state, a);
+		}
+		set_text(state, (value > 0.f ? "?R" : "") + text::format_percentage(value));
+	}
+};
+
 class u_row_attrit_icon : public image_element_base {
 	bool visible = false;
 	void on_update(sys::state& state) noexcept override {
@@ -2014,6 +2029,28 @@ public:
 	}
 };
 
+
+class u_row_location_button : public button_element_base {
+public:
+	void button_action(sys::state& state) noexcept override {
+		auto foru = retrieve<unit_var>(state, parent);
+		state.selected_armies.clear();
+		state.selected_navies.clear();
+		dcon::province_id loc;
+		if(std::holds_alternative<dcon::army_id>(foru)) {
+			auto a = std::get<dcon::army_id>(foru);
+			loc = state.world.army_get_location_from_army_location(a);
+			state.select(a);
+			state.map_state.center_map_on_province(state, loc);
+		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
+			auto a = std::get<dcon::navy_id>(foru);
+			loc = state.world.navy_get_location_from_navy_location(a);
+			state.select(a);
+			state.map_state.center_map_on_province(state, loc);
+		}
+	}
+};
+
 class multi_selection_leader_image : public button_element_base {
 public:
 	dcon::gfx_object_id default_img;
@@ -2102,8 +2139,6 @@ public:
 		} else if(std::holds_alternative<dcon::navy_id>(foru)) {
 			disabled = !command::can_change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
 		}
-		auto name = state.to_string_view(state.world.leader_get_name(lid));
-		set_button_text(state, std::string(name));
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -2116,7 +2151,6 @@ public:
 			display_leader_full(state, lid, contents, 0);
 	}
 
-
 	void button_action(sys::state& state) noexcept override {
 		auto foru = retrieve<unit_var>(state, parent);
 		auto location = get_absolute_non_mirror_location(state, *this);
@@ -2125,6 +2159,14 @@ public:
 		} else {
 			open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
 		}
+	}
+};
+class multi_selection_leader_name : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
+		auto name = state.to_string_view(state.world.leader_get_name(lid));
+		set_text(state, std::string(name));
 	}
 };
 
@@ -2168,6 +2210,10 @@ public:
 
 class selected_unit_item : public listbox_row_element_base<unit_var> {
 public:
+	void on_create(sys::state& state) noexcept override {
+		base_data.size.y -= 20;
+		listbox_row_element_base<unit_var>::on_create(state);
+	}
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "unitpanel_bg") {
 			return make_element_by_type<whole_panel_button>(state, id);
@@ -2175,10 +2221,14 @@ public:
 			return make_element_by_type<multi_selection_leader_image>(state, id);
 		} else if(name == "leader_button") {
 			return make_element_by_type<multi_selection_leader_button>(state, id);
+		} else if(name == "unitleader") {
+			return make_element_by_type<multi_selection_leader_name>(state, id);
 		} else if(name == "leader_prestige_bar") {
 			return make_element_by_type<multi_selection_leader_prestige>(state, id);
 		} else if(name == "unitstrength") {
 			return make_element_by_type<u_row_strength>(state, id);
+		} else if(name == "unitattrition") {
+			return make_element_by_type<u_row_attrit_text>(state, id);
 		} else if(name == "unitattrition_icon") {
 			return make_element_by_type<u_row_attrit_icon>(state, id);
 		} else if(name == "org_bar") {
@@ -2207,7 +2257,9 @@ public:
 			return make_element_by_type<u_row_art>(state, id);
 		} else if(name == "unit_art_count") {
 			return make_element_by_type<u_row_art_count>(state, id);
-		} else if(name == "location") {
+		} else if(name == "unit_location_button") {
+			return make_element_by_type<u_row_location_button>(state, id);
+		} else if(name == "unitlocation") {
 			return make_element_by_type<u_row_location>(state, id);
 		} else if(name == "unitname") {
 			return make_element_by_type<u_row_name>(state, id);
