@@ -830,7 +830,7 @@ public:
 		} else {
 			exp = state.world.ship_get_experience(content);
 		}
-		text::add_line(state, contents, "unit_experience", text::variable_type::x, text::fp_two_places{ exp });
+		text::add_line(state, contents, "unit_experience", text::variable_type::x, text::fp_two_places{ exp * 100.f });
 	}
 };
 

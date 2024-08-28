@@ -2077,8 +2077,8 @@ dcon::regiment_id create_new_regiment(sys::state& state, dcon::nation_id n, dcon
 	assert(t);
 	reg.set_type(t);
 	// TODO make name
-	auto exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience);
-	exp += state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level);
+	auto exp = (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience)
+		+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level)) * 0.01f;
 	reg.set_experience(std::clamp(exp, 0.f, 1.f));
 	reg.set_strength(1.f);
 	reg.set_org(1.f);
@@ -2089,8 +2089,8 @@ dcon::ship_id create_new_ship(sys::state& state, dcon::nation_id n, dcon::unit_t
 	assert(t);
 	shp.set_type(t);
 	// TODO make name
-	auto exp = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience);
-	exp += state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level);
+	auto exp = (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_unit_start_experience)
+		+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level)) * 0.01f;
 	shp.set_experience(std::clamp(exp, 0.f, 1.f));
 	shp.set_strength(1.f);
 	shp.set_org(1.f);
@@ -6870,8 +6870,8 @@ void reinforce_regiments(sys::state& state) {
 			location_modifier = 0.1f;
 		}
 
-		auto min_exp = tech_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
-			+ tech_nation.get_modifier_values(sys::national_mod_offsets::land_unit_start_experience);
+		auto min_exp = (tech_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
+			+ tech_nation.get_modifier_values(sys::national_mod_offsets::land_unit_start_experience)) * 0.01f;
 
 		auto combined = state.defines.reinforce_speed * spending_level * location_modifier *
 			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
@@ -6913,8 +6913,8 @@ maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate 
 			auto reinf_mod = in_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed) + 1.0f;
 			auto repair_val = rr_mod * reinf_mod * spending_level;
 
-			auto min_exp = in_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
-				+ in_nation.get_modifier_values(sys::national_mod_offsets::naval_unit_start_experience);
+			auto min_exp = (in_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
+				+ in_nation.get_modifier_values(sys::national_mod_offsets::naval_unit_start_experience)) * 0.01f;
 
 			for(auto reg : n.get_navy_membership()) {
 				auto new_str = std::min(reg.get_ship().get_strength() + repair_val, 1.0f);
