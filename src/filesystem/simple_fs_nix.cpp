@@ -206,9 +206,27 @@ bool contains_non_ascii(native_char const* str) {
 
 bool list_files_compare_func(native_char const& char1, native_char const& char2) {
 	auto const to_alpha_prec = [](native_char const& ch) -> native_char {
-		if(isdigit(ch)) {
-			auto digit = ch - NATIVE('0');
-			return native_char((10 - digit) + NATIVE('Z'));
+		switch(ch) {
+		case NATIVE('0'): return 123;
+		case NATIVE('1'): return 124;
+		case NATIVE('2'): return 125;
+		case NATIVE('3'): return 126;
+		case NATIVE('4'): return 127;
+		case NATIVE('5'): return 128;
+		case NATIVE('6'): return 129;
+		case NATIVE('7'): return 130;
+		case NATIVE('8'): return 131;
+		case NATIVE('9'): return 132;
+		case 123: return '0';
+		case 124: return '1';
+		case 125: return '2';
+		case 126: return '3';
+		case 127: return '4';
+		case 128: return '5';
+		case 129: return '6';
+		case 130: return '7';
+		case 131: return '8';
+		case 132: return '9';
 		}
 		return ch;
 	};
