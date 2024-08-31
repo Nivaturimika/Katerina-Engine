@@ -331,13 +331,13 @@ void tf_x_owned_province_scope_state(TRIGGER_DISPLAY_PARAMS) {
 				primary_slot != -1 ? text::get_dynamic_state_name(ws, trigger::to_state(primary_slot))
 													 : text::produce_simple_string(ws, "singular_state"));
 		text::close_layout_box(layout, box);
-		if(ui_count_subtriggers(ws, tval) > 1) {
-			auto box = text::open_layout_box(layout, indentation + indentation_amount);
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
-			text::close_layout_box(layout, box);
-		}
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 	}
+	if(ui_count_subtriggers(ws, tval) > 1) {
+		auto box = text::open_layout_box(layout, indentation + indentation_amount);
+		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
+		text::close_layout_box(layout, box);
+	}
+	display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 }
 void tf_x_owned_province_scope_nation(TRIGGER_DISPLAY_PARAMS) {
 	{
@@ -351,13 +351,13 @@ void tf_x_owned_province_scope_nation(TRIGGER_DISPLAY_PARAMS) {
 				primary_slot != -1 ? text::produce_simple_string(ws, text::get_name(ws, trigger::to_nation(primary_slot)))
 													 : text::produce_simple_string(ws, "singular_nation"));
 		text::close_layout_box(layout, box);
-		if(ui_count_subtriggers(ws, tval) > 1) {
-			auto box = text::open_layout_box(layout, indentation + indentation_amount);
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
-			text::close_layout_box(layout, box);
-		}
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 	}
+	if(ui_count_subtriggers(ws, tval) > 1) {
+		auto box = text::open_layout_box(layout, indentation + indentation_amount);
+		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
+		text::close_layout_box(layout, box);
+	}
+	display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 }
 void tf_x_core_scope_province(TRIGGER_DISPLAY_PARAMS) {
 	{
@@ -371,13 +371,13 @@ void tf_x_core_scope_province(TRIGGER_DISPLAY_PARAMS) {
 				primary_slot != -1 ? text::produce_simple_string(ws, ws.world.province_get_name(trigger::to_prov(primary_slot)))
 													 : text::produce_simple_string(ws, "singular_province"));
 		text::close_layout_box(layout, box);
-		if(ui_count_subtriggers(ws, tval) > 1) {
-			auto box = text::open_layout_box(layout, indentation + indentation_amount);
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
-			text::close_layout_box(layout, box);
-		}
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 	}
+	if(ui_count_subtriggers(ws, tval) > 1) {
+		auto box = text::open_layout_box(layout, indentation + indentation_amount);
+		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
+		text::close_layout_box(layout, box);
+	}
+	display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 }
 void tf_x_core_scope_nation(TRIGGER_DISPLAY_PARAMS) {
 	{
