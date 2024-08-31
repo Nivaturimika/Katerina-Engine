@@ -320,7 +320,7 @@ void tf_x_country_scope(TRIGGER_DISPLAY_PARAMS) {
 	display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
 }
 void tf_x_owned_province_scope_state(TRIGGER_DISPLAY_PARAMS) {
-	if(ws.user_settings.spoilers) {
+	{
 		auto box = text::open_layout_box(layout, indentation);
 		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, every_any_code_to_fixed_ui(tval[0])));
@@ -337,12 +337,10 @@ void tf_x_owned_province_scope_state(TRIGGER_DISPLAY_PARAMS) {
 			text::close_layout_box(layout, box);
 		}
 		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
-	} else {
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation, false);
 	}
 }
 void tf_x_owned_province_scope_nation(TRIGGER_DISPLAY_PARAMS) {
-	if(ws.user_settings.spoilers) {
+	{
 		auto box = text::open_layout_box(layout, indentation);
 		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, every_any_code_to_fixed_ui(tval[0])));
@@ -359,12 +357,10 @@ void tf_x_owned_province_scope_nation(TRIGGER_DISPLAY_PARAMS) {
 			text::close_layout_box(layout, box);
 		}
 		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
-	} else {
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation, false);
 	}
 }
 void tf_x_core_scope_province(TRIGGER_DISPLAY_PARAMS) {
-	if(ws.user_settings.spoilers) {
+	{
 		auto box = text::open_layout_box(layout, indentation);
 		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, every_any_code_to_fixed_ui(tval[0])));
@@ -381,8 +377,6 @@ void tf_x_core_scope_province(TRIGGER_DISPLAY_PARAMS) {
 			text::close_layout_box(layout, box);
 		}
 		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation + indentation_amount, false);
-	} else {
-		display_subtriggers(tval, ws, layout, -1, this_slot, from_slot, indentation, false);
 	}
 }
 void tf_x_core_scope_nation(TRIGGER_DISPLAY_PARAMS) {

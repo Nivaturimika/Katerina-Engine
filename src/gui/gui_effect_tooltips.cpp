@@ -708,12 +708,16 @@ uint32_t es_x_owned_scope_nation(EFFECT_DISPLAY_PARAMS) {
 
 			if(rlist.size() != 0) {
 				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
-				auto box = text::open_layout_box(layout, indentation);
-				text::add_to_layout_box(ws, layout, box, rlist[r]);
-				text::close_layout_box(layout, box);
-				show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				auto i_amount = 0;
+				if(ws.user_settings.spoilers) {
+					i_amount = indentation_amount;
+					auto box = text::open_layout_box(layout, indentation);
+					text::add_to_layout_box(ws, layout, box, rlist[r]);
+					text::close_layout_box(layout, box);
+					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
-											 indentation + indentation_amount);
+					indentation + i_amount);
 			}
 			return 0;
 		}
@@ -762,15 +766,16 @@ uint32_t es_x_owned_scope_state(EFFECT_DISPLAY_PARAMS) {
 
 			if(rlist.size() != 0) {
 				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
-
-				auto box = text::open_layout_box(layout, indentation);
-				text::add_to_layout_box(ws, layout, box, rlist[r]);
-				text::close_layout_box(layout, box);
+				auto i_amount = 0;
 				if(ws.user_settings.spoilers) {
+					i_amount = indentation_amount;
+					auto box = text::open_layout_box(layout, indentation);
+					text::add_to_layout_box(ws, layout, box, rlist[r]);
+					text::close_layout_box(layout, box);
 					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
 				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
-					indentation + indentation_amount);
+					indentation + i_amount);
 			}
 			return 0;
 		}
@@ -816,13 +821,16 @@ uint32_t es_x_core_scope(EFFECT_DISPLAY_PARAMS) {
 
 			if(rlist.size() != 0) {
 				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
-
-				auto box = text::open_layout_box(layout, indentation);
-				text::add_to_layout_box(ws, layout, box, rlist[r]);
-				text::close_layout_box(layout, box);
-				show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				auto i_amount = 0;
+				if(ws.user_settings.spoilers) {
+					i_amount = indentation_amount;
+					auto box = text::open_layout_box(layout, indentation);
+					text::add_to_layout_box(ws, layout, box, rlist[r]);
+					text::close_layout_box(layout, box);
+					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
-											 indentation + indentation_amount);
+					indentation + i_amount);
 			}
 			return 0;
 		}
