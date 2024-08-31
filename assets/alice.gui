@@ -3788,10 +3788,114 @@ guiTypes = {
 	}
 	guiButtonType = {
 		name = "alice_move_capital"
-		position = { 180 3 }
-		quadTextureSprite = "GFX_move_capital"
 		extends = "province_view_header"
+		position = { x= 180 y = 3 }
+		quadTextureSprite = "GFX_move_capital"	
 	}
+    
+    
+    
+    guiButtonType = {
+        name = "alice_exit_battleplanner"
+        position = { 800 50 }
+        quadTextureSprite ="GFX_frontend_button_236"
+        buttonText = "alice_exit_battleplanner"
+        buttonFont = "vic_22_black"
+    }
+    guiButtonType = {
+        name = "alice_armygroup_add_selected_units"
+        position = { 800 100 }
+        quadTextureSprite ="GFX_frontend_button_236"
+        buttonText = "alice_exit_battleplanner_selection"
+        buttonFont = "vic_22_black"
+    }
+    guiButtonType = {
+        name = "alice_armygroup_exit_units_selection"
+        position = { 800 50 }
+        quadTextureSprite ="GFX_frontend_button_236"
+        buttonText = "alice_exit_battleplanner_selection"
+        buttonFont = "vic_22_black"
+    }
+    guiButtonType = {
+        name = "alice_exit_deselection"
+        position = { 800 50 }
+        quadTextureSprite ="GFX_frontend_button_236"
+        buttonText = "alice_exit_battleplanner_deselection"
+        buttonFont = "vic_22_black"
+    }
+    
+    windowType = {
+		name = "alice_armygroup_order_panel"
+		position = { 500 950 }
+		size = { 600 100 }
+		moveable = 0
+		Orientation = "UPPER_LEFT"
+        
+        guiButtonType = {
+            name = "alice_armygroup_defend_button"
+            position = { 0 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_defend_order"
+            buttonFont = "vic_22_black"
+        }
+        
+        
+        
+        guiButtonType = {
+            name = "alice_armygroup_naval_travel_origin_button"
+            position = { 250 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_travel_origin_order"
+            buttonFont = "vic_22_black"
+        }
+        
+        guiButtonType = {
+            name = "alice_armygroup_new_button"
+            position = { 250 75 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_new_army_group"
+            buttonFont = "vic_22_black"
+        }
+        
+        guiButtonType = {
+            name = "alice_armygroup_naval_travel_destination_button"
+            position = { 500 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_travel_destination_order"
+            buttonFont = "vic_22_black"
+        }
+        
+        guiButtonType = {
+            name = "alice_armygroup_go_to_selection"
+            position = { 960 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_armygroup_go_to_selection"
+            buttonFont = "vic_22_black"
+        }
+	}
+    
+    windowType = {
+        name = "alice_armygroup_selection_control_panel"
+		position = { 500 950 }
+		size = { 600 100 }
+		moveable = 0
+		Orientation = "UPPER_LEFT"
+        
+        guiButtonType = {
+            name = "alice_battleplanner_add_selected"
+            position = { 250 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_add_selected"
+            buttonFont = "vic_22_black"
+        }
+        guiButtonType = {
+            name = "alice_battleplanner_remove_selected"
+            position = { 500 0 }
+            quadTextureSprite = "GFX_frontend_button_236"
+            buttonText = "alice_battleplanner_remove_selected"
+            buttonFont = "vic_22_black"
+        }
+    }
 
 	guiButtonType = {
 		name = "sort_by_focus"
