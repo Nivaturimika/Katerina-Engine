@@ -366,6 +366,8 @@ void display_data::create_meshes() {
 	create_drag_box_vbo(vbo_array[vo_drag_box]);
 	glBindVertexArray(vao_array[vo_selection]);
 	create_textured_quad_vbo(vbo_array[vo_selection]);
+	glBindVertexArray(vao_array[vo_capital]);
+	create_textured_quad_vbo(vbo_array[vo_capital]);
 	glBindVertexArray(0);
 }
 
@@ -1162,6 +1164,15 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)selection_vertices.size());
 		}
 
+		if(shaders[uint8_t(map_view_mode)][shader_selection] && !capital_vertices.empty() && zoom > map::zoom_very_close) { //only render if close enough
+			load_shader(shader_selection);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textures[texture_capital]);
+			glBindVertexArray(vao_array[vo_capital]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_capital]);
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei)capital_vertices.size());
+		}
+
 		if(shaders[uint8_t(map_view_mode)][shader_drag_box] && !drag_box_vertices.empty()) {
 			glUseProgram(shaders[uint8_t(map_view_mode)][shader_drag_box]);
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_drag_box][uniform_gamma], state.user_settings.gamma);
@@ -1632,7 +1643,7 @@ void display_data::set_drag_box(bool draw_box, glm::vec2 pos1, glm::vec2 pos2, g
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void make_selection_quad(sys::state& state, glm::vec2 p) {
+void make_selection_quad(sys::state& state, std::vector<map::textured_screen_vertex>& buffer, glm::vec2 p) {
 	glm::vec2 map_size(float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y));
 	glm::vec2 size = glm::vec2(4.f, 4.f);
 	auto p1 = (p - size) / map_size;
@@ -1641,16 +1652,16 @@ void make_selection_quad(sys::state& state, glm::vec2 p) {
 	// | /
 	// |/
 	// 2
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p1.y), glm::vec2(1.f, 0.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
+	buffer.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
+	buffer.emplace_back(glm::vec2(p2.x, p1.y), glm::vec2(1.f, 0.f));
+	buffer.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
 	//    3
 	//   /|
 	//  / |
 	// 2--1
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p2.y), glm::vec2(0.f, 1.f));
-	state.map_state.map_data.selection_vertices.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
+	buffer.emplace_back(glm::vec2(p2.x, p2.y), glm::vec2(1.f, 1.f));
+	buffer.emplace_back(glm::vec2(p1.x, p2.y), glm::vec2(0.f, 1.f));
+	buffer.emplace_back(glm::vec2(p1.x, p1.y), glm::vec2(0.f, 0.f));
 }
 
 void add_arrow_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 prev_normal_dir, glm::vec2 next_normal_dir, float fill_progress, bool end_arrow, float size_x, float size_y) {
@@ -2891,7 +2902,10 @@ void display_data::load_map(sys::state& state) {
 	ogl::set_gltex_parameters(textures[texture_other_objective_unit_arrow], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
 	textures[texture_hover_border] = load_dds_texture(assets_dir, NATIVE("hover_border.dds"));
-	ogl::set_gltex_parameters(textures[texture_imp_border], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+	ogl::set_gltex_parameters(textures[texture_hover_border], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+
+	textures[texture_capital] = load_dds_texture(map_items_dir, NATIVE("building_capital.dds"));
+	ogl::set_gltex_parameters(textures[texture_capital], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
 	// Get the province_color handle
 	// province_color is an array of 2 textures, one for province and the other for stripes
