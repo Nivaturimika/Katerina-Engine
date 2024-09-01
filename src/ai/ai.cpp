@@ -4273,6 +4273,8 @@ void distribute_guards(sys::state& state, dcon::nation_id n) {
 					float nearest_distance = 1.0f;
 					for(uint32_t k = uint32_t(guards_list.size()); k-- > 0;) {
 						auto guard_loc = state.world.army_get_location_from_army_location(guards_list[k]);
+						if(military::relative_attrition_amount(state, guards_list[k], p) >= 2.f)
+							continue; //too heavy
 
 						/*
 						// this wont work because a unit could end up in, for example, a subject's region at the end of a war
@@ -4286,9 +4288,7 @@ void distribute_guards(sys::state& state, dcon::nation_id n) {
 							continue;
 						*/
 
-						if(auto d = province::sorting_distance(state, guard_loc, p);
-							!nearest || d < nearest_distance) {
-
+						if(auto d = province::sorting_distance(state, guard_loc, p); !nearest || d < nearest_distance) {
 							nearest_index = k;
 							nearest_distance = d;
 							nearest = guards_list[k];
