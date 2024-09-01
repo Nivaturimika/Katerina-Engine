@@ -875,9 +875,9 @@ public:
 		} else if(name == "close_button") {
 			return make_element_by_type<generic_close_button>(state, id);
 		} else if(name == "administration") {
-			return make_element_by_type<simple_body_text>(state, id);
+			return make_element_by_type<simple_text_element_base>(state, id);
 		} else if(name == "current_research") {
-			return make_element_by_type<simple_body_text>(state, id);
+			return make_element_by_type<simple_text_element_base>(state, id);
 		} else if(name == "administration_type") {
 			return make_element_by_type<national_tech_school>(state, id);
 		} else if(name == "research_progress") {
