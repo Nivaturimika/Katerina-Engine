@@ -506,7 +506,7 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 	for(auto pops_by_location : context.outer_context.state.world.province_get_pop_location(context.id)) {
 		auto pop_id = pops_by_location.get_pop();
 		if(pop_id.get_culture() == final_cul_id && pop_id.get_poptype() == ptype && pop_id.get_religion() == final_rel_id) {
-			pop_id.get_size() += float(def.size) / 2.f;
+			pop_id.get_size() = float(def.size);
 			pop_id.set_militancy(final_militancy);
 			return; // done with this pop
 		}
@@ -515,7 +515,7 @@ void pop_province_list::any_group(std::string_view type, pop_history_definition 
 	auto new_pop = fatten(context.outer_context.state.world, context.outer_context.state.world.create_pop());
 	new_pop.set_culture(final_cul_id);
 	new_pop.set_religion(final_rel_id);
-	new_pop.set_size(float(def.size) / 2.f);
+	new_pop.set_size(float(def.size));
 	new_pop.set_poptype(ptype);
 	new_pop.set_militancy(final_militancy);
 	// new_pop.set_rebel_group(def.reb_id);
