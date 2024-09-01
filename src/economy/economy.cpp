@@ -12,10 +12,10 @@
 
 namespace economy {
 
-constexpr float poor_tax_factor = 1.4f;
-constexpr float mid_tax_factor = 0.5f;
-constexpr float rich_tax_factor = 0.07f;
-constexpr float pop_payout_factor = 0.0000038f;
+constexpr float poor_tax_factor = 0.5f;
+constexpr float mid_tax_factor = 0.35f;
+constexpr float rich_tax_factor = 0.1f;
+constexpr float pop_payout_factor = 0.00005f;
 
 enum class economy_reason {
 	pop, factory, rgo, artisan, construction, nation, stockpile, overseas_penalty
@@ -512,7 +512,8 @@ void initialize(sys::state& state) {
 				pop_amount += state.world.province_get_demographics(p, demographics::to_key(state, pt));
 			}
 		}
-		fp.set_rgo_size(std::max(0.001f, 0.75f * pop_amount));
+		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
+		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / 40000.f) / 2.f) + std::ceil(pop_amount / 40000.f)) * 40000.f));
 	});
 
 	state.world.for_each_nation([&](dcon::nation_id n) {
@@ -935,7 +936,12 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	*/
 	auto sz = rgo_effective_size(state, n, p, c);
 	auto ef = rgo_efficiency(state, n, p, c);
-	return sz * ef * 0.00001f;
+
+	auto tp = rgo_total_employment(state, n, p) / rgo_max_employment(state, n, p, c);
+	if(!std::isfinite(tp) || std::isnan(tp)) {
+		tp = 0.0f;
+	}
+	return tp * sz * ef * 0.00005f;
 }
 
 float factory_min_input_available(
@@ -1862,7 +1868,7 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * total_pop * consumption_factor;
 
 			float life_needs_fraction = (total_budget >= ln_cost ? 0.f : total_budget / ln_cost);
-			total_budget -= ln_cost;
+			total_budget -= std::min(total_budget,ln_cost);
 
 			//eliminate potential negative number before investment
 			total_budget = std::max(total_budget, 0.f);
@@ -1879,10 +1885,10 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			}
 
 			float everyday_needs_fraction = (total_budget >= en_cost ? 0.f : std::max(0.0f, total_budget / en_cost));
-			total_budget -= en_cost;
+			total_budget -= std::min(total_budget, en_cost);;
 
 			float luxury_needs_fraction = (total_budget >= xn_cost ? 0.f : std::max(0.0f, total_budget / xn_cost));
-			total_budget -= xn_cost;
+			total_budget -= std::min(total_budget, xn_cost);;
 
 			// induce demand across all categories
 			// maybe we need some kind of banking and ability to save up money for future instead of spending them all...
@@ -2661,25 +2667,22 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
 					if(strata == culture::pop_strata::poor) {
-						total_poor_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * poor_effect;
+						total_poor_tax_base += pop_money * poor_tax_factor;
+						pop_money -= pop_money * tax_eff * poor_effect * poor_tax_factor;
 					} else if(strata == culture::pop_strata::middle) {
-						total_mid_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * middle_effect;
+						total_mid_tax_base += pop_money * mid_tax_factor;
+						pop_money -= pop_money * tax_eff * middle_effect * mid_tax_factor;
 					} else if(strata == culture::pop_strata::rich) {
-						total_rich_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * rich_effect;
+						total_rich_tax_base += pop_money * rich_tax_factor;
+						pop_money -= pop_money * tax_eff * rich_effect * rich_tax_factor;
 					}
 				}
 			}
 		}
-		state.world.nation_set_total_rich_income(n, total_rich_tax_base * admin_efficiency * rich_tax_factor);
-		state.world.nation_set_total_middle_income(n, total_mid_tax_base * admin_efficiency * mid_tax_factor);
-		state.world.nation_set_total_poor_income(n, total_poor_tax_base * admin_efficiency * poor_tax_factor);
-		auto collected_tax = tax_eff * admin_efficiency * (
-			total_rich_tax_base * rich_effect * rich_tax_factor +
-			total_mid_tax_base * middle_effect * mid_tax_factor +
-			total_poor_tax_base * poor_effect * poor_tax_factor);
+		state.world.nation_set_total_rich_income(n, total_rich_tax_base);
+		state.world.nation_set_total_middle_income(n, total_mid_tax_base);
+		state.world.nation_set_total_poor_income(n, total_poor_tax_base);
+		auto collected_tax = tax_eff * (total_rich_tax_base * rich_effect + total_mid_tax_base * middle_effect + total_poor_tax_base * poor_effect);
 		assert(std::isfinite(collected_tax) && collected_tax >= 0.f);
 		state.world.nation_get_stockpiles(n, economy::money) += collected_tax;
 		{
