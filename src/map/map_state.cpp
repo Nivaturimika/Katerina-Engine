@@ -98,9 +98,8 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 	map_data.other_objective_unit_arrow_starts.clear();
 
 	map_data.selection_vertices.clear();
-
 	for(auto selected_army : state.selected_armies) {
-		map::make_selection_quad(state, state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army)));
+		map::make_selection_quad(state, map_data.selection_vertices, state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army)));
 		if(auto ps = state.world.army_get_path(selected_army); ps.size() > 0) {
 			auto dest_controller = state.world.province_get_nation_from_province_control(ps[0]);
 			if(state.world.army_get_black_flag(selected_army) || state.world.army_get_is_retreating(selected_army)) {
@@ -136,9 +135,9 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 	for(auto selected_navy : state.selected_navies) {
 		auto prov = state.world.navy_get_location_from_navy_location(selected_navy);
 		if(is_sea_province(state, prov)) {
-			map::make_selection_quad(state, state.world.province_get_mid_point(prov));
+			map::make_selection_quad(state, map_data.selection_vertices, state.world.province_get_mid_point(prov));
 		} else {
-			map::make_selection_quad(state, get_port_location(state, prov));
+			map::make_selection_quad(state, map_data.selection_vertices, get_port_location(state, prov));
 		}
 		if(state.world.navy_get_is_retreating(selected_navy)) {
 			auto old_size = map_data.retreat_unit_arrow_vertices.size();
@@ -182,6 +181,18 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 		glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_selection]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_screen_vertex) * map_data.selection_vertices.size(), map_data.selection_vertices.data(), GL_STATIC_DRAW);
 	}
+
+	map_data.capital_vertices.clear();
+	for(const auto n : state.world.in_nation) {
+		if(n.get_owned_province_count() > 0) {
+			map::make_selection_quad(state, map_data.capital_vertices, n.get_capital().get_mid_point());
+		}
+	}
+	if(!map_data.capital_vertices.empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_capital]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_screen_vertex) * map_data.capital_vertices.size(), map_data.capital_vertices.data(), GL_STATIC_DRAW);
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

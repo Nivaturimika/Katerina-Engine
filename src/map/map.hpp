@@ -213,6 +213,8 @@ public:
 	std::vector<text_line_vertex> province_text_line_vertices;
 	std::vector<screen_vertex> drag_box_vertices;
 	std::vector<textured_screen_vertex> selection_vertices;
+	std::vector<textured_screen_vertex> capital_vertices;
+	//
 	std::vector<uint8_t> terrain_id_map;
 	std::vector<uint8_t> median_terrain_type;
 	std::vector<uint32_t> province_area;
@@ -244,7 +246,8 @@ public:
 	static constexpr uint32_t vo_other_objective_unit_arrow = 14;
 	static constexpr uint32_t vo_selection = 15;
 	static constexpr uint32_t vo_land_globe = 16;
-	static constexpr uint32_t vo_count = 17;
+	static constexpr uint32_t vo_capital = 17;
+	static constexpr uint32_t vo_count = 18;
 	GLuint vao_array[vo_count] = { 0 };
 	GLuint vbo_array[vo_count] = { 0 };
 	// Textures
@@ -275,7 +278,8 @@ public:
 	static constexpr uint32_t texture_hover_border = 24;
 	static constexpr uint32_t texture_shoreline = 25;
 	static constexpr uint32_t texture_selection = 26;
-	static constexpr uint32_t texture_count = 27;
+	static constexpr uint32_t texture_capital = 27;
+	static constexpr uint32_t texture_count = 28;
 	GLuint textures[texture_count] = { 0 };
 	// Texture Array
 	static constexpr uint32_t texture_array_terrainsheet = 0;
@@ -396,7 +400,7 @@ void load_river_crossings(parsers::scenario_building_context& context, std::vect
 
 void make_navy_path(sys::state& state, std::vector<map::curved_line_vertex>& buffer, dcon::navy_id selected_navy, float size_x, float size_y);
 void make_army_path(sys::state& state, std::vector<map::curved_line_vertex>& buffer, dcon::army_id selected_army, float size_x, float size_y);
-void make_selection_quad(sys::state& state, glm::vec2 p);
+void make_selection_quad(sys::state& state, std::vector<map::textured_screen_vertex>& buffer, glm::vec2 p);
 glm::vec2 put_in_local(glm::vec2 new_point, glm::vec2 base_point, float size_x);
 void add_bezier_to_buffer(std::vector<map::curved_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 start_per, glm::vec2 end_per, float progress, bool last_curve, float size_x, float size_y, uint32_t num_b_segments);
 void add_tl_bezier_to_buffer(std::vector<map::textured_line_vertex>& buffer, glm::vec2 start, glm::vec2 end, glm::vec2 start_per, glm::vec2 end_per, float progress, bool last_curve, float size_x, float size_y, uint32_t num_b_segments, float& distance);
