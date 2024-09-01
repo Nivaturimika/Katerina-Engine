@@ -692,7 +692,7 @@
 	LUA_DEFINES_LIST_ELEMENT(alice_eval_ai_mil_everyday, 0.0) \
 	LUA_DEFINES_LIST_ELEMENT(ke_needs_scaling_factor, 125000.0) \
 	LUA_DEFINES_LIST_ELEMENT(ke_pop_payout_factor, 0.0000036) \
-	LUA_DEFINES_LIST_ELEMENT(ke_pop_consumption_factor, 0.000005) \
+	LUA_DEFINES_LIST_ELEMENT(ke_pop_consumption_factor, 0.0000001) \
 	LUA_DEFINES_LIST_ELEMENT(ke_profitability_factor, 0.04)
 
 // scales the needs values so that they are needs per this many pops

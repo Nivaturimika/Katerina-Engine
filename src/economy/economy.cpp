@@ -2667,14 +2667,14 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
 					if(strata == culture::pop_strata::poor) {
-						total_poor_tax_base += pop_money * poor_tax_factor;
-						pop_money -= pop_money * tax_eff * poor_effect * poor_tax_factor;
+						total_poor_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * poor_effect;
 					} else if(strata == culture::pop_strata::middle) {
-						total_mid_tax_base += pop_money * mid_tax_factor;
-						pop_money -= pop_money * tax_eff * middle_effect * mid_tax_factor;
+						total_mid_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * middle_effect;
 					} else if(strata == culture::pop_strata::rich) {
-						total_rich_tax_base += pop_money * rich_tax_factor;
-						pop_money -= pop_money * tax_eff * rich_effect * rich_tax_factor;
+						total_rich_tax_base += pop_money;
+						pop_money -= pop_money * tax_eff * rich_effect;
 					}
 				}
 			}
