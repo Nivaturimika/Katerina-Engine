@@ -4672,10 +4672,10 @@ float estimate_balanced_composition_factor(sys::state& state, dcon::army_id a) {
 float estimate_army_defensive_strength(sys::state& state, dcon::army_id a) {
 	float scale = state.world.army_get_controller_from_army_control(a) ? 1.f : 0.5f;
 	// account general
+	auto n = state.world.army_get_controller_from_army_control(a);
+	if(!n)
+		n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
 	if(auto gen = state.world.army_get_general_from_army_leadership(a); gen) {
-		auto n = state.world.army_get_controller_from_army_control(a);
-		if(!n)
-			n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
 		auto back = state.world.leader_get_background(gen);
 		auto pers = state.world.leader_get_personality(gen);
 		float morale = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::org_regain)
@@ -4687,25 +4687,26 @@ float estimate_army_defensive_strength(sys::state& state, dcon::army_id a) {
 		float def = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_defense_modifier)
 			+ state.world.leader_trait_get_defense(back)
 			+ state.world.leader_trait_get_defense(pers) + 1.0f;
-		scale *= def * morale * org;
+		scale += def * morale * org;
 	}
 	// terrain defensive bonus
 	float terrain_bonus = state.world.province_get_modifier_values(state.world.army_get_location_from_army_location(a), sys::provincial_mod_offsets::defense);
 	scale += terrain_bonus;
 	float defender_fort = 1.0f + 0.1f * state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), economy::province_building_type::fort);
 	scale += defender_fort;
+	scale += state.world.nation_get_has_gas_defense(n) ? 10.f : 0.f;
 	// composition bonus
 	float strength = estimate_balanced_composition_factor(state, a);
-	return std::max(0.1f, strength * scale);
+	return std::max(0.1f, std::max(0.75f, strength) * scale);
 }
 
 float estimate_army_offensive_strength(sys::state& state, dcon::army_id a) {
 	float scale = state.world.army_get_controller_from_army_control(a) ? 1.f : 0.5f;
 	// account general
+	auto n = state.world.army_get_controller_from_army_control(a);
+	if(!n)
+		n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
 	if(auto gen = state.world.army_get_general_from_army_leadership(a); gen) {
-		auto n = state.world.army_get_controller_from_army_control(a);
-		if(!n)
-			n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
 		auto back = state.world.leader_get_background(gen);
 		auto pers = state.world.leader_get_personality(gen);
 		float morale = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::org_regain)
@@ -4717,11 +4718,12 @@ float estimate_army_offensive_strength(sys::state& state, dcon::army_id a) {
 		float atk = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attack_modifier)
 			+ state.world.leader_trait_get_attack(back)
 			+ state.world.leader_trait_get_attack(pers) + 1.0f;
-		scale *= atk * morale * org;
+		scale += atk * morale * org;
 	}
 	// composition bonus
+	scale += state.world.nation_get_has_gas_attack(n) ? 10.f : 0.f;
 	float strength = estimate_balanced_composition_factor(state, a);
-	return std::max(0.1f, strength * scale);
+	return std::max(0.1f, std::max(0.75f, strength) * scale);
 }
 
 float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by) {
@@ -4749,7 +4751,7 @@ float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target
 			}
 		}
 	}
-	return 0.75f * state.defines.alice_ai_offensive_strength_overestimate * strength_total;
+	return 0.55f * state.defines.alice_ai_offensive_strength_overestimate * strength_total;
 }
 
 void assign_targets(sys::state& state, dcon::nation_id n) {
