@@ -3367,6 +3367,8 @@ void execute_move_army(sys::state& state, dcon::nation_id source, dcon::army_id 
 				}
 			}
 		}
+		//update leaders
+		military::update_battle_leaders(state, battle);
 	}
 }
 
@@ -3470,6 +3472,8 @@ void execute_move_navy(sys::state& state, dcon::nation_id source, dcon::navy_id 
 				}
 			}
 		}
+		//update leaders
+		military::update_battle_leaders(state, battle);
 	}
 }
 

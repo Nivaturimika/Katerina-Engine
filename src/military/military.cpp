@@ -4260,8 +4260,7 @@ bool retreat(sys::state& state, dcon::army_id n) {
 }
 
 dcon::nation_id get_naval_battle_lead_attacker(sys::state& state, dcon::naval_battle_id b) {
-	auto by_admiral =
-			state.world.leader_get_nation_from_leader_loyalty(state.world.naval_battle_get_admiral_from_attacking_admiral(b));
+	auto by_admiral = state.world.leader_get_nation_from_leader_loyalty(state.world.naval_battle_get_admiral_from_attacking_admiral(b));
 	if(by_admiral)
 		return by_admiral;
 
@@ -4280,8 +4279,7 @@ dcon::nation_id get_naval_battle_lead_attacker(sys::state& state, dcon::naval_ba
 }
 
 dcon::nation_id get_naval_battle_lead_defender(sys::state& state, dcon::naval_battle_id b) {
-	auto by_admiral =
-			state.world.leader_get_nation_from_leader_loyalty(state.world.naval_battle_get_admiral_from_defending_admiral(b));
+	auto by_admiral = state.world.leader_get_nation_from_leader_loyalty(state.world.naval_battle_get_admiral_from_defending_admiral(b));
 	if(by_admiral)
 		return by_admiral;
 
@@ -4300,8 +4298,7 @@ dcon::nation_id get_naval_battle_lead_defender(sys::state& state, dcon::naval_ba
 }
 
 dcon::nation_id get_land_battle_lead_attacker(sys::state& state, dcon::land_battle_id b) {
-	auto by_general =
-			state.world.leader_get_nation_from_leader_loyalty(state.world.land_battle_get_general_from_attacking_general(b));
+	auto by_general = state.world.leader_get_nation_from_leader_loyalty(state.world.land_battle_get_general_from_attacking_general(b));
 	if(by_general)
 		return by_general;
 
@@ -4331,8 +4328,7 @@ dcon::nation_id get_land_battle_lead_attacker(sys::state& state, dcon::land_batt
 }
 
 dcon::nation_id get_land_battle_lead_defender(sys::state& state, dcon::land_battle_id b) {
-	auto by_general =
-			state.world.leader_get_nation_from_leader_loyalty(state.world.land_battle_get_general_from_defending_general(b));
+	auto by_general = state.world.leader_get_nation_from_leader_loyalty(state.world.land_battle_get_general_from_defending_general(b));
 	if(by_general)
 		return by_general;
 
@@ -4359,6 +4355,82 @@ dcon::nation_id get_land_battle_lead_defender(sys::state& state, dcon::land_batt
 	}
 
 	return dcon::nation_id{};
+}
+
+float get_leader_select_score(sys::state& state, dcon::leader_id l) {
+	/*
+	- Each side has a leader that is in charge of the combat, which is the leader with the greatest
+	value as determined by the following formula: (organization x 5 + attack + defend + morale +
+	speed + attrition + experience / 2 + reconnaissance / 5  + reliability / 5) x (prestige + 1)
+	*/
+	auto per = state.world.leader_get_personality(l);
+	auto bak = state.world.leader_get_background(l);
+	//
+	auto org = state.world.leader_trait_get_organisation(per) + state.world.leader_trait_get_organisation(bak);
+	auto atk = state.world.leader_trait_get_attack(per) + state.world.leader_trait_get_attack(bak);
+	auto def = state.world.leader_trait_get_defense(per) + state.world.leader_trait_get_defense(bak);
+	auto spd = state.world.leader_trait_get_speed(per) + state.world.leader_trait_get_speed(bak);
+	auto mor = state.world.leader_trait_get_morale(per) + state.world.leader_trait_get_morale(bak);
+	auto att = 0.f;
+	auto rel = state.world.leader_trait_get_reliability(per) + state.world.leader_trait_get_reliability(bak);
+	auto exp = state.world.leader_trait_get_experience(per) + state.world.leader_trait_get_experience(bak);
+	auto rec = state.world.leader_trait_get_reconnaissance(per) + state.world.leader_trait_get_reconnaissance(bak);
+	auto lp = state.world.leader_get_prestige(l);
+	return (org * 5.f + atk + def + mor + spd + att + exp / 2.f + rec / 5.f + rel / 5.f) * (lp + 1.f);
+}
+void update_battle_leaders(sys::state& state, dcon::land_battle_id b) {
+	auto la = get_land_battle_lead_attacker(state, b);
+	dcon::leader_id a_lid;
+	float a_score = 0.f;
+	auto ld = get_land_battle_lead_defender(state, b);
+	dcon::leader_id d_lid;
+	float d_score = 0.f;
+	for(const auto a : state.world.land_battle_get_army_battle_participation(b)) {
+		auto l = a.get_army().get_general_from_army_leadership();
+		auto score = get_leader_select_score(state, l);
+		if(a.get_army().get_controller_from_army_control() == la) {
+			if(score > a_score) {
+				a_lid = l;
+				a_score = score;
+			}
+		} else if(a.get_army().get_controller_from_army_control() == ld) {
+			if(score > d_score) {
+				d_lid = l;
+				d_score = score;
+			}
+		}
+	}
+	auto aa = state.world.land_battle_get_attacking_general(b);
+	state.world.attacking_general_set_general(aa, a_lid);
+	auto ab = state.world.land_battle_get_defending_general(b);
+	state.world.defending_general_set_general(ab, d_lid);
+}
+void update_battle_leaders(sys::state& state, dcon::naval_battle_id b) {
+	auto la = get_naval_battle_lead_attacker(state, b);
+	dcon::leader_id a_lid;
+	float a_score = 0.f;
+	auto ld = get_naval_battle_lead_defender(state, b);
+	dcon::leader_id d_lid;
+	float d_score = 0.f;
+	for(const auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
+		auto l = a.get_navy().get_admiral_from_navy_leadership();
+		auto score = get_leader_select_score(state, l);
+		if(a.get_navy().get_controller_from_navy_control() == la) {
+			if(score > a_score) {
+				a_lid = l;
+				a_score = score;
+			}
+		} else if(a.get_navy().get_controller_from_navy_control() == ld) {
+			if(score > d_score) {
+				d_lid = l;
+				d_score = score;
+			}
+		}
+	}
+	auto aa = state.world.naval_battle_get_attacking_admiral(b);
+	state.world.attacking_admiral_set_admiral(aa, a_lid);
+	auto ab = state.world.naval_battle_get_defending_admiral(b);
+	state.world.defending_admiral_set_admiral(ab, d_lid);
 }
 
 void cleanup_army(sys::state& state, dcon::army_id n) {
