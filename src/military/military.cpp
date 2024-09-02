@@ -5348,9 +5348,7 @@ void update_land_battles(sys::state& state) {
 					* (state.world.regiment_get_experience(att_back[i]) * 0.1f + 1.f);
 
 				// gain experience
-				auto atk_leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
-				auto def_leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
-				auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
+				auto leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
 				adjust_experience_gain(state, att_back[i], str_damage * leader_exp_mod);
 
 				auto& cstr = state.world.regiment_get_strength(def_front[i]);
@@ -5397,9 +5395,7 @@ void update_land_battles(sys::state& state) {
 					* (state.world.regiment_get_experience(def_back[i]) * 0.1f + 1.f);
 
 				// gain experience
-				auto atk_leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
-				auto def_leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
-				auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
+				auto leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
 				adjust_experience_gain(state, def_back[i], str_damage * leader_exp_mod);
 
 				auto& cstr = state.world.regiment_get_strength(att_front[i]);
@@ -5459,9 +5455,7 @@ void update_land_battles(sys::state& state) {
 						* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
 
 					// gain experience
-					auto atk_leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
-					auto def_leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
-					auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
+					auto leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
 					adjust_experience_gain(state, att_front[i], str_damage * leader_exp_mod);
 
 					auto& cstr = state.world.regiment_get_strength(att_front_target);
@@ -5523,9 +5517,7 @@ void update_land_battles(sys::state& state) {
 						* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
 
 					// gain experience
-					auto atk_leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
-					auto def_leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
-					auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
+					auto leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
 					adjust_experience_gain(state, def_front[i], str_damage * leader_exp_mod);
 
 					auto& cstr = state.world.regiment_get_strength(def_front_target);
