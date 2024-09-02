@@ -3898,6 +3898,7 @@ void state::single_game_tick() {
 		case 1:
 			nations::update_monthly_points(*this);
 			economy::prune_factories(*this);
+			ai::take_ai_decisions(*this);
 			break;
 		case 2:
 			province::update_blockaded_cache(*this);
