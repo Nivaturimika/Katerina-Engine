@@ -3553,10 +3553,24 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 			a.set_arrival_time(current_date + 1);
 		}
 	}
-	for(auto shp : world.in_ship) {
+
+	dcon::unit_type_id first_ship_type;
+	for(dcon::unit_type_id::value_base_t i = 0; i < military_definitions.unit_base_definitions.size(); i++) {
+		auto const utid = dcon::unit_type_id(i);
+		auto const& ut = military_definitions.unit_base_definitions[utid];
+		if(!ut.is_land && ut.active) {
+			first_ship_type = utid;
+			break;
+		}
+	}
+	for(auto const shp : world.in_ship) {
 		assert(shp.get_navy_from_navy_membership());
+		if(!shp.get_type()) {
+			shp.set_type(first_ship_type);
+		}
 		assert(shp.get_type());
 	}
+
 	std::vector<dcon::ship_id> sin_battle;
 	for(auto b : world.in_naval_battle) {
 		for(auto slot : b.get_slots()) {
