@@ -492,9 +492,9 @@ void initialize(sys::state& state) {
 	state.world.for_each_pop([&](dcon::pop_id p) {
 		auto fp = fatten(state.world, p);
 		fp.set_life_needs_satisfaction(1.0f);
-		fp.set_everyday_needs_satisfaction(0.1f);
-		fp.set_luxury_needs_satisfaction(0.0f);
-		fp.set_savings(savings_buffer.get(fp.get_poptype()) * fp.get_size() / state.defines.ke_needs_scaling_factor);
+		fp.set_everyday_needs_satisfaction(1.0f);
+		fp.set_luxury_needs_satisfaction(1.0f);
+		fp.set_savings(fp.get_size() / state.defines.ke_needs_scaling_factor);
 	});
 
 	state.world.for_each_factory([&](dcon::factory_id f) {
@@ -2645,7 +2645,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 	/* add up production, collect taxes and tariffs, other updates purely internal to each nation */
 	concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
 		auto n = dcon::nation_id{ dcon::nation_id::value_base_t(i) };
-
 		if(state.world.nation_get_owned_province_count(n) == 0)
 			return;
 
@@ -2666,6 +2665,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					// Money drain when admin effectiveness is <100%
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
+					pop_money = std::clamp(pop_money, 0.f, 2000.f);
 					if(strata == culture::pop_strata::poor) {
 						total_poor_tax_base += pop_money;
 						pop_money -= pop_money * tax_eff * poor_effect;
@@ -2676,12 +2676,23 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 						total_rich_tax_base += pop_money;
 						pop_money -= pop_money * tax_eff * rich_effect;
 					}
+					
 				}
 			}
 		}
+		float max_change_in_tax = 2000.f;
+		auto previous_rich_tax = state.world.nation_get_total_rich_income(n);
+		total_rich_tax_base = std::clamp(total_rich_tax_base, 0.0f, previous_rich_tax + max_change_in_tax);
 		state.world.nation_set_total_rich_income(n, total_rich_tax_base);
+
+		auto previous_mid_tax = state.world.nation_get_total_middle_income(n);
+		total_mid_tax_base = std::clamp(total_mid_tax_base, 0.0f, previous_mid_tax + max_change_in_tax);
 		state.world.nation_set_total_middle_income(n, total_mid_tax_base);
+
+		auto previous_poor_tax = state.world.nation_get_total_poor_income(n);
+		total_poor_tax_base = std::clamp(total_poor_tax_base, 0.0f, previous_poor_tax + max_change_in_tax);
 		state.world.nation_set_total_poor_income(n, total_poor_tax_base);
+
 		auto collected_tax = tax_eff * (total_rich_tax_base * rich_effect + total_mid_tax_base * middle_effect + total_poor_tax_base * poor_effect);
 		assert(std::isfinite(collected_tax) && collected_tax >= 0.f);
 		state.world.nation_get_stockpiles(n, economy::money) += collected_tax;
