@@ -565,42 +565,17 @@ public:
 	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 		auto lbattle = retrieve<dcon::land_battle_id>(state, parent);
 		if(lbattle) {
-			if(auto leader = IsAttacker
-				? state.world.land_battle_get_general_from_attacking_general(lbattle)
-				: state.world.land_battle_get_general_from_defending_general(lbattle); leader) {
-				auto const controller = state.world.leader_get_nation_from_leader_loyalty(leader);
-				if(!controller)
-					return state.national_definitions.rebel_id;
-				return state.world.nation_get_identity_from_identity_holder(controller);
-			}
-			auto w = state.world.land_battle_get_war_from_land_battle_in_war(lbattle);
-			auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
-			for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
-				auto const controller = a.get_army().get_army_control().get_controller();
-				auto const role = military::get_role(state, w, controller);
-				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))
-				|| (!w && IsAttacker == bool(controller))) {
-					return state.world.nation_get_identity_from_identity_holder(controller);
-				}
-			}
-		} else {
-			auto nbattle = retrieve<dcon::naval_battle_id>(state, parent);
-			if(auto leader = IsAttacker
-				? state.world.naval_battle_get_admiral_from_attacking_admiral(nbattle)
-				: state.world.naval_battle_get_admiral_from_defending_admiral(nbattle); leader) {
-				return state.world.nation_get_identity_from_identity_holder(state.world.leader_get_nation_from_leader_loyalty(leader));
-			}
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(nbattle);
-			auto is_attacker = state.world.naval_battle_get_war_attacker_is_attacker(nbattle);
-			for(const auto a : state.world.naval_battle_get_navy_battle_participation(nbattle)) {
-				auto const controller = a.get_navy().get_navy_control().get_controller();
-				auto const role = military::get_role(state, w, controller);
-				if((role == military::war_role::attacker && (is_attacker == IsAttacker))
-				|| (role == military::war_role::defender && !(is_attacker == IsAttacker))) {
-					return state.world.nation_get_identity_from_identity_holder(controller);
-				}
-			}
+			dcon::nation_id n = IsAttacker
+				? military::get_land_battle_lead_attacker(state, lbattle)
+				: military::get_land_battle_lead_defender(state, lbattle);
+			return state.world.nation_get_identity_from_identity_holder(n);
+		}
+		auto nbattle = retrieve<dcon::naval_battle_id>(state, parent);
+		if(nbattle) {
+			dcon::nation_id n = IsAttacker
+				? military::get_naval_battle_lead_attacker(state, nbattle)
+				: military::get_naval_battle_lead_defender(state, nbattle);
+			return state.world.nation_get_identity_from_identity_holder(n);
 		}
 		return state.national_definitions.rebel_id;
 	}
