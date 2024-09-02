@@ -1227,6 +1227,7 @@ void update_single_factory_production(sys::state& state, dcon::factory_id f, dco
 				* state.defines.alice_factory_per_level_employment / state.defines.ke_needs_scaling_factor;
 			if(money_made < min_wages) {
 				auto diff = min_wages - money_made;
+				assert(diff > 0.0f);
 				if(state.world.nation_get_stockpiles(n, economy::money) > diff || can_take_loans(state, n)) {
 					state.world.factory_set_full_profit(f, min_wages);
 					state.world.nation_get_stockpiles(n, economy::money) -= diff;
