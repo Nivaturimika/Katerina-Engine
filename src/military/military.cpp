@@ -4371,7 +4371,7 @@ float get_leader_select_score(sys::state& state, dcon::leader_id l) {
 	auto def = state.world.leader_trait_get_defense(per) + state.world.leader_trait_get_defense(bak);
 	auto spd = state.world.leader_trait_get_speed(per) + state.world.leader_trait_get_speed(bak);
 	auto mor = state.world.leader_trait_get_morale(per) + state.world.leader_trait_get_morale(bak);
-	auto att = 0.f;
+	auto att = state.world.leader_trait_get_experience(per) + state.world.leader_trait_get_experience(bak);
 	auto rel = state.world.leader_trait_get_reliability(per) + state.world.leader_trait_get_reliability(bak);
 	auto exp = state.world.leader_trait_get_experience(per) + state.world.leader_trait_get_experience(bak);
 	auto rec = state.world.leader_trait_get_reconnaissance(per) + state.world.leader_trait_get_reconnaissance(bak);
@@ -5857,20 +5857,21 @@ void update_naval_battles(sys::state& state) {
 
 				/*
 				Torpedo attack: is treated as 0 except against big ships
-				Damage to organization is (gun-power + torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x target-strength x
-				define:NAVAL_COMBAT_DAMAGE_ORG_MULT / (target-max-hull x target-experience x 0.1 + 1) Damage to strength is (gun-power +
+				- Damage to organization is (gun-power + torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x target-strength x
+				define:NAVAL_COMBAT_DAMAGE_ORG_MULT / (target-max-hull x target-experience x 0.1 + 1)
+				- Damage to strength is (gun-power +
 				torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x attacker-strength x define:NAVAL_COMBAT_DAMAGE_STR_MULT x
 				define:NAVAL_COMBAT_DAMAGE_MULT_NO_ORG (if target has no org) / (target-max-hull x target-experience x 0.1 + 1)
 				*/
 
+				float str_damage_org_mult = state.defines.naval_combat_damage_str_mult * (state.world.ship_get_org(slots[j].ship) == 0.f ? state.defines.naval_combat_damage_mult_no_org : 0.f);
 				float org_damage = org_dam_mul * (ship_stats.attack_or_gun_power + (target_is_big ? ship_stats.siege_or_torpedo_attack : 0.0f)) *
-													 (is_attacker ? attacker_mod : defender_mod) * state.defines.naval_combat_damage_org_mult /
-													 ((ship_target_stats.defence_or_hull + 1.0f) * (is_attacker ? defender_org_bonus : attacker_org_bonus) *
-															 (1.0f + state.world.nation_get_modifier_values(ship_target_owner,
-																					 sys::national_mod_offsets::naval_organisation)));
+					(is_attacker ? attacker_mod : defender_mod) * state.defines.naval_combat_damage_org_mult /
+					((ship_target_stats.defence_or_hull * state.world.ship_get_experience(slots[j].ship) * 0.1f + 1.0f) * (is_attacker ? defender_org_bonus : attacker_org_bonus)
+					* (1.0f + state.world.nation_get_modifier_values(ship_target_owner, sys::national_mod_offsets::naval_organisation)));
 				float str_damage = str_dam_mul * (ship_stats.attack_or_gun_power + (target_is_big ? ship_stats.siege_or_torpedo_attack : 0.0f)) *
-													 (is_attacker ? attacker_mod : defender_mod) * state.defines.naval_combat_damage_str_mult /
-													 (ship_target_stats.defence_or_hull + 1.0f);
+					(is_attacker ? attacker_mod : defender_mod) * str_damage_org_mult /
+					(ship_target_stats.defence_or_hull * state.world.ship_get_experience(slots[j].ship) * 0.1f + 1.0f);
 
 				auto& torg = state.world.ship_get_org(tship);
 				torg = std::max(0.0f, torg - org_damage);
