@@ -743,10 +743,12 @@ public:
 
 	void on_update(sys::state& state) noexcept override {
 		populated = false;
-		for(const auto p : state.world.nation_get_mobilization_schedule(state.local_player_nation)) {
-			if(p.where == prov) {
-				populated = true;
-				break;
+		if(state.map_state.active_map_mode == map_mode::mode::recruitment) {
+			for(const auto p : state.world.nation_get_mobilization_schedule(state.local_player_nation)) {
+				if(p.where == prov) {
+					populated = true;
+					break;
+				}
 			}
 		}
 	}
