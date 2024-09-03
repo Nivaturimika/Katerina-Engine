@@ -1853,6 +1853,7 @@ bool leader_is_in_combat(sys::state& state, dcon::leader_id l) {
 dcon::leader_id make_new_leader(sys::state& state, dcon::nation_id n, bool is_general) {
 	auto l = fatten(state.world, state.world.create_leader());
 	l.set_is_admiral(!is_general);
+	l.set_auto_assign(true);
 
 	uint32_t seed_base = (uint32_t(n.index()) << 6) ^ uint32_t(l.id.index());
 

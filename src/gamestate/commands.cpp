@@ -131,6 +131,7 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(notify_pause_game, no_data) \
 	GS_COMMAND_LIST_ENTRY(toggle_auto_create_generals, no_data) \
 	GS_COMMAND_LIST_ENTRY(toggle_auto_assign_leaders, no_data) \
+	GS_COMMAND_LIST_ENTRY(toggle_auto_assign_single_leader, leader) \
 
 uint32_t get_size(command_type t) {
 	//return sizeof(command::payload);
@@ -4310,6 +4311,18 @@ void execute_toggle_auto_assign_leaders(sys::state& state, dcon::nation_id sourc
 	state.world.nation_set_auto_assign_leaders(source, !state.world.nation_get_auto_assign_leaders(source));
 }
 
+void toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id l) {
+	payload p;
+	memset(&p, 0, sizeof(payload));
+	p.type = command_type::toggle_auto_assign_single_leader;
+	p.source = source;
+	p.data.leader.l = l;
+	add_to_command_queue(state, p);
+}
+void execute_toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id) {
+	state.world.leader_set_auto_assign(source, !state.world.leader_get_auto_assign(source));
+}
+
 void enable_debt(sys::state& state, dcon::nation_id source) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
@@ -5027,6 +5040,8 @@ bool can_perform_command(sys::state& state, payload& c) {
 		return true;
 	case command_type::toggle_auto_assign_leaders:
 		return true;
+	case command_type::toggle_auto_assign_single_leader:
+		return true;
 	case command_type::give_military_access:
 		return can_give_military_access(state, c.source, c.data.diplo_action.target);
 
@@ -5426,6 +5441,9 @@ void execute_command(sys::state& state, payload& c) {
 		break;
 	case command_type::toggle_auto_assign_leaders:
 		execute_toggle_auto_assign_leaders(state, c.source);
+		break;
+	case command_type::toggle_auto_assign_single_leader:
+		execute_toggle_auto_assign_single_leader(state, c.source, c.data.leader.l);
 		break;
 	case command_type::give_military_access:
 		execute_give_military_access(state, c.source, c.data.diplo_action.target);

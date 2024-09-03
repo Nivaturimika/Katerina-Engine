@@ -2425,6 +2425,11 @@ object {
 		type{ bitfield }
 		tag{ save }
 	}
+	property{
+		name{ auto_assign }
+		type{ bitfield }
+		tag{ save }
+	}
 }
 
 relationship{

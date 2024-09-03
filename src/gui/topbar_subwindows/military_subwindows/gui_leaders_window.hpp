@@ -121,6 +121,18 @@ public:
 	}
 };
 
+class leader_auto_assign : public checkbox_button {
+public:
+	bool is_active(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		return state.world.leader_get_auto_assign(l);
+	}
+	void button_action(sys::state& state) noexcept override {
+		auto l = retrieve<dcon::leader_id>(state, parent);
+		command::toggle_auto_assign_single_leader(state, state.local_player_nation, l);
+	}
+};
+
 class military_leaders : public listbox_row_element_base<dcon::leader_id> {
 public:
 	ui::simple_text_element_base* leader_name = nullptr;
@@ -142,7 +154,7 @@ public:
 		} else if(name == "personality") {
 			return make_element_by_type<leader_personality_text>(state, id);
 		} else if(name == "use_leader") {
-			return make_element_by_type<invisible_element>(state, id);
+			return make_element_by_type<leader_auto_assign>(state, id);
 		} else if(name == "army") {
 			return make_element_by_type<leader_unit_name_text>(state, id);
 		} else if(name == "location") {

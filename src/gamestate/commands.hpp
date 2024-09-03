@@ -107,6 +107,7 @@ enum class command_type : uint8_t {
 	nbutton_script = 98,
 	toggle_auto_create_generals = 99,
 	toggle_auto_assign_leaders = 100,
+	toggle_auto_assign_single_leader = 101,
 
 	// network
 	notify_player_ban = 106,
@@ -158,6 +159,10 @@ enum class command_type : uint8_t {
 	c_always_allow_decisions = 159,
 	c_always_potential_decisions = 160,
 	c_add_year = 161,
+};
+
+struct leader_data {
+	dcon::leader_id l;
 };
 
 struct pbutton_data {
@@ -494,6 +499,7 @@ struct payload {
 	uint8_t padding = 0;
 	dcon::nation_id source; //2
 	union dtype {
+		leader_data leader;
 		national_focus_data nat_focus;
 		start_research_data start_research;
 		make_leader_data make_leader;
@@ -837,6 +843,7 @@ bool can_invite_to_crisis(sys::state& state, dcon::nation_id source, dcon::natio
 void toggle_mobilization(sys::state& state, dcon::nation_id source);
 void toggle_auto_create_generals(sys::state& state, dcon::nation_id source);
 void toggle_auto_assign_leaders(sys::state& state, dcon::nation_id source);
+void toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id l);
 
 void enable_debt(sys::state& state, dcon::nation_id source);
 
