@@ -4319,8 +4319,8 @@ void toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source,
 	p.data.leader.l = l;
 	add_to_command_queue(state, p);
 }
-void execute_toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id) {
-	state.world.leader_set_auto_assign(source, !state.world.leader_get_auto_assign(source));
+void execute_toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id l) {
+	state.world.leader_set_auto_assign(l, !state.world.leader_get_auto_assign(l));
 }
 
 void enable_debt(sys::state& state, dcon::nation_id source) {
