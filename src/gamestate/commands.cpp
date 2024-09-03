@@ -4731,10 +4731,10 @@ void execute_notify_start_game(sys::state& state, dcon::nation_id source) {
 	for(const auto n : state.world.in_nation) {
 		if(state.world.nation_get_is_player_controlled(n)) {
 			ai::remove_ai_data(state, n);
-		} else {
-			ai::take_ai_decisions(state);
 		}
 	}
+	ai::take_ai_decisions(state);
+
 	game_scene::switch_scene(state, game_scene::scene_id::in_game_basic);
 	state.map_state.set_selected_province(dcon::province_id{});
 	state.map_state.unhandled_province_selection = true;
