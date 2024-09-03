@@ -1668,6 +1668,11 @@ void make_selection_quad(sys::state& state, std::vector<map::textured_screen_ver
 	glm::vec2 size = glm::vec2(4.f, 4.f);
 	auto p1 = (p - size) / map_size;
 	auto p2 = (p + size) / map_size;
+	assert(p1.x < 1.f || p1.y < 1.f);
+	p1.x = std::max(0.f, p1.x);
+	p1.y = std::max(0.f, p1.x);
+	p2.x = std::min(1.f, p2.x);
+	p2.y = std::min(1.f, p2.y);
 	// 1--3
 	// | /
 	// |/
