@@ -1702,8 +1702,18 @@ void update_influence(sys::state& state) {
 						? std::max(1.0f - (rel.get_influence_target().get_industrial_score() + rel.get_influence_target().get_military_score() + prestige_score(state, rel.get_influence_target())) / gp_score,  0.0f)
 						: 0.0f;
 
+					float culture_factor = state.world.nation_get_primary_culture(grn.nation) == state.world.nation_get_primary_culture(n) ? 1.25f : 0.75f;
+
+					auto cgp = state.world.nation_get_primary_culture(grn.nation);
+					auto cn = state.world.nation_get_primary_culture(n);
+
+					auto ggp = state.world.culture_get_group_from_culture_group_membership(cgp);
+					auto gn = state.world.culture_get_group_from_culture_group_membership(cn);
+
+					culture_factor = ggp == gn ? std::max(1.0f, culture_factor) : culture_factor;
+
 					float total_multiplier = 1.0f + discredit_factor + neighbor_factor + sphere_neighbor_factor + continent_factor + puppet_factor + relationship_factor + investment_factor + pop_factor + score_factor;
-					auto gain_amount = base_shares * total_multiplier;
+					auto gain_amount = base_shares * total_multiplier * culture_factor;
 
 					/*
 					Any influence that accumulates beyond the max (define:MAX_INFLUENCE) will be subtracted from the influence of
