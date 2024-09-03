@@ -3585,6 +3585,13 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 		}
 	}
 
+	if(local_player_nation) {
+		for(uint32_t i = 0; i < 32; i++) {
+			player_data_cache.treasury_record[i] = nations::get_treasury(*this, local_player_nation);
+			player_data_cache.population_record[i] = world.nation_get_demographics(local_player_nation, demographics::total);
+		}
+	}
+
 	game_state_updated.store(true, std::memory_order::release);
 }
 
