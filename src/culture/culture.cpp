@@ -159,6 +159,7 @@ void repopulate_technology_effects(sys::state& state) {
 			});
 		}
 		for(auto cmod : tech_id.get_rgo_size()) {
+			rgo_goods_output
 			state.world.execute_serial_over_nation([&](auto nation_indices) {
 				auto has_tech_mask = state.world.nation_get_active_technologies(nation_indices, t_id);
 				auto old_value = state.world.nation_get_rgo_size(nation_indices, cmod.type);
