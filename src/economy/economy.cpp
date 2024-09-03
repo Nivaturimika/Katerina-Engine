@@ -923,7 +923,8 @@ float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, 
 	bool is_mine = state.world.commodity_get_is_mine(c);
 	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff);
 	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_eff : sys::provincial_mod_offsets::farm_rgo_eff);
-	return std::max(0.f, 1.f + nmod + pmod);
+	auto specific_pmod = state.world.nation_get_rgo_goods_output(n, c);
+	return std::max(0.f, 1.f + nmod + pmod + specific_pmod);
 }
 
 float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
