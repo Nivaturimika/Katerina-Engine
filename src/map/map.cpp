@@ -442,16 +442,36 @@ void display_data::load_shaders(simple_fs::directory& root) {
 	auto model3d_fshader = try_load_shader(shaders_dir, NATIVE("model3d_f.glsl"));
 
 	for(uint32_t j = 0; j < uint8_t(sys::projection_mode::num_of_modes); j++) {
-		shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j);
-		shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j);
-		shaders[j][shader_textured_line] = create_program(*tline_vshader, *tline_fshader, j);
-		shaders[j][shader_railroad_line] = create_program(*tline_vshader, *tlineb_fshader, j);
-		shaders[j][shader_borders] = create_program(*tlineb_vshader, *tlineb_fshader, j);
-		shaders[j][shader_line_unit_arrow] = create_program(*line_unit_arrow_vshader, *line_unit_arrow_fshader, j);
-		shaders[j][shader_text_line] = create_program(*text_line_vshader, *text_line_fshader, j);
-		shaders[j][shader_drag_box] = create_program(*screen_vshader, *white_color_fshader, j);
-		shaders[j][shader_selection] = create_program(*selection_vshader, *selection_fshader, j);
-		shaders[j][shader_map_standing_object] = create_program(*model3d_vshader, *model3d_fshader, j);
+		if(map_vshader && map_far_fshader) {
+			shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j);
+		}
+		if(map_vshader && map_close_fshader) {
+			shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j);
+		}
+		if(tline_vshader && tlineb_fshader) {
+			shaders[j][shader_textured_line] = create_program(*tline_vshader, *tline_fshader, j);
+		}
+		if(tline_vshader && tlineb_fshader) {
+			shaders[j][shader_railroad_line] = create_program(*tline_vshader, *tlineb_fshader, j);
+		}
+		if(tlineb_vshader && tlineb_fshader) {
+			shaders[j][shader_borders] = create_program(*tlineb_vshader, *tlineb_fshader, j);
+		}
+		if(line_unit_arrow_vshader && line_unit_arrow_fshader) {
+			shaders[j][shader_line_unit_arrow] = create_program(*line_unit_arrow_vshader, *line_unit_arrow_fshader, j);
+		}
+		if(text_line_vshader && text_line_fshader) {
+			shaders[j][shader_text_line] = create_program(*text_line_vshader, *text_line_fshader, j);
+		}
+		if(screen_vshader && white_color_fshader) {
+			shaders[j][shader_drag_box] = create_program(*screen_vshader, *white_color_fshader, j);
+		}
+		if(selection_vshader && selection_fshader) {
+			shaders[j][shader_selection] = create_program(*selection_vshader, *selection_fshader, j);
+		}
+		if(model3d_vshader && model3d_fshader) {
+			shaders[j][shader_map_standing_object] = create_program(*model3d_vshader, *model3d_fshader, j);
+		}
 		for(uint32_t i = 0; i < shader_count; i++) {
 			if(shaders[j][i] == 0)
 				continue;
