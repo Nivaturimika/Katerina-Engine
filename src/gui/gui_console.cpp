@@ -1703,7 +1703,7 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 				has_us = true;
 				break;
 			}
-		log_to_console(state, parent, has_us ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !has_us ? "@(T)" : "@(F)");
 		command::c_instant_research(state, state.local_player_nation);
 		break;
 	}
