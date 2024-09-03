@@ -3952,7 +3952,7 @@ object {
 		tag{ save }
 	}
 	property {
-		name{ auto_create_generals }
+		name{ auto_create_admirals }
 		type{ bitfield }
 		tag{ save }
 	}

@@ -376,7 +376,7 @@ public:
 class military_auto_assign_text : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
-		if(state.world.nation_get_auto_create_generals(state.local_player_nation)) {
+		if(!state.world.nation_get_auto_create_admirals(state.local_player_nation)) {
 			set_text(state, text::produce_simple_string(state, "military_autocreate_2"));
 		} else {
 			set_text(state, text::produce_simple_string(state, "military_autocreate"));
@@ -386,7 +386,7 @@ public:
 class military_auto_create_button : public checkbox_button {
 public:
 	bool is_active(sys::state& state) noexcept override {
-		return state.world.nation_get_auto_create_generals(state.local_player_nation);
+		return !state.world.nation_get_auto_create_admirals(state.local_player_nation);
 	}
 	void button_action(sys::state& state) noexcept override {
 		command::toggle_auto_create_generals(state, state.local_player_nation);

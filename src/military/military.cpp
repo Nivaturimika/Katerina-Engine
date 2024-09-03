@@ -1986,22 +1986,22 @@ void monthly_leaders_update(sys::state& state) {
 			// automatically make new leader
 			auto new_l = [&]() {
 				if(n.get_is_player_controlled()) { //player specified...
-					return make_new_leader(state, n, n.get_auto_create_generals());
+					return make_new_leader(state, n, !n.get_auto_create_admirals());
 				}
 				auto existing_leaders = count_leaders(state, n);
 				auto army_count = count_armies(state, n);
 				auto navy_count = count_navies(state, n);
 				if(existing_leaders.generals < army_count) {
 					return make_new_leader(state, n, true);
-				} else { //if(existing_leaders.admirals < navy_count) {
+				} else if(existing_leaders.admirals < navy_count) {
 					return make_new_leader(state, n, false);
-				}/* else {
+				} else {
 					auto too_many_generals =
 						(existing_leaders.admirals > 0 && navy_count > 0)
 						? float(existing_leaders.generals) / float(existing_leaders.admirals) > float(army_count) / float(navy_count)
 						: false;
 					return make_new_leader(state, n, !too_many_generals);
-				}*/
+				}
 			}();
 			if(state.world.leader_get_is_admiral(new_l)) {
 				for(auto v : state.world.nation_get_navy_control(n)) {

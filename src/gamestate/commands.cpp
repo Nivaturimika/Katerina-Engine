@@ -4296,7 +4296,7 @@ void toggle_auto_create_generals(sys::state& state, dcon::nation_id source) {
 }
 
 void execute_toggle_auto_create_generals(sys::state& state, dcon::nation_id source) {
-	state.world.nation_set_auto_create_generals(source, !state.world.nation_get_auto_create_generals(source));
+	state.world.nation_set_auto_create_admirals(source, !state.world.nation_get_auto_create_admirals(source));
 }
 
 void toggle_auto_assign_leaders(sys::state& state, dcon::nation_id source) {
