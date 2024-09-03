@@ -1958,7 +1958,8 @@ void monthly_leaders_update(sys::state& state) {
 		if(n.get_is_player_controlled() && n.get_auto_assign_leaders()) {
 			for(auto l : n.get_leader_loyalty()) {
 				if(!l.get_leader().get_army_from_army_leadership()
-				&& !l.get_leader().get_navy_from_navy_leadership()) {
+				&& !l.get_leader().get_navy_from_navy_leadership()
+				&& l.get_leader().get_auto_assign()) {
 					if(l.get_leader().get_is_admiral()) {
 						for(auto nc : n.get_navy_control()) {
 							if(!nc.get_navy().get_admiral_from_navy_leadership()
