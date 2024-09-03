@@ -524,7 +524,7 @@ static std::string_view he_localised_strings[uint8_t(string_index::count)] = {
 static std::string_view hu_localised_strings[uint8_t(string_index::count)] = {
 	"Forgatókönyv létrehozása",
 	"Forgatókönyv újbóli létrehozása",
-	"Dolgozó...",
+	"Töltődik...",
 	"Hozzon létre egy új forgatókönyvet",
 	"a kiválasztott modokhoz",
 	"Nem található forgatókönyv",
@@ -533,9 +533,9 @@ static std::string_view hu_localised_strings[uint8_t(string_index::count)] = {
 	"Becenév",
 	"Egyjátékos",
 	"Többjátékos",
-	"Játék kezdése",
+	"Játék indítása",
 	"Házigazda",
-	"Csatlakozik",
+	"Belépés",
 	"Mod lista"
 };
 //dutch
