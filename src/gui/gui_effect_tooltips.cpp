@@ -776,6 +776,12 @@ uint32_t es_x_owned_scope_state(EFFECT_DISPLAY_PARAMS) {
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
 					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+					/* So that SirRunner's random_owned + has_country_flag trick works properly! */
+					if((tval[0] & effect::scope_has_limit) != 0 && primary_slot != -1) {
+						auto limit = trigger::payload(tval[2]).tr_id;
+						if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot))
+							return 0;
+					}
 				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
 					indentation + i_amount);
