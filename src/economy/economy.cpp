@@ -3184,17 +3184,14 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 					if(pw_employed >= pw_num && pw_num > 0.0f)
 						continue; // no spare workers
-
-					int32_t num_factories = 0;
+					
 					float profit = 0.0f;
 					dcon::factory_id selected_factory;
-
 					// is there an upgrade target ?
 					auto d = state.world.state_instance_get_definition(s);
 					for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
 						if(p.get_province().get_nation_from_province_ownership() == n) {
 							for(auto f : p.get_province().get_factory_location()) {
-								++num_factories;
 								if((nation_rules & issue_rule::pop_expand_factory) != 0
 									&& f.get_factory().get_production_scale() >= 0.9985f
 									&& f.get_factory().get_primary_employment() >= 0.9985f
@@ -3237,7 +3234,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 						continue;
 					}
 
-					if((num_factories < int32_t(state.defines.factories_per_state)) && (nation_rules & issue_rule::pop_build_factory) != 0) {
+					if((economy::state_factory_count(state, s) < int32_t(state.defines.factories_per_state)) && (nation_rules & issue_rule::pop_build_factory) != 0) {
 						// randomly try a valid (check coastal, unlocked, non existing) factory
 						if(!desired_types.empty()) {
 							auto selected = desired_types[rng::get_random(state, uint32_t((n.id.index() << 6) ^ s.index())) % desired_types.size()];

@@ -1004,7 +1004,7 @@ void update_ai_econ_construction(sys::state& state) {
 			continue;
 
 		//if our army is too small, ignore buildings:
-		if(0.7 * n.get_recruitable_regiments() > n.get_active_regiments())
+		if(uint16_t(0.25f * n.get_recruitable_regiments()) > n.get_active_regiments())
 			continue;
 
 		auto treasury = n.get_stockpiles(economy::money);
