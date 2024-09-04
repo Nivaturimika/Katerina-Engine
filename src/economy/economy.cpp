@@ -3892,6 +3892,10 @@ void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dc
 		assert(false);
 		return;
 	}
+	
+	/* fail if adding new factory results in more than allowed factories! */
+	if(economy::state_factory_count(state, s) + 1 >= int32_t(state.defines.factories_per_state))
+		return;
 
 	auto state_cap = state.world.state_instance_get_capital(s);
 	auto new_fac = fatten(state.world, state.world.create_factory());
@@ -3899,8 +3903,6 @@ void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dc
 	new_fac.set_level(uint8_t(1));
 	new_fac.set_production_scale(1.0f);
 	state.world.try_create_factory_location(new_fac, state_cap);
-	//
-	assert(economy::state_factory_count(state, s) <= int32_t(state.defines.factories_per_state));
 }
 
 void resolve_constructions(sys::state& state) {
