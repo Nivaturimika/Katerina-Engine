@@ -2959,6 +2959,14 @@ void country_history_file::nonstate_consciousness(association_type, float value,
 	}
 }
 
+void country_history_file::oob(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
+	//if(!context.holder_id)
+	//	return;
+	if(!value.empty()) {
+		context.outer_context.map_of_oob_files_per_nation.insert_or_assign(context.nat_ident.index(), std::string(value));
+	}
+}
+
 void country_history_file::govt_flag(govt_flag_block const& value, error_handler& err, int32_t line,
 		country_history_context& context) {
 	context.outer_context.state.world.national_identity_set_government_flag_type(context.nat_ident, value.government_,

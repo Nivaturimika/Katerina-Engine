@@ -446,6 +446,7 @@ struct scenario_building_context {
 	std::vector<simple_fs::file> tech_and_invention_files;
 
 	std::vector<dcon::province_id> special_impassible;
+	ankerl::unordered_dense::map<int32_t, std::string> map_of_oob_files_per_nation;
 
 	dcon::text_key noimage;
 
@@ -2651,6 +2652,7 @@ struct country_history_file {
 			country_history_context& context);
 	void consciousness(association_type, float value, error_handler& err, int32_t line, country_history_context& context);
 	void nonstate_consciousness(association_type, float value, error_handler& err, int32_t line, country_history_context& context);
+	void oob(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 	void govt_flag(govt_flag_block const& value, error_handler& err, int32_t line, country_history_context& context);
 	void ruling_party(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 	void decision(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
