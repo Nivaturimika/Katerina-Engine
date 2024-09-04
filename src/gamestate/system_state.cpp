@@ -2704,36 +2704,6 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		}
 	}
 
-	// load oob
-	{
-		auto oob_dir = open_directory(history, NATIVE("units"));
-		for(auto oob_file_name : context.map_of_oob_files_per_nation) {
-			auto fname = simple_fs::utf8_to_native(oob_file_name.second);
-			assert(!fname.empty());
-			if(fname[0] == '/' || fname[0] == '\\')
-				fname.erase(0, 1);
-			fname = simple_fs::correct_slashes(fname);
-			auto oob_file = simple_fs::peek_file(oob_dir, fname);
-			if(oob_file) {
-				auto nat_id = dcon::national_identity_id(dcon::national_identity_id::value_base_t(oob_file_name.first));
-				auto holder = context.state.world.national_identity_get_nation_from_identity_holder(nat_id);
-				if(holder) {
-					parsers::oob_file_context new_context{ context, holder };
-					auto opened_file = simple_fs::open_file(*oob_file);
-					if(opened_file) {
-						err.file_name = simple_fs::native_to_utf8(fname);
-						auto content = view_contents(*opened_file);
-						parsers::token_generator gen(content.data, content.data + content.file_size);
-						parsers::parse_oob_file(gen, err, new_context);
-					}
-				} else {
-					err.accumulated_warnings += "dead tag '" + oob_file_name.second + "' encountered while scanning oob files\n";
-				}
-			} else {
-				err.accumulated_warnings += "dead file '" + oob_file_name.second + "' encountered while scanning oob files\n";
-			}
-		}
-	}
 	// parse diplomacy history
 	{
 		auto diplomacy_dir = open_directory(history, NATIVE("diplomacy"));
@@ -2796,6 +2766,36 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 				} else {
 					err.accumulated_warnings += "invalid tag " + utf8name.substr(0, 3) + " encountered while scanning country history files\n";
 				}
+			}
+		}
+	}
+	// load oob
+	{
+		auto oob_dir = open_directory(history, NATIVE("units"));
+		for(auto oob_file_name : context.map_of_oob_files_per_nation) {
+			auto fname = simple_fs::utf8_to_native(oob_file_name.second);
+			assert(!fname.empty());
+			if(fname[0] == '/' || fname[0] == '\\')
+				fname.erase(0, 1);
+			fname = simple_fs::correct_slashes(fname);
+			auto oob_file = simple_fs::peek_file(oob_dir, fname);
+			if(oob_file) {
+				auto nat_id = dcon::national_identity_id(dcon::national_identity_id::value_base_t(oob_file_name.first));
+				auto holder = context.state.world.national_identity_get_nation_from_identity_holder(nat_id);
+				if(holder) {
+					parsers::oob_file_context new_context{ context, holder };
+					auto opened_file = simple_fs::open_file(*oob_file);
+					if(opened_file) {
+						err.file_name = simple_fs::native_to_utf8(fname);
+						auto content = view_contents(*opened_file);
+						parsers::token_generator gen(content.data, content.data + content.file_size);
+						parsers::parse_oob_file(gen, err, new_context);
+					}
+				} else {
+					err.accumulated_warnings += "dead tag '" + oob_file_name.second + "' encountered while scanning oob files\n";
+				}
+			} else {
+				err.accumulated_warnings += "dead file '" + oob_file_name.second + "' encountered while scanning oob files\n";
 			}
 		}
 	}
