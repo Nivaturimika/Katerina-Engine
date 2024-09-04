@@ -607,8 +607,9 @@ void give_sphere_leader_production(sys::state& state, dcon::nation_id n) {
 }
 
 float effective_tariff_rate(sys::state& state, dcon::nation_id n) {
-	auto tariff_efficiency = nations::tariff_efficiency(state, n);
-	return tariff_efficiency * float(state.world.nation_get_tariffs(n)) / 100.0f;
+	auto t_total = nations::tariff_efficiency(state, n) * float(state.world.nation_get_tariffs(n)) / 100.0f;
+	//assert(t_total >= 0.f);
+	return t_total;
 }
 
 float global_market_price_multiplier(sys::state& state, dcon::nation_id n) {
@@ -2702,7 +2703,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			/* collect tariffs */
 			float t_total = effective_tariff_rate(state, n) * nation_total_imports(state, n);
 			assert(std::isfinite(t_total));
-			assert(t_total >= 0.f);
 			state.world.nation_get_stockpiles(n, economy::money) += t_total;
 		}
 
@@ -3859,7 +3859,6 @@ float unit_construction_progress(sys::state& state, dcon::province_naval_constru
 }
 
 void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t, bool is_upgrade) {
-
 	if(is_upgrade) {
 		auto d = state.world.state_instance_get_definition(s);
 		auto o = state.world.state_instance_get_nation_from_state_ownership(s);
@@ -3875,14 +3874,18 @@ void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dc
 				}
 			}
 		}
+		assert(false);
+		return;
 	}
+
 	auto state_cap = state.world.state_instance_get_capital(s);
 	auto new_fac = fatten(state.world, state.world.create_factory());
 	new_fac.set_building_type(t);
 	new_fac.set_level(uint8_t(1));
 	new_fac.set_production_scale(1.0f);
-
 	state.world.try_create_factory_location(new_fac, state_cap);
+	//
+	assert(economy::state_factory_count(state, s) <= int32_t(state.defines.factories_per_state));
 }
 
 void resolve_constructions(sys::state& state) {

@@ -364,8 +364,7 @@ void province_history_file::add_core(association_type, uint32_t value, error_han
 	}
 }
 
-void province_history_file::remove_core(association_type, uint32_t value, error_handler& err, int32_t line,
-		province_file_context& context) {
+void province_history_file::remove_core(association_type, uint32_t value, error_handler& err, int32_t line, province_file_context& context) {
 	if(auto it = context.outer_context.map_of_ident_names.find(value); it != context.outer_context.map_of_ident_names.end()) {
 		auto core = context.outer_context.state.world.get_core_by_prov_tag_key(context.id, it->second);
 		if(!core) {
@@ -378,15 +377,17 @@ void province_history_file::remove_core(association_type, uint32_t value, error_
 	}
 }
 
-void province_history_file::party_loyalty(pv_party_loyalty const& value, error_handler& err, int32_t line,
-		province_file_context& context) {
+void province_history_file::party_loyalty(pv_party_loyalty const& value, error_handler& err, int32_t line, province_file_context& context) {
 	if(value.id) {
 		context.outer_context.state.world.province_set_party_loyalty(context.id, value.id, float(value.loyalty_value) / 100.0f);
 	}
 }
 
-void province_history_file::state_building(pv_state_building const& value, error_handler& err, int32_t line,
-		province_file_context& context) {
+void province_history_file::state_building(pv_state_building const& value, error_handler& err, int32_t line, province_file_context& context) {
+	if(!value.level) {
+		err.accumulated_errors += "Level 0 state building (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		return;
+	}
 	if(value.id) {
 		auto new_fac = context.outer_context.state.world.create_factory();
 		context.outer_context.state.world.factory_set_building_type(new_fac, value.id);
@@ -395,13 +396,11 @@ void province_history_file::state_building(pv_state_building const& value, error
 	}
 }
 
-void province_history_file::is_slave(association_type, bool value, error_handler& err, int32_t line,
-		province_file_context& context) {
+void province_history_file::is_slave(association_type, bool value, error_handler& err, int32_t line, province_file_context& context) {
 	context.outer_context.state.world.province_set_is_slave(context.id, value);
 }
 
-void province_history_file::any_value(std::string_view name, association_type, uint32_t value, error_handler& err, int32_t line,
-			province_file_context& context) {
+void province_history_file::any_value(std::string_view name, association_type, uint32_t value, error_handler& err, int32_t line, province_file_context& context) {
 	for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
 		if(name == economy::province_building_type_get_name(t)) {
 			context.outer_context.state.world.province_set_building_level(context.id, t, uint8_t(value));
@@ -416,18 +415,16 @@ void province_rgo_ext_desc::max_employment(association_type, uint32_t value, err
 }
 
 void province_rgo_ext_desc::trade_good(association_type, std::string_view text, error_handler& err, int32_t line, province_file_context& context) {
-	if(auto it = context.outer_context.map_of_commodity_names.find(std::string(text));
-			it != context.outer_context.map_of_commodity_names.end()) {
+	if(auto it = context.outer_context.map_of_commodity_names.find(std::string(text)); it != context.outer_context.map_of_commodity_names.end()) {
 		trade_good_id = it->second;
 	} else {
-		err.accumulated_errors +=
-			std::string(text) + " is not a valid commodity name (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		err.accumulated_errors += std::string(text) + " is not a valid commodity name (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 }
 
 void province_rgo_ext_desc::finish(province_file_context& context) {
 	
-};
+}
 
 void province_rgo_ext::entry(province_rgo_ext_desc const& value, error_handler& err, int32_t line, province_file_context& context) {
 	if(value.trade_good_id) {
