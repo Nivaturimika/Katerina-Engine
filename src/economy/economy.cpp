@@ -3184,14 +3184,17 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 					if(pw_employed >= pw_num && pw_num > 0.0f)
 						continue; // no spare workers
-					
+
+					int32_t num_factories = 0;
 					float profit = 0.0f;
 					dcon::factory_id selected_factory;
 					// is there an upgrade target ?
 					auto d = state.world.state_instance_get_definition(s);
 					for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
 						if(p.get_province().get_nation_from_province_ownership() == n) {
-							for(auto f : p.get_province().get_factory_location()) {
+							auto fl_range = p.get_province().get_factory_location();
+							num_factories += int32_t(fl_range.end() - fl_range.begin());
+							for(auto f : fl_range) {
 								if((nation_rules & issue_rule::pop_expand_factory) != 0
 									&& f.get_factory().get_production_scale() >= 0.9985f
 									&& f.get_factory().get_primary_employment() >= 0.9985f
@@ -3230,11 +3233,10 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					if(existing_constructions.begin() != existing_constructions.end())
 						continue; // already building
 
-					if(n.get_private_investment() * 0.01f < total_cost + total_cost_added) {
+					if(n.get_private_investment() * 0.01f < total_cost + total_cost_added)
 						continue;
-					}
 
-					if((economy::state_factory_count(state, s) < int32_t(state.defines.factories_per_state)) && (nation_rules & issue_rule::pop_build_factory) != 0) {
+					if(num_factories < int32_t(state.defines.factories_per_state) && (nation_rules & issue_rule::pop_build_factory) != 0) {
 						// randomly try a valid (check coastal, unlocked, non existing) factory
 						if(!desired_types.empty()) {
 							auto selected = desired_types[rng::get_random(state, uint32_t((n.id.index() << 6) ^ s.index())) % desired_types.size()];
@@ -3264,6 +3266,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 							});
 
 							if(present_in_location)
+								continue;
+
+							if(economy::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
 								continue;
 
 							auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
@@ -3796,8 +3801,10 @@ int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid) {
 	int32_t num_factories = 0;
 	auto d = state.world.state_instance_get_definition(sid);
 	for(auto p : state.world.state_definition_get_abstract_state_membership(d))
-		if(p.get_province().get_nation_from_province_ownership() == n)
-			num_factories += int32_t(state.world.province_get_factory_location(p.get_province()).end() - state.world.province_get_factory_location(p.get_province()).begin());
+		if(p.get_province().get_nation_from_province_ownership() == n) {
+			auto fl_range = p.get_province().get_factory_location();
+			num_factories += int32_t(fl_range.end() - fl_range.begin());
+		}
 	for(auto p : state.world.state_instance_get_state_building_construction(sid))
 		if(p.get_is_upgrade() == false)
 			++num_factories;
