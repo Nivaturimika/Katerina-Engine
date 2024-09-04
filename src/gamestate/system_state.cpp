@@ -2712,7 +2712,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 			assert(!fname.empty());
 			if(fname[0] == '/' || fname[0] == '\\')
 				fname.erase(0, 1);
-			auto fname = simple_fs::correct_slashes(fname);
+			fname = simple_fs::correct_slashes(fname);
 			auto oob_file = simple_fs::peek_file(oob_dir, fname);
 			if(oob_file) {
 				auto nat_id = dcon::national_identity_id(dcon::national_identity_id::value_base_t(oob_file_name.first));
