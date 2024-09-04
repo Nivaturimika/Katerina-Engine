@@ -7,7 +7,7 @@
 namespace ui {
 
 inline std::string get_setting_text_key(int32_t type) {
-	static char const* key_str[] = {
+	static char const* key_str[uint32_t(sys::message_setting_type::count)] = {
 		"amsg_revolt",								  // revolt
 		"amsg_war_on_nation",						  // war_on_nation
 		"amsg_war_by_nation",						  // war_by_nation
@@ -273,7 +273,7 @@ protected:
 public:
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
-		for(uint32_t i = 0; i <= 102; ++i)
+		for(uint32_t i = 0; i <= 101; ++i)
 			row_contents.push_back(i);
 		update(state);
 	}
