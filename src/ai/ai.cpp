@@ -506,30 +506,31 @@ void update_influence_priorities(sys::state& state) {
 					weight += cweight;
 				}
 			}
+			// cause for Hanover to be contested by the world.
 			// focus on contested spheres a bit more!
-			for(auto gprl : state.world.nation_get_gp_relationship_as_influence_target(t.id)) {
-				auto clevel = (nations::influence::level_mask & gprl.get_status());
-				if(gprl.get_influence() >= 1.f && gprl.get_great_power() != n.nation) {
-					auto clevel_weight = 0.f;
-					switch(clevel) {
-					case nations::influence::level_hostile:
-					case nations::influence::level_opposed:
-					case nations::influence::level_neutral:
-						clevel_weight = 0.f;
-						break;
-					case nations::influence::level_cordial:
-						clevel_weight = 50.f;
-						break;
-					case nations::influence::level_friendly:
-						clevel_weight = 75.f;
-						break;
-					default:
-						clevel_weight = 1.f;
-						break;
-					}
-					weight += std::max(1.f, gprl.get_influence()) * clevel_weight;
-				}
-			}
+			//for(auto gprl : state.world.nation_get_gp_relationship_as_influence_target(t.id)) {
+			//	auto clevel = (nations::influence::level_mask & gprl.get_status());
+			//	if(gprl.get_influence() >= 1.f && gprl.get_great_power() != n.nation) {
+			//		auto clevel_weight = 0.f;
+			//		switch(clevel) {
+			//		case nations::influence::level_hostile:
+			//		case nations::influence::level_opposed:
+			//		case nations::influence::level_neutral:
+			//			clevel_weight = 0.f;
+			//			break;
+			//		case nations::influence::level_cordial:
+			//			clevel_weight = 50.f;
+			//			break;
+			//		case nations::influence::level_friendly:
+			//			clevel_weight = 75.f;
+			//			break;
+			//		default:
+			//			clevel_weight = 1.f;
+			//			break;
+			//		}
+			//		weight += std::max(1.f, gprl.get_influence()) * clevel_weight;
+			//	}
+			//}
 
 			//We probably don't want to fight a forever lasting sphere war, let's find some other uncontested nations
 			if(t.get_in_sphere_of()) {
