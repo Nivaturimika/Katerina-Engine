@@ -717,7 +717,7 @@ uint32_t es_x_owned_scope_nation(EFFECT_DISPLAY_PARAMS) {
 					if((tval[0] & effect::scope_has_limit) != 0 && primary_slot != -1) {
 						auto limit = trigger::payload(tval[2]).tr_id;
 						if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot))
-							return 1 + effect::get_effect_scope_payload_size(tval);
+							return 0;
 					}
 				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, indentation + i_amount);
