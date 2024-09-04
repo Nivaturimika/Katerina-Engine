@@ -2531,7 +2531,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			auto old_sat = state.world.nation_get_demand_satisfaction(n, c);
 			auto new_sat = rd > 0.0001f ? total_supply / rd : total_supply;
 			auto adj_sat = old_sat * state.defines.alice_sat_delay_factor + new_sat * (1.0f - state.defines.alice_sat_delay_factor);
-			state.world.nation_set_demand_satisfaction(n, c, std::min(1.0f, adj_sat));
+			state.world.nation_set_demand_satisfaction(n, c, std::max(0.0f, std::min(1.0f, adj_sat)));
 
 			if(global_price_multiplier >= 1.0f) { // prefer domestic
 				state.world.nation_set_domestic_market_pool(n, c, std::max(0.0f, dom_pool - rd));
@@ -2545,9 +2545,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					rd = std::max(rd - sp_pool, 0.0f);
 				}
 				state.world.commodity_set_global_market_pool(c, std::max(0.0f, wm_pool - rd));
-				state.world.nation_set_imports(n, c, std::min(wm_pool, rd));
+				state.world.nation_set_imports(n, c, std::max(0.0f, std::min(wm_pool, rd)));
 			} else {
-				state.world.nation_set_imports(n, c, std::min(wm_pool, rd));
+				state.world.nation_set_imports(n, c, std::max(0.0f, std::min(wm_pool, rd)));
 				state.world.commodity_set_global_market_pool(c, std::max(0.0f, wm_pool - rd));
 				rd = std::max(rd - wm_pool, 0.0f);
 				state.world.nation_set_domestic_market_pool(n, c, std::max(0.0f, dom_pool - rd));
