@@ -39,6 +39,8 @@ void regenerate_is_primary_or_accepted(sys::state& state) {
 } // namespace pop_demographics
 namespace demographics {
 
+inline constexpr float ideologies_change_rate = 0.10f;
+inline constexpr float issues_change_rate = 0.10f;
 inline constexpr float small_pop_size = 100.0f;
 
 dcon::demographics_key to_key(sys::state const& state, dcon::pop_type_id v) {
@@ -1060,7 +1062,6 @@ void update_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, i
 	For ideologies after their enable date (actual discovery / activation is irrelevant), and not restricted to civs only for pops
 	in an unciv, the attraction modifier is computed *multiplicatively*. Then, these values are collectively normalized.
 	*/
-
 	auto new_pop_count = state.world.pop_size();
 	ibuf.update(state, new_pop_count);
 
@@ -1074,33 +1075,23 @@ void update_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, i
 			if(state.world.ideology_get_is_civilized_only(i)) {
 				pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
 					auto owner = nations::owner_of_pop(state, ids);
-
-					auto amount = ve::apply(
-							[&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-								if(state.world.nation_get_is_civilized(o)) {
-									auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-									return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid),
-											trigger::to_generic(pid), 0) : 0.0f;
-								} else
-									return 0.0f;
-							},
-							ids, state.world.pop_get_poptype(ids), owner);
-
+					auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
+						if(state.world.nation_get_is_civilized(o)) {
+							auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
+							return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
+						}
+						return 0.0f;
+					}, ids, state.world.pop_get_poptype(ids), owner);
 					ibuf.temp_buffers[i].set(ids, amount);
 					ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
 				});
 			} else {
 				pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
 					auto owner = nations::owner_of_pop(state, ids);
-
-					auto amount = ve::apply(
-							[&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-								auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-								return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid),
-										trigger::to_generic(pid), 0) : 0.0f;
-							},
-							ids, state.world.pop_get_poptype(ids), owner);
-
+					auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
+						auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
+						return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
+					}, ids, state.world.pop_get_poptype(ids), owner);
 					ibuf.temp_buffers[i].set(ids, amount);
 					ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
 				});
@@ -1112,10 +1103,15 @@ void update_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, i
 void apply_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, ideology_buffer& pbuf) {
 
 	/*
-	If the normalized value is greater than twice the pop's current support for the ideology: add 0.25 to the pop's current
-	support for the ideology If the normalized value is greater than the pop's current support for the ideology: add 0.05 to the
-	pop's current support for the ideology If the normalized value is greater than half the pop's current support for the
-	ideology: do nothing Otherwise: subtract 0.25 from the pop's current support for the ideology (to a minimum of zero)
+	- For ideologies after their enable date (actual discovery / activation is irrelevant),
+	and not restricted to civs only for pops in an unciv, the attraction modifier is computed
+	*multiplicatively*. Then, these values are collectively normalized. If the normalized value
+	is greater than twice the pop's current support for the ideology: add 0.25 to the pop's current support for the ideology
+	- If the normalized value is greater than the pop's current support for the ideology: add 0.05 to the
+	pop's current support for the ideology
+	- If the normalized value is greater than half the pop's current support for the ideology: do nothing
+	- Otherwise: subtract 0.25 from the pop's current support for the ideology (to a minimum of zero)
+	- The ideological support of the pop is then normalized after the changes.
 	*/
 
 	state.world.for_each_ideology([&](dcon::ideology_id i) {
@@ -1126,15 +1122,11 @@ void apply_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, id
 				auto ttotal = pbuf.totals.get(ids);
 				auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
 				auto current = state.world.pop_get_demographics(ids, i_key);
-
-				state.world.pop_set_demographics(ids, i_key,
-					ve::select(ttotal > 0.0f, state.defines.alice_ideology_base_change_rate * avalue + (1.0f - state.defines.alice_ideology_base_change_rate) * current, current));
+				state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, ideologies_change_rate * avalue + (1.0f - ideologies_change_rate) * current, current));
 			});
 		}
 	});
 }
-
-inline constexpr float issues_change_rate = 0.10f;
 
 void update_issues(sys::state& state, uint32_t offset, uint32_t divisions, issues_buffer& ibuf) {
 	/*
@@ -1176,13 +1168,10 @@ void update_issues(sys::state& state, uint32_t offset, uint32_t divisions, issue
 
 			auto amount = owner_modifier * ve::select(allowed_by_owner,
 				ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-					 if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
+					 if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger)
 						 return trigger::evaluate_multiplicative_modifier(state, mtrigger,  trigger::to_generic(pid), trigger::to_generic(pid), 0);
-					 } else {
-						return 0.0f;
-					 }
-				 },  ids, state.world.pop_get_poptype(ids), owner),
-				0.0f);
+					 return 0.0f;
+				}, ids, state.world.pop_get_poptype(ids), owner), 0.0f);
 
 			ibuf.temp_buffers[iid].set(ids, amount);
 			ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
@@ -1208,13 +1197,8 @@ void apply_issues(sys::state& state, uint32_t offset, uint32_t divisions, issues
 			auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
 			auto current = state.world.pop_get_demographics(ids, i_key);
 			auto owner = nations::owner_of_pop(state, ids);
-			auto owner_rate_modifier =
-					(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f);
-
-			state.world.pop_set_demographics(ids, i_key,
-					ve::select(ttotal > 0.0f,
-							issues_change_rate * owner_rate_modifier * avalue + (1.0f - issues_change_rate * owner_rate_modifier) * current,
-							current));
+			auto owner_rate_modifier = (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f);
+			state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, issues_change_rate * owner_rate_modifier * avalue + (1.0f - issues_change_rate * owner_rate_modifier) * current, current));
 		});
 	});
 }

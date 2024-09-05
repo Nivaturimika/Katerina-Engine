@@ -44,9 +44,9 @@ void make_trait(std::string_view name, token_generator& gen, error_handler& err,
 	dcon::leader_trait_id new_id = context.state.world.create_leader_trait();
 	auto name_id = text::find_or_add_key(context.state, name, false);
 
-	if(name == "no_background") {
+	if(is_fixed_token_ci(name.data(), name.data() + name.length(), "no_background")) {
 		context.state.military_definitions.no_background = new_id;
-	} else if(name == "no_personality") {
+	} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "no_personality")) {
 		context.state.military_definitions.no_personality = new_id;
 	}
 
@@ -67,8 +67,7 @@ void background_traits_set(token_generator& gen, error_handler& err, scenario_bu
 
 void make_base_units(scenario_building_context& context) {
 	{
-		dcon::unit_type_id army_base_id =
-				dcon::unit_type_id(dcon::unit_type_id::value_base_t(context.state.military_definitions.unit_base_definitions.size()));
+		dcon::unit_type_id army_base_id = dcon::unit_type_id(dcon::unit_type_id::value_base_t(context.state.military_definitions.unit_base_definitions.size()));
 		context.state.military_definitions.unit_base_definitions.emplace_back();
 
 		auto name_id = text::find_or_add_key(context.state, "army_base", false);
@@ -79,8 +78,7 @@ void make_base_units(scenario_building_context& context) {
 		context.state.military_definitions.base_army_unit = army_base_id;
 	}
 	{
-		dcon::unit_type_id navy_base_id =
-				dcon::unit_type_id(dcon::unit_type_id::value_base_t(context.state.military_definitions.unit_base_definitions.size()));
+		dcon::unit_type_id navy_base_id = dcon::unit_type_id(dcon::unit_type_id::value_base_t(context.state.military_definitions.unit_base_definitions.size()));
 		context.state.military_definitions.unit_base_definitions.emplace_back();
 
 		auto name_id = text::find_or_add_key(context.state, "navy_base", false);

@@ -74,10 +74,8 @@ void add_adj_from_to_map(sys::state& ws, text::substitution_map& map, dcon::prov
 }
 
 inline uint32_t display_subeffects(EFFECT_DISPLAY_PARAMS) {
-
 	auto const source_size = 1 + effect::get_effect_scope_payload_size(tval);
 	auto sub_units_start = tval + 2 + effect::effect_scope_data_payload(tval[0]);
-
 	uint32_t i = 0;
 	while(sub_units_start < tval + source_size) {
 		i += internal_make_effect_description(ws, sub_units_start, layout, primary_slot, this_slot, from_slot, r_hi, r_lo + i, indentation);
@@ -715,9 +713,14 @@ uint32_t es_x_owned_scope_nation(EFFECT_DISPLAY_PARAMS) {
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
 					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+					/* So that SirRunner's random_owned + has_country_flag trick works properly! */
+					if((tval[0] & effect::scope_has_limit) != 0 && primary_slot != -1) {
+						auto limit = trigger::payload(tval[2]).tr_id;
+						if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot))
+							return 0;
+					}
 				}
-				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
-					indentation + i_amount);
+				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, indentation + i_amount);
 			}
 			return 0;
 		}
@@ -773,6 +776,12 @@ uint32_t es_x_owned_scope_state(EFFECT_DISPLAY_PARAMS) {
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
 					show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
+					/* So that SirRunner's random_owned + has_country_flag trick works properly! */
+					if((tval[0] & effect::scope_has_limit) != 0 && primary_slot != -1) {
+						auto limit = trigger::payload(tval[2]).tr_id;
+						if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot))
+							return 0;
+					}
 				}
 				return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
 					indentation + i_amount);
@@ -2980,13 +2989,23 @@ uint32_t ef_remove_province_modifier(EFFECT_DISPLAY_PARAMS) {
 	return 0;
 }
 uint32_t ef_remove_country_modifier(EFFECT_DISPLAY_PARAMS) {
-	auto box = text::open_layout_box(layout, indentation);
-	text::substitution_map m;
-	text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
-	text::localised_format_box(ws, layout, box, "remove_nat_mod", m);
-	text::close_layout_box(layout, box);
+	auto mod = trigger::payload(tval[1]).mod_id;
+	bool has_mod = (primary_slot == -1);
+	if(!has_mod) {
+		for(auto m : ws.world.nation_get_current_modifiers(trigger::to_nation(primary_slot))) {
+			if(m.mod_id == mod)
+				has_mod = true;
+		}
+	}
+	if(ws.user_settings.spoilers || has_mod) {
+		auto box = text::open_layout_box(layout, indentation);
+		text::substitution_map m;
+		text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(mod));
+		text::localised_format_box(ws, layout, box, "remove_nat_mod", m);
+		text::close_layout_box(layout, box);
+	}
 	if(ws.user_settings.spoilers) {
-		modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
+		modifier_description(ws, layout, mod, indentation + indentation_amount);
 	}
 	return 0;
 }
@@ -3851,9 +3870,7 @@ uint32_t ef_add_country_modifier(EFFECT_DISPLAY_PARAMS) {
 	text::add_to_substitution_map(m, text::variable_type::date, ws.current_date + trigger::payload(tval[2]).signed_value);
 	text::localised_format_box(ws, layout, box, "add_modifier_until", m);
 	text::close_layout_box(layout, box);
-	if(ws.user_settings.spoilers) {
-		modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-	}
+	modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 	return 0;
 }
 uint32_t ef_add_country_modifier_no_duration(EFFECT_DISPLAY_PARAMS) {
@@ -3862,9 +3879,7 @@ uint32_t ef_add_country_modifier_no_duration(EFFECT_DISPLAY_PARAMS) {
 	text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
 	text::localised_format_box(ws, layout, box, "add_modifier", m);
 	text::close_layout_box(layout, box);
-	if(ws.user_settings.spoilers) {
-		modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-	}
+	modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 	return 0;
 }
 uint32_t ef_casus_belli_tag(EFFECT_DISPLAY_PARAMS) {
@@ -6288,9 +6303,7 @@ uint32_t ef_add_country_modifier_province(EFFECT_DISPLAY_PARAMS) {
 	text::add_to_substitution_map(m, text::variable_type::date, ws.current_date + trigger::payload(tval[2]).signed_value);
 	text::localised_format_box(ws, layout, box, "o_add_modifier_until", m);
 	text::close_layout_box(layout, box);
-	if(ws.user_settings.spoilers) {
-		modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-	}
+	modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 	return 0;
 }
 uint32_t ef_add_country_modifier_province_no_duration(EFFECT_DISPLAY_PARAMS) {
@@ -6299,9 +6312,7 @@ uint32_t ef_add_country_modifier_province_no_duration(EFFECT_DISPLAY_PARAMS) {
 	text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
 	text::localised_format_box(ws, layout, box, "o_add_modifier", m);
 	text::close_layout_box(layout, box);
-	if(ws.user_settings.spoilers) {
-		modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-	}
+	modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 	return 0;
 }
 uint32_t ef_relation_province(EFFECT_DISPLAY_PARAMS) {

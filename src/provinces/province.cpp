@@ -778,6 +778,7 @@ void change_province_owner(sys::state& state, dcon::province_id id, dcon::nation
 		}
 	}
 
+	assert(economy::state_factory_count(state, new_si) <= int32_t(state.defines.factories_per_state));
 	
 	if(new_owner) {
 		for(auto p : state.world.province_get_pop_location(id)) {
@@ -883,11 +884,8 @@ void change_province_owner(sys::state& state, dcon::province_id id, dcon::nation
 	}
 
 	if(state_is_new && old_owner) {
-		/*
-		spawn event
-		*/
-		event::fire_fixed_event(state, state.national_definitions.on_state_conquest, trigger::to_generic(new_si),
-				event::slot_type::state, new_owner, -1, event::slot_type::none);
+		/* spawn event */
+		event::fire_fixed_event(state, state.national_definitions.on_state_conquest, trigger::to_generic(new_si), event::slot_type::state, new_owner, -1, event::slot_type::none);
 	}
 }
 

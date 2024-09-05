@@ -794,7 +794,7 @@ public:
 		// Order of category
 		// **** Order of folders within category
 		// ******** Order of appearance of technologies that have said folder?
-		std::vector<std::vector<size_t>> folders_by_category(static_cast<size_t>(5));
+		std::vector<std::vector<size_t>> folders_by_category(state.culture_definitions.tech_folders.size());
 		for(size_t i = 0; i < state.culture_definitions.tech_folders.size(); i++) {
 			auto const& folder = state.culture_definitions.tech_folders[i];
 			folders_by_category[static_cast<size_t>(folder.category)].push_back(i);

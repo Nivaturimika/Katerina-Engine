@@ -1006,7 +1006,7 @@ void update_ai_econ_construction(sys::state& state) {
 			continue;
 
 		//if our army is too small, ignore buildings:
-		if(0.7 * n.get_recruitable_regiments() > n.get_active_regiments())
+		if(uint16_t(0.25f * n.get_recruitable_regiments()) > n.get_active_regiments())
 			continue;
 
 		auto treasury = n.get_stockpiles(economy::money);
@@ -1141,8 +1141,7 @@ void update_ai_econ_construction(sys::state& state) {
 						}
 
 						// else -- try to build -- must have room
-						int32_t num_factories = economy::state_factory_count(state, si);
-						if(num_factories < int32_t(state.defines.factories_per_state)) {
+						if(economy::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
 							auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
 							new_up.set_is_pop_project(false);
 							new_up.set_is_upgrade(false);

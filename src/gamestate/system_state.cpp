@@ -3142,7 +3142,8 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 			if(src.get_regiment().get_army_from_army_membership().get_controller_from_army_control() == p.get_province().get_nation_from_province_ownership())
 				continue;
 			err.accumulated_warnings += "Army defined in " + text::produce_simple_string(*this, p.get_province().get_name()) + "; but regiment comes from a province owned by someone else\n";
-			if(!src.get_regiment().get_army_from_army_membership().get_is_retreating()
+			src.get_regiment().set_strength(0.f);
+			/*if(!src.get_regiment().get_army_from_army_membership().get_is_retreating()
 			&& !src.get_regiment().get_army_from_army_membership().get_navy_from_army_transport()
 			&& !src.get_regiment().get_army_from_army_membership().get_battle_from_army_battle_participation()
 			&& !src.get_regiment().get_army_from_army_membership().get_controller_from_army_rebel_control()) {
@@ -3152,7 +3153,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 				military::army_arrives_in_province(*this, new_u, p.get_province(), military::crossing_type::none);
 			} else {
 				src.get_regiment().set_strength(0.f);
-			}
+			}*/
 		}
 	}
 
@@ -3188,7 +3189,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 		}
 	}
 
-	// run pending triggers and effects
+	/* run pending triggers and effects */
 	for(auto pending_decision : pending_decisions) {
 		dcon::nation_id n = pending_decision.first;
 		dcon::decision_id d = pending_decision.second;
@@ -3234,6 +3235,38 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 			world.province_set_rgo(p, economy::money);
 		}
 	});
+
+	//merge factories
+	for(auto s : world.in_state_instance) {
+		province::for_each_province_in_state_instance(*this, s, [&](dcon::province_id id) {
+			auto province_fac_range = world.province_get_factory_location(id);
+			int32_t factories_in_province = int32_t(province_fac_range.end() - province_fac_range.begin());
+			int32_t factories_in_new_state = 0;
+			province::for_each_province_in_state_instance(*this, s, [&](dcon::province_id pr) {
+				auto fac_range = world.province_get_factory_location(pr);
+				// Merge factories and accumulate levels of merged factories
+				for(const auto pfac : province_fac_range) {
+					for(int32_t i = 0; i < int32_t(fac_range.end() - fac_range.begin()); i++) {
+						const auto fac = *(fac_range.begin() + i);
+						if(fac.get_factory().get_building_type() == pfac.get_factory().get_building_type()) {
+							pfac.get_factory().get_level() += fac.get_factory().get_level();
+							world.delete_factory(fac.get_factory().id);
+							--i;
+						}
+					}
+				}
+				factories_in_new_state += int32_t(fac_range.end() - fac_range.begin());
+			});
+			auto excess_factories = std::min((factories_in_new_state + factories_in_province) - int32_t(defines.factories_per_state), factories_in_province);
+			if(excess_factories > 0) {
+				err.accumulated_errors += "State instance '" + text::produce_simple_string(*this, s.get_definition().get_name()) + "' has too many factories\n";
+			}
+			while(excess_factories > 0) {
+				world.delete_factory((*(province_fac_range.begin() + excess_factories - 1)).get_factory().id);
+				--excess_factories;
+			}
+		});
+	}
 
 	economy::presimulate(*this);
 
