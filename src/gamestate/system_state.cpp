@@ -3142,7 +3142,8 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 			if(src.get_regiment().get_army_from_army_membership().get_controller_from_army_control() == p.get_province().get_nation_from_province_ownership())
 				continue;
 			err.accumulated_warnings += "Army defined in " + text::produce_simple_string(*this, p.get_province().get_name()) + "; but regiment comes from a province owned by someone else\n";
-			if(!src.get_regiment().get_army_from_army_membership().get_is_retreating()
+			src.get_regiment().set_strength(0.f);
+			/*if(!src.get_regiment().get_army_from_army_membership().get_is_retreating()
 			&& !src.get_regiment().get_army_from_army_membership().get_navy_from_army_transport()
 			&& !src.get_regiment().get_army_from_army_membership().get_battle_from_army_battle_participation()
 			&& !src.get_regiment().get_army_from_army_membership().get_controller_from_army_rebel_control()) {
@@ -3152,7 +3153,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 				military::army_arrives_in_province(*this, new_u, p.get_province(), military::crossing_type::none);
 			} else {
 				src.get_regiment().set_strength(0.f);
-			}
+			}*/
 		}
 	}
 
