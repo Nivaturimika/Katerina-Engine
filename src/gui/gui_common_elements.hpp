@@ -1086,7 +1086,7 @@ class nation_leadership_points_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto points = nations::leadership_points(state, nation_id);
-		return text::format_float(points, 1);
+		return "?Y" + text::format_float(points, 1);
 	}
 };
 
