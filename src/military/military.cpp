@@ -2902,7 +2902,9 @@ void implement_war_goal(sys::state& state, dcon::war_id war, dcon::cb_type_id wa
 			flags = uint8_t((flags & ~nations::influence::level_mask) | nations::influence::level_in_sphere);
 			state.world.nation_set_in_sphere_of(holder, from);
 		}
-		add_truce(state, holder, target, int32_t(state.defines.base_truce_months) * 30);
+
+		auto const truce_months = state.world.cb_type_get_truce_months(wargoal) + int32_t(state.defines.base_truce_months);
+		add_truce(state, holder, target, truce_months * 30);
 
 		if((bits & cb_flag::all_allowed_states) == 0) {
 			for(auto prov : state.world.state_definition_get_abstract_state_membership(wargoal_state)) {
