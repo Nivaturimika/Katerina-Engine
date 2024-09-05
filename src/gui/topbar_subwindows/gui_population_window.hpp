@@ -936,7 +936,7 @@ public:
 
 	void on_update(sys::state& state) noexcept override {
 		auto content = retrieve<dcon::state_instance_id>(state, parent);
-		colonial_icon->set_visible(state, state.world.province_get_is_colonial(state.world.state_instance_get_capital(content)));
+		if(colonial_icon) colonial_icon->set_visible(state, state.world.province_get_is_colonial(state.world.state_instance_get_capital(content)));
 	}
 };
 class pop_left_side_province_window : public window_element_base {
@@ -983,9 +983,9 @@ public:
 	}
 
 	void on_update(sys::state& state) noexcept override {
-		country_window->set_visible(state, std::holds_alternative<dcon::nation_id>(content));
-		state_window->set_visible(state, std::holds_alternative<dcon::state_instance_id>(content));
-		province_window->set_visible(state, std::holds_alternative<dcon::province_id>(content));
+		if(country_window) country_window->set_visible(state, std::holds_alternative<dcon::nation_id>(content));
+		if(state_window) state_window->set_visible(state, std::holds_alternative<dcon::state_instance_id>(content));
+		if(province_window) province_window->set_visible(state, std::holds_alternative<dcon::province_id>(content));
 	}
 
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
@@ -2026,8 +2026,11 @@ public:
 		}
 
 		// Hide all promotion windows...
-		for(std::size_t i = 0; i < promotion_windows.size(); ++i)
-			promotion_windows[i]->set_visible(state, false);
+		for(std::size_t i = 0; i < promotion_windows.size(); ++i) {
+			if(promotion_windows[i]) {
+				promotion_windows[i]->set_visible(state, false);
+			}
+		}
 		std::unordered_map<dcon::pop_type_id::value_base_t, float> distrib = {};
 		auto total = 0.f;
 		state.world.for_each_pop_type([&](dcon::pop_type_id ptid) {
@@ -2042,7 +2045,7 @@ public:
 		// And then show them as appropriate!
 		size_t index = 0;
 		for(auto const& e : distrib)
-			if(e.second > 0.f && index < promotion_windows.size()) {
+			if(e.second > 0.f && index < promotion_windows.size() && promotion_windows[index]) {
 				promotion_windows[index]->set_visible(state, true);
 				Cyto::Any pt_payload = dcon::pop_type_id(e.first);
 				promotion_windows[index]->impl_set(state, pt_payload);
@@ -2658,10 +2661,8 @@ public:
 			add_child_to_front(std::move(win6));
 
 			// It should be proper to reposition the windows now
-			const xy_pair cell_offset =
-					state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdistribution_start"))->second.definition].position;
-			const xy_pair cell_size =
-					state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdistribution_offset"))->second.definition].position;
+			const xy_pair cell_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdistribution_start"))->second.definition].position;
+			const xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdistribution_offset"))->second.definition].position;
 			xy_pair offset = cell_offset;
 			for(auto const win : dist_windows) {
 				win->base_data.position = offset;
@@ -2675,10 +2676,8 @@ public:
 
 		{
 			// Now add the filtering windows
-			const xy_pair cell_offset =
-					state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popfilter_start"))->second.definition].position;
-			const xy_pair cell_size =
-					state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popfilter_offset"))->second.definition].position;
+			const xy_pair cell_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popfilter_start"))->second.definition].position;
+			const xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popfilter_offset"))->second.definition].position;
 			xy_pair offset = cell_offset;
 
 			state.world.for_each_pop_type([&](dcon::pop_type_id id) {
@@ -2693,13 +2692,12 @@ public:
 			});
 		}
 
-		auto win7 =
-				make_element_by_type<pop_details_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("pop_details_win"))->second.definition);
+		auto win7 = make_element_by_type<pop_details_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("pop_details_win"))->second.definition);
 		details_win = win7.get();
 		add_child_to_front(std::move(win7));
 
-		{
-			auto ptr = make_element_by_type<national_focus_window>(state, "state_focus_window");
+		auto ptr = make_element_by_type<national_focus_window>(state, "state_focus_window");
+		if(ptr) {
 			ptr->set_visible(state, false);
 			nf_win = ptr.get();
 			add_child_to_front(std::move(ptr));
@@ -2822,15 +2820,16 @@ public:
 			impl_on_update(state);
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_details_data>()) {
-			move_child_to_front(details_win);
-			details_win->set_visible(state, true);
-			details_win->impl_set(state, payload);
+			if(details_win) {
+				move_child_to_front(details_win);
+				details_win->set_visible(state, true);
+				details_win->impl_set(state, payload);
+			}
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_left_side_expand_action>()) {
 			auto expand_action = any_cast<pop_left_side_expand_action>(payload);
 			auto sid = std::get<dcon::state_instance_id>(expand_action);
-			view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())] =
-					!view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())];
+			view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())] = !view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())];
 			impl_on_update(state);
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_filter_data>()) {
