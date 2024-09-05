@@ -410,15 +410,22 @@ ogl::color3f get_text_color(sys::state& state, text::text_color text_color) {
 	case text::text_color::red:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
 			return ogl::color3f{ 0.66f, 0.66f, 1.f }; //Remap to blue
+		} else if(state.user_settings.color_blind_mode != sys::color_blind_mode::none) {
+			return ogl::color3f{ 0.9f, 0.2f, 0.1f };
 		}
-		return ogl::color3f{0.9f, 0.2f, 0.1f};
+		return ogl::color3f{ 1.f, 50.f / 255.f, 50.f / 255.f };
 	case text::text_color::green:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
 			return ogl::color3f{ 0.95f, 0.95f, 0.2f }; //Remap to yellow
+		} else if(state.user_settings.color_blind_mode != sys::color_blind_mode::none) {
+			return ogl::color3f{ 0.2f, 0.95f, 0.2f };
 		}
-		return ogl::color3f{0.2f, 0.95f, 0.2f};
+		return ogl::color3f{ 0.f, 159.f / 255.f, 3.f / 255.f };
 	case text::text_color::yellow:
-		return ogl::color3f{0.9f, 0.9f, 0.f};
+		if(state.user_settings.color_blind_mode != sys::color_blind_mode::none) {
+			return ogl::color3f{ 1.f, 0.5f, 0.f };
+		}
+		return ogl::color3f{1.f, 186.f / 255.f, 0.f};
 	case text::text_color::light_blue:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
 			return ogl::color3f{ 0.33f, 0.33f, 1.f }; //increase intensity
@@ -660,7 +667,7 @@ void line_graph::set_data_points(sys::state& state, std::vector<float> const& da
 		}
 	} else {
 		for(size_t i = 0; i < count; i++) {
-			scaled_datapoints[i] = (datapoints[i] - min) / y_height;
+			scaled_datapoints[i] = ((datapoints[i] - min) / y_height) / 2.f + 0.5f;
 		}
 	}
 

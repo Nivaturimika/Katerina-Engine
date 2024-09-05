@@ -2218,35 +2218,35 @@ public:
 			return make_element_by_type<military_score_icon>(state, id);
 		} else if(name == "text_politics") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "politics"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "politics"));
 			return txt;
 		} else if(name == "text_pops") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "population"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "population"));
 			return txt;
 		} else if(name == "text_trade") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "trade"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "trade"));
 			return txt;
 		} else if(name == "text_diplomacy") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "diplomacy"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "diplomacy"));
 			return txt;
 		} else if(name == "text_military") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "military"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "military"));
 			return txt;
 		} else if(name == "text_production") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "production"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "production"));
 			return txt;
 		} else if(name == "text_tech") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "technology"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "technology"));
 			return txt;
 		} else if(name == "text_budget") {
 			auto txt = make_element_by_type<simple_text_element_base>(state, id);
-			txt->set_text(state, "?Y" + text::produce_simple_string(state, "budget"));
+			txt->set_text(state, "?s" + text::produce_simple_string(state, "budget"));
 			return txt;
 		} else {
 			return nullptr;
