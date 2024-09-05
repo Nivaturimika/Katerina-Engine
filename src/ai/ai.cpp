@@ -542,7 +542,8 @@ void update_influence_priorities(sys::state& state) {
 				weight += 1.0f;
 				weight *= 400.0f;
 			} else if(t.get_primary_culture().get_group_from_culture_group_membership() == state.world.nation_get_primary_culture(n.nation).get_group_from_culture_group_membership()) {
-				weight *= 4.0f;
+				weight += 1.0f;
+				weight *= 40.0f;
 			}
 			//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
 			if(military::can_use_cb_against(state, n.nation, t) && t.get_in_sphere_of()) {
