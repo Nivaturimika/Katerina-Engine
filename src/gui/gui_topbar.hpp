@@ -185,7 +185,7 @@ public:
 		auto n = retrieve<dcon::nation_id>(state, parent);
 		auto literacy = state.world.nation_get_demographics(n, demographics::literacy);
 		auto total_pop = std::max(1.0f, state.world.nation_get_demographics(n, demographics::total));
-		set_text(state, text::format_percentage(literacy / total_pop, 1));
+		set_text(state, "?Y" + text::format_percentage(literacy / total_pop, 1));
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -217,7 +217,7 @@ public:
 		expanded_hitbox_text::on_create(state);
 	}
 	void on_update(sys::state& state) noexcept override {
-		set_text(state, text::format_float(state.world.nation_get_infamy(retrieve<dcon::nation_id>(state, parent)), 2));
+		set_text(state, "?Y" + text::format_float(state.world.nation_get_infamy(retrieve<dcon::nation_id>(state, parent)), 2));
 	}
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
@@ -258,7 +258,7 @@ public:
 		auto layout = text::create_endless_layout(state, internal_layout,
 		text::layout_parameters{0, 0, int16_t(base_data.size.x), int16_t(base_data.size.y), base_data.data.text.font_handle, 0, text::alignment::left, text::text_color::black, false});
 		auto box = text::open_layout_box(layout, 0);
-		text::add_to_layout_box(state, layout, box, text::prettify(int32_t(total_pop)));
+		text::add_to_layout_box(state, layout, box, text::prettify(int32_t(total_pop)), text::text_color::yellow);
 		text::add_to_layout_box(state, layout, box, std::string(" ("));
 		if(pop_change > 0) {
 			text::add_to_layout_box(state, layout, box, std::string("+"), text::text_color::green);
@@ -301,7 +301,7 @@ public:
 		auto current_day_record = state.player_data_cache.treasury_record[state.ui_date.value % 32];
 		auto previous_day_record = state.player_data_cache.treasury_record[(state.ui_date.value + 31) % 32];
 		auto change = current_day_record - previous_day_record;
-		text::add_to_layout_box(state, layout, box, text::prettify_currency(nations::get_treasury(state, n)));
+		text::add_to_layout_box(state, layout, box, text::prettify_currency(nations::get_treasury(state, n)), text::text_color::yellow);
 		text::add_to_layout_box(state, layout, box, std::string(" ("));
 		if(change > 0) {
 			text::add_to_layout_box(state, layout, box, std::string("+"), text::text_color::green);
@@ -503,7 +503,7 @@ public:
 		if(in_use < available) {
 			set_text(state, "?R" + text::format_ratio(in_use, available));
 		} else {
-			set_text(state, text::format_ratio(in_use, available));
+			set_text(state, "?Y" + text::format_ratio(in_use, available));
 		}
 	}
 
@@ -564,7 +564,7 @@ public:
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
 		auto militancy = state.world.nation_get_demographics(nation_id, demographics::militancy);
 		auto total_pop = state.world.nation_get_demographics(nation_id, demographics::total);
-		set_text(state, text::format_float(total_pop == 0.f ? 0.f : militancy / total_pop));
+		set_text(state, "?Y" + text::format_float(total_pop == 0.f ? 0.f : militancy / total_pop));
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -608,7 +608,7 @@ public:
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
 		auto militancy = state.world.nation_get_demographics(nation_id, demographics::consciousness);
 		auto total_pop = state.world.nation_get_demographics(nation_id, demographics::total);
-		set_text(state, text::format_float(total_pop == 0.f ? 0.f : militancy / total_pop));
+		set_text(state, "?Y" + text::format_float(total_pop == 0.f ? 0.f : militancy / total_pop));
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
@@ -642,7 +642,7 @@ public:
 
 	void on_update(sys::state& state) noexcept override {
 		auto points = nations::diplomatic_points(state, retrieve<dcon::nation_id>(state, parent));
-		set_text(state, text::format_float(points, 1));
+		set_text(state, "?Y" + text::format_float(points, 1));
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1978,7 +1978,7 @@ public:
 
 	void on_update(sys::state& state) noexcept override {
 		auto points = nations::daily_research_points(state, retrieve<dcon::nation_id>(state, parent));
-		set_text(state, text::format_float(points, 2));
+		set_text(state, "?Y" + text::format_float(points, 2));
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
@@ -2214,15 +2214,48 @@ public:
 			var.empty() ? ptr->slot = uint8_t(0) : ptr->slot = uint8_t(std::stoi(var));
 			produced_icons.push_back(ptr.get());
 			return ptr;
-		} else if (name == "selected_military_icon") {
+		} else if(name == "selected_military_icon") {
 			return make_element_by_type<military_score_icon>(state, id);
-		}  else {
+		} else if(name == "text_politics") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "politics"));
+			return txt;
+		} else if(name == "text_pops") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "population"));
+			return txt;
+		} else if(name == "text_trade") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "trade"));
+			return txt;
+		} else if(name == "text_diplomacy") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "diplomacy"));
+			return txt;
+		} else if(name == "text_military") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "military"));
+			return txt;
+		} else if(name == "text_production") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "production"));
+			return txt;
+		} else if(name == "text_tech") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "technology"));
+			return txt;
+		} else if(name == "text_budget") {
+			auto txt = make_element_by_type<simple_text_element_base>(state, id);
+			txt->set_text(state, "?Y" + text::produce_simple_string(state, "budget"));
+			return txt;
+		} else {
 			return nullptr;
 		}
 	}
 
 	void on_update(sys::state& state) noexcept override {
-		atpeacetext->set_visible(state, !state.world.nation_get_is_at_war(state.local_player_nation));
+		if(atpeacetext)
+			atpeacetext->set_visible(state, !state.world.nation_get_is_at_war(state.local_player_nation));
 		if(state.local_player_nation != current_nation) {
 			current_nation = state.local_player_nation;
 			Cyto::Any payload = current_nation;
@@ -2305,10 +2338,8 @@ public:
 	}
 
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-		if(state.ui_state.topbar_subwindow && state.ui_state.topbar_subwindow->is_visible()) {
-			background_pic->set_visible(state, true);
-		} else {
-			background_pic->set_visible(state, false);
+		if(background_pic) {
+			background_pic->set_visible(state, state.ui_state.topbar_subwindow && state.ui_state.topbar_subwindow->is_visible());
 		}
 		window_element_base::render(state, x, y);
 	}

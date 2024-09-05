@@ -418,7 +418,7 @@ ogl::color3f get_text_color(sys::state& state, text::text_color text_color) {
 		}
 		return ogl::color3f{0.2f, 0.95f, 0.2f};
 	case text::text_color::yellow:
-		return ogl::color3f{0.9f, 0.9f, 0.1f};
+		return ogl::color3f{0.9f, 0.9f, 0.f};
 	case text::text_color::light_blue:
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan) {
 			return ogl::color3f{ 0.33f, 0.33f, 1.f }; //increase intensity

@@ -987,7 +987,6 @@ public:
 
 class nation_suppression_points_text : public expanded_hitbox_text {
 public:
-
 	void on_create(sys::state& state) noexcept override {
 		top_left_extension = ui::xy_pair{ 25, 3 };
 		bottom_right_extension = ui::xy_pair{ -10, 2 };
@@ -996,7 +995,7 @@ public:
 
 	void on_update(sys::state& state) noexcept override {
 		auto points = nations::suppression_points(state, retrieve<dcon::nation_id>(state, parent));
-		set_text(state, text::format_float(points, 1));
+		set_text(state, "?Y" + text::format_float(points, 1));
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1047,7 +1046,7 @@ public:
 			auto prov = prov_own.get_province();
 			sum += military::mobilized_regiments_possible_from_province(state, prov.id);
 		}
-		return std::to_string(sum);
+		return "?Y" + std::to_string(sum);
 	}
 };
 
@@ -1056,7 +1055,7 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto available = state.world.nation_get_recruitable_regiments(nation_id);
 		auto in_use = state.world.nation_get_active_regiments(nation_id);
-		return text::format_ratio(in_use, available);
+		return "?Y" + text::format_ratio(in_use, available);
 	}
 };
 
@@ -1065,7 +1064,7 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto available = military::naval_supply_points(state, nation_id);
 		auto in_use = military::naval_supply_points_used(state, nation_id);
-		return text::format_ratio(in_use, available);
+		return "?Y" + text::format_ratio(in_use, available);
 	}
 };
 
