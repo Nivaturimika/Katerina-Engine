@@ -3277,8 +3277,9 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	ai::update_focuses(*this);
 
 	military::recover_org(*this);
-
 	military::set_initial_leaders(*this);
+
+	military::run_gc(*this);
 }
 
 void state::preload() {
