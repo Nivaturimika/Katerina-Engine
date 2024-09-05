@@ -2904,7 +2904,7 @@ void implement_war_goal(sys::state& state, dcon::war_id war, dcon::cb_type_id wa
 		}
 
 		auto const truce_months = state.world.cb_type_get_truce_months(wargoal) + int32_t(state.defines.base_truce_months);
-		add_truce(state, holder, target, truce_months * 30);
+		add_truce(state, holder, target, truce_months * 31);
 
 		if((bits & cb_flag::all_allowed_states) == 0) {
 			for(auto prov : state.world.state_definition_get_abstract_state_membership(wargoal_state)) {
