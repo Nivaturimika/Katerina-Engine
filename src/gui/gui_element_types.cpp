@@ -668,9 +668,9 @@ void line_graph::set_data_points(sys::state& state, std::vector<float> const& da
 	} else {
 		for(size_t i = 0; i < count; i++) {
 			if(datapoints[i] >= 0.f) {
-				scaled_datapoints[i] = ((datapoints[i] - min) / y_height) / 2.f;
+				scaled_datapoints[i] = 0.5f + ((datapoints[i] - min) / y_height) * 0.5f;
 			} else {
-				scaled_datapoints[i] = 0.5f - ((datapoints[i] - min) / y_height) / 2.f;
+				scaled_datapoints[i] = ((datapoints[i] - min) / y_height) * 0.5f;
 			}
 		}
 	}
