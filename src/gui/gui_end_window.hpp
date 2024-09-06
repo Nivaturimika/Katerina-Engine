@@ -292,10 +292,11 @@ public:
 	}
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
-
-		for(uint32_t i = 0; i < 4; ++i) {
-			if(i < state.great_nations.size())
-				row_contents.push_back(state.great_nations[i].nation);
+		for(int32_t i = 0; i < int32_t(state.defines.great_nations_count) / 2; ++i) {
+			if(i < int32_t(state.nations_by_rank.size())) {
+				auto n = state.nations_by_rank[i];
+				row_contents.push_back(n);
+			}
 		}
 		update(state);
 	}
@@ -311,10 +312,11 @@ public:
 	}
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
-
-		for(uint32_t i = 4; i < 8; ++i) {
-			if(i < state.great_nations.size())
-				row_contents.push_back(state.great_nations[i].nation);
+		for(int32_t i = int32_t(state.defines.great_nations_count) / 2; i < int32_t(state.defines.great_nations_count); ++i) {
+			if(i < int32_t(state.nations_by_rank.size())) {
+				auto n = state.nations_by_rank[i];
+				row_contents.push_back(n);
+			}
 		}
 		update(state);
 	}
@@ -330,14 +332,10 @@ public:
 	}
 	void on_update(sys::state& state) noexcept override {
 		row_contents.clear();
-
-		auto total_num = int32_t(state.defines.colonial_rank - state.defines.great_nations_count);
-
-		for(int32_t i = 0; i < int32_t(state.defines.colonial_rank); ++i) {
-			auto n = state.nations_by_rank[i];
-			if(!nations::is_great_power(state, n) && total_num > 0) {
+		for(int32_t i = int32_t(state.defines.great_nations_count); i < int32_t(state.defines.colonial_rank); ++i) {
+			if(i < int32_t(state.nations_by_rank.size())) {
+				auto n = state.nations_by_rank[i];
 				row_contents.push_back(n);
-				--total_num;
 			}
 		}
 		update(state);
