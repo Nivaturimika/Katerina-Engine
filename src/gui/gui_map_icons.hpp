@@ -190,6 +190,22 @@ public:
 		}
 	}
 
+	void button_shift_action(sys::state& state) noexcept override {
+		auto prov = retrieve<dcon::province_id>(state, parent);
+		if(state.selected_armies.empty() && bool(retrieve<dcon::navy_id>(state, parent))) {
+			for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
+				if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
+					state.select(al.get_navy());
+			}
+		}
+		if(state.selected_navies.empty() && bool(retrieve<dcon::army_id>(state, parent))) {
+			for(const auto al : state.world.province_get_army_location_as_location(prov)) {
+				if(!al.get_army().get_navy_from_army_transport() && al.get_army().get_controller_from_army_control() == state.local_player_nation)
+					state.select(al.get_army());
+			}
+		}
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
