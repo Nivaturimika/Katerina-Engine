@@ -944,7 +944,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 				if(b_index > 0) {
-					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.00085f); // width
+					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.0003f); // width
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, textures[texture_imp_border]);
 					glMultiDrawArrays(GL_TRIANGLE_STRIP, b_starts.data(), b_counts.data(), GLsizei(b_index));
