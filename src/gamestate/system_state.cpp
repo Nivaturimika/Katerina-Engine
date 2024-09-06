@@ -3586,14 +3586,7 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 
 void state::single_game_tick() {
 	// do update logic
-
 	current_date += 1;
-	for(auto r : world.in_army){
-		auto nation = world.army_control_get_controller(r.get_army_control());
-		if(world.nation_get_owned_province_count(nation) == 0) {
-			world.delete_army(r);
-		}
-	}
 	if(!is_playable_date(current_date, start_date, end_date)) {
 		game_scene::switch_scene(*this, game_scene::scene_id::end_screen);
 		game_state_updated.store(true, std::memory_order::release);
