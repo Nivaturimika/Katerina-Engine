@@ -1258,7 +1258,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 			glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_texture_sampler], 0);
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_is_black], state.user_settings.black_map_font ? 1.f : 0.f);
 			glActiveTexture(GL_TEXTURE0);
-			if(vao_array[vo_text_line] && !text_line_vertices.empty()) {
+			if(zoom < map::zoom_close && !text_line_vertices.empty()) {
 				uint32_t index = 0;
 				uint32_t last_texture = 0;
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_opaque], 0.f);
@@ -1282,7 +1282,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					glMultiDrawArrays(GL_TRIANGLES, dyn_text_line_starts.data(), dyn_text_line_counts.data(), GLsizei(index));
 				}
 			}
-			if(zoom >= map::zoom_very_close && !province_text_line_vertices.empty()) {
+			if(zoom >= map::zoom_close && !province_text_line_vertices.empty()) {
 				uint32_t index = 0;
 				uint32_t last_texture = 0;
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_text_line][uniform_opaque], 1.f);
