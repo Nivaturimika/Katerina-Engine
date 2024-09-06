@@ -3525,13 +3525,13 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	// fix invalid unit types
 	for(auto reg : world.in_regiment) {
 		assert(reg.get_army_from_army_membership());
-		assert(reg.get_type());
+		assert(reg.get_type());		
 		if(!reg.get_type()) { //correct invalid units
 			reg.set_type(military_definitions.irregular);
 		}
 	}
 	for(auto plc : world.in_province_land_construction) {
-		assert(plc.get_type());
+		assert(plc.get_type());		
 		if(!plc.get_type()) { //correct invalid units
 			plc.set_type(military_definitions.irregular);
 		}
@@ -3588,7 +3588,12 @@ void state::single_game_tick() {
 	// do update logic
 
 	current_date += 1;
-
+	for(auto r : world.in_army){
+		auto nation = world.army_control_get_controller(r.get_army_control());
+		if(world.nation_get_owned_province_count(nation) == 0) {
+			world.delete_army(r);
+		}
+	}
 	if(!is_playable_date(current_date, start_date, end_date)) {
 		game_scene::switch_scene(*this, game_scene::scene_id::end_screen);
 		game_state_updated.store(true, std::memory_order::release);
@@ -3745,7 +3750,7 @@ void state::single_game_tick() {
 			break;
 		}
 	});
-
+	 
 	// because they may add pops, these changes must be applied sequentially
 	{
 		auto o = uint32_t(ymd_date.day + 6);
@@ -4002,7 +4007,7 @@ void state::single_game_tick() {
 	}
 
 	military::apply_regiment_damage(*this);
-
+	
 	if(ymd_date.day == 1) {
 		if(ymd_date.month == 1) {
 			// yearly update : redo the upper house
