@@ -235,12 +235,10 @@ void invention_description(sys::state& state, text::layout_base& contents, dcon:
 				text::localised_format_box(state, contents, box, "reconaissance");
 				text::add_to_layout_box(state, contents, box, std::string_view{": "});
 				if(mod.reconnaissance_or_fire_range < 0) {
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.reconnaissance_or_fire_range},
-							text::text_color::red);
+					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.reconnaissance_or_fire_range}, text::text_color::red);
 				} else {
 					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.reconnaissance_or_fire_range},
-							text::text_color::green);
+					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.reconnaissance_or_fire_range}, text::text_color::green);
 				}
 				text::close_layout_box(contents, box);
 			}
@@ -252,8 +250,7 @@ void invention_description(sys::state& state, text::layout_base& contents, dcon:
 					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.siege_or_torpedo_attack}, text::text_color::red);
 				} else {
 					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.siege_or_torpedo_attack},
-							text::text_color::green);
+					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.siege_or_torpedo_attack}, text::text_color::green);
 				}
 				text::close_layout_box(contents, box);
 			}
@@ -262,10 +259,10 @@ void invention_description(sys::state& state, text::layout_base& contents, dcon:
 				text::localised_format_box(state, contents, box, "support");
 				text::add_to_layout_box(state, contents, box, std::string_view{": "});
 				if(mod.support < 0) {
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.support}, text::text_color::red);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{mod.support}, text::text_color::red);
 				} else {
 					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{mod.support}, text::text_color::green);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{mod.support}, text::text_color::green);
 				}
 				text::close_layout_box(contents, box);
 			}
@@ -274,10 +271,10 @@ void invention_description(sys::state& state, text::layout_base& contents, dcon:
 				text::localised_format_box(state, contents, box, "discipline");
 				text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
 				if(mod.discipline_or_evasion < 0) {
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{ mod.discipline_or_evasion }, text::text_color::red);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{ mod.discipline_or_evasion }, text::text_color::red);
 				} else {
 					text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{ mod.discipline_or_evasion }, text::text_color::green);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{ mod.discipline_or_evasion }, text::text_color::green);
 				}
 				text::close_layout_box(contents, box);
 			}
@@ -338,10 +335,10 @@ void invention_description(sys::state& state, text::layout_base& contents, dcon:
 				text::localised_format_box(state, contents, box, "evasion");
 				text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
 				if(mod.discipline_or_evasion < 0) {
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{ mod.discipline_or_evasion }, text::text_color::red);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{ mod.discipline_or_evasion }, text::text_color::red);
 				} else {
 					text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
-					text::add_to_layout_box(state, contents, box, text::fp_two_places{ mod.discipline_or_evasion }, text::text_color::green);
+					text::add_to_layout_box(state, contents, box, text::fp_percentage{ mod.discipline_or_evasion }, text::text_color::green);
 				}
 				text::close_layout_box(contents, box);
 			}

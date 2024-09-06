@@ -368,7 +368,7 @@ public:
 			text::add_line(state, contents, "unit_defence", text::variable_type::x, text::format_float(defence_or_hull, 2));
 			text::add_line(state, contents, "unit_discipline", text::variable_type::x, text::format_percentage(discipline_or_evasion, 0));
 			if(support > 0.f) {
-				text::add_line(state, contents, "unit_support", text::variable_type::x, text::format_float(support, 0));
+				text::add_line(state, contents, "unit_support", text::variable_type::x, text::format_percentage(support, 0));
 			}
 			text::add_line(state, contents, "unit_maneuver", text::variable_type::x, text::format_float(maneuver, 0));
 			text::add_line(state, contents, "unit_max_speed", text::variable_type::x, text::format_float(maximum_speed, 2));
@@ -408,7 +408,7 @@ public:
 				text::add_line(state, contents, "unit_defence", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).defence_or_hull * float(t.amounts[i]), 2));
 				text::add_line(state, contents, "unit_discipline", text::variable_type::x, text::format_percentage(state.military_definitions.unit_base_definitions[utid].discipline_or_evasion * float(t.amounts[i]), 0));
 				if(state.military_definitions.unit_base_definitions[utid].support > 0.f) {
-					text::add_line(state, contents, "unit_support", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).support * float(t.amounts[i]), 0));
+					text::add_line(state, contents, "unit_support", text::variable_type::x, text::format_percentage(state.world.nation_get_unit_stats(state.local_player_nation, utid).support * float(t.amounts[i]), 0));
 				}
 				text::add_line(state, contents, "unit_maneuver", text::variable_type::x, text::format_float(state.military_definitions.unit_base_definitions[utid].maneuver * float(t.amounts[i]), 0));
 				text::add_line(state, contents, "unit_max_speed", text::variable_type::x, text::format_float(state.world.nation_get_unit_stats(state.local_player_nation, utid).maximum_speed * float(t.amounts[i]), 2));
