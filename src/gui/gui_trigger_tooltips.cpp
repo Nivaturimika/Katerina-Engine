@@ -158,7 +158,11 @@ void make_condition(TRIGGER_DISPLAY_PARAMS, text::layout_box& box) {
 			text::add_space_to_layout_box(ws, layout, box);
 		}
 	} else {
-		text::add_to_layout_box(ws, layout, box, std::string_view("•"), text::text_color::white);
+		if(ws.user_settings.use_classic_fonts) {
+			text::add_to_layout_box(ws, layout, box, std::string_view("-"), text::text_color::white);
+		} else {
+			text::add_to_layout_box(ws, layout, box, std::string_view("•"), text::text_color::white);
+		}
 		text::add_space_to_layout_box(ws, layout, box);
 	}
 }
