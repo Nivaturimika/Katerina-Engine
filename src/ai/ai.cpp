@@ -268,6 +268,11 @@ static bool ai_has_mutual_enemy(sys::state& state, dcon::nation_id from, dcon::n
 constexpr inline float ally_overestimate = 2.f;
 
 bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::nation_id from) {
+	// Puppets always ally overlords
+	auto ovr = state.world.nation_get_overlord_as_subject(target);
+	if(ovr && state.world.overlord_get_ruler(ovr) == from)
+		return true;
+
 	if(!state.world.nation_get_ai_is_threatened(target))
 		return false;
 
