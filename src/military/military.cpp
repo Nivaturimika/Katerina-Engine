@@ -6546,19 +6546,15 @@ void update_siege_progress(sys::state& state) {
 						first_army = ar.get_army();
 
 					auto army_stats = army_controller ? army_controller : ar.get_army().get_army_rebel_control().get_controller().get_ruler_from_rebellion_within();
-
 					owner_involved = owner_involved || owner == army_controller;
-					core_owner_involved =
-							core_owner_involved || bool(state.world.get_core_by_prov_tag_key(prov,  state.world.nation_get_identity_from_identity_holder(army_controller)));
+					core_owner_involved = core_owner_involved || bool(state.world.get_core_by_prov_tag_key(prov,  state.world.nation_get_identity_from_identity_holder(army_controller)));
 
 					for(auto r : ar.get_army().get_army_membership()) {
 						auto reg_str = r.get_regiment().get_strength();
 						if(reg_str > 0.001f) {
 							auto type = r.get_regiment().get_type();
 							auto& stats = state.world.nation_get_unit_stats(army_stats, type);
-
 							total_sieging_strength += reg_str;
-
 							if(stats.siege_or_torpedo_attack > 0.0f) {
 								strength_siege_units += reg_str;
 								max_siege_value = std::max(max_siege_value, stats.siege_or_torpedo_attack);
@@ -6574,8 +6570,7 @@ void update_siege_progress(sys::state& state) {
 		}
 
 		 if(total_sieging_strength == 0.0f) {
-			// Garrison recovers at 10% per day when not being sieged (to 100%)
-
+			 // Garrison recovers at 10% per day when not being sieged (to 100%)
 			 auto local_battles = state.world.province_get_land_battle_location(prov);
 			 if(local_battles.begin() != local_battles.end()) {
 				 // ongoing battle: do nothing
@@ -6593,12 +6588,9 @@ void update_siege_progress(sys::state& state) {
 			define:ENGINEER_UNIT_RATIO) / define:ENGINEER_UNIT_RATIO, reducing it to a minimum of 0.
 			*/
 
-			int32_t effective_fort_level =
-					std::clamp(state.world.province_get_building_level(prov, economy::province_building_type::fort) -
-												 int32_t(max_siege_value *
-																 std::min(strength_siege_units / total_sieging_strength, state.defines.engineer_unit_ratio) /
-																 state.defines.engineer_unit_ratio),
-							0, 9);
+			int32_t fort_level = state.world.province_get_building_level(prov, economy::province_building_type::fort);
+			int32_t fort_decrease = int32_t(max_siege_value * std::min(strength_siege_units / total_sieging_strength, state.defines.engineer_unit_ratio) / state.defines.engineer_unit_ratio);
+			int32_t effective_fort_level = std::clamp(fort_level - fort_decrease, 0, 9);
 
 			/*
 			We calculate the siege speed modifier as: 1 + define:RECON_SIEGE_EFFECT x greatest-reconnaissance-value-present x ((the
