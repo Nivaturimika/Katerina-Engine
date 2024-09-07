@@ -644,10 +644,7 @@ void poptype_file::life_needs(commodity_array const& value, error_handler& err, 
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
-			if(v > 80.f) {
-				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
-				v = 80.f;
-			}
+			v *= 1.f / 1000000.f; /* Needs are scaled per million pops */
 			context.outer_context.state.world.pop_type_set_life_needs(context.id, cid, v);
 		}
 	});
@@ -657,10 +654,7 @@ void poptype_file::everyday_needs(commodity_array const& value, error_handler& e
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
-			if(v > 80.f) {
-				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
-				v = 80.f;
-			}
+			v *= 1.f / 1000000.f; /* Needs are scaled per million pops */
 			context.outer_context.state.world.pop_type_set_everyday_needs(context.id, cid, v);
 		}
 	});
@@ -670,10 +664,7 @@ void poptype_file::luxury_needs(commodity_array const& value, error_handler& err
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
-			if(v > 80.f) {
-				err.accumulated_warnings += "Capped needs value " + std::to_string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
-				v = 80.f;
-			}
+			v *= 1.f / 1000000.f; /* Needs are scaled per million pops */
 			context.outer_context.state.world.pop_type_set_luxury_needs(context.id, cid, v);
 		}
 	});

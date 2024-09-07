@@ -2064,22 +2064,13 @@ public:
 		state.world.for_each_commodity([&](dcon::commodity_id cid) {
 			auto kf = state.world.commodity_get_key_factory(cid);
 			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(nat_id, kf))) {
-				auto lfn = state.world.pop_type_get_life_needs(fat_id.get_poptype(), cid)
-					* fat_id.get_size()
-					/ state.defines.ke_needs_scaling_factor
-					* state.defines.alice_lf_needs_scale;
+				auto lfn = state.world.pop_type_get_life_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
 				if(lfn > 0.f)
 					life_needs_list->row_contents.emplace_back(cid, lfn);
-				auto evn = state.world.pop_type_get_everyday_needs(fat_id.get_poptype(), cid)
-					* fat_id.get_size()
-					/ state.defines.ke_needs_scaling_factor
-					* state.defines.alice_ev_needs_scale;
+				auto evn = state.world.pop_type_get_everyday_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
 				if(evn > 0.f)
 					everyday_needs_list->row_contents.emplace_back(cid, evn);
-				auto lxn = state.world.pop_type_get_luxury_needs(fat_id.get_poptype(), cid)
-					* fat_id.get_size()
-					/ state.defines.ke_needs_scaling_factor
-					* state.defines.alice_lx_needs_scale;
+				auto lxn = state.world.pop_type_get_luxury_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
 				if(lxn > 0.f)
 					luxury_needs_list->row_contents.emplace_back(cid, lxn);
 			}
