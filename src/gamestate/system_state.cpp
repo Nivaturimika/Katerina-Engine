@@ -3886,13 +3886,13 @@ void state::single_game_tick() {
 	ai::make_defense(*this);
 	ai::make_attacks(*this);
 	ai::update_ships(*this);
-	ai::take_ai_decisions(*this);
 
 	// Once per month updates, spread out over the month
 	switch(ymd_date.day) {
 		case 1:
 			nations::update_monthly_points(*this);
 			economy::prune_factories(*this);
+			ai::take_ai_decisions(*this);
 			break;
 		case 2:
 			province::update_blockaded_cache(*this);
