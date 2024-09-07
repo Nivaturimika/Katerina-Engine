@@ -1981,17 +1981,19 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				float base_life = state.world.pop_type_get_life_needs(t, cid);
 				float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
 				float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
-
-				float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
-
-				/* Invention factor doesn't factor for life needs */
-				float demand_life = base_life *consumption_factor * pop_size * ln_mul[strata] * state.defines.alice_lf_needs_scale;
-				float demand_everyday = base_everyday * consumption_factor * pop_size * invention_factor * en_mul[strata] *  state.defines.alice_ev_needs_scale;
-				float demand_luxury = base_luxury * consumption_factor * pop_size * invention_factor * lx_mul[strata] * state.defines.alice_lx_needs_scale;
-
-				register_demand(state, n, cid, demand_life, economy_reason::pop);
-				register_demand(state, n, cid, demand_everyday, economy_reason::pop);
-				register_demand(state, n, cid, demand_luxury, economy_reason::pop);
+				for(auto nation : state.world.in_nation) {
+					if(nation.get_owned_province_count() > 0) {
+						float pop_size = state.world.nation_get_demographics(nation, demographics::to_key(state, t));
+						/* Invention factor doesn't factor for life needs */
+						float demand_life = base_life * consumption_factor * pop_size * ln_mul[strata] * state.defines.alice_lf_needs_scale;
+						float demand_everyday = base_everyday * consumption_factor * pop_size * invention_factor * en_mul[strata] * state.defines.alice_ev_needs_scale;
+						float demand_luxury = base_luxury * consumption_factor * pop_size * invention_factor * lx_mul[strata] * state.defines.alice_lx_needs_scale;
+						register_demand(state, nation, cid, demand_life, economy_reason::pop);
+						register_demand(state, nation, cid, demand_everyday, economy_reason::pop);
+						register_demand(state, nation, cid, demand_luxury, economy_reason::pop);
+					}
+					
+				}
 			}
 		}
 	}
