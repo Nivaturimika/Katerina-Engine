@@ -1873,7 +1873,7 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * total_pop * consumption_factor;
 			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * total_pop * consumption_factor;
 
-			float life_needs_fraction = (total_budget >= ln_cost ? 0.f : total_budget / ln_cost);
+			float life_needs_fraction = (total_budget >= ln_cost ? 1.f : total_budget / ln_cost);
 			total_budget -= std::min(total_budget,ln_cost);
 
 			//eliminate potential negative number before investment
@@ -1890,10 +1890,10 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				total_budget -= total_budget * state.defines.alice_invest_aristocrat;
 			}
 
-			float everyday_needs_fraction = (total_budget >= en_cost ? 0.f : std::max(0.0f, total_budget / en_cost));
+			float everyday_needs_fraction = (total_budget >= en_cost ? 1.f : std::max(0.0f, total_budget / en_cost));
 			total_budget -= std::min(total_budget, en_cost);;
 
-			float luxury_needs_fraction = (total_budget >= xn_cost ? 0.f : std::max(0.0f, total_budget / xn_cost));
+			float luxury_needs_fraction = (total_budget >= xn_cost ? 1.f : std::max(0.0f, total_budget / xn_cost));
 			total_budget -= std::min(total_budget, xn_cost);;
 
 			// induce demand across all categories
@@ -1971,23 +1971,22 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 		auto kf = state.world.commodity_get_key_factory(cid);
 		if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
-			for(const auto t : state.world.in_pop_type) {
-				auto strata = state.world.pop_type_get_strata(t);
+			for(const auto t : state.world.in_pop) {
+				
+				auto strata = state.world.pop_type_get_strata(t.get_poptype());
 				float life_weight = state.world.nation_get_life_needs_weights(n, cid);
 				float everyday_weight = state.world.nation_get_everyday_needs_weights(n, cid);
 				float luxury_weight = state.world.nation_get_luxury_needs_weights(n, cid);
 
-				float base_life = state.world.pop_type_get_life_needs(t, cid);
-				float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
-				float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
+				float base_life = state.world.pop_type_get_life_needs(t.get_poptype(), cid);
+				float base_everyday = state.world.pop_type_get_everyday_needs(t.get_poptype(), cid);
+				float base_luxury = state.world.pop_type_get_luxury_needs(t.get_poptype(), cid);
 
-				float dist_life = ln_demand_vector.get(t);
-				float dist_everyday = en_demand_vector.get(t);
-				float dist_luxury = lx_demand_vector.get(t);
+				float pop_size = t.get_size();
 
-				float demand_life = base_life * dist_life * base_demand * ln_mul[strata] * life_weight * state.defines.alice_lf_needs_scale;
-				float demand_everyday = base_everyday * dist_everyday * base_demand * invention_factor * en_mul[strata] * everyday_weight * state.defines.alice_ev_needs_scale;
-				float demand_luxury = base_luxury * dist_luxury * base_demand * invention_factor * lx_mul[strata] * luxury_weight * state.defines.alice_lx_needs_scale;
+				float demand_life = base_life *consumption_factor * pop_size * invention_factor * ln_mul[strata] * state.defines.alice_lf_needs_scale;
+				float demand_everyday = base_everyday * consumption_factor * pop_size * invention_factor * en_mul[strata] *  state.defines.alice_ev_needs_scale;
+				float demand_luxury = base_luxury * consumption_factor * pop_size * invention_factor * lx_mul[strata] * state.defines.alice_lx_needs_scale;
 
 				register_demand(state, n, cid, demand_life, economy_reason::pop);
 				register_demand(state, n, cid, demand_everyday, economy_reason::pop);
@@ -2671,24 +2670,29 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto const poor_effect = float(state.world.nation_get_poor_tax(n)) / 100.0f;
 		auto const middle_effect = float(state.world.nation_get_middle_tax(n)) / 100.0f;
 		auto const rich_effect = float(state.world.nation_get_rich_tax(n)) / 100.0f;
+		const float consumption_factor = state.defines.ke_pop_consumption_factor;
 		assert(poor_effect >= 0.f && middle_effect >= 0.f && rich_effect >= 0.f);
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			auto province = p.get_province();
 			if(state.world.province_get_nation_from_province_ownership(province) == state.world.province_get_nation_from_province_control(province)) {
 				for(auto pl : province.get_pop_location()) {
 					// Money drain when admin effectiveness is <100%
+					auto total_pop = pl.get_pop().get_size();
+					float ln_cost = state.world.nation_get_life_needs_costs(n, pl.get_pop().get_poptype()) * total_pop * consumption_factor;
+					float en_cost = state.world.nation_get_everyday_needs_costs(n, pl.get_pop().get_poptype()) * total_pop * consumption_factor;
+					float xn_cost = state.world.nation_get_luxury_needs_costs(n, pl.get_pop().get_poptype()) * total_pop * consumption_factor;
 					auto& pop_money = pl.get_pop().get_savings();
 					auto strata = culture::pop_strata(pl.get_pop().get_poptype().get_strata());
 					pop_money = std::clamp(pop_money, 0.f, 2000.f);
 					if(strata == culture::pop_strata::poor) {
 						total_poor_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * poor_effect;
+						pop_money -= pop_money * tax_eff * poor_effect - ln_cost - en_cost - xn_cost;
 					} else if(strata == culture::pop_strata::middle) {
 						total_mid_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * middle_effect;
+						pop_money -= pop_money * tax_eff * middle_effect - ln_cost - en_cost - xn_cost;
 					} else if(strata == culture::pop_strata::rich) {
 						total_rich_tax_base += pop_money;
-						pop_money -= pop_money * tax_eff * rich_effect;
+						pop_money -= pop_money * tax_eff * rich_effect - ln_cost - en_cost - xn_cost;
 					}
 					
 				}

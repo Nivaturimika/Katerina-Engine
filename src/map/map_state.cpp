@@ -75,8 +75,8 @@ glm::vec2 get_army_location(sys::state& state, dcon::province_id prov_id) {
 void update_unit_arrows(sys::state& state, display_data& map_data) {
 	map_data.unit_arrow_vertices.clear();
 	map_data.unit_arrow_counts.clear();
-	map_data.unit_arrow_starts.clear();
-
+	map_data.unit_arrow_starts.clear();	
+	
 	map_data.attack_unit_arrow_vertices.clear();
 	map_data.attack_unit_arrow_counts.clear();
 	map_data.attack_unit_arrow_starts.clear();
@@ -185,7 +185,7 @@ void update_unit_arrows(sys::state& state, display_data& map_data) {
 	map_data.capital_vertices.clear();
 	for(const auto n : state.world.in_nation) {
 		if(n.get_owned_province_count() > 0) {
-			map::make_selection_quad(state, map_data.capital_vertices, n.get_capital().get_mid_point());
+			map::make_selection_quad(state, map_data.capital_vertices, n.get_capital().get_mid_point());				
 		}
 	}
 	if(!map_data.capital_vertices.empty()) {
