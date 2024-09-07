@@ -1546,8 +1546,10 @@ public:
 	void on_update(sys::state& state) noexcept override {
 		auto pop = retrieve<dcon::pop_id>(state, parent);
 		auto mod_k = retrieve<dcon::value_modifier_key>(state, parent);
-		auto chance = trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(pop), trigger::to_generic(pop), -1);
-		set_button_text(state, text::format_percentage(chance, 1));
+		if(mod_k) {
+			auto chance = trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(pop), trigger::to_generic(pop), -1);
+			set_button_text(state, text::format_percentage(chance, 1));
+		}
 	}
 
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1557,7 +1559,9 @@ public:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto pop = retrieve<dcon::pop_id>(state, parent);
 		auto mod_k = retrieve<dcon::value_modifier_key>(state, parent);
-		additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(pop), trigger::to_generic(pop), -1);
+		if(mod_k) {
+			additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(pop), trigger::to_generic(pop), -1);
+		}
 	}
 };
 
@@ -2044,9 +2048,9 @@ public:
 		for(auto const& e : distrib) {
 			if(e.second > 0.f && index < promotion_windows.size() && promotion_windows[index]) {
 				promotion_windows[index]->set_visible(state, true);
-				Cyto::Any pt_payload = dcon::pop_type_id(e.first);
 				promotion_windows[index]->content = fat_id;
-				//promotion_windows[index]->chance
+				promotion_windows[index]->ptype = dcon::pop_type_id(e.first);
+				promotion_windows[index]->mod_key = fat_id.get_poptype().get_promotion(dcon::pop_type_id(e.first));
 				++index;
 			}
 		}
