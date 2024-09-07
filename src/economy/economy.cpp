@@ -2268,41 +2268,20 @@ struct profit_distribution {
 };
 
 profit_distribution distribute_factory_profit(sys::state const& state, dcon::state_instance_const_fat_id s, float min_wage, float total_profit) {
-	float total_min_to_pworkers =
-		min_wage * state.world.state_instance_get_demographics(s,
-			demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
-	float total_min_to_sworkers =
-		min_wage * state.world.state_instance_get_demographics(s,
-			 demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
+	float total_min_to_pworkers = min_wage * state.world.state_instance_get_demographics(s, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
+	float total_min_to_sworkers = min_wage * state.world.state_instance_get_demographics(s, demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
+	float num_pworkers = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
+	float num_sworkers = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.secondary_factory_worker));
+	float num_owners = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.capitalists));
 
-	float num_pworkers = state.world.state_instance_get_demographics(s,
-			demographics::to_key(state, state.culture_definitions.primary_factory_worker));
-	float num_sworkers = state.world.state_instance_get_demographics(s,
-			demographics::to_key(state, state.culture_definitions.secondary_factory_worker));
-	float num_owners = state.world.state_instance_get_demographics(s,
-			demographics::to_key(state, state.culture_definitions.capitalists));
-
-	auto per_pworker_profit = 0.0f;
-	auto per_sworker_profit = 0.0f;
-	auto per_owner_profit = 0.0f;
-
-	if(total_min_to_pworkers + total_min_to_sworkers <= total_profit && num_owners > 0) {
-		auto surplus = total_profit - (total_min_to_pworkers + total_min_to_sworkers);
-		per_pworker_profit = num_pworkers > 0 ? (total_min_to_pworkers + surplus * 0.1f) / num_pworkers : 0.0f;
-		per_sworker_profit = num_sworkers > 0 ? (total_min_to_sworkers + surplus * 0.2f) / num_sworkers : 0.0f;
-		per_owner_profit = (surplus * 0.7f) / num_owners;
-	} else if(total_min_to_pworkers + total_min_to_sworkers <= total_profit && num_sworkers > 0) {
-		auto surplus = total_profit - (total_min_to_pworkers + total_min_to_sworkers);
-		per_pworker_profit = num_pworkers > 0 ? (total_min_to_pworkers + surplus * 0.5f) / num_pworkers : 0.0f;
-		per_sworker_profit = num_sworkers > 0 ? (total_min_to_sworkers + surplus * 0.5f) / num_sworkers : 0.0f;
-	} else if(total_min_to_pworkers + total_min_to_sworkers <= total_profit) {
-		per_pworker_profit = num_pworkers > 0 ? total_profit / num_pworkers : 0.0f;
-	} else if(num_pworkers + num_sworkers > 0) {
-		per_pworker_profit = total_profit / (num_pworkers + num_sworkers);
-		per_sworker_profit = total_profit / (num_pworkers + num_sworkers);
-	}
-
-
+	auto n = state.world.state_instance_get_nation_from_state_ownership(s);
+	auto desired_per_pworker_profit = state.world.nation_get_life_needs_costs(n, state.culture_definitions.primary_factory_worker) * (1.f / 5.f);
+	auto desired_per_sworker_profit = state.world.nation_get_life_needs_costs(n, state.culture_definitions.secondary_factory_worker) * (1.f / 5.f);
+	auto desired_per_owner_profit = state.world.nation_get_life_needs_costs(n, state.culture_definitions.capitalists) * (1.f / 5.f);
+	auto total_desired_profit = desired_per_pworker_profit + desired_per_sworker_profit + desired_per_owner_profit;
+	auto per_owner_profit = total_profit * (desired_per_owner_profit / total_desired_profit);
+	auto per_pworker_profit = total_profit * (desired_per_pworker_profit / total_desired_profit);
+	auto per_sworker_profit = total_profit * (desired_per_sworker_profit / total_desired_profit);
 	return {
 		.per_primary_worker = per_pworker_profit,
 		.per_secondary_worker = per_sworker_profit,
@@ -2606,9 +2585,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 		acc_u = acc_u + ve::select(none_of_above && state.world.pop_type_get_has_unemployment(types), s_spending * (pop_of_type - employment) * pop_payout_factor * unemp_level * ln_costs, 0.0f);
 
-		/* Savings represent the daily income of the pop - hence, daily means it is overwriten each day with a new value
-		   w.r.t. to it's old value - no relation is given */
-		state.world.pop_set_savings(ids, ((acc_e + acc_m) + (acc_u + acc_a)));
+		/* Savings represent the daily income of the pop - hence, daily means it is overwriten each day with a new value - w.r.t. to it's old value - no relation is given */
+		state.world.pop_set_savings(ids, state.world.pop_get_savings(ids) + ((acc_e + acc_m) + (acc_u + acc_a)));
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_e);
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_m);
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_u);
@@ -2819,17 +2797,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 		/* pay factory workers / capitalists */
 		for(auto si : state.world.nation_get_state_ownership(n)) {
-			float total_profit = 0.f;
-			float rgo_owner_profit = 0.f;
-
-			float num_capitalist = state.world.state_instance_get_demographics(si.get_state(), demographics::to_key(state, state.culture_definitions.capitalists));
 			float num_aristocrat = state.world.state_instance_get_demographics(si.get_state(), demographics::to_key(state, state.culture_definitions.aristocrat));
-
-			float num_rgo_owners = num_capitalist + num_aristocrat;
-
-			auto capitalists_ratio = num_capitalist / (num_rgo_owners + 1.f);
-			auto aristocrats_ratio = num_aristocrat / (num_rgo_owners + 1.f);
-
+			float rgo_owner_profit = 0.f;
+			float total_profit = 0.f;
 			province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 				for(auto f : state.world.province_get_factory_location(p)) {
 					total_profit += std::max(0.f, f.get_factory().get_full_profit());
@@ -2847,22 +2817,16 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					}
 					float total_rgo_profit = state.world.province_get_rgo_full_profit(p);
 					float total_worker_wage = 0.0f;
-
-					if(num_rgo_owners > 0) {
-						// owners ALWAYS get "some" chunk of income
-						rgo_owner_profit += rgo_owners_cut * total_rgo_profit;
-						total_rgo_profit = (1.f - rgo_owners_cut) * total_rgo_profit;
-					}
-
-					if(total_min_to_workers <= total_rgo_profit && num_rgo_owners > 0) {
+					// owners ALWAYS get "some" chunk of income
+					rgo_owner_profit += rgo_owners_cut * total_rgo_profit;
+					total_rgo_profit = (1.f - rgo_owners_cut) * total_rgo_profit;
+					if(total_min_to_workers <= total_rgo_profit && num_aristocrat > 0.f) {
 						total_worker_wage = total_min_to_workers + (total_rgo_profit - total_min_to_workers) * 0.2f;
 						rgo_owner_profit += (total_rgo_profit - total_min_to_workers) * 0.8f;
 					} else {
 						total_worker_wage = total_rgo_profit;
 					}
-
-					auto per_worker_profit = num_workers > 0 ? total_worker_wage / num_workers : 0.0f;
-
+					auto per_worker_profit = num_workers > 0.f ? total_worker_wage / num_workers : 0.0f;
 					for(auto pl : state.world.province_get_pop_location(p)) {
 						if(pl.get_pop().get_poptype().get_is_paid_rgo_worker()) {
 							pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * per_worker_profit);
@@ -2871,8 +2835,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					}
 				}
 			});
-
-			auto const per_rgo_owner_profit = num_rgo_owners > 0 ? rgo_owner_profit / num_rgo_owners : 0.0f;
 			auto const min_wage = factory_min_wage;
 			auto profit = distribute_factory_profit(state, si.get_state(), min_wage, total_profit);
 			province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
@@ -2884,10 +2846,10 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 						pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * profit.per_secondary_worker);
 						assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 					} else if(state.culture_definitions.capitalists == pl.get_pop().get_poptype()) {
-						pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * (profit.per_owner + per_rgo_owner_profit));
+						pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * profit.per_owner);
 						assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 					} else if(state.culture_definitions.aristocrat == pl.get_pop().get_poptype()) {
-						pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * per_rgo_owner_profit);
+						pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * rgo_owner_profit);
 						assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 					}
 				}
