@@ -689,7 +689,6 @@ void pop_national_focus_button::button_action(sys::state& state) noexcept {
 	if(parent) {
 		Cyto::Any payload = dcon::state_instance_id{};
 		parent->impl_get(state, payload);
-
 		auto pop_window = static_cast<population_window*>(state.ui_state.population_subwindow);
 		if(pop_window) {
 			pop_window->focus_state = any_cast<dcon::state_instance_id>(payload);
