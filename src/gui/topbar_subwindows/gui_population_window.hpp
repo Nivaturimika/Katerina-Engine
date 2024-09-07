@@ -1650,18 +1650,46 @@ public:
 		return listbox_row_element_base<pop_details_needs_data>::get(state, payload);
 	}
 };
+
+template<size_t N>
 class pop_details_needs_listbox : public listbox_element_base<pop_details_needs_item, pop_details_needs_data> {
 public:
 	std::string_view get_row_element_name() override {
 		return "popdetail_needs_entry";
+	}
+
+	void on_update(sys::state& state) noexcept override {
+		auto const content = retrieve<pop_details_data>(state, parent);
+		row_contents.clear();
+		if(std::holds_alternative<dcon::pop_id>(content)) {
+			auto const p = std::get<dcon::pop_id>(content);
+			auto const pt = state.world.pop_get_type(p);
+			auto const n = state.world.province_get_nation_from_province_ownership(state.world.pop_get_province_from_pop_location(p));
+			for(const auto cid : state.world.in_commodity) {
+				auto kf = state.world.commodity_get_key_factory(cid);
+				if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
+					float amount = 0.f;
+					if constexpr(N == 0) {
+						amount = state.world.pop_type_get_life_needs(pt, cid) * state.world.pop_get_size(p);
+					} else if constexpr(N == 1) {
+						amount = state.world.pop_type_get_everyday_needs(pt, cid) * state.world.pop_get_size(p);
+					} else if constexpr(N == 2) {
+						amount = state.world.pop_type_get_luxury_needs(pt, cid) * state.world.pop_get_size(p);
+					}
+					if(amount > 0.f) {
+						row_contents.emplace_back(cid, amount);
+					}
+				}
+			}
+		}
+		update(state);
 	}
 };
 
 class pop_details_migration_value : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
-		auto internal_migration =
-				int64_t(demographics::get_estimated_internal_migration(state, retrieve<dcon::pop_id>(state, parent)));
+		auto internal_migration = int64_t(demographics::get_estimated_internal_migration(state, retrieve<dcon::pop_id>(state, parent)));
 		set_text(state, std::to_string(internal_migration));
 	}
 
@@ -1848,18 +1876,43 @@ public:
 	}
 };
 
+class pop_details_savings : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto const content = retrieve<pop_details_data>(state, parent);
+		if(std::holds_alternative<dcon::pop_id>(content)) {
+			auto const p = std::get<dcon::pop_id>(content);
+			set_text(state, text::format_money(state.world.pop_get_savings(p)));
+		}
+	}
+};
+
+class pop_details_expenses : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto const content = retrieve<pop_details_data>(state, parent);
+		if(std::holds_alternative<dcon::pop_id>(content)) {
+			auto fat_id = dcon::fatten(state.world, std::get<dcon::pop_id>(content));
+			auto n = fat_id.get_province_from_pop_location().get_nation_from_province_ownership();
+			// updated below ...
+			float expenses = 0.f;
+			state.world.for_each_commodity([&](dcon::commodity_id c) {
+				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_life_needs(c);
+				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_everyday_needs(c);
+				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_luxury_needs(c);
+			});
+			set_text(state, text::format_money(expenses));
+		}
+	}
+};
+
 class pop_details_window : public generic_settable_element<window_element_base, pop_details_data> {
 	pop_type_icon* type_icon = nullptr;
 	popwin_religion_type* religion_icon = nullptr;
 	simple_text_element_base* religion_text = nullptr;
 	invisible_element* income_text = nullptr;
-	simple_text_element_base* expenses_text = nullptr;
-	simple_text_element_base* savings_text = nullptr;
 	std::vector<element_base*> promotion_windows;
 	std::vector<element_base*> dist_windows;
-	pop_details_needs_listbox* life_needs_list = nullptr;
-	pop_details_needs_listbox* everyday_needs_list = nullptr;
-	pop_details_needs_listbox* luxury_needs_list = nullptr;
 
 	template<std::size_t... Targs>
 	void generate_promotion_items(sys::state& state, std::integer_sequence<std::size_t, Targs...> const&) {
@@ -1871,8 +1924,7 @@ class pop_details_window : public generic_settable_element<window_element_base, 
 			win->base_data.position.y = cell_offset.y;
 			promotion_windows.push_back(win.get());
 			add_child_to_front(std::move(win));
-		})(),
-				...);
+		})(), ...);
 	}
 
 public:
@@ -1893,10 +1945,8 @@ public:
 		}
 
 		// It should be proper to reposition the windows now
-		const xy_pair cell_offset =
-				state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdetaildistribution_start"))->second.definition].position;
-		const xy_pair cell_size =
-				state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdetaildistribution_offset"))->second.definition].position;
+		const xy_pair cell_offset = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdetaildistribution_start"))->second.definition].position;
+		const xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("popdetaildistribution_offset"))->second.definition].position;
 		xy_pair offset = cell_offset;
 		for(auto const win : dist_windows) {
 			win->base_data.position = offset;
@@ -1968,13 +2018,9 @@ public:
 			auto ptr = make_element_by_type<invisible_element>(state, id);
 			return ptr;
 		} else if(name == "expenses_value") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			expenses_text = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_expenses>(state, id);
 		} else if(name == "bank_value") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			savings_text = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_savings>(state, id);
 		} else if(name == "pop_unemployment_bar") {
 			return make_element_by_type<pop_unemployment_progress_bar>(state, id);
 		} else if(name == "lifeneed_progress") {
@@ -1984,17 +2030,11 @@ public:
 		} else if(name == "luxneed_progress") {
 			return make_element_by_type<pop_luxury_needs_progress_bar>(state, id);
 		} else if(name == "life_needs_list") {
-			auto ptr = make_element_by_type<pop_details_needs_listbox>(state, id);
-			life_needs_list = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_needs_listbox<0>>(state, id);
 		} else if(name == "everyday_needs_list") {
-			auto ptr = make_element_by_type<pop_details_needs_listbox>(state, id);
-			everyday_needs_list = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_needs_listbox<1>>(state, id);
 		} else if(name == "luxury_needs_list" || name == "luxuary_needs_list") {
-			auto ptr = make_element_by_type<pop_details_needs_listbox>(state, id);
-			luxury_needs_list = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_needs_listbox<2>>(state, id);
 		} else if(name == "religion") {
 			return make_element_by_type<generic_name_text<dcon::religion_id>>(state, id);
 		} else {
@@ -2010,15 +2050,6 @@ public:
 		auto prov_id = state.world.pop_location_get_province(state.world.pop_get_pop_location_as_pop(fat_id.id));
 		auto nat_id = state.world.province_get_nation_from_province_ownership(prov_id);
 
-		// updated below ...
-		float expenses = 0.f;
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			expenses += state.world.nation_get_effective_prices(nat_id, c) * fat_id.get_poptype().get_life_needs(c);
-			expenses += state.world.nation_get_effective_prices(nat_id, c) * fat_id.get_poptype().get_everyday_needs(c);
-			expenses += state.world.nation_get_effective_prices(nat_id, c) * fat_id.get_poptype().get_luxury_needs(c);
-		});
-		expenses_text->set_text(state, text::format_money(expenses));
-		savings_text->set_text(state, text::format_money(state.world.pop_get_savings(fat_id.id)));
 		Cyto::Any payload = fat_id.id;
 		for(auto& c : children) {
 			c->impl_set(state, payload);
@@ -2036,15 +2067,14 @@ public:
 		state.world.for_each_pop_type([&](dcon::pop_type_id ptid) {
 			auto mod_key = fat_id.get_poptype().get_promotion(ptid);
 			if(mod_key) {
-				auto chance = std::max(0.0f,
-						trigger::evaluate_additive_modifier(state, mod_key, trigger::to_generic(fat_id.id), trigger::to_generic(fat_id.id), 0));
+				auto chance = std::max(0.0f, trigger::evaluate_additive_modifier(state, mod_key, trigger::to_generic(fat_id.id), trigger::to_generic(fat_id.id), 0));
 				distrib[dcon::pop_type_id::value_base_t(ptid.index())] = chance;
 				total += chance;
 			}
 		});
 		// And then show them as appropriate!
 		size_t index = 0;
-		for(auto const& e : distrib)
+		for(auto const& e : distrib) {
 			if(e.second > 0.f && index < promotion_windows.size() && promotion_windows[index]) {
 				promotion_windows[index]->set_visible(state, true);
 				Cyto::Any pt_payload = dcon::pop_type_id(e.first);
@@ -2053,31 +2083,11 @@ public:
 				promotion_windows[index]->impl_set(state, pl_payload);
 				Cyto::Any mod_payload = state.world.pop_get_poptype(fat_id.id).get_promotion(dcon::pop_type_id(e.first));
 				promotion_windows[index]->impl_set(state, mod_payload);
-				Cyto::Any chance_payload = float(total > 0.0f ? e.second / total : 0.0f);
+				Cyto::Any chance_payload = float(e.second);
 				promotion_windows[index]->impl_set(state, chance_payload);
 				++index;
 			}
-
-		life_needs_list->row_contents.clear();
-		everyday_needs_list->row_contents.clear();
-		luxury_needs_list->row_contents.clear();
-		state.world.for_each_commodity([&](dcon::commodity_id cid) {
-			auto kf = state.world.commodity_get_key_factory(cid);
-			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(nat_id, kf))) {
-				auto lfn = state.world.pop_type_get_life_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
-				if(lfn > 0.f)
-					life_needs_list->row_contents.emplace_back(cid, lfn);
-				auto evn = state.world.pop_type_get_everyday_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
-				if(evn > 0.f)
-					everyday_needs_list->row_contents.emplace_back(cid, evn);
-				auto lxn = state.world.pop_type_get_luxury_needs(fat_id.get_poptype(), cid) * fat_id.get_size();
-				if(lxn > 0.f)
-					luxury_needs_list->row_contents.emplace_back(cid, lxn);
-			}
-		});
-		life_needs_list->update(state);
-		everyday_needs_list->update(state);
-		luxury_needs_list->update(state);
+		}
 	}
 
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {

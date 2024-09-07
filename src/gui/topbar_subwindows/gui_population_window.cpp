@@ -162,9 +162,9 @@ void describe_promotion_demotion(sys::state& state, text::columnar_layout& conte
 
 	auto owner = nations::owner_of_pop(state, ids);
 	auto promotion_chance = trigger::evaluate_additive_modifier(state, state.culture_definitions.promotion_chance,
-			trigger::to_generic(ids), trigger::to_generic(ids), 0);
+		trigger::to_generic(ids), trigger::to_generic(ids), 0);
 	auto demotion_chance = trigger::evaluate_additive_modifier(state, state.culture_definitions.demotion_chance,
-			trigger::to_generic(ids), trigger::to_generic(ids), 0);
+		trigger::to_generic(ids), trigger::to_generic(ids), 0);
 
 	auto loc = state.world.pop_get_province_from_pop_location(ids);
 	auto si = state.world.province_get_state_membership(loc);
