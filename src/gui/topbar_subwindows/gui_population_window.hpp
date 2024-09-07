@@ -10,6 +10,8 @@
 
 namespace ui {
 
+using pop_details_data = std::variant< std::monostate, dcon::pop_id>;
+
 std::vector<dcon::pop_id> const& get_pop_window_list(sys::state& state);
 dcon::pop_id get_pop_details_pop(sys::state& state);
 void describe_conversion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
@@ -1788,8 +1790,6 @@ public:
 	}
 };
 
-using pop_details_data = std::variant< std::monostate, dcon::pop_id>;
-
 class generic_rebel_name_text : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
@@ -1896,13 +1896,15 @@ public:
 	void on_create(sys::state& state) noexcept override {
 		window_element_base::on_create(state);
 		set_visible(state, false);
-		const xy_pair cell_offset{ 312, 153 };
-		for(uint32_t i = 0; i < 6 + 1; i++) {
-			auto win = make_element_by_type<pop_details_promotion_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("pop_promotion_item"))->second.definition);
-			win->base_data.position.x = cell_offset.x + (i * win->base_data.size.x);
-			win->base_data.position.y = cell_offset.y;
-			promotion_windows.push_back(win.get());
-			add_child_to_front(std::move(win));
+		{
+			const xy_pair cell_offset{ 312, 153 };
+			for(int16_t i = 0; i < 6 + 1; i++) {
+				auto win = make_element_by_type<pop_details_promotion_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("pop_promotion_item"))->second.definition);
+				win->base_data.position.x = cell_offset.x + (i * win->base_data.size.x);
+				win->base_data.position.y = cell_offset.y;
+				promotion_windows.push_back(win.get());
+				add_child_to_front(std::move(win));
+			}
 		}
 		{
 			auto win = make_element_by_type<pop_detailed_ideology_distribution>(state, state.ui_state.defs_by_name.find(state.lookup_key("distribution_window"))->second.definition);
