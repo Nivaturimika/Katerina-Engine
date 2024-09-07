@@ -666,7 +666,7 @@
 	LUA_DEFINES_LIST_ELEMENT(alice_domestic_investment_multiplier, 2.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_rgo_boost, 1.25) \
 	LUA_DEFINES_LIST_ELEMENT(alice_base_rgo_employment_bonus, 150000.0) \
-	LUA_DEFINES_LIST_ELEMENT(alice_base_rgo_efficiency_bonus, 3.0) \
+	LUA_DEFINES_LIST_ELEMENT(alice_base_rgo_efficiency_bonus, 0.5) \
 	LUA_DEFINES_LIST_ELEMENT(alice_inputs_base_factor_artisans, 1.05) \
 	LUA_DEFINES_LIST_ELEMENT(alice_output_base_factor_artisans, 0.85) \
 	LUA_DEFINES_LIST_ELEMENT(alice_inputs_base_factor, 1.0) \
@@ -690,9 +690,9 @@
 	LUA_DEFINES_LIST_ELEMENT(alice_overseas_mil, 0.1) \
 	LUA_DEFINES_LIST_ELEMENT(alice_rgo_per_size_employment, 40000.0) \
 	LUA_DEFINES_LIST_ELEMENT(alice_eval_ai_mil_everyday, 0.0) \
-	LUA_DEFINES_LIST_ELEMENT(ke_needs_scaling_factor, 125000.0) \
+	LUA_DEFINES_LIST_ELEMENT(ke_needs_scaling_factor, 166662.0) \
 	LUA_DEFINES_LIST_ELEMENT(ke_pop_payout_factor, 0.0000036) \
-	LUA_DEFINES_LIST_ELEMENT(ke_pop_consumption_factor, 0.00000005) \
+	LUA_DEFINES_LIST_ELEMENT(ke_pop_consumption_factor, 166662.0) \
 	LUA_DEFINES_LIST_ELEMENT(ke_profitability_factor, 0.04)
 
 // scales the needs values so that they are needs per this many pops

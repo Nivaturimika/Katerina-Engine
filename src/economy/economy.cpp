@@ -928,7 +928,7 @@ float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, 
 	auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff);
 	auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_eff : sys::provincial_mod_offsets::farm_rgo_eff);
 	auto specific_pmod = state.world.nation_get_rgo_goods_output(n, c);
-	return std::max(0.f, 1.f + nmod + pmod + specific_pmod);
+	return std::max(0.f, 1.f + nmod + pmod + specific_pmod + state.defines.alice_base_rgo_efficiency_bonus);
 }
 
 float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
@@ -1849,16 +1849,23 @@ void update_national_consumption(sys::state& state, dcon::nation_id n, float spe
 
 void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_demand, float invention_factor) {
 	uint32_t total_commodities = state.world.commodity_size();
-
-	static auto ln_demand_vector = state.world.pop_type_make_vectorizable_float_buffer();
-	state.world.execute_serial_over_pop_type([&](auto ids) { ln_demand_vector.set(ids, ve::fp_vector{}); });
-	static auto en_demand_vector = state.world.pop_type_make_vectorizable_float_buffer();
-	state.world.execute_serial_over_pop_type([&](auto ids) { en_demand_vector.set(ids, ve::fp_vector{}); });
-	static auto lx_demand_vector = state.world.pop_type_make_vectorizable_float_buffer();
-	state.world.execute_serial_over_pop_type([&](auto ids) { lx_demand_vector.set(ids, ve::fp_vector{}); });
-
+	
+	float ln_mul[] = {
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f };
+	float en_mul[] = {
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f };
+	float lx_mul[] = {
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f,
+		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f,
+	};
+	
 	const float consumption_factor = state.defines.ke_pop_consumption_factor;
-
+	
 	auto nation_rules = state.world.nation_get_combined_issue_rules(n);
 	bool nation_allows_investment = state.world.nation_get_is_civilized(n) && (nation_rules & (issue_rule::pop_build_factory | issue_rule::pop_expand_factory)) != 0;
 	for(auto p : state.world.nation_get_province_ownership(n)) {
@@ -1867,21 +1874,21 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			assert(t);
 			auto total_budget = pl.get_pop().get_savings();
 			auto total_pop = pl.get_pop().get_size();
+			auto strata = state.world.pop_type_get_strata(t);
 
-			//
-			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * total_pop * consumption_factor;
-			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * total_pop * consumption_factor;
-			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * total_pop * consumption_factor;
-
+			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * (total_pop / consumption_factor) * ln_mul[strata] * state.defines.alice_lf_needs_scale;
+			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * (total_pop / consumption_factor) * en_mul[strata] * invention_factor * state.defines.alice_ev_needs_scale;
+			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * (total_pop / consumption_factor) * lx_mul[strata] * invention_factor * state.defines.alice_lx_needs_scale;
+	
 			float life_needs_fraction = (total_budget >= ln_cost ? 1.f : total_budget / ln_cost);
 			total_budget -= std::min(total_budget,ln_cost);
-
+	
 			//eliminate potential negative number before investment
 			total_budget = std::max(total_budget, 0.f);
-
+	
 			//handle investment before everyday goods - they could be very hard to satisfy, depending on a mod:
 			if(!nation_allows_investment || (t != state.culture_definitions.aristocrat && t != state.culture_definitions.capitalists)) {
-
+	
 			} else if(t == state.culture_definitions.capitalists) {
 				state.world.nation_get_private_investment(n) += total_budget * state.defines.alice_invest_capitalist;
 				total_budget -= total_budget * state.defines.alice_invest_capitalist;
@@ -1889,111 +1896,45 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				state.world.nation_get_private_investment(n) += total_budget * state.defines.alice_invest_aristocrat;
 				total_budget -= total_budget * state.defines.alice_invest_aristocrat;
 			}
-
+	
 			float everyday_needs_fraction = (total_budget >= en_cost ? 1.f : std::max(0.0f, total_budget / en_cost));
 			total_budget -= std::min(total_budget, en_cost);;
-
+	
 			float luxury_needs_fraction = (total_budget >= xn_cost ? 1.f : std::max(0.0f, total_budget / xn_cost));
-			total_budget -= std::min(total_budget, xn_cost);;
-
-			// induce demand across all categories
-			// maybe we need some kind of banking and ability to save up money for future instead of spending them all...
-
-			float total_cost = ln_cost + en_cost + xn_cost;
-
-			if((total_budget > 0.f)) {
-				float life_needs_budget = total_budget * state.defines.alice_needs_lf_spend;
-				float everyday_needs_budget = total_budget * state.defines.alice_needs_ev_spend;
-				float luxury_needs_budget = total_budget * state.defines.alice_needs_lx_spend;
-
-				float induced_life_needs_demand = life_needs_budget / std::max(0.001f, ln_cost);
-				float induced_everyday_needs_demand = everyday_needs_budget / std::max(0.001f, en_cost);
-				float induced_luxury_needs_demand = luxury_needs_budget / std::max(0.001f, xn_cost);
-
-				life_needs_fraction += induced_life_needs_demand;
-				everyday_needs_fraction += induced_everyday_needs_demand;
-				luxury_needs_fraction += induced_luxury_needs_demand;
-			}
-
+			total_budget -= std::min(total_budget, xn_cost);;	
+	
 			assert(std::isfinite(life_needs_fraction));
 			assert(std::isfinite(everyday_needs_fraction));
-			assert(std::isfinite(luxury_needs_fraction));
-
-			float old_life = pl.get_pop().get_life_needs_satisfaction();
-			float old_everyday = pl.get_pop().get_everyday_needs_satisfaction();
-			float old_luxury = pl.get_pop().get_luxury_needs_satisfaction();
-
-			float old_life_to_use_in_demand_calculation = old_life;
-			float old_everyday_to_use_in_demand_calculation = old_everyday;
-			float old_luxury_to_use_in_demand_calculation = old_luxury;
-
-			float final_life_needs_fraction = life_needs_fraction;
-			float final_everyday_needs_fraction = everyday_needs_fraction;
-			float final_luxury_needs_fraction = luxury_needs_fraction;
-
-			//suppose that old satisfaction was calculated for the same conditions and find "raw" satisfaction
-			//old = raw + sub ## first summand is "raw satisfaction"
-			old_life_to_use_in_demand_calculation = std::clamp(old_life, 0.f, 1.f);
-			old_everyday_to_use_in_demand_calculation = std::clamp(old_everyday, 0.f, 1.f);
-			old_luxury_to_use_in_demand_calculation = std::clamp(old_luxury, 0.f, 1.f);
-
-			auto result_life = std::clamp(old_life_to_use_in_demand_calculation * 0.9f + life_needs_fraction * 0.1f, 0.f, 1.f);
-			auto result_everyday = std::clamp(old_everyday_to_use_in_demand_calculation * 0.9f + everyday_needs_fraction * 0.1f, 0.f, 1.f);
-			auto result_luxury = std::clamp(old_luxury_to_use_in_demand_calculation * 0.9f + luxury_needs_fraction * 0.1f, 0.f, 1.f);
-
-			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), std::clamp(old_life * 0.9f + final_life_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), std::clamp(old_everyday * 0.9f + final_everyday_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), std::clamp(old_luxury * 0.9f + final_luxury_needs_fraction * 0.01f, 0.f, 1.f));
-
-			ln_demand_vector.get(t) += result_life * total_pop * consumption_factor;
-			en_demand_vector.get(t) += result_everyday * total_pop * consumption_factor;
-			lx_demand_vector.get(t) += result_luxury * total_pop * consumption_factor;
-
-			assert(std::isfinite(ln_demand_vector.get(t)));
-			assert(std::isfinite(en_demand_vector.get(t)));
-			assert(std::isfinite(lx_demand_vector.get(t)));
+			assert(std::isfinite(luxury_needs_fraction));	
+			
+			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), life_needs_fraction);
+			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), everyday_needs_fraction);
+			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), luxury_needs_fraction);
+	
+			
 		}
 	}
-
-	float ln_mul[] = { state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f };
-	float en_mul[] = { state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f };
-	float lx_mul[] = {
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f,
-	};
-
+	
 	for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 		auto kf = state.world.commodity_get_key_factory(cid);
 		if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
 			for(const auto t : state.world.in_pop_type) {
-				
+
 				auto strata = state.world.pop_type_get_strata(t);
-				float life_weight = state.world.nation_get_life_needs_weights(n, cid);
-				float everyday_weight = state.world.nation_get_everyday_needs_weights(n, cid);
-				float luxury_weight = state.world.nation_get_luxury_needs_weights(n, cid);
+				float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
 
 				float base_life = state.world.pop_type_get_life_needs(t, cid);
 				float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
 				float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
-				for(auto nation : state.world.in_nation) {
-					if(nation.get_owned_province_count() > 0) {
-						float pop_size = state.world.nation_get_demographics(nation, demographics::to_key(state, t));
-						/* Invention factor doesn't factor for life needs */
-						float demand_life = base_life * consumption_factor * pop_size * ln_mul[strata] * state.defines.alice_lf_needs_scale;
-						float demand_everyday = base_everyday * consumption_factor * pop_size * invention_factor * en_mul[strata] * state.defines.alice_ev_needs_scale;
-						float demand_luxury = base_luxury * consumption_factor * pop_size * invention_factor * lx_mul[strata] * state.defines.alice_lx_needs_scale;
-						register_demand(state, nation, cid, demand_life, economy_reason::pop);
-						register_demand(state, nation, cid, demand_everyday, economy_reason::pop);
-						register_demand(state, nation, cid, demand_luxury, economy_reason::pop);
-					}
-					
-				}
+
+				float demand_life =  base_life * (pop_size / consumption_factor) * ln_mul[strata] * state.defines.alice_lf_needs_scale;
+				float demand_everyday =  base_everyday * (pop_size / consumption_factor) * en_mul[strata] * invention_factor * state.defines.alice_ev_needs_scale;
+				float demand_luxury =  base_luxury * (pop_size / consumption_factor) * lx_mul[strata] * invention_factor * state.defines.alice_lx_needs_scale;
+
+				register_demand(state, n, cid, demand_life, economy_reason::pop);
+				register_demand(state, n, cid, demand_everyday, economy_reason::pop);
+				register_demand(state, n, cid, demand_luxury, economy_reason::pop);
 			}
 		}
 	}
@@ -3436,11 +3377,10 @@ float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodi
 			float needs = state.world.pop_type_get_life_needs(pt, c)
 				+ state.world.pop_type_get_everyday_needs(pt, c)
 				+ state.world.pop_type_get_luxury_needs(pt, c);
-			amount += needs * state.world.nation_get_demographics(n, demographics::to_key(state, pt));
+			amount += needs * (state.world.nation_get_demographics(n, demographics::to_key(state, pt)) / state.defines.ke_needs_scaling_factor);
 		});
 	}
-	const float consumption_factor = 1.5f / state.defines.ke_needs_scaling_factor;
-	return amount * consumption_factor;
+	return amount;
 }
 
 float nation_total_imports(sys::state& state, dcon::nation_id n) {
