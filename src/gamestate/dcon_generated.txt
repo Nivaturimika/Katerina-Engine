@@ -1561,7 +1561,7 @@ object {
 	property{
 		name{ daily_net_migration }
 		type{ float }
-		tag{ unsaved }
+		tag{ saved }
 	}
 	property{
 		name{ daily_net_immigration }
