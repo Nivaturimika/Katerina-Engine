@@ -282,5 +282,6 @@ commodity_production_type get_commodity_production_type(sys::state& state, dcon:
 
 void update_land_ownership(sys::state& state);
 void update_local_subsistence_factor(sys::state& state);
+float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 
 } // namespace economy
