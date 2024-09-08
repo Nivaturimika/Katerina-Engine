@@ -1647,26 +1647,23 @@ public:
 	}
 
 	void on_update(sys::state& state) noexcept override {
-		auto const content = retrieve<pop_details_data>(state, parent);
 		row_contents.clear();
-		if(std::holds_alternative<dcon::pop_id>(content)) {
-			auto const p = std::get<dcon::pop_id>(content);
-			auto const pt = state.world.pop_get_poptype(p);
-			auto const n = state.world.province_get_nation_from_province_ownership(state.world.pop_get_province_from_pop_location(p));
-			for(const auto cid : state.world.in_commodity) {
-				auto kf = state.world.commodity_get_key_factory(cid);
-				if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
-					float amount = 0.f;
-					if constexpr(N == 0) {
-						amount = state.world.pop_type_get_life_needs(pt, cid) * state.world.pop_get_size(p);
-					} else if constexpr(N == 1) {
-						amount = state.world.pop_type_get_everyday_needs(pt, cid) * state.world.pop_get_size(p);
-					} else if constexpr(N == 2) {
-						amount = state.world.pop_type_get_luxury_needs(pt, cid) * state.world.pop_get_size(p);
-					}
-					if(amount > 0.f) {
-						row_contents.emplace_back(cid, amount);
-					}
+		auto const content = retrieve<dcon::pop_id>(state, parent);
+		auto const pt = state.world.pop_get_poptype(content);
+		auto const n = state.world.province_get_nation_from_province_ownership(state.world.pop_get_province_from_pop_location(content));
+		for(const auto cid : state.world.in_commodity) {
+			auto kf = state.world.commodity_get_key_factory(cid);
+			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
+				float amount = 0.f;
+				if constexpr(N == 0) {
+					amount = state.world.pop_type_get_life_needs(pt, cid) * state.world.pop_get_size(content);
+				} else if constexpr(N == 1) {
+					amount = state.world.pop_type_get_everyday_needs(pt, cid) * state.world.pop_get_size(content);
+				} else if constexpr(N == 2) {
+					amount = state.world.pop_type_get_luxury_needs(pt, cid) * state.world.pop_get_size(content);
+				}
+				if(amount > 0.f) {
+					row_contents.emplace_back(cid, amount);
 				}
 			}
 		}
@@ -1703,8 +1700,7 @@ public:
 class pop_details_colonial_migration_value : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
-		auto internal_migration =
-				int64_t(demographics::get_estimated_colonial_migration(state, retrieve<dcon::pop_id>(state, parent)));
+		auto internal_migration = int64_t(demographics::get_estimated_colonial_migration(state, retrieve<dcon::pop_id>(state, parent)));
 		set_text(state, std::to_string(internal_migration));
 	}
 
@@ -2020,37 +2016,25 @@ public:
 		auto fat_id = dcon::fatten(state.world, std::get<dcon::pop_id>(content));
 		auto prov_id = state.world.pop_location_get_province(state.world.pop_get_pop_location_as_pop(fat_id.id));
 		auto nat_id = state.world.province_get_nation_from_province_ownership(prov_id);
-
 		Cyto::Any payload = fat_id.id;
 		for(auto& c : children) {
 			c->impl_set(state, payload);
 			c->impl_on_update(state);
 		}
-
 		// Hide all promotion windows...
-		for(std::size_t i = 0; i < promotion_windows.size(); ++i) {
-			if(promotion_windows[i]) {
-				promotion_windows[i]->set_visible(state, false);
+		for(const auto win : promotion_windows) {
+			if(win) {
+				win->set_visible(state, false);
 			}
 		}
-		std::unordered_map<dcon::pop_type_id::value_base_t, float> distrib = {};
-		auto total = 0.f;
-		state.world.for_each_pop_type([&](dcon::pop_type_id ptid) {
-			auto mod_key = fat_id.get_poptype().get_promotion(ptid);
-			if(mod_key) {
-				auto chance = std::max(0.0f, trigger::evaluate_additive_modifier(state, mod_key, trigger::to_generic(fat_id.id), trigger::to_generic(fat_id.id), 0));
-				distrib[dcon::pop_type_id::value_base_t(ptid.index())] = chance;
-				total += chance;
-			}
-		});
-		// And then show them as appropriate!
 		size_t index = 0;
-		for(auto const& e : distrib) {
-			if(e.second > 0.f && index < promotion_windows.size() && promotion_windows[index]) {
+		for(auto const pt : state.world.in_pop_type) {
+			auto mod_k = fat_id.get_poptype().get_promotion(pt);
+			if(pt != fat_id.get_poptype() && mod_k && index < promotion_windows.size() && promotion_windows[index]) {
 				promotion_windows[index]->set_visible(state, true);
 				promotion_windows[index]->content = fat_id;
-				promotion_windows[index]->ptype = dcon::pop_type_id(e.first);
-				promotion_windows[index]->mod_key = fat_id.get_poptype().get_promotion(dcon::pop_type_id(e.first));
+				promotion_windows[index]->ptype = pt;
+				promotion_windows[index]->mod_key = mod_k;
 				++index;
 			}
 		}

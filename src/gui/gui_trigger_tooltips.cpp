@@ -1093,7 +1093,13 @@ void tf_state_scope_province(TRIGGER_DISPLAY_PARAMS) {
 			show_condition && st);
 }
 void tf_state_scope_pop(TRIGGER_DISPLAY_PARAMS) {
-	{
+	auto st = primary_slot != -1 ? ws.world.province_get_state_membership(ws.world.pop_get_province_from_pop_location(trigger::to_pop(primary_slot))) : dcon::state_instance_id{};
+	if(st) {
+		auto box = text::open_layout_box(layout, indentation);
+		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+		text::add_to_layout_box(ws, layout, box, st);
+		text::close_layout_box(layout, box);
+	} else {
 		auto box = text::open_layout_box(layout, indentation);
 		make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "containing_state"));
@@ -1107,13 +1113,7 @@ void tf_state_scope_pop(TRIGGER_DISPLAY_PARAMS) {
 		text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
 		text::close_layout_box(layout, box);
 	}
-
-	auto st = primary_slot != -1 ? ws.world.province_get_state_membership(
-																		 ws.world.pop_get_province_from_pop_location(trigger::to_pop(primary_slot)))
-															 : dcon::state_instance_id{};
-
-	display_subtriggers(tval, ws, layout, st ? trigger::to_generic(st) : -1, this_slot, from_slot, indentation + indentation_amount,
-			show_condition && st);
+	display_subtriggers(tval, ws, layout, st ? trigger::to_generic(st) : -1, this_slot, from_slot, indentation + indentation_amount, show_condition && st);
 }
 void tf_tag_scope(TRIGGER_DISPLAY_PARAMS) {
 	auto tag = trigger::payload(tval[2]).tag_id;
