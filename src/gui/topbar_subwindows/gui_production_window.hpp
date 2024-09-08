@@ -653,17 +653,8 @@ class normal_factory_background : public opaque_element_base {
 				sat >= 0.9f ? text::text_color::green : text::text_color::red
 			);
 
-			float amount =
-				base_amount
-				* input_multiplier
-				* throughput_multiplier
-				* min_input_available
-				* effective_production_scale;
-
-			float cost =
-				state.world.nation_get_effective_prices(n, cid)
-				* amount;
-
+			float amount = base_amount * input_multiplier * throughput_multiplier * min_input_available * effective_production_scale;
+			float cost = economy::commodity_effective_price(state, n, cid) * amount;
 			total_expenses += cost;
 			
 			text::add_to_layout_box(state, contents, amount_box, text::fp_two_places{ amount });
@@ -697,17 +688,8 @@ class normal_factory_background : public opaque_element_base {
 				sat >= 0.9f ? text::text_color::green : text::text_color::red
 			);
 
-			float amount =
-				base_amount
-				* input_multiplier
-				* min_e_input_available
-				* min_input_available
-				* effective_production_scale;
-
-			float cost =
-				state.world.nation_get_effective_prices(n, cid)
-				* amount;
-
+			float amount = base_amount * input_multiplier * min_e_input_available * min_input_available * effective_production_scale;
+			float cost = economy::commodity_effective_price(state, n, cid) * amount;
 			total_expenses += cost;
 
 			text::add_to_layout_box(state, contents, amount_box, text::fp_two_places{ amount });
@@ -735,10 +717,7 @@ class normal_factory_background : public opaque_element_base {
 			text::close_layout_box(contents, box);
 		};
 
-		auto output_cost_line = [&](
-			dcon::commodity_id cid,
-			float base_amount
-		) {
+		auto output_cost_line = [&](dcon::commodity_id cid, float base_amount) {
 			auto box = text::open_layout_box(contents);
 			text::layout_box name_entry = box;
 			text::layout_box amount = box;
@@ -750,17 +729,8 @@ class normal_factory_background : public opaque_element_base {
 			name_entry.x_size /= 10;
 			text::add_to_layout_box(state, contents, name_entry, state.world.commodity_get_name(cid));
 
-			float output_amount =
-				base_amount
-				* (0.75f + 0.25f * min_e_input_available)
-				* throughput_multiplier
-				* output_multiplier
-				* min_input_available
-				* effective_production_scale;
-
-			float output_cost =
-				state.world.nation_get_effective_prices(n, cid)
-				* output_amount;
+			float output_amount = base_amount * (0.75f + 0.25f * min_e_input_available) * throughput_multiplier * output_multiplier * min_input_available * effective_production_scale;
+			float output_cost = economy::commodity_effective_price(state, n, cid) * output_amount;
 
 			text::add_to_layout_box(state, contents, amount, text::fp_two_places{ output_amount });
 			text::add_to_layout_box(state, contents, cost, text::fp_currency{ output_cost }, text::text_color::green);

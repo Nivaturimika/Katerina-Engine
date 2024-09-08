@@ -1879,9 +1879,9 @@ public:
 			// updated below ...
 			float expenses = 0.f;
 			state.world.for_each_commodity([&](dcon::commodity_id c) {
-				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_life_needs(c);
-				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_everyday_needs(c);
-				expenses += state.world.nation_get_effective_prices(n, c) * fat_id.get_poptype().get_luxury_needs(c);
+				expenses += commodity_effective_price(state, n, c) * fat_id.get_poptype().get_life_needs(c);
+				expenses += commodity_effective_price(state, n, c) * fat_id.get_poptype().get_everyday_needs(c);
+				expenses += commodity_effective_price(state, n, c) * fat_id.get_poptype().get_luxury_needs(c);
 			});
 			set_text(state, text::format_money(expenses));
 		}

@@ -16,15 +16,6 @@ public:
 	}
 };
 
-class commodity_effective_price_text : public simple_text_element_base {
-public:
-	void on_update(sys::state& state) noexcept override {
-		auto n = retrieve<dcon::nation_id>(state, parent);
-		auto c = retrieve<dcon::commodity_id>(state, parent);
-		set_text(state, text::format_money(state.world.nation_get_effective_prices(n, c)));
-	}
-};
-
 class commodity_player_availability_text : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
@@ -588,7 +579,7 @@ public:
 			}
 			text::add_line(state, contents, "alice_commodity_cprice", text::variable_type::x, text::format_money(state.world.commodity_get_current_price(com)));
 			text::add_line(state, contents, "alice_commodity_cost", text::variable_type::x, text::format_money(state.world.commodity_get_cost(com)));
-			text::add_line(state, contents, "alice_commodity_eprice", text::variable_type::x, text::format_money(state.world.nation_get_effective_prices(state.local_player_nation, com)));
+			text::add_line(state, contents, "alice_commodity_eprice", text::variable_type::x, text::format_money(economy::commodity_effective_price(state.local_player_nation, com)));
 			text::add_line_break_to_layout(state, contents);
 		}
 		text::add_line(state, contents, "trade_commodity_report_1", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_total_real_demand(com) });
@@ -744,9 +735,6 @@ public:
 		} else if(name == "goods_type") {
 			return make_element_by_type<commodity_image>(state, id);
 		} else if(name == "price") {
-			auto ptr = make_element_by_type<commodity_effective_price_text>(state, id);
-			ptr->base_data.position.y += ptr->base_data.size.y / 2;
-			add_child_to_front(std::move(ptr));
 			return make_element_by_type<commodity_price_text>(state, id);
 		} else if(name == "trend_indicator") {
 			return make_element_by_type<commodity_price_trend>(state, id);

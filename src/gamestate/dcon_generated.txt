@@ -1566,7 +1566,7 @@ object {
 	property{
 		name{ daily_net_immigration }
 		type{ float }
-		tag{ unsaved }
+		tag{ save }
 	}
 	property{
 		name{ siege_progress }
@@ -3665,11 +3665,6 @@ object {
 		name{ substates_count }
 		type{ uint16_t }
 		tag{ unsaved }
-	}
-	property {
-		name{ effective_prices }
-		type{ array{commodity_id}{float} }
-		tag{ save }
 	}
 	property {
 		name{ stockpiles }
