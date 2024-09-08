@@ -405,11 +405,6 @@ object {
 		tag{ save }
 	}
 	property{
-		name{ demand_by_category }
-		type{ array{int32_t}{float} }
-		tag{ save }
-	}
-	property{
 		name{ total_consumption }
 		type{ float }
 		tag{ save }
@@ -3749,21 +3744,6 @@ object {
 	property{
 		name{ luxury_needs_costs }
 		type{ array{pop_type_id}{float} }
-		tag{ save }
-	}
-	property {
-		name{ life_needs_weights }
-		type{ array{commodity_id}{float} }
-		tag{ save }
-	}
-	property {
-		name{ everyday_needs_weights }
-		type{ array{commodity_id}{float} }
-		tag{ save }
-	}
-	property {
-		name{ luxury_needs_weights }
-		type{ array{commodity_id}{float} }
 		tag{ save }
 	}
 	property {

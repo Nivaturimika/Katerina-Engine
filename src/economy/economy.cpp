@@ -130,37 +130,26 @@ void initialize_artisan_distribution(sys::state& state) {
 	}
 }
 
-void initialize_needs_weights(sys::state& state, dcon::nation_id n) {
-	{
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			auto& w = state.world.nation_get_life_needs_weights(n, c);
-			if(state.world.commodity_get_is_life_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				w = 1.f;
-			}
-			w = 0.f;
-		});
+float pop_get_life_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	auto kf = state.world.commodity_get_key_factory(c);
+	if(state.world.commodity_get_is_life_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
+		return 1.f;
 	}
-	{
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			auto& w = state.world.nation_get_everyday_needs_weights(n, c);
-			if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				w = 1.f;
-			}
-			w = 0.f;
-		});
+	return 0.f;
+}
+float pop_get_everyday_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	auto kf = state.world.commodity_get_key_factory(c);
+	if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
+		return 1.f;
 	}
-	{
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			auto& w = state.world.nation_get_luxury_needs_weights(n, c);
-			if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				w = 1.f;
-			}
-			w = 0.f;
-		});
+	return 0.f;
+}
+float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	auto kf = state.world.commodity_get_key_factory(c);
+	if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
+		return 1.f;
 	}
+	return 0.f;
 }
 
 float pop_needs_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float need, bool is_life_need) {
@@ -184,89 +173,6 @@ Each of the pop's needs for life/everyday/luxury are multiplied by the appropria
 
 float need_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 	return 1.0f / math::sqrt(std::max(state.world.commodity_get_current_price(c), 0.001f));
-}
-
-void rebalance_needs_weights(sys::state& state, dcon::nation_id n) {
-	{
-		float total_weights = 0.0f;
-		uint32_t count = 0;
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_life_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				total_weights += weight;
-				count++;
-			}
-		});
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_life_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				auto ideal_weighting = weight / total_weights * count;
-				auto& w = state.world.nation_get_life_needs_weights(n, c);
-				w = ideal_weighting * state.defines.alice_need_drift_speed + w * (1.0f - state.defines.alice_need_drift_speed);
-
-				assert(std::isfinite(w));
-				assert(w <= count + 0.01f);
-			}
-		});
-	}
-
-	{
-		float total_weights = 0.0f;
-		uint32_t count = 0;
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				total_weights += weight;
-				count++;
-			}
-		});
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				auto ideal_weighting = weight / total_weights * count;
-				auto& w = state.world.nation_get_everyday_needs_weights(n, c);
-				w = ideal_weighting * state.defines.alice_need_drift_speed + w * (1.0f - state.defines.alice_need_drift_speed);
-
-				assert(std::isfinite(w));
-				assert(w <= count + 0.01f);
-			}
-		});
-	}
-
-	{
-		float total_weights = 0.0f;
-		uint32_t count = 0;
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				total_weights += weight;
-				count++;
-			}
-		});
-
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto kf = state.world.commodity_get_key_factory(c);
-			if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
-				auto weight = need_weight(state, n, c);
-				auto ideal_weighting = weight / total_weights * count;
-				auto& w = state.world.nation_get_luxury_needs_weights(n, c);
-				w = ideal_weighting * state.defines.alice_need_drift_speed + w * (1.0f - state.defines.alice_need_drift_speed);
-
-				assert(std::isfinite(w));
-				assert(w <= count + 0.01f);
-			}
-		});
-	}
 }
 
 void presimulate(sys::state& state) {
@@ -510,9 +416,7 @@ void initialize(sys::state& state) {
 	});
 
 	state.world.for_each_nation([&](dcon::nation_id n) {
-		initialize_needs_weights(state, n);
-
-		auto fn = fatten(state.world, n);
+		auto fn = dcon::fatten(state.world, n);
 		fn.set_administrative_spending(int8_t(50));
 		fn.set_military_spending(int8_t(25));
 		fn.set_education_spending(int8_t(25));
@@ -1928,9 +1832,6 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 		if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
 			for(const auto t : state.world.in_pop_type) {
 				auto strata = state.world.pop_type_get_strata(t);
-				float life_weight = state.world.nation_get_life_needs_weights(n, cid);
-				float everyday_weight = state.world.nation_get_everyday_needs_weights(n, cid);
-				float luxury_weight = state.world.nation_get_luxury_needs_weights(n, cid);
 				float base_life = state.world.pop_type_get_life_needs(t, cid);
 				float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
 				float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
@@ -1983,19 +1884,15 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 		if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 			float effective_price = state.world.nation_get_effective_prices(n, c);
 			assert(effective_price >= 0.f);
-			auto ln_weight = state.world.nation_get_life_needs_weights(n, c);
-			auto en_weight = state.world.nation_get_everyday_needs_weights(n, c);
-			auto lx_weight = state.world.nation_get_luxury_needs_weights(n, c);
-
 			state.world.for_each_pop_type([&](dcon::pop_type_id ids) {
 				auto ln_base = state.world.pop_type_get_life_needs(ids, c);
-				auto ln = ln_base * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)] * ln_weight * state.defines.alice_lf_needs_scale;
+				auto ln = ln_base * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_life_needs_costs(n, ids, ln + state.world.nation_get_life_needs_costs(n, ids));
 				auto en_base = state.world.pop_type_get_everyday_needs(ids, c);
-				auto en = en_base * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)] * en_weight * state.defines.alice_ev_needs_scale;
+				auto en = en_base * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_everyday_needs_costs(n, ids, en + state.world.nation_get_everyday_needs_costs(n, ids));
 				auto lx_base = state.world.pop_type_get_luxury_needs(ids, c);
-				auto lx = lx_base * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)] * lx_weight * state.defines.alice_lx_needs_scale;
+				auto lx = lx_base * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_luxury_needs_costs(n, ids, lx + state.world.nation_get_luxury_needs_costs(n, ids));
 				assert(std::isfinite(state.world.nation_get_life_needs_costs(n, ids)) && state.world.nation_get_life_needs_costs(n, ids) >= 0.f);
 				assert(std::isfinite(state.world.nation_get_everyday_needs_costs(n, ids)) && state.world.nation_get_everyday_needs_costs(n, ids) >= 0.f);
@@ -2594,15 +2491,15 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 				if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 					auto sat = state.world.nation_get_demand_satisfaction(n, c);
 
-					auto ln_val = state.world.pop_type_get_life_needs(pt, c) * state.world.nation_get_life_needs_weights(n, c);
+					auto ln_val = state.world.pop_type_get_life_needs(pt, c) * pop_get_life_needs_weight(state, n, c);
 					ln_total += ln_val;
 					ln_max.get(pt) += ln_val * sat;
 
-					auto en_val = state.world.pop_type_get_everyday_needs(pt, c) * state.world.nation_get_everyday_needs_weights(n, c);
+					auto en_val = state.world.pop_type_get_everyday_needs(pt, c) * pop_get_everyday_needs_weight(state, n, c);
 					en_total += en_val;
 					en_max.get(pt) += en_val * sat;
 
-					auto lx_val = state.world.pop_type_get_luxury_needs(pt, c) * state.world.nation_get_luxury_needs_weights(n, c);
+					auto lx_val = state.world.pop_type_get_luxury_needs(pt, c) * pop_get_luxury_needs_weight(state, n, c);
 					lx_total += lx_val;
 					lx_max.get(pt) += lx_val * sat;
 				}
@@ -2890,7 +2787,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		advance_construction(state, n);
 
 		// shift needs weights
-		rebalance_needs_weights(state, n);
 		adjust_artisan_balance(state, n);
 	});
 
