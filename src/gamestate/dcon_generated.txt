@@ -3370,6 +3370,7 @@ object {
 	property {
 		name{ max_building_level }
 		type{ array{economy::province_building_type}{uint8_t} }
+		tag{ unsaved }
 	}
 	property {
 		name{ current_modifiers }

@@ -2047,6 +2047,11 @@ float pop_min_wage_factor(sys::state& state, dcon::nation_id n) {
 	return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::minimum_wage);
 }
 
+float pop_artisan_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
+	float life = state.world.nation_get_life_needs_costs(n, state.culture_definitions.artisans);
+	float everyday = state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
+	return min_wage_factor * (life + everyday) * 1.1f;
+}
 
 float pop_farmer_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
 	float life = state.world.nation_get_life_needs_costs(n, state.culture_definitions.farmers);
