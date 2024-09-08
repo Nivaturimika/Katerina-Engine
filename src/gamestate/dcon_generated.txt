@@ -1561,12 +1561,12 @@ object {
 	property{
 		name{ daily_net_migration }
 		type{ float }
-		tag{ saved }
+		tag{ save }
 	}
 	property{
 		name{ daily_net_immigration }
 		type{ float }
-		tag{ unsaved }
+		tag{ save }
 	}
 	property{
 		name{ siege_progress }
