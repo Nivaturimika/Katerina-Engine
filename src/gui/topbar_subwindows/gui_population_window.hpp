@@ -1655,12 +1655,13 @@ public:
 			auto kf = state.world.commodity_get_key_factory(cid);
 			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
 				float amount = 0.f;
+				float pop_size = state.world.pop_get_size(content);
 				if constexpr(N == 0) {
-					amount = state.world.pop_type_get_life_needs(pt, cid);
+					amount = state.world.pop_type_get_life_needs(pt, cid) * (pop_size / state.defines.alice_lf_needs_scale);
 				} else if constexpr(N == 1) {
-					amount = state.world.pop_type_get_everyday_needs(pt, cid);
+					amount = state.world.pop_type_get_everyday_needs(pt, cid) * (pop_size / state.defines.alice_ev_needs_scale);
 				} else if constexpr(N == 2) {
-					amount = state.world.pop_type_get_luxury_needs(pt, cid);
+					amount = state.world.pop_type_get_luxury_needs(pt, cid) * (pop_size / state.defines.alice_lx_needs_scale);
 				}
 				if(amount > 0.f) {
 					row_contents.emplace_back(cid, amount);
