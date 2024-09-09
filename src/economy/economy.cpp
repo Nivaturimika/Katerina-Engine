@@ -1731,9 +1731,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			auto total_pop = pl.get_pop().get_size();
 
 			//
-			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * (total_pop / state.defines.ke_pop_consumption_factor) * consumption_factor;
-			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * (total_pop / state.defines.ke_pop_consumption_factor) * consumption_factor;
-			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * (total_pop / state.defines.ke_pop_consumption_factor) * consumption_factor;
+			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * (total_pop / state.defines.alice_lf_needs_scale) * consumption_factor;
+			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * (total_pop / state.defines.alice_ev_needs_scale) * consumption_factor;
+			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * (total_pop / state.defines.alice_lx_needs_scale) * consumption_factor;
 
 			float life_needs_fraction = (total_budget >= ln_cost ? 1.f : total_budget / ln_cost);
 			total_budget -= std::min(total_budget,ln_cost);
@@ -1833,9 +1833,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
 
 				/* Invention factor doesn't factor for life needs */
-				float demand_life = base_life * consumption_factor * (pop_size / state.defines.ke_pop_consumption_factor) * ln_mul[strata];
-				float demand_everyday = base_everyday * consumption_factor * (pop_size / state.defines.ke_pop_consumption_factor) * invention_factor * en_mul[strata];
-				float demand_luxury = base_luxury * consumption_factor * (pop_size / state.defines.ke_pop_consumption_factor) * invention_factor * lx_mul[strata];
+				float demand_life = base_life * consumption_factor * (pop_size / state.defines.alice_lf_needs_scale) * ln_mul[strata];
+				float demand_everyday = base_everyday * consumption_factor * (pop_size / state.defines.alice_ev_needs_scale) * invention_factor * en_mul[strata];
+				float demand_luxury = base_luxury * consumption_factor * (pop_size / state.defines.alice_lx_needs_scale) * invention_factor * lx_mul[strata];
 				register_demand(state, n, cid, demand_life);
 				register_demand(state, n, cid, demand_everyday);
 				register_demand(state, n, cid, demand_luxury);
