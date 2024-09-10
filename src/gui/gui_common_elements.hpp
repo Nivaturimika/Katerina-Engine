@@ -658,8 +658,9 @@ public:
 		auto disarm_factor = is_disarmed ? state.defines.disarmament_army_hit : 1.f;
 		auto supply_mod = std::max(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::supply_consumption) + 1.0f, 0.1f);
 		auto avg_land_score = state.world.nation_get_averge_land_unit_score(n);
-		auto gen_range = state.world.nation_get_leader_loyalty(n);
 		auto num_capital_ships = state.world.nation_get_capital_ship_score(n);
+		auto gen_range = state.world.nation_get_leader_loyalty(n);
+		auto num_leaders = int32_t(gen_range.end() - gen_range.begin());
 		text::add_line(state, contents, "military_score_explain_1", text::variable_type::x, text::fp_two_places{ num_capital_ships });
 		text::add_line(state, contents, "military_score_explain_2", text::variable_type::x, text::int_wholenum{ recruitable });
 		text::add_line(state, contents, "military_score_explain_3", text::variable_type::x, text::int_wholenum{ active_regs });
@@ -667,7 +668,7 @@ public:
 		text::add_line(state, contents, "military_score_explain_5", text::variable_type::x, text::fp_two_places{ supply_mod });
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::supply_consumption, true);
 		text::add_line(state, contents, "military_score_explain_6", text::variable_type::x, text::fp_two_places{ avg_land_score });
-		//text::add_line(state, contents, "military_score_explain_7", text::variable_type::x, text::fp_two_places{ num_leaders });
+		text::add_line(state, contents, "military_score_explain_7", text::variable_type::x, text::int_wholenum{ num_leaders });
 	}
 };
 
