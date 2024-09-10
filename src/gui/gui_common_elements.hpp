@@ -561,6 +561,18 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		return std::to_string(int32_t(nations::prestige_score(state, nation_id)));
 	}
+
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		text::add_line_break_to_layout(state, contents);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::prestige, true);
+		text::add_line_break_to_layout(state, contents);
+		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::permanent_prestige, true);
+	}
 };
 
 class nation_industry_score_text : public standard_nation_text {
@@ -676,22 +688,7 @@ class nation_total_score_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto fat_id = dcon::fatten(state.world, nation_id);
-		return std::to_string(
-				int32_t(nations::prestige_score(state, nation_id) + fat_id.get_industrial_score() + fat_id.get_military_score()));
-	}
-};
-
-class nation_ppp_gdp_text : public standard_nation_text {
-public:
-	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
-		return "N/A";
-	}
-};
-
-class nation_ppp_gdp_per_capita_text : public standard_nation_text {
-public:
-	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
-		return "N/A";
+		return std::to_string(int32_t(nations::prestige_score(state, nation_id) + fat_id.get_industrial_score() + fat_id.get_military_score()));
 	}
 };
 
@@ -846,8 +843,7 @@ public:
 		uint32_t num_factories = 0;
 		for(auto si : state.world.nation_get_state_ownership(nation_id)) {
 			province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
-				num_factories +=
-						uint32_t(state.world.province_get_factory_location(p).end() - state.world.province_get_factory_location(p).begin());
+				num_factories += uint32_t(state.world.province_get_factory_location(p).end() - state.world.province_get_factory_location(p).begin());
 			});
 		}
 		return std::to_string(num_factories);
@@ -857,10 +853,7 @@ public:
 class nation_provinces_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
-		size_t num_provinces = 0;
-		for(auto si : state.world.nation_get_state_ownership(nation_id))
-			province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) { ++num_provinces; });
-		return std::to_string(num_provinces);
+		return std::to_string(state.world.nation_get_owned_province_count(nation_id));
 	}
 };
 
@@ -878,7 +871,7 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto militancy = state.world.nation_get_demographics(nation_id, demographics::militancy);
 		auto total_pop = state.world.nation_get_demographics(nation_id, demographics::total);
-		return text::format_float(militancy / total_pop);
+		return text::format_float(total_pop == 0.f ? 0.f : militancy / total_pop);
 	}
 };
 
@@ -887,7 +880,7 @@ public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto consciousness = state.world.nation_get_demographics(nation_id, demographics::consciousness);
 		auto total_pop = state.world.nation_get_demographics(nation_id, demographics::total);
-		return text::format_float(consciousness / total_pop);
+		return text::format_float(total_pop == 0.f ? 0.f : consciousness / total_pop);
 	}
 };
 
@@ -897,6 +890,32 @@ public:
 		auto fcp = nations::free_colonial_points(state, nation_id);
 		auto mcp = nations::max_colonial_points(state, nation_id);
 		return text::format_ratio(fcp, mcp);
+	}
+	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+		return tooltip_behavior::variable_tooltip;
+	}
+	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto n = retrieve<dcon::nation_id>(state, parent);
+		text::substitution_map sub;
+		std::string value = text::prettify(nations::free_colonial_points(state, n));
+		text::add_to_substitution_map(sub, text::variable_type::value, std::string_view(value));
+		auto box = text::open_layout_box(contents, 0);
+		text::localised_format_box(state, contents, box, std::string_view("colonial_points_from_technology"), sub);
+		text::add_space_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, text::format_float(nations::colonial_points_from_technology(state, n), 1), text::text_color::green);
+		text::add_line_break_to_layout_box(state, contents, box);
+		text::localised_format_box(state, contents, box, std::string_view("colonial_points_from_naval_bases"), sub);
+		text::add_space_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, text::format_float(nations::colonial_points_from_naval_bases(state, n), 1), text::text_color::green);
+		text::add_line_break_to_layout_box(state, contents, box);
+		text::localised_format_box(state, contents, box, std::string_view("colonial_points_from_ships"), sub);
+		text::add_space_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, text::format_float(nations::colonial_points_from_ships(state, n), 1), text::text_color::green);
+		text::add_line_break_to_layout_box(state, contents, box);
+		text::localised_format_box(state, contents, box, std::string_view("used_colonial_maintenance"), sub);
+		text::add_space_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, text::format_float(nations::used_colonial_points(state, n), 1), text::text_color::red);
+		text::close_layout_box(contents, box);
 	}
 };
 
@@ -936,16 +955,15 @@ class nation_literacy_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto literacy = state.world.nation_get_demographics(nation_id, demographics::literacy);
-		auto total_pop = std::max(1.0f, state.world.nation_get_demographics(nation_id, demographics::total));
-		return text::format_percentage(literacy / total_pop, 1);
+		auto total_pop = state.world.nation_get_demographics(nation_id, demographics::total);
+		return text::format_percentage(total_pop == 0.f ? 0.f : literacy / total_pop, 1);
 	}
 };
 
 class nation_infamy_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
-		auto fat_id = dcon::fatten(state.world, nation_id);
-		return text::format_float(fat_id.get_infamy(), 2);
+		return text::format_float(state.world.nation_get_infamy(nation_id), 2);
 	}
 };
 
@@ -961,9 +979,8 @@ class nation_current_research_text : public standard_nation_text {
 public:
 	std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 		auto tech_id = nations::current_research(state, nation_id);
-		if(tech_id) {
+		if(tech_id)
 			return text::get_name_as_string(state, dcon::fatten(state.world, tech_id));
-		}
 		// Red is not very contrast
 		return (state.user_settings.color_blind_mode == sys::color_blind_mode::none ? "?R" : "")
 			+ text::produce_simple_string(state, "tb_tech_no_current");
@@ -1009,12 +1026,11 @@ public:
 		auto base = state.defines.suppression_points_gain_base;
 		auto nmod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::suppression_points_modifier) + 1.0f;
 		auto bmod = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.bureaucrat)) /
-						std::max(state.world.nation_get_demographics(n, demographics::total), 1.0f) * state.defines.suppress_bureaucrat_factor;
+			std::max(state.world.nation_get_demographics(n, demographics::total), 1.0f) * state.defines.suppress_bureaucrat_factor;
 
 		text::add_line(state, contents, "sup_point_gain", text::variable_type::val, text::fp_two_places{base * nmod * bmod});
 		text::add_line_break_to_layout(state, contents);
-		text::add_line(state, contents, "sup_point_explain", text::variable_type::x, text::fp_two_places{base},
-				text::variable_type::y, text::fp_three_places{bmod}, text::variable_type::val, text::fp_two_places{nmod});
+		text::add_line(state, contents, "sup_point_explain", text::variable_type::x, text::fp_two_places{base}, text::variable_type::y, text::fp_three_places{bmod}, text::variable_type::val, text::fp_two_places{nmod});
 
 		text::add_line_break_to_layout(state, contents);
 		active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::suppression_points_modifier, true);

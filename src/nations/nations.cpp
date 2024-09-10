@@ -691,15 +691,14 @@ int32_t max_national_focuses(sys::state& state, dcon::nation_id n) {
 	- number of national focuses: the lesser of total-accepted-and-primary-culture-population / define:NATIONAL_FOCUS_DIVIDER and
 	1 + the number of national focuses provided by technology.
 	*/
-	float relevant_pop =
-			state.world.nation_get_demographics(n, demographics::to_key(state, state.world.nation_get_primary_culture(n)));
+	float relevant_pop = state.world.nation_get_demographics(n, demographics::to_key(state, state.world.nation_get_primary_culture(n)));
 	for(auto ac : state.world.in_culture) {
-		if(state.world.nation_get_accepted_cultures(n, ac))
+		if(nations::nation_accepts_culture(state, n, ac)) {
 			relevant_pop += state.world.nation_get_demographics(n, demographics::to_key(state, ac));
+		}
 	}
-
 	return std::max(1, std::min(int32_t(relevant_pop / state.defines.national_focus_divider),
-												 int32_t(1 + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_national_focus))));
+		int32_t(1 + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_national_focus))));
 }
 
 int32_t national_focuses_in_use(sys::state& state, dcon::nation_id n) {

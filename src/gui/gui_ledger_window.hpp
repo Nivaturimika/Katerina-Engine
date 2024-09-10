@@ -198,7 +198,7 @@ public:
 			add_child_to_front(std::move(ptr));
 		}
 		xy_pair cell_offset{int16_t(country_flag->base_data.position.x + country_flag->base_data.size.x), 0};
-		auto cell_width = (972 - cell_offset.x) / 8;
+		auto cell_width = (972 - cell_offset.x) / 6;
 		auto apply_offset = [&](auto& ptr) {
 			ptr->base_data.position = cell_offset;
 			ptr->base_data.size.x = int16_t(cell_width);
@@ -242,18 +242,6 @@ public:
 		// Total score
 		{
 			auto ptr = make_element_by_type<nation_total_score_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
-			apply_offset(ptr);
-			add_child_to_front(std::move(ptr));
-		}
-		{
-			auto ptr = make_element_by_type<nation_ppp_gdp_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
-			apply_offset(ptr);
-			add_child_to_front(std::move(ptr));
-		}
-		{
-			auto ptr = make_element_by_type<nation_ppp_gdp_per_capita_text>(state,
 					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
 			apply_offset(ptr);
 			add_child_to_front(std::move(ptr));
