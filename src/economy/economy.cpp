@@ -15,6 +15,9 @@ namespace economy {
 constexpr float pop_payout_factor = 1.f;
 constexpr float consumption_factor = 1.f;
 
+constexpr float aristocrat_investment_ratio = 0.25f;
+constexpr float capitalist_investment_ratio = 0.5f;
+
 void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 	state.world.nation_get_real_demand(n, commodity_type) += amount;
 	assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
@@ -1745,11 +1748,11 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			if(!nation_allows_investment || (t != state.culture_definitions.aristocrat && t != state.culture_definitions.capitalists)) {
 
 			} else if(t == state.culture_definitions.capitalists) {
-				state.world.nation_get_private_investment(n) += total_budget * state.defines.alice_invest_capitalist;
-				total_budget -= total_budget * state.defines.alice_invest_capitalist;
+				state.world.nation_get_private_investment(n) += total_budget * capitalist_investment_ratio;
+				total_budget -= total_budget * capitalist_investment_ratio;
 			} else {
-				state.world.nation_get_private_investment(n) += total_budget * state.defines.alice_invest_aristocrat;
-				total_budget -= total_budget * state.defines.alice_invest_aristocrat;
+				state.world.nation_get_private_investment(n) += total_budget * aristocrat_investment_ratio;
+				total_budget -= total_budget * aristocrat_investment_ratio;
 			}
 
 			float everyday_needs_fraction = (total_budget >= en_cost ? 1.f : std::max(0.0f, total_budget / en_cost));
