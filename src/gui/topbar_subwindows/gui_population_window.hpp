@@ -1548,7 +1548,10 @@ public:
 		auto mod_k = retrieve<dcon::value_modifier_key>(state, parent);
 		if(mod_k) {
 			auto chance = trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(pop), trigger::to_generic(pop), -1);
-			set_button_text(state, text::format_percentage(chance, 1));
+			if(chance < 0.f) {
+				chance = 0.f;
+			}
+			set_button_text(state, (chance > 0.f ? "?G" : "") + text::format_percentage(chance, 1));
 		}
 	}
 
@@ -1605,29 +1608,26 @@ public:
 	}
 };
 
-using pop_details_needs_data = std::pair< dcon::commodity_id, float> ;
+using pop_details_needs_data = std::pair<dcon::commodity_id, float>;
+
+class pop_details_needs_value : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto content = retrieve<pop_details_needs_data>(state, parent);
+		set_text(state, text::format_float(content.second, 2));
+	}
+};
 
 class pop_details_needs_item : public listbox_row_element_base<pop_details_needs_data> {
-	commodity_image* commodity_icon = nullptr;
-	simple_text_element_base* value_text = nullptr;
-
 public:
 	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 		if(name == "goods_type") {
-			auto ptr = make_element_by_type<commodity_image>(state, id);
-			commodity_icon = ptr.get();
-			return ptr;
+			return make_element_by_type<commodity_image>(state, id);
 		} else if(name == "value") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			value_text = ptr.get();
-			return ptr;
+			return make_element_by_type<pop_details_needs_value>(state, id);
 		} else {
 			return nullptr;
 		}
-	}
-
-	void on_update(sys::state& state) noexcept override {
-		value_text->set_text(state, text::format_float(content.second, 1));
 	}
 
 	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {

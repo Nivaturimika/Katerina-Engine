@@ -2226,9 +2226,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 
 		auto const min_wage_factor = pop_min_wage_factor(state, n);
 		float factory_min_wage = pop_factory_min_wage(state, n, min_wage_factor);
-		float artisan_min_wage = (
-			1.0f * state.world.nation_get_life_needs_costs(n, state.culture_definitions.artisans)
-			+ 0.5f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans));
+		float artisan_min_wage = pop_artisan_min_wage(state, n, min_wage_factor);
 		float farmer_min_wage = pop_farmer_min_wage(state, n, min_wage_factor);
 		float laborer_min_wage = pop_laborer_min_wage(state, n, min_wage_factor);
 
