@@ -91,22 +91,65 @@ public:
 	}
 };
 
+template<typename T>
 class military_unit_morale_progress_bar : public vertical_progress_bar {
 public:
+	void on_update(sys::state& state) noexcept override {
+		auto container = retrieve<military_unit_info<T>>(state, parent);
+		if(!std::holds_alternative<T>(container))
+			return;
+		auto unit = std::get<T>(container);
+		float total = 0.f;
+		float value = 0.f;
+		if constexpr(std::is_same_v<T, dcon::army_id>) {
+			for(auto const r : state.world.army_get_army_membership(unit)) {
+				total += 1.f;
+				value += r.get_regiment().get_org();
+			}
+		} else {
+			for(auto const r : state.world.navy_get_navy_membership(unit)) {
+				total += 1.f;
+				value += r.get_ship().get_org();
+			}
+		}
+		progress = total == 0.f ? 0.f : value / total;
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, std::string_view("military_morale_tooltip"), text::variable_type::value,
-				uint8_t(progress * 100));
+		text::localised_single_sub_box(state, contents, box, std::string_view("military_morale_tooltip"), text::variable_type::value, uint8_t(progress * 100));
 		text::close_layout_box(contents, box);
 	}
 };
 
+template<typename T>
 class military_unit_strength_progress_bar : public vertical_progress_bar {
 public:
+	void on_update(sys::state& state) noexcept override {
+		auto container = retrieve<military_unit_info<T>>(state, parent);
+		if(!std::holds_alternative<T>(container))
+			return;
+		auto unit = std::get<T>(container);
+		float total = 0.f;
+		float value = 0.f;
+		if constexpr(std::is_same_v<T, dcon::army_id>) {
+			for(auto const r : state.world.army_get_army_membership(unit)) {
+				total += 1.f;
+				value += r.get_regiment().get_strength();
+			}
+		} else {
+			for(auto const r : state.world.navy_get_navy_membership(unit)) {
+				total += 1.f;
+				value += r.get_ship().get_strength();
+			}
+		}
+		progress = total == 0.f ? 0.f : value / total;
+	}
+
 	tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 		return tooltip_behavior::variable_tooltip;
 	}
@@ -114,8 +157,7 @@ public:
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 		auto box = text::open_layout_box(contents, 0);
 		// This should change to use "military_shipstrength_tooltip" instead for naval units
-		text::localised_single_sub_box(state, contents, box, std::string_view("military_strength_tooltip2"),
-				text::variable_type::percent, uint8_t(progress * 100));
+		text::localised_single_sub_box(state, contents, box, std::string_view("military_strength_tooltip2"), text::variable_type::percent, uint8_t(progress * 100));
 		text::close_layout_box(contents, box);
 	}
 };
@@ -282,8 +324,8 @@ class military_unit_entry : public listbox_row_element_base<military_unit_info<T
 	military_unit_building_progress_bar<T>* unit_building_progress = nullptr;
 	simple_text_element_base* unit_regiments_text = nullptr;
 	simple_text_element_base* unit_men_text = nullptr;
-	military_unit_morale_progress_bar* unit_morale_progress = nullptr;
-	military_unit_strength_progress_bar* unit_strength_progress = nullptr;
+	military_unit_morale_progress_bar<T>* unit_morale_progress = nullptr;
+	military_unit_strength_progress_bar<T>* unit_strength_progress = nullptr;
 	image_element_base* unit_moving_icon = nullptr;
 	image_element_base* unit_digin_icon = nullptr;
 	image_element_base* unit_combat_icon = nullptr;
@@ -328,11 +370,11 @@ public:
 			unit_men_text = ptr.get();
 			return ptr;
 		} else if(name == "morale_progress") {
-			auto ptr = make_element_by_type<military_unit_morale_progress_bar>(state, id);
+			auto ptr = make_element_by_type<military_unit_morale_progress_bar<T>>(state, id);
 			unit_morale_progress = ptr.get();
 			return ptr;
 		} else if(name == "strength_progress") {
-			auto ptr = make_element_by_type<military_unit_strength_progress_bar>(state, id);
+			auto ptr = make_element_by_type<military_unit_strength_progress_bar<T>>(state, id);
 			unit_strength_progress = ptr.get();
 			return ptr;
 		} else if(name == "moving") {
