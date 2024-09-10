@@ -2168,12 +2168,12 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 		// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 		auto poly_fn = [&](float x) {
 			return e.coeff[0] + e.coeff[1] * x + e.coeff[2] * x * x + e.coeff[3] * x * x * x;
-		};
+			};
 		auto dpoly_fn = [&](float x) {
 			// y = a + 1bx^1 + 1cx^2 + 1dx^3
 			// y = 0 + 1bx^0 + 2cx^1 + 3dx^2
 			return e.coeff[1] + 2.f * e.coeff[2] * x + 3.f * e.coeff[3] * x * x;
-		};
+			};
 
 
 		//cutting box if graph goes outside
@@ -2187,7 +2187,7 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 				right = (1.f - e.coeff[0]) / e.coeff[1];
 			} else if(e.coeff[1] < -0.01f) {
 				left = (1.f - e.coeff[0]) / e.coeff[1];
-				right = (- e.coeff[0]) / e.coeff[1];
+				right = (-e.coeff[0]) / e.coeff[1];
 			}
 		} else {
 			while(((poly_fn(left) < 0.f) || (poly_fn(left) > 1.f)) && (left < 1.f)) {
@@ -2233,8 +2233,9 @@ void display_data::set_text_lines(sys::state& state, std::vector<text_line_gener
 		if(font_size_index > 45.f) {
 			font_size_index = 45.f;
 		}
-		if (font_size_index > 5.f)
+		if(font_size_index > 5.f) {
 			font_size_index = 5.f * std::round(font_size_index / 5.f);
+		}
 
 		size = std::pow(1.618034f, font_size_index / 5.f);
 
