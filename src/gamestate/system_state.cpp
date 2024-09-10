@@ -67,17 +67,25 @@ void create_in_game_windows(sys::state& state) {
 		}
 	});
 	*/
-	state.world.for_each_province([&](dcon::province_id id) {
+	province::for_each_land_province(state, [&](dcon::province_id id) {
 		auto ptr = ui::make_element_by_type<ui::mobilization_counter_window>(state, "mobilization_mapicon");
 		static_cast<ui::mobilization_counter_window*>(ptr.get())->prov = id;
 		state.ui_state.units_root->add_child_to_front(std::move(ptr));
 	});
+	for(const auto sdef : state.world.in_state_definition) {
+		auto prange = sdef.get_abstract_state_membership();
+		if(prange.begin() != prange.end()) {
+			auto ptr = ui::make_element_by_type<ui::colonization_counter_window>(state, "colonization_mapicon");
+			static_cast<ui::colonization_counter_window*>(ptr.get())->prov = (*prange.begin()).get_province();
+			state.ui_state.colonizations_root->add_child_to_front(std::move(ptr));
+		}
+	}
 	state.world.for_each_province([&](dcon::province_id id) {
 		auto ptr = ui::make_element_by_type<ui::unit_counter_window<false>>(state, "unit_mapicon");
 		static_cast<ui::unit_counter_window<false>*>(ptr.get())->prov = id;
 		state.ui_state.units_root->add_child_to_front(std::move(ptr));
 	});
-	state.world.for_each_province([&](dcon::province_id id) {
+	province::for_each_land_province(state, [&](dcon::province_id id) {
 		if(state.world.province_get_port_to(id)) {
 			auto ptr = ui::make_element_by_type<ui::unit_counter_window<true>>(state, "unit_mapicon");
 			static_cast<ui::unit_counter_window<true>*>(ptr.get())->prov = id;
@@ -218,6 +226,7 @@ void create_in_game_windows(sys::state& state) {
 	}
 	state.ui_state.rgos_root->impl_on_update(state);
 	state.ui_state.units_root->impl_on_update(state);
+	state.ui_state.colonizations_root->impl_on_update(state);
 }
 }
 
@@ -345,6 +354,10 @@ void state::on_mouse_wheel(int32_t x, int32_t y, key_modifiers mod, float amount
 	auto belongs_on_map = [&](ui::element_base* b) {
 		while(b != nullptr) {
 			if(b == ui_state.units_root.get())
+				return true;
+			if(b == ui_state.colonizations_root.get())
+				return true;
+			if(b == ui_state.rgos_root.get())
 				return true;
 			b = b->parent;
 		}

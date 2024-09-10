@@ -240,6 +240,7 @@ struct construction_status {
 	bool is_under_construction = false;
 };
 
+construction_status state_building_construction(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t);
 construction_status province_building_construction(sys::state& state, dcon::province_id, province_building_type t);
 construction_status factory_upgrade(sys::state& state, dcon::factory_id f);
 

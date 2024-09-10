@@ -66,6 +66,10 @@ bool belongs_on_map(sys::state& state, ui::element_base* checked_element) {
 	while(checked_element != nullptr) {
 		if(checked_element == state.ui_state.units_root.get())
 			return true;
+		if(checked_element == state.ui_state.colonizations_root.get())
+			return true;
+		if(checked_element == state.ui_state.rgos_root.get())
+			return true;
 		checked_element = checked_element->parent;
 	}
 	return false;
@@ -650,6 +654,9 @@ void render_units(sys::state& state) {
 	if(state.ui_state.units_root) {
 		state.ui_state.units_root->impl_render(state, 0, 0);
 	}
+	if(state.ui_state.colonizations_root) {
+		state.ui_state.colonizations_root->impl_render(state, 0, 0);
+	}
 }
 
 void render_ui_military(sys::state& state) {
@@ -687,16 +694,25 @@ ui::mouse_probe recalculate_mouse_probe_units(sys::state& state, ui::mouse_probe
 	return state.ui_state.units_root->impl_probe_mouse(state, int32_t(scaled_mouse_x), int32_t(scaled_mouse_y), ui::mouse_probe_type::click);
 }
 
+ui::mouse_probe recalculate_mouse_probe_colonizations(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
+	float scaled_mouse_x = state.mouse_x_position / state.user_settings.ui_scale;
+	float scaled_mouse_y = state.mouse_y_position / state.user_settings.ui_scale;
+	return state.ui_state.colonizations_root->impl_probe_mouse(state, int32_t(scaled_mouse_x), int32_t(scaled_mouse_y), ui::mouse_probe_type::click);
+}
+
 ui::mouse_probe recalculate_mouse_probe_units_and_details(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
 	if(!mouse_probe.under_mouse) {
 		mouse_probe = recalculate_mouse_probe_units(state, mouse_probe, tooltip_probe);
+		if(!mouse_probe.under_mouse) {
+			mouse_probe = recalculate_mouse_probe_colonizations(state, mouse_probe, tooltip_probe);
+		}
 	}
 	return mouse_probe;
 }
 
 
 ui::mouse_probe recalculate_mouse_probe_basic(sys::state& state, ui::mouse_probe mouse_probe, ui::mouse_probe tooltip_probe) {
-	if(!state.ui_state.units_root || state.ui_state.ctrl_held_down) {
+	if(!state.ui_state.units_root || !state.ui_state.colonizations_root || state.ui_state.ctrl_held_down) {
 		return mouse_probe;
 	}
 	if(state.map_state.active_map_mode == map_mode::mode::rgo_output
@@ -715,8 +731,8 @@ ui::mouse_probe recalculate_tooltip_probe_units_and_details(sys::state& state, u
 		int32_t(scaled_mouse_x),
 		int32_t(scaled_mouse_y),
 		ui::mouse_probe_type::tooltip);
-	if(!mouse_probe.under_mouse) {
-		tooltip_probe = state.ui_state.units_root->impl_probe_mouse(state,
+	if(!tooltip_probe.under_mouse) {
+		tooltip_probe = state.ui_state.colonizations_root->impl_probe_mouse(state,
 			int32_t(scaled_mouse_x),
 			int32_t(scaled_mouse_y),
 			ui::mouse_probe_type::tooltip);
@@ -834,6 +850,9 @@ void update_unit_selection_ui(sys::state& state) {
 void update_ui_unit_details(sys::state& state) {
 	if(state.ui_state.units_root) {
 		state.ui_state.units_root->impl_on_update(state);
+	}
+	if(state.ui_state.colonizations_root) {
+		state.ui_state.colonizations_root->impl_on_update(state);
 	}
 }
 

@@ -6863,12 +6863,14 @@ void recover_org(sys::state& state) {
 		auto tech_nation = in_nation ? in_nation : ar.get_controller_from_army_rebel_control().get_ruler_from_rebellion_within();
 
 		auto leader = ar.get_general_from_army_leadership();
-		auto regen_mod = tech_nation.get_modifier_values(sys::national_mod_offsets::org_regain) +
-			leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f;
+		auto regen_mod = tech_nation.get_modifier_values(sys::national_mod_offsets::org_regain)
+			+ leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f
+			+ leader.get_prestige() * state.defines.leader_prestige_to_max_org_factor;
 		auto spending_level = (in_nation ? in_nation.get_effective_land_spending() : 1.0f);
 		auto modified_regen = regen_mod * spending_level / 150.0f;
 
-		auto max_org = 0.25f + 0.75f * spending_level + leader.get_prestige() * state.defines.leader_prestige_to_max_org_factor;
+		// TODO: is it max org base? 
+		auto max_org = 0.25f + 0.75f * spending_level;
 		for(auto reg : ar.get_army_membership()) {
 			auto c_org = reg.get_regiment().get_org();
 			reg.get_regiment().set_org(std::min(c_org + modified_regen, std::max(c_org, max_org)));
@@ -6882,8 +6884,8 @@ void recover_org(sys::state& state) {
 		auto in_nation = ar.get_controller_from_navy_control();
 
 		auto leader = ar.get_admiral_from_navy_leadership();
-		auto regen_mod = in_nation.get_modifier_values(sys::national_mod_offsets::org_regain) +
-			leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f
+		auto regen_mod = in_nation.get_modifier_values(sys::national_mod_offsets::org_regain)
+			+ leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f
 			+ leader.get_prestige() * state.defines.leader_prestige_to_morale_factor;
 		float oversize_amount =
 			in_nation.get_naval_supply_points() > 0
@@ -6893,7 +6895,7 @@ void recover_org(sys::state& state) {
 		auto spending_level = in_nation.get_effective_naval_spending() * over_size_penalty;
 		auto modified_regen = regen_mod * spending_level / 150.0f;
 
-		auto max_org = 0.25f + 0.75f * spending_level + leader.get_prestige() * state.defines.leader_prestige_to_max_org_factor;
+		auto max_org = 0.25f + 0.75f * spending_level;
 		for(auto reg : ar.get_navy_membership()) {
 			auto c_org = reg.get_ship().get_org();
 			reg.get_ship().set_org(std::min(c_org + modified_regen, std::max(c_org, max_org)));
@@ -6905,12 +6907,9 @@ float reinforce_amount(sys::state& state, dcon::army_id a) {
 	auto ar = fatten(state.world, a);
 	if(ar.get_battle_from_army_battle_participation() || ar.get_navy_from_army_transport() || ar.get_is_retreating())
 		return 0.0f;
-
 	auto in_nation = ar.get_controller_from_army_control();
 	auto tech_nation = in_nation ? in_nation : ar.get_controller_from_army_rebel_control().get_ruler_from_rebellion_within();
-
 	auto spending_level = (in_nation ? in_nation.get_effective_land_spending() : 1.0f);
-
 	float location_modifier = 1.0f;
 	if(ar.get_location_from_army_location().get_nation_from_province_ownership() == in_nation) {
 		location_modifier = 2.0f;
@@ -6919,11 +6918,9 @@ float reinforce_amount(sys::state& state, dcon::army_id a) {
 	} else {
 		location_modifier = 0.1f;
 	}
-
-	auto combined = state.defines.reinforce_speed * spending_level * location_modifier *
-		(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
-		(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
-
+	auto combined = state.defines.reinforce_speed * spending_level * location_modifier
+		* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed))
+		* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
 	return combined;
 }
 
@@ -6935,32 +6932,14 @@ void reinforce_regiments(sys::state& state) {
 	and 0.1 in any other hostile province) x (national-reinforce-speed-modifier + 1) x army-supplies x (number of actual regiments /
 	max possible regiments (feels like a bug to me) or 0.5 if mobilized)
 	*/
-
 	for(auto ar : state.world.in_army) {
 		if(ar.get_battle_from_army_battle_participation() || ar.get_navy_from_army_transport() || ar.get_is_retreating())
 			continue;
-
 		auto in_nation = ar.get_controller_from_army_control();
 		auto tech_nation = in_nation ? in_nation : ar.get_controller_from_army_rebel_control().get_ruler_from_rebellion_within();
-
-		auto spending_level = (in_nation ? in_nation.get_effective_land_spending() : 1.0f);
-
-		float location_modifier = 1.0f;
-		if(ar.get_location_from_army_location().get_nation_from_province_ownership() == in_nation) {
-			location_modifier = 2.0f;
-		} else if(ar.get_location_from_army_location().get_nation_from_province_control() == in_nation) {
-			location_modifier = 1.0f;
-		} else {
-			location_modifier = 0.1f;
-		}
-
 		auto min_exp = (tech_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)
 			+ tech_nation.get_modifier_values(sys::national_mod_offsets::land_unit_start_experience)) * 0.01f;
-
-		auto combined = state.defines.reinforce_speed * spending_level * location_modifier *
-			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed)) *
-			(1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
-
+		auto combined = reinforce_amount(state, ar);
 		for(auto reg : ar.get_army_membership()) {
 			auto pop = reg.get_regiment().get_pop_from_regiment_source();
 			auto pop_size = pop.get_size();
@@ -6978,13 +6957,12 @@ void reinforce_regiments(sys::state& state) {
 void repair_ships(sys::state& state) {
 	/*
 	A ship that is docked at a naval base is repaired (has its strength increase) by:
-maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate + 1) x ship-supplies x
-(national-reinforce-speed-modifier + 1) x navy-supplies
+	maximum-strength x (technology-repair-rate + provincial-modifier-to-repair-rate + 1) x ship-supplies x
+	(national-reinforce-speed-modifier + 1) x navy-supplies
 	*/
 	for(auto n : state.world.in_navy) {
 		auto nb_level = n.get_location_from_navy_location().get_building_level(economy::province_building_type::naval_base);
 		if(!n.get_arrival_time() && nb_level > 0) {
-
 			auto in_nation = n.get_controller_from_navy_control();
 
 			float oversize_amount = in_nation.get_naval_supply_points() > 0

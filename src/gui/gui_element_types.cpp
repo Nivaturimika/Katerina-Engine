@@ -1121,6 +1121,7 @@ std::unique_ptr<element_base> make_element(sys::state& state, std::string_view n
 state::state() {
 	units_root = std::make_unique<container_base>();
 	rgos_root = std::make_unique<container_base>();
+	colonizations_root = std::make_unique<container_base>();
 	province_details_root = std::make_unique<container_base>();
 	root = std::make_unique<container_base>();
 	tooltip = std::make_unique<tool_tip>();

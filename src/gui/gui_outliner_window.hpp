@@ -407,25 +407,8 @@ public:
 			set_text(state, full_str);
 		} else if(std::holds_alternative<dcon::state_building_construction_id>(content)) {
 			auto st_con = fatten(state.world, std::get<dcon::state_building_construction_id>(content));
-			auto ftid = state.world.state_building_construction_get_type(st_con);
-
-			float total = 0.0f;
-			float purchased = 0.0f;
-			auto& goods = state.world.factory_type_get_construction_costs(st_con.get_type());
-
-			float factory_mod = state.world.nation_get_modifier_values(st_con.get_nation(), sys::national_mod_offsets::factory_cost) + 1.0f;
-			float pop_factory_mod = std::max(0.1f, state.world.nation_get_modifier_values(st_con.get_nation(), sys::national_mod_offsets::factory_owner_cost));
-			auto admin_eff = st_con.get_nation().get_administrative_efficiency();
-			float admin_cost_factor = (st_con.get_is_pop_project() ? pop_factory_mod : (2.0f - admin_eff)) * factory_mod;
-
-			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-				total += goods.commodity_amounts[i] * admin_cost_factor;
-				purchased += st_con.get_purchased_goods().commodity_amounts[i];
-			}
-			auto progress = total > 0.0f ? purchased / total : 0.0f;
-
-			auto full_str = text::produce_simple_string(state, state.world.factory_type_get_name(ftid)) + " (" + text::format_percentage(progress, 0) + ")";
-
+			float progress = economy::state_building_construction(state, st_con.get_state(), st_con.get_type()).progress;
+			auto full_str = text::produce_simple_string(state, st_con.get_type().get_name()) + " (" + text::format_percentage(progress, 0) + ")";
 			color = text::text_color::white;
 			set_text(state, full_str);
 		} else if(std::holds_alternative<dcon::province_building_construction_id>(content)) {
@@ -433,9 +416,7 @@ public:
 			auto btid = state.world.province_building_construction_get_type(pbcid);
 			auto name = economy::province_building_type_get_name(economy::province_building_type(btid));
 			float progress = economy::province_building_construction(state, state.world.province_building_construction_get_province(pbcid), economy::province_building_type(btid)).progress;
-
 			auto full_str = text::produce_simple_string(state, name) + " (" + text::format_percentage(progress, 0) + ")";
-
 			color = text::text_color::white;
 			set_text(state, full_str);
 		} else if(std::holds_alternative<dcon::province_land_construction_id>(content)) {

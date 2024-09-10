@@ -135,6 +135,8 @@ void language_left::button_action(sys::state& state) noexcept {
 	//
 	if(state.ui_state.units_root)
 		state.ui_state.units_root->impl_on_reset_text(state);
+	if(state.ui_state.colonizations_root)
+		state.ui_state.colonizations_root->impl_on_reset_text(state);
 	if(state.ui_state.rgos_root)
 		state.ui_state.rgos_root->impl_on_reset_text(state);
 	if(state.ui_state.root)
@@ -186,6 +188,8 @@ void language_right::button_action(sys::state& state) noexcept {
 	//
 	if(state.ui_state.units_root)
 		state.ui_state.units_root->impl_on_reset_text(state);
+	if(state.ui_state.colonizations_root)
+		state.ui_state.colonizations_root->impl_on_reset_text(state);
 	if(state.ui_state.rgos_root)
 		state.ui_state.rgos_root->impl_on_reset_text(state);
 	if(state.ui_state.root)
@@ -515,6 +519,7 @@ void color_blind_left::button_action(sys::state& state) noexcept {
 		map_mode::update_map_mode(state);
 		state.ui_state.units_root->impl_on_update(state);
 		state.ui_state.rgos_root->impl_on_update(state);
+		state.ui_state.colonizations_root->impl_on_update(state);
 		state.ui_state.root->impl_on_update(state);
 		send(state, parent, notify_setting_update{});
 	}
@@ -529,6 +534,7 @@ void color_blind_right::button_action(sys::state& state) noexcept {
 		map_mode::update_map_mode(state);
 		state.ui_state.units_root->impl_on_update(state);
 		state.ui_state.rgos_root->impl_on_update(state);
+		state.ui_state.colonizations_root->impl_on_update(state);
 		state.ui_state.root->impl_on_update(state);
 		send(state, parent, notify_setting_update{});
 	}
@@ -629,6 +635,8 @@ void fonts_mode_checkbox::button_action(sys::state& state) noexcept {
 		state.ui_state.units_root->impl_on_reset_text(state);
 	if(state.ui_state.rgos_root)
 		state.ui_state.rgos_root->impl_on_reset_text(state);
+	if(state.ui_state.colonizations_root)
+		state.ui_state.colonizations_root->impl_on_reset_text(state);
 	if(state.ui_state.root)
 		state.ui_state.root->impl_on_reset_text(state);
 	if(state.ui_state.nation_picker)

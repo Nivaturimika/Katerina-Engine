@@ -808,6 +808,102 @@ public:
 	}
 };
 
+class colonization_counter_progress : public simple_text_element_base {
+public:
+	void on_update(sys::state& state) noexcept override {
+		auto c = retrieve<dcon::colonization_id>(state, parent);
+		auto level = state.world.colonization_get_level(c);
+		set_text(state, std::to_string(level));
+	}
+};
+class colonization_counter_flag : public flag_button {
+public:
+	dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
+		auto c = retrieve<dcon::colonization_id>(state, parent);
+		return state.world.nation_get_identity_from_identity_holder(state.world.colonization_get_colonizer(c));
+	}
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(type == mouse_probe_type::tooltip)
+			return flag_button::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
+	}
+};
+class colonization_counter_window : public window_element_base {
+public:
+	bool visible = true;
+	bool populated = false;
+	dcon::province_id prov;
+	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+		if(name == "colonization_progress") {
+			return make_element_by_type<colonization_counter_progress>(state, id);
+		} else if(name == "colonization_country_flag") {
+			return make_element_by_type<colonization_counter_flag>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
+
+	void impl_on_update(sys::state& state) noexcept override {
+		on_update(state);
+		if(!populated)
+			return;
+
+		for(auto& c : children) {
+			if(c->is_visible()) {
+				c->impl_on_update(state);
+			}
+		}
+	}
+
+	void on_update(sys::state& state) noexcept override {
+		populated = bool(retrieve<dcon::colonization_id>(state, parent));
+
+	}
+
+	void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+		if(populated) {
+			auto mid_point = state.world.province_get_mid_point(prov);
+			auto map_pos = state.map_state.normalize_map_coord(mid_point);
+			auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
+			glm::vec2 screen_pos;
+			if(!state.map_state.map_to_screen(state, map_pos, screen_size, screen_pos)) {
+				visible = false;
+				return;
+			}
+			if(!state.map_state.visible_provinces[province::to_map_id(prov)]) {
+				visible = false;
+				return;
+			}
+			visible = true;
+			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+			new_position.x += 7 - base_data.size.x / 2; //114/2 = 57
+			new_position.y -= 24 * 3;
+			base_data.position = new_position;
+			base_data.flags &= ~ui::element_data::orientation_mask; //position upperleft
+			window_element_base::impl_render(state, new_position.x, new_position.y);
+		}
+	}
+	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+		if(payload.holds_type<dcon::province_id>()) {
+			payload.emplace<dcon::province_id>(prov);
+			return message_result::consumed;
+		} else if(payload.holds_type<dcon::colonization_id>()) {
+			auto const sdef = state.world.province_get_state_from_abstract_state_membership(prov);
+			auto cr = state.world.state_definition_get_colonization(sdef);
+			if(cr.begin() != cr.end()) {
+				payload.emplace<dcon::colonization_id>(*cr.begin());
+			}
+			return message_result::consumed;
+		}
+		return message_result::unseen;
+	}
+	mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+		if(visible && populated)
+			return window_element_base::impl_probe_mouse(state, x, y, type);
+		return mouse_probe{ nullptr, ui::xy_pair{} };
+	}
+};
+
 class map_pv_rail_dots : public image_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
