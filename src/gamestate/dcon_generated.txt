@@ -1375,7 +1375,6 @@ object {
 		type{ uint8_t }
 		tag{ save }
 	}
-
 	property{
 		name{ rgo }
 		type{ commodity_id }
@@ -1401,19 +1400,16 @@ object {
 		type{ bitfield }
 		tag{ save }
 	}
-
 	property{
 		name{ is_colonial }
 		type{ bitfield }
 		tag{ save }
 	}
-
 	property{
 		name{ crime }
 		type{ crime_id }
 		tag{ save }
 	}
-
 	property{
 		name{ mid_point }
 		type{ glm::vec2 }
@@ -1424,25 +1420,21 @@ object {
 		type{ glm::vec3 }
 		tag{ unsaved }
 	}
-
 	property{
 		name{ port_to }
 		type{ dcon::province_id }
 		tag{ scenario }
 	}
-
 	property{
 		name{ party_loyalty }
 		type{array{ideology_id}{float}}
 		tag{ save }
 	}
-
 	property{
 		name{ modifier_values }
 		type{ array{provincial_modifier_value}{float} }
 		tag{ unsaved }
 	}
-
 	property {
 		name{ current_modifiers }
 		type{vector_pool{90000}{sys::dated_modifier}}
@@ -1592,6 +1584,21 @@ object {
 		name{ flag_variables }
 		type{array{provincial_flag_id}{bitfield}}
 		tag{ save }
+	}
+	property{
+		name{ text_rotation }
+		type{ float }
+		tag{ scenario }
+	}
+	property{
+		name{ text_scale }
+		type{ float }
+		tag{ scenario }
+	}
+	property{
+		name{ text_position }
+		type{ glm::vec2 }
+		tag{ scenario }
 	}
 }
 

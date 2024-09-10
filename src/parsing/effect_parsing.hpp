@@ -238,8 +238,7 @@ struct ef_wargoal {
 		if(0 <= value && size_t(value) < context.outer_context.original_id_to_prov_id_map.size()) {
 			state_province_id_ = context.outer_context.original_id_to_prov_id_map[value];
 		} else {
-			err.accumulated_errors +=
-					"wargoal given an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "wargoal given an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void finish(effect_building_context&) { }

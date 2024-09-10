@@ -2215,6 +2215,19 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 			err.accumulated_errors += "File map/climate.txt could not be opened\n";
 		}
 	}
+	// parse positions.txt
+	{
+		auto positions_file = open_file(map, NATIVE("positions.txt"));
+		if(positions_file) {
+			auto content = view_contents(*positions_file);
+			err.file_name = "positions.txt";
+			parsers::token_generator gen(content.data, content.data + content.file_size);
+			parsers::parse_positions_file(gen, err, context);
+		} else {
+			//err.fatal = true;
+			err.accumulated_errors += "File map/positions.txt could not be opened\n";
+		}
+	}
 	// parse technology.txt
 	{
 		auto tech_file = open_file(common, NATIVE("technology.txt"));

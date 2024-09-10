@@ -942,9 +942,11 @@ void update_province_text_lines(sys::state& state, display_data& map_data) {
 	for(auto p : state.world.in_province) {
 		if(p.get_name()) {
 			std::string name = text::produce_simple_string(state, p.get_name());
-			auto t_origin = p.get_mid_point() - glm::vec2(5.f, 0.f);
-			auto t_size = glm::vec2(10.f, 10.f);
-			p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), glm::vec4(0.f, 0.f, 0.f, 0.f), t_origin, t_size);
+			auto t_size = glm::vec2(5.f, 5.f) * std::max(1.f, p.get_text_scale());
+			auto t_origin = p.get_mid_point() - t_size * glm::vec2(0.5f, 0.5f);
+			//auto mo = glm::mat4x4(0.f);
+			auto mo = glm::rotate(-p.get_text_rotation(), glm::vec3(0.f, 1.f, 0.f));
+			p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), mo[0], t_origin, t_size);
 		}
 	}
 	map_data.set_province_text_lines(state, p_text_data);

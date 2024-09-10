@@ -1334,3 +1334,19 @@ locale_parser
 	map_feature     value      text      member_fn
 	fallback     value      text      member
 	gender_mode		value	uint	member
+
+province_position
+	text_rotation			value	float				member
+	text_scale				value	float				member
+	text_position			group	province_xy_pair	member
+	unit					group	none				discard
+	building_construction	group	none				discard
+	military_construction	group	none				discard
+	factory					group	none				discard
+	building_position		group	none				discard
+	building_rotation		group	none				discard
+	spawn_railway_track		group	none				discard
+	city					group	none				discard
+
+positions_file
+	#any				group	province_position	member_fn

@@ -3539,5 +3539,16 @@ void add_locale(sys::state& state, std::string_view locale_name, char const* dat
 	}
 }
 
+void positions_file::any_group(std::string_view name, province_position v, error_handler& err, int32_t line, scenario_building_context& context) {
+	auto value = parse_int(name, line, err);
+	if(0 <= value && size_t(value) < context.original_id_to_prov_id_map.size()) {
+		auto p = context.original_id_to_prov_id_map[value];
+		context.state.world.province_set_text_rotation(p, v.text_rotation);
+		context.state.world.province_set_text_scale(p, v.text_scale);
+		context.state.world.province_set_text_position(p, glm::vec2(v.text_position.x, v.text_position.y));
+	} else {
+		err.accumulated_errors += "Position specified for an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+	}
+}
 
 } // namespace parsers

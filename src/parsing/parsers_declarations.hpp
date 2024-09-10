@@ -2923,6 +2923,24 @@ struct locale_parser {
 
 void add_locale(sys::state& state, std::string_view locale_name, char const* data_start, char const* data_end);
 
+struct province_xy_pair {
+	float x = 0.f;
+	float y = 0.f;
+	void finish(scenario_building_context& context) { }
+};
+
+struct province_position {
+	float text_rotation = 0.f;
+	float text_scale = 0.f;
+	province_xy_pair text_position;
+	void finish(scenario_building_context& context) { }
+};
+
+struct positions_file {
+	void any_group(std::string_view name, province_position v, error_handler& err, int32_t line, scenario_building_context& context);
+	void finish(scenario_building_context& context) { }
+};
+
 } // namespace parsers
 
 #include "trigger_parsing.hpp"
