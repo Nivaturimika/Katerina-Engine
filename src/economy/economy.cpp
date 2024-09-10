@@ -166,21 +166,19 @@ float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::co
 
 float pop_needs_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float need, bool is_life_need) {
 	/*
-For each pop
-Each pop strata and needs type has its own demand modifier, calculated as follows:
-(national-modifier-to-goods-demand + define:BASE_GOODS_DEMAND) x (national-modifier-to-specific-strata-and-needs-type + 1) x (define:INVENTION_IMPACT_ON_DEMAND x number-of-unlocked-inventions + 1, but for non-life-needs only)
-Each needs demand is also multiplied by 2 - the nation's administrative efficiency if the pop has education / admin / military income for that need category
-We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 + national-plurality (as a fraction of 100)) x pop-size
-Each of the pop's needs for life/everyday/luxury are multiplied by the appropriate modifier and added to domestic demand
+	For each pop
+	Each pop strata and needs type has its own demand modifier, calculated as follows:
+	(national-modifier-to-goods-demand + define:BASE_GOODS_DEMAND) x (national-modifier-to-specific-strata-and-needs-type + 1) x (define:INVENTION_IMPACT_ON_DEMAND x number-of-unlocked-inventions + 1, but for non-life-needs only)
+	Each needs demand is also multiplied by 2 - the nation's administrative efficiency if the pop has education / admin / military income for that need category
+	We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 + national-plurality (as a fraction of 100)) x pop-size
+	Each of the pop's needs for life/everyday/luxury are multiplied by the appropriate modifier and added to domestic demand
 	*/
 	float num_inventions = 0.f;
 	for(const auto i : state.world.in_invention)
 		if(state.world.nation_get_active_inventions(n, i))
 			num_inventions += 1.f;
 	auto inv_impact = (is_life_need ? 1.f + +state.defines.invention_impact_on_demand * num_inventions : 1.f);
-	return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand)
-		+ state.defines.base_goods_demand * (need + 1.f)
-		* inv_impact;
+	return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand) + state.defines.base_goods_demand * (need + 1.f) * inv_impact;
 }
 
 float need_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
@@ -339,7 +337,7 @@ float get_artisan_distribution_slow(sys::state& state, dcon::nation_id n, dcon::
 
 void adjust_artisan_balance(sys::state& state, dcon::nation_id n) {
 	auto const csize = state.world.commodity_size();
-	float distribution_drift_speed = 0.0001f;
+	float distribution_drift_speed = 0.01f;
 
 	std::vector<float> current_distribution;
 	std::vector<float> profits;
@@ -1549,36 +1547,36 @@ float full_pop_spending_cost(sys::state& state, dcon::nation_id n) {
 
 		auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
 		if(ln_type == culture::income_type::administration) {
-			total += a_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * state.world.nation_get_life_needs_costs(n, pt);
+			total += a_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
 		} else if(ln_type == culture::income_type::education) {
-			total += e_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * state.world.nation_get_life_needs_costs(n, pt);
+			total += e_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
 		} else if(ln_type == culture::income_type::military) {
-			total += m_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * state.world.nation_get_life_needs_costs(n, pt);
+			total += m_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
 		} else { // unemployment, pensions
-			total += s_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * p_level * state.world.nation_get_life_needs_costs(n, pt);
+			total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
 			if(state.world.pop_type_get_has_unemployment(pt)) {
 				auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
 				//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
 				//after the employment one?
 				emp = std::min(emp, adj_pop_of_type);
-				total += s_spending * ((adj_pop_of_type - emp) / state.defines.alice_lf_needs_scale) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+				total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
 			}
 		}
 		auto en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
 		if(en_type == culture::income_type::administration) {
-			total += a_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * state.world.nation_get_everyday_needs_costs(n, pt);
+			total += a_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
 		} else if(en_type == culture::income_type::education) {
-			total += e_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * state.world.nation_get_everyday_needs_costs(n, pt);
+			total += e_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
 		} else if(en_type == culture::income_type::military) {
-			total += m_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * state.world.nation_get_everyday_needs_costs(n, pt);
+			total += m_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
 		}
 		auto lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
 		if(lx_type == culture::income_type::administration) {
-			total += a_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * state.world.nation_get_luxury_needs_costs(n, pt);
+			total += a_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		} else if(lx_type == culture::income_type::education) {
-			total += e_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * state.world.nation_get_luxury_needs_costs(n, pt);
+			total += e_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		} else if(lx_type == culture::income_type::military) {
-			total += m_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * state.world.nation_get_luxury_needs_costs(n, pt);
+			total += m_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 		assert(std::isfinite(total) && total >= 0.0f);
 	});
@@ -1739,20 +1737,16 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			auto t = pl.get_pop().get_poptype();
 			assert(t);
 			auto total_budget = pl.get_pop().get_savings();
+			assert(total_budget >= 0.f);
 			auto total_pop = pl.get_pop().get_size();
-
 			//
-			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * (total_pop / state.defines.alice_lf_needs_scale) * consumption_factor;
-			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * (total_pop / state.defines.alice_ev_needs_scale) * consumption_factor;
-			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * (total_pop / state.defines.alice_lx_needs_scale) * consumption_factor;
-
-			float life_needs_fraction = (total_budget >= ln_cost ? 1.f : total_budget / ln_cost);
-			total_budget -= std::min(total_budget,ln_cost);
-
-			//eliminate potential negative number before investment
-			total_budget = std::max(total_budget, 0.f);
-
-			//handle investment before everyday goods - they could be very hard to satisfy, depending on a mod:
+			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * total_pop;
+			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
+			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
+			total_budget -= std::min(total_budget, ln_cost);
+			total_budget -= std::min(total_budget, en_cost);
+			total_budget -= std::min(total_budget, xn_cost);
+			/* handle investment before everyday goods - they could be very hard to satisfy, depending on a mod : */
 			if(!nation_allows_investment || (t != state.culture_definitions.aristocrat && t != state.culture_definitions.capitalists)) {
 
 			} else if(t == state.culture_definitions.capitalists) {
@@ -1763,73 +1757,42 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				total_budget -= total_budget * aristocrat_investment_ratio;
 			}
 
-			float everyday_needs_fraction = (total_budget >= en_cost ? 1.f : std::max(0.0f, total_budget / en_cost));
-			total_budget -= std::min(total_budget, en_cost);;
-
-			float luxury_needs_fraction = (total_budget >= xn_cost ? 1.f : std::max(0.0f, total_budget / xn_cost));
-			total_budget -= std::min(total_budget, xn_cost);;
-
-			// induce demand across all categories
-			// maybe we need some kind of banking and ability to save up money for future instead of spending them all...
-
-			float total_cost = ln_cost + en_cost + xn_cost;
-
-			float life_needs_budget = std::max(0.0001f, total_budget) * 0.8f;
-			float everyday_needs_budget = std::max(0.0001f, total_budget) * 0.5f;
-			float luxury_needs_budget = std::max(0.0001f, total_budget) * 0.3f;
-			float induced_life_needs_demand = life_needs_budget / std::max(0.001f, ln_cost);
-			float induced_everyday_needs_demand = everyday_needs_budget / std::max(0.001f, en_cost);
-			float induced_luxury_needs_demand = luxury_needs_budget / std::max(0.001f, xn_cost);
-			life_needs_fraction += induced_life_needs_demand;
-			everyday_needs_fraction += induced_everyday_needs_demand;
-			luxury_needs_fraction += induced_luxury_needs_demand;
-
-			assert(std::isfinite(life_needs_fraction));
-			assert(std::isfinite(everyday_needs_fraction));
-			assert(std::isfinite(luxury_needs_fraction));
+			/* Induce demand across all categories maybe we need some kind of banking and ability to save up money for future instead of spending them all */
+			float life_needs_budget = std::max(0.001f, total_budget) * 0.75f;
+			float everyday_needs_budget = std::max(0.001f, total_budget) * 0.5f;
+			float luxury_needs_budget = std::max(0.001f, total_budget) * 0.25f;
+			float life_needs_fraction = life_needs_budget / std::max(0.001f, ln_cost);
+			float everyday_needs_fraction = everyday_needs_budget / std::max(0.001f, en_cost);
+			float luxury_needs_fraction = luxury_needs_budget / std::max(0.001f, xn_cost);
 
 			float old_life = pl.get_pop().get_life_needs_satisfaction();
 			float old_everyday = pl.get_pop().get_everyday_needs_satisfaction();
 			float old_luxury = pl.get_pop().get_luxury_needs_satisfaction();
 
-			float old_life_to_use_in_demand_calculation = old_life;
-			float old_everyday_to_use_in_demand_calculation = old_everyday;
-			float old_luxury_to_use_in_demand_calculation = old_luxury;
+			auto result_life = std::clamp(old_life * 0.9f + life_needs_fraction * 0.9f, 0.f, 1.f);
+			auto result_everyday = std::clamp(old_everyday * 0.9f + everyday_needs_fraction * 0.9f, 0.f, 1.f);
+			auto result_luxury = std::clamp(old_luxury * 0.9f + luxury_needs_fraction * 0.9f, 0.f, 1.f);
 
-			float final_life_needs_fraction = life_needs_fraction;
-			float final_everyday_needs_fraction = everyday_needs_fraction;
-			float final_luxury_needs_fraction = luxury_needs_fraction;
-
-			//suppose that old satisfaction was calculated for the same conditions and find "raw" satisfaction
-			//old = raw + sub ## first summand is "raw satisfaction"
-			old_life_to_use_in_demand_calculation = std::clamp(old_life, 0.f, 1.f);
-			old_everyday_to_use_in_demand_calculation = std::clamp(old_everyday, 0.f, 1.f);
-			old_luxury_to_use_in_demand_calculation = std::clamp(old_luxury, 0.f, 1.f);
-
-			auto result_life = std::clamp(old_life_to_use_in_demand_calculation * 0.9f + life_needs_fraction * 0.1f, 0.f, 1.f);
-			auto result_everyday = std::clamp(old_everyday_to_use_in_demand_calculation * 0.9f + everyday_needs_fraction * 0.1f, 0.f, 1.f);
-			auto result_luxury = std::clamp(old_luxury_to_use_in_demand_calculation * 0.9f + luxury_needs_fraction * 0.1f, 0.f, 1.f);
-
-			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), std::clamp(old_life * 0.9f + final_life_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), std::clamp(old_everyday * 0.9f + final_everyday_needs_fraction * 0.01f, 0.f, 1.f));
-			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), std::clamp(old_luxury * 0.9f + final_luxury_needs_fraction * 0.01f, 0.f, 1.f));
+			state.world.pop_set_life_needs_satisfaction(pl.get_pop(), result_life);
+			state.world.pop_set_everyday_needs_satisfaction(pl.get_pop(), result_everyday);
+			state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), result_luxury);
 		}
 	}
 
 	float ln_mul[] = {
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f)
 	};
 	float en_mul[] = {
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f)
 	};
 	float lx_mul[] = {
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f,
-		state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f,
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
+		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
 	};
 
 	for(uint32_t i = 1; i < total_commodities; ++i) {
@@ -1844,9 +1807,9 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 				float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
 
 				/* Invention factor doesn't factor for life needs */
-				float demand_life = base_life * consumption_factor * (pop_size / state.defines.alice_lf_needs_scale) * ln_mul[strata];
-				float demand_everyday = base_everyday * consumption_factor * (pop_size / state.defines.alice_ev_needs_scale) * invention_factor * en_mul[strata];
-				float demand_luxury = base_luxury * consumption_factor * (pop_size / state.defines.alice_lx_needs_scale) * invention_factor * lx_mul[strata];
+				float demand_life = base_life * pop_size * ln_mul[strata];
+				float demand_everyday = base_everyday * pop_size * invention_factor * en_mul[strata];
+				float demand_luxury = base_luxury * pop_size * invention_factor * lx_mul[strata];
 				register_demand(state, n, cid, demand_life);
 				register_demand(state, n, cid, demand_everyday);
 				register_demand(state, n, cid, demand_luxury);
@@ -1893,13 +1856,13 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 			state.world.for_each_pop_type([&](dcon::pop_type_id ids) {
 				auto ln_base = state.world.pop_type_get_life_needs(ids, c);
 				auto ln = ln_base * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_life_needs_costs(n, ids, ln + state.world.nation_get_life_needs_costs(n, ids));
+				state.world.nation_set_life_needs_costs(n, ids, ln);
 				auto en_base = state.world.pop_type_get_everyday_needs(ids, c);
 				auto en = en_base * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_everyday_needs_costs(n, ids, en + state.world.nation_get_everyday_needs_costs(n, ids));
+				state.world.nation_set_everyday_needs_costs(n, ids, en);
 				auto lx_base = state.world.pop_type_get_luxury_needs(ids, c);
 				auto lx = lx_base * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_luxury_needs_costs(n, ids, lx + state.world.nation_get_luxury_needs_costs(n, ids));
+				state.world.nation_set_luxury_needs_costs(n, ids, lx);
 				assert(std::isfinite(state.world.nation_get_life_needs_costs(n, ids)) && state.world.nation_get_life_needs_costs(n, ids) >= 0.f);
 				assert(std::isfinite(state.world.nation_get_everyday_needs_costs(n, ids)) && state.world.nation_get_everyday_needs_costs(n, ids) >= 0.f);
 				assert(std::isfinite(state.world.nation_get_luxury_needs_costs(n, ids)) && state.world.nation_get_luxury_needs_costs(n, ids) >= 0.f);
@@ -2122,9 +2085,9 @@ profit_distribution distribute_factory_profit(sys::state const& state, dcon::sta
 	auto per_pworker_profit = total_profit * (desired_per_pworker_profit / total_desired_profit);
 	auto per_sworker_profit = total_profit * (desired_per_sworker_profit / total_desired_profit);
 	return {
-		.per_primary_worker = per_pworker_profit,
-		.per_secondary_worker = per_sworker_profit,
-		.per_owner = per_owner_profit
+		.per_primary_worker = per_pworker_profit / num_pworkers,
+		.per_secondary_worker = per_sworker_profit / num_sworkers,
+		.per_owner = per_owner_profit / num_owners
 	};
 }
 
@@ -2402,26 +2365,26 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto en_costs = ve::apply([&](dcon::pop_type_id pt, dcon::nation_id n) { return pt ? state.world.nation_get_everyday_needs_costs(n, pt) : 0.0f; }, types, owners);
 		auto lx_costs = ve::apply([&](dcon::pop_type_id pt, dcon::nation_id n) { return pt ? state.world.nation_get_luxury_needs_costs(n, pt) : 0.0f; }, types, owners);
 
-		auto acc_a = ve::select(ln_types == int32_t(culture::income_type::administration), a_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * ln_costs, 0.0f);
-		auto acc_e = ve::select(ln_types == int32_t(culture::income_type::education), e_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * ln_costs, 0.0f);
-		auto acc_m = ve::select(ln_types == int32_t(culture::income_type::military), m_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * ln_costs, 0.0f);
+		auto acc_a = ve::select(ln_types == int32_t(culture::income_type::administration), a_spending * adj_pop_of_type * ln_costs, 0.0f);
+		auto acc_e = ve::select(ln_types == int32_t(culture::income_type::education), e_spending * adj_pop_of_type * ln_costs, 0.0f);
+		auto acc_m = ve::select(ln_types == int32_t(culture::income_type::military), m_spending * adj_pop_of_type * ln_costs, 0.0f);
 
 		auto none_of_above = ln_types != int32_t(culture::income_type::military) &&
 			ln_types != int32_t(culture::income_type::education) &&
 			ln_types != int32_t(culture::income_type::administration);
 
-		auto acc_u = ve::select(none_of_above, s_spending * (adj_pop_of_type / state.defines.alice_lf_needs_scale) * p_level * ln_costs, 0.0f);
+		auto acc_u = ve::select(none_of_above, s_spending * adj_pop_of_type * p_level * ln_costs, 0.0f);
 
-		acc_a = acc_a + ve::select(en_types == int32_t(culture::income_type::administration), a_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * en_costs, 0.0f);
-		acc_e = acc_e + ve::select(en_types == int32_t(culture::income_type::education), e_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * en_costs, 0.0f);
-		acc_m = acc_m + ve::select(en_types == int32_t(culture::income_type::military), m_spending * (adj_pop_of_type / state.defines.alice_ev_needs_scale) * en_costs, 0.0f);
+		acc_a = acc_a + ve::select(en_types == int32_t(culture::income_type::administration), a_spending * adj_pop_of_type * en_costs, 0.0f);
+		acc_e = acc_e + ve::select(en_types == int32_t(culture::income_type::education), e_spending * adj_pop_of_type * en_costs, 0.0f);
+		acc_m = acc_m + ve::select(en_types == int32_t(culture::income_type::military), m_spending * adj_pop_of_type * en_costs, 0.0f);
 
-		acc_u = acc_u + ve::select(types == state.culture_definitions.capitalists, di_level * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * lx_costs, 0.0f);
-		acc_u = acc_u + ve::select(types == state.culture_definitions.aristocrat, di_level * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * lx_costs, 0.0f);
+		acc_u = acc_u + ve::select(types == state.culture_definitions.capitalists, di_level * adj_pop_of_type * lx_costs, 0.0f);
+		acc_u = acc_u + ve::select(types == state.culture_definitions.aristocrat, di_level * adj_pop_of_type * lx_costs, 0.0f);
 
-		acc_a = acc_a + ve::select(lx_types == int32_t(culture::income_type::administration), a_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * lx_costs, 0.0f);
-		acc_e = acc_e + ve::select(lx_types == int32_t(culture::income_type::education), e_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * lx_costs, 0.0f);
-		acc_m = acc_m + ve::select(lx_types == int32_t(culture::income_type::military), m_spending * (adj_pop_of_type / state.defines.alice_lx_needs_scale) * lx_costs, 0.0f);
+		acc_a = acc_a + ve::select(lx_types == int32_t(culture::income_type::administration), a_spending * adj_pop_of_type * lx_costs, 0.0f);
+		acc_e = acc_e + ve::select(lx_types == int32_t(culture::income_type::education), e_spending * adj_pop_of_type * lx_costs, 0.0f);
+		acc_m = acc_m + ve::select(lx_types == int32_t(culture::income_type::military), m_spending * adj_pop_of_type * lx_costs, 0.0f);
 
 		auto employment = state.world.pop_get_employment(ids);
 
@@ -3168,7 +3131,7 @@ float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodi
 			amount += needs * state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 		});
 	}
-	return amount * consumption_factor;
+	return amount;
 }
 
 float nation_total_imports(sys::state& state, dcon::nation_id n) {
@@ -3250,15 +3213,15 @@ float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, 
 			return;
 		auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
 		if(ln_type == in) {
-			total += (adj_pop_of_type / state.defines.alice_lf_needs_scale) * state.world.nation_get_life_needs_costs(n, pt);
+			total += adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
 		}
 		auto en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
 		if(en_type == in) {
-			total += (adj_pop_of_type / state.defines.alice_ev_needs_scale) * state.world.nation_get_everyday_needs_costs(n, pt);
+			total += adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
 		}
 		auto lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
 		if(lx_type == in) {
-			total += (adj_pop_of_type / state.defines.alice_lx_needs_scale) * state.world.nation_get_luxury_needs_costs(n, pt);
+			total += adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
 		}
 	});
 	return total * pop_payout_factor;

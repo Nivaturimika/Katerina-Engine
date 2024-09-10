@@ -1657,11 +1657,11 @@ public:
 				float amount = 0.f;
 				float pop_size = state.world.pop_get_size(content);
 				if constexpr(N == 0) {
-					amount = state.world.pop_type_get_life_needs(pt, cid) * (pop_size / state.defines.alice_lf_needs_scale);
+					amount = state.world.pop_type_get_life_needs(pt, cid) * pop_size;
 				} else if constexpr(N == 1) {
-					amount = state.world.pop_type_get_everyday_needs(pt, cid) * (pop_size / state.defines.alice_ev_needs_scale);
+					amount = state.world.pop_type_get_everyday_needs(pt, cid) * pop_size;
 				} else if constexpr(N == 2) {
-					amount = state.world.pop_type_get_luxury_needs(pt, cid) * (pop_size / state.defines.alice_lx_needs_scale);
+					amount = state.world.pop_type_get_luxury_needs(pt, cid) * pop_size;
 				}
 				if(amount > 0.f) {
 					row_contents.emplace_back(cid, amount);

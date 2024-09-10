@@ -644,6 +644,7 @@ void poptype_file::life_needs(commodity_array const& value, error_handler& err, 
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
+			v /= context.outer_context.state.defines.alice_lf_needs_scale;
 			context.outer_context.state.world.pop_type_set_life_needs(context.id, cid, v);
 		}
 	});
@@ -653,6 +654,7 @@ void poptype_file::everyday_needs(commodity_array const& value, error_handler& e
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
+			v /= context.outer_context.state.defines.alice_ev_needs_scale;
 			context.outer_context.state.world.pop_type_set_everyday_needs(context.id, cid, v);
 		}
 	});
@@ -662,6 +664,7 @@ void poptype_file::luxury_needs(commodity_array const& value, error_handler& err
 	context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
 		if(cid.index() < value.data.ssize()) {
 			auto v = value.data[cid];
+			v /= context.outer_context.state.defines.alice_lx_needs_scale;
 			context.outer_context.state.world.pop_type_set_luxury_needs(context.id, cid, v);
 		}
 	});
