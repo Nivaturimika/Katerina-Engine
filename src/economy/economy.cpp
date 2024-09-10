@@ -2663,6 +2663,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 					}
 				}
 			});
+			rgo_owner_profit = num_aristocrat > 0.f ? rgo_owner_profit / num_aristocrat : 0.0f;
+
 			auto const min_wage = factory_min_wage;
 			auto profit = distribute_factory_profit(state, si.get_state(), min_wage, total_profit);
 			province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
