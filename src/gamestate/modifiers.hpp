@@ -31,7 +31,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(21, local_artisan_output, true, modifier_display_type::percent, "modifier_artisan_output")              \
 	MOD_LIST_ELEMENT(22, local_artisan_throughput, true, modifier_display_type::percent, "modifier_artisan_throughput")      \
 	MOD_LIST_ELEMENT(23, number_of_voters, true, modifier_display_type::percent, "modifier_number_of_voters")                      \
-	MOD_LIST_ELEMENT(24, goods_demand, true, modifier_display_type::percent, "modifier_goods_demand")                              \
+	MOD_LIST_ELEMENT(24, goods_demand, false, modifier_display_type::percent, "modifier_goods_demand")                              \
 	MOD_LIST_ELEMENT(25, assimilation_rate, true, modifier_display_type::percent, "modifier_assimilation_rate")                    \
 	MOD_LIST_ELEMENT(26, life_rating, true, modifier_display_type::percent, "modifier_life_rating")                                \
 	MOD_LIST_ELEMENT(27, farm_rgo_eff, true, modifier_display_type::percent, "modifier_farm_efficiency")                           \
@@ -39,8 +39,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(29, farm_rgo_size, true, modifier_display_type::percent, "modifier_farm_size")                                \
 	MOD_LIST_ELEMENT(30, mine_rgo_size, true, modifier_display_type::percent, "modifier_mine_size")                                \
 	MOD_LIST_ELEMENT(31, pop_militancy_modifier, false, modifier_display_type::fp_two_places, "modifier_pop_militancy_modifier") \
-	MOD_LIST_ELEMENT(32, pop_consciousness_modifier, true, modifier_display_type::fp_two_places,                                \
-			"modifier_pop_consciousness_modifier")                                                                                     \
+	MOD_LIST_ELEMENT(32, pop_consciousness_modifier, false, modifier_display_type::fp_two_places, "modifier_pop_consciousness_modifier")                                                                                     \
 	MOD_LIST_ELEMENT(33, rich_income_modifier, true, modifier_display_type::percent, "modifier_rich_income_modifier")              \
 	MOD_LIST_ELEMENT(34, middle_income_modifier, true, modifier_display_type::percent, "modifier_middle_income_modifier")          \
 	MOD_LIST_ELEMENT(35, poor_income_modifier, true, modifier_display_type::percent, "modifier_poor_income_modifier")              \
@@ -52,7 +51,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(41, movement_cost, false, modifier_display_type::percent, "modifier_movement_cost")                           \
 	MOD_LIST_ELEMENT(42, defense, true, modifier_display_type::integer, "defence")                                                 \
 	MOD_LIST_ELEMENT(43, attack, true, modifier_display_type::integer, "attack")                                                   \
-	MOD_LIST_ELEMENT(44, combat_width, true, modifier_display_type::integer, "modifier_combat_width")                              \
+	MOD_LIST_ELEMENT(44, combat_width, false, modifier_display_type::integer, "modifier_combat_width")                              \
 	MOD_LIST_ELEMENT(45, min_build_naval_base, false, modifier_display_type::integer, "naval_base_level")                          \
 	MOD_LIST_ELEMENT(46, min_build_railroad, false, modifier_display_type::integer, "railroad_level")                              \
 	MOD_LIST_ELEMENT(47, min_build_fort, false, modifier_display_type::integer, "fort_level") \
@@ -68,7 +67,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(3, leadership_modifier, true, modifier_display_type::percent, "modifier_global_leadership_modifier")          \
 	MOD_LIST_ELEMENT(4, supply_consumption, false, modifier_display_type::percent, "modifier_supply_consumption")                  \
 	MOD_LIST_ELEMENT(5, org_regain, true, modifier_display_type::percent, "modifier_org_regain")                                   \
-	MOD_LIST_ELEMENT(6, reinforce_speed, true, modifier_display_type::percent, "modifier_reinforce_speed")                         \
+	MOD_LIST_ELEMENT(6, reinforce_speed, false, modifier_display_type::percent, "modifier_reinforce_speed")                         \
 	MOD_LIST_ELEMENT(7, land_organisation, true, modifier_display_type::percent, "modifier_land_organisation")                     \
 	MOD_LIST_ELEMENT(8, naval_organisation, true, modifier_display_type::percent, "modifier_naval_organisation")                   \
 	MOD_LIST_ELEMENT(9, research_points, true, modifier_display_type::integer, "modifier_research_points")                         \
@@ -112,7 +111,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(47, artisan_input, false, modifier_display_type::percent, "modifier_artisan_input")                           \
 	MOD_LIST_ELEMENT(48, artisan_output, true, modifier_display_type::percent, "modifier_artisan_output")                          \
 	MOD_LIST_ELEMENT(49, artisan_throughput, true, modifier_display_type::percent, "modifier_artisan_throughput")                  \
-	MOD_LIST_ELEMENT(50, goods_demand, true, modifier_display_type::percent, "modifier_goods_demand")                              \
+	MOD_LIST_ELEMENT(50, goods_demand, false, modifier_display_type::percent, "modifier_goods_demand")                              \
 	MOD_LIST_ELEMENT(51, badboy, false, modifier_display_type::fp_two_places, "modifier_badboy")                                   \
 	MOD_LIST_ELEMENT(52, global_assimilation_rate, true, modifier_display_type::percent, "modifier_assimilation_rate")      \
 	MOD_LIST_ELEMENT(53, prestige, true, modifier_display_type::percent, "modifier_prestige")                                      \
@@ -133,28 +132,20 @@ namespace sys {
 	MOD_LIST_ELEMENT(68, influence_modifier, true, modifier_display_type::percent, "modifier_greatpower_influence_gain")           \
 	MOD_LIST_ELEMENT(69, diplomatic_points_modifier, true, modifier_display_type::percent, "modifier_diplopoints_gain")            \
 	MOD_LIST_ELEMENT(70, mobilization_size, true, modifier_display_type::percent, "modifier_mobilisation_size")                    \
-	MOD_LIST_ELEMENT(71, global_pop_militancy_modifier, false, modifier_display_type::fp_two_places, \
-			"modifier_global_pop_militancy_modifier")                                                                                  \
-	MOD_LIST_ELEMENT(72, global_pop_consciousness_modifier, true, modifier_display_type::fp_two_places, \
-			"modifier_global_pop_consciousness_modifier")                                                                              \
-	MOD_LIST_ELEMENT(73, core_pop_militancy_modifier, false, modifier_display_type::fp_two_places,                                       \
-			"modifier_core_pop_militancy_modifier")                                                                                    \
-	MOD_LIST_ELEMENT(74, core_pop_consciousness_modifier, true, modifier_display_type::fp_two_places, \
-			"modifier_core_pop_consciousness_modifier")                                                                                \
-	MOD_LIST_ELEMENT(75, non_accepted_pop_militancy_modifier, false, modifier_display_type::fp_two_places, \
-			"modifier_non_accepted_pop_militancy_modifier")                                                                            \
-	MOD_LIST_ELEMENT(76, non_accepted_pop_consciousness_modifier, true, modifier_display_type::fp_two_places, \
-			"modifier_non_accepted_pop_consciousness_modifier")                                                                        \
+	MOD_LIST_ELEMENT(71, global_pop_militancy_modifier, false, modifier_display_type::fp_two_places, "modifier_global_pop_militancy_modifier")                                                                                  \
+	MOD_LIST_ELEMENT(72, global_pop_consciousness_modifier, false, modifier_display_type::fp_two_places, "modifier_global_pop_consciousness_modifier")                                                                              \
+	MOD_LIST_ELEMENT(73, core_pop_militancy_modifier, false, modifier_display_type::fp_two_places, "modifier_core_pop_militancy_modifier")                                                                                    \
+	MOD_LIST_ELEMENT(74, core_pop_consciousness_modifier, false, modifier_display_type::fp_two_places, "modifier_core_pop_consciousness_modifier")                                                                                \
+	MOD_LIST_ELEMENT(75, non_accepted_pop_militancy_modifier, false, modifier_display_type::fp_two_places, "modifier_non_accepted_pop_militancy_modifier")                                                                            \
+	MOD_LIST_ELEMENT(76, non_accepted_pop_consciousness_modifier, false, modifier_display_type::fp_two_places, "modifier_non_accepted_pop_consciousness_modifier")                                                                        \
 	MOD_LIST_ELEMENT(77, cb_generation_speed_modifier, true, modifier_display_type::percent, "cb_manufacture_tech")                \
 	MOD_LIST_ELEMENT(78, mobilization_impact, true, modifier_display_type::percent, "modifier_mobilization_impact")               \
 	MOD_LIST_ELEMENT(79, suppression_points_modifier, true, modifier_display_type::percent, "suppression_tech")                    \
 	MOD_LIST_ELEMENT(80, education_efficiency_modifier, true, modifier_display_type::percent, "modifier_education_efficiency")     \
 	MOD_LIST_ELEMENT(81, civilization_progress_modifier, true, modifier_display_type::percent, "modifier_civilization_progress")   \
-	MOD_LIST_ELEMENT(82, administrative_efficiency_modifier, true, modifier_display_type::percent,                                 \
-			"modifier_administrative_efficiency")                                                                                      \
+	MOD_LIST_ELEMENT(82, administrative_efficiency_modifier, true, modifier_display_type::percent, "modifier_administrative_efficiency")                                                                                      \
 	MOD_LIST_ELEMENT(83, land_unit_start_experience, true, modifier_display_type::percent, "modifier_land_unit_start_experience")  \
-	MOD_LIST_ELEMENT(84, naval_unit_start_experience, true, modifier_display_type::percent,                                        \
-			"modifier_naval_unit_start_experience")                                                                                    \
+	MOD_LIST_ELEMENT(84, naval_unit_start_experience, true, modifier_display_type::percent, "modifier_naval_unit_start_experience")                                                                                    \
 	MOD_LIST_ELEMENT(85, naval_attack_modifier, true, modifier_display_type::percent, "modifier_naval_attack")                     \
 	MOD_LIST_ELEMENT(86, naval_defense_modifier, true, modifier_display_type::percent, "modifier_naval_defense")                   \
 	MOD_LIST_ELEMENT(87, land_attack_modifier, true, modifier_display_type::percent, "modifier_land_attack")                       \
@@ -174,7 +165,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(101, colonial_migration, true, modifier_display_type::percent, "colonial_migration_tech")                     \
 	MOD_LIST_ELEMENT(102, max_national_focus, true, modifier_display_type::integer, "tech_max_focus")                              \
 	MOD_LIST_ELEMENT(103, education_efficiency, true, modifier_display_type::percent, "edu_eff_tech")                              \
-	MOD_LIST_ELEMENT(104, reinforce_rate, true, modifier_display_type::percent, "reinforce_tech")                                  \
+	MOD_LIST_ELEMENT(104, reinforce_rate, false, modifier_display_type::percent, "reinforce_tech")                                  \
 	MOD_LIST_ELEMENT(105, influence, true, modifier_display_type::percent, "tech_gp_influence")                                    \
 	MOD_LIST_ELEMENT(106, dig_in_cap, true, modifier_display_type::integer, "digin_from_tech")                                     \
 	MOD_LIST_ELEMENT(107, combat_width, false, modifier_display_type::integer, "combat_width_tech")                                \
