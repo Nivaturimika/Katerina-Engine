@@ -1335,6 +1335,10 @@ locale_parser
 	fallback     value      text      member
 	gender_mode		value	uint	member
 
+province_xy_pair
+	x						value	float				member
+	y						value	float				member
+
 province_position
 	text_rotation			value	float				member
 	text_scale				value	float				member
