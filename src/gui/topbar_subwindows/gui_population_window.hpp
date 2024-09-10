@@ -1862,28 +1862,22 @@ public:
 class pop_details_savings : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
-		auto const content = retrieve<pop_details_data>(state, parent);
-		if(std::holds_alternative<dcon::pop_id>(content)) {
-			auto const p = std::get<dcon::pop_id>(content);
-			set_text(state, text::format_money(state.world.pop_get_savings(p)));
-		}
+		auto const p = retrieve<dcon::pop_id>(state, parent);
+		set_text(state, text::format_money(state.world.pop_get_savings(p)));
 	}
 };
 
 class pop_details_expenses : public simple_text_element_base {
 public:
 	void on_update(sys::state& state) noexcept override {
-		auto const content = retrieve<pop_details_data>(state, parent);
-		if(std::holds_alternative<dcon::pop_id>(content)) {
-			auto fat_id = dcon::fatten(state.world, std::get<dcon::pop_id>(content));
-			auto n = fat_id.get_province_from_pop_location().get_nation_from_province_ownership();
-			// updated below ...
-			float expenses = (state.world.nation_get_life_needs_costs(n, fat_id.get_poptype())
-				+ state.world.nation_get_everyday_needs_costs(n, fat_id.get_poptype())
-				+ state.world.nation_get_luxury_needs_costs(n, fat_id.get_poptype()))
-				* (fat_id.get_size() / state.defines.ke_pop_consumption_factor);
-			set_text(state, text::format_money(expenses));
-		}
+		auto fat_id = dcon::fatten(state.world, retrieve<dcon::pop_id>(state, parent));
+		auto n = fat_id.get_province_from_pop_location().get_nation_from_province_ownership();
+		// updated below ...
+		auto lf_costs = state.world.nation_get_life_needs_costs(n, fat_id.get_poptype());
+		auto ev_costs = state.world.nation_get_everyday_needs_costs(n, fat_id.get_poptype());
+		auto lx_costs = state.world.nation_get_luxury_needs_costs(n, fat_id.get_poptype());
+		float expenses = (lf_costs + ev_costs + lx_costs) * fat_id.get_size();
+		set_text(state, text::format_money(expenses));
 	}
 };
 
