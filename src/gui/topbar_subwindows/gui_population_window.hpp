@@ -1655,12 +1655,13 @@ public:
 			auto kf = state.world.commodity_get_key_factory(cid);
 			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
 				float amount = 0.f;
+				float pop_size = state.world.pop_get_size(content);
 				if constexpr(N == 0) {
-					amount = state.world.pop_type_get_life_needs(pt, cid) * state.world.pop_get_size(content);
+					amount = state.world.pop_type_get_life_needs(pt, cid) * (pop_size / state.defines.alice_lf_needs_scale);
 				} else if constexpr(N == 1) {
-					amount = state.world.pop_type_get_everyday_needs(pt, cid) * state.world.pop_get_size(content);
+					amount = state.world.pop_type_get_everyday_needs(pt, cid) * (pop_size / state.defines.alice_ev_needs_scale);
 				} else if constexpr(N == 2) {
-					amount = state.world.pop_type_get_luxury_needs(pt, cid) * state.world.pop_get_size(content);
+					amount = state.world.pop_type_get_luxury_needs(pt, cid) * (pop_size / state.defines.alice_lx_needs_scale);
 				}
 				if(amount > 0.f) {
 					row_contents.emplace_back(cid, amount);
@@ -1877,9 +1878,10 @@ public:
 			auto fat_id = dcon::fatten(state.world, std::get<dcon::pop_id>(content));
 			auto n = fat_id.get_province_from_pop_location().get_nation_from_province_ownership();
 			// updated below ...
-			float expenses = state.world.nation_get_life_needs_costs(n, fat_id.get_poptype())
+			float expenses = (state.world.nation_get_life_needs_costs(n, fat_id.get_poptype())
 				+ state.world.nation_get_everyday_needs_costs(n, fat_id.get_poptype())
-				+ state.world.nation_get_luxury_needs_costs(n, fat_id.get_poptype());
+				+ state.world.nation_get_luxury_needs_costs(n, fat_id.get_poptype()))
+				* (fat_id.get_size() / state.defines.ke_pop_consumption_factor);
 			set_text(state, text::format_money(expenses));
 		}
 	}
