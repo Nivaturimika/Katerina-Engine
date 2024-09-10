@@ -15,8 +15,8 @@ namespace economy {
 constexpr float pop_payout_factor = 1.f;
 constexpr float consumption_factor = 1.f;
 
-constexpr float aristocrat_investment_ratio = 0.25f;
-constexpr float capitalist_investment_ratio = 0.5f;
+constexpr float aristocrat_investment_ratio = 0.60f;
+constexpr float capitalist_investment_ratio = 0.85f;
 
 void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 	state.world.nation_get_real_demand(n, commodity_type) += amount;
