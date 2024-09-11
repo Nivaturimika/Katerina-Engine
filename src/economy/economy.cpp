@@ -1828,9 +1828,6 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 	- We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 +
 	national-plurality (as a fraction of 100)) x pop-size
 	*/
-
-	uint32_t total_commodities = state.world.commodity_size();
-
 	float ln_mul[] = {
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
@@ -1846,8 +1843,7 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
 	};
-
-	for(uint32_t i = 1; i < total_commodities; ++i) {
+	for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 		dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
@@ -2190,7 +2186,6 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		int32_t num_inventions = 0;
 		state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
 		float invention_factor = float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f;
-
 		populate_needs_costs(state, n, base_demand, invention_factor);
 
 		float mobilization_impact = state.world.nation_get_is_mobilized(n) ? military::mobilization_impact(state, n) : 1.0f;
