@@ -77,9 +77,9 @@ float max_loan(sys::state& state, dcon::nation_id n) {
 	/*
 	There is an income cap to how much may be borrowed, namely: define:MAX_LOAN_CAP_FROM_BANKS x (national-modifier-to-max-loan-amount + 1) x national-tax-base.
 	*/
-	auto mod = (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_loan_modifier) + 1.0f);
+	auto mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_loan_modifier) + 1.f;
 	auto total_tax_base = state.world.nation_get_total_rich_income(n) + state.world.nation_get_total_middle_income(n) + state.world.nation_get_total_poor_income(n);
-	return std::max(0.0f, total_tax_base * mod);
+	return std::max(0.001f, state.defines.max_loan_cap_from_banks * mod * total_tax_base);
 }
 
 int32_t most_recent_price_record_index(sys::state& state) {
@@ -428,13 +428,13 @@ void initialize(sys::state& state) {
 	state.world.for_each_nation([&](dcon::nation_id n) {
 		auto fn = dcon::fatten(state.world, n);
 		fn.set_administrative_spending(int8_t(50));
-		fn.set_military_spending(int8_t(25));
-		fn.set_education_spending(int8_t(25));
-		fn.set_social_spending(int8_t(25));
-		fn.set_land_spending(int8_t(25));
-		fn.set_naval_spending(int8_t(25));
-		fn.set_construction_spending(int8_t(25));
-		fn.set_overseas_spending(int8_t(25));
+		fn.set_military_spending(int8_t(50));
+		fn.set_education_spending(int8_t(50));
+		fn.set_social_spending(int8_t(50));
+		fn.set_land_spending(int8_t(100));
+		fn.set_naval_spending(int8_t(100));
+		fn.set_construction_spending(int8_t(100));
+		fn.set_overseas_spending(int8_t(100));
 
 		fn.set_poor_tax(int8_t(75));
 		fn.set_middle_tax(int8_t(75));
@@ -3881,10 +3881,8 @@ void bound_budget_settings(sys::state& state, dcon::nation_id n) {
 		v = int8_t(std::clamp(std::clamp(int32_t(v), min_spend, max_spend), 0, 100));
 	}
 	{
-		auto min_spend =
-			int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
-		auto max_spend =
-			int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
+		auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
+		auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
 		if(max_spend <= 0)
 			max_spend = 100;
 		max_spend = std::max(min_spend, max_spend);
@@ -3901,6 +3899,21 @@ void bound_budget_settings(sys::state& state, dcon::nation_id n) {
 
 		auto& v = state.world.nation_get_domestic_investment_spending(n);
 		v = int8_t(std::clamp(std::clamp(int32_t(v), min_spend, max_spend), 0, 100));
+	}
+	{
+		auto min_spend = int32_t(100.0f * state.defines.trade_cap_low_limit_constructions);
+		auto& v = state.world.nation_get_construction_spending(n);
+		v = int8_t(std::clamp(std::clamp(int32_t(v), min_spend, 100), 0, 100));
+	}
+	{
+		auto min_spend = int32_t(100.0f * state.defines.trade_cap_low_limit_land);
+		auto& v = state.world.nation_get_land_spending(n);
+		v = int8_t(std::clamp(std::clamp(int32_t(v), min_spend, 100), 0, 100));
+	}
+	{
+		auto min_spend = int32_t(100.0f * state.defines.trade_cap_low_limit_naval);
+		auto& v = state.world.nation_get_naval_spending(n);
+		v = int8_t(std::clamp(std::clamp(int32_t(v), min_spend, 100), 0, 100));
 	}
 }
 

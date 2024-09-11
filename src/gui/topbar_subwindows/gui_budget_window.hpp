@@ -498,10 +498,8 @@ public:
 	void on_update(sys::state& state) noexcept final {
 		switch(SliderTarget) {
 		case budget_slider_target::poor_tax: {
-			auto min_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
-			auto max_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
+			auto min_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
+			auto max_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
 			if(max_tax <= 0)
 				max_tax = 100;
 			max_tax = std::max(min_tax, max_tax);
@@ -515,10 +513,8 @@ public:
 			change_settings(state, new_settings);
 		} break;
 		case budget_slider_target::middle_tax: {
-			auto min_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
-			auto max_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
+			auto min_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
+			auto max_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
 			if(max_tax <= 0)
 				max_tax = 100;
 			max_tax = std::max(min_tax, max_tax);
@@ -532,10 +528,8 @@ public:
 			change_settings(state, new_settings);
 		} break;
 		case budget_slider_target::rich_tax: {
-			auto min_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
-			auto max_tax =
-					int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
+			auto min_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_tax));
+			auto max_tax = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_tax));
 			if(max_tax <= 0)
 				max_tax = 100;
 			max_tax = std::max(min_tax, max_tax);
@@ -549,10 +543,8 @@ public:
 			change_settings(state, new_settings);
 		} break;
 		case budget_slider_target::social: {
-			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation,
-																						sys::national_mod_offsets::min_social_spending));
-			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation,
-																						sys::national_mod_offsets::max_social_spending));
+			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_social_spending));
+			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_social_spending));
 			if(max_spend <= 0)
 				max_spend = 100;
 			max_spend = std::max(min_spend, max_spend);
@@ -566,10 +558,8 @@ public:
 			change_settings(state, new_settings);
 		} break;
 		case budget_slider_target::military: {
-			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation,
-																						sys::national_mod_offsets::min_military_spending));
-			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation,
-																						sys::national_mod_offsets::max_military_spending));
+			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_military_spending));
+			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_military_spending));
 			if(max_spend <= 0)
 				max_spend = 100;
 			max_spend = std::max(min_spend, max_spend);
@@ -597,10 +587,8 @@ public:
 		} break;
 		case budget_slider_target::domestic_investment:
 		{
-			auto min_domestic_investment = int32_t(
-				100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_domestic_investment));
-			auto max_domestic_investment = int32_t(
-				100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_domestic_investment));
+			auto min_domestic_investment = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::min_domestic_investment));
+			auto max_domestic_investment = int32_t(100.0f * state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::max_domestic_investment));
 			if(max_domestic_investment <= 0)
 				max_domestic_investment = 100;
 			max_domestic_investment = std::max(min_domestic_investment, max_domestic_investment);
@@ -611,6 +599,39 @@ public:
 			new_settings.using_limits = true;
 			new_settings.lower_limit = std::clamp(min_domestic_investment, 0, 100);
 			new_settings.upper_limit = std::clamp(max_domestic_investment, 0, 100);
+			change_settings(state, new_settings);
+		} break;
+		case budget_slider_target::construction_stock:
+		{
+			auto min_spending = int32_t(100.0f * state.defines.trade_cap_low_limit_constructions);
+			mutable_scrollbar_settings new_settings;
+			new_settings.lower_value = 0;
+			new_settings.upper_value = 100;
+			new_settings.using_limits = true;
+			new_settings.lower_limit = std::clamp(min_spending, 0, 100);
+			new_settings.upper_limit = 100;
+			change_settings(state, new_settings);
+		} break;
+		case budget_slider_target::army_stock:
+		{
+			auto min_spending = int32_t(100.0f * state.defines.trade_cap_low_limit_land);
+			mutable_scrollbar_settings new_settings;
+			new_settings.lower_value = 0;
+			new_settings.upper_value = 100;
+			new_settings.using_limits = true;
+			new_settings.lower_limit = std::clamp(min_spending, 0, 100);
+			new_settings.upper_limit = 100;
+			change_settings(state, new_settings);
+		} break;
+		case budget_slider_target::navy_stock:
+		{
+			auto min_spending = int32_t(100.0f * state.defines.trade_cap_low_limit_naval);
+			mutable_scrollbar_settings new_settings;
+			new_settings.lower_value = 0;
+			new_settings.upper_value = 100;
+			new_settings.using_limits = true;
+			new_settings.lower_limit = std::clamp(min_spending, 0, 100);
+			new_settings.upper_limit = 100;
 			change_settings(state, new_settings);
 		} break;
 		default:
