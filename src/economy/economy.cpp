@@ -12,7 +12,7 @@
 
 namespace economy {
 
-constexpr float pop_payout_factor = 1.f;
+constexpr float pop_payout_factor = 10.f;
 constexpr float consumption_factor = 1.f;
 
 constexpr float aristocrat_investment_ratio = 0.60f;
@@ -1366,12 +1366,6 @@ inline constexpr float diff_non_factory = day_1_build_time_modifier_non_factory 
 inline constexpr float shift_non_factory = -diff_non_factory / day_1_derivative_non_factory;
 inline constexpr float slope_non_factory = diff_non_factory * shift_non_factory;
 
-
-float global_non_factory_construction_time_modifier(sys::state& state) {
-	float t = math::sqrt((static_cast<float>(state.current_date.value) * 0.01f + 2.f));
-	return day_inf_build_time_modifier_non_factory + slope_non_factory / (t + shift_non_factory);
-}
-
 inline constexpr float day_1_build_time_modifier_factory = 0.9f;
 inline constexpr float day_inf_build_time_modifier_factory = 0.75f;
 inline constexpr float day_1_derivative_factory = -0.01f;
@@ -1380,13 +1374,13 @@ inline constexpr float diff_factory = day_1_build_time_modifier_factory - day_in
 inline constexpr float shift_factory = -diff_factory / day_1_derivative_factory;
 inline constexpr float slope_factory = diff_factory * shift_factory;
 
-// also we want to speed up factories construction right at the start
-// as it's the most vulnerable time for them
-// and we need to establish *some* industrial base for world to develop
-// their build time should also become faster with time to delay growth bottleneck
 float global_factory_construction_time_modifier(sys::state& state) {
-	float t = math::sqrt((static_cast<float>(state.current_date.value) * 0.01f + 2.f));
+	float t = math::sqrt(float(state.current_date.value) * 0.01f + 2.f);
 	return day_inf_build_time_modifier_factory + slope_factory / (t + shift_factory);
+}
+float global_non_factory_construction_time_modifier(sys::state& state) {
+	float t = math::sqrt(float(state.current_date.value) * 0.01f + 2.f);
+	return day_inf_build_time_modifier_non_factory + slope_non_factory / (t + shift_non_factory);
 }
 
 void populate_construction_consumption(sys::state& state) {
@@ -2386,7 +2380,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		acc_u = acc_u + ve::select(none_of_above && state.world.pop_type_get_has_unemployment(types), s_spending * (pop_of_type - employment) * pop_payout_factor * unemp_level * ln_costs, 0.0f);
 
 		/* Savings represent the daily income of the pop - hence, daily means it is overwriten each day with a new value - w.r.t. to it's old value - no relation is given */
-		state.world.pop_set_savings(ids, state.world.pop_get_savings(ids) + ((acc_e + acc_m) + (acc_u + acc_a)));
+		state.world.pop_set_savings(ids, ((acc_e + acc_m) + (acc_u + acc_a)));
+		//state.world.pop_set_savings(ids, state.world.pop_get_savings(ids) + ((acc_e + acc_m) + (acc_u + acc_a)));
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_e);
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_m);
 		ve::apply([](float v) { assert(std::isfinite(v) && v >= 0.f); }, acc_u);
@@ -3329,11 +3324,9 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 	for(auto lc : state.world.nation_get_province_land_construction(n)) {
 		auto province = state.world.pop_get_province_from_pop_location(state.world.province_land_construction_get_pop(lc));
 		if(state.world.province_get_nation_from_province_control(province) == n) {
-
 			auto& base_cost = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_cost;
 			auto& current_purchased = state.world.province_land_construction_get_purchased_goods(lc);
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
-
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3344,19 +3337,16 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			}
 		}
 	}
-
 	for(auto po : state.world.nation_get_province_ownership(n)) {
 		auto p = po.get_province();
 		if(state.world.province_get_nation_from_province_control(p) != n)
 			continue;
-
 		auto rng = state.world.province_get_province_naval_construction(p);
 		if(rng.begin() != rng.end()) {
 			auto c = *(rng.begin());
 			auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 			auto& current_purchased = c.get_purchased_goods();
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3367,14 +3357,12 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			}
 		}
 	}
-
 	for(auto c : state.world.nation_get_province_building_construction(n)) {
 		if(n == c.get_province().get_nation_from_province_control() && !c.get_is_pop_project()) {
 			auto t = economy::province_building_type(c.get_type());
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
-
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3385,7 +3373,6 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			}
 		}
 	}
-
 	for(auto c : state.world.nation_get_state_building_construction(n)) {
 		if(!c.get_is_pop_project()) {
 			auto& base_cost = c.get_type().get_construction_costs();

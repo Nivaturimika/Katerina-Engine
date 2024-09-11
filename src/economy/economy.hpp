@@ -275,6 +275,7 @@ void go_bankrupt(sys::state& state, dcon::nation_id n);
 dcon::modifier_id get_province_selector_modifier(sys::state& state);
 dcon::modifier_id get_province_immigrator_modifier(sys::state& state);
 
+float factory_build_cost_modifier(sys::state& state, dcon::nation_id n, bool pop_project);
 bool can_take_loans(sys::state& state, dcon::nation_id n);
 float interest_payment(sys::state& state, dcon::nation_id n);
 float max_loan(sys::state& state, dcon::nation_id n);

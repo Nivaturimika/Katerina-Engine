@@ -921,9 +921,10 @@ class budget_construction_stockpile_slider : public budget_slider<budget_slider_
 				auto& current_purchased = c.get_purchased_goods();
 				float construction_time = float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
 				float total_cost = 0.f;
+				auto cost_mod = economy::factory_build_cost_modifier(state, state.local_player_nation, c.get_is_pop_project());
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 					if(auto cid = base_cost.commodity_type[i]; cid) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
 							float amount = state.world.nation_get_demand_satisfaction(n, cid) * base_cost.commodity_amounts[i] * factory_mod / construction_time;
 							float cost = state.world.commodity_get_current_price(cid);
 							total_cost += cost * amount;
