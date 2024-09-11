@@ -1325,20 +1325,6 @@ bool allow_in_area(sys::state& state, dcon::province_id p, dcon::rebel_faction_i
 	}
 	return false;
 }
-bool allow_in_area_defection(sys::state& state, dcon::province_id p, dcon::rebel_faction_id reb) {
-	auto rf = dcon::fatten(state.world, reb);
-	auto prov = dcon::fatten(state.world, p);
-	switch(culture::rebel_independence(rf.get_type().get_independence())) {
-	case culture::rebel_independence::culture:
-	case culture::rebel_independence::culture_group:
-	case culture::rebel_independence::religion:
-	case culture::rebel_independence::pan_nationalist:
-		return province::has_core(state, prov, rf.get_defection_target());
-	default:
-		break;
-	}
-	return false;
-}
 
 void update_armies(sys::state& state) {
 	concurrency::parallel_for(uint32_t(0), state.world.army_rebel_control_size(), [&](uint32_t i) {
@@ -1374,10 +1360,9 @@ void update_armies(sys::state& state) {
 			/* impassable */
 			if((adj.get_type() & province::border::impassible_bit) != 0)
 				continue;
-			if(allow_in_area(state, prov, arc.get_controller())
-			&& allow_in_area_defection(state, prov, arc.get_controller())) {
-				//float weight = trigger::evaluate_multiplicative_modifier(state, type.get_movement_evaluation(), trigger::to_generic(prov), trigger::to_generic(prov), trigger::to_generic(arc.get_controller()));
-				float weight = float(rng::get_random(state, uint32_t(prov.id.index() * ar.id.index())) % 100);
+			if(allow_in_area(state, prov, arc.get_controller())) {
+				float weight = trigger::evaluate_multiplicative_modifier(state, type.get_movement_evaluation(), trigger::to_generic(prov), trigger::to_generic(prov), trigger::to_generic(arc.get_controller()));
+				//float weight = float(rng::get_random(state, uint32_t(prov.id.index() * ar.id.index())) % 100);
 				//if(prov.get_army_location().begin() != prov.get_army_location().end()) {
 				//	weight *= 0.01f;
 				//}
