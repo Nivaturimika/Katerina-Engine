@@ -1366,9 +1366,9 @@ void update_armies(sys::state& state) {
 				//if(prov.get_army_location().begin() != prov.get_army_location().end()) {
 				//	weight *= 0.01f;
 				//}
-				if(prov.get_rebel_faction_from_province_rebel_control()) {
-					weight *= 0.0001f;
-				}
+				//if(prov.get_rebel_faction_from_province_rebel_control()) {
+				//	weight *= 0.0001f;
+				//}
 				if(weight >= best_weight) {
 					best_weight = weight;
 					best_prov = prov;
