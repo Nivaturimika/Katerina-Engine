@@ -53,24 +53,27 @@ public:
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		auto fat_id = dcon::fatten(state.world, retrieve<T>(state, parent));
 		{
 			auto box = text::open_layout_box(contents, 0);
 			text::localised_format_box(state, contents, box, std::string_view("curr_comb_str"));
-			auto fat = dcon::fatten(state.world, retrieve<T>(state, parent));
-			auto color = fat.get_strength() >= 0.9f ? text::text_color::green
-				: fat.get_strength() < 0.5f ? text::text_color::red
+			auto color = fat_id.get_strength() >= 0.9f ? text::text_color::green
+				: fat_id.get_strength() < 0.5f ? text::text_color::red
 				: text::text_color::yellow;
-			text::add_to_layout_box(state, contents, box, text::fp_percentage{ fat.get_strength() }, color);
+			text::add_to_layout_box(state, contents, box, text::fp_percentage{ fat_id.get_strength() }, color);
 			text::close_layout_box(contents, box);
 		}
-		auto fat_id = dcon::fatten(state.world, retrieve<T>(state, parent));
-		auto o_sc_mod = std::max(0.01f, state.world.nation_get_modifier_values(state.local_player_nation, sys::national_mod_offsets::supply_consumption) + 1.0f);
-		auto& supply_cost = state.military_definitions.unit_base_definitions[fat_id.get_type()].supply_cost;
+		economy::commodity_set supply_cost;
+		if constexpr(std::is_same_v<T, dcon::army_id>) {
+			supply_cost = military::get_required_supply(state, state.local_player_nation, fat_id.id);
+		} else if constexpr(std::is_same_v<T, dcon::navy_id>) {
+			supply_cost = military::get_required_supply(state, state.local_player_nation, fat_id.id);
+		}
 		float total_cost = 0.f;
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(supply_cost.commodity_type[i]) {
-				float cost = state.world.commodity_get_cost(supply_cost.commodity_type[i]);
-				float amount = supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(state.local_player_nation, fat_id.get_type()).supply_consumption * o_sc_mod;
+				float cost = economy::commodity_effective_price(state, state.local_player_nation, supply_cost.commodity_type[i]);
+				float amount = supply_cost.commodity_amounts[i];
 				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(supply_cost.commodity_type[i]));
 				text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });

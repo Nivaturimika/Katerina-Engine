@@ -6796,11 +6796,13 @@ economy::commodity_set get_required_supply(sys::state& state, dcon::nation_id ow
 		auto reg = fatten(state.world, r);
 		auto type = state.world.regiment_get_type(r.get_regiment());
 
+		float admin_eff = state.world.nation_get_administrative_efficiency(owner);
+		float admin_cost_factor = 2.0f - admin_eff;
 		auto o_sc_mod = std::max(0.01f, state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::supply_consumption) + 1.0f);
 		auto& supply_cost = state.military_definitions.unit_base_definitions[type].supply_cost;
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(supply_cost.commodity_type[i]) {
-				commodities.commodity_amounts[i] += supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption * o_sc_mod;
+				commodities.commodity_amounts[i] += supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption * o_sc_mod * admin_cost_factor;
 				commodities.commodity_type[i] = supply_cost.commodity_type[i];
 			} else {
 				break;
@@ -6816,32 +6818,28 @@ economy::commodity_set get_required_supply(sys::state& state, dcon::nation_id ow
 	// supply amount = type_consumption * (2 - admin_eff)*[(type_consumption_mod^0.01)*land_spending]
 	float supply_amount = .0f;
 	int32_t amount_of_units = 0;
-
 	economy::commodity_set commodities;
 	for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 		commodities.commodity_amounts[i] = 0.0f;
 	}
-
 	for(auto sh : state.world.navy_get_navy_membership(navy)) {
 		auto shp = fatten(state.world, sh.get_ship());
 		auto type = state.world.ship_get_type(sh.get_ship());
-
 		if(owner) {
+			float admin_eff = state.world.nation_get_administrative_efficiency(owner);
+			float admin_cost_factor = 2.0f - admin_eff;
 			auto o_sc_mod = std::max(0.01f, state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::supply_consumption) + 1.0f);
 			auto& supply_cost = state.military_definitions.unit_base_definitions[type].supply_cost;
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				if(supply_cost.commodity_type[i]) {
-					commodities.commodity_amounts[i] +=
-						supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption *
-						o_sc_mod;
+					commodities.commodity_amounts[i] += supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption * o_sc_mod * admin_cost_factor;
 					commodities.commodity_type[i] = supply_cost.commodity_type[i];
 				} else {
 					break;
 				}
 			}
 		}
-	};
-
+	}
 	return commodities;
 }
 

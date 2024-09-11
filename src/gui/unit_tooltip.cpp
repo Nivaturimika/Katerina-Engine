@@ -53,12 +53,14 @@ void single_unit_tooltip(sys::state& state, text::columnar_layout& contents, dco
 	float total_cost = 0.f;
 	for(const auto memb : army.get_army_membership()) {
 		auto type = state.world.regiment_get_type(memb.get_regiment());
+		float admin_eff = state.world.nation_get_administrative_efficiency(controller);
+		float admin_cost_factor = 2.0f - admin_eff;
 		auto o_sc_mod = std::max(0.01f, state.world.nation_get_modifier_values(controller, sys::national_mod_offsets::supply_consumption) + 1.0f);
 		auto& supply_cost = state.military_definitions.unit_base_definitions[type].supply_cost;
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(supply_cost.commodity_type[i]) {
 				float cost = state.world.commodity_get_cost(supply_cost.commodity_type[i]);
-				float amount = supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(controller, type).supply_consumption * o_sc_mod;
+				float amount = supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(controller, type).supply_consumption * o_sc_mod * admin_cost_factor;
 				total_cost += cost * amount;
 			} else {
 				break;
@@ -111,12 +113,14 @@ void single_unit_tooltip(sys::state& state, text::columnar_layout& contents, dco
 	float total_cost = 0.f;
 	for(const auto memb : navy.get_navy_membership()) {
 		auto type = state.world.ship_get_type(memb.get_ship());
+		float admin_eff = state.world.nation_get_administrative_efficiency(controller);
+		float admin_cost_factor = 2.0f - admin_eff;
 		auto o_sc_mod = std::max(0.01f, state.world.nation_get_modifier_values(controller, sys::national_mod_offsets::supply_consumption) + 1.0f);
 		auto& supply_cost = state.military_definitions.unit_base_definitions[type].supply_cost;
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(supply_cost.commodity_type[i]) {
 				float cost = state.world.commodity_get_cost(supply_cost.commodity_type[i]);
-				float amount = supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(controller, type).supply_consumption * o_sc_mod;
+				float amount = supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(controller, type).supply_consumption * o_sc_mod * admin_cost_factor;
 				total_cost += cost * amount;
 			} else {
 				break;

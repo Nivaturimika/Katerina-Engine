@@ -800,7 +800,7 @@ class budget_army_stockpile_slider : public budget_slider<budget_slider_target::
 		uint32_t total_commodities = state.world.commodity_size();
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto cost = state.world.commodity_get_current_price(cid);
+			auto cost = economy::commodity_effective_price(state, state.local_player_nation, cid);
 			auto amount = state.world.nation_get_army_demand(n, cid);
 			if(amount > 0.f) {
 				text::substitution_map m;
@@ -833,7 +833,7 @@ class budget_navy_stockpile_slider : public budget_slider<budget_slider_target::
 		uint32_t total_commodities = state.world.commodity_size();
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto cost = state.world.commodity_get_current_price(cid);
+			auto cost = economy::commodity_effective_price(state, state.local_player_nation, cid);
 			auto amount = state.world.nation_get_navy_demand(n, cid);
 			if(amount > 0.f) {
 				text::substitution_map m;
