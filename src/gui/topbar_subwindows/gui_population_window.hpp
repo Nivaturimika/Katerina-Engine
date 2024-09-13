@@ -1655,13 +1655,20 @@ public:
 			auto kf = state.world.commodity_get_key_factory(cid);
 			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
 				float amount = 0.f;
+				/*
+				We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 +
+				national-plurality (as a fraction of 100)) x pop-size
+				*/
+				bool is_colonial = state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(content));
+				float nmod = (0.5f + state.world.pop_get_consciousness(content) / state.defines.pdef_base_con)
+					* (is_colonial ? 1.f : 1.f + state.world.nation_get_plurality(n));
 				float pop_size = state.world.pop_get_size(content);
 				if constexpr(N == 0) {
-					amount = state.world.pop_type_get_life_needs(pt, cid) * pop_size;
+					amount = nmod * state.world.pop_type_get_life_needs(pt, cid) * pop_size;
 				} else if constexpr(N == 1) {
-					amount = state.world.pop_type_get_everyday_needs(pt, cid) * pop_size;
+					amount = nmod * state.world.pop_type_get_everyday_needs(pt, cid) * pop_size;
 				} else if constexpr(N == 2) {
-					amount = state.world.pop_type_get_luxury_needs(pt, cid) * pop_size;
+					amount = nmod * state.world.pop_type_get_luxury_needs(pt, cid) * pop_size;
 				}
 				if(amount > 0.f) {
 					row_contents.emplace_back(cid, amount);

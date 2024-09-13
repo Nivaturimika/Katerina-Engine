@@ -1737,10 +1737,15 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			auto total_budget = pl.get_pop().get_savings();
 			assert(total_budget >= 0.f);
 			auto total_pop = pl.get_pop().get_size();
-			//
-			float ln_cost = state.world.nation_get_life_needs_costs(n, t) * total_pop;
-			float en_cost = state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
-			float xn_cost = state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
+			/*
+			We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 +
+			national-plurality (as a fraction of 100)) x pop-size
+			*/
+			float nmod = (0.5f + pl.get_pop().get_consciousness() / state.defines.pdef_base_con)
+				* (p.get_province().get_is_colonial() ? 1.f : 1.f + state.world.nation_get_plurality(n));
+			float ln_cost = nmod * state.world.nation_get_life_needs_costs(n, t) * total_pop;
+			float en_cost = nmod * state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
+			float xn_cost = nmod * state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
 			total_budget -= std::min(total_budget, ln_cost);
 			total_budget -= std::min(total_budget, en_cost);
 			total_budget -= std::min(total_budget, xn_cost);
