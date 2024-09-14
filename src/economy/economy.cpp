@@ -12,7 +12,7 @@
 
 namespace economy {
 
-constexpr float pop_payout_factor = 3.f;
+constexpr float pop_payout_factor = 1.f;
 constexpr float consumption_factor = 1.f;
 
 constexpr float aristocrat_investment_ratio = 0.60f;
