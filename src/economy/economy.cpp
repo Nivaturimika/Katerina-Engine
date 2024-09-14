@@ -12,7 +12,7 @@
 
 namespace economy {
 
-constexpr float pop_payout_factor = 10.f;
+constexpr float pop_payout_factor = 1.f;
 constexpr float consumption_factor = 1.f;
 
 constexpr float aristocrat_investment_ratio = 0.60f;
@@ -1846,6 +1846,8 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
 		std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
 	};
+	float admin_eff = state.world.nation_get_administrative_efficiency(n);
+	float admin_cost_factor = 2.0f - admin_eff;
 	for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 		dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 		auto kf = state.world.commodity_get_key_factory(c);
@@ -1854,13 +1856,13 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 			assert(effective_price >= 0.f);
 			state.world.for_each_pop_type([&](dcon::pop_type_id ids) {
 				auto ln_base = state.world.pop_type_get_life_needs(ids, c);
-				auto ln = ln_base * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)];
+				auto ln = ln_base * admin_cost_factor * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_life_needs_costs(n, ids, ln);
 				auto en_base = state.world.pop_type_get_everyday_needs(ids, c);
-				auto en = en_base * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)];
+				auto en = en_base * admin_cost_factor * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_everyday_needs_costs(n, ids, en);
 				auto lx_base = state.world.pop_type_get_luxury_needs(ids, c);
-				auto lx = lx_base * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)];
+				auto lx = lx_base * admin_cost_factor * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)];
 				state.world.nation_set_luxury_needs_costs(n, ids, lx);
 				assert(std::isfinite(state.world.nation_get_life_needs_costs(n, ids)) && state.world.nation_get_life_needs_costs(n, ids) >= 0.f);
 				assert(std::isfinite(state.world.nation_get_everyday_needs_costs(n, ids)) && state.world.nation_get_everyday_needs_costs(n, ids) >= 0.f);
@@ -2185,10 +2187,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		auto sl = state.world.nation_get_in_sphere_of(n);
 
 		float base_demand = std::max(0.001f, state.defines.base_goods_demand + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand));
-
 		int32_t num_inventions = 0;
 		state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
-		float invention_factor = float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f;
+		float invention_factor = std::max(0.001f, float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f);
 		populate_needs_costs(state, n, base_demand, invention_factor);
 
 		float mobilization_impact = state.world.nation_get_is_mobilized(n) ? military::mobilization_impact(state, n) : 1.0f;
