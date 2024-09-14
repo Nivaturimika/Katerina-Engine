@@ -1661,7 +1661,7 @@ public:
 				*/
 				bool is_colonial = state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(content));
 				float nmod = (0.5f + state.world.pop_get_consciousness(content) / state.defines.pdef_base_con)
-					* (is_colonial ? 1.f : 1.f + state.world.nation_get_plurality(n));
+					* (is_colonial ? 1.f : 1.f + state.world.nation_get_plurality(n) * 0.01f);
 				float pop_size = state.world.pop_get_size(content);
 				if constexpr(N == 0) {
 					amount = nmod * state.world.pop_type_get_life_needs(pt, cid) * pop_size;

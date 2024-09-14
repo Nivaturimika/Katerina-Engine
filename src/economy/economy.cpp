@@ -1742,7 +1742,7 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			national-plurality (as a fraction of 100)) x pop-size
 			*/
 			float nmod = (0.5f + pl.get_pop().get_consciousness() / state.defines.pdef_base_con)
-				* (p.get_province().get_is_colonial() ? 1.f : 1.f + state.world.nation_get_plurality(n));
+				* (p.get_province().get_is_colonial() ? 1.f : 1.f + state.world.nation_get_plurality(n) * 0.01f);
 			float ln_cost = nmod * state.world.nation_get_life_needs_costs(n, t) * total_pop;
 			float en_cost = nmod * state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
 			float xn_cost = nmod * state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
