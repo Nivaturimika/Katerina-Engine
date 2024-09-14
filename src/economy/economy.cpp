@@ -12,7 +12,7 @@
 
 namespace economy {
 
-constexpr float pop_payout_factor = 1.f;
+constexpr float pop_payout_factor = 3.f;
 constexpr float consumption_factor = 1.f;
 
 constexpr float aristocrat_investment_ratio = 0.60f;
@@ -162,27 +162,6 @@ float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::co
 		return 1.f;
 	}
 	return 0.f;
-}
-
-float pop_needs_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float need, bool is_life_need) {
-	/*
-	For each pop
-	Each pop strata and needs type has its own demand modifier, calculated as follows:
-	(national-modifier-to-goods-demand + define:BASE_GOODS_DEMAND) x (national-modifier-to-specific-strata-and-needs-type + 1) x (define:INVENTION_IMPACT_ON_DEMAND x number-of-unlocked-inventions + 1, but for non-life-needs only)
-	Each needs demand is also multiplied by 2 - the nation's administrative efficiency if the pop has education / admin / military income for that need category
-	We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 + national-plurality (as a fraction of 100)) x pop-size
-	Each of the pop's needs for life/everyday/luxury are multiplied by the appropriate modifier and added to domestic demand
-	*/
-	float num_inventions = 0.f;
-	for(const auto i : state.world.in_invention)
-		if(state.world.nation_get_active_inventions(n, i))
-			num_inventions += 1.f;
-	auto inv_impact = (is_life_need ? 1.f + +state.defines.invention_impact_on_demand * num_inventions : 1.f);
-	return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand) + state.defines.base_goods_demand * (need + 1.f) * inv_impact;
-}
-
-float need_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
-	return 1.0f / math::sqrt(std::max(state.world.commodity_get_current_price(c), 0.001f));
 }
 
 void presimulate(sys::state& state) {
@@ -1848,27 +1827,29 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 	};
 	float admin_eff = state.world.nation_get_administrative_efficiency(n);
 	float admin_cost_factor = 2.0f - admin_eff;
-	for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-		dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
-		auto kf = state.world.commodity_get_key_factory(c);
-		if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
-			float effective_price = commodity_effective_price(state, n, c);
-			assert(effective_price >= 0.f);
-			state.world.for_each_pop_type([&](dcon::pop_type_id ids) {
-				auto ln_base = state.world.pop_type_get_life_needs(ids, c);
-				auto ln = ln_base * admin_cost_factor * effective_price * base_demand * ln_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_life_needs_costs(n, ids, ln);
-				auto en_base = state.world.pop_type_get_everyday_needs(ids, c);
-				auto en = en_base * admin_cost_factor * effective_price * base_demand * invention_factor * en_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_everyday_needs_costs(n, ids, en);
-				auto lx_base = state.world.pop_type_get_luxury_needs(ids, c);
-				auto lx = lx_base * admin_cost_factor * effective_price * base_demand * invention_factor * lx_mul[state.world.pop_type_get_strata(ids)];
-				state.world.nation_set_luxury_needs_costs(n, ids, lx);
-				assert(std::isfinite(state.world.nation_get_life_needs_costs(n, ids)) && state.world.nation_get_life_needs_costs(n, ids) >= 0.f);
-				assert(std::isfinite(state.world.nation_get_everyday_needs_costs(n, ids)) && state.world.nation_get_everyday_needs_costs(n, ids) >= 0.f);
-				assert(std::isfinite(state.world.nation_get_luxury_needs_costs(n, ids)) && state.world.nation_get_luxury_needs_costs(n, ids) >= 0.f);
-			});
+	for(const auto ids : state.world.in_pop_type) {
+		float ln_total = 0.f;
+		float en_total = 0.f;
+		float lx_total = 0.f;
+		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+			dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+			auto kf = state.world.commodity_get_key_factory(c);
+			if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
+				float effective_price = commodity_effective_price(state, n, c);
+				assert(effective_price >= 0.f);
+				auto nmod = admin_cost_factor * effective_price * base_demand;
+				auto strata = state.world.pop_type_get_strata(ids);
+				ln_total = state.world.pop_type_get_life_needs(ids, c) * nmod * ln_mul[strata];
+				en_total += state.world.pop_type_get_everyday_needs(ids, c) * nmod * invention_factor * en_mul[strata];
+				lx_total += state.world.pop_type_get_luxury_needs(ids, c) * nmod * invention_factor * lx_mul[strata];
+			}
 		}
+		state.world.nation_set_life_needs_costs(n, ids, ln_total);
+		state.world.nation_set_everyday_needs_costs(n, ids, en_total);
+		state.world.nation_set_luxury_needs_costs(n, ids, lx_total);
+		assert(std::isfinite(state.world.nation_get_life_needs_costs(n, ids)) && state.world.nation_get_life_needs_costs(n, ids) >= 0.f);
+		assert(std::isfinite(state.world.nation_get_everyday_needs_costs(n, ids)) && state.world.nation_get_everyday_needs_costs(n, ids) >= 0.f);
+		assert(std::isfinite(state.world.nation_get_luxury_needs_costs(n, ids)) && state.world.nation_get_luxury_needs_costs(n, ids) >= 0.f);
 	}
 }
 
@@ -2190,11 +2171,11 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		int32_t num_inventions = 0;
 		state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
 		float invention_factor = std::max(0.001f, float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f);
-		populate_needs_costs(state, n, base_demand, invention_factor);
+		populate_needs_costs(state, n, base_dema                                                      nd, invention_factor);
 
 		float mobilization_impact = state.world.nation_get_is_mobilized(n) ? military::mobilization_impact(state, n) : 1.0f;
-
-		auto const min_wage_factor = pop_min_wage_factor(state, n);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+		auto const min_wage_factor = pop_min_wage_factor(state                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              , n);
 		float factory_min_wage = pop_factory_min_wage(state, n, min_wage_factor);
 		float artisan_min_wage = pop_artisan_min_wage(state, n, min_wage_factor);
 		float farmer_min_wage = pop_farmer_min_wage(state, n, min_wage_factor);
