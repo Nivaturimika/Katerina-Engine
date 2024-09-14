@@ -1839,7 +1839,7 @@ void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_deman
 				assert(effective_price >= 0.f);
 				auto nmod = admin_cost_factor * effective_price * base_demand;
 				auto strata = state.world.pop_type_get_strata(ids);
-				ln_total = state.world.pop_type_get_life_needs(ids, c) * nmod * ln_mul[strata];
+				ln_total += state.world.pop_type_get_life_needs(ids, c) * nmod * ln_mul[strata];
 				en_total += state.world.pop_type_get_everyday_needs(ids, c) * nmod * invention_factor * en_mul[strata];
 				lx_total += state.world.pop_type_get_luxury_needs(ids, c) * nmod * invention_factor * lx_mul[strata];
 			}
