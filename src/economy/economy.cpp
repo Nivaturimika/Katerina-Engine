@@ -1725,8 +1725,11 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			float ln_cost = nmod * state.world.nation_get_life_needs_costs(n, t) * total_pop;
 			float en_cost = nmod * state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
 			float xn_cost = nmod * state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
+			float life_needs_budget = std::min(ln_cost, total_budget);
 			total_budget -= std::min(total_budget, ln_cost);
+			float everyday_needs_budget = std::min(en_cost, total_budget);
 			total_budget -= std::min(total_budget, en_cost);
+			float luxury_needs_budget = std::min(xn_cost, total_budget);
 			total_budget -= std::min(total_budget, xn_cost);
 			/* handle investment before everyday goods - they could be very hard to satisfy, depending on a mod : */
 			if(!nation_allows_investment || (t != state.culture_definitions.aristocrat && t != state.culture_definitions.capitalists)) {
@@ -1740,9 +1743,7 @@ void update_pop_consumption(sys::state& state, dcon::nation_id n, float base_dem
 			}
 
 			/* Induce demand across all categories maybe we need some kind of banking and ability to save up money for future instead of spending them all */
-			float life_needs_budget = std::max(0.001f, total_budget) * 0.75f;
-			float everyday_needs_budget = std::max(0.001f, total_budget) * 0.5f;
-			float luxury_needs_budget = std::max(0.001f, total_budget) * 0.25f;
+			
 			float life_needs_fraction = life_needs_budget / std::max(0.001f, ln_cost);
 			float everyday_needs_fraction = everyday_needs_budget / std::max(0.001f, en_cost);
 			float luxury_needs_fraction = luxury_needs_budget / std::max(0.001f, xn_cost);
