@@ -3274,13 +3274,13 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	for(auto r : world.in_army) {
 		auto nation = world.army_control_get_controller(r.get_army_control());
 		if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
-			world.delete_army(r);
+			military::cleanup_army(*this,r);
 		}
 	}
 	for(auto r : world.in_navy) {
 		auto nation = world.navy_control_get_controller(r.get_navy_control());
 		if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {			
-			world.delete_navy(r);
+			military::cleanup_navy(*this, r);
 		}
 	}
 }
