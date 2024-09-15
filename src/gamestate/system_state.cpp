@@ -3161,7 +3161,7 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	//Fixup armies defined on a different place
 	for(auto p : world.in_pop_location) {
 		for(const auto src : p.get_pop().get_regiment_source()) {
-			if(src.get_regiment().get_army_from_army_membership().get_controller_from_army_control() == p.get_province().get_nation_from_province_ownership())
+			if(src.get_regiment().get_army_from_army_membership().get_controller_from_army_control() == p.get_province().get_nation_from_province_ownership() || src.get_regiment().get_army_from_army_membership().get_controller_from_army_control() == world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id))
 				continue;
 			err.accumulated_warnings += "Army defined in " + text::produce_simple_string(*this, p.get_province().get_name()) + "; but regiment comes from a province owned by someone else\n";
 			src.get_regiment().set_strength(0.f);
