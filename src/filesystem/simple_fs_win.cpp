@@ -18,6 +18,7 @@
 namespace simple_fs {
 
 static UINT default_codepage = CP_UTF8; // default is UTF8
+
 void identify_global_system_properties() {
 	CPINFO cp_info;
 	if(GetCPInfo(CP_UTF8, &cp_info) == FALSE) {
@@ -113,14 +114,40 @@ directory get_root(file_system const& fs) {
 	return directory(&fs, NATIVE(""));
 }
 
+native_string get_steam_path() {
+	WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
+	HKEY hKey;
+	LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
+	if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
+		DWORD lnBuffer = 4096;
+		res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
+		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
+			szBuffer[lnBuffer] = 0;
+			RegCloseKey(hKey);
+			return native_string(szBuffer);
+		}
+	}
+	return native_string();
+}
+
 native_string extract_state(file_system const& fs) {
-	native_string result;
+	native_string steam_path = get_steam_path();
+	native_string result; //no steam install (base dir)
 	for(auto const& str : fs.ordered_roots) {
 		result += NATIVE(";") + str;
 	}
 	result += NATIVE("?");
 	for(auto const& replace_path : fs.ignored_paths) {
 		result += replace_path + NATIVE(";");
+	}
+	if(!steam_path.empty()) { //steam install
+		for(auto const& str : fs.ordered_roots) {
+			result += steam_path + NATIVE(";") + str;
+		}
+		result += NATIVE("?");
+		for(auto const& replace_path : fs.ignored_paths) {
+			result += steam_path + replace_path + NATIVE(";");
+		}
 	}
 	return result;
 }
@@ -209,9 +236,7 @@ std::vector<unopened_file> list_files(directory const& dir, native_char const* e
 									 [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; });
 								search_result == accumulated_results.end()) {
 
-							accumulated_results.emplace_back(dir.parent_system->ordered_roots[i] + dir.relative_path + NATIVE("\\") +
-																									 find_result.cFileName,
-									find_result.cFileName);
+							accumulated_results.emplace_back(dir.parent_system->ordered_roots[i] + dir.relative_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
 						}
 					}
 				} while(FindNextFileW(find_handle, &find_result) != 0);

@@ -119,22 +119,6 @@ void EnableCrashingOnCrashes() {
 	SetUserObjectInformationA(GetCurrentProcess(), UOI_TIMERPROC_EXCEPTION_SUPPRESSION, &insanity, sizeof(insanity));
 }
 
-native_string get_steam_path() {
-	WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
-	HKEY hKey;
-	LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
-	if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-		DWORD lnBuffer = 4096;
-		res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
-		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-			szBuffer[lnBuffer] = 0;
-			RegCloseKey(hKey);
-			return native_string(szBuffer);
-		}
-	}
-	return native_string(NATIVE("."));
-}
-
 int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR /*commandline*/, int /*nCmdShow*/
 ) {
 
@@ -190,13 +174,11 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 
 		if(num_params < 2) {
 			add_root(game_state.common_fs, NATIVE(".")); // for the moment this lets us find the shader files
-			add_root(game_state.common_fs, get_steam_path()); // for the moment this lets us find the shader files
 			if(!sys::try_read_scenario_and_save_file(game_state, NATIVE("development_test_file.bin"))) {
 				// scenario making functions
 				parsers::error_handler err{ "" };
 				simple_fs::file_system fs_root;
 				simple_fs::add_root(fs_root, NATIVE("."));
-				simple_fs::add_root(fs_root, get_steam_path());
 				auto root = get_root(fs_root);
 				auto common = open_directory(root, NATIVE("common"));
 				parsers::bookmark_context bookmark_context;
@@ -225,7 +207,6 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					//
 					auto inner_game_state = std::make_unique<sys::state>();
 					simple_fs::add_root(inner_game_state->common_fs, NATIVE("."));
-
 					inner_game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
 					if(err.fatal)
 						break;
@@ -263,7 +244,6 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			std::vector<parsers::mod_file> mod_list;
 			simple_fs::file_system fs_root;
 			simple_fs::add_root(fs_root, NATIVE("."));
-			simple_fs::add_root(fs_root, get_steam_path());
 			for(int i = 1; i < num_params; ++i) {
 				if(native_string(parsed_cmd[i]) == NATIVE("-host")) {
 					forwarding_apparatus.start_forwarding();
@@ -396,8 +376,6 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					window::emit_error_message(msg, true);
 				}
 			}
-			// for mp sharing of scenarios
-			simple_fs::add_root(game_state.common_fs, get_steam_path());
 			network::init(game_state);
 		}
 		LocalFree(parsed_cmd);

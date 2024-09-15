@@ -955,15 +955,11 @@ bool nth_item_can_move_down(int32_t n) {
 native_string produce_mod_path() {
 	simple_fs::file_system dummy;
 	simple_fs::add_root(dummy, NATIVE("."));
-	simple_fs::add_root(dummy, get_steam_path());
-
 	for(int32_t i = 0; i < int32_t(mod_list.size()); ++i) {
 		if(mod_list[i].mod_selected == false)
 			break;
-
 		mod_list[i].add_to_file_system(dummy);
 	}
-
 	return simple_fs::extract_state(dummy);
 }
 
@@ -1328,28 +1324,10 @@ static GLfloat global_square_left_flipped_data[] = { 0.0f, 0.0f, 1.0f, 1.0f, 0.0
 
 static GLuint ui_shader_program = 0;
 
-native_string get_steam_path() {
-	WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
-	HKEY hKey;
-	LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
-	if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-		DWORD lnBuffer = 4096;
-		res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
-		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-			szBuffer[lnBuffer] = 0;
-			RegCloseKey(hKey);
-			return native_string(szBuffer);
-		}
-	}
-	return native_string(NATIVE("."));
-}
-
 void load_shaders() {
 	simple_fs::file_system fs;
 	simple_fs::add_root(fs, NATIVE("."));
-	simple_fs::add_root(fs, get_steam_path());
 	auto root = get_root(fs);
-
 	std::string_view fx_str =
 		"in vec2 tex_coord;\n"
 		"out vec4 frag_color;\n"
@@ -1993,7 +1971,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		simple_fs::identify_global_system_properties();
 		simple_fs::file_system fs;
 		simple_fs::add_root(fs, NATIVE("."));
-		simple_fs::add_root(fs, get_steam_path());
 		auto root = get_root(fs);
 
 		uint8_t font_set_load = 0;
