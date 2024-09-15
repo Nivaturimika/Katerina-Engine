@@ -3270,6 +3270,19 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	military::set_initial_leaders(*this);
 
 	military::run_gc(*this);
+
+	for(auto r : world.in_army) {
+		auto nation = world.army_control_get_controller(r.get_army_control());
+		if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
+			world.delete_army(r);
+		}
+	}
+	for(auto r : world.in_navy) {
+		auto nation = world.navy_control_get_controller(r.get_navy_control());
+		if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {			
+			world.delete_navy(r);
+		}
+	}
 }
 
 void state::preload() {
