@@ -396,6 +396,8 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					window::emit_error_message(msg, true);
 				}
 			}
+			// for mp sharing of scenarios
+			simple_fs::add_root(game_state.common_fs, get_steam_path());
 			network::init(game_state);
 		}
 		LocalFree(parsed_cmd);
