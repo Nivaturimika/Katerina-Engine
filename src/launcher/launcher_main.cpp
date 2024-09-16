@@ -1050,7 +1050,7 @@ void make_mod_file() {
 			auto pdir = simple_fs::get_or_create_settings_directory();
 			simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
 
-			if(!err.accumulated_errors.empty()) {
+			if(!err.accumulated_errors.empty() && err.fatal) {
 				auto fname = simple_fs::get_full_name(pdir) + NATIVE("\\scenario_errors.txt");
 				ShellExecuteW(
 					nullptr,
