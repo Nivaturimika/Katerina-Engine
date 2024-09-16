@@ -4210,7 +4210,14 @@ void state::game_loop() {
 		} else {
 			auto speed = actual_game_speed.load(std::memory_order::acquire);
 			auto upause = ui_pause.load(std::memory_order::acquire);
-			if(network_mode != sys::network_mode_type::host) { // prevent host from pausing the game with open event windows
+			if(network_mode == sys::network_mode_type::host) {
+				for(auto client : network_state.clients) {
+					if(client.is_active()) {
+						//more than 1 month before
+						upause = std::abs(client.last_game_date.to_raw_value() - current_date.to_raw_value()) >= 30;
+					}
+				}
+			} else { // prevent host from pausing the game with open event windows
 				upause = upause || ui::events_pause_test(*this);
 			}
 
