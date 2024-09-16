@@ -2737,7 +2737,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		domestic supply or demand, unless noted otherwise, it should be taken as given that the same is added to world
 		supply or demand. Also, world supply and demand for all commodities should be treated as at least 1.
 		*/
-		float supply = prior_production + state.world.commodity_get_global_market_pool(cid);
+		float supply = prior_production;// +state.world.commodity_get_global_market_pool(cid);
 		float demand = total_r_demand;
 		auto base_price = state.world.commodity_get_cost(cid);
 		auto current_price = state.world.commodity_get_current_price(cid);

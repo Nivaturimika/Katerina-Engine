@@ -437,34 +437,56 @@ void initialize_ai_tech_weights(sys::state& state) {
 		else if(state.culture_definitions.tech_folders[t.get_folder_index()].category == culture::tech_category::navy)
 			base *= 0.9f;
 
+		if(t.get_increase_building(economy::province_building_type::railroad))
+			base = std::max(base, 6500.0f);
+
 		auto mod = t.get_modifier();
 		auto& vals = mod.get_national_values();
 		for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
 			if(vals.offsets[i] == sys::national_mod_offsets::research_points) {
-				base *= 6.0f;
+				base = std::max(base, 9000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::research_points_modifier) {
-				base *= 6.0f;
+				base = std::max(base, 9000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::education_efficiency) {
-				base *= 3.0f;
+				base = std::max(base, 6000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::education_efficiency_modifier) {
-				base *= 3.0f;
+				base = std::max(base, 6000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::pop_growth) {
-				base *= 5.0f;
+				base = std::max(base, 8000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::supply_limit) {
+				base = std::max(base, 8000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::max_national_focus) {
-				base *= 4.0f;
+				base = std::max(base, 7000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::colonial_life_rating) {
-				base *= 4.0f;
-			} else if(vals.offsets[i] == sys::national_mod_offsets::rgo_output) {
-				base *= 1.2f;
-			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_output) {
-				base *= 2.0f;
-			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_throughput) {
-				base *= 1.2f;
-			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_input) {
-				base *= 2.0f;
+				base = std::max(base, 7000.0f);
 			} else if(vals.offsets[i] == sys::national_mod_offsets::tax_efficiency) {
-				base *= 5.0f;
+				base = std::max(base, 2500.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::influence_modifier) {
+				base = std::max(base, 6000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::rgo_output) {
+				base = std::max(base, 8000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_output) {
+				base = std::max(base, 6500.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_throughput) {
+				base = std::max(base, 5500.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::factory_input) {
+				base = std::max(base, 6000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::farm_rgo_eff) {
+				base = std::max(base, 7500.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::farm_rgo_size) {
+				base = std::max(base, 7000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::mine_rgo_eff) {
+				base = std::max(base, 7000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::mine_rgo_size) {
+				base = std::max(base, 7000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::rgo_input) {
+				base = std::max(base, 8500.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::rgo_output) {
+				base = std::max(base, 8000.0f);
+			} else if(vals.offsets[i] == sys::national_mod_offsets::rgo_throughput) {
+				base = std::max(base, 8000.0f);
 			}
+
 		}
 
 		t.set_ai_weight(base);
