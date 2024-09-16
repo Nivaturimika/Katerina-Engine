@@ -1029,6 +1029,20 @@ public:
 	}
 
 	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+		if(state.network_mode == sys::network_mode_type::host) {
+			auto box = text::open_layout_box(contents);
+			for(auto& client : state.network_state.clients) {
+				if(client.is_active()) {
+					auto const n = client.playing_as.index();
+					std::string player_name = std::string(state.network_state.map_of_player_names[n].to_string_view());
+					text::add_to_layout_box(state, contents, box, player_name, text::text_color::yellow);
+					text::add_space_to_layout_box(state, contents, box);
+					text::add_to_layout_box(state, contents, box, client.last_game_date, text::text_color::white);
+				}
+			}
+			text::close_layout_box(contents, box);
+		}
+
 		if(state.network_mode == sys::network_mode_type::client) {
 			text::add_line(state, contents, "alice_only_host_speed");
 		} else {

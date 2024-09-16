@@ -809,6 +809,8 @@ void broadcast_save_to_clients(sys::state& state, command::payload& c, uint8_t c
 			continue;
 		bool send_full = (client.playing_as == c.data.notify_save_loaded.target) || (!c.data.notify_save_loaded.target);
 		if(send_full) {
+			/* Reset date for lag detection */
+			client.last_game_date = state.current_date;
 			/* And then we have to first send the command payload itself */
 			client.save_stream_size = size_t(length);
 			c.data.notify_save_loaded.length = size_t(length);
@@ -863,6 +865,7 @@ static void accept_new_clients(sys::state& state) {
 		}
 		/* Send it data so she is in sync with everyone else! */
 		client.playing_as = get_temp_nation(state);
+		client.last_game_date = state.current_date; /* It'd be the current date (for lag detection) */
 		assert(client.playing_as);
 		{ /* Tell the client their assigned nation */
 			server_handshake_data hshake;

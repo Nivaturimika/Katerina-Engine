@@ -121,6 +121,7 @@ enum class command_type : uint8_t {
 	notify_stop_game = 114, // "go back to lobby"
 	notify_pause_game = 115, // visual aid mostly
 	notify_reload = 116,
+	notify_advanced_tick = 117,
 	advance_tick = 120,
 	chat_message = 121,
 

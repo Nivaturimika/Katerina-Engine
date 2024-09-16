@@ -123,6 +123,7 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(notify_player_kick, nation_pick) \
 	GS_COMMAND_LIST_ENTRY(notify_player_picks_nation, nation_pick) \
 	GS_COMMAND_LIST_ENTRY(notify_player_oos, no_data) \
+	GS_COMMAND_LIST_ENTRY(notify_advanced_tick, no_data) \
 	GS_COMMAND_LIST_ENTRY(advance_tick, advance_tick) \
 	GS_COMMAND_LIST_ENTRY(notify_save_loaded, notify_save_loaded) \
 	GS_COMMAND_LIST_ENTRY(notify_reload, no_data) \
@@ -4634,6 +4635,23 @@ void execute_notify_player_oos(sys::state& state, dcon::nation_id source) {
 	post_chat_message(state, m);
 }
 
+void notify_advanced_tick(sys::state& state, dcon::nation_id source) {
+	payload p;
+	memset(&p, 0, sizeof(payload));
+	p.type = command::command_type::notify_advanced_tick;
+	p.source = source;
+	add_to_command_queue(state, p);
+}
+void execute_notify_advanced_tick(sys::state& state, dcon::nation_id source) {
+	if(state.network_mode == sys::network_mode_type::host) {
+		for(auto& client : state.network_state.clients) {
+			if(client.is_active() && client.playing_as == source) {
+				client.last_game_date += 1;
+			}
+		}
+	}
+}
+
 void advance_tick(sys::state& state, dcon::nation_id source) {
 	payload p;
 	memset(&p, 0, sizeof(payload));
@@ -4657,6 +4675,8 @@ void execute_advance_tick(sys::state& state, dcon::nation_id source, sys::checks
 			}
 		}
 		state.actual_game_speed = speed;
+		/* Notify server that we advnaced a tick */
+		command::notify_advanced_tick(state, state.local_player_nation);
 	}
 	state.single_game_tick();
 }
@@ -5118,6 +5138,8 @@ bool can_perform_command(sys::state& state, payload& c) {
 
 	case command_type::notify_player_oos:
 		return true; //return can_notify_player_oos(state, c.source);
+	case command_type::notify_advanced_tick:
+		return true;
 	case command_type::advance_tick:
 		return true; //return can_advance_tick(state, c.source, c.data.advance_tick.checksum, c.data.advance_tick.speed);
 	case command_type::notify_save_loaded:
@@ -5527,6 +5549,9 @@ void execute_command(sys::state& state, payload& c) {
 		break;
 	case command_type::notify_player_oos:
 		execute_notify_player_oos(state, c.source);
+		break;
+	case command_type::notify_advanced_tick:
+		execute_notify_advanced_tick(state, c.source);
 		break;
 	case command_type::advance_tick:
 		execute_advance_tick(state, c.source, c.data.advance_tick.checksum, c.data.advance_tick.speed);
