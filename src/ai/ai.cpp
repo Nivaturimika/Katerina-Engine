@@ -404,6 +404,8 @@ void update_ai_research(sys::state& state) {
 		}
 
 		for(auto& pt : potential) { // weight techs
+			auto k_mod = state.world.technology_get_ai_chance(pt.id);
+			auto base = k_mod ? trigger::evaluate_multiplicative_modifier(state, k_mod, trigger::to_generic(n), trigger::to_generic(n), -1) : 0.f;
 			auto base = state.world.technology_get_ai_weight(pt.id);
 			if(state.world.nation_get_ai_is_threatened(n) && state.culture_definitions.tech_folders[state.world.technology_get_folder_index(pt.id)].category == culture::tech_category::army) {
 				base *= 2.0f;
@@ -415,8 +417,7 @@ void update_ai_research(sys::state& state) {
 		std::sort(potential.begin(), potential.end(), [&](potential_techs& a, potential_techs& b) {
 			if(a.weight != b.weight)
 				return a.weight > b.weight;
-			else // sort semi randomly
-				return (a.id.index() ^ rval) > (b.id.index() ^ rval);
+			return (a.id.index() ^ rval) > (b.id.index() ^ rval);
 		});
 
 		if(!potential.empty()) {
