@@ -3261,7 +3261,6 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 	economy::presimulate(*this);
 
 	ai::identify_focuses(*this);
-	ai::initialize_ai_tech_weights(*this);
 	// ai::update_ai_research(*this);
 	ai::update_influence_priorities(*this);
 	ai::update_focuses(*this);
@@ -3498,7 +3497,6 @@ void state::fill_unsaved_data() { // reconstructs derived values that are not di
 	ui_date = current_date;
 
 	ai::identify_focuses(*this);
-	ai::initialize_ai_tech_weights(*this);
 	ai::update_ai_general_status(*this);
 	ai::refresh_home_ports(*this);
 
