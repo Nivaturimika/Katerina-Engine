@@ -1351,6 +1351,9 @@ province_position
 	building_rotation		group	none				discard
 	spawn_railway_track		group	none				discard
 	city					group	none				discard
+	railroad_visibility		group	none				discard
+	town					group	none				discard
+	building_nudge			group	none				discard
 
 positions_file
 	#any				group	province_position	member_fn
