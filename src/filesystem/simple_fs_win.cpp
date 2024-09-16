@@ -18,8 +18,26 @@
 namespace simple_fs {
 
 static UINT default_codepage = CP_UTF8; // default is UTF8
+static native_string steam_path;
+
+native_string get_steam_path() {
+	WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
+	HKEY hKey;
+	LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
+	if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
+		DWORD lnBuffer = 4096;
+		res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
+		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
+			szBuffer[lnBuffer] = 0;
+			RegCloseKey(hKey);
+			return native_string(szBuffer);
+		}
+	}
+	return native_string();
+}
 
 void identify_global_system_properties() {
+	steam_path = get_steam_path();
 	CPINFO cp_info;
 	if(GetCPInfo(CP_UTF8, &cp_info) == FALSE) {
 		default_codepage = CP_ACP;
@@ -54,8 +72,7 @@ void file::operator=(file&& other) noexcept {
 }
 
 file::file(native_string const& full_path) {
-	file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+	file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 	if(file_handle != INVALID_HANDLE_VALUE) {
 		absolute_path = full_path;
 		mapping_handle = CreateFileMappingW(file_handle, nullptr, PAGE_READONLY, 0, 0, nullptr);
@@ -106,7 +123,6 @@ void add_relative_root(file_system& fs, native_string_view root_path) {
 		module_name[path_used] = 0;
 		--path_used;
 	}
-
 	fs.ordered_roots.push_back(native_string(module_name) + native_string(root_path));
 }
 
@@ -114,40 +130,14 @@ directory get_root(file_system const& fs) {
 	return directory(&fs, NATIVE(""));
 }
 
-native_string get_steam_path() {
-	WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
-	HKEY hKey;
-	LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
-	if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-		DWORD lnBuffer = 4096;
-		res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
-		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-			szBuffer[lnBuffer] = 0;
-			RegCloseKey(hKey);
-			return native_string(szBuffer);
-		}
-	}
-	return native_string();
-}
-
 native_string extract_state(file_system const& fs) {
-	native_string steam_path = get_steam_path();
-	native_string result; //no steam install (base dir)
+	native_string result;
 	for(auto const& str : fs.ordered_roots) {
 		result += NATIVE(";") + str;
 	}
 	result += NATIVE("?");
 	for(auto const& replace_path : fs.ignored_paths) {
 		result += replace_path + NATIVE(";");
-	}
-	if(!steam_path.empty()) { //steam install
-		for(auto const& str : fs.ordered_roots) {
-			result += steam_path + NATIVE(";") + str;
-		}
-		result += NATIVE("?");
-		for(auto const& replace_path : fs.ignored_paths) {
-			result += steam_path + replace_path + NATIVE(";");
-		}
 	}
 	return result;
 }
@@ -222,21 +212,15 @@ std::vector<unopened_file> list_files(directory const& dir, native_char const* e
 		for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 			auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
 			auto const appended_path = dir_path + NATIVE("\\*") + extension;
-
-			if(simple_fs::is_ignored_path(*dir.parent_system, appended_path)) {
+			if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
 				continue;
-			}
-
 			WIN32_FIND_DATAW find_result;
 			auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 			if(find_handle != INVALID_HANDLE_VALUE) {
 				do {
 					if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-						if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(),
-									 [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; });
-								search_result == accumulated_results.end()) {
-
-							accumulated_results.emplace_back(dir.parent_system->ordered_roots[i] + dir.relative_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
+						if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(), [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; }); search_result == accumulated_results.end()) {
+							accumulated_results.emplace_back(dir_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
 						}
 					}
 				} while(FindNextFileW(find_handle, &find_result) != 0);
@@ -267,18 +251,15 @@ std::vector<directory> list_subdirectories(directory const& dir) {
 		for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 			auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
 			auto const appended_path = dir_path + NATIVE("\\*");
-			if(simple_fs::is_ignored_path(*dir.parent_system, appended_path)) {
+			if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
 				continue;
-			}
 			WIN32_FIND_DATAW find_result;
 			auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 			if(find_handle != INVALID_HANDLE_VALUE) {
 				do {
 					if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
 						native_string const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
-						if(find_result.cFileName[0] != NATIVE('.') &&
-								std::find_if(accumulated_results.begin(), accumulated_results.end(),
-										[&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
+						if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
 							accumulated_results.emplace_back(dir.parent_system, rel_name);
 						}
 					}
@@ -303,9 +284,7 @@ std::vector<directory> list_subdirectories(directory const& dir) {
 		}
 	}
 	std::sort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
-		return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path),
-				std::end(b.relative_path),
-				[](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
+		return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path), std::end(b.relative_path), [](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
 	});
 	return accumulated_results;
 }
@@ -340,16 +319,14 @@ std::optional<file> open_file(directory const& dir, native_string_view file_name
 			if(simple_fs::is_ignored_path(*dir.parent_system, full_path)) {
 				continue;
 			}
-			HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-					FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+			HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 			if(file_handle != INVALID_HANDLE_VALUE) {
 				return std::optional<file>(file(file_handle, full_path));
 			}
 		}
 	} else {
 		native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
-		HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-				FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+		HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 		if(file_handle != INVALID_HANDLE_VALUE) {
 			return std::optional<file>(file(file_handle, full_path));
 		}
