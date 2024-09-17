@@ -168,7 +168,7 @@ effect_body
 	add_province_modifier           value       text                member_fn
 	add_country_modifier            value       text                member_fn
 	set_country_flag                value       text                member_fn
-	clr_country_flag                value       text                member_fn=
+	clr_country_flag                value       text                member_fn
 	set_news_flag                value       text                member_fn (set_country_flag)
 	clear_news_flag                value       text                member_fn (clr_country_flag)
 	country_event                   value       int                 member_fn
