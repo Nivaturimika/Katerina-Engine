@@ -1242,7 +1242,6 @@ mod_file
 	extend							value		text					discard
 	replace							value		text					member_fn (replace_path)
 	dependencies					group		dependencies_list		member_fn
-	use_katerina_extensions			value		bool					member_fn
 
 battleplan_option
 	name					value		text					discard
