@@ -64,8 +64,7 @@ struct ef_trigger_revolt {
 				it != context.outer_context.map_of_culture_names.end()) {
 			culture_ = it->second;
 		} else {
-			err.accumulated_errors +=
-					"Invalid culture " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid culture " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void religion(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
@@ -73,8 +72,7 @@ struct ef_trigger_revolt {
 				it != context.outer_context.map_of_religion_names.end()) {
 			religion_ = it->second;
 		} else {
-			err.accumulated_errors +=
-					"Invalid religion " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid religion " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void ideology(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
@@ -82,8 +80,7 @@ struct ef_trigger_revolt {
 				it != context.outer_context.map_of_ideologies.end()) {
 			ideology_ = it->second.id;
 		} else {
-			err.accumulated_errors +=
-					"Invalid ideology " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid ideology " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void type(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
@@ -91,8 +88,7 @@ struct ef_trigger_revolt {
 				it != context.outer_context.map_of_rebeltypes.end()) {
 			type_ = it->second.id;
 		} else {
-			err.accumulated_errors +=
-					"Invalid rebel type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid rebel type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void finish(effect_building_context&) { }
@@ -839,8 +835,7 @@ struct effect_body {
 				return;
 			}
 		} else {
-			err.accumulated_errors += "trade_goods effect supplied with invalid commodity name " + std::string(value) + " (" +
-																err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "trade_goods effect supplied with invalid commodity name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -851,7 +846,7 @@ struct effect_body {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union | effect::no_payload));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "this_union")) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union_this | effect::no_payload));
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "from_union")) {
+			} else if(context.outer_context.use_extensions && is_fixed_token_ci(value.data(), value.data() + value.length(), "from_union")) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union_from | effect::no_payload));
 			} else if(is_this(value)) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_this | effect::no_payload));
@@ -1147,8 +1142,7 @@ struct effect_body {
 			context.compiled_effect.push_back(uint16_t(effect::clr_country_flag));
 			context.compiled_effect.push_back(trigger::payload(context.outer_context.get_national_flag(std::string(value))).value);
 		} else {
-			err.accumulated_errors +=
-				"clr_country_flag effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "clr_country_flag effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -1172,8 +1166,7 @@ struct effect_body {
 	}
 	void country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 	void province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-	void military_access(association_type t, std::string_view value, error_handler& err, int32_t line,
-			effect_building_context& context) {
+	void military_access(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(is_this(value)) {
 				if(context.this_slot == trigger::slot_contents::nation)
@@ -2535,16 +2528,19 @@ struct effect_body {
 			return;
 		}
 	}
-	void add_province_modifier(association_type t, std::string_view value, error_handler& err, int32_t line,
-			effect_building_context& context) {
+	void add_province_modifier(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension add_province_modifier = <modifier> but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot == trigger::slot_contents::province) {
 			if(auto it = context.outer_context.map_of_modifiers.find(std::string(value));
 					it != context.outer_context.map_of_modifiers.end()) {
 				context.compiled_effect.push_back(uint16_t(effect::add_province_modifier_no_duration));
 				context.compiled_effect.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors += "add_province_modifier effect supplied with invalid modifier name " + std::string(value) +
-					" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "add_province_modifier effect supplied with invalid modifier name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else if(context.main_slot == trigger::slot_contents::state) {
@@ -2553,31 +2549,31 @@ struct effect_body {
 				context.compiled_effect.push_back(uint16_t(effect::add_province_modifier_state_no_duration));
 				context.compiled_effect.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors += "add_province_modifier effect supplied with invalid modifier name " + std::string(value) +
-					" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "add_province_modifier effect supplied with invalid modifier name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			err.accumulated_errors += "add_province_modifier effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "add_province_modifier effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
-	void add_country_modifier(association_type t, std::string_view value, error_handler& err, int32_t line,
-			effect_building_context& context) {
+	void add_country_modifier(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension add_country_modifier = <modifier> but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(auto it = context.outer_context.map_of_modifiers.find(std::string(value));
 					it != context.outer_context.map_of_modifiers.end()) {
 				context.compiled_effect.push_back(uint16_t(effect::add_country_modifier_no_duration));
 				context.compiled_effect.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors += "add_country_modifier effect supplied with invalid modifier name " + std::string(value) + " (" +
-																	err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "add_country_modifier effect supplied with invalid modifier name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			err.accumulated_errors += "add_country_modifier effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "add_country_modifier effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -3266,6 +3262,9 @@ struct effect_body {
 		}
 	}
 	void province_event(ef_province_event const& value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions && value.days > 1) {
+			err.accumulated_warnings += "province_event with more than 1 day could cause crashes (" + err.file_name + ")\n";
+		}
 		if(context.main_slot == trigger::slot_contents::province) {
 			if(value.days <= 0) {
 				if(context.this_slot == trigger::slot_contents::nation)
@@ -3277,8 +3276,7 @@ struct effect_body {
 				else if(context.this_slot == trigger::slot_contents::pop)
 					context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_pop));
 				else {
-					err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																		std::to_string(line) + ")\n";
+					err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 				context.compiled_effect.push_back(trigger::payload(value.id_).value);
@@ -3292,16 +3290,14 @@ struct effect_body {
 				else if(context.this_slot == trigger::slot_contents::pop)
 					context.compiled_effect.push_back(uint16_t(effect::province_event_this_pop));
 				else {
-					err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																		std::to_string(line) + ")\n";
+					err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 				context.compiled_effect.push_back(trigger::payload(value.id_).value);
 				context.compiled_effect.push_back(uint16_t(value.days));
 			}
 		} else {
-			err.accumulated_errors +=
-					"province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -3357,8 +3353,7 @@ struct effect_body {
 	}
 	void change_variable(ef_change_variable const& value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors +=
-					"change_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "change_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		context.compiled_effect.push_back(effect::change_variable);
@@ -3366,9 +3361,13 @@ struct effect_body {
 		context.add_float_to_payload(value.value);
 	}
 	void increment_variable(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension increment_variable but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors +=
-				"change_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "change_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		auto which_ = context.outer_context.get_national_variable(std::string(value));
@@ -3377,9 +3376,13 @@ struct effect_body {
 		context.add_float_to_payload(1.f);
 	}
 	void decrement_variable(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension decrement_variable but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors +=
-				"change_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "decrement_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		auto which_ = context.outer_context.get_national_variable(std::string(value));
@@ -3388,9 +3391,13 @@ struct effect_body {
 		context.add_float_to_payload(-1.f);
 	}
 	void set_variable_to_zero(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension set_variable_to_zero but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors +=
-				"set_variable effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "set_variable_to_zero effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		auto which_ = context.outer_context.get_national_variable(std::string(value));
@@ -3399,8 +3406,12 @@ struct effect_body {
 		context.add_float_to_payload(0.f);
 	}
 	void change_terrain(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(auto it = context.outer_context.map_of_terrain_types.find(std::string(value));
-				it != context.outer_context.map_of_terrain_types.end()) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension change_terrain but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
+		if(auto it = context.outer_context.map_of_terrain_types.find(std::string(value)); it != context.outer_context.map_of_terrain_types.end()) {
 			if(context.main_slot == trigger::slot_contents::pop) {
 				context.compiled_effect.push_back(uint16_t(effect::change_terrain_pop));
 			} else if(context.main_slot == trigger::slot_contents::province) {
@@ -3415,6 +3426,11 @@ struct effect_body {
 		}
 	}
 	void masquerade_as_nation(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension masquerade_as_nation but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(is_this(value)) {
 				context.compiled_effect.push_back(uint16_t(effect::masquerade_as_nation_this));
@@ -3430,8 +3446,7 @@ struct effect_body {
 	}
 	void ideology(ef_ideology const& value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::pop) {
-			err.accumulated_errors +=
-					"ideology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "ideology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		context.compiled_effect.push_back(effect::ideology);

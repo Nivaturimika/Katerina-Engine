@@ -95,6 +95,11 @@ void tr_scope_war_countries(token_generator& gen, error_handler& err, trigger_bu
 	context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 }
 void tr_scope_all_war_countries(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_war_countries but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_trigger.push_back(uint16_t(trigger::x_war_countries_scope_nation));
 	} else if(context.main_slot == trigger::slot_contents::pop) {
@@ -123,6 +128,11 @@ void tr_scope_any_greater_power(token_generator& gen, error_handler& err, trigge
 	context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 }
 void tr_scope_any_country(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension any_country but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	context.compiled_trigger.push_back(uint16_t(trigger::x_country_scope | trigger::is_existence_scope));
 	context.compiled_trigger.push_back(uint16_t(1));
 	auto payload_size_offset = context.compiled_trigger.size() - 1;
@@ -135,6 +145,11 @@ void tr_scope_any_country(token_generator& gen, error_handler& err, trigger_buil
 	context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 }
 void tr_scope_every_country(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension every_country but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	context.compiled_trigger.push_back(uint16_t(trigger::x_country_scope));
 	context.compiled_trigger.push_back(uint16_t(1));
 	auto payload_size_offset = context.compiled_trigger.size() - 1;
@@ -287,6 +302,11 @@ void tr_scope_any_pop(token_generator& gen, error_handler& err, trigger_building
 	context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 }
 void tr_scope_all_state(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_state but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_trigger.push_back(uint16_t(trigger::x_state_scope));
 		context.compiled_trigger.push_back(uint16_t(1));
@@ -303,6 +323,11 @@ void tr_scope_all_state(token_generator& gen, error_handler& err, trigger_buildi
 	}
 }
 void tr_scope_all_substate(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_substate but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_trigger.push_back(uint16_t(trigger::x_substate_scope));
 		context.compiled_trigger.push_back(uint16_t(1));
@@ -316,6 +341,11 @@ void tr_scope_all_substate(token_generator& gen, error_handler& err, trigger_bui
 	}
 }
 void tr_scope_all_sphere_member(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_pshere_member but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_trigger.push_back(uint16_t(trigger::x_sphere_member_scope));
 		context.compiled_trigger.push_back(uint16_t(1));
@@ -329,6 +359,11 @@ void tr_scope_all_sphere_member(token_generator& gen, error_handler& err, trigge
 	}
 }
 void tr_scope_all_pop(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_pop but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_trigger.push_back(uint16_t(trigger::x_pop_scope_nation));
 	} else if(context.main_slot == trigger::slot_contents::province) {
@@ -349,6 +384,11 @@ void tr_scope_all_pop(token_generator& gen, error_handler& err, trigger_building
 	context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 }
 void tr_scope_all_greater_power(token_generator& gen, error_handler& err, trigger_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of trigger extension all_greater_power but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	context.compiled_trigger.push_back(uint16_t(trigger::x_greater_power_scope));
 	context.compiled_trigger.push_back(uint16_t(1));
 	auto payload_size_offset = context.compiled_trigger.size() - 1;

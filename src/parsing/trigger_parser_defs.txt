@@ -47,7 +47,6 @@ trigger_body
 	have_core_in   value   text       member_fn
 	test           value           text          member_fn
 	ai               value           bool               member_fn
-	is_ai           value           bool               member_fn (ai)
 	tag              value           text               member_fn
 	war              value           bool               member_fn
 	owns             value           text                member_fn
@@ -97,7 +96,6 @@ trigger_body
 	neighbour        value           text               member_fn
 	plurality        value           float              member_fn
 	vassal_of        value           text               member_fn
-	is_vassal_of        value           text               member_fn (vassal_of)
 	war_score        value           float              member_fn
 	corruption       value           float              member_fn
 	government       value           text               member_fn
@@ -115,7 +113,6 @@ trigger_body
 	has_faction      value           text               member_fn
 	is_colonial      value           bool               member_fn
 	is_disarmed      value           bool               member_fn
-	disarmed      value           bool               member_fn (is_disarmed)
 	is_overseas      value           bool               member_fn
 	is_substate      value           bool               member_fn
 	life_rating      value           int                member_fn
@@ -145,7 +142,6 @@ trigger_body
 	nationalvalue    value           text               member_fn
 	num_of_allies    value           int                member_fn
 	num_of_cities    value           text               member_fn
-	number_of_cities    value           text               member_fn (num_of_cities)
 	crime_fighting   value           float              member_fn (administration_spending)
 	everyday_needs   value           float              member_fn
 	has_flashpoint   value           bool               member_fn
@@ -169,7 +165,6 @@ trigger_body
 	social_movement       value      bool               member_fn
 	social_spending       value      float              member_fn
 	accepted_culture      value      text               member_fn
-	has_accepted_culture      value      text               member_fn (accepted_culture)
 	brigades_compare      value      float              member_fn
 	has_country_flag      value      text               member_fn
 	has_news_flag			value		text			member_fn (has_country_flag)
@@ -177,7 +172,6 @@ trigger_body
 	has_culture_core      value      bool               member_fn
 	has_pop_religion      value      text               member_fn
 	industrial_score      value      text               member_fn
-	industry_score      value      text               member_fn (industrial_score)
 	stronger_army_than      value      text               member_fn
 	is_canal_enabled      value      int                member_fn
 	is_culture_group      value      text               member_fn (culture_group)
@@ -230,9 +224,7 @@ trigger_body
 	has_national_minority      value       bool         member_fn
 	has_province_modifier      value       text         member_fn
 	has_recent_imigration      value       int          member_fn
-	has_recent_immigration     value       bool         member_fn (has_recent_imigration)
 	has_recently_lost_war      value       bool         member_fn
-	recently_lost_war      value       bool         member_fn (has_recently_lost_war)
 	political_reform_want      value       float        member_fn
 	poor_strata_militancy      value       float        member_fn
 	pop_majority_ideology      value       text         member_fn
@@ -288,7 +280,6 @@ trigger_body
 	war_countries                extern tr_scope_war_countries          discard
 	any_greater_power            extern tr_scope_any_greater_power      discard
 	any_owned_province           extern tr_scope_any_owned_province     discard
-	any_owned					 extern tr_scope_any_owned_province     discard
 	any_core                     extern tr_scope_any_core               discard
 	all_core                     extern tr_scope_all_core               discard
 	any_state                    extern tr_scope_any_state              discard
@@ -311,10 +302,8 @@ trigger_body
 	crisis_state_scope           extern tr_crisis_state_scope           discard
 	state_scope                  extern tr_state_scope                  discard
 	any_country                  extern tr_scope_any_country            discard
-	any_known_country            extern tr_scope_any_country            discard
 	every_country                extern tr_scope_every_country          discard
 	all_war_countries            extern tr_scope_all_war_countries      discard
-	any_war_countries            extern tr_scope_war_countries          discard
 	all_state                    extern tr_scope_all_state              discard
 	all_substate                 extern tr_scope_all_substate           discard
 	all_sphere_member            extern tr_scope_all_sphere_member      discard

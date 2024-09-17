@@ -9,6 +9,11 @@ dcon::trigger_key ef_limit(token_generator& gen, error_handler& err, effect_buil
 }
 
 void ef_scope_if(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension if but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 
 	context.compiled_effect.push_back(uint16_t(effect::if_scope | effect::scope_has_limit));
@@ -24,6 +29,11 @@ void ef_scope_if(token_generator& gen, error_handler& err, effect_building_conte
 }
 
 void ef_scope_else_if(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension else_if but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 
 	context.compiled_effect.push_back(uint16_t(effect::else_if_scope | effect::scope_has_limit));
@@ -39,6 +49,11 @@ void ef_scope_else_if(token_generator& gen, error_handler& err, effect_building_
 }
 
 void ef_scope_hidden_tooltip(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension hidden_tooltip but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 
 	context.compiled_effect.push_back(uint16_t(effect::generic_scope | effect::scope_has_limit));
@@ -155,6 +170,11 @@ void ef_scope_any_country(token_generator& gen, error_handler& err, effect_build
 }
 
 void ef_scope_from_bounce(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension from_bounce but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 	context.compiled_effect.push_back(uint16_t(effect::from_bounce_scope | effect::scope_has_limit));
 	context.compiled_effect.push_back(uint16_t(0));
@@ -171,6 +191,11 @@ void ef_scope_from_bounce(token_generator& gen, error_handler& err, effect_build
 	context.limit_position = old_limit_offset;
 }
 void ef_scope_this_bounce(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension this_bounce but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 	context.compiled_effect.push_back(uint16_t(effect::this_bounce_scope | effect::scope_has_limit));
 	context.compiled_effect.push_back(uint16_t(0));
@@ -188,6 +213,11 @@ void ef_scope_this_bounce(token_generator& gen, error_handler& err, effect_build
 }
 
 void ef_scope_any_existing_country_except_scoped(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension any_existing_country_except_scoped but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 	auto old_main = context.main_slot;
 
@@ -210,6 +240,11 @@ void ef_scope_any_existing_country_except_scoped(token_generator& gen, error_han
 	context.main_slot = old_main;
 }
 void ef_scope_any_defined_country(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension any_defined_country but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 	auto old_main = context.main_slot;
 
@@ -355,6 +390,11 @@ void ef_scope_any_greater_power(token_generator& gen, error_handler& err, effect
 }
 
 void ef_scope_random_greater_power(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension random_greater_power but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 	auto old_main = context.main_slot;
 
@@ -585,7 +625,7 @@ void ef_scope_all_core(token_generator& gen, error_handler& err, effect_building
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_effect.push_back(uint16_t(effect::x_core_scope | effect::scope_has_limit));
 		context.main_slot = trigger::slot_contents::province;
-	} else if(context.main_slot == trigger::slot_contents::province) {
+	} else if(context.outer_context.use_extensions && context.main_slot == trigger::slot_contents::province) {
 		context.compiled_effect.push_back(uint16_t(effect::x_core_scope_province | effect::scope_has_limit));
 		context.main_slot = trigger::slot_contents::nation;
 	} else {
@@ -634,8 +674,12 @@ void ef_scope_any_state(token_generator& gen, error_handler& err, effect_buildin
 }
 
 void ef_scope_any_substate(token_generator& gen, error_handler& err, effect_building_context& context) {
-	auto old_limit_offset = context.limit_position;
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension any_substate but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
 
+	auto old_limit_offset = context.limit_position;
 	if(context.main_slot == trigger::slot_contents::nation) {
 		context.compiled_effect.push_back(uint16_t(effect::x_substate_scope | effect::scope_has_limit));
 	} else {
@@ -1145,6 +1189,11 @@ void ef_scope_random(token_generator& gen, error_handler& err, effect_building_c
 }
 
 void ef_random_by_modifier(token_generator& gen, error_handler& err, effect_building_context& context) {
+	if(!context.outer_context.use_extensions) {
+		err.accumulated_errors += "Usage of effect extension random_by_modifier but parser isn't in extension mode (" + err.file_name + ")\n";
+		return;
+	}
+
 	auto old_limit_offset = context.limit_position;
 
 	context.compiled_effect.push_back(uint16_t(effect::random_by_modifier_scope | effect::scope_has_limit));
@@ -1572,8 +1621,7 @@ void ef_country_event::id(association_type t, int32_t value, error_handler& err,
 	}
 }
 
-void effect_body::country_event(association_type t, int32_t value, error_handler& err, int32_t line,
-		effect_building_context& context) {
+void effect_body::country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 	if(context.main_slot == trigger::slot_contents::nation) {
 		if(context.this_slot == trigger::slot_contents::nation)
 			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_nation));
@@ -1647,8 +1695,7 @@ void effect_body::country_event(association_type t, int32_t value, error_handler
 	}
 }
 
-void effect_body::province_event(association_type t, int32_t value, error_handler& err, int32_t line,
-		effect_building_context& context) {
+void effect_body::province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 	if(context.main_slot == trigger::slot_contents::province) {
 		if(context.this_slot == trigger::slot_contents::nation)
 			context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_nation));

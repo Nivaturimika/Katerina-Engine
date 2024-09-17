@@ -168,8 +168,7 @@ effect_body
 	add_province_modifier           value       text                member_fn
 	add_country_modifier            value       text                member_fn
 	set_country_flag                value       text                member_fn
-	clr_country_flag                value       text                member_fn
-	remove_country_flag                value       text                member_fn (clr_country_flag)
+	clr_country_flag                value       text                member_fn=
 	set_news_flag                value       text                member_fn (set_country_flag)
 	clear_news_flag                value       text                member_fn (clr_country_flag)
 	country_event                   value       int                 member_fn
@@ -200,7 +199,6 @@ effect_body
 	enable_canal                    value       int                 member_fn
 	set_global_flag                 value       text                member_fn
 	clr_global_flag                 value       text                member_fn
-	clear_global_flag               value       text                member_fn (clr_global_flag)
 	nationalvalue                   value       text                member_fn
 	civilized                       value       bool                member_fn
 	election                        value       text                member_fn
@@ -292,8 +290,6 @@ effect_body
 	random_province                 extern      ef_scope_random_owned       discard
 	any_core                 extern      ef_scope_all_core       discard
 	any_owned                       extern      ef_scope_any_owned          discard
-	any_prov                       extern      ef_scope_any_owned          discard
-	any_owned_province  extern      ef_scope_any_owned          discard
 	all_core                        extern      ef_scope_all_core           discard
 	any_state                       extern      ef_scope_any_state          discard
 	any_substate                       extern      ef_scope_any_substate          discard

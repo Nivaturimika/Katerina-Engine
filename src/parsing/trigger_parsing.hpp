@@ -2447,6 +2447,11 @@ struct trigger_body {
 		}
 	}
 	void have_core_in(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension have_core_in but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(is_this(value)) {
 			if(context.main_slot == trigger::slot_contents::nation && context.this_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::have_core_in_nation_this | association_to_bool_code(a)));
@@ -3032,15 +3037,17 @@ struct trigger_body {
 		} else if(context.main_slot == trigger::slot_contents::state) {
 			context.compiled_trigger.push_back(uint16_t(trigger::has_country_flag_state | association_to_bool_code(a)));
 		} else {
-			err.accumulated_errors += "has_country_flag trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_country_flag trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		context.compiled_trigger.push_back(trigger::payload(context.outer_context.get_national_flag(std::string(value))).value);
 	}
-	void has_province_flag(association_type a, std::string_view value, error_handler& err, int32_t line,
-			trigger_building_context& context) {
+	void has_province_flag(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension has_province_flag but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(context.main_slot == trigger::slot_contents::province) {
 			context.compiled_trigger.push_back(uint16_t(trigger::has_province_flag | association_to_bool_code(a)));
 		} else {
@@ -3053,7 +3060,7 @@ struct trigger_body {
 	}
 	void has_global_flag(association_type a, std::string_view value, error_handler& err, int32_t line,
 			trigger_building_context& context) {
-		if(is_fixed_token_ci(value.data(), value.data() + value.length(), "project_alice")) {
+		if(context.outer_context.use_extensions && is_fixed_token_ci(value.data(), value.data() + value.length(), "katerina_engine")) {
 			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | association_to_bool_code(a, true)));
 		} else {
 			context.compiled_trigger.push_back(uint16_t(trigger::has_global_flag | association_to_bool_code(a)));
@@ -3929,6 +3936,11 @@ struct trigger_body {
 		}
 	}
 	void has_national_focus(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension has_national_focus but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(auto it = context.outer_context.map_of_national_focuses.find(std::string(value));
 			it != context.outer_context.map_of_national_focuses.end()) {
 			if(context.main_slot == trigger::slot_contents::state) {
@@ -5361,6 +5373,11 @@ struct trigger_body {
 		}
 	}
 	void test(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension test but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
 		if(auto it = context.outer_context.map_of_stored_triggers.find(std::string(value)); it != context.outer_context.map_of_stored_triggers.end()) {
 			dcon::stored_trigger_id st;
 			for(auto r : it->second) {

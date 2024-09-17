@@ -63,12 +63,7 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `random_by_modifier = { ... }`: See below for syntax usage
 - `build_bank_in_capital = { ... }`: Invalid in vanilla, added for mods to use.
 - `build_university_in_capital = { ... }`: Invalid in vanilla, added for mods to use.
-- `any_owned_province = { ... }`: Providing uniformity with respect to triggers.
-- `any_prov = { ... }`: Shorthand for `any_owned`.
-- `any_owned_province = { ... }` : Shorthand for `any_owned`.
 - `any_substate = { ... }`: For parity with triggers, scopes any substates of the country.
-- `remove_country_flag = flag`: Alias of `clr_country_flag`.
-- `clear_global_flag = flag`: Alias of `clr_global_flag`.
 - `province_immigrator = n`: `n` can only be `1` or `-1`. This is the "province selector" used in various mods.
 - `immigrator = n`: Alias of `province_immigrator`.
 - `immigrator_selector = n`: Alias of `province_immigrator`.
@@ -95,26 +90,15 @@ build_bank_in_capital = {
 ### New trigger conditions
 
 - `test = name_of_scripted_trigger`: evaluates a scripted trigger (see below)
-- `any_country = { ... }`: tests whether any existent country satisfies the conditions given in `...`. This is essentially just mirroring how the existing `any_country` effect scope works but for trigger conditions.
-- `any_known_country = { ... }`: same as above, alias
+- `any_country = { ... }`: Tests whether any existent country satisfies the conditions given in `...`. This is essentially just mirroring how the existing `any_country` effect scope works but for trigger conditions.
 - `every_country = { ... }`: Like `any_country`, but applies to EVERY country.
-- `has_global_flag = project_alice`: true if playing on Katerina Engine, false if not
+- `has_global_flag = katerina_engine`: true if playing on Katerina Engine, false if not
 - `all_war_countries = { ... }`: All countries we're at war with MUST fullfill the condition, as opposed to `war_countries` were only one country has to fullfill the condition
-- `any_war_countries = { ... }`: Equivalent to `war_countries`
 - `all_state = { ... }`: All states must fulfill condition, similar to `any_state`
 - `all_substate = { ... }`: All substates must fulfill condition, similar to `any_substate`
 - `all_sphere_member = { ... }`: All sphere members must fulfill condition, similar to `any_sphere_member`
 - `all_pop = { ... }`: All POPs must fulfill condition, similar to `any_pop`
 - `all_greater_power = { ... }`: All greater powers must fullfill condition.
-- `any_owned = { ... }`: Shorthand for `any_owned_province`.
-- `is_ai = yes/no`: Alias of `ai = yes/no`.
-- `recently_lost_war`: Alias of `has_recently_lost_war = yes`
-- `has_recent_immigration`: Alias of `has_recent_imigration` (the original is mispelt).
-- `industry_score`: Alias of `industrial_score`.
-- `has_accepted_culture`: Alias of `accepted_culture`.
-- `number_of_cities`: Alias of `num_of_cities`.
-- `disarmed`: Alias of `is_disarmed`.
-- `is_vassal_of`: Alias of `vassal_of`.
 - `has_national_focus = focus`: Checks if a state (or province) in scope has a focus `focus`.
 - `have_core_in = THIS/FROM/TAG`: Doesn't work in vanilla, but will work here.
 - `treasury = x`: Alias of `money`.
