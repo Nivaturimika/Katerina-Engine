@@ -849,7 +849,7 @@ void parse_xsm(xsm_context& context, const char* start, const char* end, parsers
 				parse_xac_any_binary<uint8_t>(&start, end, err);
 				parse_xac_any_binary<uint8_t>(&start, end, err);
 				uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
-				context.use_quat_16 = (pad == 0);
+				context.use_quat_16 = (h.major_version == 2);
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
