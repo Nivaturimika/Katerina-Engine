@@ -49,11 +49,6 @@ void ef_scope_else_if(token_generator& gen, error_handler& err, effect_building_
 }
 
 void ef_scope_hidden_tooltip(token_generator& gen, error_handler& err, effect_building_context& context) {
-	if(!context.outer_context.use_extensions) {
-		err.accumulated_errors += "Usage of effect extension hidden_tooltip but parser isn't in extension mode (" + err.file_name + ")\n";
-		return;
-	}
-
 	auto old_limit_offset = context.limit_position;
 
 	context.compiled_effect.push_back(uint16_t(effect::generic_scope | effect::scope_has_limit));
@@ -1569,9 +1564,11 @@ dcon::effect_key make_effect(token_generator& gen, error_handler& err, effect_bu
 	ef_scope_hidden_tooltip(gen, err, context);
 
 	if(context.compiled_effect.size() >= std::numeric_limits<uint16_t>::max()) {
-		err.accumulated_errors += "effect is " + std::to_string(context.compiled_effect.size()) +
-			" cells big, which exceeds 64 KB bytecode limit (" + err.file_name + ")\n";
+		err.accumulated_errors += "effect is " + std::to_string(context.compiled_effect.size()) + " cells big, which exceeds 64 KB bytecode limit (" + err.file_name + ")\n";
 		return dcon::effect_key{0};
+	} else if(context.compiled_effect.empty()) {
+		err.accumulated_errors += "effect is empty limit (" + err.file_name + ")\n";
+		return dcon::effect_key{ 0 };
 	}
 
 	auto const new_size = simplify_effect(context.compiled_effect.data());
