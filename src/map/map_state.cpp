@@ -945,9 +945,9 @@ void update_province_text_lines(sys::state& state, display_data& map_data) {
 			auto t_size = glm::vec2(5.f, 5.f) * std::max(1.f, p.get_text_scale());
 			//auto t_position = p.get_text_position() + glm::vec2(0.f, 375.f); // glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 			//if(t_position.x == 0.f || t_position.y == 0.f) {
-				auto t_position = p.get_mid_point() - t_size * glm::vec2(0.5f, 1.f);
+			auto t_position = p.get_mid_point() - t_size * glm::vec2(0.5f, 1.f);
 			//}
-			auto t_origin = t_position; //- t_size * glm::vec2(0.5f, 0.5f);
+			auto t_origin = t_position + t_size * glm::vec2(0.f, std::abs(0.5f * std::sin(p.get_text_rotation())));
 			//auto mo = glm::mat4x4(0.f);
 			auto mo = glm::rotate(-p.get_text_rotation(), glm::vec3(0.f, 1.f, 0.f));
 			p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), mo[0], t_origin, t_size);
