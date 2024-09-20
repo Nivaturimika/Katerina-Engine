@@ -57,8 +57,7 @@ template<typename A, typename B>
 }
 
 template<typename B>
-[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, dcon::nation_fat_id value_a, B value_b)
-		-> decltype(value_a.id == value_b) {
+[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, dcon::nation_fat_id value_a, B value_b) -> decltype(value_a.id == value_b) {
 	switch(trigger_code & trigger::association_mask) {
 	case trigger::association_eq:
 		return value_a.id == value_b;
@@ -3420,65 +3419,54 @@ TRIGGER_FUNCTION(tf_truce_with_this_state) {
 }
 TRIGGER_FUNCTION(tf_truce_with_this_pop) {
 	auto owner = nations::owner_of_pop(ws, to_pop(this_slot));
-	auto result = ve::apply(
-			[&ws](dcon::nation_id a, dcon::nation_id b) {
-				auto rel = ws.world.get_diplomatic_relation_by_diplomatic_pair(a, b);
-				auto date = ws.world.diplomatic_relation_get_truce_until(rel);
-				return bool(date) && date > ws.current_date;
-			},
-			to_nation(primary_slot), owner);
+	auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
+		auto rel = ws.world.get_diplomatic_relation_by_diplomatic_pair(a, b);
+		auto date = ws.world.diplomatic_relation_get_truce_until(rel);
+		return bool(date) && date > ws.current_date;
+	}, to_nation(primary_slot), owner);
 	return compare_to_true(tval[0], result);
 }
 TRIGGER_FUNCTION(tf_total_pops_nation) {
-	return compare_values(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::total),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::total), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_total_pops_state) {
-	return compare_values(tval[0], ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::total),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::total), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_total_pops_province) {
-	return compare_values(tval[0], ws.world.province_get_demographics(to_prov(primary_slot), demographics::total),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.province_get_demographics(to_prov(primary_slot), demographics::total), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_total_pops_pop) {
 	auto location = ws.world.pop_get_province_from_pop_location(to_pop(primary_slot));
-	return compare_values(tval[0], ws.world.province_get_demographics(location, demographics::total),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.province_get_demographics(location, demographics::total), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_has_pop_type_nation) {
 	auto type = payload(tval[1]).popt_id;
-	return compare_to_true(tval[0],
-			ws.world.nation_get_demographics(to_nation(primary_slot), demographics::to_key(ws, type)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::to_key(ws, type)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_type_state) {
 	auto type = payload(tval[1]).popt_id;
-	return compare_to_true(tval[0],
-			ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::to_key(ws, type)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::to_key(ws, type)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_type_province) {
 	auto type = payload(tval[1]).popt_id;
-	return compare_to_true(tval[0],
-			ws.world.province_get_demographics(to_prov(primary_slot), demographics::to_key(ws, type)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.province_get_demographics(to_prov(primary_slot), demographics::to_key(ws, type)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_type_pop) {
 	auto type = payload(tval[1]).popt_id;
 	return compare_values_eq(tval[0], ws.world.pop_get_poptype(to_pop(primary_slot)), type);
 }
 TRIGGER_FUNCTION(tf_has_empty_adjacent_province) {
-	auto result = ve::apply(
-			[&ws](dcon::province_id p) {
-				auto acc = empty_province_accumulator(ws);
-				for(auto a : ws.world.province_get_province_adjacency(p)) {
-					auto other = a.get_connected_provinces(0) != p ? a.get_connected_provinces(0) : a.get_connected_provinces(1);
-					acc.add_value(to_generic(other));
-					if(acc.result)
-						return true;
-				}
-				acc.flush();
-				return acc.result;
-			},
-			to_prov(primary_slot));
+	auto result = ve::apply([&ws](dcon::province_id p) {
+		auto acc = empty_province_accumulator(ws);
+		for(auto a : ws.world.province_get_province_adjacency(p)) {
+			auto other = a.get_connected_provinces(0) != p ? a.get_connected_provinces(0) : a.get_connected_provinces(1);
+			acc.add_value(to_generic(other));
+			if(acc.result)
+				return true;
+		}
+		acc.flush();
+		return acc.result;
+	}, to_prov(primary_slot));
 	return compare_to_true(tval[0], result);
 }
 TRIGGER_FUNCTION(tf_has_leader) {
@@ -4643,8 +4631,7 @@ TRIGGER_FUNCTION(tf_has_pop_culture_nation) {
 			ws.world.nation_get_demographics(to_nation(primary_slot), demographics::to_key(ws, payload(tval[1]).cul_id)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_pop_this_pop) {
-	return compare_values_eq(tval[0], ws.world.pop_get_religion(to_pop(primary_slot)),
-			ws.world.pop_get_religion(to_pop(this_slot)));
+	return compare_values_eq(tval[0], ws.world.pop_get_religion(to_pop(primary_slot)), ws.world.pop_get_religion(to_pop(this_slot)));
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_state_this_pop) {
 	auto rel = ws.world.pop_get_religion(to_pop(this_slot));
@@ -4666,39 +4653,29 @@ TRIGGER_FUNCTION(tf_has_pop_religion_province_this_pop) {
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_nation_this_pop) {
 	auto rel = ws.world.pop_get_religion(to_pop(this_slot));
-	auto result = ve::apply(
-			[&ws](dcon::nation_id s, dcon::religion_id r) {
-				return bool(r) ? ws.world.nation_get_demographics(s, demographics::to_key(ws, r)) > 0.0f : false;
-			},
-			to_nation(primary_slot), rel);
+	auto result = ve::apply([&ws](dcon::nation_id s, dcon::religion_id r) { return bool(r) ? ws.world.nation_get_demographics(s, demographics::to_key(ws, r)) > 0.0f : false; }, to_nation(primary_slot), rel);
 	return compare_to_true(tval[0], result);
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_pop) {
 	return compare_values_eq(tval[0], ws.world.pop_get_religion(to_pop(primary_slot)), payload(tval[1]).rel_id);
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_state) {
-	return compare_to_true(tval[0],
-			ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.state_instance_get_demographics(to_state(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_province) {
-	return compare_to_true(tval[0],
-			ws.world.province_get_demographics(to_prov(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.province_get_demographics(to_prov(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_has_pop_religion_nation) {
-	return compare_to_true(tval[0],
-			ws.world.nation_get_demographics(to_nation(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
+	return compare_to_true(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::to_key(ws, payload(tval[1]).rel_id)) > 0.0f);
 }
 TRIGGER_FUNCTION(tf_life_needs) {
-	return compare_values(tval[0], ws.world.pop_get_life_needs_satisfaction(to_pop(primary_slot)),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.pop_get_life_needs_satisfaction(to_pop(primary_slot)), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_everyday_needs) {
-	return compare_values(tval[0], ws.world.pop_get_everyday_needs_satisfaction(to_pop(primary_slot)),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.pop_get_everyday_needs_satisfaction(to_pop(primary_slot)), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_luxury_needs) {
-	return compare_values(tval[0], ws.world.pop_get_luxury_needs_satisfaction(to_pop(primary_slot)),
-			read_float_from_payload(tval + 1));
+	return compare_values(tval[0], ws.world.pop_get_luxury_needs_satisfaction(to_pop(primary_slot)), read_float_from_payload(tval + 1));
 }
 TRIGGER_FUNCTION(tf_consciousness_pop) {
 	return compare_values(tval[0], ws.world.pop_get_consciousness(to_pop(primary_slot)), read_float_from_payload(tval + 1));

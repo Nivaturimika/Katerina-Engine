@@ -2071,22 +2071,17 @@ struct trigger_body {
 			err.accumulated_errors += "has_pop_culture trigger supplied with an invalid culture \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
-	void has_pop_religion(association_type a, std::string_view value, error_handler& err, int32_t line,
-			trigger_building_context& context) {
+	void has_pop_religion(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(is_this(value)) {
 			if(context.this_slot == trigger::slot_contents::pop) {
 				if(context.main_slot == trigger::slot_contents::nation)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_religion_nation_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_nation_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::pop)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_religion_pop_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_pop_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::state)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_religion_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.main_slot == trigger::slot_contents::province)
-					context.compiled_trigger.push_back(
-							uint16_t(trigger::has_pop_religion_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else {
 					err.accumulated_errors += "has_pop_religion = this trigger used in an incorrect scope type " +
 																		slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
@@ -2099,8 +2094,7 @@ struct trigger_body {
 																	std::to_string(line) + ")\n";
 				return;
 			}
-		} else if(auto it = context.outer_context.map_of_religion_names.find(std::string(value));
-							it != context.outer_context.map_of_religion_names.end()) {
+		} else if(auto it = context.outer_context.map_of_religion_names.find(std::string(value)); it != context.outer_context.map_of_religion_names.end()) {
 			if(context.main_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_nation | association_to_bool_code(a)));
 			} else if(context.main_slot == trigger::slot_contents::state) {
@@ -2110,20 +2104,16 @@ struct trigger_body {
 			} else if(context.main_slot == trigger::slot_contents::pop) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_pop_religion_pop | association_to_bool_code(a)));
 			} else {
-				err.accumulated_errors += "has_pop_religion trigger used in an incorrect scope type " +
-																	slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+				err.accumulated_errors += "has_pop_religion trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors += "has_pop_religion trigger supplied with an invalid religion \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_pop_religion trigger supplied with an invalid religion \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 
-	void culture_group(association_type a, std::string_view value, error_handler& err, int32_t line,
-			trigger_building_context& context) {
+	void culture_group(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(is_this(value)) {
 			if(context.this_slot == trigger::slot_contents::nation) {
 				if(context.main_slot == trigger::slot_contents::nation)
@@ -4437,10 +4427,8 @@ struct trigger_body {
 			err.accumulated_errors += "produces trigger supplied with an invalid commodity \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
-	void has_pop_type(association_type a, std::string_view value, error_handler& err, int32_t line,
-			trigger_building_context& context) {
-		if(auto it = context.outer_context.map_of_poptypes.find(std::string(value));
-				it != context.outer_context.map_of_poptypes.end()) {
+	void has_pop_type(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(auto it = context.outer_context.map_of_poptypes.find(std::string(value)); it != context.outer_context.map_of_poptypes.end()) {
 			if(context.main_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_pop_type_nation | association_to_bool_code(a)));
 			} else if(context.main_slot == trigger::slot_contents::state) {
@@ -4450,8 +4438,7 @@ struct trigger_body {
 			} else if(context.main_slot == trigger::slot_contents::pop) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_pop_type_pop | association_to_bool_code(a)));
 			} else {
-				err.accumulated_errors += "has_pop_type trigger used in an incorrect scope type " +
-					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "has_pop_type trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);

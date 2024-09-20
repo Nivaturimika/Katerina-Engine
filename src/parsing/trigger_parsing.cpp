@@ -800,8 +800,7 @@ void tr_scope_variable(std::string_view name, token_generator& gen, error_handle
 inline void invert_trigger_internal(uint16_t* source) {
 	if((source[0] & trigger::code_mask) >= trigger::first_scope_code) {
 		auto const neg_disjunctive_bit = trigger::is_disjunctive_scope & ~source[0];
-		auto const neg_existence_bit =
-				scope_has_any_all(source[0] & trigger::code_mask) ? (trigger::is_existence_scope & ~source[0]) : 0;
+		auto const neg_existence_bit = scope_has_any_all(source[0] & trigger::code_mask) ? (trigger::is_existence_scope & ~source[0]) : 0;
 		auto const masked_source = source[0] & ~(trigger::is_disjunctive_scope | trigger::is_existence_scope);
 
 		source[0] = uint16_t(masked_source | neg_disjunctive_bit | neg_existence_bit);

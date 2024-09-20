@@ -2447,8 +2447,7 @@ struct effect_body {
 			context.compiled_effect.push_back(uint16_t(effect::literacy));
 			context.add_float_to_payload(value);
 		} else {
-			err.accumulated_errors +=
-					"literacy effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "literacy effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
