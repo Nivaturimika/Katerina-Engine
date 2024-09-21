@@ -465,7 +465,7 @@ struct scenario_building_context {
 	int32_t number_of_national_values_seen = 0;
 	bool new_maps = false;
 	bool money_set = false;
-	bool use_extensions = false; // use ke extensions?
+	bool use_extensions = true; // use ke extensions?
 };
 
 struct national_identity_file {
