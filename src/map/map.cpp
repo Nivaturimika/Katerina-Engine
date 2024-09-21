@@ -1534,6 +1534,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 					}
 				}
 			});
+			glCullFace(GL_FRONT);
 			render_models(list, time_counter, map_view_mode);
 		}
 	}

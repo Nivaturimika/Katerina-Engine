@@ -14,7 +14,7 @@ uniform float time;
 uniform vec2 model_offset;
 uniform float target_facing;
 
-//#define HAVE_ANIMATIONS
+#define HAVE_ANIMATIONS 1
 
 #define MAX_BONES 100
 uniform mat4 bones_matrices[MAX_BONES];
