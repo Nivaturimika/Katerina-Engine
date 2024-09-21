@@ -4212,7 +4212,7 @@ void state::game_loop() {
 				for(auto client : network_state.clients) {
 					if(client.is_active()) {
 						//more than 1 month before
-						upause = std::abs(client.last_game_date.to_raw_value() - current_date.to_raw_value()) >= 30;
+						upause = std::abs(client.last_game_date.to_raw_value() - current_date.to_raw_value()) >= 3;
 					}
 				}
 			} else { // prevent host from pausing the game with open event windows
