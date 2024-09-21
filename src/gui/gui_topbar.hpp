@@ -1038,6 +1038,7 @@ public:
 					text::add_to_layout_box(state, contents, box, player_name, text::text_color::yellow);
 					text::add_space_to_layout_box(state, contents, box);
 					text::add_to_layout_box(state, contents, box, client.last_game_date, text::text_color::white);
+					text::add_line_break_to_layout_box(state, contents, box);
 				}
 			}
 			text::close_layout_box(contents, box);
