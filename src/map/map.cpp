@@ -798,6 +798,8 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_stripes]);
+		glActiveTexture(GL_TEXTURE8); //addendum
+		glBindTexture(GL_TEXTURE_2D, textures[texture_colormap_water]);
 		load_shader(shader_far_terrain);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_provinces_texture_sampler], 0);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_terrain_texture_sampler], 1);
@@ -807,6 +809,7 @@ void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 of
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_colormap_political], 5);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_province_highlight], 6);
 		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_stripes_texture], 7);
+		glUniform1i(shader_uniforms[uint8_t(map_view_mode)][shader_far_terrain][uniform_colormap_water], 8); //addendum
 		if(map_view_mode == sys::projection_mode::flat) {
 			glEnable(GL_PRIMITIVE_RESTART);
 			glPrimitiveRestartIndex(std::numeric_limits<uint16_t>::max());
