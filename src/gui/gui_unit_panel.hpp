@@ -968,6 +968,12 @@ class unit_details_load_army_button : public button_element_base {
 public:
 	bool visible = false;
 
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
+			base_data.data.button.shortcut = sys::virtual_key::A;
+		}
+	}
 	void button_action(sys::state& state) noexcept override {
 		auto a = retrieve<dcon::army_id>(state, parent);
 		auto p = state.world.army_get_location_from_army_location(a);
@@ -1057,6 +1063,12 @@ class unit_details_unload_army_button : public button_element_base {
 public:
 	bool visible = false;
 
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
+			base_data.data.button.shortcut = sys::virtual_key::D;
+		}
+	}
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::army_id>(state, parent);
 		command::embark_army(state, state.local_player_nation, n);
@@ -1099,6 +1111,12 @@ public:
 };
 class unit_details_unload_navy_button : public button_element_base {
 public:
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
+			base_data.data.button.shortcut = sys::virtual_key::D;
+		}
+	}
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::navy_id>(state, parent);
 		auto tprted = state.world.navy_get_army_transport(n);
@@ -1138,6 +1156,12 @@ public:
 
 class unit_details_select_loaded_army : public button_element_base {
 public:
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
+			base_data.data.button.shortcut = sys::virtual_key::A;
+		}
+	}
 	void button_action(sys::state& state) noexcept override {
 		auto n = retrieve<dcon::navy_id>(state, parent);
 		auto tprted = state.world.navy_get_army_transport(n);

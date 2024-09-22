@@ -13,6 +13,12 @@ enum class leader_select_sort {
 
 class unset_leader_button : public button_element_base {
 public:
+	void on_create(sys::state& state) noexcept override {
+		button_element_base::on_create(state);
+		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
+			base_data.data.button.shortcut = sys::virtual_key::N;
+		}
+	}
 	void button_action(sys::state& state) noexcept override {
 		if(auto a = retrieve<dcon::army_id>(state, parent);  a) {
 			command::change_general(state, state.local_player_nation, a, dcon::leader_id{});
