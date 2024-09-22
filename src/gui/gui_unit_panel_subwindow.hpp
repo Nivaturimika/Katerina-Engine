@@ -332,8 +332,8 @@ public:
 					}
 				}
 				std::sort(listbox_left::row_contents.begin(), listbox_left::row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
-					auto av = state.world.regiment_get_type(a).index();
-					auto bv = state.world.regiment_get_type(b).index();
+					auto av = uint8_t(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(a)].type);
+					auto bv = uint8_t(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(b)].type);
 					if(av != bv)
 						return av > bv;
 					else
@@ -346,8 +346,8 @@ public:
 					}
 				}
 				std::sort(listbox_left::row_contents.begin(), listbox_left::row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
-					auto av = state.world.ship_get_type(a).index();
-					auto bv = state.world.ship_get_type(b).index();
+					auto av = uint8_t(state.military_definitions.unit_base_definitions[state.world.ship_get_type(a)].type);
+					auto bv = uint8_t(state.military_definitions.unit_base_definitions[state.world.ship_get_type(b)].type);
 					if(av != bv)
 						return av > bv;
 					else
@@ -388,8 +388,8 @@ public:
 					}
 				}
 				std::sort(listbox_right::row_contents.begin(), listbox_right::row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
-					auto av = state.world.regiment_get_type(a).index();
-					auto bv = state.world.regiment_get_type(b).index();
+					auto av = uint8_t(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(a)].type);
+					auto bv = uint8_t(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(b)].type);
 					if(av != bv)
 						return av > bv;
 					else
@@ -402,8 +402,8 @@ public:
 					}
 				}
 				std::sort(listbox_right::row_contents.begin(), listbox_right::row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
-					auto av = state.world.ship_get_type(a).index();
-					auto bv = state.world.ship_get_type(b).index();
+					auto av = uint8_t(state.military_definitions.unit_base_definitions[state.world.ship_get_type(a)].type);
+					auto bv = uint8_t(state.military_definitions.unit_base_definitions[state.world.ship_get_type(b)].type);
 					if(av != bv)
 						return av > bv;
 					else
