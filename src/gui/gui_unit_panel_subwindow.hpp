@@ -313,13 +313,6 @@ protected:
 	}
 
 public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
-			base_data.data.button.shortcut = sys::virtual_key::Z;
-		}
-	}
-
 	void on_update(sys::state& state) noexcept override {
 		if(listbox_left::parent) {
 			auto content = retrieve<T>(state, listbox_left::parent);
@@ -376,13 +369,6 @@ protected:
 	}
 
 public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		if(base_data.data.button.shortcut == sys::virtual_key::NONE) {
-			base_data.data.button.shortcut = sys::virtual_key::B;
-		}
-	}
-
 	void on_update(sys::state& state) noexcept override {
 		if(listbox_right::parent) {
 			auto content = retrieve<T>(state, listbox_right::parent);
