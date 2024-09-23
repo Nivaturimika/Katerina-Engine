@@ -838,9 +838,9 @@ public:
 		float sum = 0.f;
 		for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
 			if(auto b1 = state.world.factory_type_get_bonus_trigger(ft)[i]; b1) {
-				text::add_line(state, contents, "alice_factory_bonus", text::variable_type::x, text::fp_four_places{ state.world.factory_type_get_bonus_amount(content)[i] });
+				text::add_line(state, contents, "alice_factory_bonus", text::variable_type::x, text::fp_four_places{ state.world.factory_type_get_bonus_amount(ft)[i] });
 				if(trigger::evaluate(state, b1, trigger::to_generic(sid), trigger::to_generic(n), 0)) {
-					sum -= state.world.factory_type_get_bonus_amount(content)[i];
+					sum -= state.world.factory_type_get_bonus_amount(ft)[i];
 				}
 				ui::trigger_description(state, contents, b1, trigger::to_generic(sid), trigger::to_generic(n), 0);
 			}
