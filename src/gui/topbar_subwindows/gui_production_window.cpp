@@ -1,4 +1,12 @@
 #include "gui_production_window.hpp"
+#include "gui_factory_buttons_window.hpp"
+#include "gui_invest_brow_window.hpp"
+#include "gui_pop_sort_buttons_window.hpp"
+#include "gui_commodity_filters_window.hpp"
+#include "gui_projects_window.hpp"
+#include "gui_build_factory_window.hpp"
+#include "gui_project_investment_window.hpp"
+#include "gui_foreign_investment_window.hpp"
 
 namespace ui {
 
@@ -404,6 +412,124 @@ message_result production_window::get(sys::state& state, Cyto::Any& payload) noe
 			payload.emplace<dcon::nation_id>(foreign_nation);
 		else
 			payload.emplace<dcon::nation_id>(state.local_player_nation);
+		return message_result::consumed;
+	}
+	return message_result::unseen;
+}
+
+void invest_brow_window::on_create(sys::state& state) noexcept {
+	window_element_base::on_create(state);
+	set_visible(state, false);
+	country_listbox->list_scrollbar->base_data.position.x += 13;
+}
+
+std::unique_ptr<element_base> invest_brow_window::make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept {
+	if(name == "country_listbox") {
+		auto ptr = make_element_by_type<production_country_listbox>(state, id);
+		ptr->base_data.position.x -= 8 + 5; // Nudge
+		country_listbox = ptr.get();
+		return ptr;
+	} else if(name == "sort_by_my_flag") {
+		auto ptr = make_element_by_type<production_sort_my_nation_flag>(state, id);
+		ptr->base_data.position.y -= 2; // Nudge
+		return ptr;
+	} else if(name == "sort_by_country") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::country>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_boss") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::boss>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_prestige") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::prestige_rank>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_economic") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::economic_rank>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_military") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::military_rank>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_total") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::total_rank>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_relation") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::relation>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name == "sort_by_opinion") {
+		return make_element_by_type<country_sort_button<country_list_sort::opinion>>(state, id);
+	} else if(name == "sort_by_prio") {
+		return make_element_by_type<country_sort_button<country_list_sort::priority>>(state, id);
+	} else if(name == "filter_all") {
+		return make_element_by_type<category_filter_button<country_list_filter::all>>(state, id);
+	} else if(name == "filter_enemies") {
+		return make_element_by_type<category_filter_button<country_list_filter::enemies>>(state, id);
+	} else if(name == "filter_allies") {
+		return make_element_by_type<category_filter_button<country_list_filter::allies>>(state, id);
+	} else if(name == "filter_neighbours") {
+		return make_element_by_type<category_filter_button<country_list_filter::neighbors>>(state, id);
+	} else if(name == "filter_sphere") {
+		return make_element_by_type<category_filter_button<country_list_filter::sphere>>(state, id);
+	} else if(name == "sort_by_invest_factories") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::factories>>(state, id);
+		ptr->base_data.position.y -= 1; // Nudge
+		return ptr;
+	} else if(name.length() >= 7 && name.substr(0, 7) == "filter_") {
+		auto const filter_name = name.substr(7);
+		auto ptr = make_element_by_type<continent_filter_button>(state, id);
+		auto k = state.lookup_key(name);
+		if(k) {
+			for(auto m : state.world.in_modifier) {
+				if(m.get_name() == k) {
+					ptr->continent = m;
+					break;
+				}
+			}
+		}
+		return ptr;
+	} else if(name.substr(0, 14) == "sort_by_gpflag") {
+		auto ptr = make_element_by_type<production_sort_nation_gp_flag>(state, id);
+		ptr->rank = uint16_t(std::stoi(std::string{ name.substr(14) }));
+		ptr->base_data.position.y -= 2; // Nudge
+		return ptr;
+	} else if(name.substr(0, 10) == "sort_by_gp") {
+		auto ptr = make_element_by_type<country_sort_button<country_list_sort::gp_investment>>(state, id);
+		ptr->offset = uint8_t(std::stoi(std::string{ name.substr(10) }));
+		return ptr;
+	} else if(name == "sort_by_my_invest") {
+		return make_element_by_type<country_sort_button<country_list_sort::player_investment>>(state, id);
+	} else {
+		return nullptr;
+	}
+}
+
+message_result invest_brow_window::get(sys::state& state, Cyto::Any& payload) noexcept {
+	if(payload.holds_type<country_sort_setting>()) {
+		payload.emplace<country_sort_setting>(sort);
+		return message_result::consumed;
+	} else if(payload.holds_type< country_filter_setting>()) {
+		payload.emplace<country_filter_setting>(filter);
+		return message_result::consumed;
+	} else if(payload.holds_type<element_selection_wrapper<country_list_sort>>()) {
+		auto new_sort = any_cast<element_selection_wrapper<country_list_sort>>(payload).data;
+		sort.sort_ascend = (new_sort == sort.sort) ? !sort.sort_ascend : true;
+		sort.sort = new_sort;
+		country_listbox->impl_on_update(state);
+		return message_result::consumed;
+	} else if(payload.holds_type<country_list_filter>()) {
+		auto temp = any_cast<country_list_filter>(payload);
+		filter.general_category = filter.general_category != temp ? temp : country_list_filter::all;
+		country_listbox->impl_on_update(state);
+		return message_result::consumed;
+	} else if(payload.holds_type<dcon::modifier_id>()) {
+		auto temp_c = any_cast<dcon::modifier_id>(payload);
+		filter.continent = filter.continent == temp_c ? dcon::modifier_id{} : temp_c;
+		country_listbox->impl_on_update(state);
 		return message_result::consumed;
 	}
 	return message_result::unseen;
