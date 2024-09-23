@@ -1349,21 +1349,19 @@ inline constexpr float diff_non_factory = day_1_build_time_modifier_non_factory 
 inline constexpr float shift_non_factory = -diff_non_factory / day_1_derivative_non_factory;
 inline constexpr float slope_non_factory = diff_non_factory * shift_non_factory;
 
-inline constexpr float day_1_build_time_modifier_factory = 0.9f;
-inline constexpr float day_inf_build_time_modifier_factory = 0.75f;
-inline constexpr float day_1_derivative_factory = -0.01f;
+inline constexpr float day_1_build_time_modifier_factory = 1.f;
+inline constexpr float day_inf_build_time_modifier_factory = 0.5f;
+inline constexpr float day_1_derivative_factory = -0.2f;
 
 inline constexpr float diff_factory = day_1_build_time_modifier_factory - day_inf_build_time_modifier_factory;
 inline constexpr float shift_factory = -diff_factory / day_1_derivative_factory;
 inline constexpr float slope_factory = diff_factory * shift_factory;
 
 float global_factory_construction_time_modifier(sys::state& state) {
-	float t = math::sqrt(float(state.current_date.value) * 0.01f + 2.f);
-	return day_inf_build_time_modifier_factory + slope_factory / (t + shift_factory);
+	return 1.f;
 }
 float global_non_factory_construction_time_modifier(sys::state& state) {
-	float t = math::sqrt(float(state.current_date.value) * 0.01f + 2.f);
-	return day_inf_build_time_modifier_non_factory + slope_non_factory / (t + shift_non_factory);
+	return 1.f;
 }
 
 void populate_construction_consumption(sys::state& state) {
@@ -1383,7 +1381,7 @@ void populate_construction_consumption(sys::state& state) {
 		if(owner && state.world.province_get_nation_from_province_control(province) == owner) {
 			auto& base_cost = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_cost;
 			auto& current_purchased = state.world.province_land_construction_get_purchased_goods(lc);
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
+			float construction_time = float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -1410,7 +1408,7 @@ void populate_construction_consumption(sys::state& state) {
 
 			auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
+			float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -1431,7 +1429,7 @@ void populate_construction_consumption(sys::state& state) {
 			float admin_cost_factor = 2.0f - admin_eff;
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
+			float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -1449,7 +1447,7 @@ void populate_construction_consumption(sys::state& state) {
 		if(owner && !c.get_is_pop_project()) {
 			auto& base_cost = c.get_type().get_construction_costs();
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.5f : 1.0f);
+			float construction_time = float(c.get_type().get_construction_time());
 			float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
@@ -1479,7 +1477,7 @@ void populate_private_construction_consumption(sys::state& state) {
 			auto t = economy::province_building_type(c.get_type());
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
+			float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i])
@@ -1495,7 +1493,7 @@ void populate_private_construction_consumption(sys::state& state) {
 		if(owner && c.get_is_pop_project()) {
 			auto& base_cost = c.get_type().get_construction_costs();
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
+			float construction_time = float(c.get_type().get_construction_time());
 			float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
@@ -1897,8 +1895,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				auto c = *(rng.begin());
 				auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-
+				float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -1921,8 +1918,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 				auto c = *(rng.begin());
 				auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-
+				float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -1946,39 +1942,21 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 			// Rationale for not checking the building type:
 			// Pop projects created for forts and naval bases should NOT happen in the first place, so checking against them
 			// is a waste of resources
-			if(!c.get_is_pop_project()) {
-				auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
-				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
-
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
-							current_purchased.commodity_amounts[i] += delta;
-							source -= delta;
-						}
-					} else {
-						break;
+			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
+			auto& current_purchased = c.get_purchased_goods();
+			float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
+			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+				if(base_cost.commodity_type[i]) {
+					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+						auto& source = c.get_is_pop_project()
+							? state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i])
+							: state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
+						auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
+						current_purchased.commodity_amounts[i] += delta;
+						source -= delta;
 					}
-				}
-			} else if(c.get_is_pop_project()) {
-				auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
-				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
-
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
-							auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
-							current_purchased.commodity_amounts[i] += delta;
-							source -= delta;
-						}
-					} else {
-						break;
-					}
+				} else {
+					break;
 				}
 			}
 		}
@@ -1987,7 +1965,7 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 	for(auto c : state.world.nation_get_state_building_construction(n)) {
 		auto& base_cost = c.get_type().get_construction_costs();
 		auto& current_purchased = c.get_purchased_goods();
-		float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
+		float construction_time = float(c.get_type().get_construction_time());
 		float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 			if(base_cost.commodity_type[i]) {
@@ -3327,7 +3305,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 		if(state.world.province_get_nation_from_province_control(province) == n) {
 			auto& base_cost = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_cost;
 			auto& current_purchased = state.world.province_land_construction_get_purchased_goods(lc);
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
+			float construction_time = float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3347,7 +3325,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			auto c = *(rng.begin());
 			auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
+			float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3363,7 +3341,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 			auto t = economy::province_building_type(c.get_type());
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
+			float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
@@ -3378,7 +3356,7 @@ float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
 		if(!c.get_is_pop_project()) {
 			auto& base_cost = c.get_type().get_construction_costs();
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.1f : 1.0f);
+			float construction_time = float(c.get_type().get_construction_time());
 			float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
