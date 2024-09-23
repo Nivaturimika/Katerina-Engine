@@ -3400,7 +3400,7 @@ construction_status state_building_construction(sys::state& state, dcon::state_i
 			float purchased = 0.0f;
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				total += goods.commodity_amounts[i] * cost_mod;
-				purchased += st_con.get_purchased_goods().commodity_amounts[i];
+				purchased += std::min(total, st_con.get_purchased_goods().commodity_amounts[i]);
 			}
 			return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
 		}
