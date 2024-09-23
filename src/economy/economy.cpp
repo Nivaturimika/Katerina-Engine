@@ -1412,8 +1412,8 @@ void populate_construction_consumption(sys::state& state) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-						float amount = base_cost.commodity_amounts[i] * admin_cost_factor;
-						register_construction_demand(state, owner, base_cost.commodity_type[i], amount / construction_time);
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 					}
 				} else {
 					break;
@@ -1433,8 +1433,8 @@ void populate_construction_consumption(sys::state& state) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-						float amount = base_cost.commodity_amounts[i] * admin_cost_factor;
-						register_construction_demand(state, owner, base_cost.commodity_type[i], amount / construction_time);
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 					}
 				} else {
 					break;
@@ -1452,7 +1452,7 @@ void populate_construction_consumption(sys::state& state) {
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
-						float amount = base_cost.commodity_amounts[i] * cost_mod;
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * cost_mod - current_purchased.commodity_amounts[i]);
 						register_construction_demand(state, owner, base_cost.commodity_type[i], amount / construction_time);
 					}
 				} else {
