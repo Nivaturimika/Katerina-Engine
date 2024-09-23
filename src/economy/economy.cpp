@@ -1386,8 +1386,10 @@ void populate_construction_consumption(sys::state& state) {
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						register_construction_demand(state, owner, base_cost.commodity_type[i], base_cost.commodity_amounts[i] * admin_cost_factor / construction_time);
+					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+					}
 				} else {
 					break;
 				}
@@ -1411,8 +1413,10 @@ void populate_construction_consumption(sys::state& state) {
 			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						register_construction_demand(state, owner, base_cost.commodity_type[i], base_cost.commodity_amounts[i] * admin_cost_factor / construction_time);
+					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+					}
 				} else {
 					break;
 				}
@@ -1427,11 +1431,12 @@ void populate_construction_consumption(sys::state& state) {
 			float admin_cost_factor = 2.0f - admin_eff;
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_non_factory_construction_time_modifier(state) * float(state.economy_definitions.building_definitions[int32_t(t)].time);
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-						register_construction_demand(state, owner, base_cost.commodity_type[i], base_cost.commodity_amounts[i] * admin_cost_factor / construction_time);
+					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+					}
 				} else {
 					break;
 				}
@@ -1443,12 +1448,13 @@ void populate_construction_consumption(sys::state& state) {
 		if(owner && !c.get_is_pop_project()) {
 			auto& base_cost = c.get_type().get_construction_costs();
 			auto& current_purchased = c.get_purchased_goods();
-			float construction_time = global_factory_construction_time_modifier(state) * float(c.get_type().get_construction_time()) * (c.get_is_upgrade() ? 0.5f : 1.0f);
 			float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
-					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod)
-						register_construction_demand(state, owner, base_cost.commodity_type[i], base_cost.commodity_amounts[i] * cost_mod / construction_time);
+					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
+						float amount = std::max(0.f, base_cost.commodity_amounts[i] * cost_mod - current_purchased.commodity_amounts[i]);
+						register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+					}
 				} else {
 					break;
 				}
