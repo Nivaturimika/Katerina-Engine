@@ -44,7 +44,7 @@ template void for_each_upgraded_factory<std::function<void(upgraded_factory)>>(s
 
 float factory_build_cost_modifier(sys::state& state, dcon::nation_id n, bool pop_project) {
 	float admin_eff = state.world.nation_get_administrative_efficiency(n);
-	float factory_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_cost) + 1.0f;
+	float factory_mod = std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_cost) + 1.0f);
 	float pop_factory_mod = std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_owner_cost));
 	return (pop_project ? pop_factory_mod : (2.0f - admin_eff)) * factory_mod;
 }
@@ -1983,9 +1983,10 @@ void advance_construction(sys::state& state, dcon::nation_id n) {
 		float cost_mod = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 			if(base_cost.commodity_type[i]) {
-				if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] *cost_mod) {
-					auto amount = base_cost.commodity_amounts[i] * cost_mod / construction_time;
-					auto& source = state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i]);
+				if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
+					auto& source = c.get_is_pop_project()
+						? state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i])
+						: state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
 					auto delta = std::clamp(base_cost.commodity_amounts[i] * cost_mod / construction_time, 0.f, source);
 					current_purchased.commodity_amounts[i] += delta;
 					source -= delta;

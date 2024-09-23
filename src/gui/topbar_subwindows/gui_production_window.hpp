@@ -484,22 +484,17 @@ public:
 			return;
 		for(auto p : state.world.state_instance_get_state_building_construction(si)) {
 			if(p.get_type() == nf.type) {
-				float admin_eff = state.world.nation_get_administrative_efficiency(p.get_nation());
-				float factory_mod = state.world.nation_get_modifier_values(p.get_nation(), sys::national_mod_offsets::factory_cost) + 1.0f;
-				float pop_factory_mod = std::max(0.1f, state.world.nation_get_modifier_values(p.get_nation(), sys::national_mod_offsets::factory_owner_cost));
-				float admin_cost_factor = (p.get_is_pop_project() ? pop_factory_mod : (2.0f - admin_eff)) * factory_mod;
-
+				float cost_mod = economy::factory_build_cost_modifier(state, p.get_nation(), p.get_is_pop_project());
 				auto& goods = state.world.factory_type_get_construction_costs(nf.type);
 				auto& cgoods = p.get_purchased_goods();
-
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 					if(goods.commodity_type[i]) {
 						auto box = text::open_layout_box(contents, 0);
 						text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
 						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp( cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * admin_cost_factor) });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp(cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * cost_mod) });
 						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
 						text::close_layout_box(contents, box);
 					}
 				}
@@ -608,20 +603,11 @@ class normal_factory_background : public opaque_element_base {
 		auto amount = (0.75f + 0.25f * min_e_input_available) * min_input_available * state.world.factory_get_production_scale(fid);
 
 		text::add_line(state, contents, "factory_stats_1", text::variable_type::val, text::fp_percentage{amount});
-
-		text::add_line(state, contents, "factory_stats_2", text::variable_type::val,
-				text::fp_percentage{state.world.factory_get_production_scale(fid)});
-
-		text::add_line(state, contents, "factory_stats_3", text::variable_type::val,
-				text::fp_one_place{state.world.factory_get_actual_production(fid) }, text::variable_type::x, type.get_output().get_name());
-
-		text::add_line(state, contents, "factory_stats_4", text::variable_type::val,
-				text::fp_currency{state.world.factory_get_full_profit(fid)});
-
+		text::add_line(state, contents, "factory_stats_2", text::variable_type::val, text::fp_percentage{state.world.factory_get_production_scale(fid)});
+		text::add_line(state, contents, "factory_stats_3", text::variable_type::val, text::fp_one_place{state.world.factory_get_actual_production(fid) }, text::variable_type::x, type.get_output().get_name());
+		text::add_line(state, contents, "factory_stats_4", text::variable_type::val, text::fp_currency{state.world.factory_get_full_profit(fid)});
 		text::add_line_break_to_layout(state, contents);
-
 		text::add_line(state, contents, "factory_stats_5");
-
 
 		float total_expenses = 0.f;
 
@@ -845,6 +831,21 @@ public:
 				active_modifiers_description(state, contents, p, 0, sys::provincial_mod_offsets::farm_rgo_size, true);
 			}
 		}
+
+		auto f = retrieve<dcon::factory_id>(state, parent);
+		auto ft = state.world.factory_get_building_type(f);
+		auto sid = state.world.province_get_state_membership(p);
+		float sum = 0.f;
+		for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
+			if(auto b1 = state.world.factory_type_get_bonus_trigger(ft)[i]; b1) {
+				text::add_line(state, contents, "alice_factory_bonus", text::variable_type::x, text::fp_four_places{ state.world.factory_type_get_bonus_amount(content)[i] });
+				if(trigger::evaluate(state, b1, trigger::to_generic(sid), trigger::to_generic(n), 0)) {
+					sum -= state.world.factory_type_get_bonus_amount(content)[i];
+				}
+				ui::trigger_description(state, contents, b1, trigger::to_generic(sid), trigger::to_generic(n), 0);
+			}
+		}
+		text::add_line(state, contents, "alice_factory_total_bonus", text::variable_type::x, text::fp_four_places{ sum });
 	}
 
 	void render(sys::state& state, int32_t x, int32_t y) noexcept override {
