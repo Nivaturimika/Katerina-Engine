@@ -276,6 +276,14 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 	if(nations::has_core_in_nation(state, state.world.nation_get_identity_from_identity_holder(target), from))
 		return false;
 
+	/*auto pc = state.world.nation_get_primary_culture(target);
+	auto cg = state.world.culture_get_group_from_culture_group_membership(pc);
+	auto cu = state.world.culture_group_get_identity_from_cultural_union_of(cg);
+	if(cu) {
+		if(nations::has_core_in_nation(state, cu, from))
+			return false;
+	}*/
+
 	if(!state.world.nation_get_ai_is_threatened(target))
 		return false;
 
@@ -340,6 +348,7 @@ void explain_ai_alliance_reasons(sys::state& state, dcon::nation_id target, text
 	auto target_score = estimate_strength(state, target);
 	auto source_score = estimate_strength(state, state.local_player_nation);
 	text::add_line_with_condition(state, contents, "ai_alliance_4", std::max<float>(source_score, 1.f) * ally_overestimate >= target_score, indent + 15);
+	text::add_line_with_condition(state, contents, "ai_alliance_6", nations::has_core_in_nation(state, state.world.nation_get_identity_from_identity_holder(target), state.local_player_nation));
 }
 
 bool ai_will_grant_access(sys::state& state, dcon::nation_id target, dcon::nation_id from) {

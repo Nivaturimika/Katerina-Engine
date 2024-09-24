@@ -87,3 +87,4 @@ mapmode_tooltip_culture_minorities;And $x$ other minorities
 mapmode_tooltip_employment_none;No factory workers here
 unit_experience;Experience: $x$
 unit_select_only;Select
+ai_alliance_6;Doesn't own their cores
