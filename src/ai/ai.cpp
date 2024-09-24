@@ -273,6 +273,9 @@ bool ai_will_accept_alliance(sys::state& state, dcon::nation_id target, dcon::na
 	if(ovr && state.world.overlord_get_ruler(ovr) == from)
 		return true;
 
+	if(nations::has_core_in_nation(state, state.world.nation_get_identity_from_identity_holder(target), from))
+		return false;
+
 	if(!state.world.nation_get_ai_is_threatened(target))
 		return false;
 

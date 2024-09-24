@@ -3123,4 +3123,12 @@ void enact_issue(sys::state& state, dcon::nation_id source, dcon::issue_option_i
 	state.world.nation_set_last_issue_or_reform_change(source, state.current_date);
 }
 
+bool has_core_in_nation(sys::state& state, dcon::national_identity_id nid, dcon::nation_id m) {
+	for(auto p : state.world.nation_get_province_ownership(m)) {
+		if(state.world.get_core_by_prov_tag_key(p.get_province(), nid))
+			return true;
+	}
+	return false;
+}
+
 } // namespace nations

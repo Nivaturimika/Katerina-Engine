@@ -1649,29 +1649,17 @@ TRIGGER_FUNCTION(tf_has_unclaimed_cores) {
 TRIGGER_FUNCTION(tf_have_core_in_nation_tag) {
 	auto h = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
 	return compare_to_true(tval[0], ve::apply([&](dcon::national_identity_id n) {
-			for(auto p : ws.world.nation_get_province_ownership(h)) {
-				if(ws.world.get_core_by_prov_tag_key(p.get_province(), n))
-					return true;
-			}
-			return false;
-		}, ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(primary_slot))));
+		return nations::has_core_in_nation(state, h, n);
+	}, ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(primary_slot))));
 }
 TRIGGER_FUNCTION(tf_have_core_in_nation_this) {
 	return compare_to_true(tval[0], ve::apply([&](dcon::national_identity_id n, dcon::nation_id h) {
-		for(auto p : ws.world.nation_get_province_ownership(h)) {
-			if(ws.world.get_core_by_prov_tag_key(p.get_province(), n))
-				return true;
-		}
-		return false;
+		return nations::has_core_in_nation(state, h, n);
 	}, ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(primary_slot)), trigger::to_nation(this_slot)));
 }
 TRIGGER_FUNCTION(tf_have_core_in_nation_from) {
 	return compare_to_true(tval[0], ve::apply([&](dcon::national_identity_id n, dcon::nation_id h) {
-		for(auto p : ws.world.nation_get_province_ownership(h)) {
-			if(ws.world.get_core_by_prov_tag_key(p.get_province(), n))
-				return true;
-		}
-		return false;
+		return nations::has_core_in_nation(state, h, n);
 	}, ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(primary_slot)), trigger::to_nation(from_slot)));
 }
 

@@ -392,4 +392,6 @@ void make_uncivilized(sys::state& state, dcon::nation_id n);
 
 void run_gc(sys::state& state);
 
+bool has_core_in_nation(sys::state& state, dcon::national_identity_id nid, dcon::nation_id m);
+
 } // namespace nations
