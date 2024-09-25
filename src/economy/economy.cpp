@@ -360,8 +360,8 @@ void initialize(sys::state& state) {
 		fc.set_total_consumption(0.0f);
 		fc.set_total_production(0.0f);
 		fc.set_total_real_demand(0.0f);
-		fc.set_last_total_production(0.0f);
-		fc.set_last_total_real_demand(0.0f);
+		//fc.set_last_total_production(0.0f);
+		//fc.set_last_total_real_demand(0.0f);
 		for(uint32_t i = 0; i < price_history_length; ++i) {
 			fc.set_price_record(i, fc.get_cost());
 		}
@@ -403,7 +403,7 @@ void initialize(sys::state& state) {
 			}
 		}
 		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
-		float workforce = fp.get_rgo().get_rgo_workforce();
+		auto workforce = fp.get_rgo().get_rgo_workforce();
 		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / workforce) / 2.f) + std::ceil(pop_amount / workforce)) * workforce));
 	});
 
@@ -830,12 +830,15 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	*/
 	auto sz = rgo_effective_size(state, n, p, c);
 	auto ef = rgo_efficiency(state, n, p, c);
-
+	auto fp = dcon::fatten(state.world, p);
+	auto workforce = fp.get_rgo().get_rgo_workforce();
+	auto vl = fp.get_rgo().get_rgo_amount();
+	auto base = std::ceil( sz / workforce);
 	auto tp = rgo_total_employment(state, n, p) / rgo_max_employment(state, n, p, c);
 	if(!std::isfinite(tp) || std::isnan(tp)) {
 		tp = 0.0f;
 	}
-	return tp * sz * ef * 0.00008f;
+	return vl * tp * base * ef;
 }
 
 float factory_min_input_available(
@@ -2700,8 +2703,8 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			return;
 		}
 
-		state.world.commodity_set_last_total_consumption(cid, state.world.commodity_get_total_consumption(cid));
-		state.world.commodity_set_last_total_real_demand(cid, state.world.commodity_get_total_real_demand(cid));
+		//state.world.commodity_set_last_total_consumption(cid, state.world.commodity_get_total_consumption(cid));
+		//state.world.commodity_set_last_total_real_demand(cid, state.world.commodity_get_total_real_demand(cid));
 
 		float total_r_demand = 0.0f;
 		float total_consumption = 0.0f;
