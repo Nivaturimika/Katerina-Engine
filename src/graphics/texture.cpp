@@ -106,7 +106,7 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 	}
 
 	/*	try reading in the header */
-	DDS_header* header = reinterpret_cast<DDS_header*>(buffer);
+	DDS_header const* header = reinterpret_cast<DDS_header const*>(buffer);
 	uint32_t buffer_index = sizeof(DDS_header);
 
 	/*	validate the header (warning, "goto"'s ahead, shield your eyes!!)	*/
@@ -246,10 +246,10 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 			switch(block_size) {
 			case 4:
 			{
-				uint32_t rmask_zeros = std::countr_zero(header->sPixelFormat.dwRBitMask);
-				uint32_t gmask_zeros = std::countr_zero(header->sPixelFormat.dwGBitMask);
-				uint32_t bmask_zeros = std::countr_zero(header->sPixelFormat.dwBBitMask);
-				uint32_t amask_zeros = std::countr_zero(header->sPixelFormat.dwAlphaBitMask);
+				uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+				uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+				uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+				uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
 				for(uint32_t i = 0; i < dds_full_size; i += block_size) {
 					uint32_t data = *(uint32_t const*)(buffer + buffer_index + i);
 					uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
@@ -276,10 +276,10 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 				uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
 				float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
 				//
-				uint16_t rmask_zeros = std::countr_zero(header->sPixelFormat.dwRBitMask);
-				uint16_t gmask_zeros = std::countr_zero(header->sPixelFormat.dwGBitMask);
-				uint16_t bmask_zeros = std::countr_zero(header->sPixelFormat.dwBBitMask);
-				uint16_t amask_zeros = std::countr_zero(header->sPixelFormat.dwAlphaBitMask);
+				uint16_t rmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+				uint16_t gmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+				uint16_t bmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+				uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
 				for(uint32_t i = 0; i < dds_full_size; i += block_size) {
 					uint16_t data = *(uint16_t const*)(buffer + buffer_index + i);
 					uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
