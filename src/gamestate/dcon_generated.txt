@@ -434,6 +434,17 @@ object {
 		type{ bitfield }
 		tag{ unsaved }
 	}
+
+	property{
+		name{ last_total_production }
+		type{ float }
+		tag{ save }
+	}
+	property{
+		name{ last_total_real_demand }
+		type{ float }
+		tag{ save }
+	}
 }
 
 object {

@@ -360,6 +360,8 @@ void initialize(sys::state& state) {
 		fc.set_total_consumption(0.0f);
 		fc.set_total_production(0.0f);
 		fc.set_total_real_demand(0.0f);
+		fc.set_last_total_production(0.0f);
+		fc.set_last_total_real_demand(0.0f);
 		for(uint32_t i = 0; i < price_history_length; ++i) {
 			fc.set_price_record(i, fc.get_cost());
 		}
@@ -2696,6 +2698,9 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 		if(state.world.commodity_get_money_rgo(cid)) {
 			return;
 		}
+
+		state.world.commodity_set_last_total_consumption(cid, state.world.commodity_get_total_consumption(cid));
+		state.world.commodity_set_last_total_real_demand(cid, state.world.commodity_get_total_real_demand(cid));
 
 		float total_r_demand = 0.0f;
 		float total_consumption = 0.0f;
