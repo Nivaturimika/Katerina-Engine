@@ -667,38 +667,29 @@ void describe_assimilation(sys::state& state, text::columnar_layout& contents, d
 
 std::vector<dcon::pop_id> const& get_pop_window_list(sys::state& state) {
 	static const std::vector<dcon::pop_id> empty{};
-	if(state.ui_state.population_subwindow)
-		return static_cast<population_window*>(state.ui_state.population_subwindow)->country_pop_listbox->row_contents;
+	auto win = static_cast<population_window*>(state.ui_state.population_subwindow);
+	if(win && win->country_pop_listbox)
+		return win->country_pop_listbox->row_contents;
 	return empty;
 }
 
 dcon::pop_id get_pop_details_pop(sys::state& state) {
-	dcon::pop_id id{};
-	if(state.ui_state.population_subwindow) {
-		auto win = static_cast<population_window*>(state.ui_state.population_subwindow)->details_win;
-		if(win) {
-			Cyto::Any payload = dcon::pop_id{};
-			win->impl_get(state, payload);
-			id = any_cast<dcon::pop_id>(payload);
-		}
-	}
-	return id;
+	auto win = static_cast<population_window*>(state.ui_state.population_subwindow);
+	if(win)
+		return retrieve<dcon::pop_id>(state, win);
+	return dcon::pop_id{};
 }
 
 void pop_national_focus_button::button_action(sys::state& state) noexcept {
-	if(parent) {
-		Cyto::Any payload = dcon::state_instance_id{};
-		parent->impl_get(state, payload);
-		auto pop_window = static_cast<population_window*>(state.ui_state.population_subwindow);
-		if(pop_window) {
-			pop_window->focus_state = any_cast<dcon::state_instance_id>(payload);
-			if(pop_window->nf_win) {
-				pop_window->nf_win->set_visible(state, !pop_window->nf_win->is_visible());
-				pop_window->nf_win->base_data.position = base_data.position;
-			}
-			pop_window->move_child_to_front(pop_window->nf_win);
-			pop_window->impl_on_update(state);
+	auto win = static_cast<population_window*>(state.ui_state.population_subwindow);
+	if(win) {
+		win->focus_state = retrieve<dcon::state_instance_id>(state, parent);
+		if(win->nf_win) {
+			win->nf_win->set_visible(state, !win->nf_win->is_visible());
+			win->nf_win->base_data.position = base_data.position;
 		}
+		win->move_child_to_front(win->nf_win);
+		win->impl_on_update(state);
 	}
 }
 

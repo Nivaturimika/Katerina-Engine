@@ -2332,35 +2332,39 @@ private:
 	std::vector<bool> pop_filters;
 	dcon::state_instance_id focus_state{};
 	pop_list_sort sort = pop_list_sort::size;
-	bool sort_ascend = true;
+	bool sort_ascend = false;
+
+	void add_pops_from_province_to_list(sys::state& state, dcon::province_id p) {
+		state.world.province_for_each_pop_location_as_province(p, [&](dcon::pop_location_id id) {
+			// Apply pop filters properly...
+			auto pop_id = state.world.pop_location_get_pop(id);
+			auto pt_id = state.world.pop_get_poptype(pop_id);
+			if(pop_filters[dcon::pop_type_id::value_base_t(pt_id.id.index())])
+				country_pop_listbox->row_contents.push_back(pop_id);
+		});
+	}
 
 	void update_pop_list(sys::state& state) {
 		country_pop_listbox->row_contents.clear();
-
-		auto nation_id = std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : state.local_player_nation;
-		std::vector<dcon::state_instance_id> state_list{};
-		for(auto si : state.world.nation_get_state_ownership(nation_id))
-			state_list.push_back(si.get_state().id);
-
+		auto filter_nation = std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : dcon::nation_id{};
+		auto filter_state = std::holds_alternative<dcon::state_instance_id>(filter) ? std::get<dcon::state_instance_id>(filter) : dcon::state_instance_id{};
+		auto filter_prov = std::holds_alternative<dcon::province_id>(filter) ? std::get<dcon::province_id>(filter) : dcon::province_id{};
 		std::vector<dcon::province_id> province_list{};
-		for(auto& state_id : state_list) {
-			if(std::holds_alternative<dcon::state_instance_id>(filter) && std::get<dcon::state_instance_id>(filter) != state_id)
-				continue;
-			auto fat_id = dcon::fatten(state.world, state_id);
-			province::for_each_province_in_state_instance(state, fat_id, [&](dcon::province_id id) { province_list.push_back(id); });
-		}
-
-		for(auto& province_id : province_list) {
-			if(std::holds_alternative<dcon::province_id>(filter) && std::get<dcon::province_id>(filter) != province_id)
-				continue;
-			auto fat_id = dcon::fatten(state.world, province_id);
-			fat_id.for_each_pop_location_as_province([&](dcon::pop_location_id id) {
-				// Apply pop filters properly...
-				auto pop_id = state.world.pop_location_get_pop(id);
-				auto pt_id = state.world.pop_get_poptype(pop_id);
-				if(pop_filters[dcon::pop_type_id::value_base_t(pt_id.id.index())])
-					country_pop_listbox->row_contents.push_back(pop_id);
+		if(filter_nation) { //nation
+			for(auto po : state.world.nation_get_province_ownership(filter_nation))
+				add_pops_from_province_to_list(state, po.get_province());
+		} else if(filter_state) { //state
+			province::for_each_province_in_state_instance(state, filter_state, [&](dcon::province_id id) {
+				add_pops_from_province_to_list(state, id);
 			});
+		} else if(filter_prov) { //province
+			add_pops_from_province_to_list(state, filter_prov);
+		} else { //no set filter
+			for(auto si : state.world.nation_get_state_ownership(state.local_player_nation)) {
+				province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id id) {
+					add_pops_from_province_to_list(state, id);
+				});
+			}
 		}
 	}
 
@@ -2791,8 +2795,7 @@ public:
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_filter_select_action>()) {
 			auto data = any_cast<pop_filter_select_action>(payload);
-			state.world.for_each_pop_type(
-					[&](dcon::pop_type_id id) { pop_filters[dcon::pop_type_id::value_base_t(id.index())] = data.value; });
+			state.world.for_each_pop_type([&](dcon::pop_type_id id) { pop_filters[dcon::pop_type_id::value_base_t(id.index())] = data.value; });
 			impl_on_update(state);
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_list_sort>()) {
@@ -2812,8 +2815,7 @@ public:
 		} else if(payload.holds_type<pop_left_side_expand_action>()) {
 			auto expand_action = any_cast<pop_left_side_expand_action>(payload);
 			auto sid = std::get<dcon::state_instance_id>(expand_action);
-			payload.emplace<pop_left_side_expand_action>(
-					pop_left_side_expand_action(view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())]));
+			payload.emplace<pop_left_side_expand_action>(pop_left_side_expand_action(view_expanded_state[dcon::state_instance_id::value_base_t(sid.index())]));
 			return message_result::consumed;
 		} else if(payload.holds_type<pop_filter_data>()) {
 			auto data = any_cast<pop_filter_data>(payload);
