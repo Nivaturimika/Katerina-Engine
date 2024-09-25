@@ -403,7 +403,7 @@ void initialize(sys::state& state) {
 			}
 		}
 		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
-		float workforce = fp.get_rgo().get_rgo_workforce();
+		float workforce = float(fp.get_rgo().get_rgo_workforce());
 		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / workforce) / 2.f) + std::ceil(pop_amount / workforce)) * workforce));
 	});
 
@@ -838,20 +838,12 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	return tp * sz * ef * 0.00008f;
 }
 
-float factory_min_input_available(
-	sys::state& state,
-	dcon::nation_id n,
-	dcon::factory_type_fat_id fac_type
-) {
+float factory_min_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type) {
 	float min_input_available = 1.0f;
 	auto& inputs = fac_type.get_inputs();
 	for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 		if(inputs.commodity_type[i]) {
-			min_input_available =
-				std::min(
-					min_input_available,
-					state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i])
-				);
+			min_input_available = std::min(min_input_available, state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]));
 		} else {
 			break;
 		}
@@ -877,16 +869,11 @@ float factory_min_e_input_available(sys::state& state, dcon::nation_id n, dcon::
 	auto& e_inputs = fac_type.get_efficiency_inputs();
 	for(uint32_t i = 0; i < small_commodity_set::set_size; ++i) {
 		if(e_inputs.commodity_type[i]) {
-			min_e_input_available =
-				std::min(
-					min_e_input_available,
-					state.world.nation_get_demand_satisfaction(n, e_inputs.commodity_type[i])
-				);
+			min_e_input_available = std::min(min_e_input_available, state.world.nation_get_demand_satisfaction(n, e_inputs.commodity_type[i]));
 		} else {
 			break;
 		}
 	}
-
 	return min_e_input_available;
 }
 
@@ -1003,13 +990,7 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 
 	float total_workers = factory_max_employment(state, f);
 	float several_workers_scale = 10.f / total_workers;
-	float max_production_scale = factory_max_production_scale(
-		state,
-		fac,
-		mobilization_impact,
-		occupied
-	);
-
+	float max_production_scale = factory_max_production_scale(state, fac, mobilization_impact, occupied);
 	float current_workers = total_workers * max_production_scale;
 
 	//inputs
@@ -1055,7 +1036,6 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 	// also multiply by target production scale... otherwise too much excess demand is generated
 	// also multiply by something related to minimal satisfied input
 	// to prevent generation of too much demand on rgos already influenced by a shortage
-
 	float input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_input_available * 0.9f);
 	for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 		if(inputs.commodity_type[i]) {
@@ -1069,9 +1049,10 @@ void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dc
 	//  the consumption of efficiency inputs is (national-factory-maintenance-modifier + 1) x input-multiplier x
 	//  throughput-multiplier x factory level
 	auto const mfactor = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_maintenance) + 1.0f;
+	float e_input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_e_input_available * 0.9f);
 	for(uint32_t i = 0; i < small_commodity_set::set_size; ++i) {
 		if(e_inputs.commodity_type[i]) {
-			register_intermediate_demand(state, n, e_inputs.commodity_type[i], mfactor * input_scale * e_inputs.commodity_amounts[i] * (0.1f + min_e_input_available * 0.9f));
+			register_intermediate_demand(state, n, e_inputs.commodity_type[i], mfactor * e_input_scale * e_inputs.commodity_amounts[i] * (0.1f + min_e_input_available * 0.9f));
 		} else {
 			break;
 		}
@@ -1197,7 +1178,6 @@ void update_national_artisan_consumption(sys::state& state, dcon::nation_id n, f
 	auto num_artisans = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.artisans));
 	float total_profit = 0.0f;
 
-
 	float multiplier = get_artisans_multiplier(state, n);
 	float max_score = max_artisan_score(state, n, multiplier);
 	float total_score = total_artisan_exp_score(state, n, multiplier, max_score);
@@ -1235,12 +1215,7 @@ void update_national_artisan_consumption(sys::state& state, dcon::nation_id n, f
 				//profitability_factor = std::clamp(profitability_factor * 0.5f + 0.5f, 0.0f, 1.0f);
 			for(uint32_t j = 0; j < commodity_set::set_size; ++j) {
 				if(inputs.commodity_type[j]) {
-					register_intermediate_demand(
-						state,
-						n,
-						inputs.commodity_type[j],
-						input_multiplier * throughput_multiplier * max_production_scale * inputs.commodity_amounts[j] * (0.1f + 0.9f * min_available)
-					);
+					register_intermediate_demand(state, n, inputs.commodity_type[j], input_multiplier * throughput_multiplier * max_production_scale * inputs.commodity_amounts[j] * (0.1f + 0.9f * min_available));
 				} else {
 					break;
 				}
@@ -2700,7 +2675,7 @@ void daily_update(sys::state& state, bool initiate_buildings) {
 			return;
 		}
 
-		state.world.commodity_set_last_total_consumption(cid, state.world.commodity_get_total_consumption(cid));
+		state.world.commodity_set_last_total_production(cid, state.world.commodity_get_total_production(cid));
 		state.world.commodity_set_last_total_real_demand(cid, state.world.commodity_get_total_real_demand(cid));
 
 		float total_r_demand = 0.0f;
@@ -3082,10 +3057,48 @@ float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::com
 	auto amount = 0.f;
 	for(const auto po : state.world.nation_get_province_ownership(n)) {
 		for(const auto fl : po.get_province().get_factory_location()) {
-			auto const& inputs = fl.get_factory().get_building_type().get_inputs();
+			auto fac = fl.get_factory();
+			auto fac_type = fl.get_factory().get_building_type();
+			auto occupied = po.get_province().get_nation_from_province_control() != po.get_province().get_nation_from_province_ownership();
+			auto mobilization_impact = military::mobilization_impact(state, n);
+			auto p = po.get_province();
+			auto s = po.get_province().get_state_membership();
+			//
+			float total_workers = factory_max_employment(state, fac);
+			float several_workers_scale = 10.f / total_workers;
+			float max_production_scale = factory_max_production_scale(state, fac, mobilization_impact, occupied);
+			float current_workers = total_workers * max_production_scale;
+
+			//inputs
+			float input_total = factory_input_total_cost(state, n, fac_type);
+			float min_input_available = factory_min_input_available(state, n, fac_type);
+			//modifiers
+			float input_multiplier = std::max(0.f, factory_input_multiplier(state, fac, n, p, s));
+			float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, fac_type, n, p, s) + fac.get_triggered_modifiers());
+			float effective_production_scale = std::min(fac.get_production_scale() * fac.get_level(), max_production_scale);
+			//
+			auto const& inputs = fac_type.get_inputs();
+			float input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_input_available * 0.9f);
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
 				if(inputs.commodity_type[i]) {
-					amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
+					if(inputs.commodity_type[i] == c) {
+						amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
+					}
+				} else {
+					break;
+				}
+			}
+			//
+			auto const& e_inputs = fac_type.get_efficiency_inputs();
+			float e_input_total = factory_e_input_total_cost(state, n, fac_type);
+			float min_e_input_available = factory_min_e_input_available(state, n, fac_type);
+			auto const mfactor = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_maintenance) + 1.0f;
+			float e_input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_e_input_available * 0.9f);
+			for(uint32_t i = 0; i < small_commodity_set::set_size; ++i) {
+				if(e_inputs.commodity_type[i] == c) {
+					if(e_inputs.commodity_type[i] == c) {
+						register_intermediate_demand(state, n, e_inputs.commodity_type[i], mfactor * e_input_scale * e_inputs.commodity_amounts[i] * (0.1f + min_e_input_available * 0.9f));
+					}
 				} else {
 					break;
 				}

@@ -957,17 +957,14 @@ public:
 		auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
 
 		row_contents.clear();
-		populate_rows(
-				state,
-				[&](dcon::factory_id fid) -> bool {
-					auto ftid = state.world.factory_get_building_type(fid);
-					auto& inputs = state.world.factory_type_get_inputs(ftid);
-					for(uint32_t i = 0; i < inputs.set_size; ++i)
-						if(inputs.commodity_type[i] == commodity_id)
-							return inputs.commodity_amounts[i] > 0.f; // Some inputs taken
-					return false;
-				},
-				trade_flow_data::value_type::used_by);
+		populate_rows(state, [&](dcon::factory_id fid) -> bool {
+			auto ftid = state.world.factory_get_building_type(fid);
+			auto& inputs = state.world.factory_type_get_inputs(ftid);
+			for(uint32_t i = 0; i < inputs.set_size; ++i)
+				if(inputs.commodity_type[i] == commodity_id)
+					return inputs.commodity_amounts[i] > 0.f; // Some inputs taken
+			return false;
+		}, trade_flow_data::value_type::used_by);
 		update(state);
 	}
 };
@@ -977,17 +974,15 @@ public:
 		auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
 
 		row_contents.clear();
-		populate_rows(
-				state,
-				[&](dcon::factory_id fid) -> bool {
-					auto ftid = state.world.factory_get_building_type(fid);
-					auto& inputs = state.world.factory_type_get_inputs(ftid);
-					for(uint32_t i = 0; i < inputs.set_size; ++i)
-						if(inputs.commodity_type[i] == commodity_id)
-							return inputs.commodity_amounts[i] == 0.f; // No inputs intaken
-					return false;
-				},
-				trade_flow_data::value_type::may_be_used_by);
+		populate_rows(state, [&](dcon::factory_id fid) -> bool {
+			auto ftid = state.world.factory_get_building_type(fid);
+			auto& inputs = state.world.factory_type_get_inputs(ftid);
+			for(uint32_t i = 0; i < inputs.set_size; ++i)
+				if(inputs.commodity_type[i] == commodity_id)
+					return inputs.commodity_amounts[i] == 0.f; // No inputs intaken
+			return false;
+		},
+		trade_flow_data::value_type::may_be_used_by);
 		update(state);
 	}
 };
