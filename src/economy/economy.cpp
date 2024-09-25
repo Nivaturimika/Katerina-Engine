@@ -403,7 +403,8 @@ void initialize(sys::state& state) {
 			}
 		}
 		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
-		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / 40000.f) / 2.f) + std::ceil(pop_amount / 40000.f)) * 40000.f));
+		float workforce = fp.get_rgo().get_rgo_workforce();
+		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / workforce) / 2.f) + std::ceil(pop_amount / workforce)) * workforce));
 	});
 
 	state.world.for_each_nation([&](dcon::nation_id n) {
