@@ -106,50 +106,49 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 	}
 
 	/*	try reading in the header */
-	DDS_header header;
-	std::memcpy((void*)(&header), (void const*)buffer, sizeof(DDS_header));
+	DDS_header* header = reinterpret_cast<DDS_header*>(buffer);
 	uint32_t buffer_index = sizeof(DDS_header);
 
 	/*	validate the header (warning, "goto"'s ahead, shield your eyes!!)	*/
-	if(header.dwMagic != (('D' << 0) | ('D' << 8) | ('S' << 16) | (' ' << 24))) {
+	if(header->dwMagic != (('D' << 0) | ('D' << 8) | ('S' << 16) | (' ' << 24))) {
 		return 0;
 	}
-	if(header.dwSize != 124) {
+	if(header->dwSize != 124) {
 		return 0;
 	}
 	/*	I need all of these	*/
 	flag = ALICE_DDSD_CAPS | ALICE_DDSD_HEIGHT | ALICE_DDSD_WIDTH | ALICE_DDSD_PIXELFORMAT;
-	if((header.dwFlags & flag) != flag) {
+	if((header->dwFlags & flag) != flag) {
 		return 0;
 	}
 	/*	According to the MSDN spec, the dwFlags should contain
 		ALICE_DDSD_LINEARSIZE if it's compressed, or ALICE_DDSD_PITCH if
 		uncompressed.  Some DDS writers do not conform to the
 		spec, so I need to make my reader more tolerant	*/
-	if(header.sPixelFormat.dwSize != 32) {
+	if(header->sPixelFormat.dwSize != 32) {
 		return 0;
 	}
 	/*	I need one of these	*/
-	if((header.sPixelFormat.dwFlags & (ALICE_DDPF_FOURCC | ALICE_DDPF_RGB | ALICE_DDPF_ALPHAPIXELS)) == 0) {
+	if((header->sPixelFormat.dwFlags & (ALICE_DDPF_FOURCC | ALICE_DDPF_RGB | ALICE_DDPF_ALPHAPIXELS)) == 0) {
 		return 0;
 	}
 	/*	make sure it is a type we can upload	*/
-	if((header.sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) &&
-		!((header.sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24))) ||
-			(header.sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24))) ||
-			(header.sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
+	if((header->sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) &&
+		!((header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24))) ||
+			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24))) ||
+			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
 		return 0;
 	}
-	if((header.sCaps.dwCaps1 & ALICE_DDSCAPS_TEXTURE) == 0) {
+	if((header->sCaps.dwCaps1 & ALICE_DDSCAPS_TEXTURE) == 0) {
 		return 0;
 	}
-	if((header.sCaps.dwCaps2 & ALICE_DDSCAPS2_CUBEMAP) != 0) {
+	if((header->sCaps.dwCaps2 & ALICE_DDSCAPS2_CUBEMAP) != 0) {
 		return 0;
 	}
 	/*	OK, validated the header, let's load the image data	*/
-	width = header.dwWidth;
-	height = header.dwHeight;
-	bool uncompressed = (header.sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) == 0;
+	width = header->dwWidth;
+	height = header->dwHeight;
+	bool uncompressed = (header->sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) == 0;
 	GLint s3tc_format = 0; //How we want to give it to shaders
 	GLint s3tc_format_layout = 0; //How's it laid on memory
 	GLint s3tc_type = GL_UNSIGNED_BYTE;
@@ -158,11 +157,11 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 		s3tc_format = GL_RGB;
 		s3tc_format_layout = GL_RGB;
 		block_size = 3;
-		if(header.sPixelFormat.dwFlags & ALICE_DDPF_ALPHAPIXELS) {
+		if(header->sPixelFormat.dwFlags & ALICE_DDPF_ALPHAPIXELS) {
 			s3tc_format = GL_RGBA;
 			s3tc_format_layout = GL_RGBA;
 			block_size = 4;
-			if(header.sPixelFormat.dwRGBBitCount == 16) {
+			if(header->sPixelFormat.dwRGBBitCount == 16) {
 				//s3tc_format_layout = GL_RGBA;
 				//s3tc_type = GL_UNSIGNED_BYTE;
 				block_size = 2;
@@ -179,7 +178,7 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 		//	return 0;
 		// }
 		/*	well, we know it is DXT1/3/5, because we checked above	*/
-		switch((header.sPixelFormat.dwFourCC >> 24) - '0') {
+		switch((header->sPixelFormat.dwFourCC >> 24) - '0') {
 		case 1:
 			s3tc_format = SOIL_RGBA_S3TC_DXT1;
 			block_size = 8;
@@ -197,8 +196,8 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 	}
 	uint32_t dds_full_size = dds_main_size;
 	uint32_t mipmaps = 0;
-	if((header.sCaps.dwCaps1 & ALICE_DDSCAPS_MIPMAP) != 0 && (header.dwMipMapCount > 1)) {
-		mipmaps = header.dwMipMapCount - 1;
+	if((header->sCaps.dwCaps1 & ALICE_DDSCAPS_MIPMAP) != 0 && (header->dwMipMapCount > 1)) {
+		mipmaps = header->dwMipMapCount - 1;
 		for(uint32_t i = 1; i <= mipmaps; ++i) {
 			uint32_t w = std::max<uint32_t>(width >> i, 1);
 			uint32_t h = std::max<uint32_t>(height >> i, 1);
@@ -247,12 +246,16 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 			switch(block_size) {
 			case 4:
 			{
+				uint32_t rmask_zeros = std::countr_zero(header->sPixelFormat.dwRBitMask);
+				uint32_t gmask_zeros = std::countr_zero(header->sPixelFormat.dwGBitMask);
+				uint32_t bmask_zeros = std::countr_zero(header->sPixelFormat.dwBBitMask);
+				uint32_t amask_zeros = std::countr_zero(header->sPixelFormat.dwAlphaBitMask);
 				for(uint32_t i = 0; i < dds_full_size; i += block_size) {
 					uint32_t data = *(uint32_t const*)(buffer + buffer_index + i);
-					uint32_t r = (data & header.sPixelFormat.dwRBitMask) >> std::countr_zero(header.sPixelFormat.dwRBitMask);
-					uint32_t g = (data & header.sPixelFormat.dwGBitMask) >> std::countr_zero(header.sPixelFormat.dwGBitMask);
-					uint32_t b = (data & header.sPixelFormat.dwBBitMask) >> std::countr_zero(header.sPixelFormat.dwBBitMask);
-					uint32_t a = (data & header.sPixelFormat.dwAlphaBitMask) >> std::countr_zero(header.sPixelFormat.dwAlphaBitMask);
+					uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+					uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+					uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+					uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
 					dds_dest_data[i + 0] = static_cast<uint8_t>(r);
 					dds_dest_data[i + 1] = static_cast<uint8_t>(g);
 					dds_dest_data[i + 2] = static_cast<uint8_t>(b);
@@ -264,20 +267,25 @@ GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint3
 			{
 				dds_dest_data.reset();
 				dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
-				uint16_t mr1 = uint16_t(header.sPixelFormat.dwRBitMask >> std::countr_zero(header.sPixelFormat.dwRBitMask));
+				uint16_t mr1 = uint16_t(header->sPixelFormat.dwRBitMask >> std::countr_zero(header->sPixelFormat.dwRBitMask));
 				float mr2 = mr1 == 0 ? 0.f : 255.f / float(mr1);
-				uint16_t mg1 = uint16_t(header.sPixelFormat.dwGBitMask >> std::countr_zero(header.sPixelFormat.dwGBitMask));
+				uint16_t mg1 = uint16_t(header->sPixelFormat.dwGBitMask >> std::countr_zero(header->sPixelFormat.dwGBitMask));
 				float mg2 = mg1 == 0 ? 0.f : 255.f / float(mg1);
-				uint16_t mb1 = uint16_t(header.sPixelFormat.dwBBitMask >> std::countr_zero(header.sPixelFormat.dwBBitMask));
+				uint16_t mb1 = uint16_t(header->sPixelFormat.dwBBitMask >> std::countr_zero(header->sPixelFormat.dwBBitMask));
 				float mb2 = mb1 == 0 ? 0.f : 255.f / float(mb1);
-				uint16_t ma1 = uint16_t(header.sPixelFormat.dwAlphaBitMask >> std::countr_zero(header.sPixelFormat.dwAlphaBitMask));
+				uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
 				float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
+				//
+				uint16_t rmask_zeros = std::countr_zero(header->sPixelFormat.dwRBitMask);
+				uint16_t gmask_zeros = std::countr_zero(header->sPixelFormat.dwGBitMask);
+				uint16_t bmask_zeros = std::countr_zero(header->sPixelFormat.dwBBitMask);
+				uint16_t amask_zeros = std::countr_zero(header->sPixelFormat.dwAlphaBitMask);
 				for(uint32_t i = 0; i < dds_full_size; i += block_size) {
 					uint16_t data = *(uint16_t const*)(buffer + buffer_index + i);
-					uint16_t r = (data & header.sPixelFormat.dwRBitMask) >> std::countr_zero(header.sPixelFormat.dwRBitMask);
-					uint16_t g = (data & header.sPixelFormat.dwGBitMask) >> std::countr_zero(header.sPixelFormat.dwGBitMask);
-					uint16_t b = (data & header.sPixelFormat.dwBBitMask) >> std::countr_zero(header.sPixelFormat.dwBBitMask);
-					uint16_t a = (data & header.sPixelFormat.dwAlphaBitMask) >> std::countr_zero(header.sPixelFormat.dwAlphaBitMask);
+					uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+					uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+					uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+					uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
 					dds_dest_data[i * 2 + 0] = uint8_t(float(r) * mr2);
 					dds_dest_data[i * 2 + 1] = uint8_t(float(g) * mg2);
 					dds_dest_data[i * 2 + 2] = uint8_t(float(b) * mb2);
@@ -394,8 +402,7 @@ GLuint load_file_and_return_handle(native_string const& native_name, simple_fs::
 
 				if(keep_data) {
 					asset_texture.data = static_cast<uint8_t*>(STBI_MALLOC(4 * w * h));
-					glGetTextureImage(asset_texture.texture_handle, 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<int32_t>(4 * w * h),
-						asset_texture.data);
+					glGetTextureImage(asset_texture.texture_handle, 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<int32_t>(4 * w * h), asset_texture.data);
 				}
 				return asset_texture.texture_handle;
 			}
@@ -418,8 +425,7 @@ GLuint load_file_and_return_handle(native_string const& native_name, simple_fs::
 
 		int32_t file_channels = 4;
 
-		asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size),
-			&(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
+		asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
 
 		asset_texture.channels = 4;
 		asset_texture.loaded = true;
@@ -429,8 +435,7 @@ GLuint load_file_and_return_handle(native_string const& native_name, simple_fs::
 			glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
 
 			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, asset_texture.size_x, asset_texture.size_y);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, asset_texture.size_x, asset_texture.size_y, GL_RGBA, GL_UNSIGNED_BYTE,
-					asset_texture.data);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, asset_texture.size_x, asset_texture.size_y, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
