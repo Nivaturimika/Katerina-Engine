@@ -404,6 +404,7 @@ void initialize(sys::state& state) {
 		}
 		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
 		float workforce = float(fp.get_rgo().get_rgo_workforce());
+		workforce = workforce == 0.f ? 40000.f : workforce;
 		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / workforce) / 2.f) + std::ceil(pop_amount / workforce)) * workforce));
 	});
 
