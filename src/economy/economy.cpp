@@ -12,6 +12,8 @@
 
 namespace economy {
 
+constexpr float default_workforce = 40000.f;
+
 constexpr float pop_payout_factor = 1.f;
 constexpr float consumption_factor = 1.f;
 
@@ -404,7 +406,7 @@ void initialize(sys::state& state) {
 		}
 		//floor(ceil(workforce/BaseWorkforce)/2)+ceil(workforce/BaseWorkforce)
 		float workforce = float(fp.get_rgo().get_rgo_workforce());
-		workforce = workforce == 0.f ? 40000.f : workforce;
+		workforce = workforce == 0.f ? default_workforce : workforce;
 		fp.set_rgo_size(std::max(0.001f, (std::floor(std::ceil(pop_amount / workforce) / 2.f) + std::ceil(pop_amount / workforce)) * workforce));
 	});
 
@@ -834,7 +836,7 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	auto fp = dcon::fatten(state.world, p);
 	float workforce = float(fp.get_rgo().get_rgo_workforce());
 	auto vl = fp.get_rgo().get_rgo_amount();
-	auto base = workforce == 0.f ? 0.f : std::ceil(sz / workforce);
+	auto base = workforce == 0.f ? default_workforce : std::ceil(sz / workforce);
 	auto tp = rgo_total_employment(state, n, p) / rgo_max_employment(state, n, p, c);
 	if(!std::isfinite(tp) || std::isnan(tp)) {
 		tp = 0.0f;
