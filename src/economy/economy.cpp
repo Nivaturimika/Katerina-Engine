@@ -831,7 +831,7 @@ float rgo_full_production_quantity(sys::state& state, dcon::nation_id n, dcon::p
 	auto sz = rgo_effective_size(state, n, p, c);
 	auto ef = rgo_efficiency(state, n, p, c);
 	auto fp = dcon::fatten(state.world, p);
-	auto workforce = fp.get_rgo().get_rgo_workforce();
+	float workforce = float(fp.get_rgo().get_rgo_workforce());
 	auto vl = fp.get_rgo().get_rgo_amount();
 	auto base = std::ceil( sz / workforce);
 	auto tp = rgo_total_employment(state, n, p) / rgo_max_employment(state, n, p, c);
