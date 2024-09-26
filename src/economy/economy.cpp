@@ -421,9 +421,9 @@ void initialize(sys::state& state) {
 		fn.set_construction_spending(int8_t(100));
 		fn.set_overseas_spending(int8_t(100));
 
-		fn.set_poor_tax(int8_t(75));
-		fn.set_middle_tax(int8_t(75));
-		fn.set_rich_tax(int8_t(75));
+		fn.set_poor_tax(int8_t(50));
+		fn.set_middle_tax(int8_t(50));
+		fn.set_rich_tax(int8_t(50));
 
 		fn.set_spending_level(1.0f);
 
