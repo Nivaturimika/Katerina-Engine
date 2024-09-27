@@ -1016,5 +1016,7 @@ std::string resolve_string_substitution(sys::state& state, dcon::text_key key, s
 
 uint32_t codepoint_from_utf8(char const* start, char const* end);
 size_t size_from_utf8(char const* start, char const*);
+bool codepoint_is_space(uint32_t c) noexcept;
+bool codepoint_is_line_break(uint32_t c) noexcept;
 
 } // namespace text
