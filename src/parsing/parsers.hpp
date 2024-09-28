@@ -23,9 +23,9 @@
  */
 
 namespace parsers {
-enum class token_type { identifier, quoted_string, special_identifier, brace, open_brace, close_brace, unknown };
+	enum class token_type { identifier, quoted_string, special_identifier, brace, open_brace, close_brace, unknown };
 
-enum class association_type : unsigned short { none, eq, lt, le, gt, ge, ne, eq_default, list };
+	enum class association_type : unsigned short { none, eq, lt, le, gt, ge, ne, eq_default, list };
 
 	struct token_and_type {
 		std::string_view content;
