@@ -303,7 +303,7 @@ void enter_dated_block(std::string_view name, token_generator& gen, error_handle
 		gen.discard_group();
 	} else {
 		context.history_blocks.emplace_back(d, gen);
-		parse_province_history_file(gen, err, context); //unordered execute -- printout errors
+		//parse_province_history_file(gen, err, context); //unordered execute -- printout errors
 	}
 }
 
