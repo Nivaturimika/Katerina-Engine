@@ -291,7 +291,7 @@ void province_history_file::finish(province_file_context& context) {
 	context.history_blocks.clear();
 
 	error_handler err("dummy");
-	for(auto& block : context.history_blocks) { //ordered execute -- errors streamed to dummy
+	for(auto& block : history_blocks) { //ordered execute -- errors streamed to dummy
 		parse_province_history_file(block.second, err, context);
 	}
 }
