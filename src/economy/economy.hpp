@@ -119,7 +119,7 @@ namespace economy {
 	+ sizeof(global_economy_state::immigrator_modifier)
 	+ sizeof(global_economy_state::craftsmen_fraction));
 
-enum class worker_effect : uint8_t { none = 0, input, output, throughput };
+	enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 
 	template<typename T>
 	auto desired_needs_spending(sys::state const& state, T pop_indices) {
@@ -130,7 +130,6 @@ enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 	constexpr inline dcon::commodity_id money(0);
 
 	inline constexpr float production_scale_delta = 0.1f;
-	inline constexpr float factory_closed_threshold = 0.0001f;
 	inline constexpr uint32_t price_history_length = 256;
 	inline constexpr uint32_t gdp_history_length = 128;
 	inline constexpr float rgo_owners_cut = 0.05f;
@@ -143,33 +142,19 @@ enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 	float rgo_total_effective_size(sys::state& state, dcon::nation_id n, dcon::province_id p);
 	float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_id p);
 	float rgo_full_production_quantity(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
-	float rgo_max_employment(sys::state & state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
+	float rgo_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
 	float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p);
 
 	float subsistence_max_pseudoemployment(sys::state& state, dcon::nation_id n, dcon::province_id p);
 
-	float factory_max_employment(sys::state const& state, dcon::factory_id f);
+	
 
-	bool has_factory(sys::state const& state, dcon::state_instance_id si);
+	
 	bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::factory_type_id fac);
 	bool is_bankrupt_debtor_to(sys::state& state, dcon::nation_id debt_holder, dcon::nation_id debtor);
 
 	void populate_effective_prices(sys::state& state, dcon::nation_id n);
-	float factory_min_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type);
-	float factory_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type);
-	float factory_min_e_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type);
-	float factory_e_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type);
-	float factory_input_multiplier(sys::state& state, dcon::factory_fat_id fac, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id s);
-	float factory_throughput_multiplier(sys::state& state, dcon::factory_type_fat_id fac_type, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id s);
-	float factory_output_multiplier(sys::state& state, dcon::factory_fat_id fac, dcon::nation_id n, dcon::province_id p);
-	float factory_max_production_scale(sys::state& state, dcon::factory_fat_id fac, float mobilization_impact, bool occupied);
-	float factory_desired_raw_profit(dcon::factory_fat_id fac, float spendings);
-	float factory_total_employment(sys::state const& state, dcon::factory_id f);
-	float factory_primary_employment(sys::state const& state, dcon::factory_id f);
-	float factory_secondary_employment(sys::state const& state, dcon::factory_id f);
-	int32_t factory_priority(sys::state const& state, dcon::factory_id f);
-	void set_factory_priority(sys::state& state, dcon::factory_id f, int32_t priority);
-	bool factory_is_profitable(sys::state const& state, dcon::factory_id f);
+	
 
 	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n);
 	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n);
@@ -205,7 +190,6 @@ enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 	float stockpile_commodity_daily_increase(sys::state& state, dcon::commodity_id c, dcon::nation_id n);
 	float global_market_commodity_daily_increase(sys::state& state, dcon::commodity_id c);
 	float government_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
-	float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	float nation_total_imports(sys::state& state, dcon::nation_id n);
 	float pop_income(sys::state& state, dcon::pop_id p);
@@ -242,25 +226,11 @@ enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 
 	construction_status state_building_construction(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t);
 	construction_status province_building_construction(sys::state& state, dcon::province_id, province_building_type t);
-	construction_status factory_upgrade(sys::state& state, dcon::factory_id f);
 
-	struct new_factory {
-		float progress = 0.0f;
-		dcon::factory_type_id type;
-	};
-
-	struct upgraded_factory {
-		float progress = 0.0f;
-		dcon::factory_type_id type;
-	};
-
-	bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id si, dcon::factory_type_id ft);
-	bool state_contains_factory(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id ft);
-	int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid);
-	int32_t state_built_factory_count(sys::state& state, dcon::state_instance_id sid);
+	
 	float unit_construction_progress(sys::state& state, dcon::province_land_construction_id c);
 	float unit_construction_progress(sys::state& state, dcon::province_naval_construction_id c);
-	void try_add_factory_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t);
+	
 	void bound_budget_settings(sys::state& state, dcon::nation_id n);
 
 	int32_t most_recent_price_record_index(sys::state& state);
@@ -270,12 +240,10 @@ enum class worker_effect : uint8_t { none = 0, input, output, throughput };
 
 	float gdp_adjusted(sys::state& state, dcon::nation_id n);
 
-	void prune_factories(sys::state& state); // get rid of closed factories in full states
+	
 	void go_bankrupt(sys::state& state, dcon::nation_id n);
 	dcon::modifier_id get_province_selector_modifier(sys::state& state);
 	dcon::modifier_id get_province_immigrator_modifier(sys::state& state);
-
-	float factory_build_cost_modifier(sys::state& state, dcon::nation_id n, bool pop_project);
 	bool can_take_loans(sys::state& state, dcon::nation_id n);
 	float interest_payment(sys::state& state, dcon::nation_id n);
 	float max_loan(sys::state& state, dcon::nation_id n);

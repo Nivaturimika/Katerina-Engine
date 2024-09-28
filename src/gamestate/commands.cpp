@@ -1,6 +1,6 @@
 #include "commands.hpp"
 #include "demographics.hpp"
-#include "economy_templates.hpp"
+#include "factory_templates.hpp"
 #include "effects.hpp"
 #include "serialization.hpp"
 #include "system_state.hpp"
