@@ -21,6 +21,11 @@ namespace economy {
 	constexpr float capitalist_investment_ratio = 0.85f;
 
 	constexpr float satisfaction_delay_factor = 0.1f;
+	constexpr float artisan_buff_factor = 1.25f;
+
+	inline constexpr float ln_2 = 0.30103f;
+
+	constexpr float artisan_baseline_score = 6.25f;
 
 	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
@@ -100,8 +105,6 @@ namespace economy {
 		return 0.f;
 	}
 
-	
-
 	void initialize_artisan_distribution(sys::state& state) {
 		state.world.nation_resize_artisan_distribution(state.world.commodity_size());
 		state.world.nation_resize_artisan_actual_production(state.world.commodity_size());
@@ -126,6 +129,7 @@ namespace economy {
 		}
 		return 0.f;
 	}
+
 	float pop_get_everyday_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
@@ -133,6 +137,7 @@ namespace economy {
 		}
 		return 0.f;
 	}
+
 	float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
@@ -164,10 +169,6 @@ namespace economy {
 		state.world.unilateral_relationship_get_owns_debt_of(state.world.get_unilateral_relationship_by_unilateral_pair(debtor, debt_holder)) > 0.1f;
 	}
 
-	
-
-	constexpr float artisan_buff_factor = 1.25f;
-
 	float base_artisan_profit(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto const& inputs = state.world.commodity_get_artisan_inputs(c);
 		float input_total = 0.0f;
@@ -184,6 +185,7 @@ namespace economy {
 		float output_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
 		return output_total * output_multiplier - input_multiplier * input_total;
 	}
+
 	float artisan_scale_limit(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		float least = 1.0f;
 		auto const& inputs = state.world.commodity_get_artisan_inputs(c);
@@ -203,8 +205,6 @@ namespace economy {
 		return (state.world.commodity_get_artisan_output_amount(cid) > 0.0f
 		&& (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))));
 	}
-
-	inline constexpr float ln_2 = 0.30103f;
 
 	//crude approximation of exp
 	float pseudo_exp_for_negative(float f) {
@@ -227,8 +227,6 @@ namespace economy {
 		float multiplier = 0.000001f * state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.artisans);
 		return 1.f / (multiplier + 1.f);
 	}
-
-	constexpr float artisan_baseline_score = 6.25f;
 
 	float max_artisan_score(sys::state& state, dcon::nation_id n, float multiplier) {
 		auto const csize = state.world.commodity_size();
@@ -463,10 +461,6 @@ namespace economy {
 		return effective_tariff_rate(state, n) + i_mod;
 	}
 
-	
-
-	
-
 	float rgo_effective_size(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 		/*
 		effective size = base size x (technology-bonus-to-specific-rgo-good-size
@@ -511,8 +505,6 @@ namespace economy {
 		});
 		return total;
 	}
-
-	
 
 	void update_rgo_employment(sys::state& state) {
 		province::for_each_land_province(state, [&](dcon::province_id p) {
@@ -592,8 +584,6 @@ namespace economy {
 		});
 	}
 
-	
-
 	/*
 	*
 	- Each factory has an input, output, and throughput multipliers.
@@ -619,8 +609,6 @@ namespace economy {
 	efficiency consumption scale)
 
 	*/
-
-	
 
 	float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 		bool is_mine = state.world.commodity_get_is_mine(c);
@@ -723,7 +711,6 @@ namespace economy {
 			}
 		});
 	}
-
 
 	void update_national_artisan_consumption(sys::state& state, dcon::nation_id n, float expected_min_wage, float mobilization_impact) {
 		auto const csize = state.world.commodity_size();
@@ -868,10 +855,8 @@ namespace economy {
 		});
 	}
 
-
 	// we want "cheaper per day"(= slower) construction at the start to avoid initial demand bomb
 	// and "more expensive"(=faster) construction at late game
-	
 
 	void populate_construction_consumption(sys::state& state) {
 		uint32_t total_commodities = state.world.commodity_size();
@@ -1535,8 +1520,6 @@ namespace economy {
 		return std::max(0.001f, eff_p); //sanity
 	}
 
-	
-
 	void daily_update(sys::state& state, bool initiate_buildings) {
 		/* initialization parallel block */
 		concurrency::parallel_for(0, 10, [&](int32_t index) {
@@ -1633,7 +1616,7 @@ namespace economy {
 
 			float base_demand = std::max(0.001f, state.defines.base_goods_demand + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::goods_demand));
 			int32_t num_inventions = 0;
-		state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
+			state.world.for_each_invention([&](auto iid) { num_inventions += int32_t(state.world.nation_get_active_inventions(n, iid)); });
 			float invention_factor = std::max(0.001f, float(num_inventions) * state.defines.invention_impact_on_demand + 1.0f);
 			populate_needs_costs(state, n, base_demand, invention_factor);
 

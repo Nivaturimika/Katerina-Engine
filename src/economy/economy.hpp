@@ -81,6 +81,7 @@ namespace economy {
 			return "???";
 		}
 	}
+
 	inline std::string_view province_building_type_get_level_text(economy::province_building_type v) {
 		switch(v) {
 			case economy::province_building_type::railroad:
@@ -152,15 +153,10 @@ namespace economy {
 	float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p);
 
 	float subsistence_max_pseudoemployment(sys::state& state, dcon::nation_id n, dcon::province_id p);
-
-	
-
-	
 	bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::factory_type_id fac);
 	bool is_bankrupt_debtor_to(sys::state& state, dcon::nation_id debt_holder, dcon::nation_id debtor);
 
 	void populate_effective_prices(sys::state& state, dcon::nation_id n);
-	
 
 	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n);
 	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n);
@@ -232,7 +228,6 @@ namespace economy {
 
 	construction_status state_building_construction(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t);
 	construction_status province_building_construction(sys::state& state, dcon::province_id, province_building_type t);
-
 	
 	float unit_construction_progress(sys::state& state, dcon::province_land_construction_id c);
 	float unit_construction_progress(sys::state& state, dcon::province_naval_construction_id c);

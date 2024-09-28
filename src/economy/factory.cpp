@@ -38,10 +38,12 @@ namespace factory {
 		}
 		return false;
 	}
+
 	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n) {
 		auto rng = state.world.nation_get_state_building_construction(n);
 		return rng.begin() != rng.end();
 	}
+
 	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n) { // TODO - should be "good" now
 		auto nation_fat = dcon::fatten(state.world, n);
 		for(auto prov_owner : nation_fat.get_province_ownership()) {
@@ -83,13 +85,16 @@ namespace factory {
 	int32_t factory_priority(sys::state const& state, dcon::factory_id f) {
 		return (state.world.factory_get_priority_low(f) ? 1 : 0) + (state.world.factory_get_priority_high(f) ? 2 : 0);
 	}
+
 	void set_factory_priority(sys::state& state, dcon::factory_id f, int32_t priority) {
 		state.world.factory_set_priority_high(f, priority >= 2);
 		state.world.factory_set_priority_low(f, (priority & 1) != 0);
 	}
+
 	bool factory_is_profitable(sys::state const& state, dcon::factory_id f) {
 		return state.world.factory_get_unprofitable(f) == false || state.world.factory_get_subsidized(f);
 	}
+
 	float factory_max_employment(sys::state const& state, dcon::factory_id f) {
 		return state.defines.alice_factory_per_level_employment * state.world.factory_get_level(f);
 	}
@@ -98,10 +103,12 @@ namespace factory {
 		auto primary_employment = state.world.factory_get_primary_employment(f);
 		return factory_max_employment(state, f) * (state.economy_definitions.craftsmen_fraction * primary_employment);
 	}
+
 	float factory_secondary_employment(sys::state const& state, dcon::factory_id f) {
 		auto secondary_employment = state.world.factory_get_secondary_employment(f);
 		return factory_max_employment(state, f) * ((1 - state.economy_definitions.craftsmen_fraction) * secondary_employment);
 	}
+
 	float factory_total_employment(sys::state const& state, dcon::factory_id f) {
 		// TODO: Document this, also is this a stub?
 		auto primary_employment = state.world.factory_get_primary_employment(f);
@@ -198,6 +205,7 @@ namespace factory {
 			});
 		});
 	}
+
 	float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n, float mobilization_impact) {
 		auto fac = fatten(state.world, f);
 		auto fac_type = fac.get_building_type();
@@ -213,6 +221,7 @@ namespace factory {
 			* std::max(0.0f, mobilization_impact);
 		return throughput_multiplier * output_multiplier * max_production_scale;
 	}
+
 	float factory_min_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_fat_id fac_type) {
 		float min_input_available = 1.0f;
 		auto& inputs = fac_type.get_inputs();
@@ -493,6 +502,7 @@ namespace factory {
 	float global_factory_construction_time_modifier(sys::state& state) {
 		return 1.f;
 	}
+
 	float global_non_factory_construction_time_modifier(sys::state& state) {
 		return 1.f;
 	}
@@ -664,6 +674,7 @@ namespace factory {
 		assert(num_factories <= int32_t(state.defines.factories_per_state));
 		return num_factories;
 	}
+
 	void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t, bool is_upgrade) {
 		if(is_upgrade) {
 			auto d = state.world.state_instance_get_definition(s);
