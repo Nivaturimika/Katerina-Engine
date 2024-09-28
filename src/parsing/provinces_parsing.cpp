@@ -281,12 +281,24 @@ void make_climate_definition(std::string_view name, token_generator& gen, error_
 	}
 }
 
+void province_history_file::finish(province_file_context& context) {
+	std::stable_sort(context.history_blocks.begin(), context.history_blocks.end(), [](const auto a, const auto b) {
+		return a.first < b.first;
+	});
+	error_handler err("dummy");
+	for(auto& block : context.history_blocks) { //ordered execute -- errors streamed to dummy
+		parse_province_history_file(block.second, err, context);
+	}
+}
+
 void enter_dated_block(std::string_view name, token_generator& gen, error_handler& err, province_file_context& context) {
 	auto ymd = parse_date(name, 0, err);
-	if(sys::date(ymd, context.outer_context.state.start_date) > context.outer_context.state.current_date) { // is after the start date
+	auto d = sys::date(ymd, context.outer_context.state.start_date);
+	if(d > context.outer_context.state.current_date) { // is after the start date
 		gen.discard_group();
 	} else {
-		parse_province_history_file(gen, err, context);
+		context.history_blocks.emplace_back(d, gen);
+		parse_province_history_file(gen, err, context); //unordered execute -- printout errors
 	}
 }
 

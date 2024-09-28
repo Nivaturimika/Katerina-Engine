@@ -1520,6 +1520,7 @@ void make_unit_names_list(std::string_view name, token_generator& gen, error_han
 struct province_file_context {
 	scenario_building_context& outer_context;
 	dcon::province_id id;
+	std::vector<std::pair<sys::date, token_generator>> history_blocks;
 };
 
 struct pv_party_loyalty {
@@ -1578,7 +1579,7 @@ struct province_history_file {
 	void is_slave(association_type, bool value, error_handler& err, int32_t line, province_file_context& context);
 	void rgo_distribution(province_rgo_ext const& value, error_handler& err, int32_t line, province_file_context& context);
 	void any_value(std::string_view name, association_type, uint32_t value, error_handler& err, int32_t line, province_file_context& context);
-	void finish(province_file_context&) { }
+	void finish(province_file_context&);
 };
 
 void enter_dated_block(std::string_view name, token_generator& gen, error_handler& err, province_file_context& context);
