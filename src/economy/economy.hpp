@@ -26,6 +26,12 @@ namespace economy {
 	uint8_t padding[3] = { 0 };
 	};
 
+	struct profit_distribution {
+		float per_primary_worker;
+		float per_secondary_worker;
+		float per_owner;
+	};
+
 	static_assert(sizeof(building_information) == 104);
 	static_assert(sizeof(building_information::cost) == 40);
 	static_assert(sizeof(building_information::colonial_points) == 32);
@@ -253,5 +259,7 @@ namespace economy {
 	void update_land_ownership(sys::state& state);
 	void update_local_subsistence_factor(sys::state& state);
 	float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
+	void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
+	void register_domestic_supply(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
 
 } // namespace economy

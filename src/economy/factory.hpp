@@ -2,6 +2,7 @@
 
 #include "container_types.hpp"
 #include "dcon_generated.hpp"
+#include "economy.hpp"
 
 namespace factory {
 
@@ -52,4 +53,10 @@ namespace factory {
 	float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 
 	float factory_build_cost_modifier(sys::state& state, dcon::nation_id n, bool pop_project);
+	void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id s, float mobilization_impact, float expected_min_wage, bool occupied);
+	void update_factory_triggered_modifiers(sys::state& state);
+	void update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage);
+	void add_factory_level_to_state(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t, bool is_upgrade);
+	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id s);
+	economy::profit_distribution distribute_factory_profit(sys::state const& state, dcon::state_instance_const_fat_id s, float min_wage, float total_profit);
 }

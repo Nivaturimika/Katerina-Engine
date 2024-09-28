@@ -459,7 +459,7 @@ namespace factory {
 				if(money_made < min_wages) {
 					auto diff = min_wages - money_made;
 					assert(diff > 0.0f);
-					if(state.world.nation_get_stockpiles(n, economy::money) > diff || can_take_loans(state, n)) {
+					if(state.world.nation_get_stockpiles(n, economy::money) > diff || economy::can_take_loans(state, n)) {
 						state.world.factory_set_full_profit(f, min_wages);
 						state.world.nation_get_stockpiles(n, economy::money) -= diff;
 						state.world.nation_get_subsidies_spending(n) += diff;
