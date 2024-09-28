@@ -819,30 +819,30 @@ std::vector<uint32_t> select_states_map_from(sys::state& state) {
 
 namespace map_mode {
 
-void set_map_mode(sys::state& state, mode mode) {
-	std::vector<uint32_t> prov_color;
-	switch(mode) {
-		case map_mode::mode::migration:
-		case map_mode::mode::population:
-		case map_mode::mode::relation:
-		case map_mode::mode::revolt:
-		case map_mode::mode::supply:
-		case map_mode::mode::admin:
-		case map_mode::mode::crisis:
-		//New mapmodes
-		case map_mode::mode::literacy:
-		case map_mode::mode::conciousness:
-		case map_mode::mode::growth:
-		case map_mode::mode::income:
-		case map_mode::mode::employment:
-		case map_mode::mode::militancy:
-		case map_mode::mode::life_needs:
-		case map_mode::mode::everyday_needs:
-		case map_mode::mode::luxury_needs:
-		case map_mode::mode::mobilization:
-		case map_mode::mode::officers:
-		case map_mode::mode::life_rating:
-		case map_mode::mode::clerk_to_craftsmen_ratio:
+	void set_map_mode(sys::state& state, mode mode) {
+		std::vector<uint32_t> prov_color;
+		switch(mode) {
+			case map_mode::mode::migration:
+			case map_mode::mode::population:
+			case map_mode::mode::relation:
+			case map_mode::mode::revolt:
+			case map_mode::mode::supply:
+			case map_mode::mode::admin:
+			case map_mode::mode::crisis:
+			//New mapmodes
+			case map_mode::mode::literacy:
+			case map_mode::mode::conciousness:
+			case map_mode::mode::growth:
+			case map_mode::mode::income:
+			case map_mode::mode::employment:
+			case map_mode::mode::militancy:
+			case map_mode::mode::life_needs:
+			case map_mode::mode::everyday_needs:
+			case map_mode::mode::luxury_needs:
+			case map_mode::mode::mobilization:
+			case map_mode::mode::officers:
+			case map_mode::mode::life_rating:
+			case map_mode::mode::clerk_to_craftsmen_ratio:
 			if(!state.ui_state.map_gradient_legend) {
 				auto legend_win = ui::make_element_by_type<ui::map_legend_gradient>(state, "alice_map_legend_gradient_window");
 				state.ui_state.map_gradient_legend = legend_win.get();
@@ -850,250 +850,250 @@ void set_map_mode(sys::state& state, mode mode) {
 			}
 			state.ui_state.map_gradient_legend->set_visible(state, true);
 			break;
-		default:
+			default:
 			if(state.ui_state.map_gradient_legend)
 				state.ui_state.map_gradient_legend->set_visible(state, false);
 			break;
-	}
-	if(mode == mode::civilization_level) {
-		if(!state.ui_state.map_civ_level_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_civ_level>(state, "alice_map_legend_civ_level");
-			state.ui_state.map_civ_level_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
 		}
-		state.ui_state.map_civ_level_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_civ_level_legend)
-			state.ui_state.map_civ_level_legend->set_visible(state, false);
-	}
-	if(mode == mode::colonial) {
-		if(!state.ui_state.map_col_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_col>(state, "alice_map_legend_colonial");
-			state.ui_state.map_col_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_col_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_col_legend)
-			state.ui_state.map_col_legend->set_visible(state, false);
-	}
-	if(mode == mode::diplomatic) {
-		if(!state.ui_state.map_dip_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_dip>(state, "alice_map_legend_diplomatic");
-			state.ui_state.map_dip_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_dip_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_dip_legend)
-			state.ui_state.map_dip_legend->set_visible(state, false);
-	}
-	if(mode == mode::infrastructure || mode == mode::fort) {
-		if(!state.ui_state.map_rr_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_rr>(state, "alice_map_legend_infrastructure");
-			state.ui_state.map_rr_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_rr_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_rr_legend)
-			state.ui_state.map_rr_legend->set_visible(state, false);
-	}
-	if(mode == mode::naval) {
-		if(!state.ui_state.map_nav_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_nav>(state, "alice_map_legend_naval");
-			state.ui_state.map_nav_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_nav_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_nav_legend)
-			state.ui_state.map_nav_legend->set_visible(state, false);
-	}
-	if(mode == mode::rank) {
-		if(!state.ui_state.map_rank_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_rank>(state, "alice_map_legend_rank");
-			state.ui_state.map_rank_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_rank_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_rank_legend)
-			state.ui_state.map_rank_legend->set_visible(state, false);
-	}
-	if(mode == mode::recruitment) {
-		if(!state.ui_state.map_rec_legend) {
-			auto legend_win = ui::make_element_by_type<ui::map_legend_rec>(state, "alice_map_legend_rec");
-			state.ui_state.map_rec_legend = legend_win.get();
-			state.ui_state.root->add_child_to_front(std::move(legend_win));
-		}
-		state.ui_state.map_rec_legend->set_visible(state, true);
-	} else {
-		if(state.ui_state.map_rec_legend)
-			state.ui_state.map_rec_legend->set_visible(state, false);
-	}
-
-	switch(mode) {
-	case mode::state_select:
-		prov_color = select_states_map_from(state);
-		break;
-	case mode::terrain:
-		state.map_state.set_terrain_map_mode();
-		return;
-	case mode::political:
-		prov_color = political_map_from(state);
-		break;
-	case mode::region:
-		prov_color = region_map_from(state);
-		break;
-	case mode::population:
-		prov_color = population_map_from(state);
-		break;
-	case mode::nationality:
-		prov_color = nationality_map_from(state);
-		break;
-	case mode::sphere:
-		prov_color = sphere_map_from(state);
-		break;
-	case mode::diplomatic:
-		prov_color = diplomatic_map_from(state);
-		break;
-	case mode::rank:
-		prov_color = rank_map_from(state);
-		break;
-	case mode::recruitment:
-		prov_color = recruitment_map_from(state);
-		break;
-	case mode::supply:
-		prov_color = supply_map_from(state);
-		break;
-	case mode::relation:
-		prov_color = relation_map_from(state);
-		break;
-	case mode::civilization_level:
-		prov_color = civilization_level_map_from(state);
-		break;
-	case mode::migration:
-		prov_color = migration_map_from(state);
-		break;
-	case mode::infrastructure:
-		prov_color = infrastructure_map_from(state);
-		break;
-	case mode::revolt:
-		prov_color = revolt_map_from(state);
-		break;
-	case mode::party_loyalty:
-		prov_color = party_loyalty_map_from(state);
-		break;
-	case mode::admin:
-		prov_color = admin_map_from(state);
-		break;
-	case mode::naval:
-		prov_color = naval_map_from(state);
-		break;
-	case mode::national_focus:
-		prov_color = national_focus_map_from(state);
-		break;
-	case mode::crisis:
-		prov_color = crisis_map_from(state);
-		break;
-	case mode::colonial:
-		prov_color = colonial_map_from(state);
-		break;
-	case mode::rgo_output:
-		prov_color = rgo_output_map_from(state);
-		break;
-	case mode::religion:
-		prov_color = religion_map_from(state);
-		break;
-	case mode::issues:
-		prov_color = issue_map_from(state);
-		break;
-	case mode::ideology:
-		prov_color = ideology_map_from(state);
-		break;
-	case mode::fort:
-		prov_color = fort_map_from(state);
-		break;
-	case mode::income:
-		prov_color = income_map_from(state);
-		break;
-	case mode::conciousness:
-		prov_color = con_map_from(state);
-		break;
-	case mode::militancy:
-		prov_color = militancy_map_from(state);
-		break;
-	case mode::literacy:
-		prov_color = literacy_map_from(state);
-		break;
-	case mode::employment:
-		prov_color = employment_map_from(state);
-		break;
-	case mode::factories:
-		prov_color = factory_map_from(state);
-		break;
-	case mode::growth:
-		prov_color = growth_map_from(state);
-		break;
-	//even newer mapmodes
-	case mode::players:
-		prov_color = players_map_from(state);
-		break;
-	case mode::life_needs:
-		prov_color = life_needs_map_from(state);
-		break;
-	case mode::everyday_needs:
-		prov_color = everyday_needs_map_from(state);
-		break;
-	case mode::luxury_needs:
-		prov_color = luxury_needs_map_from(state);
-		break;
-	case mode::life_rating:
-		prov_color = life_rating_map_from(state);
-		break;
-	case mode::clerk_to_craftsmen_ratio:
-		prov_color = ctc_map_from(state);
-		break;
-	case mode::crime:
-		prov_color = crime_map_from(state);
-		break;
-	case mode::rally:
-		prov_color = rally_map_from(state);
-		break;
-	case mode::officers:
-		prov_color = officers_map_from(state);
-		break;
-	case mode::mobilization:
-		prov_color = mobilization_map_from(state);
-		break;
-	case mode::workforce:
-		prov_color = workforce_map_from(state);
-		break;
-	default:
-		return;
-	}
-
-	if(mode == mode::political) {
-		uint32_t province_size = state.world.province_size();
-		uint32_t texture_size = province_size + 256 - province_size % 256;
-		// colour the battle planner
-		for(const auto& group : state.army_groups) {
-			for(const auto p : group.defensive_line) {
-				auto i = province::to_map_id(p);
-				prov_color[i + texture_size] = sys::pack_color(255, 128, 128);
+		if(mode == mode::civilization_level) {
+			if(!state.ui_state.map_civ_level_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_civ_level>(state, "alice_map_legend_civ_level");
+				state.ui_state.map_civ_level_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
 			}
-			auto i = province::to_map_id(group.hq);
-			prov_color[i + texture_size] = sys::pack_color(128, 128, 255);
+			state.ui_state.map_civ_level_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_civ_level_legend)
+			state.ui_state.map_civ_level_legend->set_visible(state, false);
 		}
-	}
-	state.map_state.set_province_color(prov_color, mode);
-}
+		if(mode == mode::colonial) {
+			if(!state.ui_state.map_col_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_col>(state, "alice_map_legend_colonial");
+				state.ui_state.map_col_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_col_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_col_legend)
+			state.ui_state.map_col_legend->set_visible(state, false);
+		}
+		if(mode == mode::diplomatic) {
+			if(!state.ui_state.map_dip_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_dip>(state, "alice_map_legend_diplomatic");
+				state.ui_state.map_dip_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_dip_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_dip_legend)
+			state.ui_state.map_dip_legend->set_visible(state, false);
+		}
+		if(mode == mode::infrastructure || mode == mode::fort) {
+			if(!state.ui_state.map_rr_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_rr>(state, "alice_map_legend_infrastructure");
+				state.ui_state.map_rr_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_rr_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_rr_legend)
+			state.ui_state.map_rr_legend->set_visible(state, false);
+		}
+		if(mode == mode::naval) {
+			if(!state.ui_state.map_nav_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_nav>(state, "alice_map_legend_naval");
+				state.ui_state.map_nav_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_nav_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_nav_legend)
+			state.ui_state.map_nav_legend->set_visible(state, false);
+		}
+		if(mode == mode::rank) {
+			if(!state.ui_state.map_rank_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_rank>(state, "alice_map_legend_rank");
+				state.ui_state.map_rank_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_rank_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_rank_legend)
+			state.ui_state.map_rank_legend->set_visible(state, false);
+		}
+		if(mode == mode::recruitment) {
+			if(!state.ui_state.map_rec_legend) {
+				auto legend_win = ui::make_element_by_type<ui::map_legend_rec>(state, "alice_map_legend_rec");
+				state.ui_state.map_rec_legend = legend_win.get();
+				state.ui_state.root->add_child_to_front(std::move(legend_win));
+			}
+			state.ui_state.map_rec_legend->set_visible(state, true);
+		} else {
+			if(state.ui_state.map_rec_legend)
+			state.ui_state.map_rec_legend->set_visible(state, false);
+		}
 
-void update_map_mode(sys::state& state) {
-	if(state.map_state.active_map_mode == mode::terrain || state.map_state.active_map_mode == mode::region) {
-		return;
+		switch(mode) {
+			case mode::state_select:
+			prov_color = select_states_map_from(state);
+			break;
+			case mode::terrain:
+			state.map_state.set_terrain_map_mode();
+			return;
+			case mode::political:
+			prov_color = political_map_from(state);
+			break;
+			case mode::region:
+			prov_color = region_map_from(state);
+			break;
+			case mode::population:
+			prov_color = population_map_from(state);
+			break;
+			case mode::nationality:
+			prov_color = nationality_map_from(state);
+			break;
+			case mode::sphere:
+			prov_color = sphere_map_from(state);
+			break;
+			case mode::diplomatic:
+			prov_color = diplomatic_map_from(state);
+			break;
+			case mode::rank:
+			prov_color = rank_map_from(state);
+			break;
+			case mode::recruitment:
+			prov_color = recruitment_map_from(state);
+			break;
+			case mode::supply:
+			prov_color = supply_map_from(state);
+			break;
+			case mode::relation:
+			prov_color = relation_map_from(state);
+			break;
+			case mode::civilization_level:
+			prov_color = civilization_level_map_from(state);
+			break;
+			case mode::migration:
+			prov_color = migration_map_from(state);
+			break;
+			case mode::infrastructure:
+			prov_color = infrastructure_map_from(state);
+			break;
+			case mode::revolt:
+			prov_color = revolt_map_from(state);
+			break;
+			case mode::party_loyalty:
+			prov_color = party_loyalty_map_from(state);
+			break;
+			case mode::admin:
+			prov_color = admin_map_from(state);
+			break;
+			case mode::naval:
+			prov_color = naval_map_from(state);
+			break;
+			case mode::national_focus:
+			prov_color = national_focus_map_from(state);
+			break;
+			case mode::crisis:
+			prov_color = crisis_map_from(state);
+			break;
+			case mode::colonial:
+			prov_color = colonial_map_from(state);
+			break;
+			case mode::rgo_output:
+			prov_color = rgo_output_map_from(state);
+			break;
+			case mode::religion:
+			prov_color = religion_map_from(state);
+			break;
+			case mode::issues:
+			prov_color = issue_map_from(state);
+			break;
+			case mode::ideology:
+			prov_color = ideology_map_from(state);
+			break;
+			case mode::fort:
+			prov_color = fort_map_from(state);
+			break;
+			case mode::income:
+			prov_color = income_map_from(state);
+			break;
+			case mode::conciousness:
+			prov_color = con_map_from(state);
+			break;
+			case mode::militancy:
+			prov_color = militancy_map_from(state);
+			break;
+			case mode::literacy:
+			prov_color = literacy_map_from(state);
+			break;
+			case mode::employment:
+			prov_color = employment_map_from(state);
+			break;
+			case mode::factories:
+			prov_color = factory_map_from(state);
+			break;
+			case mode::growth:
+			prov_color = growth_map_from(state);
+			break;
+			//even newer mapmodes
+			case mode::players:
+			prov_color = players_map_from(state);
+			break;
+			case mode::life_needs:
+			prov_color = life_needs_map_from(state);
+			break;
+			case mode::everyday_needs:
+			prov_color = everyday_needs_map_from(state);
+			break;
+			case mode::luxury_needs:
+			prov_color = luxury_needs_map_from(state);
+			break;
+			case mode::life_rating:
+			prov_color = life_rating_map_from(state);
+			break;
+			case mode::clerk_to_craftsmen_ratio:
+			prov_color = ctc_map_from(state);
+			break;
+			case mode::crime:
+			prov_color = crime_map_from(state);
+			break;
+			case mode::rally:
+			prov_color = rally_map_from(state);
+			break;
+			case mode::officers:
+			prov_color = officers_map_from(state);
+			break;
+			case mode::mobilization:
+			prov_color = mobilization_map_from(state);
+			break;
+			case mode::workforce:
+			prov_color = workforce_map_from(state);
+			break;
+			default:
+			return;
+		}
+
+		if(mode == mode::political) {
+			uint32_t province_size = state.world.province_size();
+			uint32_t texture_size = province_size + 256 - province_size % 256;
+			// colour the battle planner
+			for(const auto& group : state.army_groups) {
+				for(const auto p : group.defensive_line) {
+					auto i = province::to_map_id(p);
+					prov_color[i + texture_size] = sys::pack_color(255, 128, 128);
+				}
+				auto i = province::to_map_id(group.hq);
+				prov_color[i + texture_size] = sys::pack_color(128, 128, 255);
+			}
+		}
+		state.map_state.set_province_color(prov_color, mode);
 	}
-	set_map_mode(state, state.map_state.active_map_mode);
-}
+
+	void update_map_mode(sys::state& state) {
+		if(state.map_state.active_map_mode == mode::terrain || state.map_state.active_map_mode == mode::region) {
+			return;
+		}
+		set_map_mode(state, state.map_state.active_map_mode);
+	}
 } // namespace map_mode

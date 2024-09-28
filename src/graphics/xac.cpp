@@ -269,713 +269,713 @@ chunk CA: bone animation (v2)
 */
 
 namespace emfx {
-const char* parse_xac_cstring(const char* start, const char* end, parsers::error_handler& err) {
-	auto const len = parse_xac_any_binary<uint32_t>(&start, end, err);
-	return start + len;
-}
-
-const char* parse_xac_cstring_nodiscard(std::string& out, const char* start, const char* end, parsers::error_handler& err) {
-	auto const len = parse_xac_any_binary<uint32_t>(&start, end, err);
-	if(len >= 0xffff) {
-		err.accumulated_errors += "Invalid string size (" + std::to_string(len) + ")\n";
+	const char* parse_xac_cstring(const char* start, const char* end, parsers::error_handler& err) {
+		auto const len = parse_xac_any_binary<uint32_t>(&start, end, err);
 		return start + len;
 	}
-	out.resize(size_t(len), '\0');
-	std::memcpy(&out[0], start, size_t(len));
-	out[len] = '\0';
-	return start + len;
-}
 
-const char* parse_xac_metadata_v2(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	auto const mh = parse_xac_any_binary<xac_metadata_chunk_header>(&start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("program-name=%s\n", start + 4);
-#endif
-	start = parse_xac_cstring(start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("workspace-folder-name=%s\n", start + 4);
-#endif
-	start = parse_xac_cstring(start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("edition-or-creation-date=%s\n", start + 4);
-#endif
-	start = parse_xac_cstring(start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("name-of-the-model=%s\n", start + 4);
-#endif
-	start = parse_xac_cstring(start, end, err);
-	return start;
-}
-
-const char* parse_xac_material_block_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	auto const mh = parse_xac_any_binary<xac_material_block_v1_chunk_header>(&start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("NumStd=%u,NumFx=%u\n", mh.num_standard_materials, mh.num_fx_materials);
-#endif
-	context.max_standard_materials = mh.num_standard_materials;
-	context.max_fx_materials = mh.num_fx_materials;
-	return start;
-}
-
-const char* parse_xac_material_v2(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	auto const mh = parse_xac_any_binary<xac_material_v2_chunk_header>(&start, end, err);
-	std::string name = "";
-	start = parse_xac_cstring_nodiscard(name, start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("Name=%s,NumLayers=%u,sz=%zu\n", name.c_str(), mh.num_layers, sizeof(xac_material_v2_chunk_header));
-#endif
-	xac_pp_actor_material mat;
-	mat.ambient_color = mh.ambient_color;
-	mat.diffuse_color = mh.diffuse_color;
-	mat.double_sided = mh.double_sided;
-	mat.emissive_color = mh.emissive_color;
-	mat.ior = mh.ior;
-	mat.opacity = mh.opacity;
-	mat.shine = mh.shine;
-	mat.shine_strength = mh.shine_strength;
-	mat.specular_color = mh.specular_color;
-	mat.wireframe = mh.wireframe;
-	mat.name = name;
-	for(uint8_t i = 0; i < mh.num_layers; ++i) {
-		auto const mlh = parse_xac_any_binary<xac_material_layer_v2_header>(&start, end, err);
-		std::string layer_name = "";
-		start = parse_xac_cstring_nodiscard(layer_name, start, end, err);
-#ifdef XAC_DEBUG
-		std::printf("Name=%s,sz=%zu+%zu,MapType=%u\n", name.c_str(), sizeof(xac_material_layer_v2_header), name.size(), mlh.map_type);
-#endif
-		xac_pp_actor_material_layer layer;
-		layer.amount = mlh.amount;
-		layer.u_offset = mlh.u_offset;
-		layer.v_offset = mlh.v_offset;
-		layer.u_tiling = mlh.u_tiling;
-		layer.v_tiling = mlh.v_tiling;
-		layer.rotation = mlh.rotation;
-		layer.material_id = mlh.material_id;
-		layer.map_type = xac_pp_material_map_type(mlh.map_type);
-		layer.texture = layer_name;
-		mat.layers.push_back(layer);
+	const char* parse_xac_cstring_nodiscard(std::string& out, const char* start, const char* end, parsers::error_handler& err) {
+		auto const len = parse_xac_any_binary<uint32_t>(&start, end, err);
+		if(len >= 0xffff) {
+			err.accumulated_errors += "Invalid string size (" + std::to_string(len) + ")\n";
+			return start + len;
+		}
+		out.resize(size_t(len), '\0');
+		std::memcpy(&out[0], start, size_t(len));
+		out[len] = '\0';
+		return start + len;
 	}
-	context.materials.push_back(mat);
-	if(context.materials.size() > context.max_standard_materials) {
-		err.accumulated_errors += "File reports maximum standard materials = " + std::to_string(context.max_standard_materials) + ", but the file defines more materials than that on " + err.file_name + "\n";
-	}
-	// Length does NOT align with the true size of the chunk!
-	context.ignore_length = true;
-	return start;
-}
 
-const char* parse_xac_node_hierachy_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	auto const ch = parse_xac_any_binary<xac_node_hierachy_v1_chunk_header>(&start, end, err);
-	if(int32_t(ch.num_nodes) <= 0) {
-		err.accumulated_errors += "Unexpected number of nodes (on NodeHierachy) on " + err.file_name + "\n";
+	const char* parse_xac_metadata_v2(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		auto const mh = parse_xac_any_binary<xac_metadata_chunk_header>(&start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("program-name=%s\n", start + 4);
+		#endif
+		start = parse_xac_cstring(start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("workspace-folder-name=%s\n", start + 4);
+		#endif
+		start = parse_xac_cstring(start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("edition-or-creation-date=%s\n", start + 4);
+		#endif
+		start = parse_xac_cstring(start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("name-of-the-model=%s\n", start + 4);
+		#endif
+		start = parse_xac_cstring(start, end, err);
 		return start;
 	}
-	if(int32_t(ch.num_root_nodes) <= 0) {
-		err.accumulated_errors += "Unexpected number of RootNodes (on NodeHierachy) on " + err.file_name + "\n";
+
+	const char* parse_xac_material_block_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		auto const mh = parse_xac_any_binary<xac_material_block_v1_chunk_header>(&start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("NumStd=%u,NumFx=%u\n", mh.num_standard_materials, mh.num_fx_materials);
+		#endif
+		context.max_standard_materials = mh.num_standard_materials;
+		context.max_fx_materials = mh.num_fx_materials;
 		return start;
 	}
-	for(uint32_t i = 0; i < ch.num_nodes; i++) {
-		auto const mh = parse_xac_any_binary<xac_node_hierachy_v1_node_header>(&start, end, err);
+
+	const char* parse_xac_material_v2(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		auto const mh = parse_xac_any_binary<xac_material_v2_chunk_header>(&start, end, err);
 		std::string name = "";
 		start = parse_xac_cstring_nodiscard(name, start, end, err);
-#ifdef XAC_DEBUG
-		std::printf(">(Id=%u),Name=%s,IIBC=%x,Imp=%f,ParentId=%i,NumChild=%u,Unk=%x,%x\n", i, name.c_str(), mh.include_in_bounds_calc, mh.importance_factor, mh.parent_id, mh.num_children, mh.unknown[0], mh.unknown[1]);
-#endif
-		xac_pp_actor_node node;
-		node.name = name;
-		node.position = mh.position;
-		node.position.x = -node.position.x; //OpenGL fixup
-		node.rotation = mh.rotation;
-		node.scale_rotation = mh.scale_rotation;
-		node.scale = mh.scale;
-		node.transform = mh.transform;
-		node.parent_id = mh.parent_id;
-		if(mh.parent_id == -1) {
-			context.root_nodes.push_back(node);
+		#ifdef XAC_DEBUG
+		std::printf("Name=%s,NumLayers=%u,sz=%zu\n", name.c_str(), mh.num_layers, sizeof(xac_material_v2_chunk_header));
+		#endif
+		xac_pp_actor_material mat;
+		mat.ambient_color = mh.ambient_color;
+		mat.diffuse_color = mh.diffuse_color;
+		mat.double_sided = mh.double_sided;
+		mat.emissive_color = mh.emissive_color;
+		mat.ior = mh.ior;
+		mat.opacity = mh.opacity;
+		mat.shine = mh.shine;
+		mat.shine_strength = mh.shine_strength;
+		mat.specular_color = mh.specular_color;
+		mat.wireframe = mh.wireframe;
+		mat.name = name;
+		for(uint8_t i = 0; i < mh.num_layers; ++i) {
+			auto const mlh = parse_xac_any_binary<xac_material_layer_v2_header>(&start, end, err);
+			std::string layer_name = "";
+			start = parse_xac_cstring_nodiscard(layer_name, start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf("Name=%s,sz=%zu+%zu,MapType=%u\n", name.c_str(), sizeof(xac_material_layer_v2_header), name.size(), mlh.map_type);
+			#endif
+			xac_pp_actor_material_layer layer;
+			layer.amount = mlh.amount;
+			layer.u_offset = mlh.u_offset;
+			layer.v_offset = mlh.v_offset;
+			layer.u_tiling = mlh.u_tiling;
+			layer.v_tiling = mlh.v_tiling;
+			layer.rotation = mlh.rotation;
+			layer.material_id = mlh.material_id;
+			layer.map_type = xac_pp_material_map_type(mlh.map_type);
+			layer.texture = layer_name;
+			mat.layers.push_back(layer);
+		}
+		context.materials.push_back(mat);
+		if(context.materials.size() > context.max_standard_materials) {
+			err.accumulated_errors += "File reports maximum standard materials = " + std::to_string(context.max_standard_materials) + ", but the file defines more materials than that on " + err.file_name + "\n";
+		}
+		// Length does NOT align with the true size of the chunk!
+		context.ignore_length = true;
+		return start;
+	}
+
+	const char* parse_xac_node_hierachy_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		auto const ch = parse_xac_any_binary<xac_node_hierachy_v1_chunk_header>(&start, end, err);
+		if(int32_t(ch.num_nodes) <= 0) {
+			err.accumulated_errors += "Unexpected number of nodes (on NodeHierachy) on " + err.file_name + "\n";
+			return start;
+		}
+		if(int32_t(ch.num_root_nodes) <= 0) {
+			err.accumulated_errors += "Unexpected number of RootNodes (on NodeHierachy) on " + err.file_name + "\n";
+			return start;
+		}
+		for(uint32_t i = 0; i < ch.num_nodes; i++) {
+			auto const mh = parse_xac_any_binary<xac_node_hierachy_v1_node_header>(&start, end, err);
+			std::string name = "";
+			start = parse_xac_cstring_nodiscard(name, start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf(">(Id=%u),Name=%s,IIBC=%x,Imp=%f,ParentId=%i,NumChild=%u,Unk=%x,%x\n", i, name.c_str(), mh.include_in_bounds_calc, mh.importance_factor, mh.parent_id, mh.num_children, mh.unknown[0], mh.unknown[1]);
+			#endif
+			xac_pp_actor_node node;
+			node.name = name;
+			node.position = mh.position;
+			node.position.x = -node.position.x; //OpenGL fixup
+			node.rotation = mh.rotation;
+			node.scale_rotation = mh.scale_rotation;
+			node.scale = mh.scale;
+			node.transform = mh.transform;
+			node.parent_id = mh.parent_id;
+			if(mh.parent_id == -1) {
+				context.root_nodes.push_back(node);
+			} else {
+				if(size_t(mh.parent_id) >= context.nodes.size()) {
+					err.accumulated_errors += "Specified actor node " + node.name + " before parent " + err.file_name + "\n";
+					return start;
+				}
+			}
+			context.nodes.push_back(node);
+		}
+		return start;
+	}
+
+	const char* parse_xac_mesh_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		auto const cd = parse_xac_any_binary<xac_mesh_v1_chunk_header>(&start, end, err);
+		if(cd.node_id >= int32_t(context.nodes.size())) {
+			err.accumulated_errors += "Object references OOB node (" + err.file_name + ")\n";
+			return start;
+		}
+		#ifdef XAC_DEBUG
+		std::printf("N-AttribLayers=%u\n", cd.num_attribute_layers);
+		std::printf("IsCollision=%u,Pad=%u,%u,%u\n", cd.is_collision_mesh, cd.unused[0], cd.unused[1], cd.unused[2]);
+		#endif
+		// Parse vertex blocks
+	xac_pp_actor_mesh obj{};
+		obj.influence_starts.resize(size_t(cd.num_influence_ranges), 0);
+		obj.influence_counts.resize(size_t(cd.num_influence_ranges), 0);
+		for(uint32_t i = 0; i < cd.num_attribute_layers; ++i) {
+			auto const vbh = parse_xac_any_binary<xac_vertex_block_v1_header>(&start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf("T=%u,AttribSize=%u,NumVertices=%u,IsKeep=%u,IsScale=%u\n", vbh.ident, vbh.size, cd.num_vertices, vbh.keep_original, vbh.is_scale_factor);
+			#endif
+			for(uint32_t j = 0; j < cd.num_vertices; ++j) {
+				switch(xac_vertex_block_v1_type(vbh.ident)) {
+					case xac_vertex_block_v1_type::normal:
+					if(vbh.size != sizeof(xac_vector3f)) {
+						err.accumulated_errors += "Attribute size doesn't match! [normal] (" + err.file_name + ")\n";
+						start += vbh.size;
+					} else {
+						auto normal = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+						normal.x = -normal.x;
+						obj.normals.push_back(normal);
+					}
+					break;
+					case xac_vertex_block_v1_type::vertex:
+					if(vbh.size != sizeof(xac_vector3f)) {
+						err.accumulated_errors += "Attribute size doesn't match! [vertex] (" + err.file_name + ")\n";
+						start += vbh.size;
+					} else {
+						auto vertex = parse_xac_any_binary<xac_vector3f>(&start, end, err);
+						vertex.x = -vertex.x;
+						obj.vertices.push_back(vertex);
+					}
+					break;
+					case xac_vertex_block_v1_type::texcoord:
+					if(vbh.size != sizeof(xac_vector2f)) {
+						err.accumulated_errors += "Attribute size doesn't match! [texcoord] (" + err.file_name + ")\n";
+						start += vbh.size;
+					} else {
+						auto const texcoord = parse_xac_any_binary<xac_vector2f>(&start, end, err);
+						obj.texcoords.push_back(texcoord);
+					}
+					break;
+					case xac_vertex_block_v1_type::weight:
+					if(vbh.size != sizeof(xac_vector4f)) {
+						err.accumulated_errors += "Attribute size doesn't match! [weight] (" + err.file_name + ")\n";
+						start += vbh.size;
+					} else {
+						auto const weight = parse_xac_any_binary<xac_vector4f>(&start, end, err);
+						obj.weights.push_back(weight);
+					}
+					break;
+					case xac_vertex_block_v1_type::influence_indices:
+					if(vbh.size != sizeof(uint32_t)) {
+						err.accumulated_errors += "Attribute size doesn't match! [influenceRange] (" + err.file_name + ")\n";
+						start += vbh.size;
+					} else {
+						auto const influence_index = parse_xac_any_binary<uint32_t>(&start, end, err);
+						obj.influence_indices.push_back(influence_index);
+					}
+					break;
+					default:
+					err.accumulated_warnings += "Unknown vertex block type " + std::to_string(vbh.ident) + " on " + err.file_name + "\n";
+					start += vbh.size;
+					break;
+				}
+			}
+		}
+		uint32_t vertex_offset = 0;
+		for(uint32_t i = 0; i < cd.num_sub_meshes; i++) {
+			auto const smh = parse_xac_any_binary<xac_submesh_v1_header>(&start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf("SubObj,NumInd=%u,NumVert=%u,NumBone=%u\n", smh.num_indices, smh.num_vertices, smh.num_bones);
+			#endif
+			if((int32_t(smh.num_indices) % 3) != 0) {
+				err.accumulated_warnings += "Indices not divisible by 3 " + std::to_string(smh.num_indices) + " (" + err.file_name + ")\n";
+			}
+			if(int32_t(smh.num_indices) < 0) {
+				err.accumulated_warnings += "Invalid number of indices " + std::to_string(smh.num_indices) + " (" + err.file_name + ")\n";
+			}
+			if(int32_t(smh.num_bones) < 0) {
+				err.accumulated_warnings += "Invalid number of bones " + std::to_string(smh.num_bones) + " (" + err.file_name + ")\n";
+			}
+		xac_pp_actor_submesh sub{};
+			sub.material_id = smh.material_id;
+			sub.num_vertices = smh.num_vertices;
+			sub.vertex_offset = vertex_offset;
+			for(uint32_t j = 0; j < smh.num_indices; j++) {
+				auto index = parse_xac_any_binary<uint32_t>(&start, end, err);
+				if(index >= smh.num_vertices) {
+					err.accumulated_warnings += "submeshes index oob " + std::to_string(int32_t(index)) + " (" + err.file_name + ")\n";
+				}
+				sub.indices.push_back(index);
+			}
+			for(uint32_t j = 0; j < smh.num_bones; j++) {
+				auto index = parse_xac_any_binary<uint32_t>(&start, end, err);
+				sub.bone_ids.push_back(index);
+			}
+			obj.submeshes.push_back(sub);
+			vertex_offset += smh.num_vertices;
+		}
+		auto& node = context.nodes[cd.node_id];
+		if(cd.is_collision_mesh) {
+			if(node.collision_mesh >= 0)
+			err.accumulated_errors += "More than 1 collision object (" + err.file_name + ")\n";
+			//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
+			node.collision_mesh = int32_t(node.meshes.size());
 		} else {
-			if(size_t(mh.parent_id) >= context.nodes.size()) {
-				err.accumulated_errors += "Specified actor node " + node.name + " before parent " + err.file_name + "\n";
+			if(node.visual_mesh >= 0)
+			err.accumulated_errors += "More than 1 visual object (" + err.file_name + ")\n";
+			//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
+			node.visual_mesh = int32_t(node.meshes.size());
+		}
+		//
+		if(vertex_offset != cd.num_vertices) {
+			err.accumulated_warnings += "Object total meshes doesn't add up to subojects " + std::to_string(vertex_offset) + " != " + std::to_string(cd.num_vertices) + " (" + err.file_name + ")\n";
+		}
+		node.meshes.push_back(obj);
+		return start;
+	}
+
+	const char* parse_xac_skinning_v3(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		/*
+		Influence indices indexes into the (influence starts and counts) arrays, as in:
+		start = influence_start[influence_indice[vertex_id]]
+		then the influence start and count determines the range/span into the influences array
+		influences[start:start + count] -> our influences for this vertice
+
+		This amounts to the set of a weight and a node id (bone id), the bone id corresponds to a node
+		so this means nodes can be used to manipulate elements only.
+
+		For example, "UniversalManip" can be a node with no vertices, but with defined influences into a
+		visible, polygonal node (that has visible polygonal meshes).
+		*/
+		auto const sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&start, end, err);
+		#ifdef XAC_DEBUG
+		std::printf("NInfluences=%u\n", sh.num_influences);
+		#endif
+		std::vector<xac_skinning_v3_influence_entry> influence_data;
+		for(uint32_t i = 0; i < sh.num_influences; i++) {
+			auto influence = parse_xac_any_binary<xac_skinning_v3_influence_entry>(&start, end, err);
+			assert(influence.weight >= 0.f && influence.weight <= 1.f);
+			assert(influence.bone_id != -1);
+			influence_data.push_back(influence);
+		}
+		if(sh.node_id >= int32_t(context.nodes.size())) {
+			err.accumulated_errors += "Referencing a node in bone data which is OOB (" + err.file_name + ")\n";
+			return start;
+		} else if(sh.node_id < 0) {
+			err.accumulated_errors += "Bone with no associated node (" + err.file_name + ")\n";
+			return start;
+		}
+		//
+		auto& node = context.nodes[sh.node_id];
+		if(sh.is_for_collision_mesh) {
+			if(node.collision_mesh >= 0) {
+				auto& obj = node.meshes[node.collision_mesh];
+				for(const auto& influence : influence_data) {
+				xac_pp_bone_influence bone_influence{};
+					bone_influence.weight = influence.weight;
+					bone_influence.bone_id = influence.bone_id;
+					obj.influences.push_back(bone_influence);
+				}
+				for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
+					auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
+					obj.influence_starts[i] = range.first_influence_index;
+					obj.influence_counts[i] = range.num_influences;
+					assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
+					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
+				}
+			} else {
+				err.accumulated_errors += "Collision mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
+				return start;
+			}
+		} else {
+			if(node.visual_mesh >= 0) {
+				auto& obj = node.meshes[node.visual_mesh];
+				for(const auto& influence : influence_data) {
+				xac_pp_bone_influence bone_influence{};
+					bone_influence.weight = influence.weight;
+					bone_influence.bone_id = influence.bone_id;
+					obj.influences.push_back(bone_influence);
+				}
+				for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
+					auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
+					obj.influence_starts[i] = range.first_influence_index;
+					obj.influence_counts[i] = range.num_influences;
+					assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
+					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
+				}
+			} else {
+				err.accumulated_errors += "Visual mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
 				return start;
 			}
 		}
-		context.nodes.push_back(node);
-	}
-	return start;
-}
-
-const char* parse_xac_mesh_v1(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	auto const cd = parse_xac_any_binary<xac_mesh_v1_chunk_header>(&start, end, err);
-	if(cd.node_id >= int32_t(context.nodes.size())) {
-		err.accumulated_errors += "Object references OOB node (" + err.file_name + ")\n";
 		return start;
 	}
-#ifdef XAC_DEBUG
-	std::printf("N-AttribLayers=%u\n", cd.num_attribute_layers);
-	std::printf("IsCollision=%u,Pad=%u,%u,%u\n", cd.is_collision_mesh, cd.unused[0], cd.unused[1], cd.unused[2]);
-#endif
-	// Parse vertex blocks
-	xac_pp_actor_mesh obj{};
-	obj.influence_starts.resize(size_t(cd.num_influence_ranges), 0);
-	obj.influence_counts.resize(size_t(cd.num_influence_ranges), 0);
-	for(uint32_t i = 0; i < cd.num_attribute_layers; ++i) {
-		auto const vbh = parse_xac_any_binary<xac_vertex_block_v1_header>(&start, end, err);
-#ifdef XAC_DEBUG
-		std::printf("T=%u,AttribSize=%u,NumVertices=%u,IsKeep=%u,IsScale=%u\n", vbh.ident, vbh.size, cd.num_vertices, vbh.keep_original, vbh.is_scale_factor);
-#endif
-		for(uint32_t j = 0; j < cd.num_vertices; ++j) {
-			switch(xac_vertex_block_v1_type(vbh.ident)) {
-			case xac_vertex_block_v1_type::normal:
-				if(vbh.size != sizeof(xac_vector3f)) {
-					err.accumulated_errors += "Attribute size doesn't match! [normal] (" + err.file_name + ")\n";
-					start += vbh.size;
-				} else {
-					auto normal = parse_xac_any_binary<xac_vector3f>(&start, end, err);
-					normal.x = -normal.x;
-					obj.normals.push_back(normal);
-				}
-				break;
-			case xac_vertex_block_v1_type::vertex:
-				if(vbh.size != sizeof(xac_vector3f)) {
-					err.accumulated_errors += "Attribute size doesn't match! [vertex] (" + err.file_name + ")\n";
-					start += vbh.size;
-				} else {
-					auto vertex = parse_xac_any_binary<xac_vector3f>(&start, end, err);
-					vertex.x = -vertex.x;
-					obj.vertices.push_back(vertex);
-				}
-				break;
-			case xac_vertex_block_v1_type::texcoord:
-				if(vbh.size != sizeof(xac_vector2f)) {
-					err.accumulated_errors += "Attribute size doesn't match! [texcoord] (" + err.file_name + ")\n";
-					start += vbh.size;
-				} else {
-					auto const texcoord = parse_xac_any_binary<xac_vector2f>(&start, end, err);
-					obj.texcoords.push_back(texcoord);
-				}
-				break;
-			case xac_vertex_block_v1_type::weight:
-				if(vbh.size != sizeof(xac_vector4f)) {
-					err.accumulated_errors += "Attribute size doesn't match! [weight] (" + err.file_name + ")\n";
-					start += vbh.size;
-				} else {
-					auto const weight = parse_xac_any_binary<xac_vector4f>(&start, end, err);
-					obj.weights.push_back(weight);
-				}
-				break;
-			case xac_vertex_block_v1_type::influence_indices:
-				if(vbh.size != sizeof(uint32_t)) {
-					err.accumulated_errors += "Attribute size doesn't match! [influenceRange] (" + err.file_name + ")\n";
-					start += vbh.size;
-				} else {
-					auto const influence_index = parse_xac_any_binary<uint32_t>(&start, end, err);
-					obj.influence_indices.push_back(influence_index);
-				}
-				break;
-			default:
-				err.accumulated_warnings += "Unknown vertex block type " + std::to_string(vbh.ident) + " on " + err.file_name + "\n";
-				start += vbh.size;
-				break;
-			}
-		}
-	}
-	uint32_t vertex_offset = 0;
-	for(uint32_t i = 0; i < cd.num_sub_meshes; i++) {
-		auto const smh = parse_xac_any_binary<xac_submesh_v1_header>(&start, end, err);
-#ifdef XAC_DEBUG
-		std::printf("SubObj,NumInd=%u,NumVert=%u,NumBone=%u\n", smh.num_indices, smh.num_vertices, smh.num_bones);
-#endif
-		if((int32_t(smh.num_indices) % 3) != 0) {
-			err.accumulated_warnings += "Indices not divisible by 3 " + std::to_string(smh.num_indices) + " (" + err.file_name + ")\n";
-		}
-		if(int32_t(smh.num_indices) < 0) {
-			err.accumulated_warnings += "Invalid number of indices " + std::to_string(smh.num_indices) + " (" + err.file_name + ")\n";
-		}
-		if(int32_t(smh.num_bones) < 0) {
-			err.accumulated_warnings += "Invalid number of bones " + std::to_string(smh.num_bones) + " (" + err.file_name + ")\n";
-		}
-		xac_pp_actor_submesh sub{};
-		sub.material_id = smh.material_id;
-		sub.num_vertices = smh.num_vertices;
-		sub.vertex_offset = vertex_offset;
-		for(uint32_t j = 0; j < smh.num_indices; j++) {
-			auto index = parse_xac_any_binary<uint32_t>(&start, end, err);
-			if(index >= smh.num_vertices) {
-				err.accumulated_warnings += "submeshes index oob " + std::to_string(int32_t(index)) + " (" + err.file_name + ")\n";
-			}
-			sub.indices.push_back(index);
-		}
-		for(uint32_t j = 0; j < smh.num_bones; j++) {
-			auto index = parse_xac_any_binary<uint32_t>(&start, end, err);
-			sub.bone_ids.push_back(index);
-		}
-		obj.submeshes.push_back(sub);
-		vertex_offset += smh.num_vertices;
-	}
-	auto& node = context.nodes[cd.node_id];
-	if(cd.is_collision_mesh) {
-		if(node.collision_mesh >= 0)
-			err.accumulated_errors += "More than 1 collision object (" + err.file_name + ")\n";
-		//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
-		node.collision_mesh = int32_t(node.meshes.size());
-	} else {
-		if(node.visual_mesh >= 0)
-			err.accumulated_errors += "More than 1 visual object (" + err.file_name + ")\n";
-		//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
-		node.visual_mesh = int32_t(node.meshes.size());
-	}
-	//
-	if(vertex_offset != cd.num_vertices) {
-		err.accumulated_warnings += "Object total meshes doesn't add up to subojects " + std::to_string(vertex_offset) + " != " + std::to_string(cd.num_vertices) + " (" + err.file_name + ")\n";
-	}
-	node.meshes.push_back(obj);
-	return start;
-}
 
-const char* parse_xac_skinning_v3(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	/*
-	Influence indices indexes into the (influence starts and counts) arrays, as in:
-	start = influence_start[influence_indice[vertex_id]]
-	then the influence start and count determines the range/span into the influences array
-	influences[start:start + count] -> our influences for this vertice
-
-	This amounts to the set of a weight and a node id (bone id), the bone id corresponds to a node
-	so this means nodes can be used to manipulate elements only.
-
-	For example, "UniversalManip" can be a node with no vertices, but with defined influences into a
-	visible, polygonal node (that has visible polygonal meshes).
-	*/
-	auto const sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&start, end, err);
-#ifdef XAC_DEBUG
-	std::printf("NInfluences=%u\n", sh.num_influences);
-#endif
-	std::vector<xac_skinning_v3_influence_entry> influence_data;
-	for(uint32_t i = 0; i < sh.num_influences; i++) {
-		auto influence = parse_xac_any_binary<xac_skinning_v3_influence_entry>(&start, end, err);
-		assert(influence.weight >= 0.f && influence.weight <= 1.f);
-		assert(influence.bone_id != -1);
-		influence_data.push_back(influence);
-	}
-	if(sh.node_id >= int32_t(context.nodes.size())) {
-		err.accumulated_errors += "Referencing a node in bone data which is OOB (" + err.file_name + ")\n";
-		return start;
-	} else if(sh.node_id < 0) {
-		err.accumulated_errors += "Bone with no associated node (" + err.file_name + ")\n";
-		return start;
-	}
-	//
-	auto& node = context.nodes[sh.node_id];
-	if(sh.is_for_collision_mesh) {
-		if(node.collision_mesh >= 0) {
-			auto& obj = node.meshes[node.collision_mesh];
-			for(const auto& influence : influence_data) {
-				xac_pp_bone_influence bone_influence{};
-				bone_influence.weight = influence.weight;
-				bone_influence.bone_id = influence.bone_id;
-				obj.influences.push_back(bone_influence);
+	void parse_xac(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		const char* file_start = start;
+		auto const h = parse_xac_any_binary<xac_header>(&start, end, err);
+		if(h.ident[0] != uint8_t('X') || h.ident[1] != uint8_t('A') || h.ident[2] != uint8_t('C') || h.ident[3] != uint8_t(' ')) {
+			err.accumulated_errors += "Invalid XAC identifier on " + err.file_name + "\n";
+			return;
+		}
+		#ifdef XAC_DEBUG
+		std::printf("XacFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
+		#endif
+		while(start < end) {
+			auto const ch = parse_xac_any_binary<xac_chunk_header>(&start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
+			#endif
+			context.ignore_length = false; // Reset
+			const char* expected = start + ch.len;
+			switch(xac_chunk_type(ch.ident)) {
+				case xac_chunk_type::mesh:
+				if(ch.version == 1) {
+					start = parse_xac_mesh_v1(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+				}
+				break;
+				case xac_chunk_type::metadata:
+				if(ch.version == 2) {
+					start = parse_xac_metadata_v2(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+				}
+				break;
+				case xac_chunk_type::material_block:
+				if(ch.version == 1) {
+					start = parse_xac_material_block_v1(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+				}
+				break;
+				case xac_chunk_type::material_3:
+				if(ch.version == 2) {
+					start = parse_xac_material_v2(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+				}
+				break;
+				case xac_chunk_type::node_hierachy:
+				{
+					if(ch.version == 1) {
+						start = parse_xac_node_hierachy_v1(context, start, end, err);
+					} else {
+						err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+					}
+					break;
+					case xac_chunk_type::skinning:
+					if(ch.version == 3) {
+						start = parse_xac_skinning_v3(context, start, end, err);
+					} else {
+						err.accumulated_errors += "Unsupported version (" + err.file_name + ")\n";
+					}
+					break;
+				}
+				default:
+				#ifdef XAC_DEBUG
+				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
+				#endif
+				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
+				start += ch.len;
+				break;
 			}
-			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
-				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
-				obj.influence_starts[i] = range.first_influence_index;
-				obj.influence_counts[i] = range.num_influences;
-				assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
-					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
+			if(!context.ignore_length && start != expected) {
+				err.accumulated_errors += "Incorrect parsing for chunk ident " + std::to_string(int32_t(ch.ident)) + " (difference from expected " + std::to_string(int32_t(expected - start)) + ") on " + err.file_name + "\n";
+				start = expected;
 			}
+		}
+		#ifdef XAC_DEBUG
+		for(const auto& node : context.nodes) {
+			std::printf("Node: %s\n", node.name.c_str());
+			std::printf("* Meshes: %zu\n", node.meshes.size());
+			for(const auto& o : node.meshes) {
+				std::printf("\tMesh\n");
+				std::printf("\t* vertices: %zu\n", o.vertices.size());
+				std::printf("\t* normals: %zu\n", o.normals.size());
+				std::printf("\t* texcoords: %zu\n", o.texcoords.size());
+			}
+		}
+		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
+		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
+		#endif
+	}
+
+	emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index) {
+		assert(node_index < context.nodes.size());
+		auto const& c_node = context.nodes[node_index];
+		if(c_node.parent_id != -1) {
+			return &context.nodes[c_node.parent_id];
+		}
+		return nullptr;
+	}
+	emfx::xac_pp_actor_node* get_visible_parent_node(xac_context& context, uint32_t node_index) {
+		if(auto* node = get_parent_node(context, node_index); node) {
+			if(node->visual_mesh != -1) {
+				return node;
+			}
+			return get_visible_parent_node(context, node->parent_id);
+		}
+		return nullptr;
+	}
+
+	void finish(xac_context& context) {
+		// Post-proccessing step: Transform ALL vectors using the given matrices
+		// for rotation and position, and scale too!
+		for(auto& node : context.nodes) {
+			/*
+			const emfx::xac_vector4f q = node.rotation;
+			const emfx::xac_mat4x4 qm{
+				2.f * (q.x * q.x + q.y * q.y) - 1.f, //0 * 4 + 0 = 0
+				2.f * (q.y * q.z - q.x * q.w), //0 * 4 + 1 = 1
+				2.f * (q.y * q.w + q.x * q.z), //0 * 4 + 2 = 2
+				0.f, //0 * 4 + 3 = 3
+				2.f * (q.y * q.z + q.x * q.w), //1 * 4 + 0 = 4
+				2.f * (q.x * q.x + q.z * q.z) - 1.f, //1 * 4 + 1 = 5
+				2.f * (q.z * q.w - q.x * q.y), //1 * 4 + 2 = 6
+				0.f, //1 * 4 + 3 = 7
+				2.f * (q.y * q.w - q.x * q.z), //2 * 4 + 0 = 8
+				2.f * (q.z * q.w + q.x * q.y), //2 * 4 + 1 = 9
+				2.f * (q.x * q.x + q.w * q.w) - 1.f, //2 * 4 + 2 = 10
+				0.f, //2 * 4 + 3 = 11
+			};
+			const emfx::xac_mat4x4 tm{
+				qm.m[0][0] * node.scale.x, //0 * 4 + 0 = 0
+				qm.m[0][1] * node.scale.y, //0 * 4 + 1 = 1
+				qm.m[0][2] * node.scale.z, //0 * 4 + 2 = 2
+				node.position.x, //0 * 4 + 3 = 3
+				qm.m[1][0] * node.scale.x, //1 * 4 + 0 = 4
+				qm.m[1][1] * node.scale.y, //1 * 4 + 1 = 5
+				qm.m[1][2] * node.scale.z, //1 * 4 + 2 = 6
+				node.position.y, //1 * 4 + 3 = 7
+				qm.m[2][0] * node.scale.x, //2 * 4 + 0 = 8
+				qm.m[2][1] * node.scale.y, //2 * 4 + 1 = 9
+				qm.m[2][2] * node.scale.z, //2 * 4 + 2 = 10
+				node.position.z, //2 * 4 + 3 = 11
+			};
+			*/
+		}
+	}
+
+	xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err, bool as_16b) {
+		// can be either 16 or 32 bit
+		xac_vector4f nkf;
+		if(as_16b) {
+			auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
+			nkf = kf.to_vector4f();
 		} else {
-			err.accumulated_errors += "Collision mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
-			return start;
+			nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 		}
-	} else {
-		if(node.visual_mesh >= 0) {
-			auto& obj = node.meshes[node.visual_mesh];
-			for(const auto& influence : influence_data) {
-				xac_pp_bone_influence bone_influence{};
-				bone_influence.weight = influence.weight;
-				bone_influence.bone_id = influence.bone_id;
-				obj.influences.push_back(bone_influence);
-			}
-			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
-				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&start, end, err);
-				obj.influence_starts[i] = range.first_influence_index;
-				obj.influence_counts[i] = range.num_influences;
-				assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
-					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
-			}
-		} else {
-			err.accumulated_errors += "Visual mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
-			return start;
-		}
+		nkf.y = -nkf.y;
+		nkf.z = -nkf.z;
+		return nkf;
 	}
-	return start;
-}
 
-void parse_xac(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	const char* file_start = start;
-	auto const h = parse_xac_any_binary<xac_header>(&start, end, err);
-	if(h.ident[0] != uint8_t('X') || h.ident[1] != uint8_t('A') || h.ident[2] != uint8_t('C') || h.ident[3] != uint8_t(' ')) {
-		err.accumulated_errors += "Invalid XAC identifier on " + err.file_name + "\n";
-		return;
-	}
-#ifdef XAC_DEBUG
-	std::printf("XacFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
-#endif
-	while(start < end) {
-		auto const ch = parse_xac_any_binary<xac_chunk_header>(&start, end, err);
-#ifdef XAC_DEBUG
-		std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
-#endif
-		context.ignore_length = false; // Reset
-		const char* expected = start + ch.len;
-		switch(xac_chunk_type(ch.ident)) {
-		case xac_chunk_type::mesh:
-			if(ch.version == 1) {
-				start = parse_xac_mesh_v1(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-			}
-			break;
-		case xac_chunk_type::metadata:
-			if(ch.version == 2) {
-				start = parse_xac_metadata_v2(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-			}
-			break;
-		case xac_chunk_type::material_block:
-			if(ch.version == 1) {
-				start = parse_xac_material_block_v1(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-			}
-			break;
-		case xac_chunk_type::material_3:
-			if(ch.version == 2) {
-				start = parse_xac_material_v2(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-			}
-			break;
-		case xac_chunk_type::node_hierachy:
-		{
-			if(ch.version == 1) {
-				start = parse_xac_node_hierachy_v1(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-			}
-			break;
-		case xac_chunk_type::skinning:
-			if(ch.version == 3) {
-				start = parse_xac_skinning_v3(context, start, end, err);
-			} else {
-				err.accumulated_errors += "Unsupported version (" + err.file_name + ")\n";
-			}
-			break;
-		}
-		default:
-#ifdef XAC_DEBUG
-			std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
-#endif
-			err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
-			start += ch.len;
-			break;
-		}
-		if(!context.ignore_length && start != expected) {
-			err.accumulated_errors += "Incorrect parsing for chunk ident " + std::to_string(int32_t(ch.ident)) + " (difference from expected " + std::to_string(int32_t(expected - start)) + ") on " + err.file_name + "\n";
-			start = expected;
-		}
-	}
-#ifdef XAC_DEBUG
-	for(const auto& node : context.nodes) {
-		std::printf("Node: %s\n", node.name.c_str());
-		std::printf("* Meshes: %zu\n", node.meshes.size());
-		for(const auto& o : node.meshes) {
-			std::printf("\tMesh\n");
-			std::printf("\t* vertices: %zu\n", o.vertices.size());
-			std::printf("\t* normals: %zu\n", o.normals.size());
-			std::printf("\t* texcoords: %zu\n", o.texcoords.size());
-		}
-	}
-	std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
-	std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
-#endif
-}
-
-emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index) {
-	assert(node_index < context.nodes.size());
-	auto const& c_node = context.nodes[node_index];
-	if(c_node.parent_id != -1) {
-		return &context.nodes[c_node.parent_id];
-	}
-	return nullptr;
-}
-emfx::xac_pp_actor_node* get_visible_parent_node(xac_context& context, uint32_t node_index) {
-	if(auto* node = get_parent_node(context, node_index); node) {
-		if(node->visual_mesh != -1) {
-			return node;
-		}
-		return get_visible_parent_node(context, node->parent_id);
-	}
-	return nullptr;
-}
-
-void finish(xac_context& context) {
-	// Post-proccessing step: Transform ALL vectors using the given matrices
-	// for rotation and position, and scale too!
-	for(auto& node : context.nodes) {
-		/*
-		const emfx::xac_vector4f q = node.rotation;
-		const emfx::xac_mat4x4 qm{
-			2.f * (q.x * q.x + q.y * q.y) - 1.f, //0 * 4 + 0 = 0
-			2.f * (q.y * q.z - q.x * q.w), //0 * 4 + 1 = 1
-			2.f * (q.y * q.w + q.x * q.z), //0 * 4 + 2 = 2
-			0.f, //0 * 4 + 3 = 3
-			2.f * (q.y * q.z + q.x * q.w), //1 * 4 + 0 = 4
-			2.f * (q.x * q.x + q.z * q.z) - 1.f, //1 * 4 + 1 = 5
-			2.f * (q.z * q.w - q.x * q.y), //1 * 4 + 2 = 6
-			0.f, //1 * 4 + 3 = 7
-			2.f * (q.y * q.w - q.x * q.z), //2 * 4 + 0 = 8
-			2.f * (q.z * q.w + q.x * q.y), //2 * 4 + 1 = 9
-			2.f * (q.x * q.x + q.w * q.w) - 1.f, //2 * 4 + 2 = 10
-			0.f, //2 * 4 + 3 = 11
-		};
-		const emfx::xac_mat4x4 tm{
-			qm.m[0][0] * node.scale.x, //0 * 4 + 0 = 0
-			qm.m[0][1] * node.scale.y, //0 * 4 + 1 = 1
-			qm.m[0][2] * node.scale.z, //0 * 4 + 2 = 2
-			node.position.x, //0 * 4 + 3 = 3
-			qm.m[1][0] * node.scale.x, //1 * 4 + 0 = 4
-			qm.m[1][1] * node.scale.y, //1 * 4 + 1 = 5
-			qm.m[1][2] * node.scale.z, //1 * 4 + 2 = 6
-			node.position.y, //1 * 4 + 3 = 7
-			qm.m[2][0] * node.scale.x, //2 * 4 + 0 = 8
-			qm.m[2][1] * node.scale.y, //2 * 4 + 1 = 9
-			qm.m[2][2] * node.scale.z, //2 * 4 + 2 = 10
-			node.position.z, //2 * 4 + 3 = 11
-		};
-		*/
-	}
-}
-
-xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err, bool as_16b) {
-	// can be either 16 or 32 bit
-	xac_vector4f nkf;
-	if(as_16b) {
-		auto kf = parse_xac_any_binary<xac_vector4u16>(start, end, err);
-		nkf = kf.to_vector4f();
-	} else {
-		nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
-	}
-	nkf.y = -nkf.y;
-	nkf.z = -nkf.z;
-	return nkf;
-}
-
-const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
-	for(uint32_t i = 0; i < num_sub_motions; i++) {
+	const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
+		for(uint32_t i = 0; i < num_sub_motions; i++) {
 		context.animations.push_back(xsm_animation{});
-		xsm_animation& anim = context.animations.back();
-		anim.pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
-		anim.bind_pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
-		anim.pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
-		anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
-		//
-		anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
-		anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
-		anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
-		anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
-		anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
-		anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
-		//
-		uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
-		uint32_t num_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
-		uint32_t num_scale_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
-		uint32_t num_scale_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
-		anim.max_error = parse_xac_any_binary<float>(&start, end, err);
-		start = parse_xac_cstring_nodiscard(anim.node, start, end, err);
-		for(uint32_t j = 0; j < num_pos_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
-			kf.value.x = -kf.value.x;
-			anim.position_keys.push_back(kf);
-		}
-		for(uint32_t j = 0; j < num_rot_keys; j++) {
-			auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
-			auto time = parse_xac_any_binary<float>(&start, end, err);
+			xsm_animation& anim = context.animations.back();
+			anim.pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+			anim.bind_pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+			anim.pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+			anim.bind_pose_scale_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
+			//
+			anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+			anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
+			anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+			anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+			anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
+			anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&start, end, err);
+			//
+			uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+			uint32_t num_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+			uint32_t num_scale_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+			uint32_t num_scale_rot_keys = parse_xac_any_binary<uint32_t>(&start, end, err);
+			anim.max_error = parse_xac_any_binary<float>(&start, end, err);
+			start = parse_xac_cstring_nodiscard(anim.node, start, end, err);
+			for(uint32_t j = 0; j < num_pos_keys; j++) {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
+				kf.value.x = -kf.value.x;
+				anim.position_keys.push_back(kf);
+			}
+			for(uint32_t j = 0; j < num_rot_keys; j++) {
+				auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
+				auto time = parse_xac_any_binary<float>(&start, end, err);
 			anim.rotation_keys.push_back(xsm_animation_key{ kf, time });
-		}
-		for(uint32_t j = 0; j < num_scale_keys; j++) {
-			auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
-			anim.scale_keys.push_back(kf);
-		}
-		for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
-			auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
-			auto time = parse_xac_any_binary<float>(&start, end, err);
+			}
+			for(uint32_t j = 0; j < num_scale_keys; j++) {
+				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
+				anim.scale_keys.push_back(kf);
+			}
+			for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
+				auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
+				auto time = parse_xac_any_binary<float>(&start, end, err);
 			anim.scale_rotation_keys.push_back(xsm_animation_key{ kf, time });
-		}
-	}
-	return nullptr;
-}
-
-void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
-	const char* file_start = start;
-	auto const h = parse_xac_any_binary<xsm_header>(&start, end, err);
-	if(h.ident[0] != uint8_t('X') || h.ident[1] != uint8_t('S') || h.ident[2] != uint8_t('M') || h.ident[3] != uint8_t(' ')) {
-		err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
-		return;
-	}
-	//context.use_quat_16 = h.multiply_order == 0;
-#ifdef XAC_DEBUG
-	std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
-#endif
-	while(start < end) {
-		auto const ch = parse_xac_any_binary<xsm_chunk_header>(&start, end, err);
-#ifdef XAC_DEBUG
-		std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
-#endif
-		context.ignore_length = false; // Reset
-		const char* expected = start + ch.len;
-		switch(xsm_chunk_type(ch.ident)) {
-		case xsm_chunk_type::bone_animation:
-			if(ch.version == 1) {
-				start = parse_xsm_bone_animation_v2(context, start, end, err);
-			} else {
-				err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 			}
-			break;
-		default:
-			if(ch.ident == 0xc9) {
-				parse_xac_any_binary<float>(&start, end, err);
-				parse_xac_any_binary<float>(&start, end, err);
-				parse_xac_any_binary<uint32_t>(&start, end, err);
-				parse_xac_any_binary<uint8_t>(&start, end, err);
-				parse_xac_any_binary<uint8_t>(&start, end, err);
-				uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
-				context.use_quat_16 = (h.major_version == 2);
-				start = parse_xac_cstring(start, end, err);
-				start = parse_xac_cstring(start, end, err);
-				start = parse_xac_cstring(start, end, err);
-				start = parse_xac_cstring(start, end, err);
-			}
-#ifdef XAC_DEBUG
-			std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
-#endif
-			err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
-			start += ch.len;
-			break;
 		}
-		if(!context.ignore_length && start != expected) {
-			err.accumulated_errors += "Incorrect parsing for chunk ident " + std::to_string(int32_t(ch.ident)) + " (difference from expected " + std::to_string(int32_t(expected - start)) + ") on " + err.file_name + "\n";
-			start = expected;
-		}
+		return nullptr;
 	}
-#ifdef XAC_DEBUG
-	std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
-	std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
-#endif
-}
 
-xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
-	auto kf = i < position_keys.size() ? position_keys[i]
+	void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		const char* file_start = start;
+		auto const h = parse_xac_any_binary<xsm_header>(&start, end, err);
+		if(h.ident[0] != uint8_t('X') || h.ident[1] != uint8_t('S') || h.ident[2] != uint8_t('M') || h.ident[3] != uint8_t(' ')) {
+			err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
+			return;
+		}
+		//context.use_quat_16 = h.multiply_order == 0;
+		#ifdef XAC_DEBUG
+		std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
+		#endif
+		while(start < end) {
+			auto const ch = parse_xac_any_binary<xsm_chunk_header>(&start, end, err);
+			#ifdef XAC_DEBUG
+			std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
+			#endif
+			context.ignore_length = false; // Reset
+			const char* expected = start + ch.len;
+			switch(xsm_chunk_type(ch.ident)) {
+				case xsm_chunk_type::bone_animation:
+				if(ch.version == 1) {
+					start = parse_xsm_bone_animation_v2(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
+				}
+				break;
+				default:
+				if(ch.ident == 0xc9) {
+					parse_xac_any_binary<float>(&start, end, err);
+					parse_xac_any_binary<float>(&start, end, err);
+					parse_xac_any_binary<uint32_t>(&start, end, err);
+					parse_xac_any_binary<uint8_t>(&start, end, err);
+					parse_xac_any_binary<uint8_t>(&start, end, err);
+					uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
+					context.use_quat_16 = (h.major_version == 2);
+					start = parse_xac_cstring(start, end, err);
+					start = parse_xac_cstring(start, end, err);
+					start = parse_xac_cstring(start, end, err);
+					start = parse_xac_cstring(start, end, err);
+				}
+				#ifdef XAC_DEBUG
+				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
+				#endif
+				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
+				start += ch.len;
+				break;
+			}
+			if(!context.ignore_length && start != expected) {
+				err.accumulated_errors += "Incorrect parsing for chunk ident " + std::to_string(int32_t(ch.ident)) + " (difference from expected " + std::to_string(int32_t(expected - start)) + ") on " + err.file_name + "\n";
+				start = expected;
+			}
+		}
+		#ifdef XAC_DEBUG
+		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
+		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
+		#endif
+	}
+
+	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
+		auto kf = i < position_keys.size() ? position_keys[i]
 		: xsm_animation_key<xac_vector3f>{ pose_position, 0.f };
-	return kf;
-}
-xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
-	auto kf = i < rotation_keys.size() ? rotation_keys[i]
+		return kf;
+	}
+	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
+		auto kf = i < rotation_keys.size() ? rotation_keys[i]
 		: xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f };
-	return kf;
-}
-xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
-	auto kf = i < scale_keys.size() ? scale_keys[i]
+		return kf;
+	}
+	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
+		auto kf = i < scale_keys.size() ? scale_keys[i]
 		: xsm_animation_key<xac_vector3f>{ pose_scale, 0.f };
-	return kf;
-}
-xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
-	auto kf = i < scale_rotation_keys.size() ? scale_rotation_keys[i]
+		return kf;
+	}
+	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
+		auto kf = i < scale_rotation_keys.size() ? scale_rotation_keys[i]
 		: xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f };
-	return kf;
-}
+		return kf;
+	}
 
-uint32_t xsm_animation::get_position_key_index(float time) const {
-	for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
-		if(time >= position_keys[i + 0].time
-		&& time <= position_keys[i + 1].time) {
-			return i;
+	uint32_t xsm_animation::get_position_key_index(float time) const {
+		for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
+			if(time >= position_keys[i + 0].time
+			&& time <= position_keys[i + 1].time) {
+				return i;
+			}
 		}
+		return 0;
 	}
-	return 0;
-}
-uint32_t xsm_animation::get_rotation_key_index(float time) const {
-	for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
-		if(time >= rotation_keys[i + 0].time
-		&& time <= rotation_keys[i + 1].time) {
-			return i;
+	uint32_t xsm_animation::get_rotation_key_index(float time) const {
+		for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
+			if(time >= rotation_keys[i + 0].time
+			&& time <= rotation_keys[i + 1].time) {
+				return i;
+			}
 		}
+		return 0;
 	}
-	return 0;
-}
-uint32_t xsm_animation::get_scale_key_index(float time) const {
-	for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
-		if(time >= scale_keys[i + 0].time
-		&& time <= scale_keys[i + 1].time) {
-			return i;
+	uint32_t xsm_animation::get_scale_key_index(float time) const {
+		for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
+			if(time >= scale_keys[i + 0].time
+			&& time <= scale_keys[i + 1].time) {
+				return i;
+			}
 		}
+		return 0;
 	}
-	return 0;
-}
-uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
-	for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
-		if(time >= scale_rotation_keys[i + 0].time
-		&& time <= scale_rotation_keys[i + 1].time) {
-			return i;
+	uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
+		for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
+			if(time >= scale_rotation_keys[i + 0].time
+			&& time <= scale_rotation_keys[i + 1].time) {
+				return i;
+			}
 		}
+		return 0;
 	}
-	return 0;
-}
 
-float xsm_animation::get_player_scale_factor(float t1, float t2, float time) const {
-	assert(t1 <= t2);
-	if(t1 == t2)
+	float xsm_animation::get_player_scale_factor(float t1, float t2, float time) const {
+		assert(t1 <= t2);
+		if(t1 == t2)
 		return 0.f;
-	float mid_len = time - t1;
-	float frames_diff = t2 - t1;
-	float factor = mid_len / frames_diff;
-	//assert(factor >= 0.f && factor <= 1.f);
-	return std::clamp(factor, 0.f, 1.f);
-}
+		float mid_len = time - t1;
+		float frames_diff = t2 - t1;
+		float factor = mid_len / frames_diff;
+		//assert(factor >= 0.f && factor <= 1.f);
+		return std::clamp(factor, 0.f, 1.f);
+	}
 
-void finish(xsm_context& context) {
-	for(auto& anim : context.animations) {
-		for(auto& s : anim.position_keys) {
-			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-			anim.total_position_anim_time = std::max(anim.total_position_anim_time, s.time);
-		}
-		if(anim.position_keys.empty()) {
-			anim.position_keys.emplace_back(anim.pose_position, 0.f);
-		}
-		//
-		for(auto& s : anim.rotation_keys) {
-			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-			anim.total_rotation_anim_time = std::max(anim.total_rotation_anim_time, s.time);
-		}
-		if(anim.rotation_keys.empty()) {
-			anim.rotation_keys.emplace_back(anim.pose_rotation, 0.f);
-		}
-		//
-		for(auto& s : anim.scale_keys) {
-			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-			anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
-		}
-		if(anim.scale_keys.empty()) {
-			anim.scale_keys.emplace_back(anim.pose_scale, 0.f);
-		}
-		//
-		for(auto& s : anim.scale_rotation_keys) {
-			anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-			anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
-		}
-		if(anim.scale_rotation_keys.empty()) {
-			anim.scale_rotation_keys.emplace_back(anim.pose_scale_rotation, 0.f);
+	void finish(xsm_context& context) {
+		for(auto& anim : context.animations) {
+			for(auto& s : anim.position_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_position_anim_time = std::max(anim.total_position_anim_time, s.time);
+			}
+			if(anim.position_keys.empty()) {
+				anim.position_keys.emplace_back(anim.pose_position, 0.f);
+			}
+			//
+			for(auto& s : anim.rotation_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_rotation_anim_time = std::max(anim.total_rotation_anim_time, s.time);
+			}
+			if(anim.rotation_keys.empty()) {
+				anim.rotation_keys.emplace_back(anim.pose_rotation, 0.f);
+			}
+			//
+			for(auto& s : anim.scale_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
+			}
+			if(anim.scale_keys.empty()) {
+				anim.scale_keys.emplace_back(anim.pose_scale, 0.f);
+			}
+			//
+			for(auto& s : anim.scale_rotation_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
+			}
+			if(anim.scale_rotation_keys.empty()) {
+				anim.scale_rotation_keys.emplace_back(anim.pose_scale_rotation, 0.f);
+			}
 		}
 	}
-}
 
 }

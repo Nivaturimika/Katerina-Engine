@@ -32,13 +32,13 @@ std::vector<uint32_t> political_map_from(sys::state& state) {
 		if(ol) {
 			auto ol_color = state.world.nation_get_color(ol);
 			switch(state.user_settings.vassal_color) {
-			case sys::map_vassal_color_mode::inherit:
+				case sys::map_vassal_color_mode::inherit:
 				nation_color[n.value] = derive_color_from_ol_color(state, ol_color, n);
 				break;
-			case sys::map_vassal_color_mode::same:
+				case sys::map_vassal_color_mode::same:
 				nation_color[n.value] = ol_color;
 				break;
-			case sys::map_vassal_color_mode::none:
+				case sys::map_vassal_color_mode::none:
 				break;
 			}
 		}

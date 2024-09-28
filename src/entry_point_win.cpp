@@ -122,9 +122,9 @@ void EnableCrashingOnCrashes() {
 int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR /*commandline*/, int /*nCmdShow*/
 ) {
 
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
-#endif
+	#endif
 
 	InitializeCriticalSection(&guard_abort_handler);
 

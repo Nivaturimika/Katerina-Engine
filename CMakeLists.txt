@@ -81,11 +81,11 @@ if(WIN32)
 add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}
 	"src/alice.rc"
-	${ASSET_FILES})
+	${ASSET_FILES} "src/economy/factory.cpp")
 add_executable(KatEngineIncremental WIN32
 	${ALICE_INCREMENTAL_SOURCES_LIST}
 	"src/alice.rc"
-	${ASSET_FILES})
+	${ASSET_FILES} "src/economy/factory.cpp")
 else()
 add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}

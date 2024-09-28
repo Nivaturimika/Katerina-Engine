@@ -97,21 +97,21 @@ improvements.
 namespace r123 {
 /**
 @{
-@cond HIDDEN_FROM_DOXYGEN
-*/
+	@cond HIDDEN_FROM_DOXYGEN
+	*/
 
-#if R123_USE_CXX11_TYPE_TRAITS
-using std::make_signed;
-using std::make_unsigned;
-#else
-// Sigh... We could try to find another <type_traits>, e.g., from
-// boost or TR1.  Or we can do it ourselves in the r123 namespace.
-// It's not clear which will cause less headache...
-template<typename T>
+	#if R123_USE_CXX11_TYPE_TRAITS
+	using std::make_signed;
+	using std::make_unsigned;
+	#else
+	// Sigh... We could try to find another <type_traits>, e.g., from
+	// boost or TR1.  Or we can do it ourselves in the r123 namespace.
+	// It's not clear which will cause less headache...
+	template<typename T>
 struct make_signed { };
-template<typename T>
+	template<typename T>
 struct make_unsigned { };
-#define R123_MK_SIGNED_UNSIGNED(ST, UT)                                                                                          \
+	#define R123_MK_SIGNED_UNSIGNED(ST, UT)                                                                                          \
 	template<>                                                                                                                     \
 	struct make_signed<ST> {                                                                                                       \
 		typedef ST type;                                                                                                             \
@@ -129,40 +129,40 @@ struct make_unsigned { };
 		typedef UT type;                                                                                                             \
 	}
 
-R123_MK_SIGNED_UNSIGNED(int8_t, uint8_t);
-R123_MK_SIGNED_UNSIGNED(int16_t, uint16_t);
-R123_MK_SIGNED_UNSIGNED(int32_t, uint32_t);
-R123_MK_SIGNED_UNSIGNED(int64_t, uint64_t);
-#if R123_USE_GNU_UINT128
-R123_MK_SIGNED_UNSIGNED(__int128_t, __uint128_t);
-#endif
-#undef R123_MK_SIGNED_UNSIGNED
-#endif
+	R123_MK_SIGNED_UNSIGNED(int8_t, uint8_t);
+	R123_MK_SIGNED_UNSIGNED(int16_t, uint16_t);
+	R123_MK_SIGNED_UNSIGNED(int32_t, uint32_t);
+	R123_MK_SIGNED_UNSIGNED(int64_t, uint64_t);
+	#if R123_USE_GNU_UINT128
+	R123_MK_SIGNED_UNSIGNED(__int128_t, __uint128_t);
+	#endif
+	#undef R123_MK_SIGNED_UNSIGNED
+	#endif
 
-#if defined(__CUDACC__) || defined(_LIBCPP_HAS_NO_CONSTEXPR)
-// Amazing! cuda thinks numeric_limits::max() is a __host__ function, so
-// we can't use it in a device function.
-//
-// The LIBCPP_HAS_NO_CONSTEXP test catches situations where the libc++
-// library thinks that the compiler doesn't support constexpr, but we
-// think it does.  As a consequence, the library declares
-// numeric_limits::max without constexpr.  This workaround should only
-// affect a narrow range of compiler/library pairings.
-//
-// In both cases, we find max() by computing ~(unsigned)0 right-shifted
-// by is_signed.
-template<typename T>
-R123_CONSTEXPR R123_STATIC_INLINE R123_CUDA_DEVICE T maxTvalue() {
-	typedef typename make_unsigned<T>::type uT;
-	return (~uT(0)) >> std::numeric_limits<T>::is_signed;
-}
-#else
-template<typename T>
-R123_CONSTEXPR R123_STATIC_INLINE T maxTvalue() {
-	return std::numeric_limits<T>::max();
-}
-#endif
-/** @endcond
+	#if defined(__CUDACC__) || defined(_LIBCPP_HAS_NO_CONSTEXPR)
+	// Amazing! cuda thinks numeric_limits::max() is a __host__ function, so
+	// we can't use it in a device function.
+	//
+	// The LIBCPP_HAS_NO_CONSTEXP test catches situations where the libc++
+	// library thinks that the compiler doesn't support constexpr, but we
+	// think it does.  As a consequence, the library declares
+	// numeric_limits::max without constexpr.  This workaround should only
+	// affect a narrow range of compiler/library pairings.
+	//
+	// In both cases, we find max() by computing ~(unsigned)0 right-shifted
+	// by is_signed.
+	template<typename T>
+	R123_CONSTEXPR R123_STATIC_INLINE R123_CUDA_DEVICE T maxTvalue() {
+		typedef typename make_unsigned<T>::type uT;
+		return (~uT(0)) >> std::numeric_limits<T>::is_signed;
+	}
+	#else
+	template<typename T>
+	R123_CONSTEXPR R123_STATIC_INLINE T maxTvalue() {
+		return std::numeric_limits<T>::max();
+	}
+	#endif
+	/** @endcond
 	@}
  */
 
@@ -190,12 +190,12 @@ R123_CUDA_DEVICE R123_STATIC_INLINE Ftype u01(Itype in) {
 	typedef typename make_unsigned<Itype>::type Utype;
 	R123_CONSTEXPR Ftype factor = Ftype(1.) / (Ftype(maxTvalue<Utype>()) + Ftype(1.));
 	R123_CONSTEXPR Ftype halffactor = Ftype(0.5) * factor;
-#if R123_UNIFORM_FLOAT_STORE
+	#if R123_UNIFORM_FLOAT_STORE
 	volatile Ftype x = Utype(in) * factor;
 	return x + halffactor;
-#else
+	#else
 	return Utype(in) * factor + halffactor;
-#endif
+	#endif
 }
 
 //! Return a signed value in [-1,1]
@@ -222,12 +222,12 @@ R123_CUDA_DEVICE R123_STATIC_INLINE Ftype uneg11(Itype in) {
 	typedef typename make_signed<Itype>::type Stype;
 	R123_CONSTEXPR Ftype factor = Ftype(1.) / (Ftype(maxTvalue<Stype>()) + Ftype(1.));
 	R123_CONSTEXPR Ftype halffactor = Ftype(0.5) * factor;
-#if R123_UNIFORM_FLOAT_STORE
+	#if R123_UNIFORM_FLOAT_STORE
 	volatile Ftype x = Stype(in) * factor;
 	return x + halffactor;
-#else
+	#else
 	return Stype(in) * factor + halffactor;
-#endif
+	#endif
 }
 
 //! Return a value in (0,1) chosen from a set of equally spaced fixed-point values

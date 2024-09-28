@@ -6,7 +6,7 @@
 namespace sys {
 
 // cat t.cpp | awk '{print $1 $6 ", " $5 ", " $2 " " $3 " " $4}' >t2.cpp
-#define MOD_PROV_LIST                                                                                                            \
+	#define MOD_PROV_LIST                                                                                                            \
 	MOD_LIST_ELEMENT(0, supply_limit, true, modifier_display_type::integer, "modifier_supply_limit")                               \
 	MOD_LIST_ELEMENT(1, attrition, false, modifier_display_type::percent, "modifier_attrition")                                    \
 	MOD_LIST_ELEMENT(2, max_attrition, false, modifier_display_type::integer, "modifier_max_attrition")                            \
@@ -58,9 +58,9 @@ namespace sys {
 	MOD_LIST_ELEMENT(48, min_build_bank, false, modifier_display_type::integer, "bank_level") \
 	MOD_LIST_ELEMENT(49, min_build_university, false, modifier_display_type::integer, "university_level") \
 	MOD_LIST_ELEMENT(50, conversion_rate, true, modifier_display_type::percent, "modifier_conversion_rate")
-#define MOD_PROV_LIST_COUNT 51
+	#define MOD_PROV_LIST_COUNT 51
 
-#define MOD_NAT_LIST                                                                                                             \
+	#define MOD_NAT_LIST                                                                                                             \
 	MOD_LIST_ELEMENT(0, war_exhaustion, false, modifier_display_type::fp_two_places, "war_exhaustion")                             \
 	MOD_LIST_ELEMENT(1, max_war_exhaustion, true, modifier_display_type::integer, "max_war_exhaustion")                            \
 	MOD_LIST_ELEMENT(2, leadership, true, modifier_display_type::integer, "leadership")                                            \
@@ -188,96 +188,96 @@ namespace sys {
 	MOD_LIST_ELEMENT(124, flavor_tech_research_bonus, true, modifier_display_type::percent, "flavor_theory_tech_research_bonus") \
 	MOD_LIST_ELEMENT(125, seperatism, false, modifier_display_type::fp_two_places, "seperatism") \
 
-#define MOD_NAT_LIST_COUNT 126
+	#define MOD_NAT_LIST_COUNT 126
 
-namespace provincial_mod_offsets {
-#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
+	namespace provincial_mod_offsets {
+		#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
 	constexpr inline dcon::provincial_modifier_value name{num};
-MOD_PROV_LIST
-#undef MOD_LIST_ELEMENT
-constexpr inline uint32_t count = MOD_PROV_LIST_COUNT;
-} // namespace provincial_mod_offsets
+		MOD_PROV_LIST
+		#undef MOD_LIST_ELEMENT
+		constexpr inline uint32_t count = MOD_PROV_LIST_COUNT;
+	} // namespace provincial_mod_offsets
 
-namespace national_mod_offsets {
-#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
+	namespace national_mod_offsets {
+		#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
 	constexpr inline dcon::national_modifier_value name{num};
-MOD_NAT_LIST
-#undef MOD_LIST_ELEMENT
-constexpr inline uint32_t count = MOD_NAT_LIST_COUNT;
-} // namespace national_mod_offsets
+		MOD_NAT_LIST
+		#undef MOD_LIST_ELEMENT
+		constexpr inline uint32_t count = MOD_NAT_LIST_COUNT;
+	} // namespace national_mod_offsets
 
-struct provincial_modifier_definition {
-	static constexpr uint32_t modifier_definition_size = 22;
+	struct provincial_modifier_definition {
+		static constexpr uint32_t modifier_definition_size = 22;
 
 	float values[modifier_definition_size] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	dcon::provincial_modifier_value offsets[modifier_definition_size] = {dcon::provincial_modifier_value{}};
-	uint16_t padding = 0;
-};
-static_assert(sizeof(provincial_modifier_definition) ==
+		uint16_t padding = 0;
+	};
+	static_assert(sizeof(provincial_modifier_definition) ==
 	sizeof(provincial_modifier_definition::values)
 	+ sizeof(provincial_modifier_definition::offsets)
 	+ sizeof(provincial_modifier_definition::padding));
 
-struct national_modifier_definition {
-	static constexpr uint32_t modifier_definition_size = 22;
+	struct national_modifier_definition {
+		static constexpr uint32_t modifier_definition_size = 22;
 
 	float values[modifier_definition_size] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	dcon::national_modifier_value offsets[modifier_definition_size] = {dcon::national_modifier_value{}};
-	uint16_t padding = 0;
-};
-static_assert(sizeof(national_modifier_definition) ==
+		uint16_t padding = 0;
+	};
+	static_assert(sizeof(national_modifier_definition) ==
 	sizeof(national_modifier_definition::values)
 	+ sizeof(national_modifier_definition::offsets)
 	+ sizeof(national_modifier_definition::padding));
 
-struct commodity_modifier {
-	float amount = 0.0f;
-	dcon::commodity_id type;
+	struct commodity_modifier {
+		float amount = 0.0f;
+		dcon::commodity_id type;
 	uint8_t padding[3] = {0};
-};
-static_assert(sizeof(commodity_modifier) ==
+	};
+	static_assert(sizeof(commodity_modifier) ==
 	sizeof(commodity_modifier::amount)
 	+ sizeof(commodity_modifier::type)
 	+ sizeof(commodity_modifier::padding));
 
-struct unit_variable_stats {
-	int32_t build_time = 0;
-	int32_t default_organisation = 0;
-	float maximum_speed = 0.0f;
-	float defence_or_hull = 0.0f;
-	float attack_or_gun_power = 0.0f;
-	float supply_consumption = 0.0f;
-	float support = 0.0f;
-	float siege_or_torpedo_attack = 0.0f;
-	float reconnaissance_or_fire_range = 0.0f;
-	float discipline_or_evasion = 0.0f;
+	struct unit_variable_stats {
+		int32_t build_time = 0;
+		int32_t default_organisation = 0;
+		float maximum_speed = 0.0f;
+		float defence_or_hull = 0.0f;
+		float attack_or_gun_power = 0.0f;
+		float supply_consumption = 0.0f;
+		float support = 0.0f;
+		float siege_or_torpedo_attack = 0.0f;
+		float reconnaissance_or_fire_range = 0.0f;
+		float discipline_or_evasion = 0.0f;
 
-	void operator+=(unit_variable_stats const& other) {
-		build_time += other.build_time;
-		default_organisation += other.default_organisation;
-		maximum_speed += other.maximum_speed;
-		defence_or_hull += other.defence_or_hull;
-		attack_or_gun_power += other.attack_or_gun_power;
-		supply_consumption += other.supply_consumption;
-		support += other.support;
-		siege_or_torpedo_attack += other.siege_or_torpedo_attack;
-		reconnaissance_or_fire_range += other.reconnaissance_or_fire_range;
-		discipline_or_evasion += other.discipline_or_evasion;
-	}
-	void operator-=(unit_variable_stats const& other) {
-		build_time -= other.build_time;
-		default_organisation -= other.default_organisation;
-		maximum_speed -= other.maximum_speed;
-		defence_or_hull -= other.defence_or_hull;
-		attack_or_gun_power -= other.attack_or_gun_power;
-		supply_consumption -= other.supply_consumption;
-		support -= other.support;
-		siege_or_torpedo_attack -= other.siege_or_torpedo_attack;
-		reconnaissance_or_fire_range -= other.reconnaissance_or_fire_range;
-		discipline_or_evasion -= other.discipline_or_evasion;
-	}
-};
-static_assert(sizeof(unit_variable_stats) ==
+		void operator+=(unit_variable_stats const& other) {
+			build_time += other.build_time;
+			default_organisation += other.default_organisation;
+			maximum_speed += other.maximum_speed;
+			defence_or_hull += other.defence_or_hull;
+			attack_or_gun_power += other.attack_or_gun_power;
+			supply_consumption += other.supply_consumption;
+			support += other.support;
+			siege_or_torpedo_attack += other.siege_or_torpedo_attack;
+			reconnaissance_or_fire_range += other.reconnaissance_or_fire_range;
+			discipline_or_evasion += other.discipline_or_evasion;
+		}
+		void operator-=(unit_variable_stats const& other) {
+			build_time -= other.build_time;
+			default_organisation -= other.default_organisation;
+			maximum_speed -= other.maximum_speed;
+			defence_or_hull -= other.defence_or_hull;
+			attack_or_gun_power -= other.attack_or_gun_power;
+			supply_consumption -= other.supply_consumption;
+			support -= other.support;
+			siege_or_torpedo_attack -= other.siege_or_torpedo_attack;
+			reconnaissance_or_fire_range -= other.reconnaissance_or_fire_range;
+			discipline_or_evasion -= other.discipline_or_evasion;
+		}
+	};
+	static_assert(sizeof(unit_variable_stats) ==
 	sizeof(unit_variable_stats::build_time)
 	+ sizeof(unit_variable_stats::default_organisation)
 	+ sizeof(unit_variable_stats::maximum_speed)
@@ -289,50 +289,50 @@ static_assert(sizeof(unit_variable_stats) ==
 	+ sizeof(unit_variable_stats::reconnaissance_or_fire_range)
 	+ sizeof(unit_variable_stats::discipline_or_evasion));
 
-struct unit_modifier : public unit_variable_stats {
-	dcon::unit_type_id type;
+	struct unit_modifier : public unit_variable_stats {
+		dcon::unit_type_id type;
 	uint8_t padding[3] = { 0 };
-};
-static_assert(sizeof(unit_modifier) ==
+	};
+	static_assert(sizeof(unit_modifier) ==
 	sizeof(unit_variable_stats)
 	+ sizeof(unit_modifier::type)
 	+ sizeof(unit_modifier::padding));
 
-struct rebel_org_modifier {
-	float amount = 0.0f; //4
-	dcon::rebel_type_id type; //2 - no type set = all rebels
-	uint16_t padding = 0;
-};
-static_assert(sizeof(rebel_org_modifier) ==
+	struct rebel_org_modifier {
+		float amount = 0.0f; //4
+		dcon::rebel_type_id type; //2 - no type set = all rebels
+		uint16_t padding = 0;
+	};
+	static_assert(sizeof(rebel_org_modifier) ==
 	sizeof(rebel_org_modifier::amount)
 	+ sizeof(rebel_org_modifier::type)
 	+ sizeof(rebel_org_modifier::padding));
 
-struct dated_modifier {
-	sys::date expiration; //0,4
-	dcon::modifier_id mod_id; //4,2
-	uint16_t padding = 0;
-};
-static_assert(sizeof(dated_modifier) ==
+	struct dated_modifier {
+		sys::date expiration; //0,4
+		dcon::modifier_id mod_id; //4,2
+		uint16_t padding = 0;
+	};
+	static_assert(sizeof(dated_modifier) ==
 	sizeof(dated_modifier::expiration)
 	+ sizeof(dated_modifier::mod_id)
 	+ sizeof(dated_modifier::padding));
 
-// restores values after loading a save
-void repopulate_modifier_effects(sys::state& state);
+	// restores values after loading a save
+	void repopulate_modifier_effects(sys::state& state);
 
-void update_modifier_effects(sys::state& state);
-void update_single_nation_modifiers(sys::state& state, dcon::nation_id n);
+	void update_modifier_effects(sys::state& state);
+	void update_single_nation_modifiers(sys::state& state, dcon::nation_id n);
 
-void add_modifier_to_nation(sys::state& state, dcon::nation_id target_nation, dcon::modifier_id mod_id,
+	void add_modifier_to_nation(sys::state& state, dcon::nation_id target_nation, dcon::modifier_id mod_id,
 		sys::date expiration); // default construct date for no expiration
-void add_modifier_to_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id,
+	void add_modifier_to_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id,
 		sys::date expiration); // default construct date for no expiration
-void remove_modifier_from_nation(sys::state& state, dcon::nation_id target_nation, dcon::modifier_id mod_id);
-void remove_modifier_from_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id);
-void remove_expired_modifiers_from_nation(sys::state& state, dcon::nation_id target_nation);
-void remove_expired_modifiers_from_province(sys::state& state, dcon::province_id target_prov);
+	void remove_modifier_from_nation(sys::state& state, dcon::nation_id target_nation, dcon::modifier_id mod_id);
+	void remove_modifier_from_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id);
+	void remove_expired_modifiers_from_nation(sys::state& state, dcon::nation_id target_nation);
+	void remove_expired_modifiers_from_province(sys::state& state, dcon::province_id target_prov);
 
-void toggle_modifier_from_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id, sys::date expiration);
+	void toggle_modifier_from_province(sys::state& state, dcon::province_id target_prov, dcon::modifier_id mod_id, sys::date expiration);
 
 } // namespace sys

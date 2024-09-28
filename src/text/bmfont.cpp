@@ -58,185 +58,185 @@ aaedev@gmail.com 2012
 #include "parsers.hpp"
 
 namespace parsers {
-struct bmfont_file_context {
-	scenario_building_context& outer_context;
-	text::bm_font& font;
-	uint8_t char_id = 0;
-	int32_t first = 0;
-	int32_t second = 0;
+	struct bmfont_file_context {
+		scenario_building_context& outer_context;
+		text::bm_font& font;
+		uint8_t char_id = 0;
+		int32_t first = 0;
+		int32_t second = 0;
 
 	bmfont_file_context(scenario_building_context& outer_context, text::bm_font& font) : outer_context(outer_context), font(font) { }
-};
-struct bmfont_file {
-	void x(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].x = value;
-	}
-	void y(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].y = value;
-	}
-	void xadvance(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].x_advance = value;
-	}
-	void xoffset(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].x_offset = value;
-	}
-	void yoffset(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].y_offset = value;
-	}
-	void page(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].page = value;
-	}
-	void width(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].width = value;
-	}
-	void height(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.chars[context.char_id].height = value;
-	}
-	void first(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.first = value;
-	}
-	void second(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.second = value;
-	}
-	void amount(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		uint16_t index = (uint16_t(context.first) << 8) | uint16_t(context.second);
-		context.font.kernings.insert_or_assign(index, value);
-	}
-	void id(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.char_id = uint8_t(value);
-	}
-	void lineheight(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
-		context.font.line_height = value;
-	}
-	void finish(bmfont_file_context& context) {
-		assert(context.font.line_height >= 0);
-	}
-};
+	};
+	struct bmfont_file {
+		void x(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].x = value;
+		}
+		void y(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].y = value;
+		}
+		void xadvance(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].x_advance = value;
+		}
+		void xoffset(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].x_offset = value;
+		}
+		void yoffset(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].y_offset = value;
+		}
+		void page(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].page = value;
+		}
+		void width(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].width = value;
+		}
+		void height(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.chars[context.char_id].height = value;
+		}
+		void first(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.first = value;
+		}
+		void second(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.second = value;
+		}
+		void amount(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			uint16_t index = (uint16_t(context.first) << 8) | uint16_t(context.second);
+			context.font.kernings.insert_or_assign(index, value);
+		}
+		void id(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.char_id = uint8_t(value);
+		}
+		void lineheight(association_type, int32_t value, error_handler& err, int32_t line, bmfont_file_context& context) {
+			context.font.line_height = value;
+		}
+		void finish(bmfont_file_context& context) {
+			assert(context.font.line_height >= 0);
+		}
+	};
 }
 #include "bmfont_defs_generated.hpp"
 
 namespace text {
 
-bool bm_font::parse_font(sys::state& state, simple_fs::file& f) {
-	auto content = simple_fs::view_contents(f);
-	parsers::error_handler err("");
-	parsers::scenario_building_context context(state);
-	err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(f));
-	parsers::token_generator gen(content.data, content.data + content.file_size);
-	parsers::bmfont_file_context bmfont_file_context(context, *this);
-	parsers::parse_bmfont_file(gen, err, bmfont_file_context);
-	return true;
-}
-
-int bm_font::get_kerning_pair(char first, char second) const {
-	uint16_t index = (uint16_t(first) << 8) | uint16_t(second);
-	if(auto it = kernings.find(index); it != kernings.end())
-		return it->second;
-	else
-		return 0;
-}
-
-float bm_font::get_string_width(sys::state& state, char const* string, uint32_t count) const {
-	float total = 0.f;
-	for(uint32_t i = 0; i < count; ++i) {
-		auto ch = uint8_t(string[i]);
-		if(i != 0 && i < count - 1 && ch == 0xC3 && uint8_t(string[i + 1]) == 0xA3) {
-			ch = 0xA3;
-			i++;
-		} else if(ch == 0xA4) {
-			ch = 0xA3;
-		}
-		if(i != count - 1) {
-			total += get_kerning_pair(ch, string[i + 1]);
-		}
-		total += chars[ch].x_advance;
+	bool bm_font::parse_font(sys::state& state, simple_fs::file& f) {
+		auto content = simple_fs::view_contents(f);
+		parsers::error_handler err("");
+		parsers::scenario_building_context context(state);
+		err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(f));
+		parsers::token_generator gen(content.data, content.data + content.file_size);
+		parsers::bmfont_file_context bmfont_file_context(context, *this);
+		parsers::parse_bmfont_file(gen, err, bmfont_file_context);
+		return true;
 	}
-	return total;
-}
 
-bm_font::bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image) {
-	auto font_result = ogl::make_font_texture(font_image);
-	ftexid = font_result.handle;
-	parse_font(state, font_metrics);
-	assert(ftexid != 0);
-	width = int16_t(font_result.size);
-}
-
-bm_font::bm_font(bm_font&& src) noexcept {
-	ftexid = src.ftexid;
-	chars = src.chars;
-	kernings = std::move(src.kernings);
-	width = src.width;
-	height = src.height;
-	base = src.base;
-	line_height = src.line_height;
-	src.ftexid = 0;
-}
-
-bm_font& bm_font::operator=(bm_font&& src) noexcept {
-	ftexid = src.ftexid;
-	chars = src.chars;
-	kernings = std::move(src.kernings);
-	width = src.width;
-	height = src.height;
-	base = src.base;
-	line_height = src.line_height;
-	src.ftexid = 0;
-	return *this;
-}
-
-bm_font::~bm_font() {
-	if(ftexid)
-		glDeleteTextures(1, &ftexid);
-}
-
-bm_font const& get_bm_font(sys::state& state, uint16_t font_handle) {
-	if(auto it = state.font_collection.bitmap_fonts.find(font_handle); it != state.font_collection.bitmap_fonts.end()) {
+	int bm_font::get_kerning_pair(char first, char second) const {
+		uint16_t index = (uint16_t(first) << 8) | uint16_t(second);
+		if(auto it = kernings.find(index); it != kernings.end())
 		return it->second;
-	} else {
-		auto fit = state.font_collection.font_names.find(font_handle);
-		assert(fit != state.font_collection.font_names.end());
-		auto fname = [&]() {
-			auto sv = state.to_string_view(fit->second);
-			if(sv == "Main_14")
-				return std::string("garamond_14");
-			if(sv == "Main_14_plain")
-				return std::string("garamond_14");
-			if(sv == "Main_14_grey")
-				return std::string("garamond_14_bold");
-			if(sv == "Main_14_black")
-				return std::string("garamond_14_bold");
-			if(sv == "Main_14_red")
-				return std::string("garamond_14_bold");
-			if(sv == "Main_14_bold")
-				return std::string("garamond_14_bold");
-			if(sv == "Main_14_orange")
-				return std::string("garamond_14_bold");
-			if(sv == "Main_14_eu")
-				return std::string("garamond_14");
-			if(sv == "tahoma_60")
-				return std::string("mapfont_56");
-			if(sv == "mapfont_56_small")
-				return std::string("vic_22_bl");
-			if(sv == "ToolTip_Font")
-				return std::string("vic_18");
-			if(sv == "FPS_Font")
-				return std::string("Arial14");
-			return std::string(sv);
-		}();
+		else
+		return 0;
+	}
 
-		auto root = get_root(state.common_fs);
-		auto gfx_dir = open_directory(root, NATIVE("gfx"));
-		auto font_dir = open_directory(gfx_dir, NATIVE("fonts"));
-		auto font_def = open_file(font_dir, simple_fs::win1250_to_native(fname + ".fnt"));
-		auto font_image = open_file(font_dir, simple_fs::win1250_to_native(fname + ".tga"));
-		if(!bool(font_def) || !bool(font_image)) {
-			auto result = state.font_collection.bitmap_fonts.insert_or_assign(font_handle, bm_font());
+	float bm_font::get_string_width(sys::state& state, char const* string, uint32_t count) const {
+		float total = 0.f;
+		for(uint32_t i = 0; i < count; ++i) {
+			auto ch = uint8_t(string[i]);
+			if(i != 0 && i < count - 1 && ch == 0xC3 && uint8_t(string[i + 1]) == 0xA3) {
+				ch = 0xA3;
+				i++;
+			} else if(ch == 0xA4) {
+				ch = 0xA3;
+			}
+			if(i != count - 1) {
+				total += get_kerning_pair(ch, string[i + 1]);
+			}
+			total += chars[ch].x_advance;
+		}
+		return total;
+	}
+
+	bm_font::bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image) {
+		auto font_result = ogl::make_font_texture(font_image);
+		ftexid = font_result.handle;
+		parse_font(state, font_metrics);
+		assert(ftexid != 0);
+		width = int16_t(font_result.size);
+	}
+
+	bm_font::bm_font(bm_font&& src) noexcept {
+		ftexid = src.ftexid;
+		chars = src.chars;
+		kernings = std::move(src.kernings);
+		width = src.width;
+		height = src.height;
+		base = src.base;
+		line_height = src.line_height;
+		src.ftexid = 0;
+	}
+
+	bm_font& bm_font::operator=(bm_font&& src) noexcept {
+		ftexid = src.ftexid;
+		chars = src.chars;
+		kernings = std::move(src.kernings);
+		width = src.width;
+		height = src.height;
+		base = src.base;
+		line_height = src.line_height;
+		src.ftexid = 0;
+		return *this;
+	}
+
+	bm_font::~bm_font() {
+		if(ftexid)
+		glDeleteTextures(1, &ftexid);
+	}
+
+	bm_font const& get_bm_font(sys::state& state, uint16_t font_handle) {
+		if(auto it = state.font_collection.bitmap_fonts.find(font_handle); it != state.font_collection.bitmap_fonts.end()) {
+			return it->second;
+		} else {
+			auto fit = state.font_collection.font_names.find(font_handle);
+			assert(fit != state.font_collection.font_names.end());
+			auto fname = [&]() {
+				auto sv = state.to_string_view(fit->second);
+				if(sv == "Main_14")
+				return std::string("garamond_14");
+				if(sv == "Main_14_plain")
+				return std::string("garamond_14");
+				if(sv == "Main_14_grey")
+				return std::string("garamond_14_bold");
+				if(sv == "Main_14_black")
+				return std::string("garamond_14_bold");
+				if(sv == "Main_14_red")
+				return std::string("garamond_14_bold");
+				if(sv == "Main_14_bold")
+				return std::string("garamond_14_bold");
+				if(sv == "Main_14_orange")
+				return std::string("garamond_14_bold");
+				if(sv == "Main_14_eu")
+				return std::string("garamond_14");
+				if(sv == "tahoma_60")
+				return std::string("mapfont_56");
+				if(sv == "mapfont_56_small")
+				return std::string("vic_22_bl");
+				if(sv == "ToolTip_Font")
+				return std::string("vic_18");
+				if(sv == "FPS_Font")
+				return std::string("Arial14");
+				return std::string(sv);
+			}();
+
+			auto root = get_root(state.common_fs);
+			auto gfx_dir = open_directory(root, NATIVE("gfx"));
+			auto font_dir = open_directory(gfx_dir, NATIVE("fonts"));
+			auto font_def = open_file(font_dir, simple_fs::win1250_to_native(fname + ".fnt"));
+			auto font_image = open_file(font_dir, simple_fs::win1250_to_native(fname + ".tga"));
+			if(!bool(font_def) || !bool(font_image)) {
+				auto result = state.font_collection.bitmap_fonts.insert_or_assign(font_handle, bm_font());
+				return result.first->second;
+			}
+			auto result = state.font_collection.bitmap_fonts.insert_or_assign(font_handle, bm_font(state, *font_def, *font_image));
 			return result.first->second;
 		}
-		auto result = state.font_collection.bitmap_fonts.insert_or_assign(font_handle, bm_font(state, *font_def, *font_image));
-		return result.first->second;
 	}
-}
 
 } // namespace text
