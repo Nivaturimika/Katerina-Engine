@@ -282,9 +282,14 @@ void make_climate_definition(std::string_view name, token_generator& gen, error_
 }
 
 void province_history_file::finish(province_file_context& context) {
-	std::stable_sort(context.history_blocks.begin(), context.history_blocks.end(), [](const auto a, const auto b) {
+	std::stable_sort(context.history_blocks.begin(), context.history_blocks.end(), [](const auto& a, const auto& b) {
 		return a.first < b.first;
 	});
+
+	std::vector<std::pair<sys::date, token_generator>> history_blocks;
+	history_blocks = context.history_blocks;
+	context.history_blocks.clear();
+
 	error_handler err("dummy");
 	for(auto& block : context.history_blocks) { //ordered execute -- errors streamed to dummy
 		parse_province_history_file(block.second, err, context);
