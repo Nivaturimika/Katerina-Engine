@@ -1792,9 +1792,9 @@ namespace demographics {
 					If the pop size is less than 100 or thereabouts, they seem to get all assimilated if there is any assimilation.
 					*/
 
-					/*if(current_size < small_pop_size && base_amount >= 0.001f) {
+					if(current_size < small_pop_size && base_amount >= 0.001f) {
 						pbuf.amounts.set(p, current_size);
-					} else*/ if(base_amount >= 0.001f) {
+					} else if(base_amount >= 0.001f) {
 						auto transfer_amount = std::min(current_size, std::ceil(base_amount));
 						pbuf.amounts.set(p, transfer_amount);
 					}
