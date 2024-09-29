@@ -353,18 +353,17 @@ namespace ai {
 
 	bool ai_will_grant_access(sys::state& state, dcon::nation_id target, dcon::nation_id from) {
 		if(!state.world.nation_get_is_at_war(from))
-		return false;
+			return false;
 		if(state.world.nation_get_ai_rival(target) == from)
-		return false;
+			return false;
 		if(military::are_at_war(state, from, state.world.nation_get_ai_rival(target)))
-		return true;
-
+			return true;
 		for(auto wa : state.world.nation_get_war_participant(target)) {
 			auto is_attacker = wa.get_is_attacker();
 			for(auto o : wa.get_war().get_war_participant()) {
 				if(o.get_is_attacker() != is_attacker) {
 					if(military::are_at_war(state, o.get_nation(), from))
-					return true;
+						return true;
 				}
 			}
 		}
@@ -379,13 +378,11 @@ namespace ai {
 		auto ymd_date = state.current_date.to_ymd(state.start_date);
 		auto year = uint32_t(ymd_date.year);
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t id) {
-		dcon::nation_id n{ dcon::nation_id::value_base_t(id) };
-
+			dcon::nation_id n{ dcon::nation_id::value_base_t(id) };
 			if(state.world.nation_get_is_player_controlled(n)
 			|| state.world.nation_get_current_research(n)
 			|| !state.world.nation_get_is_civilized(n)
 			|| state.world.nation_get_owned_province_count(n) == 0) {
-
 				//skip -- does not need new research
 				return;
 			}
@@ -407,10 +404,11 @@ namespace ai {
 					// Previous technology is from the same folder so we have to check that we have researched it beforehand
 					if(tid.id.index() != 0 && state.world.technology_get_folder_index(prev_tech) == state.world.technology_get_folder_index(tid)) {
 						// Only allow if all previously researched techs are researched
-						if(state.world.nation_get_active_technologies(n, prev_tech))
-						potential.push_back(potential_techs{ tid, 0.0f });
+						if(state.world.nation_get_active_technologies(n, prev_tech)) {
+							potential.push_back(potential_techs{ tid, 0.0f });
+						}
 					} else { // first tech in folder
-					potential.push_back(potential_techs{ tid, 0.0f });
+						potential.push_back(potential_techs{ tid, 0.0f });
 					}
 				}
 			}
@@ -418,19 +416,17 @@ namespace ai {
 			for(auto& pt : potential) { // weight techs
 				auto k_mod = state.world.technology_get_ai_chance(pt.id);
 				auto base = k_mod ? trigger::evaluate_multiplicative_modifier(state, k_mod, trigger::to_generic(n), trigger::to_generic(n), -1) : 0.f;
-				if(state.world.nation_get_ai_is_threatened(n) && state.culture_definitions.tech_folders[state.world.technology_get_folder_index(pt.id)].category == culture::tech_category::army) {
-					base *= 2.0f;
-				}
+				//if(state.world.nation_get_ai_is_threatened(n) && state.culture_definitions.tech_folders[state.world.technology_get_folder_index(pt.id)].category == culture::tech_category::army) {
+				//	base *= 2.0f;
+				//}
 				auto cost = std::max(1.0f, culture::effective_technology_cost(state, year, n, pt.id));
 				pt.weight = base / cost;
 			}
-			auto rval = rng::get_random(state, id);
 			std::sort(potential.begin(), potential.end(), [&](potential_techs& a, potential_techs& b) {
 				if(a.weight != b.weight)
-				return a.weight > b.weight;
-				return (a.id.index() ^ rval) > (b.id.index() ^ rval);
+					return a.weight > b.weight;
+				return a.id.index() > b.id.index();
 			});
-
 			if(!potential.empty()) {
 				state.world.nation_set_current_research(n, potential[0].id);
 			}
