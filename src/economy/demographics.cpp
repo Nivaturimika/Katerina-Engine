@@ -1810,22 +1810,21 @@ namespace demographics {
 
 		// slaves do not assimilate
 		if(state.world.pop_get_poptype(ids) == state.culture_definitions.slaves)
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		// pops of an accepted culture do not assimilate
 		if(state.world.pop_get_is_primary_or_accepted_culture(ids))
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		// pops in an overseas and colonial province do not assimilate
 		if(state.world.province_get_is_colonial(location) && province::is_overseas(state, location))
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		float current_size = state.world.pop_get_size(ids);
-		float base_amount =
-		state.defines.assimilation_scale *
-		std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::assimilation_rate) + 1.0f)) *
-		std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_assimilation_rate) + 1.0f)) *
-			assimilation_chances * current_size;
+		float base_amount = state.defines.assimilation_scale
+			* std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::assimilation_rate) + 1.0f))
+			* std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_assimilation_rate) + 1.0f))
+			* assimilation_chances * current_size;
 
 		/*
 		In a colonial province, assimilation numbers for pops with an *non* "overseas"-type culture group are reduced by a
@@ -1835,7 +1834,7 @@ namespace demographics {
 
 		auto pc = state.world.pop_get_culture(ids);
 		if(!state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(pc))) {
-			base_amount /= 10.0f;
+			base_amount *= 1.f / 10.0f;
 		}
 
 
@@ -1846,17 +1845,16 @@ namespace demographics {
 
 		for(auto core : state.world.province_get_core(location)) {
 			if(core.get_identity().get_primary_culture() == pc) {
-				base_amount /= 100.0f;
+				base_amount *= 1.f / 100.0f;
 			}
 		}
 
 		/*
 		If the pop size is less than 100 or thereabouts, they seem to get all assimilated if there is any assimilation.
 		*/
-
-		/*if(current_size < 100.0f && base_amount >= 0.001f) {
+		if(current_size < 100.0f && base_amount >= 0.001f) {
 			return current_size;
-		} else*/ if(base_amount >= 0.001f) {
+		} else if(base_amount >= 0.001f) {
 			return std::min(current_size, std::ceil(base_amount));
 		} else {
 			return 0.0f;
@@ -1876,40 +1874,42 @@ namespace demographics {
 			auto owners = state.world.province_get_nation_from_province_ownership(loc);
 			auto conversion_chances = ve::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.conversion_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
 
-			ve::apply(
-				[&](dcon::pop_id p, dcon::province_id location, dcon::nation_id owner, float conversion_chance) {
-					// no conversion in unowned provinces
-					if(!owner)
-						return; // early exit
+			ve::apply([&](dcon::pop_id p, dcon::province_id location, dcon::nation_id owner, float conversion_chance) {
+				// no conversion in unowned provinces
+				if(!owner)
+					return; // early exit
 
-					auto state_religion = state.world.nation_get_religion(owner);
-					// pops of the state religion do not convert
-					if(state_religion == state.world.pop_get_religion(p))
-						return; // early exit
+				auto state_religion = state.world.nation_get_religion(owner);
+				// pops of the state religion do not convert
+				if(state_religion == state.world.pop_get_religion(p))
+					return; // early exit
 
-					// need at least 1 pop following the religion in the province
-					if(state.world.province_get_demographics(location, demographics::to_key(state, state_religion.id)) < 1.f)
-						return; // early exit
+				// need at least 1 pop following the religion in the province
+				if(state.world.province_get_demographics(location, demographics::to_key(state, state_religion.id)) < 1.f)
+					return; // early exit
 
-					/*
-					Amount: define:CONVERSION_SCALE x (provincial-conversion-rate-modifier + 1) x
-					(national-conversion-rate-modifier + 1) x pop-size x conversion chance factor (computed additively, and always
-					at least 0.01).
-					*/
+				/*
+				Amount: define:CONVERSION_SCALE x (provincial-conversion-rate-modifier + 1) x
+				(national-conversion-rate-modifier + 1) x pop-size x conversion chance factor (computed additively, and always
+				at least 0.01).
+				*/
 
-					float current_size = state.world.pop_get_size(p);
-					float base_amount =
-							state.defines.conversion_scale *
-							std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f)) *
-							std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f)) *
-							conversion_chance * current_size;
+				float current_size = state.world.pop_get_size(p);
+				float base_amount = state.defines.conversion_scale
+					* std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f))
+					* std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f))
+					* conversion_chance * current_size;
 
-					if(base_amount >= 0.001f) {
-						auto transfer_amount = std::min(current_size, std::ceil(base_amount));
-						pbuf.amounts.set(p, transfer_amount);
-					}
-				},
-				ids, loc, owners, conversion_chances);
+				/*
+				If the pop size is less than 100 or thereabouts, they seem to get all converted if there is any conversion.
+				*/
+				if(current_size < small_pop_size && base_amount >= 0.001f) {
+					pbuf.amounts.set(p, current_size);
+				} else if(base_amount >= 0.001f) {
+					auto transfer_amount = std::min(current_size, std::ceil(base_amount));
+					pbuf.amounts.set(p, transfer_amount);
+				}
+			}, ids, loc, owners, conversion_chances);
 		});
 	}
 
@@ -1920,25 +1920,29 @@ namespace demographics {
 
 		// pops of the state religion do not convert
 		if(state.world.nation_get_religion(owner) == state.world.pop_get_religion(ids))
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		auto state_religion = state.world.nation_get_religion(owner);
 		// pops of the state religion do not convert
 		if(state_religion == state.world.pop_get_religion(ids))
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		// need at least 1 pop following the religion in the province
 		if(state.world.province_get_demographics(location, demographics::to_key(state, state_religion.id)) < 1.f)
-		return 0.0f; // early exit
+			return 0.0f; // early exit
 
 		float current_size = state.world.pop_get_size(ids);
-		float base_amount =
-		state.defines.conversion_scale *
-		std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f)) *
-		std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f)) *
-			conversion_chances * current_size;
+		float base_amount = state.defines.conversion_scale
+			* std::max(0.0f, (state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f))
+			* std::max(0.0f, (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f))
+			* conversion_chances * current_size;
 
-		if(base_amount >= 0.001f) {
+		/*
+		If the pop size is less than 100 or thereabouts, they seem to get all converted if there is any conversion.
+		*/
+		if(current_size < 100.0f && base_amount >= 0.001f) {
+			return current_size;
+		} else if(base_amount >= 0.001f) {
 			return std::min(current_size, std::ceil(base_amount));
 		} else {
 			return 0.0f;

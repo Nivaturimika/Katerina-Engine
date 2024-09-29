@@ -23,27 +23,27 @@ namespace ai {
 	float estimate_defensive_strength(sys::state& state, dcon::nation_id n) {
 		float value = estimate_strength(state, n);
 		for(auto dr : state.world.nation_get_diplomatic_relation(n)) {
-			if(!dr.get_are_allied())
-			continue;
-
-			auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-			if(other.get_overlord_as_subject().get_ruler() != n)
-			value += estimate_strength(state, other);
+			if(dr.get_are_allied()) {
+				auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
+				if(other.get_overlord_as_subject().get_ruler() != n) {
+					value += estimate_strength(state, other);
+				}
+			}
 		}
-		if(auto sl = state.world.nation_get_in_sphere_of(n); sl)
-		value += estimate_strength(state, sl);
+		if(auto sl = state.world.nation_get_in_sphere_of(n); sl) {
+			value += estimate_strength(state, sl);
+		}
 		return value;
 	}
 
 	float estimate_additional_offensive_strength(sys::state& state, dcon::nation_id n, dcon::nation_id target) {
 		float value = 0.f;
 		for(auto dr : state.world.nation_get_diplomatic_relation(n)) {
-			if(!dr.get_are_allied())
-			continue;
-
-			auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-			if(other.get_overlord_as_subject().get_ruler() != n && military::can_use_cb_against(state, other, target) && !military::has_truce_with(state, other, target))
-			value += estimate_strength(state, other);
+			if(dr.get_are_allied()) {
+				auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
+				if(other.get_overlord_as_subject().get_ruler() != n && military::can_use_cb_against(state, other, target) && !military::has_truce_with(state, other, target))
+					value += estimate_strength(state, other);
+			}
 		}
 		return value * state.defines.alice_ai_offensive_strength_overestimate;
 	}
@@ -52,7 +52,7 @@ namespace ai {
 		for(auto n : state.world.in_nation) {
 			if(state.world.nation_get_owned_province_count(n) == 0) {
 				state.world.nation_set_ai_is_threatened(n, false);
-			state.world.nation_set_ai_rival(n, dcon::nation_id{});
+				state.world.nation_set_ai_rival(n, dcon::nation_id{});
 				continue;
 			}
 
@@ -105,7 +105,7 @@ namespace ai {
 				auto rival_str = estimate_strength(state, n.get_ai_rival());
 				auto ol = n.get_ai_rival().get_overlord_as_subject().get_ruler();
 				if(ol || n.get_ai_rival().get_in_sphere_of() == n || rival_str * 2 < self_str || self_str * 2 < rival_str) {
-				n.set_ai_rival(dcon::nation_id{});
+					n.set_ai_rival(dcon::nation_id{});
 				}
 			}
 		}
@@ -124,13 +124,13 @@ namespace ai {
 		// Adjacency with us
 		internal_get_alliance_targets_by_adjacency(state, n, n, alliance_targets);
 		if(!alliance_targets.empty())
-		return;
+			return;
 
 		// Adjacency with rival (useful for e.x, Chile allying Paraguay to fight bolivia)
 		if(auto rival = state.world.nation_get_ai_rival(n); bool(rival)) {
 			internal_get_alliance_targets_by_adjacency(state, n, rival, alliance_targets);
 			if(!alliance_targets.empty())
-			return;
+				return;
 		}
 
 		// Adjacency with people who are at war with us
@@ -139,7 +139,7 @@ namespace ai {
 				if(p.get_is_attacker() == !wp.get_is_attacker()) {
 					internal_get_alliance_targets_by_adjacency(state, n, p.get_nation(), alliance_targets);
 					if(!alliance_targets.empty())
-					return;
+						return;
 				}
 			}
 		}
@@ -154,8 +154,10 @@ namespace ai {
 				internal_get_alliance_targets(state, n, alliance_targets);
 				if(!alliance_targets.empty()) {
 					std::sort(alliance_targets.begin(), alliance_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-						if(estimate_strength(state, a) != estimate_strength(state, b))
-						return estimate_strength(state, a) > estimate_strength(state, b);
+						auto a_str = estimate_strength(state, a);
+						auto b_str = estimate_strength(state, b);
+						if(a_str != b_str)
+							return a_str > b_str;
 						return a.index() > b.index();
 					});
 					if(state.world.nation_get_is_player_controlled(alliance_targets[0])) {
@@ -181,20 +183,21 @@ namespace ai {
 				for(auto dr : n.get_diplomatic_relation()) {
 					if(dr.get_are_allied()) {
 						auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-						if(other.get_in_sphere_of() != n
-						&& !military::are_allied_in_war(state, n, other)) {
+						if(other.get_in_sphere_of() != n && !military::are_allied_in_war(state, n, other)) {
 							prune_targets.push_back(other);
 						}
 					}
 				}
 
-				if(prune_targets.empty())
-				continue;
+				if(prune_targets.empty()) {
+					continue;
+				}
 
 				std::sort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(estimate_strength(state, a) != estimate_strength(state, b))
-					return estimate_strength(state, a) < estimate_strength(state, b);
-					else
+					auto a_str = estimate_strength(state, a);
+					auto b_str = estimate_strength(state, b);
+					if(a_str != b_str)
+						return a_str > b_str;
 					return a.index() > b.index();
 				});
 
@@ -246,7 +249,7 @@ namespace ai {
 		auto rival_b = state.world.nation_get_ai_rival(from);
 		// Same rival equates to instantaneous alliance (we benefit from more allies against a common enemy)
 		if(rival_a && rival_a == rival_b)
-		return true;
+			return true;
 		// // Our rivals are allied?
 		// if(rival_a && rival_b && rival_a != rival_b && nations::are_allied(state, rival_a, rival_b))
 		// 	return true;
@@ -271,10 +274,10 @@ namespace ai {
 		// Puppets always ally overlords
 		auto ovr = state.world.nation_get_overlord_as_subject(target);
 		if(ovr && state.world.overlord_get_ruler(ovr) == from)
-		return true;
+			return true;
 
 		if(nations::has_core_in_nation(state, state.world.nation_get_identity_from_identity_holder(target), from))
-		return false;
+			return false;
 
 		/*auto pc = state.world.nation_get_primary_culture(target);
 		auto cg = state.world.culture_get_group_from_culture_group_membership(pc);
@@ -285,15 +288,15 @@ namespace ai {
 		}*/
 
 		if(!state.world.nation_get_ai_is_threatened(target))
-		return false;
+			return false;
 
 		// Has not surpassed infamy limit
 		if(state.world.nation_get_infamy(target) >= state.defines.badboy_limit * 0.75f)
-		return false;
+			return false;
 
 		// Won't ally our rivals
 		if(state.world.nation_get_ai_rival(target) == from || state.world.nation_get_ai_rival(from) == target)
-		return false;
+			return false;
 
 		//until great wars
 		if(state.world.nation_get_is_great_power(target) && !state.military_definitions.great_wars_enabled) {
@@ -311,27 +314,24 @@ namespace ai {
 
 		// AI's ignore relations with other AI's, but with player
 		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, from);
-		if(state.world.diplomatic_relation_get_value(rel) >= state.defines.relation_limit_no_alliance_offer
-		&& state.world.nation_get_is_player_controlled(from))
-		return false;
+		if(state.world.diplomatic_relation_get_value(rel) >= state.defines.relation_limit_no_alliance_offer && state.world.nation_get_is_player_controlled(from))
+			return false;
 
 		auto spherelord = state.world.nation_get_in_sphere_of(from);
 		if(spherelord) {
 			//If no spherelord -> Then must not ally spherelings
 			//If spherelord -> Then must not ally non-spherelings
 			if(state.world.nation_get_in_sphere_of(target) != spherelord && target != spherelord)
-			return false;
+				return false;
 			if(target == spherelord)
-			return true; //always ally spherelord
+				return true; //always ally spherelord
 		}
 
 		if(ai_has_mutual_enemy(state, from, target))
-		return true;
-
+			return true;
 		// Otherwise we may consider alliances only iff they are close to our continent or we are adjacent
 		if(!ai_is_close_enough(state, target, from))
-		return false;
-
+			return false;
 		// And also if they're powerful enough to be considered for an alliance
 		auto target_score = estimate_strength(state, target);
 		auto source_score = estimate_strength(state, from);
