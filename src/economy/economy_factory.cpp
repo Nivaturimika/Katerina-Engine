@@ -305,6 +305,19 @@ namespace economy_factory {
 		return amount;
 	}
 
+	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
+		float employed = state.world.nation_get_demographics(n, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
+		float total = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
+		float unemployement_crisis_measures = 1.f;
+		if(total > 0.f) {
+			unemployement_crisis_measures = employed / total;
+		}
+		float life = state.world.nation_get_life_needs_costs(n, state.culture_definitions.primary_factory_worker);
+		float everyday = state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.primary_factory_worker);
+		return min_wage_factor * (life + everyday) * 1.1f * unemployement_crisis_measures * unemployement_crisis_measures * unemployement_crisis_measures;
+	}
+
+
 	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id s) {
 		auto fat_id = fatten(state.world, ft);
 		auto n = state.world.state_instance_get_nation_from_state_ownership(s);
@@ -316,7 +329,6 @@ namespace economy_factory {
 		}
 		return sum;
 	}
-
 
 	float update_factory_scale(sys::state& state, dcon::factory_fat_id fac, float max_production_scale, float raw_profit, float desired_raw_profit) {
 		float total_workers = factory_max_employment(state, fac);

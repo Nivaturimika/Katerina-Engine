@@ -71,8 +71,9 @@ namespace economy_factory {
 	float global_non_factory_construction_time_modifier(sys::state& state);
 
 	float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
-	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id s);
+	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
 
+	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id s);
 	float update_factory_scale(sys::state& state, dcon::factory_fat_id fac, float max_production_scale, float raw_profit, float desired_raw_profit);
 
 

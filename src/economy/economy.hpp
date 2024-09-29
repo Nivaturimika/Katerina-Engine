@@ -164,7 +164,6 @@ namespace economy {
 	float pop_min_wage_factor(sys::state& state, dcon::nation_id n);
 	float pop_farmer_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
 	float pop_laborer_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
-	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
 
 	struct rgo_workers_breakdown {
 		float paid_workers;

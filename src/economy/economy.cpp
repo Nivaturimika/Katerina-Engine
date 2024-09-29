@@ -1500,17 +1500,7 @@ namespace economy {
 		return min_wage_factor * (life + everyday) * 1.1f;
 	}
 
-	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
-		float employed = state.world.nation_get_demographics(n, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
-		float total = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
-		float unemployement_crisis_measures = 1.f;
-		if(total > 0.f) {
-			unemployement_crisis_measures = employed / total;
-		}
-		float life = state.world.nation_get_life_needs_costs(n, state.culture_definitions.primary_factory_worker);
-		float everyday = state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.primary_factory_worker);
-		return min_wage_factor * (life + everyday) * 1.1f * unemployement_crisis_measures * unemployement_crisis_measures * unemployement_crisis_measures;
-	}
+	
 
 	float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto global_price_multiplier = global_market_price_multiplier(state, n);
