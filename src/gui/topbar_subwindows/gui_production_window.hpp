@@ -748,7 +748,7 @@ namespace ui {
 			text::add_line_break_to_layout(state, contents);
 
 			auto const min_wage_factor = economy::pop_min_wage_factor(state, n);
-			float factory_min_wage = economy::pop_factory_min_wage(state, n, min_wage_factor);
+			float factory_min_wage = economy_factory::pop_factory_min_wage(state, n, min_wage_factor);
 
 			float wage_estimation =
 			factory_min_wage
