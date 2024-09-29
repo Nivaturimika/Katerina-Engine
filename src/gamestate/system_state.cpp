@@ -2431,8 +2431,12 @@ void state::load_scenario_data(parsers::error_handler& err, sys::year_month_day 
 						parsers::token_generator gen(content.data, content.data + content.file_size);
 						parsers::parse_province_history_file(gen, err, pf_context);
 						//ordered execute -- errors streamed to dummy
+						std::stable_sort(pf_context.history_blocks.begin(), pf_context.history_blocks.end(), [](const auto& a, const auto& b) {
+							return a.first < b.first;
+						});
 						for(auto& block : pf_context.history_blocks) {
-							parse_province_history_file(block.second, err, pf_context);
+							parsers::province_file_context tpf_context{ context, pid };
+							parsers::parse_province_history_file(block.second, err, tpf_context);
 						}
 					}
 				}
