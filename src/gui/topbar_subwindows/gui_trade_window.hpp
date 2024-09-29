@@ -85,7 +85,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
 			if(commodity_id)
-			set_text(state, text::format_float(commodity_id ? economy::nation_factory_consumption(state, state.local_player_nation, commodity_id) : 0.0f, 2));
+			set_text(state, text::format_float(commodity_id ? economy_factory::nation_factory_consumption(state, state.local_player_nation, commodity_id) : 0.0f, 2));
 		}
 	};
 
@@ -445,7 +445,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_commodity([&](dcon::commodity_id id) {
-				if(id != economy::money && economy::nation_factory_consumption(state, state.local_player_nation, id) > 0.f) {
+				if(id != economy::money && economy_factory::nation_factory_consumption(state, state.local_player_nation, id) > 0.f) {
 					row_contents.push_back(id);
 				}
 			});
@@ -457,8 +457,8 @@ namespace ui {
 				break;
 				case trade_sort::needs:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = economy::nation_factory_consumption(state, state.local_player_nation, a);
-					auto bv = economy::nation_factory_consumption(state, state.local_player_nation, b);
+					auto av = economy_factory::nation_factory_consumption(state, state.local_player_nation, a);
+					auto bv = economy_factory::nation_factory_consumption(state, state.local_player_nation, b);
 					if(av != bv)
 					return av > bv;
 					else
@@ -1145,7 +1145,7 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
-			set_text(state, text::format_float(economy::nation_factory_consumption(state, state.local_player_nation, commodity_id), 2));
+			set_text(state, text::format_float(economy_factory::nation_factory_consumption(state, state.local_player_nation, commodity_id), 2));
 		}
 	};
 

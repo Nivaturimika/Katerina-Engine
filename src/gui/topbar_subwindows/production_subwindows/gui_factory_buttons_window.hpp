@@ -21,7 +21,7 @@ namespace ui {
 
 						if(is_set) {
 							command::change_factory_settings(state, state.local_player_nation, fac.get_factory(),
-								uint8_t(economy::factory_priority(state, fac.get_factory())), true);
+								uint8_t(economy_factory::factory_priority(state, fac.get_factory())), true);
 						}
 					}
 				}
@@ -64,7 +64,7 @@ namespace ui {
 						parent->impl_get(state, payload);
 						bool is_set = any_cast<commodity_filter_query_data>(payload).filter;
 						if(is_set) {
-							command::change_factory_settings(state, state.local_player_nation, fac.get_factory(), uint8_t(economy::factory_priority(state, fac.get_factory())), false);
+							command::change_factory_settings(state, state.local_player_nation, fac.get_factory(), uint8_t(economy_factory::factory_priority(state, fac.get_factory())), false);
 						}
 					}
 				}

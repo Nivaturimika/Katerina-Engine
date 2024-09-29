@@ -1,6 +1,6 @@
 #include "commands.hpp"
 #include "demographics.hpp"
-#include "factory_templates.hpp"
+#include "economy_factory_templates.hpp"
 #include "effects.hpp"
 #include "serialization.hpp"
 #include "system_state.hpp"
@@ -613,7 +613,7 @@ namespace command {
 		if(!is_upgrade) {
 			// Check factories being built
 			bool has_dup = false;
-		economy::for_each_new_factory(state, location, [&](economy::new_factory const& nf) { has_dup = has_dup || nf.type == type; });
+		economy_factory::for_each_new_factory(state, location, [&](economy_factory::new_factory const& nf) { has_dup = has_dup || nf.type == type; });
 			if(has_dup)
 			return false;
 
@@ -688,7 +688,7 @@ namespace command {
 				return false;
 			}
 
-			int32_t num_factories = economy::state_factory_count(state, location);
+			int32_t num_factories = economy_factory::state_factory_count(state, location);
 			return num_factories < int32_t(state.defines.factories_per_state);
 		}
 	}
@@ -929,7 +929,7 @@ namespace command {
 
 		auto rules = state.world.nation_get_combined_issue_rules(source);
 
-		auto current_priority = economy::factory_priority(state, f);
+		auto current_priority = economy_factory::factory_priority(state, f);
 		if(priority >= 4)
 		return false;
 
@@ -957,11 +957,11 @@ namespace command {
 
 		for(auto f : state.world.province_get_factory_location(location)) {
 			if(f.get_factory().get_building_type() == type) {
-				auto current_priority = economy::factory_priority(state, f.get_factory());
+				auto current_priority = economy_factory::factory_priority(state, f.get_factory());
 				if(current_priority != priority) {
 					if((rules & issue_rule::factory_priority) == 0)
 					return;
-					economy::set_factory_priority(state, f.get_factory(), priority);
+					economy_factory::set_factory_priority(state, f.get_factory(), priority);
 				}
 				if(subsidized && !f.get_factory().get_subsidized()) {
 					auto& scale = f.get_factory().get_production_scale();

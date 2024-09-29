@@ -306,7 +306,7 @@ namespace politics {
 		if(auto rules = state.world.nation_get_combined_issue_rules(n); (rules & issue_rule::factory_priority) == 0) {
 			for(auto po : state.world.nation_get_province_ownership_as_nation(n)) {
 				for(auto fl : po.get_province().get_factory_location()) {
-					economy::set_factory_priority(state, fl.get_factory(), 0);
+					economy_factory::set_factory_priority(state, fl.get_factory(), 0);
 				}
 			}
 		}

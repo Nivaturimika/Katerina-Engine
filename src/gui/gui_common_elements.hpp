@@ -3,6 +3,7 @@
 #include "dcon_generated.hpp"
 #include "demographics.hpp"
 #include "economy.hpp"
+#include "economy_factory.hpp"
 #include "gui_graphics.hpp"
 #include "gui_element_types.hpp"
 #include "military.hpp"
@@ -323,7 +324,7 @@ class button_press_notification { };
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
-			int32_t count = economy::state_factory_count(state, content);
+			int32_t count = economy_factory::state_factory_count(state, content);
 			auto txt = std::to_string(count) + "/" + std::to_string(int32_t(state.defines.factories_per_state));
 			set_text(state, txt);
 		}
@@ -1793,7 +1794,7 @@ class button_press_notification { };
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto factory_id = retrieve<dcon::factory_id>(state, parent);
-			set_text(state, text::format_float(economy::factory_total_employment(state, factory_id), 2));
+			set_text(state, text::format_float(economy_factory::factory_total_employment(state, factory_id), 2));
 		}
 	};
 	class factory_level_text : public simple_text_element_base {
@@ -1840,7 +1841,7 @@ class button_press_notification { };
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::factory_id>(state, parent);
-			frame = economy::factory_priority(state, content);
+			frame = economy_factory::factory_priority(state, content);
 		}
 	};
 

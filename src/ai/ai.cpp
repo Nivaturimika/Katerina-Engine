@@ -1113,7 +1113,7 @@ namespace ai {
 							}
 
 							// else -- try to build -- must have room
-							if(economy::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
+							if(economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
 								new_up.set_is_pop_project(false);
 								new_up.set_is_upgrade(false);

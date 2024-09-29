@@ -215,19 +215,19 @@ std::vector<uint32_t> factory_map_from(sys::state& state) {
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
 		auto sdef = state.world.state_instance_get_definition(sid);
 		if(!sel_nation || sel_nation == state.world.state_instance_get_nation_from_state_ownership(sid)) {
-			int32_t built = economy::state_built_factory_count(state, sid);
+			int32_t built = economy_factory::state_built_factory_count(state, sid);
 			if(built > max_built_total)
 				max_built_total = built;
-			int32_t total = economy::state_factory_count(state, sid);
+			int32_t total = economy_factory::state_factory_count(state, sid);
 			if(total > max_total)
 				max_total = total;
 		}
 	});
 	state.world.for_each_state_instance([&](dcon::state_instance_id sid) {
-		int32_t total = economy::state_factory_count(state, sid);
+		int32_t total = economy_factory::state_factory_count(state, sid);
 		if(total == 0)
 			return;
-		int32_t built = economy::state_built_factory_count(state, sid);
+		int32_t built = economy_factory::state_built_factory_count(state, sid);
 		auto sdef = state.world.state_instance_get_definition(sid);
 		for(const auto abm : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if((sel_nation && abm.get_province().get_province_ownership().get_nation() != sel_nation)

@@ -778,7 +778,7 @@ namespace province {
 			}
 		}
 
-		assert(economy::state_factory_count(state, new_si) <= int32_t(state.defines.factories_per_state));
+		assert(economy_factory::state_factory_count(state, new_si) <= int32_t(state.defines.factories_per_state));
 	
 		if(new_owner) {
 			for(auto p : state.world.province_get_pop_location(id)) {

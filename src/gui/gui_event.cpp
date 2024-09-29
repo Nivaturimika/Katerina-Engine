@@ -184,7 +184,7 @@ namespace ui {
 		text::add_to_substitution_map(sub, text::variable_type::good, state.world.province_get_rgo(target_province).get_name());
 		text::add_to_substitution_map(sub, text::variable_type::resource, state.world.province_get_rgo(target_province).get_name());
 		text::add_to_substitution_map(sub, text::variable_type::terrain, state.world.province_get_terrain(target_province).get_name());
-	text::add_to_substitution_map(sub, text::variable_type::numfactories, text::pretty_integer{ economy::state_factory_count(state, target_state) });
+	text::add_to_substitution_map(sub, text::variable_type::numfactories, text::pretty_integer{ economy_factory::state_factory_count(state, target_state) });
 		text::add_to_substitution_map(sub, text::variable_type::fromruler, text::get_ruler_title(state, from_nation));
 		text::add_to_substitution_map(sub, text::variable_type::focus, state.world.state_instance_get_owner_focus(target_state).get_name());
 		text::add_to_substitution_map(sub, text::variable_type::nf, state.world.state_instance_get_owner_focus(target_state).get_name());

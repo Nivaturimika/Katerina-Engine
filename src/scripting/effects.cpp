@@ -2808,7 +2808,7 @@ namespace effect {
 		auto cs = ws.world.province_get_state_membership(c);
 		if(!cs)
 		return 0;
-		economy::try_add_factory_to_state(ws, cs, trigger::payload(tval[1]).fac_id);
+		economy_factory::try_add_factory_to_state(ws, cs, trigger::payload(tval[1]).fac_id);
 		return 0;
 	}
 	uint32_t ef_activate_technology(EFFECT_PARAMTERS) {

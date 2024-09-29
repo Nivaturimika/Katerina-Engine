@@ -158,9 +158,6 @@ namespace economy {
 
 	void populate_effective_prices(sys::state& state, dcon::nation_id n);
 
-	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n);
-	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n);
-
 	void initialize(sys::state& state);
 	void regenerate_unsaved_values(sys::state& state);
 
@@ -182,7 +179,6 @@ namespace economy {
 
 
 	void update_rgo_employment(sys::state& state);
-	void update_factory_employment(sys::state& state);
 	void daily_update(sys::state& state, bool initiate_building);
 	void resolve_constructions(sys::state& state);
 

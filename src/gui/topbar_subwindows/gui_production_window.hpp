@@ -11,8 +11,6 @@
 #include "gui_foreign_investment_window.hpp"
 #include "economy_factory_templates.hpp"
 #include "province_templates.hpp"
-#include "economy_factory.hpp"
-#include "economy.hpp"
 
 namespace ui {
 

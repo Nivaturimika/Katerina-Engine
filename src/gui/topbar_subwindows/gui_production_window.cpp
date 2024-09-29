@@ -15,7 +15,7 @@ namespace ui {
 		for(auto const fat_id : state.world.nation_get_state_ownership(n)) {
 			if(show_empty && !fat_id.get_state().get_capital().get_is_colonial()) {
 				row_contents.push_back(fat_id.get_state());
-			} else if(economy::has_factory(state, fat_id.get_state().id)) {
+			} else if(economy_factory::has_factory(state, fat_id.get_state().id)) {
 				// Then account for factories **hidden** by the filter from goods...
 				size_t count = 0;
 				province::for_each_province_in_state_instance(state, fat_id.get_state(), [&](dcon::province_id pid) {
@@ -46,8 +46,8 @@ namespace ui {
 			return a_name < b_name;
 		};
 		auto sort_by_factories = [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-			auto acount = economy::state_factory_count(state, a);
-			auto bcount = economy::state_factory_count(state, b);
+			auto acount = economy_factory::state_factory_count(state, a);
+			auto bcount = economy_factory::state_factory_count(state, b);
 			return acount > bcount;
 		};
 		auto sort_by_primary_workers = [&](dcon::state_instance_id a, dcon::state_instance_id b) {

@@ -15,12 +15,12 @@ namespace economy_factory {
 				float purchased = 0.0f;
 				auto& goods = state.world.factory_type_get_construction_costs(st_con.get_type());
 	
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 					total += goods.commodity_amounts[i] * admin_cost_factor;
 					purchased += st_con.get_purchased_goods().commodity_amounts[i];
 				}
 	
-				func(new_factory{ total > 0.0f ? purchased / total : 0.0f, st_con.get_type().id });
+				func(economy_factory::new_factory{ total > 0.0f ? purchased / total : 0.0f, st_con.get_type().id });
 			}
 		}
 	}
@@ -38,12 +38,12 @@ namespace economy_factory {
 				float purchased = 0.0f;
 				auto& goods = state.world.factory_type_get_construction_costs(st_con.get_type());
 	
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 					total += goods.commodity_amounts[i] * admin_cost_factor;
 					purchased += st_con.get_purchased_goods().commodity_amounts[i];
 				}
 	
-				func(upgraded_factory{ total > 0.0f ? purchased / total : 0.0f, st_con.get_type().id });
+				func(economy_factory::upgraded_factory{ total > 0.0f ? purchased / total : 0.0f, st_con.get_type().id });
 			}
 		}
 	}

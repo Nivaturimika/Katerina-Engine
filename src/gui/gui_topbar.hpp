@@ -1208,7 +1208,7 @@ namespace ui {
 	class topbar_building_factories_icon : public standard_nation_icon {
 		public:
 		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			return int32_t(!economy::nation_is_constructing_factories(state, nation_id));
+			return int32_t(!economy_factory::nation_is_constructing_factories(state, nation_id));
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1222,9 +1222,9 @@ namespace ui {
 				auto nation_id = any_cast<dcon::nation_id>(payload);
 
 				auto box = text::open_layout_box(contents, 0);
-				if(!economy::nation_is_constructing_factories(state, nation_id)) {
+				if(!economy_factory::nation_is_constructing_factories(state, nation_id)) {
 				text::localised_format_box(state, contents, box, "countryalert_no_isbuildingfactories", text::substitution_map{});
-				} else if(economy::nation_is_constructing_factories(state, nation_id)) {
+				} else if(economy_factory::nation_is_constructing_factories(state, nation_id)) {
 				text::localised_format_box(state, contents, box, "countryalert_isbuildingfactories", text::substitution_map{});
 					auto nation_fat_id = dcon::fatten(state.world, nation_id);
 					nation_fat_id.for_each_state_building_construction([&](dcon::state_building_construction_id building_slim_id) {
@@ -1246,7 +1246,7 @@ namespace ui {
 	class topbar_closed_factories_icon : public standard_nation_icon {
 		public:
 		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			return int32_t(!economy::nation_has_closed_factories(state, nation_id));
+			return int32_t(!economy_factory::nation_has_closed_factories(state, nation_id));
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1260,9 +1260,9 @@ namespace ui {
 				auto nation_id = any_cast<dcon::nation_id>(payload);
 
 				auto box = text::open_layout_box(contents, 0);
-				if(!economy::nation_has_closed_factories(state, nation_id)) {
+				if(!economy_factory::nation_has_closed_factories(state, nation_id)) {
 				text::localised_format_box(state, contents, box, "remove_countryalert_no_hasclosedfactories", text::substitution_map{});
-				} else if(economy::nation_has_closed_factories(state, nation_id)) {
+				} else if(economy_factory::nation_has_closed_factories(state, nation_id)) {
 				text::localised_format_box(state, contents, box, "remove_countryalert_hasclosedfactories", text::substitution_map{});
 					text::add_line_break_to_layout_box(state, contents, box);
 					auto nation_fat = dcon::fatten(state.world, nation_id);

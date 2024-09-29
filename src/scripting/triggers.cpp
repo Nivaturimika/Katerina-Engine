@@ -2324,7 +2324,7 @@ struct empty_mask { };
 	}
 
 	TRIGGER_FUNCTION(tf_has_building_factory) {
-	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy::has_factory(ws, s); }, to_state(primary_slot));
+	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, to_state(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_building_state) {
@@ -2341,7 +2341,7 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_has_building_factory_from_province) {
 		auto state = ws.world.province_get_state_membership(to_prov(primary_slot));
-	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy::has_factory(ws, s); }, state);
+	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_empty) {
@@ -3710,7 +3710,7 @@ struct empty_mask { };
 		return compare_to_true(tval[0], ws.world.province_get_is_colonial(ws.world.pop_get_province_from_pop_location(to_pop(primary_slot))));
 	}
 	TRIGGER_FUNCTION(tf_has_factories_state) {
-	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy::has_factory(ws, s); }, to_state(primary_slot));
+	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, to_state(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_factories_nation) {

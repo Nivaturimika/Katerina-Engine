@@ -3241,7 +3241,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		nations::update_industrial_scores(*this);
 		military::update_naval_supply_points(*this);
 		economy::update_rgo_employment(*this);
-		economy::update_factory_employment(*this);
+		economy_factory::update_factory_employment(*this);
 		nations::update_military_scores(*this); // depends on ship score, land unit average
 		nations::update_rankings(*this);		// depends on industrial score, military scores
 
@@ -3835,7 +3835,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 				economy::update_rgo_employment(*this);
 				break;
 				case 9:
-				economy::update_factory_employment(*this);
+				economy_factory::update_factory_employment(*this);
 				break;
 				case 10:
 				nations::update_administrative_efficiency(*this);
@@ -3901,7 +3901,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		switch(ymd_date.day) {
 			case 1:
 			nations::update_monthly_points(*this);
-			economy::prune_factories(*this);
+			economy_factory::prune_factories(*this);
 			break;
 			case 2:
 			province::update_blockaded_cache(*this);

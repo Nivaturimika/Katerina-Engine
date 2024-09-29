@@ -391,7 +391,7 @@ namespace economy {
 		});
 
 		update_rgo_employment(state);
-		update_factory_employment(state);
+		economy_factory::update_factory_employment(state);
 
 		populate_army_consumption(state);
 		populate_navy_consumption(state);
