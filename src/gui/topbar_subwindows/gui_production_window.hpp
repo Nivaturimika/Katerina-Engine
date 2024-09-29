@@ -582,8 +582,8 @@ namespace ui {
 
 			float input_total = economy_factory::factory_input_total_cost(state, n, type);
 			float min_input_available = economy_factory::factory_min_input_available(state, n, type);
-			float e_input_total = economy_factory::factory_e_input_total_cost(state, n, type);
-			float min_e_input_available = economy_factory::factory_min_e_input_available(state, n, type);
+			float e_input_total = economy_factory::factory_efficiency_input_total_cost(state, n, type);
+			float min_e_input_available = economy_factory::factory_min_efficiency_input_available(state, n, type);
 
 			//modifiers
 
