@@ -2426,19 +2426,19 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 						auto opened_file = open_file(prov_file);
 						if(opened_file) {
 							auto pid = context.original_id_to_prov_id_map[province_id];
-						parsers::province_file_context pf_context{ context, pid };
-							auto content = view_contents(*opened_file);
-							parsers::token_generator gen(content.data, content.data + content.file_size);
-							parsers::parse_province_history_file(gen, err, pf_context);
-							//ordered execute -- errors streamed to dummy
-							std::stable_sort(pf_context.history_blocks.begin(), pf_context.history_blocks.end(), [](const auto& a, const auto& b) {
-								return a.first < b.first;
-							});
-							for(auto& block : pf_context.history_blocks) {
-								parsers::province_file_context tpf_context{ context, pid };
-								parsers::parse_province_history_file(block.second, err, tpf_context);
-							}
-						}
+						  parsers::province_file_context pf_context{ context, pid };
+						  auto content = view_contents(*opened_file);
+						  parsers::token_generator gen(content.data, content.data + content.file_size);
+					  	parsers::parse_province_history_file(gen, err, pf_context);
+					  	//ordered execute -- errors streamed to dummy
+					  	std::stable_sort(pf_context.history_blocks.begin(), pf_context.history_blocks.end(), [](const auto& a, const auto& b) {
+					  		return a.first < b.first;
+					  	});
+						  for(auto& block : pf_context.history_blocks) {
+						  	parsers::province_file_context tpf_context{ context, pid };
+						  	parsers::parse_province_history_file(block.second, err, tpf_context);
+              }
+            }
 					}
 				}
 			}
