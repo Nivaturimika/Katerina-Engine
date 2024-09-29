@@ -5,650 +5,650 @@
 
 namespace ui {
 
-class ui_scale_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class ui_scale_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class ui_scale_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class ui_scale_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class ui_scale_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class ui_scale_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class window_mode_checkbox : public checkbox_button {
-public:
-	void on_update(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class projection_mode_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class projection_mode_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class projection_mode_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class window_mode_checkbox : public checkbox_button {
+		public:
+		void on_update(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class projection_mode_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class projection_mode_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class projection_mode_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class fonts_mode_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
+	class fonts_mode_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class left_mouse_click_mode_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
+	class left_mouse_click_mode_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
 
-	message_result on_lbutton_down(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept override {
-		if(!disabled) {
-			sound::play_interface_sound(state, sound::get_click_sound(state), state.user_settings.interface_volume * state.user_settings.master_volume);
-			button_action(state);
+		message_result on_lbutton_down(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept override {
+			if(!disabled) {
+				sound::play_interface_sound(state, sound::get_click_sound(state), state.user_settings.interface_volume * state.user_settings.master_volume);
+				button_action(state);
+			}
+			return message_result::consumed;
 		}
-		return message_result::consumed;
-	}
-	message_result on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods, bool under_mouse) noexcept override {
-		return message_result::consumed;
-	}
-};
+		message_result on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods, bool under_mouse) noexcept override {
+			return message_result::consumed;
+		}
+	};
 
-class master_volume : public scrollbar {
-	void on_value_change(sys::state& state, int32_t v) noexcept final;
-	void on_update(sys::state& state) noexcept final;
-	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
-};
-class music_volume : public scrollbar {
-	void on_value_change(sys::state& state, int32_t v) noexcept final;
-	void on_update(sys::state& state) noexcept final;
-	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
-};
-class effects_volume : public scrollbar {
-	void on_value_change(sys::state& state, int32_t v) noexcept final;
-	void on_update(sys::state& state) noexcept final;
-	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
-};
-class interface_volume : public scrollbar {
-	void on_value_change(sys::state& state, int32_t v) noexcept final;
-	void on_update(sys::state& state) noexcept final;
-	tooltip_behavior has_tooltip(sys::state& state) noexcept final;
-	void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
-};
+	class master_volume : public scrollbar {
+		void on_value_change(sys::state& state, int32_t v) noexcept final;
+		void on_update(sys::state& state) noexcept final;
+		tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
+	};
+	class music_volume : public scrollbar {
+		void on_value_change(sys::state& state, int32_t v) noexcept final;
+		void on_update(sys::state& state) noexcept final;
+		tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
+	};
+	class effects_volume : public scrollbar {
+		void on_value_change(sys::state& state, int32_t v) noexcept final;
+		void on_update(sys::state& state) noexcept final;
+		tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
+	};
+	class interface_volume : public scrollbar {
+		void on_value_change(sys::state& state, int32_t v) noexcept final;
+		void on_update(sys::state& state) noexcept final;
+		tooltip_behavior has_tooltip(sys::state& state) noexcept final;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept final;
+	};
 
-class autosave_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class autosave_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class autosave_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class autosave_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class autosave_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class autosave_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class language_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class language_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class language_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class language_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class language_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class language_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class map_zoom_mode_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class map_zoom_mode_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class map_zoom_mode_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
-class map_mouse_edge_scrolling: public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
+	class map_zoom_mode_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class map_zoom_mode_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class map_zoom_mode_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
+	class map_mouse_edge_scrolling: public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
 
-class tooltip_mode_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class spoilers_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class wasd_for_map_movement_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class dm_popup_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class mute_on_focus_lost_checkbox : public checkbox_button {
-public:
-	void button_action(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-};
-class zoom_speed_scrollbar : public scrollbar {
-	void on_value_change(sys::state& state, int32_t v) noexcept final;
-	void on_update(sys::state& state) noexcept final;
-};
+	class tooltip_mode_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class spoilers_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class wasd_for_map_movement_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class dm_popup_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class mute_on_focus_lost_checkbox : public checkbox_button {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+	};
+	class zoom_speed_scrollbar : public scrollbar {
+		void on_value_change(sys::state& state, int32_t v) noexcept final;
+		void on_update(sys::state& state) noexcept final;
+	};
 
-class fow_checkbox : public checkbox_button {
-public:
-	void on_create(sys::state& state) noexcept override;
-	bool is_active(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-};
-class render_models_checkbox : public checkbox_button {
-public:
-	bool is_active(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-};
-class black_map_font_checkbox : public checkbox_button {
-public:
-	bool is_active(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-};
-class railroad_checkbox : public checkbox_button {
-public:
-	bool is_active(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-};
-class river_checkbox : public checkbox_button {
-public:
-	bool is_active(sys::state& state) noexcept override;
-	void button_action(sys::state& state) noexcept override;
-};
+	class fow_checkbox : public checkbox_button {
+		public:
+		void on_create(sys::state& state) noexcept override;
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
+	class render_models_checkbox : public checkbox_button {
+		public:
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
+	class black_map_font_checkbox : public checkbox_button {
+		public:
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
+	class railroad_checkbox : public checkbox_button {
+		public:
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
+	class river_checkbox : public checkbox_button {
+		public:
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
 
-class map_label_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class map_label_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class map_label_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class map_label_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class map_label_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class map_label_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class antialiasing_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class antialiasing_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class antialiasing_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class antialiasing_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class antialiasing_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class antialiasing_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class gaussianblur_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class gaussianblur_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class gaussianblur_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class gaussianblur_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class gaussianblur_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class gaussianblur_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class gamma_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class gamma_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class gamma_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class gamma_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class gamma_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class gamma_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class vassal_color_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class vassal_color_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class vassal_color_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class vassal_color_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class vassal_color_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class vassal_color_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class color_blind_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class color_blind_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-	void on_update(sys::state& state) noexcept override;
-};
-class color_blind_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class color_blind_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class color_blind_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+		void on_update(sys::state& state) noexcept override;
+	};
+	class color_blind_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
-class music_player_left : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-};
-class music_player_right : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override;
-};
-class music_player_display : public simple_text_element_base {
-	void on_update(sys::state& state) noexcept override;
-};
+	class music_player_left : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+	};
+	class music_player_right : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override;
+	};
+	class music_player_display : public simple_text_element_base {
+		void on_update(sys::state& state) noexcept override;
+	};
 
 struct notify_setting_update { };
 
-class settings_submenu_window : public window_element_base {
-public:
-	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-		if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "background") {
-			return make_element_by_type<draggable_target>(state, id);
-		} else if(name == "auto_save_value") {
-			return make_element_by_type<autosave_display>(state, id);
-		} else if(name == "auto_save_left") {
-			return make_element_by_type<autosave_left>(state, id);
-		} else if(name == "auto_save_right") {
-			return make_element_by_type<autosave_right>(state, id);
-		} else if(name == "language_value") {
-			return make_element_by_type<language_display>(state, id);
-		} else if(name == "language_left") {
-			return make_element_by_type<language_left>(state, id);
-		} else if(name == "language_right") {
-			return make_element_by_type<language_right>(state, id);
-		} else if(name == "zoom_mode_value") {
-			return make_element_by_type<map_zoom_mode_display>(state, id);
-		} else if(name == "zoom_mode_left") {
-			return make_element_by_type<map_zoom_mode_left>(state, id);
-		} else if(name == "zoom_mode_right") {
-			return make_element_by_type<map_zoom_mode_right>(state, id);
-		} else if(name == "tooltip_mode_checkbox") {
-			return make_element_by_type<tooltip_mode_checkbox>(state, id);
-		} else if(name == "spoilers_checkbox") {
-			return make_element_by_type<spoilers_checkbox>(state, id);
-		} else if(name == "dm_popup_checkbox") {
-			return make_element_by_type<dm_popup_checkbox>(state, id);
-		} else if(name == "zoom_speed_scrollbar") {
-			return make_element_by_type<zoom_speed_scrollbar>(state, id);
-		} else if(name == "mouse_edge_scrolling_checkbox") {
-			return make_element_by_type<map_mouse_edge_scrolling>(state, id);
-		} else if(name == "wasd_for_map_movement_checkbox") {
-			return make_element_by_type<wasd_for_map_movement_checkbox>(state, id);
-		} else if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "background") {
-			return make_element_by_type<draggable_target>(state, id);
-		} else if(name == "ui_scale_value") {
-			return make_element_by_type<ui_scale_display>(state, id);
-		} else if(name == "ui_scale_left") {
-			return make_element_by_type<ui_scale_left>(state, id);
-		} else if(name == "ui_scale_right") {
-			return make_element_by_type<ui_scale_right>(state, id);
-		} else if(name == "window_mode_checkbox") {
-			return make_element_by_type<window_mode_checkbox>(state, id);
-		} else if(name == "projection_left") {
-			return make_element_by_type<projection_mode_left>(state, id);
-		} else if(name == "projection_right") {
-			return make_element_by_type<projection_mode_right>(state, id);
-		} else if(name == "projection_value") {
-			return make_element_by_type<projection_mode_display>(state, id);
-		} else if(name == "fonts_checkbox") {
-			return make_element_by_type<fonts_mode_checkbox>(state, id);
-		} else if(name == "mouse_left_click_mode_checkbox") {
-			return make_element_by_type<left_mouse_click_mode_checkbox>(state, id);
-		} else if(name == "fow_checkbox") {
-			return make_element_by_type<fow_checkbox>(state, id);
-		} else if(name == "render_models_checkbox") {
-			return make_element_by_type<render_models_checkbox>(state, id);
-		} else if(name == "black_map_font_checkbox") {
-			return make_element_by_type<black_map_font_checkbox>(state, id);
-		} else if(name == "railroad_checkbox") {
-			return make_element_by_type<railroad_checkbox>(state, id);
-		} else if(name == "river_checkbox") {
-			return make_element_by_type<river_checkbox>(state, id);
-		} else if(name == "map_label_value") {
-			return make_element_by_type<map_label_display>(state, id);
-		} else if(name == "map_label_left") {
-			return make_element_by_type<map_label_left>(state, id);
-		} else if(name == "map_label_right") {
-			return make_element_by_type<map_label_right>(state, id);
-		} else if(name == "antialiasing_value") {
-			return make_element_by_type<antialiasing_display>(state, id);
-		} else if(name == "antialiasing_left") {
-			return make_element_by_type<antialiasing_left>(state, id);
-		} else if(name == "antialiasing_right") {
-			return make_element_by_type<antialiasing_right>(state, id);
-		} else if(name == "gaussianblur_value") {
-			return make_element_by_type<gaussianblur_display>(state, id);
-		} else if(name == "gaussianblur_left") {
-			return make_element_by_type<gaussianblur_left>(state, id);
-		} else if(name == "gaussianblur_right") {
-			return make_element_by_type<gaussianblur_right>(state, id);
-		} else if(name == "gamma_value") {
-			return make_element_by_type<gamma_display>(state, id);
-		} else if(name == "gamma_left") {
-			return make_element_by_type<gamma_left>(state, id);
-		} else if(name == "gamma_right") {
-			return make_element_by_type<gamma_right>(state, id);
-		} else if(name == "vassal_color_value") {
-			return make_element_by_type<vassal_color_display>(state, id);
-		} else if(name == "vassal_color_left") {
-			return make_element_by_type<vassal_color_left>(state, id);
-		} else if(name == "vassal_color_right") {
-			return make_element_by_type<vassal_color_right>(state, id);
-		} else if(name == "color_blind_value") {
-			return make_element_by_type<color_blind_display>(state, id);
-		} else if(name == "color_blind_left") {
-			return make_element_by_type<color_blind_left>(state, id);
-		} else if(name == "color_blind_right") {
-			return make_element_by_type<color_blind_right>(state, id);
-		} else if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "background") {
-			return make_element_by_type<draggable_target>(state, id);
-		} else if(name == "master_volume_scroll_bar") {
-			return make_element_by_type<master_volume>(state, id);
-		} else if(name == "music_volume_scroll_bar") {
-			return make_element_by_type<music_volume>(state, id);
-		} else if(name == "interface_volume_scroll_bar") {
-			return make_element_by_type<interface_volume>(state, id);
-		} else if(name == "effect_volume_scroll_bar") {
-			return make_element_by_type<effects_volume>(state, id);
-		} else if(name == "music_player_value") {
-			return make_element_by_type<music_player_display>(state, id);
-		} else if(name == "music_player_left") {
-			return make_element_by_type<music_player_left>(state, id);
-		} else if(name == "music_player_right") {
-			return make_element_by_type<music_player_right>(state, id);
-		} else if(name == "mute_on_focus_lost_checkbox") {
-			return make_element_by_type<mute_on_focus_lost_checkbox>(state, id);
-		} else {
-			return nullptr;
+	class settings_submenu_window : public window_element_base {
+		public:
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else if(name == "background") {
+				return make_element_by_type<draggable_target>(state, id);
+			} else if(name == "auto_save_value") {
+				return make_element_by_type<autosave_display>(state, id);
+			} else if(name == "auto_save_left") {
+				return make_element_by_type<autosave_left>(state, id);
+			} else if(name == "auto_save_right") {
+				return make_element_by_type<autosave_right>(state, id);
+			} else if(name == "language_value") {
+				return make_element_by_type<language_display>(state, id);
+			} else if(name == "language_left") {
+				return make_element_by_type<language_left>(state, id);
+			} else if(name == "language_right") {
+				return make_element_by_type<language_right>(state, id);
+			} else if(name == "zoom_mode_value") {
+				return make_element_by_type<map_zoom_mode_display>(state, id);
+			} else if(name == "zoom_mode_left") {
+				return make_element_by_type<map_zoom_mode_left>(state, id);
+			} else if(name == "zoom_mode_right") {
+				return make_element_by_type<map_zoom_mode_right>(state, id);
+			} else if(name == "tooltip_mode_checkbox") {
+				return make_element_by_type<tooltip_mode_checkbox>(state, id);
+			} else if(name == "spoilers_checkbox") {
+				return make_element_by_type<spoilers_checkbox>(state, id);
+			} else if(name == "dm_popup_checkbox") {
+				return make_element_by_type<dm_popup_checkbox>(state, id);
+			} else if(name == "zoom_speed_scrollbar") {
+				return make_element_by_type<zoom_speed_scrollbar>(state, id);
+			} else if(name == "mouse_edge_scrolling_checkbox") {
+				return make_element_by_type<map_mouse_edge_scrolling>(state, id);
+			} else if(name == "wasd_for_map_movement_checkbox") {
+				return make_element_by_type<wasd_for_map_movement_checkbox>(state, id);
+			} else if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else if(name == "background") {
+				return make_element_by_type<draggable_target>(state, id);
+			} else if(name == "ui_scale_value") {
+				return make_element_by_type<ui_scale_display>(state, id);
+			} else if(name == "ui_scale_left") {
+				return make_element_by_type<ui_scale_left>(state, id);
+			} else if(name == "ui_scale_right") {
+				return make_element_by_type<ui_scale_right>(state, id);
+			} else if(name == "window_mode_checkbox") {
+				return make_element_by_type<window_mode_checkbox>(state, id);
+			} else if(name == "projection_left") {
+				return make_element_by_type<projection_mode_left>(state, id);
+			} else if(name == "projection_right") {
+				return make_element_by_type<projection_mode_right>(state, id);
+			} else if(name == "projection_value") {
+				return make_element_by_type<projection_mode_display>(state, id);
+			} else if(name == "fonts_checkbox") {
+				return make_element_by_type<fonts_mode_checkbox>(state, id);
+			} else if(name == "mouse_left_click_mode_checkbox") {
+				return make_element_by_type<left_mouse_click_mode_checkbox>(state, id);
+			} else if(name == "fow_checkbox") {
+				return make_element_by_type<fow_checkbox>(state, id);
+			} else if(name == "render_models_checkbox") {
+				return make_element_by_type<render_models_checkbox>(state, id);
+			} else if(name == "black_map_font_checkbox") {
+				return make_element_by_type<black_map_font_checkbox>(state, id);
+			} else if(name == "railroad_checkbox") {
+				return make_element_by_type<railroad_checkbox>(state, id);
+			} else if(name == "river_checkbox") {
+				return make_element_by_type<river_checkbox>(state, id);
+			} else if(name == "map_label_value") {
+				return make_element_by_type<map_label_display>(state, id);
+			} else if(name == "map_label_left") {
+				return make_element_by_type<map_label_left>(state, id);
+			} else if(name == "map_label_right") {
+				return make_element_by_type<map_label_right>(state, id);
+			} else if(name == "antialiasing_value") {
+				return make_element_by_type<antialiasing_display>(state, id);
+			} else if(name == "antialiasing_left") {
+				return make_element_by_type<antialiasing_left>(state, id);
+			} else if(name == "antialiasing_right") {
+				return make_element_by_type<antialiasing_right>(state, id);
+			} else if(name == "gaussianblur_value") {
+				return make_element_by_type<gaussianblur_display>(state, id);
+			} else if(name == "gaussianblur_left") {
+				return make_element_by_type<gaussianblur_left>(state, id);
+			} else if(name == "gaussianblur_right") {
+				return make_element_by_type<gaussianblur_right>(state, id);
+			} else if(name == "gamma_value") {
+				return make_element_by_type<gamma_display>(state, id);
+			} else if(name == "gamma_left") {
+				return make_element_by_type<gamma_left>(state, id);
+			} else if(name == "gamma_right") {
+				return make_element_by_type<gamma_right>(state, id);
+			} else if(name == "vassal_color_value") {
+				return make_element_by_type<vassal_color_display>(state, id);
+			} else if(name == "vassal_color_left") {
+				return make_element_by_type<vassal_color_left>(state, id);
+			} else if(name == "vassal_color_right") {
+				return make_element_by_type<vassal_color_right>(state, id);
+			} else if(name == "color_blind_value") {
+				return make_element_by_type<color_blind_display>(state, id);
+			} else if(name == "color_blind_left") {
+				return make_element_by_type<color_blind_left>(state, id);
+			} else if(name == "color_blind_right") {
+				return make_element_by_type<color_blind_right>(state, id);
+			} else if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else if(name == "background") {
+				return make_element_by_type<draggable_target>(state, id);
+			} else if(name == "master_volume_scroll_bar") {
+				return make_element_by_type<master_volume>(state, id);
+			} else if(name == "music_volume_scroll_bar") {
+				return make_element_by_type<music_volume>(state, id);
+			} else if(name == "interface_volume_scroll_bar") {
+				return make_element_by_type<interface_volume>(state, id);
+			} else if(name == "effect_volume_scroll_bar") {
+				return make_element_by_type<effects_volume>(state, id);
+			} else if(name == "music_player_value") {
+				return make_element_by_type<music_player_display>(state, id);
+			} else if(name == "music_player_left") {
+				return make_element_by_type<music_player_left>(state, id);
+			} else if(name == "music_player_right") {
+				return make_element_by_type<music_player_right>(state, id);
+			} else if(name == "mute_on_focus_lost_checkbox") {
+				return make_element_by_type<mute_on_focus_lost_checkbox>(state, id);
+			} else {
+				return nullptr;
+			}
 		}
-	}
-};
+	};
 
-enum class settings_submenu_tab : uint8_t {
-	graphics,
-	controls,
-	sounds,
-	other
-};
-class settings_menu_window : public generic_tabbed_window<settings_submenu_tab> {
-	std::array<settings_submenu_window*, 4> submenu_windows;
-public:
-	bool setting_changed = false;
-	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-		if(name == "sub_menu_1") {
-			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
-			submenu_windows[0] = ptr.get();
-			return ptr;
-		} else if(name == "sub_menu_2") {
-			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
-			submenu_windows[1] = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "sub_menu_3") {
-			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
-			submenu_windows[2] = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "sub_menu_4") {
-			auto ptr = make_element_by_type<settings_submenu_window>(state, id);
-			submenu_windows[3] = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else if(name == "sub_menu_tab_1") {
-			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
-			ptr->target = settings_submenu_tab::graphics;
-			return ptr;
-		} else if(name == "sub_menu_tab_2") {
-			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
-			ptr->target = settings_submenu_tab::controls;
-			return ptr;
-		} else if(name == "sub_menu_tab_3") {
-			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
-			ptr->target = settings_submenu_tab::sounds;
-			return ptr;
-		} else if(name == "sub_menu_tab_4") {
-			auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
-			ptr->target = settings_submenu_tab::other;
-			return ptr;
-		} else if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else {
-			return nullptr;
+	enum class settings_submenu_tab : uint8_t {
+		graphics,
+		controls,
+		sounds,
+		other
+	};
+	class settings_menu_window : public generic_tabbed_window<settings_submenu_tab> {
+		std::array<settings_submenu_window*, 4> submenu_windows;
+		public:
+		bool setting_changed = false;
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "sub_menu_1") {
+				auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+				submenu_windows[0] = ptr.get();
+				return ptr;
+			} else if(name == "sub_menu_2") {
+				auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+				submenu_windows[1] = ptr.get();
+				ptr->set_visible(state, false);
+				return ptr;
+			} else if(name == "sub_menu_3") {
+				auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+				submenu_windows[2] = ptr.get();
+				ptr->set_visible(state, false);
+				return ptr;
+			} else if(name == "sub_menu_4") {
+				auto ptr = make_element_by_type<settings_submenu_window>(state, id);
+				submenu_windows[3] = ptr.get();
+				ptr->set_visible(state, false);
+				return ptr;
+			} else if(name == "sub_menu_tab_1") {
+				auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+				ptr->target = settings_submenu_tab::graphics;
+				return ptr;
+			} else if(name == "sub_menu_tab_2") {
+				auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+				ptr->target = settings_submenu_tab::controls;
+				return ptr;
+			} else if(name == "sub_menu_tab_3") {
+				auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+				ptr->target = settings_submenu_tab::sounds;
+				return ptr;
+			} else if(name == "sub_menu_tab_4") {
+				auto ptr = make_element_by_type<generic_tab_button<settings_submenu_tab>>(state, id);
+				ptr->target = settings_submenu_tab::other;
+				return ptr;
+			} else if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else {
+				return nullptr;
+			}
 		}
-	}
-	void on_hide(sys::state& state) noexcept override {
-		if(setting_changed)
+		void on_hide(sys::state& state) noexcept override {
+			if(setting_changed)
 			state.save_user_settings();
-	}
-	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-		if(payload.holds_type<settings_submenu_tab>()) {
-			auto enum_val = any_cast<settings_submenu_tab>(payload);
-			active_tab = enum_val;
-			for(auto const win : submenu_windows) {
-				if(win)
+		}
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<settings_submenu_tab>()) {
+				auto enum_val = any_cast<settings_submenu_tab>(payload);
+				active_tab = enum_val;
+				for(auto const win : submenu_windows) {
+					if(win)
 					win->set_visible(state, false);
-			}
-			if(submenu_windows[uint8_t(active_tab)])
+				}
+				if(submenu_windows[uint8_t(active_tab)])
 				submenu_windows[uint8_t(active_tab)]->set_visible(state, true);
-			return message_result::consumed;
-		} else if(payload.holds_type<notify_setting_update>()) {
-			setting_changed = true;
-			impl_on_update(state);
-			return message_result::consumed;
-		}
-		return message_result::unseen;
-	}
-};
-
-enum class main_menu_sub_window {
-	settings, message_settings
-};
-
-class close_application_button : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override {
-		window::close_window(state);
-	}
-};
-
-class mm_disabled_button : public button_element_base {
-public:
-	void on_create(sys::state& state) noexcept override {
-		button_element_base::on_create(state);
-		disabled = true;
-	}
-};
-
-class save_button : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override {
-		command::save_game(state, state.local_player_nation, false);
-	}
-};
-
-class save_and_quit_button : public button_element_base {
-public:
-	void button_action(sys::state& state) noexcept override {
-		command::save_game(state, state.local_player_nation, true);
-	}
-};
-
-class restricted_main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
-	settings_menu_window* settings_menu = nullptr;
-public:
-	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-		if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "settings") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::settings;
-			return ptr;
-		} else if(name == "message_settings") {
-			return make_element_by_type<mm_disabled_button>(state, id);
-		} else if(name == "save") {
-			return make_element_by_type<mm_disabled_button>(state, id);
-		} else if(name == "save_and_exit") {
-			return make_element_by_type<mm_disabled_button>(state, id);
-		} else if(name == "background") {
-			return make_element_by_type<draggable_target>(state, id);
-		} else if(name == "exit") {
-			return make_element_by_type<close_application_button>(state, id);
-		} else if(name == "settings_menu") {
-			auto ptr = make_element_by_type<settings_menu_window>(state, id);
-			settings_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else {
-			return nullptr;
-		}
-	}
-
-	void hide_subwindows(sys::state& state) {
-		if(settings_menu)
-			settings_menu->set_visible(state, false);
-	}
-
-	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-		if(payload.holds_type<main_menu_sub_window>()) {
-			auto enum_val = any_cast<main_menu_sub_window>(payload);
-			hide_subwindows(state);
-			switch(enum_val) {
-			case main_menu_sub_window::settings:
-				settings_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::message_settings:
-				break;
+				return message_result::consumed;
+			} else if(payload.holds_type<notify_setting_update>()) {
+				setting_changed = true;
+				impl_on_update(state);
+				return message_result::consumed;
 			}
-			return message_result::consumed;
+			return message_result::unseen;
 		}
-		return message_result::unseen;
-	}
-};
+	};
 
-class main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
-	settings_menu_window* settings_menu = nullptr;
-	element_base* message_settings_menu = nullptr;
-public:
-	void on_create(sys::state& state) noexcept override {
-		window_element_base::on_create(state);
+	enum class main_menu_sub_window {
+		settings, message_settings
+	};
 
-		auto m = make_element_by_type<message_settings_window>(state, "alice_message_settings");
-		message_settings_menu = m.get();
-		m->set_visible(state, false);
-		state.ui_state.root->add_child_to_front(std::move(m));
-	}
-
-	std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-		if(name == "close_button") {
-			return make_element_by_type<generic_close_button>(state, id);
-		} else if(name == "settings") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::settings;
-			return ptr;
-		} else if(name == "message_settings") {
-			auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
-			ptr->target = main_menu_sub_window::message_settings;
-			return ptr;
-		} else if(name == "background") {
-			return make_element_by_type<draggable_target>(state, id);
-		} else if(name == "exit") {
-			return make_element_by_type<close_application_button>(state, id);
-		} else if(name == "save") {
-			return make_element_by_type<save_button>(state, id);
-		} else if(name == "save_and_exit") {
-			return make_element_by_type<save_and_quit_button>(state, id);
-		} else if(name == "settings_menu") {
-			auto ptr = make_element_by_type<settings_menu_window>(state, id);
-			settings_menu = ptr.get();
-			ptr->set_visible(state, false);
-			return ptr;
-		} else {
-			return nullptr;
+	class close_application_button : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override {
+			window::close_window(state);
 		}
-	}
+	};
 
-	void hide_subwindows(sys::state& state) {
-		if(settings_menu)
+	class mm_disabled_button : public button_element_base {
+		public:
+		void on_create(sys::state& state) noexcept override {
+			button_element_base::on_create(state);
+			disabled = true;
+		}
+	};
+
+	class save_button : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override {
+			command::save_game(state, state.local_player_nation, false);
+		}
+	};
+
+	class save_and_quit_button : public button_element_base {
+		public:
+		void button_action(sys::state& state) noexcept override {
+			command::save_game(state, state.local_player_nation, true);
+		}
+	};
+
+	class restricted_main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
+		settings_menu_window* settings_menu = nullptr;
+		public:
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else if(name == "settings") {
+				auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
+				ptr->target = main_menu_sub_window::settings;
+				return ptr;
+			} else if(name == "message_settings") {
+				return make_element_by_type<mm_disabled_button>(state, id);
+			} else if(name == "save") {
+				return make_element_by_type<mm_disabled_button>(state, id);
+			} else if(name == "save_and_exit") {
+				return make_element_by_type<mm_disabled_button>(state, id);
+			} else if(name == "background") {
+				return make_element_by_type<draggable_target>(state, id);
+			} else if(name == "exit") {
+				return make_element_by_type<close_application_button>(state, id);
+			} else if(name == "settings_menu") {
+				auto ptr = make_element_by_type<settings_menu_window>(state, id);
+				settings_menu = ptr.get();
+				ptr->set_visible(state, false);
+				return ptr;
+			} else {
+				return nullptr;
+			}
+		}
+
+		void hide_subwindows(sys::state& state) {
+			if(settings_menu)
 			settings_menu->set_visible(state, false);
-		if(message_settings_menu)
+		}
+
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<main_menu_sub_window>()) {
+				auto enum_val = any_cast<main_menu_sub_window>(payload);
+				hide_subwindows(state);
+				switch(enum_val) {
+					case main_menu_sub_window::settings:
+					settings_menu->set_visible(state, true);
+					break;
+					case main_menu_sub_window::message_settings:
+					break;
+				}
+				return message_result::consumed;
+			}
+			return message_result::unseen;
+		}
+	};
+
+	class main_menu_window : public generic_tabbed_window<main_menu_sub_window> {
+		settings_menu_window* settings_menu = nullptr;
+		element_base* message_settings_menu = nullptr;
+		public:
+		void on_create(sys::state& state) noexcept override {
+			window_element_base::on_create(state);
+
+			auto m = make_element_by_type<message_settings_window>(state, "alice_message_settings");
+			message_settings_menu = m.get();
+			m->set_visible(state, false);
+			state.ui_state.root->add_child_to_front(std::move(m));
+		}
+
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "close_button") {
+				return make_element_by_type<generic_close_button>(state, id);
+			} else if(name == "settings") {
+				auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
+				ptr->target = main_menu_sub_window::settings;
+				return ptr;
+			} else if(name == "message_settings") {
+				auto ptr = make_element_by_type<generic_tab_button<main_menu_sub_window>>(state, id);
+				ptr->target = main_menu_sub_window::message_settings;
+				return ptr;
+			} else if(name == "background") {
+				return make_element_by_type<draggable_target>(state, id);
+			} else if(name == "exit") {
+				return make_element_by_type<close_application_button>(state, id);
+			} else if(name == "save") {
+				return make_element_by_type<save_button>(state, id);
+			} else if(name == "save_and_exit") {
+				return make_element_by_type<save_and_quit_button>(state, id);
+			} else if(name == "settings_menu") {
+				auto ptr = make_element_by_type<settings_menu_window>(state, id);
+				settings_menu = ptr.get();
+				ptr->set_visible(state, false);
+				return ptr;
+			} else {
+				return nullptr;
+			}
+		}
+
+		void hide_subwindows(sys::state& state) {
+			if(settings_menu)
+			settings_menu->set_visible(state, false);
+			if(message_settings_menu)
 			message_settings_menu->set_visible(state, false);
-	}
-
-	message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-		if(payload.holds_type<main_menu_sub_window>()) {
-			auto enum_val = any_cast<main_menu_sub_window>(payload);
-			hide_subwindows(state);
-			switch(enum_val) {
-			case main_menu_sub_window::settings:
-				settings_menu->set_visible(state, true);
-				break;
-			case main_menu_sub_window::message_settings:
-				message_settings_menu->set_visible(state, true);
-				state.ui_state.root->move_child_to_front(message_settings_menu);
-				break;
-			}
-			return message_result::consumed;
 		}
-		return message_result::unseen;
-	}
-};
+
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<main_menu_sub_window>()) {
+				auto enum_val = any_cast<main_menu_sub_window>(payload);
+				hide_subwindows(state);
+				switch(enum_val) {
+					case main_menu_sub_window::settings:
+					settings_menu->set_visible(state, true);
+					break;
+					case main_menu_sub_window::message_settings:
+					message_settings_menu->set_visible(state, true);
+					state.ui_state.root->move_child_to_front(message_settings_menu);
+					break;
+				}
+				return message_result::consumed;
+			}
+			return message_result::unseen;
+		}
+	};
 
 } // namespace ui
 

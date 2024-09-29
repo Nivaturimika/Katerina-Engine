@@ -57,282 +57,282 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		{GLFW_KEY_RIGHT_CONTROL, sys::virtual_key::RCONTROL}, {GLFW_KEY_RIGHT_ALT, sys::virtual_key::RMENU},
 		{GLFW_KEY_RIGHT_SUPER, sys::virtual_key::RWIN}, {GLFW_KEY_MENU, sys::virtual_key::MENU}};
 
-bool is_key_depressed(sys::state const& game_state, sys::virtual_key key) {
-	for(auto it = glfw_key_to_virtual_key.begin(); it != glfw_key_to_virtual_key.end(); ++it)
+	bool is_key_depressed(sys::state const& game_state, sys::virtual_key key) {
+		for(auto it = glfw_key_to_virtual_key.begin(); it != glfw_key_to_virtual_key.end(); ++it)
 		if(it->second == key)
 			return glfwGetKey(game_state.win_ptr->window, it->first) == GLFW_PRESS;
 
-	return false;
-}
-
-void get_window_size(sys::state const& game_state, int& width, int& height) {
-	glfwGetWindowSize(game_state.win_ptr->window, &width, &height);
-}
-
-bool is_in_fullscreen(sys::state const& game_state) {
-	return (game_state.win_ptr) && game_state.win_ptr->in_fullscreen;
-}
-
-void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
-	if(game_state.win_ptr && game_state.win_ptr->window) {
-		// Maybe fix this at some point. Just maximize atm
-		if(fullscreen)
-			glfwMaximizeWindow(game_state.win_ptr->window);
-		else
-			glfwRestoreWindow(game_state.win_ptr->window);
+		return false;
 	}
-}
 
-void close_window(sys::state& game_state) {
-	// Signal to close window (should close = yes)
-	glfwSetWindowShouldClose(game_state.win_ptr->window, 1);
-}
+	void get_window_size(sys::state const& game_state, int& width, int& height) {
+		glfwGetWindowSize(game_state.win_ptr->window, &width, &height);
+	}
 
-sys::key_modifiers get_current_modifiers(GLFWwindow* window) {
-	bool control =
+	bool is_in_fullscreen(sys::state const& game_state) {
+		return (game_state.win_ptr) && game_state.win_ptr->in_fullscreen;
+	}
+
+	void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
+		if(game_state.win_ptr && game_state.win_ptr->window) {
+			// Maybe fix this at some point. Just maximize atm
+			if(fullscreen)
+			glfwMaximizeWindow(game_state.win_ptr->window);
+			else
+			glfwRestoreWindow(game_state.win_ptr->window);
+		}
+	}
+
+	void close_window(sys::state& game_state) {
+		// Signal to close window (should close = yes)
+		glfwSetWindowShouldClose(game_state.win_ptr->window, 1);
+	}
+
+	sys::key_modifiers get_current_modifiers(GLFWwindow* window) {
+		bool control =
 			(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
-	bool alt = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS);
-	bool shift =
+		bool alt = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS);
+		bool shift =
 			(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
-	uint32_t val = uint32_t(control ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none) |
+		uint32_t val = uint32_t(control ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none) |
 								 uint32_t(alt ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none) |
 								 uint32_t(shift ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
-	return sys::key_modifiers(val);
-}
+		return sys::key_modifiers(val);
+	}
 
-sys::key_modifiers get_current_modifiers(int glfw_mods) {
-	uint32_t val =
+	sys::key_modifiers get_current_modifiers(int glfw_mods) {
+		uint32_t val =
 			uint32_t((glfw_mods & GLFW_MOD_CONTROL) ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none) |
 			uint32_t((glfw_mods & GLFW_MOD_ALT) ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none) |
 			uint32_t((glfw_mods & GLFW_MOD_SHIFT) ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
-	return sys::key_modifiers(val);
-}
+		return sys::key_modifiers(val);
+	}
 
-static void glfw_error_callback(int error, char const* description) {
+	static void glfw_error_callback(int error, char const* description) {
 	emit_error_message(std::string{ "Glfw Error " } + std::to_string(error) + std::string{ description }, false);
-}
+	}
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
 
-	sys::virtual_key virtual_key = glfw_key_to_virtual_key.at(key);
-	switch(action) {
-	case GLFW_PRESS:
-		state->on_key_down(virtual_key, get_current_modifiers(mods));
-		break;
-	case GLFW_RELEASE:
-		state->on_key_up(virtual_key, get_current_modifiers(mods));
-		break;
-	case GLFW_REPEAT:
-		switch(virtual_key) {
-		case sys::virtual_key::RETURN: [[fallthrough]];
-		case sys::virtual_key::BACK: [[fallthrough]];
-		case sys::virtual_key::DELETE_KEY: [[fallthrough]];
-		case sys::virtual_key::LEFT: [[fallthrough]];
-		case sys::virtual_key::RIGHT: [[fallthrough]];
-		case sys::virtual_key::UP: [[fallthrough]];
-		case sys::virtual_key::DOWN:
+		sys::virtual_key virtual_key = glfw_key_to_virtual_key.at(key);
+		switch(action) {
+			case GLFW_PRESS:
 			state->on_key_down(virtual_key, get_current_modifiers(mods));
 			break;
-		default:
+			case GLFW_RELEASE:
+			state->on_key_up(virtual_key, get_current_modifiers(mods));
+			break;
+			case GLFW_REPEAT:
+			switch(virtual_key) {
+				case sys::virtual_key::RETURN: [[fallthrough]];
+				case sys::virtual_key::BACK: [[fallthrough]];
+				case sys::virtual_key::DELETE_KEY: [[fallthrough]];
+				case sys::virtual_key::LEFT: [[fallthrough]];
+				case sys::virtual_key::RIGHT: [[fallthrough]];
+				case sys::virtual_key::UP: [[fallthrough]];
+				case sys::virtual_key::DOWN:
+				state->on_key_down(virtual_key, get_current_modifiers(mods));
+				break;
+				default:
+				break;
+			}
+			break;
+			default:
 			break;
 		}
-		break;
-	default:
-		break;
 	}
-}
 
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
 
-	int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
-	int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
-	state->on_mouse_move(x, y, get_current_modifiers(window));
+		int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
+		int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
+		state->on_mouse_move(x, y, get_current_modifiers(window));
 
-	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		state->on_mouse_drag(x, y, get_current_modifiers(window));
 
-	state->mouse_x_position = x;
-	state->mouse_y_position = y;
-}
-
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
-
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-	int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
-	int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
-
-	switch(action) {
-	case GLFW_PRESS:
-		if(button == GLFW_MOUSE_BUTTON_LEFT) {
-			state->on_lbutton_down(x, y, get_current_modifiers(window));
-			state->win_ptr->left_mouse_down = true;
-		} else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
-			state->on_rbutton_down(x, y, get_current_modifiers(window));
-		} else if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
-			state->on_mbutton_down(x, y, get_current_modifiers(window));
-		}
 		state->mouse_x_position = x;
 		state->mouse_y_position = y;
-		break;
-	case GLFW_RELEASE:
-		if(button == GLFW_MOUSE_BUTTON_LEFT) {
-			state->on_lbutton_up(x, y, get_current_modifiers(window));
-			state->win_ptr->left_mouse_down = false;
-		} else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
-			state->on_rbutton_up(x, y, get_current_modifiers(window));
-		} else if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
-			state->on_mbutton_up(x, y, get_current_modifiers(window));
+	}
+
+	void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
+		int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
+
+		switch(action) {
+			case GLFW_PRESS:
+			if(button == GLFW_MOUSE_BUTTON_LEFT) {
+				state->on_lbutton_down(x, y, get_current_modifiers(window));
+				state->win_ptr->left_mouse_down = true;
+			} else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
+				state->on_rbutton_down(x, y, get_current_modifiers(window));
+			} else if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
+				state->on_mbutton_down(x, y, get_current_modifiers(window));
+			}
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			break;
+			case GLFW_RELEASE:
+			if(button == GLFW_MOUSE_BUTTON_LEFT) {
+				state->on_lbutton_up(x, y, get_current_modifiers(window));
+				state->win_ptr->left_mouse_down = false;
+			} else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
+				state->on_rbutton_up(x, y, get_current_modifiers(window));
+			} else if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
+				state->on_mbutton_up(x, y, get_current_modifiers(window));
+			}
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			break;
 		}
+	}
+
+	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
+		int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
+
+		state->on_mouse_wheel(x, y, get_current_modifiers(window), (float)yoffset);
 		state->mouse_x_position = x;
 		state->mouse_y_position = y;
-		break;
 	}
-}
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
-
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-	int32_t x = (xpos > 0 ? (int32_t)std::round(xpos) : 0);
-	int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
-
-	state->on_mouse_wheel(x, y, get_current_modifiers(window), (float)yoffset);
-	state->mouse_x_position = x;
-	state->mouse_y_position = y;
-}
-
-void character_callback(GLFWwindow* window, unsigned int codepoint) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
-	if(state->ui_state.edit_target) {
-		state->on_text(codepoint);
+	void character_callback(GLFWwindow* window, unsigned int codepoint) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+		if(state->ui_state.edit_target) {
+			state->on_text(codepoint);
+		}
 	}
-}
 
-void on_window_change(GLFWwindow* window) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+	void on_window_change(GLFWwindow* window) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
 
-	window_state t = window_state::normal;
-	if(glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_MAXIMIZED)
+		window_state t = window_state::normal;
+		if(glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_MAXIMIZED)
 		t = window_state::maximized;
-	else if(glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_ICONIFIED)
+		else if(glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_ICONIFIED)
 		t = window_state::minimized;
 
-	// redo OpenGL viewport
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	state->on_resize(width, height, t);
-	state->x_size = width;
-	state->y_size = height;
-}
+		// redo OpenGL viewport
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		state->on_resize(width, height, t);
+		state->x_size = width;
+		state->y_size = height;
+	}
 
-void window_size_callback(GLFWwindow* window, int width, int height) {
-	// on_window_change(window);
-	// framebuffer_size_callback should be enough
-}
+	void window_size_callback(GLFWwindow* window, int width, int height) {
+		// on_window_change(window);
+		// framebuffer_size_callback should be enough
+	}
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	on_window_change(window);
-}
+	void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+		on_window_change(window);
+	}
 
-void window_iconify_callback(GLFWwindow* window, int iconified) {
-	on_window_change(window);
-}
+	void window_iconify_callback(GLFWwindow* window, int iconified) {
+		on_window_change(window);
+	}
 
-void window_maximize_callback(GLFWwindow* window, int maximized) {
-	on_window_change(window);
-}
+	void window_maximize_callback(GLFWwindow* window, int maximized) {
+		on_window_change(window);
+	}
 
-void focus_callback(GLFWwindow* window, int focused) {
-	sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
-	if(focused) {
-		if(state->user_settings.mute_on_focus_lost) {
-			sound::resume_all(*state);
-		}
-	} else {
-		if(state->user_settings.mute_on_focus_lost) {
-			sound::pause_all(*state);
+	void focus_callback(GLFWwindow* window, int focused) {
+		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
+		if(focused) {
+			if(state->user_settings.mute_on_focus_lost) {
+				sound::resume_all(*state);
+			}
+		} else {
+			if(state->user_settings.mute_on_focus_lost) {
+				sound::pause_all(*state);
+			}
 		}
 	}
-}
 
-void create_window(sys::state& game_state, creation_parameters const& params) {
-	game_state.win_ptr = std::make_unique<window_data_impl>();
-	game_state.win_ptr->creation_x_size = params.size_x;
-	game_state.win_ptr->creation_y_size = params.size_y;
-	game_state.win_ptr->in_fullscreen = params.borderless_fullscreen;
+	void create_window(sys::state& game_state, creation_parameters const& params) {
+		game_state.win_ptr = std::make_unique<window_data_impl>();
+		game_state.win_ptr->creation_x_size = params.size_x;
+		game_state.win_ptr->creation_y_size = params.size_y;
+		game_state.win_ptr->in_fullscreen = params.borderless_fullscreen;
 
-	// Setup window
-	glfwSetErrorCallback(glfw_error_callback);
-	if(!glfwInit())
+		// Setup window
+		glfwSetErrorCallback(glfw_error_callback);
+		if(!glfwInit())
 		emit_error_message("Failed to init glfw\n", true);
 
-	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-	//glfwWindowHint(GLFW_SAMPLES, game_state.user_settings.antialias_level);
+		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+		//glfwWindowHint(GLFW_SAMPLES, game_state.user_settings.antialias_level);
 
-	// Create window with graphics context
-	auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
-	if(window == NULL)
+		// Create window with graphics context
+		auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
+		if(window == NULL)
 		emit_error_message("Failed to create window\n", true);
-	game_state.win_ptr->window = window;
+		game_state.win_ptr->window = window;
 
-	glfwSetWindowUserPointer(window, &game_state);
+		glfwSetWindowUserPointer(window, &game_state);
 
-	// event callbacks
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetCursorPosCallback(window, cursor_position_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetCharCallback(window, character_callback);
-	glfwSetWindowSizeCallback(window, window_size_callback);
-	glfwSetWindowIconifyCallback(window, window_iconify_callback);
-	glfwSetWindowMaximizeCallback(window, window_maximize_callback);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetWindowFocusCallback(window, focus_callback);
-	glfwSetWindowSizeLimits(window, 640, 400, 2400, 1800);
+		// event callbacks
+		glfwSetKeyCallback(window, key_callback);
+		glfwSetCursorPosCallback(window, cursor_position_callback);
+		glfwSetMouseButtonCallback(window, mouse_button_callback);
+		glfwSetScrollCallback(window, scroll_callback);
+		glfwSetCharCallback(window, character_callback);
+		glfwSetWindowSizeCallback(window, window_size_callback);
+		glfwSetWindowIconifyCallback(window, window_iconify_callback);
+		glfwSetWindowMaximizeCallback(window, window_maximize_callback);
+		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+		glfwSetWindowFocusCallback(window, focus_callback);
+		glfwSetWindowSizeLimits(window, 640, 400, 2400, 1800);
 
-	ogl::initialize_opengl(game_state);
+		ogl::initialize_opengl(game_state);
 
-	sound::initialize_sound_system(game_state);
-	sound::start_music(game_state, game_state.user_settings.master_volume * game_state.user_settings.music_volume);
+		sound::initialize_sound_system(game_state);
+		sound::start_music(game_state, game_state.user_settings.master_volume * game_state.user_settings.music_volume);
 
-	on_window_change(window); // Init the window size
+		on_window_change(window); // Init the window size
 
-	change_cursor(game_state, cursor_type::busy);
-	game_state.on_create();
-	change_cursor(game_state, cursor_type::normal);
+		change_cursor(game_state, cursor_type::busy);
+		game_state.on_create();
+		change_cursor(game_state, cursor_type::normal);
 
-	while(!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-		// Run game code
+		while(!glfwWindowShouldClose(window)) {
+			glfwPollEvents();
+			// Run game code
 
-		game_state.render();
-		glfwSwapBuffers(window);
+			game_state.render();
+			glfwSwapBuffers(window);
 
-		sound::update_music_track(game_state);
+			sound::update_music_track(game_state);
+		}
+
+		glfwDestroyWindow(window);
+		glfwTerminate();
 	}
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
-}
-
-void change_cursor(sys::state const& state, cursor_type type) {
-	//TODO: Implement on linux
-}
-
-void emit_error_message(std::string const& content, bool fatal) {
-	std::fprintf(stderr, "%s", content.c_str());
-	if(fatal) {
-		std::exit(EXIT_FAILURE);
+	void change_cursor(sys::state const& state, cursor_type type) {
+		//TODO: Implement on linux
 	}
-}
+
+	void emit_error_message(std::string const& content, bool fatal) {
+		std::fprintf(stderr, "%s", content.c_str());
+		if(fatal) {
+			std::exit(EXIT_FAILURE);
+		}
+	}
 
 } // namespace window

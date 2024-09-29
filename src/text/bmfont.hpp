@@ -35,47 +35,47 @@ For more information, please refer to <http://unlicense.org/>
 #include "unordered_dense.h"
 
 namespace sys {
-struct state;
+	struct state;
 }
 
 namespace text {
 
-struct char_descriptor {
-	int32_t x = 0;
-	int32_t y = 0;
-	int32_t width = 0;
-	int32_t height = 0;
-	int32_t x_offset = 0;
-	int32_t y_offset = 0;
-	int32_t x_advance = 0;
-	int32_t page = 0;
-};
+	struct char_descriptor {
+		int32_t x = 0;
+		int32_t y = 0;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t x_offset = 0;
+		int32_t y_offset = 0;
+		int32_t x_advance = 0;
+		int32_t page = 0;
+	};
 
-class bm_font {
-public:
+	class bm_font {
+		public:
 	bm_font() { }
-	bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image);
-	bm_font(bm_font&& src) noexcept;
-	bm_font& operator=(bm_font&& src) noexcept;
-	~bm_font();
+		bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image);
+		bm_font(bm_font&& src) noexcept;
+		bm_font& operator=(bm_font&& src) noexcept;
+		~bm_font();
 
-	std::array<char_descriptor, 256> chars;
-	ankerl::unordered_dense::map<uint16_t, int32_t> kernings;
-	int32_t line_height = 0;
-	int32_t base = 0;
-	int32_t width = 0;
-	int32_t height = 0;
-	int32_t pages = 0;
-	int32_t scale_w = 0;
-	int32_t scale_h = 0;
-	GLuint ftexid = 0;
+		std::array<char_descriptor, 256> chars;
+		ankerl::unordered_dense::map<uint16_t, int32_t> kernings;
+		int32_t line_height = 0;
+		int32_t base = 0;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t pages = 0;
+		int32_t scale_w = 0;
+		int32_t scale_h = 0;
+		GLuint ftexid = 0;
 
 	float get_height() const { return float(line_height); }
-	float get_string_width(sys::state& state, char const*, uint32_t) const;
-	bool parse_font(sys::state& state, simple_fs::file& f);
-	int get_kerning_pair(char, char) const;
-};
+		float get_string_width(sys::state& state, char const*, uint32_t) const;
+		bool parse_font(sys::state& state, simple_fs::file& f);
+		int get_kerning_pair(char, char) const;
+	};
 
-bm_font const& get_bm_font(sys::state& state, uint16_t font_handle);
+	bm_font const& get_bm_font(sys::state& state, uint16_t font_handle);
 
 } // namespace text

@@ -704,13 +704,13 @@
 //constexpr inline float needs_scaling_factor = 1'000'000.0f * 2.0f;
 
 namespace parsing {
-struct defines {
-#define LUA_DEFINES_LIST_ELEMENT(key, const_value) float key = const_value##f;
-	LUA_DEFINES_LIST
-#undef LUA_DEFINES_LIST_ELEMENT
+	struct defines {
+		#define LUA_DEFINES_LIST_ELEMENT(key, const_value) float key = const_value##f;
+		LUA_DEFINES_LIST
+		#undef LUA_DEFINES_LIST_ELEMENT
 
-	void assign_define(sys::state& state, int32_t line, std::string_view key, float v, parsers::error_handler& err);
-	void parse_line(sys::state& state, int32_t line, std::string_view data, parsers::error_handler& err);
-	void parse_file(sys::state& state, std::string_view data, parsers::error_handler& err);
-};
+		void assign_define(sys::state& state, int32_t line, std::string_view key, float v, parsers::error_handler& err);
+		void parse_line(sys::state& state, int32_t line, std::string_view data, parsers::error_handler& err);
+		void parse_file(sys::state& state, std::string_view data, parsers::error_handler& err);
+	};
 } // namespace parsing
