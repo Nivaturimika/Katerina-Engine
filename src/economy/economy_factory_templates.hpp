@@ -1,7 +1,7 @@
 #pragma once
 #include "system_state.hpp"
 
-namespace factory {
+namespace economy_factory {
 	template<typename F>
 	void for_each_new_factory(sys::state& state, dcon::state_instance_id s, F&& func) {
 		for(auto st_con : state.world.state_instance_get_state_building_construction(s)) {

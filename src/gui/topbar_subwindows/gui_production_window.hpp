@@ -9,9 +9,9 @@
 #include "gui_build_factory_window.hpp"
 #include "gui_project_investment_window.hpp"
 #include "gui_foreign_investment_window.hpp"
-#include "factory_templates.hpp"
+#include "economy_factory_templates.hpp"
 #include "province_templates.hpp"
-#include "factory.hpp"
+#include "economy_factory.hpp"
 #include "economy.hpp"
 
 namespace ui {

@@ -1,4 +1,4 @@
-#include "factory.hpp"
+#include "economy_factory.hpp"
 #include "demographics.hpp"
 #include "dcon_generated.hpp"
 #include "ai.hpp"
@@ -8,10 +8,10 @@
 #include "nations_templates.hpp"
 #include "province_templates.hpp"
 #include "triggers.hpp"
-#include "factory_templates.hpp"
+#include "economy_factory_templates.hpp"
 #include "economy.hpp"
 
-namespace factory {
+namespace economy_factory {
 	template void for_each_new_factory<std::function<void(new_factory)>>(sys::state&, dcon::state_instance_id, std::function<void(new_factory)>&&);
 	template void for_each_upgraded_factory<std::function<void(upgraded_factory)>>(sys::state&, dcon::state_instance_id, std::function<void(upgraded_factory)>&&);
 

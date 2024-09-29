@@ -4,7 +4,7 @@
 #include "dcon_generated.hpp"
 #include "economy.hpp"
 
-namespace factory {
+namespace economy_factory {
 
 	inline constexpr float factory_closed_threshold = 0.0001f;
 

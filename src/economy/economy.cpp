@@ -8,7 +8,7 @@
 #include "nations_templates.hpp"
 #include "province_templates.hpp"
 #include "triggers.hpp"
-#include "factory.hpp"
+#include "economy_factory.hpp"
 
 namespace economy {
 
