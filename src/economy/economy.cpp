@@ -942,7 +942,7 @@ namespace economy {
 				auto& base_cost = c.get_type().get_construction_costs();
 				auto& current_purchased = c.get_purchased_goods();
 				float construction_time = float(c.get_type().get_construction_time());
-				float cost_mod = factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
+				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
@@ -988,7 +988,7 @@ namespace economy {
 				auto& base_cost = c.get_type().get_construction_costs();
 				auto& current_purchased = c.get_purchased_goods();
 				float construction_time = float(c.get_type().get_construction_time());
-				float cost_mod = factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
+				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod)
@@ -1460,7 +1460,7 @@ namespace economy {
 			auto& base_cost = c.get_type().get_construction_costs();
 			auto& current_purchased = c.get_purchased_goods();
 			float construction_time = float(c.get_type().get_construction_time());
-			float cost_mod = factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
+			float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 			for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
@@ -1525,19 +1525,19 @@ namespace economy {
 		concurrency::parallel_for(0, 10, [&](int32_t index) {
 			switch(index) {
 				case 0:
-				populate_army_consumption(state);
+					populate_army_consumption(state);
 				break;
 				case 1:
-				populate_navy_consumption(state);
+					populate_navy_consumption(state);
 				break;
 				case 2:
-				populate_construction_consumption(state);
+					populate_construction_consumption(state);
 				break;
 				case 3:
-				populate_private_construction_consumption(state);
+					populate_private_construction_consumption(state);
 				break;
 				case 4:
-				factory::update_factory_triggered_modifiers(state);
+					economy_factory::update_factory_triggered_modifiers(state);
 				break;
 				case 5:
 				state.world.for_each_pop_type([&](dcon::pop_type_id t) {
@@ -1647,7 +1647,7 @@ namespace economy {
 				for(auto f : state.world.province_get_factory_location(p.get_province())) {
 					// factory
 
-					factory::update_single_factory_consumption(
+					economy_factory::update_single_factory_consumption(
 					state,
 					f.get_factory(),
 					n,
@@ -1985,7 +1985,7 @@ namespace economy {
 
 				for(auto f : state.world.province_get_factory_location(p.get_province())) {
 					// factory
-					factory::update_single_factory_production(state, f.get_factory(), n, factory_min_wage);
+					economy_factory::update_single_factory_production(state, f.get_factory(), n, factory_min_wage);
 				}
 
 				// artisan
@@ -2062,7 +2062,7 @@ namespace economy {
 				rgo_owner_profit = num_aristocrat > 0.f ? rgo_owner_profit / num_aristocrat : 0.0f;
 
 				auto const min_wage = factory_min_wage;
-				auto profit = factory::distribute_factory_profit(state, si.get_state(), min_wage, total_profit);
+				auto profit = economy_factory::distribute_factory_profit(state, si.get_state(), min_wage, total_profit);
 				province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 					for(auto pl : state.world.province_get_pop_location(p)) {
 						if(state.culture_definitions.primary_factory_worker == pl.get_pop().get_poptype()) {
@@ -2377,7 +2377,7 @@ namespace economy {
 
 						if(num_factories < int32_t(state.defines.factories_per_state) && (nation_rules & issue_rule::pop_build_factory) != 0) {
 							// randomly try a valid (check coastal, unlocked, non existing) factory
-							if(factory::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
+							if(economy_factory::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
 							continue;
 							if(!desired_types.empty()) {
 								std::vector<dcon::factory_type_id> valid_desired_types;
@@ -2409,8 +2409,8 @@ namespace economy {
 								}
 
 								std::sort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
-									auto a_bonus = factory::sum_of_factory_triggered_modifiers(state, a, s);
-									auto b_bonus = factory::sum_of_factory_triggered_modifiers(state, b, s);
+									auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s);
+									auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s);
 									if(a_bonus != b_bonus)
 									return a_bonus > b_bonus;
 									return a.index() < b.index(); // force total ordering
@@ -2802,7 +2802,7 @@ namespace economy {
 				auto& base_cost = c.get_type().get_construction_costs();
 				auto& current_purchased = c.get_purchased_goods();
 				float construction_time = float(c.get_type().get_construction_time());
-				float cost_mod = factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
+				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod)
@@ -2826,7 +2826,7 @@ namespace economy {
 		for(auto st_con : state.world.state_instance_get_state_building_construction(s)) {
 			if(st_con.get_type() == t) {
 				auto& goods = state.world.factory_type_get_construction_costs(st_con.get_type());
-				float cost_mod = factory::factory_build_cost_modifier(state, st_con.get_nation(), st_con.get_is_pop_project());
+				float cost_mod = economy_factory::factory_build_cost_modifier(state, st_con.get_nation(), st_con.get_is_pop_project());
 				float total = 0.0f;
 				float purchased = 0.0f;
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
@@ -3067,7 +3067,7 @@ namespace economy {
 			auto type = state.world.state_building_construction_get_type(c);
 			auto& base_cost = state.world.factory_type_get_construction_costs(type);
 			auto& current_purchased = state.world.state_building_construction_get_purchased_goods(c);
-			float cost_mod = factory::factory_build_cost_modifier(state, n, state.world.state_building_construction_get_is_pop_project(c));
+			float cost_mod = economy_factory::factory_build_cost_modifier(state, n, state.world.state_building_construction_get_is_pop_project(c));
 			bool all_finished = true;
 			if(!(n == state.local_player_nation && state.cheat_data.instant_industry)) {
 				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
@@ -3081,7 +3081,7 @@ namespace economy {
 				}
 			}
 			if(all_finished) {
-				factory::add_factory_level_to_state(state, state.world.state_building_construction_get_state(c), type, state.world.state_building_construction_get_is_upgrade(c));
+				economy_factory::add_factory_level_to_state(state, state.world.state_building_construction_get_state(c), type, state.world.state_building_construction_get_is_upgrade(c));
 				if(state.world.state_building_construction_get_nation(c) == state.local_player_nation
 				&& state.world.state_building_construction_get_is_pop_project(c)) {
 					notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {

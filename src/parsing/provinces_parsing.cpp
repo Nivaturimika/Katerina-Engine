@@ -282,9 +282,7 @@ namespace parsers {
 	}
 
 	void province_history_file::finish(province_file_context& context) {
-		std::stable_sort(context.history_blocks.begin(), context.history_blocks.end(), [](const auto& a, const auto& b) {
-			return a.first < b.first;
-		});
+		
 	}
 
 	void enter_dated_block(std::string_view name, token_generator& gen, error_handler& err, province_file_context& context) {
@@ -294,7 +292,7 @@ namespace parsers {
 			gen.discard_group();
 		} else {
 			context.history_blocks.emplace_back(d, gen);
-			//parse_province_history_file(gen, err, context); //unordered execute -- printout errors
+			gen.discard_group();
 		}
 	}
 

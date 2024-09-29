@@ -1923,9 +1923,9 @@ namespace ui {
 				case ledger_sort_type::employment:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
 					if(lsort.reversed) {
-						return economy::factory_total_employment(state, a) < economy::factory_total_employment(state, b);
+						return economy_factory::factory_total_employment(state, a) < economy_factory::factory_total_employment(state, b);
 					} else {
-						return economy::factory_total_employment(state, a) > economy::factory_total_employment(state, b);
+						return economy_factory::factory_total_employment(state, a) > economy_factory::factory_total_employment(state, b);
 					}
 				});
 				break;
