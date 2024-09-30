@@ -2910,8 +2910,9 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 		for(auto t : world.in_technology) {
 			for(auto n : world.in_nation) {
-				if(n.get_active_technologies(t))
-				culture::apply_technology(*this, n, t);
+				if(n.get_active_technologies(t)) {
+					culture::apply_technology(*this, n, t);
+				}
 			}
 		}
 		for(auto t : world.in_invention) {
@@ -2924,6 +2925,11 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					culture::apply_invention(*this, n, t);
 				}
 			}
+		}
+
+		// TODO: default diplo points is 9, why?
+		for(auto n : world.in_nation) {
+			n.set_diplomatic_points(9.f);
 		}
 
 		map_loader.join();
@@ -2959,7 +2965,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			}
 		}
 		for(int32_t i = province_definitions.first_sea_province.index(); i < int32_t(world.province_size()); ++i) {
-		dcon::province_id id{ dcon::province_id::value_base_t(i) };
+			dcon::province_id id{ dcon::province_id::value_base_t(i) };
 			world.province_set_terrain(id, context.ocean_terrain);
 		}
 
