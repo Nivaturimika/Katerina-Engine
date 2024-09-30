@@ -36,6 +36,7 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"src/culture/rebels.cpp"
 	"src/economy/demographics.cpp"
 	"src/economy/economy.cpp"
+ 	"src/economy/economy_factory.cpp"
 	"src/gamestate/commands.cpp"
 	"src/gamestate/diplomatic_messages.cpp"
 	"src/gamestate/modifiers.cpp"
@@ -75,17 +76,18 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"src/zstd/zstd.cpp"
 	"src/network/pcp.cpp"
 	"src/gamestate/game_scene.cpp"
+ 
 )
 
 if(WIN32)
 add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}
 	"src/alice.rc"
-	${ASSET_FILES} "src/economy/economy_factory.cpp")
+	${ASSET_FILES})
 add_executable(KatEngineIncremental WIN32
 	${ALICE_INCREMENTAL_SOURCES_LIST}
 	"src/alice.rc"
-	${ASSET_FILES} "src/economy/economy_factory.cpp")
+	${ASSET_FILES})
 else()
 add_executable(KatEngine WIN32
 	${ALICE_CORE_SOURCES_LIST}
