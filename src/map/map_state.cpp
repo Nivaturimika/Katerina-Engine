@@ -15,7 +15,6 @@
 #include <set>
 
 namespace map {
-
 	dcon::province_id map_state::get_selected_province() {
 		return selected_province;
 	}
@@ -64,7 +63,7 @@ namespace map {
 
 	glm::vec2 get_navy_location(sys::state& state, dcon::province_id prov_id) {
 		if(is_sea_province(state, prov_id))
-		return state.world.province_get_mid_point(prov_id);
+			return state.world.province_get_mid_point(prov_id);
 		return get_port_location(state, prov_id);
 	}
 
@@ -324,7 +323,7 @@ namespace map {
 				}
 			}
 			if(!n || n.get_owned_province_count() == 0)
-			continue;
+				continue;
 
 			auto nation_name = text::produce_simple_string(state, text::get_name(state, n));
 			nation_name = nation_name_prettify_for_map(state, nation_name);
@@ -442,7 +441,7 @@ namespace map {
 					break;
 				}
 				default:
-				break; //no fix
+					break; //no fix
 			}
 
 			std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
@@ -635,7 +634,7 @@ namespace map {
 			//throwing away bad cluster
 
 			std::vector<glm::vec2> good_points;
-		glm::vec2 sum_points = { 0.f, 0.f };
+			glm::vec2 sum_points = { 0.f, 0.f };
 			for(auto point : points) {
 				size_t closest = 0;
 				float best_dist = std::numeric_limits<float>::max();
@@ -720,12 +719,12 @@ namespace map {
 				update_bbox(key_provs, key_point);
 			}
 
-		glm::vec2 map_size{ float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y) };
-		glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
-		glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
+			glm::vec2 map_size{ float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y) };
+			glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
+			glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
 
-			if(ratio.x < 0.001f || ratio.y < 0.001f)
-			continue;
+			if(ratio.x < 0.003f || ratio.y < 0.003f)
+				continue;
 
 			points = final_points;
 
