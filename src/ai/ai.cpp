@@ -969,9 +969,9 @@ namespace ai {
 			continue;
 			*/
 
-			float base_income = economy::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
+			float base_income = economy_estimations::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
 
-			if(economy::estimate_construction_spending(state, n) > 0.5f * base_income)
+			if(economy_estimations::estimate_construction_spending(state, n) > 0.5f * base_income)
 			continue;
 
 			//if our army is too small, ignore buildings:
@@ -3263,7 +3263,7 @@ namespace ai {
 					if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 					return;
 
-					float base_income = economy::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
+					float base_income = economy_estimations::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
 
 					// they don't have to add up to 1.f
 					// the reason they are there is to slow down AI spendings,
@@ -3304,22 +3304,22 @@ namespace ai {
 					float soldiers_budget = soldiers_budget_ratio * base_income;
 					float overseas_budget = overseas_maintenance_budget_ratio * base_income;
 
-					float ratio_land = 100.f * land_budget / (1.f + economy::estimate_land_spending(state, n));
-					float ratio_naval = 100.f * naval_budget / (1.f + economy::estimate_naval_spending(state, n));
+					float ratio_land = 100.f * land_budget / (1.f + economy_estimations::estimate_land_spending(state, n));
+					float ratio_naval = 100.f * naval_budget / (1.f + economy_estimations::estimate_naval_spending(state, n));
 
 					ratio_land = n.get_is_at_war() && n.get_ai_is_threatened() ? 100.f : std::clamp(ratio_land * 0.5f, 0.f, 25.f);
 					ratio_naval = n.get_is_at_war() && n.get_ai_is_threatened() ? 75.f : std::clamp(ratio_naval * 0.5f, 0.f, 25.f);
 					n.set_land_spending(int8_t(ratio_land));
 					n.set_naval_spending(int8_t(ratio_naval));
 
-					float ratio_construction = 100.f * construction_budget / (1.f + economy::estimate_construction_spending(state, n));
+					float ratio_construction = 100.f * construction_budget / (1.f + economy_estimations::estimate_construction_spending(state, n));
 					ratio_construction = std::clamp(ratio_construction, 1.f, 100.f);
 					n.set_construction_spending(int8_t(ratio_construction));
-		
-					float max_education_budget = 1.f + economy::estimate_pop_payouts_by_income_type(state, n, culture::income_type::education);
-					float max_soldiers_budget = 1.f + economy::estimate_pop_payouts_by_income_type(state, n, culture::income_type::military);
-					float max_admin_budget = 1.f + economy::estimate_pop_payouts_by_income_type(state, n, culture::income_type::administration);
-					float max_overseas_budget = 1.f + economy::estimate_overseas_penalty_spending(state, n);
+
+					float max_education_budget = 1.f + economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::education);
+					float max_soldiers_budget = 1.f + economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::military);
+					float max_admin_budget = 1.f + economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::administration);
+					float max_overseas_budget = 1.f + economy_estimations::estimate_overseas_penalty_spending(state, n);
 
 					// solving x^2 * max = desired
 					float ratio_education = 100.f * math::sqrt(education_budget / max_education_budget);
@@ -3328,7 +3328,7 @@ namespace ai {
 
 					if(n.get_is_civilized()) {
 						float investment_budget = investments_budget_ratio * base_income;
-						float max_investment_budget = 1.f + economy::estimate_domestic_investment(state, n);
+						float max_investment_budget = 1.f + economy_estimations::estimate_domestic_investment(state, n);
 						float investment_ratio = 100.f * math::sqrt(investment_budget / max_investment_budget);
 						investment_ratio = std::clamp(investment_ratio, 0.f, 100.f);
 						n.set_domestic_investment_spending(int8_t(investment_ratio));
