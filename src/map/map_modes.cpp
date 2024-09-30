@@ -1,12 +1,13 @@
-#include "map_modes.hpp"
+#include <unordered_map>
 
+#include "map_modes.hpp"
 #include "color.hpp"
 #include "demographics.hpp"
 #include "system_state.hpp"
 #include "dcon_generated.hpp"
 #include "province.hpp"
 #include "nations.hpp"
-#include <unordered_map>
+#include "economy_factory.hpp"
 
 #include "modes/political.hpp"
 #include "modes/supply.hpp"

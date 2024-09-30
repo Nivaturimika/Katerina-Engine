@@ -1,5 +1,6 @@
 #pragma once
 #include "system_state.hpp"
+#include "economy_factory.hpp"
 
 namespace economy_factory {
 	template<typename F>

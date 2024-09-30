@@ -3,6 +3,7 @@
 #include "demographics.hpp"
 #include "military_templates.hpp"
 #include "nations_templates.hpp"
+#include "economy_factory.hpp"
 #include "prng.hpp"
 #include "province_templates.hpp"
 #include "ve_scalar_extensions.hpp"
@@ -2335,18 +2336,16 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_has_building_state_from_province) {
 		auto state = ws.world.province_get_state_membership(to_prov(primary_slot));
-		auto result =
-			ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) { return economy::has_building(ws, s, f); }, state);
+		auto result = ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) { return economy::has_building(ws, s, f); }, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_building_factory_from_province) {
 		auto state = ws.world.province_get_state_membership(to_prov(primary_slot));
-	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
+		auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_empty) {
-		return compare_to_true(tval[0],
-			ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot)) == dcon::nation_id());
+		return compare_to_true(tval[0], ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot)) == dcon::nation_id());
 	}
 	TRIGGER_FUNCTION(tf_empty_state) {
 		return compare_to_true(tval[0], to_state(primary_slot) == dcon::state_instance_id());

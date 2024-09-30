@@ -723,7 +723,7 @@ namespace map {
 			glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
 			glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
 
-			if(ratio.x < 0.003f || ratio.y < 0.003f)
+			if(ratio.x < 0.005f || ratio.y < 0.005f)
 				continue;
 
 			points = final_points;

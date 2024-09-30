@@ -10,6 +10,7 @@
 #include "province_templates.hpp"
 #include "nations_templates.hpp"
 #include "triggers.hpp"
+#include "economy_factory.hpp"
 
 namespace ai {
 

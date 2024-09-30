@@ -5,6 +5,7 @@
 #include "politics.hpp"
 #include "prng.hpp"
 #include "province_templates.hpp"
+#include "economy_factory.hpp"
 #include "rebels.hpp"
 #include "triggers.hpp"
 #include "script_constants.hpp"
@@ -2805,20 +2806,19 @@ namespace effect {
 	}
 	uint32_t ef_build_factory_in_capital_state(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
-		auto cs = ws.world.province_get_state_membership(c);
-		if(!cs)
-		return 0;
-		economy_factory::try_add_factory_to_state(ws, cs, trigger::payload(tval[1]).fac_id);
+		if(auto cs = ws.world.province_get_state_membership(c); cs) {
+			economy_factory::try_add_factory_to_state(ws, cs, trigger::payload(tval[1]).fac_id);
+		}
 		return 0;
 	}
 	uint32_t ef_activate_technology(EFFECT_PARAMTERS) {
 		if(ws.world.nation_get_active_technologies(trigger::to_nation(primary_slot), trigger::payload(tval[1]).tech_id) == false)
-		culture::apply_technology(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).tech_id);
+			culture::apply_technology(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).tech_id);
 		return 0;
 	}
 	uint32_t ef_activate_invention(EFFECT_PARAMTERS) {
 		if(ws.world.nation_get_active_inventions(trigger::to_nation(primary_slot), trigger::payload(tval[1]).invt_id) == true)
-		culture::apply_invention(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).invt_id);
+			culture::apply_invention(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).invt_id);
 		return 0;
 	}
 	uint32_t ef_great_wars_enabled_yes(EFFECT_PARAMTERS) {
