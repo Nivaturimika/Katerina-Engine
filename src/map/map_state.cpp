@@ -267,6 +267,7 @@ namespace map {
 		// retroscipt
 		std::vector<text_line_generator_data> text_data;
 		std::vector<bool> visited(65536, false);
+		std::vector<uint16_t> group_of_regions;
 		std::unordered_map<uint16_t, std::set<uint16_t>> regions_graph;
 
 		int samples_N = 100;
@@ -275,6 +276,22 @@ namespace map {
 		float step_y = float(map_data.size_y) / float(samples_M);
 
 		// generate graph of regions:
+		for(auto candidate : state.world.in_province) {
+			auto rid = candidate.get_connected_region_id();
+
+			auto nation = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(candidate));
+
+			for(auto adj : candidate.get_province_adjacency()) {
+				auto indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
+				auto neighbor = adj.get_connected_provinces(indx);
+				// if sea, try to jump to the next province
+				if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
+					auto nation_2 = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(neighbor));
+					if(nation == nation_2)
+						regions_graph[rid].insert(neighbor.get_connected_region_id());
+				}
+			}
+		}
 		for(auto p : state.world.in_province) {
 			if(p.id.index() >= state.province_definitions.first_sea_province.index())
 				break;
@@ -287,6 +304,21 @@ namespace map {
 			n = get_top_overlord(state, n.id);
 
 			//Flood fill regions
+			group_of_regions.clear();
+			group_of_regions.push_back(rid);
+			int first_index = 0;
+			int vacant_index = 1;
+			while(first_index < vacant_index) {
+				auto current_region = group_of_regions[first_index];
+				first_index++;
+				for(auto neighbour_region : regions_graph[current_region]) {
+					if(!visited[neighbour_region]) {
+						group_of_regions.push_back(neighbour_region);
+						visited[neighbour_region] = true;
+						vacant_index++;
+					}
+				}
+			}
 			if(!n || n.get_owned_province_count() == 0)
 				continue;
 
@@ -294,10 +326,15 @@ namespace map {
 			nation_name = nation_name_prettify_for_map(state, nation_name);
 
 			std::string name = nation_name;
-			bool connected_to_capital = (n.get_capital().get_connected_region_id() == rid);
+			bool connected_to_capital = false;
+			for(auto visited_region : group_of_regions) {
+				if(n.get_capital().get_connected_region_id() == visited_region) {
+					connected_to_capital = true;
+				}
+			}
 			if(!connected_to_capital) {
 				auto state_name = text::get_short_state_name(state, p.get_state_membership());
-			text::substitution_map sub{};
+				text::substitution_map sub{};
 				text::add_to_substitution_map(sub, text::variable_type::adj, text::get_adjective(state, n));
 				text::add_to_substitution_map(sub, text::variable_type::country, std::string_view(nation_name));
 				text::add_to_substitution_map(sub, text::variable_type::province, p);
@@ -314,17 +351,19 @@ namespace map {
 				dcon::province_id last_province;
 				province::for_each_land_province(state, [&](dcon::province_id candidate_id) {
 					auto candidate = dcon::fatten(state.world, candidate_id);
-					if(candidate.get_connected_region_id() == rid) {
-						if(candidate.get_state_membership() == p.get_state_membership()) {
-							++total_same_state;
-						}
-						++total_provinces;
-						for(const auto core : candidate.get_core_as_province()) {
-							uint32_t v = 1;
-							if(auto const it = map.find(core.get_identity().id.index()); it != map.end()) {
-								v += it->second;
+					for(auto visited_region : group_of_regions) {
+						if(candidate.get_connected_region_id() == visited_region) {
+							if(candidate.get_state_membership() == p.get_state_membership()) {
+								++total_same_state;
 							}
-							map.insert_or_assign(core.get_identity().id.index(), v);
+							++total_provinces;
+							for(const auto core : candidate.get_core_as_province()) {
+								uint32_t v = 1;
+								if(auto const it = map.find(core.get_identity().id.index()); it != map.end()) {
+									v += it->second;
+								}
+								map.insert_or_assign(core.get_identity().id.index(), v);
+							}
 						}
 					}
 				});
@@ -382,24 +421,25 @@ namespace map {
 			}
 
 			if(name.empty())
-			continue;
+				continue;
 
 			// grammatical gender fix
 			switch(state.world.locale_get_grammatical_gender_mode(state.font_collection.get_current_locale())) {
-				case 1: { //spanish
-					auto sp = name.find_first_of(' ');
-					if(sp != std::string::npos && sp > 0) {
-						//yes, purpousefully lowercase
-						if(name[sp - 1] == 'o' && name[name.length() - 1] == 'a') {
-							name[name.length() - 1] = 'o';
-						} else if(name[sp - 1] == 'a' && name[name.length() - 1] == 'o') {
-							name[name.length() - 1] = 'a';
-						}
+			case 1:
+			{ //spanish
+				auto sp = name.find_first_of(' ');
+				if(sp != std::string::npos && sp > 0) {
+					//yes, purpousefully lowercase
+					if(name[sp - 1] == 'o' && name[name.length() - 1] == 'a') {
+						name[name.length() - 1] = 'o';
+					} else if(name[sp - 1] == 'a' && name[name.length() - 1] == 'o') {
+						name[name.length() - 1] = 'a';
 					}
-					break;
 				}
-				default:
-					break; //no fix
+				break;
+			}
+			default:
+				break; //no fix
 			}
 
 			std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
@@ -407,26 +447,31 @@ namespace map {
 			});
 
 			float rough_box_left = std::numeric_limits<float>::max();
-			float rough_box_right = 0.f;
+			float rough_box_right = 0;
 			float rough_box_bottom = std::numeric_limits<float>::max();
-			float rough_box_top = 0.f;
-			for(auto candidate : state.world.in_province) {
-				if(candidate.get_connected_region_id() == rid) {
-					glm::vec2 mid_point = candidate.get_mid_point();
-					if(mid_point.x < rough_box_left) {
-						rough_box_left = mid_point.x;
-					}
-					if(mid_point.x > rough_box_right) {
-						rough_box_right = mid_point.x;
-					}
-					if(mid_point.y < rough_box_bottom) {
-						rough_box_bottom = mid_point.y;
-					}
-					if(mid_point.y > rough_box_top) {
-						rough_box_top = mid_point.y;
+			float rough_box_top = 0;
+
+			for(auto visited_region : group_of_regions) {
+				for(auto candidate : state.world.in_province) {
+					if(candidate.get_connected_region_id() == visited_region) {
+						glm::vec2 mid_point = candidate.get_mid_point();
+
+						if(mid_point.x < rough_box_left) {
+							rough_box_left = mid_point.x;
+						}
+						if(mid_point.x > rough_box_right) {
+							rough_box_right = mid_point.x;
+						}
+						if(mid_point.y < rough_box_bottom) {
+							rough_box_bottom = mid_point.y;
+						}
+						if(mid_point.y > rough_box_top) {
+							rough_box_top = mid_point.y;
+						}
 					}
 				}
 			}
+
 			if(rough_box_right - rough_box_left > map_data.size_x * 0.9f) {
 				continue;
 			}
@@ -462,8 +507,10 @@ namespace map {
 					auto idx = int32_t(y) * int32_t(map_data.size_x) + int32_t(x);
 					if(0 <= idx && size_t(idx) < map_data.province_id_map.size()) {
 						auto fat_id = dcon::fatten(state.world, province::from_map_id(map_data.province_id_map[idx]));
-						if(fat_id.get_connected_region_id() == rid) {
-							points.push_back(candidate);
+						for(auto visited_region : group_of_regions) {
+							if(fat_id.get_connected_region_id() == visited_region) {
+								points.push_back(candidate);
+							}
 						}
 					}
 				}
@@ -476,15 +523,17 @@ namespace map {
 				float left_x = (float)(map_data.size_x);
 				for(int i = 0; i < width_steps; i++) {
 					float x = rough_box_left + float(i) * local_step.x;
-				glm::vec2 candidate = { x, y };
+					glm::vec2 candidate = { x, y };
 					auto idx = int32_t(y) * int32_t(map_data.size_x) + int32_t(x);
 					if(0 <= idx && size_t(idx) < map_data.province_id_map.size()) {
 						auto fat_id = dcon::fatten(state.world, province::from_map_id(map_data.province_id_map[idx]));
-						if(fat_id.get_connected_region_id() == rid) {
-							points_above++;
-							current_length += local_step.x;
-							if(x < left_x) {
-								left_x = x;
+						for(auto visited_region : group_of_regions) {
+							if(fat_id.get_connected_region_id() == visited_region) {
+								points_above++;
+								current_length += local_step.x;
+								if(x < left_x) {
+									left_x = x;
+								}
 							}
 						}
 					}
@@ -558,10 +607,7 @@ namespace map {
 
 				size_t counter_of_neighbors = 0;
 				for(size_t j = 0; j < num_of_clusters; j++) {
-					if(i == j) {
-						continue;
-					}
-					if(glm::distance(centroids[i], centroids[j]) < locally_good_distance * 1.2f) {
+					if(i != j && glm::distance(centroids[i], centroids[j]) < locally_good_distance * 1.2f) {
 						counter_of_neighbors++;
 					}
 				}
