@@ -6,7 +6,7 @@ body_font = LibreCaslonText_Regular.ttf
 header_font = SourceSerif4Subhead_Regular.ttf
 header_feature = smcp
 
-map_font = EBGaramond_Regular.ttf #SourceSerif4Subhead_Regular.ttf
+map_font = EBGaramond_Bold.ttf #SourceSerif4Subhead_Regular.ttf
 #map_feature = smcp
 
 prevent_map_letterspacing = no
