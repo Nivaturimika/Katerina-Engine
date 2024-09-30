@@ -3921,4 +3921,11 @@ guiTypes = {
 		scrollbartype = "standardlistbox_slider"
 		borderSize = { 0 0 }
 	}
+
+	guiButtonType = {
+		name = "budget_warning"
+		extends = "topbar"
+		position = { 147 23 }
+		quadTextureSprite = "GFX_gunboats"	
+	}
 }
