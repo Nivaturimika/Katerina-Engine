@@ -4,6 +4,7 @@
 #include "demographics.hpp"
 #include "economy.hpp"
 #include "economy_factory.hpp"
+#include "economy_rgo.hpp"
 #include "gui_graphics.hpp"
 #include "gui_element_types.hpp"
 #include "military.hpp"
@@ -1693,7 +1694,7 @@ class button_press_notification { };
 			state.world.for_each_commodity([&](dcon::commodity_id c) {
 				auto rgo_employment = state.world.province_get_rgo_employment_per_good(p, c);
 				auto current_employment = int64_t(rgo_employment);
-				auto max_employment = int64_t(economy::rgo_max_employment(state, n, p, c));
+				auto max_employment = int64_t(economy_rgo::rgo_max_employment(state, n, p, c));
 				if(max_employment < 1.f)
 				return;
 			
@@ -1712,9 +1713,9 @@ class button_press_notification { };
 				text::close_layout_box(contents, base_box);
 			});
 
-			auto rgo_employment = economy::rgo_total_employment(state, n, p);
+			auto rgo_employment = economy_rgo::rgo_total_employment(state, n, p);
 			auto current_employment = int64_t(rgo_employment);
-			auto max_employment = int64_t(economy::rgo_total_max_employment(state, n, p));
+			auto max_employment = int64_t(economy_rgo::rgo_total_max_employment(state, n, p));
 			auto expected_profit = 0.f;
 
 			auto base_box = text::open_layout_box(contents);
@@ -1749,7 +1750,7 @@ class button_press_notification { };
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto province_id = retrieve<dcon::province_id>(state, parent);
-			set_text(state, text::format_float(economy::rgo_total_effective_size(state, state.world.province_get_nation_from_province_ownership(province_id), province_id), 2));
+			set_text(state, text::format_float(economy_rgo::rgo_total_effective_size(state, state.world.province_get_nation_from_province_ownership(province_id), province_id), 2));
 		}
 	};
 

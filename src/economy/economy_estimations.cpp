@@ -1,0 +1,3 @@
+namespace economy_estimations {
+
+}
