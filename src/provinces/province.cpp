@@ -444,18 +444,18 @@ namespace province {
 	}
 	float land_maximum_employment(sys::state& state, dcon::province_id id) {
 		auto owner = state.world.province_get_nation_from_province_ownership(id);
-		return economy::rgo_total_max_employment(state, owner, id);
+		return economy_rgo::rgo_total_max_employment(state, owner, id);
 	}
 	float land_employment(sys::state& state, dcon::province_id id) {
 		auto owner = state.world.province_get_nation_from_province_ownership(id);
-		return economy::rgo_total_employment(state, owner, id);
+		return economy_rgo::rgo_total_employment(state, owner, id);
 	}
 	float rgo_maximum_employment(sys::state& state, dcon::province_id id) {
 		auto owner = state.world.province_get_nation_from_province_ownership(id);
-		return economy::rgo_total_max_employment(state, owner, id);
+		return economy_rgo::rgo_total_max_employment(state, owner, id);
 	}
 	float rgo_employment(sys::state& state, dcon::province_id id) {
-		return economy::rgo_total_employment(state, state.world.province_get_nation_from_province_ownership(id), id);
+		return economy_rgo::rgo_total_employment(state, state.world.province_get_nation_from_province_ownership(id), id);
 	}
 	float rgo_income(sys::state& state, dcon::province_id id) {
 		return state.world.province_get_rgo_full_profit(id);

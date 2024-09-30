@@ -2834,10 +2834,10 @@ namespace nations {
 	 * return value is passed to text::fp_currency{}
 		 */
 		float sum = 0;
-		sum += economy::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor);
-		sum += economy::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
-		sum += economy::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
-		sum += economy::estimate_gold_income(state, n);
+		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor);
+		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
+		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
+		sum += economy_estimations::estimate_gold_income(state, n);
 		return sum;
 	}
 

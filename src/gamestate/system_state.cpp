@@ -3246,7 +3246,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		military::regenerate_ship_scores(*this);
 		nations::update_industrial_scores(*this);
 		military::update_naval_supply_points(*this);
-		economy::update_rgo_employment(*this);
+		economy_rgo::update_rgo_employment(*this);
 		economy_factory::update_factory_employment(*this);
 		nations::update_military_scores(*this); // depends on ship score, land unit average
 		nations::update_rankings(*this);		// depends on industrial score, military scores
@@ -3838,7 +3838,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 				military::regenerate_total_regiment_counts(*this);
 				break;
 				case 8:
-				economy::update_rgo_employment(*this);
+				economy_rgo::update_rgo_employment(*this);
 				break;
 				case 9:
 				economy_factory::update_factory_employment(*this);

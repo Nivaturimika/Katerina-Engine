@@ -50,7 +50,7 @@ namespace ui {
 
 			{
 				auto const production = province::rgo_production_quantity(state, prov_id, rgo_good);
-				auto const base_size = economy::rgo_effective_size(state, nat_id, prov_id, rgo_good) * state.world.commodity_get_rgo_amount(rgo_good);
+				auto const base_size = economy_rgo::rgo_effective_size(state, nat_id, prov_id, rgo_good) * state.world.commodity_get_rgo_amount(rgo_good);
 			text::add_line(state, contents, std::string_view("production_base_output_goods_tooltip"), text::variable_type::base, text::fp_two_places{ base_size });
 			}
 

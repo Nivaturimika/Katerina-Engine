@@ -2,6 +2,7 @@
 
 #include "gui_element_types.hpp"
 #include "military.hpp"
+#include "economy_estimations.hpp"
 #include "ai.hpp"
 
 namespace ui {
@@ -748,13 +749,13 @@ namespace ui {
 			bool subsidies = state.world.unilateral_relationship_get_war_subsidies(rel);
 
 			if(subsidies) {
-			text::add_line(state, contents, "cancel_w_sub_explain_1", text::variable_type::x, text::fp_currency{ economy::estimate_war_subsidies(state, target) });
+			text::add_line(state, contents, "cancel_w_sub_explain_1", text::variable_type::x, text::fp_currency{ economy_estimations::estimate_war_subsidies(state, target) });
 				if(state.defines.cancelwarsubsidy_diplomatic_cost > 0) {
 					text::add_line_break_to_layout(state, contents);
 					text::add_line_with_condition(state, contents, "cancel_w_sub_explain_2", state.world.nation_get_diplomatic_points(state.local_player_nation) >= state.defines.cancelwarsubsidy_diplomatic_cost, text::variable_type::x, int16_t(state.defines.cancelwarsubsidy_diplomatic_cost));
 				}
 			} else {
-			text::add_line(state, contents, "warsubsidies_desc", text::variable_type::money, text::fp_one_place{ economy::estimate_war_subsidies(state, target) });
+			text::add_line(state, contents, "warsubsidies_desc", text::variable_type::money, text::fp_one_place{ economy_estimations::estimate_war_subsidies(state, target) });
 				text::add_line_break_to_layout(state, contents);
 
 				if(state.local_player_nation == target) {

@@ -5,6 +5,21 @@
 
 namespace economy {
 
+	constexpr float default_workforce = 40000.f;
+
+	constexpr float pop_payout_factor = 1.f;
+	constexpr float consumption_factor = 1.f;
+	
+	constexpr float aristocrat_investment_ratio = 0.60f;
+	constexpr float capitalist_investment_ratio = 0.85f;
+	
+	constexpr float satisfaction_delay_factor = 0.1f;
+	constexpr float artisan_buff_factor = 1.25f;
+	
+	inline constexpr float ln_2 = 0.30103f;
+	
+	constexpr float artisan_baseline_score = 6.25f;
+
 	enum commodity_production_type {
 		primary,
 		derivative,
@@ -145,18 +160,16 @@ namespace economy {
 
 	float commodity_daily_production_amount(sys::state& state, dcon::commodity_id c);
 
-	float rgo_effective_size(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
-	float rgo_total_effective_size(sys::state& state, dcon::nation_id n, dcon::province_id p);
-	float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_id p);
-	float rgo_full_production_quantity(sys::state const& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
-	float rgo_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c);
-	float rgo_total_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p);
+	float full_spending_cost(sys::state& state, dcon::nation_id n);
+	void populate_army_consumption(sys::state& state);
+	void populate_navy_consumption(sys::state& state);
+	void populate_construction_consumption(sys::state& state);
 
-	float subsistence_max_pseudoemployment(sys::state& state, dcon::nation_id n, dcon::province_id p);
+	//float subsistence_max_pseudoemployment(sys::state& state, dcon::nation_id n, dcon::province_id p);
 	bool has_building(sys::state const& state, dcon::state_instance_id si, dcon::factory_type_id fac);
 	bool is_bankrupt_debtor_to(sys::state& state, dcon::nation_id debt_holder, dcon::nation_id debtor);
 
-	void populate_effective_prices(sys::state& state, dcon::nation_id n);
+	//void populate_effective_prices(sys::state& state, dcon::nation_id n);
 
 	void initialize(sys::state& state);
 	void regenerate_unsaved_values(sys::state& state);
@@ -171,13 +184,7 @@ namespace economy {
 		float total;
 	};
 
-	rgo_workers_breakdown rgo_relevant_population(sys::state& state, dcon::province_id p, dcon::nation_id n);
-
-	float rgo_desired_worker_norm_profit(sys::state& state, dcon::province_id p, dcon::nation_id n, float min_wage, float total_relevant_population);
-	float rgo_expected_worker_norm_profit(sys::state& state, dcon::province_id p, dcon::nation_id n, dcon::commodity_id c);
-
-
-	void update_rgo_employment(sys::state& state);
+	
 	void daily_update(sys::state& state, bool initiate_building);
 	void resolve_constructions(sys::state& state);
 
@@ -191,30 +198,7 @@ namespace economy {
 	float nation_total_imports(sys::state& state, dcon::nation_id n);
 	float pop_income(sys::state& state, dcon::pop_id p);
 
-	float estimate_gold_income(sys::state& state, dcon::nation_id n);
-	float estimate_tariff_income(sys::state& state, dcon::nation_id n);
-	float estimate_social_spending(sys::state& state, dcon::nation_id n);
-	float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, culture::income_type in);
-	float estimate_tax_income_by_strata(sys::state& state, dcon::nation_id n, culture::pop_strata ps);
-	float estimate_subsidy_spending(sys::state& state, dcon::nation_id n);
-	float estimate_diplomatic_balance(sys::state& state, dcon::nation_id n);
-	float estimate_domestic_investment(sys::state& state, dcon::nation_id n);
-
-	float estimate_land_spending(sys::state& state, dcon::nation_id n);
-	float estimate_naval_spending(sys::state& state, dcon::nation_id n);
-	float estimate_construction_spending(sys::state& state, dcon::nation_id n);
-	float estimate_war_subsidies_spending(sys::state& state, dcon::nation_id n);
-	float estimate_reparations_spending(sys::state& state, dcon::nation_id n);
-	float estimate_war_subsidies_income(sys::state& state, dcon::nation_id n);
-	float estimate_reparations_income(sys::state& state, dcon::nation_id n);
-	float estimate_overseas_penalty_spending(sys::state& state, dcon::nation_id n);
-	float estimate_stockpile_filling_spending(sys::state& state, dcon::nation_id n);
-
-	// NOTE: used to estimate how much you will pay if you were to subsidize a particular nation,
-	// *not* how much you are paying at the moment
-	float estimate_war_subsidies(sys::state& state, dcon::nation_id n);
-
-	float estimate_daily_income(sys::state& state, dcon::nation_id n);
+	
 
 	struct construction_status {
 		float progress = 0.0f; // in range [0,1)
@@ -231,10 +215,10 @@ namespace economy {
 
 	int32_t most_recent_price_record_index(sys::state& state);
 	int32_t previous_price_record_index(sys::state& state);
-	int32_t most_recent_gdp_record_index(sys::state& state);
-	int32_t previous_gdp_record_index(sys::state& state);
+	//int32_t most_recent_gdp_record_index(sys::state& state);
+	//int32_t previous_gdp_record_index(sys::state& state);
 
-	float gdp_adjusted(sys::state& state, dcon::nation_id n);
+	//float gdp_adjusted(sys::state& state, dcon::nation_id n);
 
 	
 	void go_bankrupt(sys::state& state, dcon::nation_id n);
@@ -246,8 +230,8 @@ namespace economy {
 
 	commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c);
 
-	void update_land_ownership(sys::state& state);
-	void update_local_subsistence_factor(sys::state& state);
+	//void update_land_ownership(sys::state& state);
+	//void update_local_subsistence_factor(sys::state& state);
 	float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
 	void register_domestic_supply(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
