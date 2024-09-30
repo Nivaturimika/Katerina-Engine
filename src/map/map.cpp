@@ -2156,12 +2156,12 @@ namespace map {
 		const auto map_x_scaling = float(size_x) / float(size_y);
 		auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
 		if(!f.hb_buf)
-		return;
+			return;
 
 		for(const auto& e : data) {
 			// omit invalid, nan or infinite coefficients
 			if(!std::isfinite(e.coeff[0]) || !std::isfinite(e.coeff[1]) || !std::isfinite(e.coeff[2]) || !std::isfinite(e.coeff[3]))
-			continue;
+				continue;
 
 			bool is_linear = true;
 			if((e.coeff[2] != 0) || (e.coeff[3] != 0)) {
@@ -2179,12 +2179,9 @@ namespace map {
 				return e.coeff[1] + 2.f * e.coeff[2] * x + 3.f * e.coeff[3] * x * x;
 			};
 
-
 			//cutting box if graph goes outside
-
 			float left = 0.f;
 			float right = 1.f;
-
 			if(is_linear) {
 				if(e.coeff[1] > 0.01f) {
 					left = (-e.coeff[0]) / e.coeff[1];
@@ -2228,20 +2225,18 @@ namespace map {
 					curve_length += 2.0f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
 				}
 			}
+
 			float size = (curve_length / text_length) * 0.8f; //* 0.66f;
-
 			// typography "golden ratio" steps
-
-			float font_size_index = std::round(5.f * log(size) / log(1.618034f));
-
-			if(font_size_index > 45.f) {
-				font_size_index = 45.f;
-			}
+			float font_size_index = std::round(5.f * glm::log(size) / glm::log(glm::golden_ratio<float>()));
 			if(font_size_index > 5.f) {
-				font_size_index = 5.f * std::round(font_size_index / 5.f);
+				font_size_index = 5.f * std::round(std::min(45.f, font_size_index) / 5.f);
 			}
+			size = glm::pow(glm::golden_ratio<float>(), font_size_index / 5.f);
 
-			size = std::pow(1.618034f, font_size_index / 5.f);
+			if(size < 10.f) {
+				continue;
+			}
 
 			auto real_text_size = size / (size_x * 2.0f);
 
@@ -2270,7 +2265,7 @@ namespace map {
 				float y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
 				if(glyphid != FT_Get_Char_Index(f.font_face, ' ')) {
 					// Add up baseline and kerning offsets
-				glm::vec2 glyph_positions{ x_offset / 64.f, -y_offset / 64.f };
+					glm::vec2 glyph_positions{ x_offset / 64.f, -y_offset / 64.f };
 
 					glm::vec2 curr_dir = glm::normalize(glm::vec2(effective_ratio, dpoly_fn(x)));
 					glm::vec2 curr_normal_dir = glm::vec2(-curr_dir.y, curr_dir.x);
@@ -2322,7 +2317,7 @@ namespace map {
 					}
 				}
 				if(!swapped)
-				break;
+					break;
 			}
 			dyn_text_line_starts.resize(text_line_texture_per_quad.size());
 			dyn_text_line_counts.resize(text_line_texture_per_quad.size());
@@ -2338,12 +2333,12 @@ namespace map {
 		const auto map_x_scaling = float(size_x) / float(size_y);
 		auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
 		if(!f.hb_buf)
-		return;
+			return;
 
 		for(const auto& e : data) {
 			// omit invalid, nan or infinite coefficients
 			if(!std::isfinite(e.coeff[0]) || !std::isfinite(e.coeff[1]) || !std::isfinite(e.coeff[2]) || !std::isfinite(e.coeff[3]))
-			continue;
+				continue;
 
 			auto effective_ratio = e.ratio.x * map_x_scaling / e.ratio.y;
 
