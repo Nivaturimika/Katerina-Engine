@@ -291,7 +291,7 @@ namespace ui {
 	};
 
 	class leaders_sortby_prestige : public button_element_base {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override {
 			send(state, parent, leader_sort::prestige);
 		}

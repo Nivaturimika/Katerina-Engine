@@ -309,39 +309,38 @@ namespace ui {
 	};
 
 	class saves_listbox : public listbox_element_base<save_game_item, std::shared_ptr<save_item>> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "alice_savegameentry";
 		}
 
 		void update_save_list(sys::state& state) noexcept {
 			row_contents.clear();
-		row_contents.push_back(std::make_shared<save_item>(save_item{ NATIVE(""), 0, sys::date(0), dcon::national_identity_id{ }, dcon::government_type_id{ }, true, std::string("") }));
+			row_contents.push_back(std::make_shared<save_item>(save_item{ NATIVE(""), 0, sys::date(0), dcon::national_identity_id{ }, dcon::government_type_id{ }, true, std::string("") }));
 
 			auto sdir = simple_fs::get_or_create_save_game_directory();
 			for(auto& f : simple_fs::list_files(sdir, NATIVE(".bin"))) {
-				auto of = simple_fs::open_file(f);
-				if(of) {
+				if(auto of = simple_fs::open_file(f); of) {
 					auto content = simple_fs::view_contents(*of);
 					sys::save_header h;
-					if(content.file_size > sys::sizeof_save_header(h))
-					sys::read_save_header(reinterpret_cast<uint8_t const*>(content.data), h);
+					if(content.file_size > sys::sizeof_save_header(h)) {
+						sys::read_save_header(reinterpret_cast<uint8_t const*>(content.data), h);
+					}
 					if(h.checksum.is_equal(state.scenario_checksum)) {
-					row_contents.push_back(std::make_shared<save_item>(save_item{ simple_fs::get_file_name(f), h.timestamp, h.d, h.tag, h.cgov, false, std::string(h.save_name) }));
+						row_contents.push_back(std::make_shared<save_item>(save_item{ simple_fs::get_file_name(f), h.timestamp, h.d, h.tag, h.cgov, false, std::string(h.save_name) }));
 					}
 				}
 			}
 
 			std::sort(row_contents.begin() + 1, row_contents.end(), [](std::shared_ptr<save_item> const& a, std::shared_ptr<save_item> const& b) {
 				if(a->is_bookmark() != b->is_bookmark())
-				return a->is_bookmark();
+					return a->is_bookmark();
 				return a->timestamp > b->timestamp;
 			});
 
 			update(state);
 		}
-
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			base_data.size.x -= 20; //nudge
 			base_data.size.y += base_data.position.y;
@@ -359,7 +358,7 @@ namespace ui {
 	};
 
 	class saves_window : public window_element_base {
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "save_games_list") {
 				return make_element_by_type<saves_listbox>(state, id);
@@ -369,7 +368,7 @@ namespace ui {
 	};
 
 	class pick_nation_button : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			if(state.network_mode == sys::network_mode_type::single_player) {
@@ -438,12 +437,12 @@ namespace ui {
 	};
 
 	class playable_nations_lb : public listbox_element_base<playable_nations_item, dcon::nation_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "playable_countries_list_item";
 		}
 
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			for(auto n : state.world.in_nation) {
@@ -451,27 +450,31 @@ namespace ui {
 				row_contents.push_back(n);
 			}
 			auto s = retrieve<picker_sort>(state, parent);
+			auto is_asc = retrieve<bool>(state, parent);
 			switch(s) {
-				case picker_sort::name:
+			case picker_sort::name:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					return text::get_name_as_string(state, fatten(state.world, a)) < text::get_name_as_string(state, fatten(state.world, b));
 				});
 				break;
-				case picker_sort::mil_rank:
+			case picker_sort::mil_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					return state.world.nation_get_military_rank(a) < state.world.nation_get_military_rank(b);
 				});
 				break;
-				case picker_sort::indust_rank:
+			case picker_sort::indust_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					return state.world.nation_get_industrial_rank(a) < state.world.nation_get_industrial_rank(b);
 				});
 				break;
-				case picker_sort::p_rank:
+			case picker_sort::p_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					return state.world.nation_get_prestige_rank(a) < state.world.nation_get_prestige_rank(b);
 				});
 				break;
+			}
+			if(is_asc) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 			update(state);
 		}
@@ -480,12 +483,14 @@ namespace ui {
 	template< picker_sort stype>
 	class playable_nations_sort_button : public button_element_base {
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, element_selection_wrapper<picker_sort>{stype});
+			send(state, parent, element_selection_wrapper<picker_sort>{stype});
 		}
 	};
 
 	class playable_nations_window : public window_element_base {
 		picker_sort sort_order = picker_sort::name;
+		bool is_asc = false;
+
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "lobby_sort_countryname") {
 				auto ptr = make_element_by_type<playable_nations_sort_button<picker_sort::name>>(state, id);
@@ -509,6 +514,9 @@ namespace ui {
 				return message_result::consumed;
 			} else if(payload.holds_type<element_selection_wrapper<picker_sort>>()) {
 				auto v = any_cast<element_selection_wrapper<picker_sort>>(payload);
+				if(sort_order == v.data) {
+					is_asc = !is_asc;
+				}
 				sort_order = v.data;
 				impl_on_update(state);
 				return message_result::consumed;
@@ -518,7 +526,6 @@ namespace ui {
 	};
 
 	class date_label : public simple_text_element_base {
-		public:
 		void on_update(sys::state& state) noexcept override {
 			text::substitution_map m;
 			auto myd = state.current_date.to_ymd(state.start_date);
@@ -599,14 +606,12 @@ namespace ui {
 	};
 
 	class quit_game_button : public button_element_base {
-		public:
 		void button_action(sys::state& state) noexcept override {
 			window::close_window(state);
 		}
 	};
 
 	class multiplayer_status_text : public simple_text_element_base {
-		public:
 		void on_update(sys::state& state) noexcept override {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			if(state.network_mode == sys::network_mode_type::host) {
@@ -638,19 +643,18 @@ namespace ui {
 	};
 
 	class number_of_players_text : public simple_text_element_base {
-		public:
 		void on_update(sys::state& state) noexcept override {
 			int32_t count = 0;
 			if(state.network_mode == sys::network_mode_type::single_player) {
 				count = 1;
 			} else {
 				state.world.for_each_nation([&](dcon::nation_id n) {
-					if(state.world.nation_get_is_player_controlled(n))
-					count++;
+					if(state.world.nation_get_is_player_controlled(n)) {
+						count++;
+					}
 				});
 			}
-
-		text::substitution_map sub{};
+			text::substitution_map sub{};
 			text::add_to_substitution_map(sub, text::variable_type::num, count);
 			set_text(state, text::resolve_string_substitution(state, "fe_num_players", sub));
 		}
@@ -696,11 +700,11 @@ namespace ui {
 	};
 
 	class nation_picker_multiplayer_listbox : public listbox_element_base<nation_picker_multiplayer_entry, dcon::nation_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "multiplayer_entry_server";
 		}
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			if(state.network_mode == sys::network_mode_type::single_player) {
@@ -716,7 +720,7 @@ namespace ui {
 	};
 
 	class checksum_text : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			std::string s;
 			s += std::string(__TIME__);
@@ -750,7 +754,7 @@ namespace ui {
 	};
 
 	class nation_picker_multiplayer_window : public window_element_base {
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "multiplayer_list") {
 				return make_element_by_type<nation_picker_multiplayer_listbox>(state, id);
@@ -769,7 +773,7 @@ namespace ui {
 			text::add_line_break_to_layout(state, contents);
 			text::add_line(state, contents, "gc_desc");
 		}
-		public:
+	public:
 		void on_reset_text(sys::state& state) noexcept override {
 			auto container = text::create_endless_layout(state, delegate->internal_layout,
 			text::layout_parameters{ 0, 0, static_cast<int16_t>(base_data.size.x), static_cast<int16_t>(base_data.size.y),

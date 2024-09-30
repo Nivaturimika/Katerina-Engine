@@ -3078,11 +3078,11 @@ namespace command {
 
 		auto pending = state.world.nation_get_peace_offer_from_pending_peace_offer(source);
 		if(!pending)
-		return false;
+			return false;
 
 		auto war = state.world.peace_offer_get_war_from_war_settlement(pending);
 		if(war)
-		return false;
+			return false;
 
 		bool found = [&]() {
 			for(auto& par : state.crisis_participants) {
@@ -3093,9 +3093,9 @@ namespace command {
 					if(cb_state == par.joined_with_offer.wargoal_state && cb_tag == par.joined_with_offer.wargoal_tag &&
 						cb_secondary_nation == par.joined_with_offer.wargoal_secondary_nation && target == par.joined_with_offer.target &&
 						primary_cb == par.joined_with_offer.wargoal_type)
-					return true;
+						return true;
 					else
-					return false;
+						return false;
 				}
 			}
 			return false;
@@ -3109,7 +3109,6 @@ namespace command {
 			if(wg.get_wargoal().get_added_by() == wargoal_from)
 				return false;
 		}
-
 		return true;
 	}
 	void execute_add_to_crisis_peace_offer(sys::state& state, dcon::nation_id source, crisis_invitation_data const& data) {
@@ -3135,7 +3134,7 @@ namespace command {
 	bool can_send_peace_offer(sys::state& state, dcon::nation_id source) {
 		auto pending = state.world.nation_get_peace_offer_from_pending_peace_offer(source);
 		if(!pending || !state.world.peace_offer_get_war_from_war_settlement(pending))
-		return false;
+			return false;
 		return true;
 	}
 	void execute_send_peace_offer(sys::state& state, dcon::nation_id source) {
@@ -3147,10 +3146,8 @@ namespace command {
 		}
 
 		auto target = state.world.peace_offer_get_target(pending_offer);
-
 		// A peace offer must be accepted when war score reaches 100.
 		if(military::directed_warscore(state, in_war, source, target) >= 100.0f && (!target.get_is_player_controlled() || !state.world.peace_offer_get_is_concession(pending_offer)) && military::cost_of_peace_offer(state, pending_offer) <= 100) {
-
 			military::implement_peace_offer(state, pending_offer);
 		} else {
 			diplomatic_message::message m;
@@ -3174,12 +3171,11 @@ namespace command {
 	bool can_send_crisis_peace_offer(sys::state& state, dcon::nation_id source) {
 		auto pending = state.world.nation_get_peace_offer_from_pending_peace_offer(source);
 		if(!pending || state.world.peace_offer_get_war_from_war_settlement(pending))
-		return false;
+			return false;
 		if(source != state.primary_crisis_attacker && source != state.primary_crisis_defender)
-		return false;
+			return false;
 		if(state.current_crisis_mode != sys::crisis_mode::heating_up)
-		return false;
-
+			return false;
 		return true;
 	}
 	void execute_send_crisis_peace_offer(sys::state& state, dcon::nation_id source) {
@@ -3188,9 +3184,9 @@ namespace command {
 		if(!can_send_crisis_peace_offer(state, source)) {
 			if(pending_offer) {
 				if(!state.world.peace_offer_get_war_from_war_settlement(pending_offer))
-				nations::cleanup_crisis_peace_offer(state, pending_offer);
+					nations::cleanup_crisis_peace_offer(state, pending_offer);
 				else
-				state.world.delete_peace_offer(pending_offer);
+					state.world.delete_peace_offer(pending_offer);
 			}
 			return;
 		}
@@ -3219,27 +3215,23 @@ namespace command {
 	}
 
 	bool can_partial_retreat_from(sys::state& state, dcon::land_battle_id b) {
-		if(!b)
-		return true;
-		if(!military::can_retreat_from_battle(state, b))
-		return false;
+		if(!b && !military::can_retreat_from_battle(state, b))
+			return false;
 		return true;
 	}
 	bool can_partial_retreat_from(sys::state& state, dcon::naval_battle_id b) {
-		if(!b)
-		return true;
-		if(!military::can_retreat_from_battle(state, b))
-		return false;
+		if(b && !military::can_retreat_from_battle(state, b))
+			return false;
 		return true;
 	}
 
 	std::vector<dcon::province_id> can_move_army(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::province_id dest) {
 		if(source != state.world.army_get_controller_from_army_control(a))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 		if(state.world.army_get_is_retreating(a))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 		if(!dest)
-		return std::vector<dcon::province_id>{}; // stop movement
+			return std::vector<dcon::province_id>{}; // stop movement
 
 		auto last_province = state.world.army_get_location_from_army_location(a);
 		auto movement = state.world.army_get_path(a);
@@ -3248,10 +3240,10 @@ namespace command {
 		}
 
 		if(last_province == dest)
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 
 		if(!can_partial_retreat_from(state, state.world.army_get_battle_from_army_battle_participation(a)))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 
 		if(dest.index() < state.province_definitions.first_sea_province.index()) {
 			if(state.world.army_get_black_flag(a)) {
@@ -3259,11 +3251,11 @@ namespace command {
 			} else if(province::has_access_to_province(state, source, dest)) {
 				return province::make_land_path(state, last_province, dest, source, a);
 			} else {
-			return std::vector<dcon::province_id>{};
+				return std::vector<dcon::province_id>{};
 			}
 		} else {
 			if(!military::can_embark_onto_sea_tile(state, source, dest, a))
-			return std::vector<dcon::province_id>{};
+				return std::vector<dcon::province_id>{};
 			if(state.world.army_get_black_flag(a)) {
 				return province::make_unowned_land_path(state, last_province, dest);
 			} else {
@@ -3274,9 +3266,9 @@ namespace command {
 
 	void execute_move_army(sys::state& state, dcon::nation_id source, dcon::army_id a, dcon::province_id dest, bool reset) {
 		if(source != state.world.army_get_controller_from_army_control(a))
-		return;
+			return;
 		if(state.world.army_get_is_retreating(a))
-		return;
+			return;
 
 		auto battle = state.world.army_get_battle_from_army_battle_participation(a);
 		if(dest.index() < state.province_definitions.first_sea_province.index()) {
@@ -3292,14 +3284,13 @@ namespace command {
 		}
 
 		auto existing_path = state.world.army_get_path(a);
-
 		if(!dest) {
 			existing_path.clear();
-		state.world.army_set_arrival_time(a, sys::date{});
+			state.world.army_set_arrival_time(a, sys::date{});
 			return;
 		}
 
-	auto old_first_prov = existing_path.size() > 0 ? existing_path.at(existing_path.size() - 1) : dcon::province_id{};
+		auto old_first_prov = existing_path.size() > 0 ? existing_path.at(existing_path.size() - 1) : dcon::province_id{};
 		if(reset) {
 			existing_path.clear();
 		}
@@ -3325,40 +3316,40 @@ namespace command {
 			state.world.army_set_dig_in(a, 0);
 			state.world.army_set_is_rebel_hunter(a, false);
 		} else if(reset) {
-		state.world.army_set_arrival_time(a, sys::date{});
+			state.world.army_set_arrival_time(a, sys::date{});
 		}
 		state.world.army_set_moving_to_merge(a, false);
 
 		if(battle) {
 			state.world.army_set_is_retreating(a, true);
-		state.world.army_set_battle_from_army_battle_participation(a, dcon::land_battle_id{});
+			state.world.army_set_battle_from_army_battle_participation(a, dcon::land_battle_id{});
 			for(auto reg : state.world.army_get_army_membership(a)) {
 				{
 					auto& line = state.world.land_battle_get_attacker_front_line(battle);
 					for(auto& lr : line) {
 						if(lr == reg.get_regiment())
-						lr = dcon::regiment_id{};
+							lr = dcon::regiment_id{};
 					}
 				}
 				{
 					auto& line = state.world.land_battle_get_attacker_back_line(battle);
 					for(auto& lr : line) {
 						if(lr == reg.get_regiment())
-						lr = dcon::regiment_id{};
+							lr = dcon::regiment_id{};
 					}
 				}
 				{
 					auto& line = state.world.land_battle_get_defender_front_line(battle);
 					for(auto& lr : line) {
 						if(lr == reg.get_regiment())
-						lr = dcon::regiment_id{};
+							lr = dcon::regiment_id{};
 					}
 				}
 				{
 					auto& line = state.world.land_battle_get_defender_back_line(battle);
 					for(auto& lr : line) {
 						if(lr == reg.get_regiment())
-						lr = dcon::regiment_id{};
+							lr = dcon::regiment_id{};
 					}
 				}
 				auto res = state.world.land_battle_get_reserves(battle);
@@ -3386,11 +3377,11 @@ namespace command {
 	}
 	std::vector<dcon::province_id> can_move_navy(sys::state& state, dcon::nation_id source, dcon::navy_id n, dcon::province_id dest) {
 		if(source != state.world.navy_get_controller_from_navy_control(n))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 		if(state.world.navy_get_is_retreating(n))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 		if(!dest)
-		return std::vector<dcon::province_id>{}; // stop movement
+			return std::vector<dcon::province_id>{}; // stop movement
 
 		auto last_province = state.world.navy_get_location_from_navy_location(n);
 		auto movement = state.world.navy_get_path(n);
@@ -3399,28 +3390,26 @@ namespace command {
 		}
 
 		if(last_province == dest)
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 
 		if(!can_partial_retreat_from(state, state.world.navy_get_battle_from_navy_battle_participation(n)))
-		return std::vector<dcon::province_id>{};
+			return std::vector<dcon::province_id>{};
 
 		if(dest.index() >= state.province_definitions.first_sea_province.index()) {
 			return province::make_naval_path(state, last_province, dest);
 		} else {
 			if(!state.world.province_get_is_coast(dest))
-			return std::vector<dcon::province_id>{};
-
+				return std::vector<dcon::province_id>{};
 			if(!province::has_naval_access_to_province(state, source, dest))
-			return std::vector<dcon::province_id>{};
-
+				return std::vector<dcon::province_id>{};
 			return province::make_naval_path(state, last_province, dest);
 		}
 	}
 	void execute_move_navy(sys::state& state, dcon::nation_id source, dcon::navy_id n, dcon::province_id dest, bool reset) {
 		if(source != state.world.navy_get_controller_from_navy_control(n))
-		return;
+			return;
 		if(state.world.navy_get_is_retreating(n))
-		return;
+			return;
 
 		auto battle = state.world.navy_get_battle_from_navy_battle_participation(n);
 		if(battle && dest.index() < state.province_definitions.first_sea_province.index() && !province::has_naval_access_to_province(state, source, dest)) {
@@ -3431,11 +3420,11 @@ namespace command {
 
 		if(!dest) {
 			existing_path.clear();
-		state.world.navy_set_arrival_time(n, sys::date{});
+			state.world.navy_set_arrival_time(n, sys::date{});
 			return;
 		}
 
-	auto old_first_prov = existing_path.size() > 0 ? existing_path.at(existing_path.size() - 1) : dcon::province_id{};
+		auto old_first_prov = existing_path.size() > 0 ? existing_path.at(existing_path.size() - 1) : dcon::province_id{};
 		if(reset) {
 			existing_path.clear();
 		}
@@ -3458,17 +3447,17 @@ namespace command {
 				state.world.navy_set_arrival_time(n, military::arrival_time_to(state, n, path.back()));
 			}
 		} else if(reset) {
-		state.world.navy_set_arrival_time(n, sys::date{});
+			state.world.navy_set_arrival_time(n, sys::date{});
 		}
 		state.world.navy_set_moving_to_merge(n, false);
 
 		if(battle) {
 			state.world.navy_set_is_retreating(n, true);
-		state.world.navy_set_battle_from_navy_battle_participation(n, dcon::naval_battle_id{});
+			state.world.navy_set_battle_from_navy_battle_participation(n, dcon::naval_battle_id{});
 			for(auto shp : state.world.navy_get_navy_membership(n)) {
 				for(auto& s : state.world.naval_battle_get_slots(battle)) {
 					if(s.ship == shp.get_ship()) {
-					s.ship = dcon::ship_id{};
+						s.ship = dcon::ship_id{};
 						s.flags &= ~s.mode_mask;
 						s.flags |= s.mode_retreated;
 					}
@@ -3490,16 +3479,16 @@ namespace command {
 
 	bool can_embark_army(sys::state& state, dcon::nation_id source, dcon::army_id a) {
 		if(source != state.world.army_get_controller_from_army_control(a))
-		return false;
+			return false;
 		if(state.world.army_get_is_retreating(a))
-		return false;
+			return false;
 
 		auto location = state.world.army_get_location_from_army_location(a);
 		if(location.index() >= state.province_definitions.first_sea_province.index())
-		return false;
+			return false;
 
 		if(state.world.army_get_battle_from_army_battle_participation(a))
-		return false;
+			return false;
 
 		if(state.world.army_get_navy_from_army_transport(a)) {
 			return true;
@@ -3510,19 +3499,19 @@ namespace command {
 
 	void execute_embark_army(sys::state& state, dcon::nation_id source, dcon::army_id a) {
 		if(source != state.world.army_get_controller_from_army_control(a))
-		return;
+			return;
 		if(state.world.army_get_is_retreating(a))
-		return;
+			return;
 
 		if(state.world.army_get_battle_from_army_battle_participation(a))
-		return;
+			return;
 
 		auto location = state.world.army_get_location_from_army_location(a);
 		if(location.index() >= state.province_definitions.first_sea_province.index())
-		return;
+			return;
 
 		if(state.world.army_get_navy_from_army_transport(a)) {
-		state.world.army_set_navy_from_army_transport(a, dcon::navy_id{});
+			state.world.army_set_navy_from_army_transport(a, dcon::navy_id{});
 			military::army_arrives_in_province(state, a, location, military::crossing_type::none);
 		} else {
 			auto to_navy = military::find_embark_target(state, source, location, a);
