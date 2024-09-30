@@ -172,14 +172,21 @@ namespace ui {
 	};
 
 	class military_leaders_listbox : public listbox_element_base<military_leaders, dcon::leader_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "milview_leader_entry";
 		}
-
 		bool is_asc = false;
 		leader_sort sort = leader_sort::army;
-		public:
+		//
+		bool leader_default_sort(sys::state& state, dcon::leader_id a, dcon::leader_id b) {
+			auto ls_a = military::get_leader_select_score(state, a);
+			auto ls_b = military::get_leader_select_score(state, b);
+			if(ls_a != ls_b)
+				return ls_a < ls_b;
+			return a.index() < b.index();
+		}
+	public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			for(auto const fat_id : state.world.nation_get_leader_loyalty(state.local_player_nation)) {
@@ -187,49 +194,43 @@ namespace ui {
 			}
 			switch(sort) {
 				case leader_sort::name:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-					auto in_a = state.to_string_view(state.world.leader_get_name(a));
-					auto in_b = state.to_string_view(state.world.leader_get_name(b));
-					if(in_a != in_b)
-					return in_a < in_b;
-					return a.index() < b.index();
-				});
-				break;
+					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+						auto in_a = state.to_string_view(state.world.leader_get_name(a));
+						auto in_b = state.to_string_view(state.world.leader_get_name(b));
+						if(in_a != in_b)
+							return in_a < in_b;
+						return leader_default_sort(state, a, b);
+					});
+					break;
 				case leader_sort::prestige:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-					auto in_a = state.world.leader_get_prestige(a);
-					auto in_b = state.world.leader_get_prestige(b);
-					if(in_a != in_b)
-					return in_a < in_b;
-					return a.index() < b.index();
-				});
-				break;
+					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+						auto in_a = state.world.leader_get_prestige(a);
+						auto in_b = state.world.leader_get_prestige(b);
+						if(in_a != in_b)
+							return in_a < in_b;
+						return leader_default_sort(state, a, b);
+					});
+					break;
 				case leader_sort::type:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-					auto in_a = state.world.leader_get_is_admiral(a);
-					auto in_b = state.world.leader_get_is_admiral(b);
-					if(in_a != in_b)
-					return in_a < in_b;
-					auto in_a1 = state.world.leader_trait_get_attack(state.world.leader_get_background(a))
-					+ state.world.leader_trait_get_attack(state.world.leader_get_personality(a));
-					auto in_b1 = state.world.leader_trait_get_attack(state.world.leader_get_background(b))
-					+ state.world.leader_trait_get_attack(state.world.leader_get_personality(b));
-					if(in_a1 != in_b1)
-					return in_a1 < in_b1;
-					return a.index() < b.index();
-				});
-				break;
+					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+						auto in_a = state.world.leader_get_is_admiral(a);
+						auto in_b = state.world.leader_get_is_admiral(b);
+						if(in_a != in_b)
+							return in_a < in_b;
+						return leader_default_sort(state, a, b);
+					});
+					break;
 				case leader_sort::army:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-					auto ar_a = state.world.leader_get_army_from_army_leadership(a);
-					auto ar_b = state.world.leader_get_army_from_army_leadership(b);
-					auto in_a = state.to_string_view(state.world.army_get_name(ar_a));
-					auto in_b = state.to_string_view(state.world.army_get_name(ar_b));
-					if(in_a != in_b)
-					return in_a < in_b;
-					return a.index() < b.index();
-				});
-				break;
+					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+						auto ar_a = state.world.leader_get_army_from_army_leadership(a);
+						auto ar_b = state.world.leader_get_army_from_army_leadership(b);
+						auto in_a = state.to_string_view(state.world.army_get_name(ar_a));
+						auto in_b = state.to_string_view(state.world.army_get_name(ar_b));
+						if(in_a != in_b)
+							return in_a < in_b;
+						return leader_default_sort(state, a, b);
+					});
+					break;
 			}
 			if(is_asc) {
 				std::reverse(row_contents.begin(), row_contents.end());
