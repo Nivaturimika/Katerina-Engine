@@ -2224,7 +2224,7 @@ namespace map {
 				}
 			}
 
-			float size = (curve_length / text_length) * 0.8f; //* 0.66f;
+			float size = (curve_length / text_length) * 0.75f; //* 0.66f;
 			// typography "golden ratio" steps
 			float font_size_index = std::round(5.f * glm::log(size) / glm::log(glm::golden_ratio<float>()));
 			if(font_size_index > 5.f) {

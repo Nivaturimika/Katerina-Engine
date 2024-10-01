@@ -195,43 +195,6 @@ namespace map {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void update_bbox(std::array<glm::vec2, 5>& bbox, glm::vec2 p) {
-		if(p.x <= bbox[1].x) {
-			bbox[1] = p;
-		} if(p.y <= bbox[2].y) {
-			bbox[2] = p;
-		} if(p.x >= bbox[3].x) {
-			bbox[3] = p;
-		} if(p.y >= bbox[4].y) {
-			bbox[4] = p;
-		}
-	}
-
-	bool is_inside_bbox(std::array<glm::vec2, 5>& bbox, glm::vec2 p) {
-		if(p.x <= bbox[1].x) {
-			return false;
-		} if(p.y <= bbox[2].y) {
-			return false;
-		} if(p.x >= bbox[3].x) {
-			return false;
-		} if(p.y >= bbox[4].y) {
-			return false;
-		}
-
-		return true;
-	}
-
-	void update_bbox_negative(std::array<glm::vec2, 5>& bbox, glm::vec2 p) {
-		if(!is_inside_bbox(bbox, p))
-		return;
-
-		//auto mp = p.get_mid_point();
-		//if(mp.x <= bbox[0].x)
-		//	bbox[1].x = mp.x * 0.1f + bbox[1].x * 0.9f;
-		//if(mp.x >= bbox[0].x)
-		//	bbox[3].x = mp.x * 0.1f + bbox[3].x * 0.9f;
-	}
-
 	dcon::nation_id get_top_overlord(sys::state& state, dcon::nation_id n) {
 		auto olr = state.world.nation_get_overlord_as_subject(n);
 		auto ol = state.world.overlord_get_ruler(olr);
@@ -285,7 +248,8 @@ namespace map {
 				auto neighbor = adj.get_connected_provinces(indx);
 				// if sea, try to jump to the next province
 				if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
-					auto nation_2 = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(neighbor));
+					auto nation_2 = state.world.province_get_nation_from_province_ownership(neighbor);
+					nation_2 = get_top_overlord(state, nation_2);
 					if(nation == nation_2) {
 						regions_graph[rid].insert(neighbor.get_connected_region_id());
 					}
@@ -447,15 +411,13 @@ namespace map {
 			});
 
 			float rough_box_left = std::numeric_limits<float>::max();
-			float rough_box_right = 0;
+			float rough_box_right = 0.f;
 			float rough_box_bottom = std::numeric_limits<float>::max();
-			float rough_box_top = 0;
-
-			for(auto visited_region : group_of_regions) {
-				for(auto candidate : state.world.in_province) {
+			float rough_box_top = 0.f;
+			for(auto const candidate : state.world.in_province) {
+				for(auto const visited_region : group_of_regions) {
 					if(candidate.get_connected_region_id() == visited_region) {
 						glm::vec2 mid_point = candidate.get_mid_point();
-
 						if(mid_point.x < rough_box_left) {
 							rough_box_left = mid_point.x;
 						}
@@ -510,6 +472,13 @@ namespace map {
 						for(auto visited_region : group_of_regions) {
 							if(fat_id.get_connected_region_id() == visited_region) {
 								points.push_back(candidate);
+								auto cap = state.world.nation_get_capital(n);
+								if(fat_id.get_connected_region_id() == state.world.province_get_connected_region_id(cap)) {
+									points.push_back(candidate);
+									if(fat_id.get_is_coast()) {
+										points.push_back(candidate);
+									}
+								}
 							}
 						}
 					}
@@ -648,7 +617,7 @@ namespace map {
 					is_good = true;
 				}
 
-				if (is_good) {
+				if(is_good) {
 					good_points.push_back(point);
 					sum_points += point;
 				}
@@ -694,26 +663,13 @@ namespace map {
 				}
 			}
 
-			std::vector<glm::vec2> key_points;
-
-			key_points.push_back(center + glm::vec2(left, 0));
-			key_points.push_back(center + glm::vec2(0, bottom + local_step.y));
-			key_points.push_back(center + glm::vec2(right, 0));
-			key_points.push_back(center + glm::vec2(0, top - local_step.y));
-
 			std::array<glm::vec2, 5> key_provs{
 				center, //capital
-				center, //min x
-				center, //min y
-				center, //max x
-				center //max y
+				center + glm::vec2(left, 0.f), //min x
+				center + glm::vec2(0.f, bottom + local_step.y), //min y
+				center + glm::vec2(right, 0.f), //max x
+				center + glm::vec2(0.f, top - local_step.y) //max y
 			};
-
-			for(auto key_point : key_points) {
-				//if (glm::length(key_point - center) < 100.f * glm::length(eigenvector_1)) 
-				update_bbox(key_provs, key_point);
-			}
-
 			glm::vec2 map_size{ float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y) };
 			glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
 			glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
