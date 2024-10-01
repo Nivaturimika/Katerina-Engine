@@ -396,6 +396,22 @@ The allow trigger condition is optional and is used to determine when the button
 
 The tooltip for these scriptable buttons will always display the relevant allow condition and the effect. You may also optionally add a custom description to the tooltip by adding a localization key that is the name of the button followed by `_tooltip`. In the case of the button above, for example, the tooltip is defined as `wololo_button_tooltip;Wololo $PROVINCE$`. The following three variables can be used in the tooltip: `$PROVINCE$`, which will resolve to the targeted province, `$NATION$`, which will resolve to the targeted nation or the owner of the targeted province, and `$PLAYER$`, which will always resolve to the player's own nation.
 
+### Variable-controlled frames
+
+GUI elements with multiple frames can control what frame they're using by:
+
+- Using `nationScriptButtonType`
+- Creating a variable called `gui_frame_buttonName`
+
+For example:
+```
+nationScriptButtonType = {
+	name = "doomsday_clock"
+}
+```
+
+It's "current frame" would be controlled by the variable `gui_frame_doomsday_clock`, but only if it exists.
+
 ### Abbreviated `.gui` syntax
  
 `size = { x = 5 y = 10 }` can be written as `size = { 5 10 }`, as can most places expecting an x and y pair.

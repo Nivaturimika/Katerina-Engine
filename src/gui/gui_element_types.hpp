@@ -524,10 +524,11 @@ namespace ui {
 	};
 
 	class province_script_button : public button_element_base {
-		public:
+	public:
 		dcon::gui_def_id base_definition;
 
-	province_script_button(dcon::gui_def_id base_definition) : base_definition(base_definition) { }
+		province_script_button(dcon::gui_def_id base_definition) : base_definition(base_definition) { }
+		void on_create(sys::state& state) noexcept override;
 		void button_action(sys::state& state) noexcept override;
 		void on_update(sys::state& state) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -536,10 +537,12 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 	class nation_script_button : public button_element_base {
-		public:
+	public:
 		dcon::gui_def_id base_definition;
+		dcon::national_variable_id frame_var;
 
-	nation_script_button(dcon::gui_def_id base_definition) : base_definition(base_definition) { }
+		nation_script_button(dcon::gui_def_id base_definition) : base_definition(base_definition), frame_var(dcon::national_variable_id{}) { }
+		void on_create(sys::state& state) noexcept override;
 		void button_action(sys::state& state) noexcept override;
 		void on_update(sys::state& state) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {

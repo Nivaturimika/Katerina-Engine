@@ -2040,20 +2040,16 @@ namespace ui {
 			}
 		}
 	}
-
 	void province_script_button::button_action(sys::state& state) noexcept {
 		auto p = retrieve<dcon::province_id>(state, parent);
 		if(p && state.local_player_nation)
-		command::use_province_button(state, state.local_player_nation, base_definition, p);
+			command::use_province_button(state, state.local_player_nation, base_definition, p);
 	}
 	void province_script_button::on_update(sys::state& state) noexcept {
 		disabled = false;
 		auto& def = state.ui_defs.gui[base_definition];
-		if(def.get_element_type() != ui::element_type::button) {
-			disabled = true;
-			return;
-		}
-		if(def.data.button.get_button_scripting() != ui::button_scripting::province) {
+		if(def.get_element_type() != ui::element_type::button
+		|| def.data.button.get_button_scripting() != ui::button_scripting::province) {
 			disabled = true;
 			return;
 		}
@@ -2066,24 +2062,22 @@ namespace ui {
 	}
 	void province_script_button::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 		auto& def = state.ui_defs.gui[base_definition];
-
 		if(def.get_element_type() != ui::element_type::button)
-		return;
+			return;
 		if(def.data.button.get_button_scripting() != ui::button_scripting::province)
-		return;
+			return;
 		auto p = retrieve<dcon::province_id>(state, parent);
 		if(!p)
-		return;
+			return;
 		if(!state.local_player_nation)
-		return;
+			return;
 
 		auto name = state.to_string_view(def.name);
-	auto tt_name = std::string{ name } + "_tooltip";
+		auto tt_name = std::string{ name } + "_tooltip";
 		if(state.key_is_localized(tt_name)) {
 		text::add_line(state, contents, std::string_view{tt_name}, text::variable_type::province, p, text::variable_type::nation, state.world.province_get_nation_from_province_ownership(p), text::variable_type::player, state.local_player_nation);
 			text::add_line_break_to_layout(state, contents);
 		}
-
 		if(def.data.button.scriptable_enable) {
 			text::add_line(state, contents, "allow_reform_cond");
 			ui::trigger_description(state, contents, def.data.button.scriptable_enable, trigger::to_generic(p), trigger::to_generic(p), trigger::to_generic(state.local_player_nation));
@@ -2092,6 +2086,18 @@ namespace ui {
 		if(def.data.button.scriptable_effect) {
 			text::add_line(state, contents, "msg_decision_2");
 			ui::effect_description(state, contents, def.data.button.scriptable_effect, trigger::to_generic(p), trigger::to_generic(p), trigger::to_generic(state.local_player_nation), uint32_t(state.current_date.value), uint32_t(p.index() ^ (base_definition.index() << 4)));
+		}
+	}
+	void nation_script_button::on_create(sys::state& state) noexcept {
+		auto gui_name = state.to_string_view(state.ui_defs.gui[base_definition].name);
+		std::string cmp_name = "gui_frame_" + std::string(gui_name);
+		for(int32_t i = 0; i < state.national_definitions.num_allocated_national_variables; i++) {
+			auto nv = dcon::national_variable_id(dcon::national_variable_id::value_base_t(i));
+			auto var_name = state.to_string_view(state.national_definitions.variable_names[nv]);
+			if(var_name == cmp_name) {
+				frame_var = nv;
+				return;
+			}
 		}
 	}
 	void nation_script_button::button_action(sys::state& state) noexcept {
@@ -2105,11 +2111,8 @@ namespace ui {
 	void nation_script_button::on_update(sys::state& state) noexcept {
 		disabled = false;
 		auto& def = state.ui_defs.gui[base_definition];
-		if(def.get_element_type() != ui::element_type::button) {
-			disabled = true;
-			return;
-		}
-		if(def.data.button.get_button_scripting() != ui::button_scripting::nation) {
+		if(def.get_element_type() != ui::element_type::button
+		|| def.data.button.get_button_scripting() != ui::button_scripting::nation) {
 			disabled = true;
 			return;
 		}
@@ -2117,6 +2120,9 @@ namespace ui {
 		if(!state.local_player_nation) {
 			disabled = true;
 			return;
+		}
+		if(frame_var) {
+			frame = state.world.nation_get_variables(n ? n : state.local_player_nation, frame_var);
 		}
 		disabled = !command::can_use_nation_button(state, state.local_player_nation, base_definition, n ? n : state.local_player_nation);
 	}
