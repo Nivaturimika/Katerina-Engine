@@ -11,6 +11,7 @@
 #include "nations_templates.hpp"
 #include "triggers.hpp"
 #include "economy_factory.hpp"
+#include "economy_estimations.hpp"
 
 namespace ai {
 

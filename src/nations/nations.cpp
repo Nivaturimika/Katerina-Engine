@@ -13,6 +13,7 @@
 #include "effects.hpp"
 #include "province_templates.hpp"
 #include "rebels.hpp"
+#include "economy_estimations.hpp"
 
 namespace nations {
 

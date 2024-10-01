@@ -3215,7 +3215,7 @@ namespace command {
 	}
 
 	bool can_partial_retreat_from(sys::state& state, dcon::land_battle_id b) {
-		if(!b && !military::can_retreat_from_battle(state, b))
+		if(b && !military::can_retreat_from_battle(state, b))
 			return false;
 		return true;
 	}

@@ -528,11 +528,11 @@ namespace map {
 		auto pos2 = an.get_position_key(pos_index + 1).value;
 		auto pos2_time = an.get_position_key(pos_index + 1).time;
 		glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
-		glm::mix(
-			glm::vec3(pos1.x, pos1.y, pos1.z),
-			glm::vec3(pos2.x, pos2.y, pos2.z),
-			an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
-		)
+			glm::mix(
+				glm::vec3(pos1.x, pos1.y, pos1.z),
+				glm::vec3(pos2.x, pos2.y, pos2.z),
+				an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
+			)
 		);
 		//
 		auto sca_index = an.get_scale_key_index(anim_time);
@@ -541,11 +541,11 @@ namespace map {
 		auto sca2 = an.get_scale_key(sca_index + 1).value;
 		auto sca2_time = an.get_scale_key(sca_index + 1).time;
 		glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
-		glm::mix(
-			glm::vec3(sca1.x, sca1.y, sca1.z),
-			glm::vec3(sca2.x, sca2.y, sca2.z),
-			an.get_player_scale_factor(sca1_time, sca2_time, anim_time)
-		)
+			glm::mix(
+				glm::vec3(sca1.x, sca1.y, sca1.z),
+				glm::vec3(sca2.x, sca2.y, sca2.z),
+				an.get_player_scale_factor(sca1_time, sca2_time, anim_time)
+			)
 		);
 		//
 		auto rot_index = an.get_rotation_key_index(anim_time);
@@ -554,11 +554,11 @@ namespace map {
 		auto rot2 = an.get_rotation_key(rot_index + 1).value;
 		auto rot2_time = an.get_rotation_key(rot_index + 1).time;
 		glm::mat4x4 mr = glm::toMat4(glm::normalize(
-		glm::slerp(
-			glm::quat(rot1.x, rot1.y, rot1.z, rot1.w),
-			glm::quat(rot2.x, rot2.y, rot2.z, rot2.w),
-			an.get_player_scale_factor(rot1_time, rot2_time, anim_time)
-		)
+			glm::slerp(
+				glm::quat(rot1.x, rot1.y, rot1.z, rot1.w),
+				glm::quat(rot2.x, rot2.y, rot2.z, rot2.w),
+				an.get_player_scale_factor(rot1_time, rot2_time, anim_time)
+			)
 		));
 		//
 		auto rsc_index = an.get_scale_rotation_key_index(anim_time);
@@ -567,13 +567,13 @@ namespace map {
 		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1).value;
 		auto rsc2_time = an.get_scale_rotation_key(rsc_index + 1).time;
 		glm::mat4x4 mu = glm::toMat4(glm::normalize(
-		glm::slerp(
-			glm::quat(rsc1.x, rsc1.y, rsc1.z, rsc1.w),
-			glm::quat(rsc2.x, rsc2.y, rsc2.z, rsc1.w),
-			an.get_player_scale_factor(rsc1_time, rsc2_time, anim_time)
-		)
+			glm::slerp(
+				glm::quat(rsc1.x, rsc1.y, rsc1.z, rsc1.w),
+				glm::quat(rsc2.x, rsc2.y, rsc2.z, rsc1.w),
+				an.get_player_scale_factor(rsc1_time, rsc2_time, anim_time)
+			)
 		));
-		return mr * mu;
+		return mt * ms * mr;
 	}
 
 	glm::mat4x4 get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, emfx::xsm_animation const& current, float time_counter) {
@@ -1454,7 +1454,6 @@ namespace map {
 						list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle);
 					}
 				});
-				#if 0
 				// Render armies
 				province::for_each_land_province(state, [&](dcon::province_id p) {
 					auto units = state.world.province_get_army_location_as_location(p);
@@ -1494,7 +1493,6 @@ namespace map {
 						}
 					}
 				});
-				#endif
 				// Render navies
 				province::for_each_sea_province(state, [&](dcon::province_id p) {
 					auto units = state.world.province_get_navy_location_as_location(p);
@@ -1534,7 +1532,7 @@ namespace map {
 						}
 					}
 				});
-				glCullFace(GL_FRONT);
+				//glCullFace(GL_FRONT);
 				render_models(list, time_counter, map_view_mode);
 			}
 		}
