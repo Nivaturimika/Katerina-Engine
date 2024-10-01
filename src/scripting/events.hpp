@@ -101,6 +101,7 @@ enum class slot_type : uint8_t { none, nation, state, province, pop };
 	void take_option(sys::state& state, pending_human_f_p_event const& e, uint8_t opt);
 
 	bool would_be_duplicate_instance(sys::state& state, dcon::national_event_id e, dcon::nation_id n, sys::date date);
+	bool would_be_duplicate_instance(sys::state& state, dcon::provincial_event_id e, dcon::province_id n, sys::date date);
 	void update_future_events(sys::state& state);
 	void update_events(sys::state& state);
 

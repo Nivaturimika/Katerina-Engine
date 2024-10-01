@@ -1062,7 +1062,7 @@ namespace parsers {
 			return;
 		}
 
-	event_building_context e_context{ context.outer_context, trigger::slot_contents::nation, trigger::slot_contents::nation, context.this_slot };
+		event_building_context e_context{ context.outer_context, trigger::slot_contents::nation, trigger::slot_contents::nation, context.this_slot };
 		auto event_result = parse_generic_event(gen, err, e_context);
 		auto id = context.outer_context.state.world.create_national_event();
 		auto fid = dcon::fatten(context.outer_context.state.world, id);
@@ -1155,12 +1155,13 @@ namespace parsers {
 			return;
 		}
 
-	event_building_context e_context{ context.outer_context, trigger::slot_contents::province, trigger::slot_contents::province, context.this_slot };
+		event_building_context e_context{ context.outer_context, trigger::slot_contents::province, trigger::slot_contents::province, context.this_slot };
 		auto event_result = parse_generic_event(gen, err, e_context);
 		auto id = context.outer_context.state.world.create_provincial_event();
 		auto fid = dcon::fatten(context.outer_context.state.world, id);
 		fid.set_description(event_result.desc_);
 		fid.set_immediate_effect(event_result.immediate_);
+		fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 		fid.set_name(event_result.title_);
 		fid.get_options() = event_result.options;
 		//Effect
@@ -1271,7 +1272,7 @@ namespace parsers {
 
 					err.file_name = e.second.original_file + " [pending]";
 
-				event_building_context e_context{context, data_copy.main_slot, data_copy.this_slot, data_copy.from_slot};
+					event_building_context e_context{context, data_copy.main_slot, data_copy.this_slot, data_copy.from_slot};
 					auto event_result = parse_generic_event(data_copy.generator_state, err, e_context);
 
 					auto fid = fatten(context.state.world, data_copy.id);
@@ -1371,7 +1372,7 @@ namespace parsers {
 					}
 
 					if(context.map_of_national_events.size() != fixed_size)
-					break;
+						break;
 				}
 			}
 
@@ -1388,12 +1389,13 @@ namespace parsers {
 
 					err.file_name = e.second.original_file + " [pending]";
 
-				event_building_context e_context{context, data_copy.main_slot, data_copy.this_slot, data_copy.from_slot};
+					event_building_context e_context{context, data_copy.main_slot, data_copy.this_slot, data_copy.from_slot};
 					auto event_result = parse_generic_event(data_copy.generator_state, err, e_context);
 
 					auto fid = fatten(context.state.world, data_copy.id);
 					fid.set_description(event_result.desc_);
 					fid.set_immediate_effect(event_result.immediate_);
+					fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 					fid.set_name(event_result.title_);
 					fid.get_options() = event_result.options;
 
@@ -1409,7 +1411,7 @@ namespace parsers {
 					}
 
 					if(context.map_of_provincial_events.size() != fixed_size)
-					break;
+						break;
 				}
 			}
 		} while(count > 0);

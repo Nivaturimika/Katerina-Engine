@@ -456,14 +456,23 @@ namespace event {
 	};
 
 	bool would_be_duplicate_instance(sys::state& state, dcon::national_event_id e, dcon::nation_id n, sys::date date) {
-		if(state.world.national_event_get_allow_multiple_instances(e))
+		if(!state.world.national_event_get_allow_multiple_instances(e)) {
+			for(int32_t i = 0; i < int32_t(state.future_n_event.size()); i++) {
+				auto const& nev = state.future_n_event[i];
+				if(nev.e == e && nev.n == n && nev.date == date) {
+					return true;
+				}
+			}
+		}
 		return false;
-		for(int32_t i = 0; i < int32_t(state.future_n_event.size()); i++) {
-			auto const& nev = state.future_n_event[i];
-			if(nev.e == e
-			&& nev.n == n
-			&& nev.date == date) {
-				return true;
+	}
+	bool would_be_duplicate_instance(sys::state& state, dcon::provincial_event_id e, dcon::province_id n, sys::date date) {
+		if(!state.world.provincial_event_get_allow_multiple_instances(e)) {
+			for(int32_t i = 0; i < int32_t(state.future_p_event.size()); i++) {
+				auto const& nev = state.future_p_event[i];
+				if(nev.e == e && nev.p == p && nev.date == date) {
+					return true;
+				}
 			}
 		}
 		return false;
