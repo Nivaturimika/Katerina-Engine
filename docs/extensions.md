@@ -407,6 +407,9 @@ For example:
 ```
 nationScriptButtonType = {
 	name = "doomsday_clock"
+	#Required, can be anything really
+	trigger = { always = yes }
+	effect = { treasury = 0 }
 }
 ```
 

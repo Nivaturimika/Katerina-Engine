@@ -2124,7 +2124,7 @@ namespace ui {
 			return;
 		}
 		if(frame_var) {
-			frame = state.world.nation_get_variables(n ? n : state.local_player_nation, frame_var);
+			frame = int32_t(state.world.nation_get_variables(n ? n : state.local_player_nation, frame_var));
 		}
 		disabled = !command::can_use_nation_button(state, state.local_player_nation, base_definition, n ? n : state.local_player_nation);
 	}
@@ -2142,12 +2142,11 @@ namespace ui {
 		return;
 
 		auto name = state.to_string_view(def.name);
-	auto tt_name = std::string{ name } + "_tooltip";
+		auto tt_name = std::string{ name } + "_tooltip";
 		if(state.key_is_localized(tt_name)) {
 		text::add_line(state, contents, std::string_view{ tt_name }, text::variable_type::nation, n, text::variable_type::player, state.local_player_nation);
 			text::add_line_break_to_layout(state, contents);
 		}
-
 		if(def.data.button.scriptable_enable) {
 			text::add_line(state, contents, "allow_reform_cond");
 			ui::trigger_description(state, contents, def.data.button.scriptable_enable, trigger::to_generic(n), trigger::to_generic(n), trigger::to_generic(state.local_player_nation));
