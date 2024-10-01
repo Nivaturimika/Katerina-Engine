@@ -969,40 +969,6 @@ namespace map {
 						glMultiDrawArrays(GL_TRIANGLE_STRIP, b_starts.data(), b_counts.data(), GLsizei(b_index));
 					}
 				} else {
-					if(zoom > map::zoom_very_close) { // Render province borders
-						b_index = 0;
-						for(auto b : borders) {
-							if(border_is_visible(b.adj)
-							&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == 0) {
-								b_starts[b_index] = b.start_index;
-								b_counts[b_index] = b.count;
-								++b_index;
-							}
-						}
-						if(b_index > 0) {
-							glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.0001f); // width
-							glActiveTexture(GL_TEXTURE0);
-							glBindTexture(GL_TEXTURE_2D, textures[texture_prov_border]);
-							glMultiDrawArrays(GL_TRIANGLE_STRIP, b_starts.data(), b_counts.data(), GLsizei(b_index));
-						}
-					}
-					if(zoom > map::zoom_close) { // Render state borders
-						b_index = 0;
-						for(auto b : borders) {
-							if(border_is_visible(b.adj)
-							&& (state.world.province_adjacency_get_type(b.adj) & (province::border::non_adjacent_bit | province::border::coastal_bit | province::border::national_bit | province::border::state_bit)) == province::border::state_bit) {
-								b_starts[b_index] = b.start_index;
-								b_counts[b_index] = b.count;
-								++b_index;
-							}
-						}
-						if(b_index > 0) {
-							glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.0002f); // width
-							glActiveTexture(GL_TEXTURE0);
-							glBindTexture(GL_TEXTURE_2D, textures[texture_state_border]);
-							glMultiDrawArrays(GL_TRIANGLE_STRIP, b_starts.data(), b_counts.data(), GLsizei(b_index));
-						}
-					}
 					// national borders
 					b_index = 0;
 					for(auto b : borders) {
@@ -1088,7 +1054,7 @@ namespace map {
 						}
 					}
 				}
-			dcon::province_id prov{};
+				dcon::province_id prov{};
 				glm::vec2 map_pos;
 				if(!state.ui_state.under_mouse && state.map_state.screen_to_map(glm::vec2(state.mouse_x_position, state.mouse_y_position), screen_size, state.map_state.current_view(state), map_pos)) {
 					map_pos *= glm::vec2(float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y));
@@ -1161,7 +1127,7 @@ namespace map {
 				}
 				// coasts
 				if(zoom <= map::zoom_close) {
-					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.0004f); // width
+					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_borders][uniform_width], 0.0006f); // width
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, textures[texture_coastal_border]);
 					glBindVertexArray(vao_array[vo_coastal]);
