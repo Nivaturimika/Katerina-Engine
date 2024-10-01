@@ -286,7 +286,7 @@ namespace map {
 				auto neighbor = adj.get_connected_provinces(indx);
 				// if sea, try to jump to the next province
 				if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
-					auto nation_2 = get_top_overlord(state, nation_2);
+					auto nation_2 = get_top_overlord(state, nation);
 					if(nation == nation_2) {
 						regions_graph[rid].insert(neighbor.get_connected_region_id());
 					}
