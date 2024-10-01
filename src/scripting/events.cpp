@@ -470,7 +470,7 @@ namespace event {
 		if(!state.world.provincial_event_get_allow_multiple_instances(e)) {
 			for(int32_t i = 0; i < int32_t(state.future_p_event.size()); i++) {
 				auto const& nev = state.future_p_event[i];
-				if(nev.e == e && nev.p == p && nev.date == date) {
+				if(nev.e == e && nev.p == n && nev.date == date) {
 					return true;
 				}
 			}
