@@ -280,13 +280,12 @@ namespace map {
 			auto rid = candidate.get_connected_region_id();
 
 			auto nation = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(candidate));
-
 			for(auto adj : candidate.get_province_adjacency()) {
 				auto indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
 				auto neighbor = adj.get_connected_provinces(indx);
 				// if sea, try to jump to the next province
 				if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
-					auto nation_2 = get_top_overlord(state, nation);
+					auto nation_2 = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(neighbor));
 					if(nation == nation_2) {
 						regions_graph[rid].insert(neighbor.get_connected_region_id());
 					}
