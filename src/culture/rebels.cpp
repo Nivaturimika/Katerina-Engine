@@ -797,8 +797,7 @@ namespace rebel {
 			auto da = province::sorting_distance(state, a.p, loc) + aa;
 			auto db = province::sorting_distance(state, b.p, loc) + ab;
 			if(da != db)
-			return da < db;
-			else
+				return da < db;
 			return a.p.index() < b.p.index();
 		});
 	}

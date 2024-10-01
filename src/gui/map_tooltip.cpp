@@ -3,6 +3,7 @@
 #include "rebels.hpp"
 #include "unit_tooltip.hpp"
 #include "nations_templates.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -385,7 +386,13 @@ namespace ui {
 						cultures.push_back(pop.get_pop().get_culture());
 					}
 				}
-			std::sort(cultures.begin(), cultures.end(), [&](auto a, auto b) {return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id)); });
+				pdqsort(cultures.begin(), cultures.end(), [&](auto a, auto b) {
+					auto av = fat.get_demographics(demographics::to_key(state, a.id));
+					auto bv = fat.get_demographics(demographics::to_key(state, b.id));
+					if(av != bv)
+						return av < bv;
+					return a.id.index() < b.id.index();
+				});
 
 				float p_total = fat.get_demographics(demographics::total);
 				uint32_t i = 0;
@@ -614,10 +621,9 @@ namespace ui {
 						else
 						total_neg += last_value[i];
 					}
-					std::sort(migration_values.begin(), migration_values.end(), [](nation_and_value const& a, nation_and_value const& b) {
-						if(a.v < 0.f && b.v < 0.f) {
+					pdqsort(migration_values.begin(), migration_values.end(), [](nation_and_value const& a, nation_and_value const& b) {
+						if(a.v < 0.f && b.v < 0.f)
 							return std::abs(a.v) > std::abs(b.v);
-						}
 						return a.v > b.v;
 					});
 				}
@@ -861,7 +867,9 @@ namespace ui {
 						religions.push_back(pop.get_pop().get_religion());
 					}
 				}
-			std::sort(religions.begin(), religions.end(), [&](auto a, auto b) {return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id)); });
+				pdqsort(religions.begin(), religions.end(), [&](auto a, auto b) {
+					return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
+				});
 				//for(size_t i = religions.size(); i > 0; i--) {
 					for(size_t i = 0; i < religions.size(); i++) {
 						text::add_line_break_to_layout_box(state, contents, box);
@@ -892,7 +900,9 @@ namespace ui {
 							issues.push_back(dcon::fatten(state.world, id));
 						}
 					});
-				std::sort(issues.begin(), issues.end(), [&](auto a, auto b) {return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b)); });
+					pdqsort(issues.begin(), issues.end(), [&](auto a, auto b) {
+						return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b));
+					});
 					for(size_t i = 0; i < std::min(static_cast<size_t>(5), issues.size()); i++) {
 						text::add_line_break_to_layout_box(state, contents, box);
 						text::add_space_to_layout_box(state, contents, box);
@@ -939,7 +949,9 @@ namespace ui {
 							ideologies.push_back(dcon::fatten(state.world, id));
 						}
 					});
-				std::sort(ideologies.begin(), ideologies.end(), [&](auto a, auto b) {return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id)); });
+					pdqsort(ideologies.begin(), ideologies.end(), [&](auto a, auto b) {
+						return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
+					});
 					for(size_t i = 0; i < ideologies.size(); i++) {
 						text::add_line_break_to_layout_box(state, contents, box);
 						text::add_space_to_layout_box(state, contents, box);
@@ -1034,7 +1046,13 @@ namespace ui {
 							}
 						}
 					}
-				std::sort(factories.begin(), factories.end(), [&](auto a, auto b) {return a.get_level() > b.get_level(); });
+					pdqsort(factories.begin(), factories.end(), [&](auto a, auto b) {
+						auto av = a.get_level();
+						auto bv = b.get_level();
+						if(av != bv)
+							return av > bv;
+						return a.id.index() < b.id.index();
+					});
 
 					text::add_to_layout_box(state, contents, box, text::prettify(int64_t(factories.size())), text::text_color::yellow);
 					for(size_t i = 0; i < factories.size(); i++) {
@@ -1112,7 +1130,7 @@ namespace ui {
 							total_rebels += pop.get_pop().get_size();
 						}
 					}
-				std::sort(rebel_factions.begin(), rebel_factions.end(), [&](auto a, auto b) {return a.second > b.second; });
+					pdqsort(rebel_factions.begin(), rebel_factions.end(), [&](auto a, auto b) {return a.second > b.second; });
 
 					auto box = text::open_layout_box(contents);
 

@@ -19,6 +19,7 @@
 #include "system_state.hpp"
 #include "text.hpp"
 #include "gui_event.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -1375,11 +1376,11 @@ namespace ui {
 			}
 			if(!data.empty()) {
 				text::add_line(state, contents, "remove_countryalert_hasunemployedworkers");
-				std::sort(data.begin(), data.end(), [&](auto const& a, auto const& b) {
+				pdqsort(data.begin(), data.end(), [&](auto const& a, auto const& b) {
 					if(a.amount != b.amount)
-					return a.amount < b.amount;
+						return a.amount < b.amount;
 					if(a.sid.index() != b.sid.index())
-					return a.sid.index() < b.sid.index();
+						return a.sid.index() < b.sid.index();
 					return a.pt.index() < b.pt.index();
 				});
 				std::reverse(data.begin(), data.end());

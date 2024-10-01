@@ -2,6 +2,7 @@
 #include "gui_leader_select.hpp"
 #include "gui_politics_window.hpp"
 #include "triggers.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -1090,30 +1091,36 @@ namespace ui {
 		} else if(payload.holds_type<politics_issue_sort_order>()) {
 			auto enum_val = any_cast<politics_issue_sort_order>(payload);
 			switch(enum_val) {
-				case politics_issue_sort_order::name:
-				std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+			case politics_issue_sort_order::name:
+				pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 					[&](dcon::issue_option_id a, dcon::issue_option_id b) {
-					auto a_name = text::get_name_as_string(state, dcon::fatten(state.world, a));
-					auto b_name = text::get_name_as_string(state, dcon::fatten(state.world, b));
-					return a_name < b_name;
+						auto a_name = text::get_name_as_string(state, dcon::fatten(state.world, a));
+						auto b_name = text::get_name_as_string(state, dcon::fatten(state.world, b));
+						if(a_name != b_name)
+							return a_name < b_name;
+						return a.index() < b.index();
 					});
 				issues_listbox->update(state);
 				break;
-				case politics_issue_sort_order::popular_support:
-				std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+			case politics_issue_sort_order::popular_support:
+				pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 					[&](dcon::issue_option_id a, dcon::issue_option_id b) {
-					auto a_support = politics::get_popular_support(state, state.local_player_nation, a);
-					auto b_support = politics::get_popular_support(state, state.local_player_nation, b);
-					return a_support > b_support;
+						auto a_support = politics::get_popular_support(state, state.local_player_nation, a);
+						auto b_support = politics::get_popular_support(state, state.local_player_nation, b);
+						if(a_support != b_support)
+							return a_support < b_support;
+						return a.index() < b.index();
 					});
 				issues_listbox->update(state);
 				break;
-				case politics_issue_sort_order::voter_support:
-				std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+			case politics_issue_sort_order::voter_support:
+				pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 					[&](dcon::issue_option_id a, dcon::issue_option_id b) {
-					auto a_support = politics::get_voter_support(state, state.local_player_nation, a);
-					auto b_support = politics::get_voter_support(state, state.local_player_nation, b);
-					return a_support > b_support;
+						auto a_support = politics::get_voter_support(state, state.local_player_nation, a);
+						auto b_support = politics::get_voter_support(state, state.local_player_nation, b);
+						if(a_support != b_support)
+							return a_support < b_support;
+						return a.index() < b.index();
 					});
 				issues_listbox->update(state);
 				break;

@@ -10,6 +10,7 @@
 #include "triggers.hpp"
 #include "economy_factory_templates.hpp"
 #include "economy.hpp"
+#include "pdqsort.h"
 
 namespace economy_factory {
 
@@ -525,7 +526,7 @@ namespace economy_factory {
 				}
 			});
 
-			std::sort(ordered_factories.begin(), ordered_factories.end(), [&](dcon::factory_id factory_id_a, dcon::factory_id factory_id_b) {
+			pdqsort(ordered_factories.begin(), ordered_factories.end(), [&](dcon::factory_id factory_id_a, dcon::factory_id factory_id_b) {
 				if(factory_is_profitable(state, factory_id_a) != factory_is_profitable(state, factory_id_b)) {
 					return factory_is_profitable(state, factory_id_a);
 				}

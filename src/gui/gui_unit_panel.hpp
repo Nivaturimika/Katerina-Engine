@@ -8,6 +8,7 @@
 #include "gui_leader_tooltip.hpp"
 #include "gui_leader_select.hpp"
 #include "gui_unit_grid_box.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -922,12 +923,15 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				auto rid = state.world.army_membership_get_regiment(amid);
 				row_contents.push_back(rid);
 			});
-			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
-				auto av = state.world.regiment_get_type(a).index();
-				auto bv = state.world.regiment_get_type(b).index();
+			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
+				auto au = state.world.regiment_get_type(a);
+				auto bu = state.world.regiment_get_type(b);
+				auto av = uint8_t(state.military_definitions.unit_base_definitions[au].type);
+				auto bv = uint8_t(state.military_definitions.unit_base_definitions[bu].type);
 				if(av != bv)
-				return av > bv;
-				else
+					return av < bv;
+				if(au != bu)
+					return au.index() < bu.index();
 				return a.index() < b.index();
 			});
 			update(state);
@@ -952,12 +956,15 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				auto sid = state.world.navy_membership_get_ship(nmid);
 				row_contents.push_back(sid);
 			});
-			std::sort(row_contents.begin(), row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
-				auto av = state.world.ship_get_type(a).index();
-				auto bv = state.world.ship_get_type(b).index();
+			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
+				auto au = state.world.ship_get_type(a);
+				auto bu = state.world.ship_get_type(b);
+				auto av = uint8_t(state.military_definitions.unit_base_definitions[au].type);
+				auto bv = uint8_t(state.military_definitions.unit_base_definitions[bu].type);
 				if(av != bv)
-				return av > bv;
-				else
+					return av < bv;
+				if(au != bu)
+					return au.index() < bu.index();
 				return a.index() < b.index();
 			});
 			update(state);

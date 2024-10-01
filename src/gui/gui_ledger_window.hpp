@@ -4,11 +4,9 @@
 #include "gui_element_types.hpp"
 #include "province_templates.hpp"
 #include "economy_factory.hpp"
+#include "pdqsort.h"
 
 namespace ui {
-
-
-
 	class ledger_page_number {
 		public:
 		int8_t value;
@@ -272,84 +270,46 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_nation([&](dcon::nation_id id) {
-				if(state.world.nation_get_owned_province_count(id) != 0)
-				row_contents.push_back(id);
+				if(state.world.nation_get_owned_province_count(id) != 0) {
+					row_contents.push_back(id);
+				}
 			});
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
-				case ledger_sort_type::country_status:
+			case ledger_sort_type::country_status:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return int32_t(nations::get_status(state, a)) >  int32_t(nations::get_status(state, b));
-					} else {
-						return int32_t(nations::get_status(state, a)) < int32_t(nations::get_status(state, b));
-					}
+					return int32_t(nations::get_status(state, a)) < int32_t(nations::get_status(state, b));
 				});
 				break;
-				case ledger_sort_type::military_score:
+			case ledger_sort_type::military_score:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_military_score(a) < state.world.nation_get_military_score(b);
-					} else {
-						return state.world.nation_get_military_score(a) > state.world.nation_get_military_score(b);
-					}
+					return state.world.nation_get_military_score(a) < state.world.nation_get_military_score(b);
 				});
 				break;
-				case ledger_sort_type::industrial_score:
+			case ledger_sort_type::industrial_score:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_industrial_score(a) < state.world.nation_get_industrial_score(b);
-					} else {
-						return state.world.nation_get_industrial_score(a) > state.world.nation_get_industrial_score(b);
-					}
+					return state.world.nation_get_industrial_score(a) < state.world.nation_get_industrial_score(b);
 				});
 				break;
-				case ledger_sort_type::prestige:
+			case ledger_sort_type::prestige:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return nations::prestige_score(state, a) < nations::prestige_score(state, b);
-					} else {
-						return nations::prestige_score(state, a) > nations::prestige_score(state, b);
-					}
+					return nations::prestige_score(state, a) < nations::prestige_score(state, b);
 				});
 				break;
-				case ledger_sort_type::total_score:
+			case ledger_sort_type::total_score:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					} else {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) > state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					}
+					return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 				});
 				break;
-				case ledger_sort_type::gdp_capita:
+			default:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					} else {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) > state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
 				break;
-				case ledger_sort_type::gdp:	
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					} else {
-						return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) > state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
-					}
-				});
-				break;
-				default:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
-				});
-				break;
+			}
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 			update(state);
 		}
@@ -521,32 +481,25 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_nation([&](dcon::nation_id id) {
-				if(state.world.nation_get_owned_province_count(id) != 0)
-				row_contents.push_back(id);
+				if(state.world.nation_get_owned_province_count(id) != 0) {
+					row_contents.push_back(id);
+				}
 			});
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
-				case ledger_sort_type::total_pop:
+			case ledger_sort_type::total_pop:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_demographics(a, demographics::total) < state.world.nation_get_demographics(b, demographics::total);
-					} else {
-						return state.world.nation_get_demographics(a, demographics::total) > state.world.nation_get_demographics(b, demographics::total);
-					}
+					return state.world.nation_get_demographics(a, demographics::total) < state.world.nation_get_demographics(b, demographics::total);
 				});
 				break;
-				case ledger_sort_type::provinces:
+			case ledger_sort_type::provinces:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_owned_province_count(a) < state.world.nation_get_owned_province_count(b);
-					} else {
-						return state.world.nation_get_owned_province_count(a) > state.world.nation_get_owned_province_count(b);
-					}
+					return state.world.nation_get_owned_province_count(a) < state.world.nation_get_owned_province_count(b);
 				});
 				break;
-				case ledger_sort_type::factories:
+			case ledger_sort_type::factories:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					uint32_t anum_factories = 0;
 					for(auto si : state.world.nation_get_state_ownership(a)) {
@@ -560,60 +513,40 @@ namespace ui {
 							bnum_factories += uint32_t(state.world.province_get_factory_location(p).end() - state.world.province_get_factory_location(p).begin());
 						});
 					}
-					if(lsort.reversed) {
-						return anum_factories < bnum_factories;
-					} else {
-						return anum_factories > bnum_factories;
-					}
+					return anum_factories > bnum_factories;
 				});
 				break;
-				case ledger_sort_type::literacy:
+			case ledger_sort_type::literacy:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto aliteracy = state.world.nation_get_demographics(a, demographics::literacy) / std::max(1.0f, state.world.nation_get_demographics(a, demographics::total));
 					auto bliteracy = state.world.nation_get_demographics(b, demographics::literacy) / std::max(1.0f, state.world.nation_get_demographics(b, demographics::total));
-					if(lsort.reversed) {
-						return aliteracy < bliteracy;
-					} else {
-						return aliteracy > bliteracy;
-					}
+					return aliteracy < bliteracy;
 				});
 				break;
-				case ledger_sort_type::leadership:
+			case ledger_sort_type::leadership:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_leadership_points(a) < state.world.nation_get_leadership_points(b);
-					} else {
-						return state.world.nation_get_leadership_points(a) > state.world.nation_get_leadership_points(b);
-					}
+					return state.world.nation_get_leadership_points(a) > state.world.nation_get_leadership_points(b);
 				});
 				break;
-				case ledger_sort_type::brigades:
+			case ledger_sort_type::brigades:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_active_regiments(a) < state.world.nation_get_active_regiments(b);
-					} else {
-						return state.world.nation_get_active_regiments(a) > state.world.nation_get_active_regiments(b);
-					}
+					return state.world.nation_get_active_regiments(a) > state.world.nation_get_active_regiments(b);
 				});
 				break;
-				case ledger_sort_type::ships:
+			case ledger_sort_type::ships:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return military::total_ships(state, a) < military::total_ships(state, b);
-					} else {
-						return military::total_ships(state, a) > military::total_ships(state, b);
-					}
+					return military::total_ships(state, a) > military::total_ships(state, b);
 				});
 				break;
-				default:
+			default:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
 				break;
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -748,58 +681,43 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_nation([&](dcon::nation_id id) {
-				if(state.world.nation_get_owned_province_count(id) != 0)
-				row_contents.push_back(id);
+				if(state.world.nation_get_owned_province_count(id) != 0) {
+					row_contents.push_back(id);
+				}
 			});
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
-				case ledger_sort_type::government_type:
+			case ledger_sort_type::government_type:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_government_type(a).id.index() < state.world.nation_get_government_type(b).id.index();
-					} else {
-						return state.world.nation_get_government_type(a).id.index() > state.world.nation_get_government_type(b).id.index();
-					}
+					return state.world.nation_get_government_type(a).id.index() < state.world.nation_get_government_type(b).id.index();
 				});
 				break;
-				case ledger_sort_type::ruling_party:
+			case ledger_sort_type::ruling_party:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, state.world.nation_get_ruling_party(a).get_name()) < text::produce_simple_string(state, state.world.nation_get_ruling_party(b).get_name());
-					} else {
-						return text::produce_simple_string(state, state.world.nation_get_ruling_party(a).get_name()) > text::produce_simple_string(state, state.world.nation_get_ruling_party(b).get_name());
-					}
+					return text::produce_simple_string(state, state.world.nation_get_ruling_party(a).get_name()) < text::produce_simple_string(state, state.world.nation_get_ruling_party(b).get_name());
 				});
 				break;
-				case ledger_sort_type::national_value:
+			case ledger_sort_type::national_value:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_national_value(a).id.index() < state.world.nation_get_national_value(b).id.index();
-					} else {
-						return state.world.nation_get_national_value(a).id.index() > state.world.nation_get_national_value(b).id.index();
-					}
+					return state.world.nation_get_national_value(a).id.index() < state.world.nation_get_national_value(b).id.index();
 				});
 				break;
-				case ledger_sort_type::ruling_ideology:
+			case ledger_sort_type::ruling_ideology:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_ruling_party(a).get_ideology().id.index() < state.world.nation_get_ruling_party(b).get_ideology().id.index();
-					} else {
-						return state.world.nation_get_ruling_party(a).get_ideology().id.index() > state.world.nation_get_ruling_party(b).get_ideology().id.index();
-					}
+					return state.world.nation_get_ruling_party(a).get_ideology().id.index() < state.world.nation_get_ruling_party(b).get_ideology().id.index();
 				});
 				break;
-				default:
+			default:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
 				break;
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -940,20 +858,16 @@ namespace ui {
 			if(std::holds_alternative<dcon::issue_id>(lsort.type)) {
 				auto iss = std::get<dcon::issue_id>(lsort.type);
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_issues(a, iss).id.index() < state.world.nation_get_issues(b, iss).id.index();
-					} else {
-						return state.world.nation_get_issues(a, iss).id.index() > state.world.nation_get_issues(b, iss).id.index();
-					}
+					return state.world.nation_get_issues(a, iss).id.index() > state.world.nation_get_issues(b, iss).id.index();
 				});
 			} else {
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -977,20 +891,16 @@ namespace ui {
 			if(std::holds_alternative<dcon::issue_id>(lsort.type)) {
 				auto iss = std::get<dcon::issue_id>(lsort.type);
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_issues(a, iss).id.index() < state.world.nation_get_issues(b, iss).id.index();
-					} else {
-						return state.world.nation_get_issues(a, iss).id.index() > state.world.nation_get_issues(b, iss).id.index();
-					}
+					return state.world.nation_get_issues(a, iss).id.index() > state.world.nation_get_issues(b, iss).id.index();
 				});
 			} else {
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -1107,8 +1017,9 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_nation([&](dcon::nation_id id) {
-				if(state.world.nation_get_owned_province_count(id) != 0)
-				row_contents.push_back(id);
+				if(state.world.nation_get_owned_province_count(id) != 0) {
+					row_contents.push_back(id);
+				}
 			});
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
@@ -1116,20 +1027,16 @@ namespace ui {
 				auto pt = std::get<dcon::pop_type_id>(lsort.type);
 				auto dkey = demographics::to_key(state, pt);
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return state.world.nation_get_demographics(a, dkey) < state.world.nation_get_demographics(b, dkey);
-					} else {
-						return state.world.nation_get_demographics(a, dkey) > state.world.nation_get_demographics(b, dkey);
-					}
+					return state.world.nation_get_demographics(a, dkey) > state.world.nation_get_demographics(b, dkey);
 				});
 			} else {
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, text::get_name(state, a)) > text::produce_simple_string(state, text::get_name(state, b));
-					} else {
-						return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
-					}
+					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
 				});
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -1308,94 +1215,62 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-			for(auto si : state.world.nation_get_state_ownership(state.local_player_nation))
-			province::for_each_province_in_state_instance(state, si.get_state(),
-					[&](dcon::province_id p) { row_contents.push_back(p); });
+			for(auto po : state.world.nation_get_province_ownership(state.local_player_nation)) {
+				row_contents.push_back(po.get_province());
+			}
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
-				case ledger_sort_type::total_pop:
+			case ledger_sort_type::total_pop:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_demographics(a, demographics::total) < state.world.province_get_demographics(b, demographics::total);
-					} else {
-						return state.world.province_get_demographics(a, demographics::total) > state.world.province_get_demographics(b, demographics::total);
-					}
+					return state.world.province_get_demographics(a, demographics::total) > state.world.province_get_demographics(b, demographics::total);
 				});
 				break;
-				case ledger_sort_type::militancy:
+			case ledger_sort_type::militancy:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_demographics(a, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) < state.world.province_get_demographics(b, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					} else {
-						return state.world.province_get_demographics(a, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					}
+					return state.world.province_get_demographics(a, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::militancy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
 				});
 				break;
-				case ledger_sort_type::conciousness:
+			case ledger_sort_type::conciousness:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_demographics(a, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) < state.world.province_get_demographics(b, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					} else {
-						return state.world.province_get_demographics(a, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					}
+					return state.world.province_get_demographics(a, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::consciousness) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
 				});
 				break;
-				case ledger_sort_type::literacy:
+			case ledger_sort_type::literacy:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_demographics(a, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) < state.world.province_get_demographics(b, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					} else {
-						return state.world.province_get_demographics(a, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
-					}
+					return state.world.province_get_demographics(a, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(a, demographics::total)) > state.world.province_get_demographics(b, demographics::literacy) / std::max(1.0f, state.world.province_get_demographics(b, demographics::total));
 				});
 				break;
-				case ledger_sort_type::culture:
+			case ledger_sort_type::culture:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(a))) > text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(b)));
-					} else {
-						return text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(a))) < text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(b)));
-					}
+					return text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(a))) < text::produce_simple_string(state, state.world.culture_get_name(state.world.province_get_dominant_culture(b)));
 				});
 				break;
-				case ledger_sort_type::religion:
+			case ledger_sort_type::religion:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_dominant_religion(a).id.index() > state.world.province_get_dominant_religion(b).id.index();
-					} else {
-						return state.world.province_get_dominant_religion(a).id.index() < state.world.province_get_dominant_religion(b).id.index();
-					}
+					return state.world.province_get_dominant_religion(a).id.index() < state.world.province_get_dominant_religion(b).id.index();
 				});
 				break;
-				case ledger_sort_type::dom_ideology:
+			case ledger_sort_type::dom_ideology:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_dominant_ideology(a).id.index() > state.world.province_get_dominant_ideology(b).id.index();
-					} else {
-						return state.world.province_get_dominant_ideology(a).id.index() < state.world.province_get_dominant_ideology(b).id.index();
-					}
+					return state.world.province_get_dominant_ideology(a).id.index() < state.world.province_get_dominant_ideology(b).id.index();
 				});
 				break;
-				case ledger_sort_type::dom_issue:
+			case ledger_sort_type::dom_issue:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_dominant_issue_option(a).id.index() > state.world.province_get_dominant_issue_option(b).id.index();
-					} else {
-						return state.world.province_get_dominant_issue_option(a).id.index() < state.world.province_get_dominant_issue_option(b).id.index();
-					}
+					return state.world.province_get_dominant_issue_option(a).id.index() < state.world.province_get_dominant_issue_option(b).id.index();
 				});
 				break;
-				default:
+			default:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, state.world.province_get_name(a)) > text::produce_simple_string(state, state.world.province_get_name(b));
-					} else {
-						return text::produce_simple_string(state, state.world.province_get_name(a)) < text::produce_simple_string(state, state.world.province_get_name(b));
-					}
+					return text::produce_simple_string(state, state.world.province_get_name(a)) < text::produce_simple_string(state, state.world.province_get_name(b));
 				});
 				break;
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -1504,29 +1379,33 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-			for(auto si : state.world.nation_get_state_ownership(state.local_player_nation))
-			province::for_each_province_in_state_instance(state, si.get_state(),
-					[&](dcon::province_id p) { row_contents.push_back(p); });
+			for(auto po : state.world.nation_get_province_ownership(state.local_player_nation)) {
+				row_contents.push_back(po.get_province());
+			}
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			if(std::holds_alternative<dcon::pop_type_id>(lsort.type)) {
 				auto pt = std::get<dcon::pop_type_id>(lsort.type);
 				auto dkey = demographics::to_key(state, pt);
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return state.world.province_get_demographics(a, dkey) < state.world.province_get_demographics(b, dkey);
-					} else {
-						return state.world.province_get_demographics(a, dkey) > state.world.province_get_demographics(b, dkey);
-					}
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
+					auto av = state.world.province_get_demographics(a, dkey);
+					auto bv = state.world.province_get_demographics(b, dkey);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 			} else {
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
-					if(lsort.reversed) {
-						return text::produce_simple_string(state, state.world.province_get_name(a)) > text::produce_simple_string(state, state.world.province_get_name(b));
-					} else {
-						return text::produce_simple_string(state, state.world.province_get_name(a)) < text::produce_simple_string(state, state.world.province_get_name(b));
-					}
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
+					auto av = text::produce_simple_string(state, state.world.province_get_name(a));
+					auto bv = text::produce_simple_string(state, state.world.province_get_name(b));
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
+			}
+
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
 			}
 
 			update(state);
@@ -1884,72 +1763,76 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-			for(auto const fat_smemb_id : state.world.nation_get_state_ownership(state.local_player_nation))
-			province::for_each_province_in_state_instance(state, fat_smemb_id.get_state(), [&](dcon::province_id pid) {
-				auto fat_id = dcon::fatten(state.world, pid);
-				fat_id.for_each_factory_location_as_province(
-						[&](dcon::factory_location_id flid) { row_contents.push_back(state.world.factory_location_get_factory(flid)); });
-			});
+			for(auto const fat_smemb_id : state.world.nation_get_state_ownership(state.local_player_nation)) {
+				province::for_each_province_in_state_instance(state, fat_smemb_id.get_state(), [&](dcon::province_id pid) {
+					auto fat_id = dcon::fatten(state.world, pid);
+					fat_id.for_each_factory_location_as_province([&](dcon::factory_location_id flid) {
+						row_contents.push_back(state.world.factory_location_get_factory(flid));
+					});
+				});
+			}
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
-				case ledger_sort_type::commodity_type:
+			case ledger_sort_type::commodity_type:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return state.world.factory_get_building_type(a).get_output().id.index() < state.world.factory_get_building_type(b).get_output().id.index();
-					} else {
-						return state.world.factory_get_building_type(a).get_output().id.index() > state.world.factory_get_building_type(b).get_output().id.index();
-					}
+					auto av = state.world.factory_get_building_type(a).get_output().id.index();
+					auto bv = state.world.factory_get_building_type(b).get_output().id.index();
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
-				case ledger_sort_type::output_amount:
+			case ledger_sort_type::output_amount:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return state.world.factory_get_actual_production(a) < state.world.factory_get_actual_production(b);
-					} else {
-						return state.world.factory_get_actual_production(a) > state.world.factory_get_actual_production(b);
-					}
+					auto av = state.world.factory_get_actual_production(a);
+					auto bv = state.world.factory_get_actual_production(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
-				case ledger_sort_type::profit:
+			case ledger_sort_type::profit:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return state.world.factory_get_full_profit(a) < state.world.factory_get_full_profit(b);
-					} else {
-						return state.world.factory_get_full_profit(a) > state.world.factory_get_full_profit(b);
-					}
+					auto av = state.world.factory_get_full_profit(a);
+					auto bv = state.world.factory_get_full_profit(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
-				case ledger_sort_type::employment:
+			case ledger_sort_type::employment:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return economy_factory::factory_total_employment(state, a) < economy_factory::factory_total_employment(state, b);
-					} else {
-						return economy_factory::factory_total_employment(state, a) > economy_factory::factory_total_employment(state, b);
-					}
+					auto av = economy_factory::factory_total_employment(state, a);
+					auto bv = economy_factory::factory_total_employment(state, b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
-				case ledger_sort_type::factory_level:
+			case ledger_sort_type::factory_level:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return state.world.factory_get_level(a) < state.world.factory_get_level(b);
-					} else {
-						return state.world.factory_get_level(a) > state.world.factory_get_level(b);
-					}
+					auto av = state.world.factory_get_level(a);
+					auto bv = state.world.factory_get_level(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
-				default:
+			default:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::factory_id a, dcon::factory_id b) {
-					if(lsort.reversed) {
-						return text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(a)) > text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(b));
-					} else {
-						return text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(a)) < text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(b));
-					}
+					auto av = text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(a));
+					auto bv = text::get_province_state_name(state, state.world.factory_get_province_from_factory_location(b));
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			}
-
+			if(lsort.reversed) {
+				std::reverse(row_contents.begin(), row_contents.end());
+			}
 			update(state);
 		}
 	};

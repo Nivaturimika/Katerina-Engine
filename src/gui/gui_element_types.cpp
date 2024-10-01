@@ -22,6 +22,7 @@
 #include "unit_tooltip.hpp"
 #include "triggers.hpp"
 #include "effects.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -1197,7 +1198,8 @@ namespace ui {
 
 	template<class T>
 	void piechart<T>::update_chart(sys::state& state) {
-	std::sort(distribution.begin(), distribution.end(), [](auto const& a, auto const& b) { return a.value > b.value; });
+		pdqsort(distribution.begin(), distribution.end(), [](auto const& a, auto const& b) { return a.value > b.value; });
+
 		float total = 0.0f;
 		for(auto& e : distribution) {
 			total += e.value;
@@ -1221,8 +1223,9 @@ namespace ui {
 				for(auto& e : distribution) {
 					e.slices += uint8_t(1);
 					rem -= 1;
-					if(rem == 0)
-					break;
+					if(rem == 0) {
+						break;
+					}
 				}
 			}
 		} else if(int_total > resolution) {

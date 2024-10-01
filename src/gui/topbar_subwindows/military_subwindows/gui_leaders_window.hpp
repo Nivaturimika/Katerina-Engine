@@ -3,6 +3,7 @@
 #include "gui_element_types.hpp"
 #include "prng.hpp"
 #include "gui_leader_tooltip.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -193,44 +194,44 @@ namespace ui {
 				row_contents.push_back(fat_id.get_leader());
 			}
 			switch(sort) {
-				case leader_sort::name:
-					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-						auto in_a = state.to_string_view(state.world.leader_get_name(a));
-						auto in_b = state.to_string_view(state.world.leader_get_name(b));
-						if(in_a != in_b)
-							return in_a < in_b;
-						return leader_default_sort(state, a, b);
-					});
-					break;
-				case leader_sort::prestige:
-					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-						auto in_a = state.world.leader_get_prestige(a);
-						auto in_b = state.world.leader_get_prestige(b);
-						if(in_a != in_b)
-							return in_a < in_b;
-						return leader_default_sort(state, a, b);
-					});
-					break;
-				case leader_sort::type:
-					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-						auto in_a = state.world.leader_get_is_admiral(a);
-						auto in_b = state.world.leader_get_is_admiral(b);
-						if(in_a != in_b)
-							return in_a < in_b;
-						return leader_default_sort(state, a, b);
-					});
-					break;
-				case leader_sort::army:
-					std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
-						auto ar_a = state.world.leader_get_army_from_army_leadership(a);
-						auto ar_b = state.world.leader_get_army_from_army_leadership(b);
-						auto in_a = state.to_string_view(state.world.army_get_name(ar_a));
-						auto in_b = state.to_string_view(state.world.army_get_name(ar_b));
-						if(in_a != in_b)
-							return in_a < in_b;
-						return leader_default_sort(state, a, b);
-					});
-					break;
+			case leader_sort::name:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+					auto in_a = state.to_string_view(state.world.leader_get_name(a));
+					auto in_b = state.to_string_view(state.world.leader_get_name(b));
+					if(in_a != in_b)
+						return in_a < in_b;
+					return leader_default_sort(state, a, b);
+				});
+				break;
+			case leader_sort::prestige:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+					auto in_a = state.world.leader_get_prestige(a);
+					auto in_b = state.world.leader_get_prestige(b);
+					if(in_a != in_b)
+						return in_a < in_b;
+					return leader_default_sort(state, a, b);
+				});
+				break;
+			case leader_sort::type:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+					auto in_a = state.world.leader_get_is_admiral(a);
+					auto in_b = state.world.leader_get_is_admiral(b);
+					if(in_a != in_b)
+						return in_a < in_b;
+					return leader_default_sort(state, a, b);
+				});
+				break;
+			case leader_sort::army:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+					auto ar_a = state.world.leader_get_army_from_army_leadership(a);
+					auto ar_b = state.world.leader_get_army_from_army_leadership(b);
+					auto in_a = state.to_string_view(state.world.army_get_name(ar_a));
+					auto in_b = state.to_string_view(state.world.army_get_name(ar_b));
+					if(in_a != in_b)
+						return in_a < in_b;
+					return leader_default_sort(state, a, b);
+				});
+				break;
 			}
 			if(is_asc) {
 				std::reverse(row_contents.begin(), row_contents.end());
@@ -280,7 +281,7 @@ namespace ui {
 			return tooltip_behavior::tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-		text::add_line(state, contents, "alice_mw_create_lp", text::variable_type::x, text::fp_two_places{ state.defines.leader_recruit_cost });
+			text::add_line(state, contents, "alice_mw_create_lp", text::variable_type::x, text::fp_two_places{ state.defines.leader_recruit_cost });
 			text::add_line(state, contents, "alice_mw_create_lpb");
 			if(B) {
 				text::add_line(state, contents, "alice_mw_controls_1");

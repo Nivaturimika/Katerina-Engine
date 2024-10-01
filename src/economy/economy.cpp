@@ -10,6 +10,7 @@
 #include "triggers.hpp"
 #include "economy_factory.hpp"
 #include "economy_rgo.hpp"
+#include "pdqsort.h"
 
 namespace economy {
 
@@ -1983,11 +1984,11 @@ namespace economy {
 							states_in_order.push_back(si.get_state().id);
 						}
 					}
-					std::sort(states_in_order.begin(), states_in_order.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+					pdqsort(states_in_order.begin(), states_in_order.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 						auto a_pop = state.world.state_instance_get_demographics(a, demographics::total);
 						auto b_pop = state.world.state_instance_get_demographics(b, demographics::total);
 						if(a_pop != b_pop)
-						return a_pop > b_pop;
+							return a_pop > b_pop;
 						return a.index() < b.index(); // force total ordering
 					});
 
@@ -2091,11 +2092,11 @@ namespace economy {
 									valid_desired_types.push_back(ft);
 								}
 
-								std::sort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
+								pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
 									auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s);
 									auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s);
 									if(a_bonus != b_bonus)
-									return a_bonus > b_bonus;
+										return a_bonus > b_bonus;
 									return a.index() < b.index(); // force total ordering
 								});
 

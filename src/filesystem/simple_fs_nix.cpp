@@ -9,6 +9,7 @@
 
 #include "simple_fs.hpp"
 #include "text.hpp"
+#include "pdqsort.h"
 
 namespace simple_fs {
 
@@ -299,7 +300,7 @@ namespace simple_fs {
 				closedir(d);
 			}
 		}
-		std::sort(accumulated_results.begin(), accumulated_results.end(), [](unopened_file const& a, unopened_file const& b) {
+		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](unopened_file const& a, unopened_file const& b) {
 			return std::lexicographical_compare(std::begin(a.file_name), std::end(a.file_name), std::begin(b.file_name), std::end(b.file_name), list_files_compare_func);
 		});
 		return accumulated_results;
@@ -318,11 +319,9 @@ namespace simple_fs {
 					while((dir_ent = readdir(d)) != nullptr) {
 						// Check if it's a directory. Not POSIX standard but included in Linux
 						if(dir_ent->d_type != DT_DIR)
-						continue;
-
+							continue;
 						if(impl::contains_non_ascii(dir_ent->d_name))
-						continue;
-
+							continue;
 						native_string const rel_name = dir.relative_path + NATIVE("/") + dir_ent->d_name;
 						if(dir_ent->d_name[0] != NATIVE('.')) {
 							auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(),
@@ -343,11 +342,9 @@ namespace simple_fs {
 				while((dir_ent = readdir(d)) != nullptr) {
 					// Check if it's a directory. Not POSIX standard but included in Linux
 					if(dir_ent->d_type != DT_DIR)
-					continue;
-
+						continue;
 					if(impl::contains_non_ascii(dir_ent->d_name))
-					continue;
-
+						continue;
 					native_string const rel_name = dir.relative_path + NATIVE("/") + dir_ent->d_name;
 					if(dir_ent->d_name[0] != NATIVE('.')) {
 						accumulated_results.emplace_back(nullptr, rel_name);
@@ -356,12 +353,11 @@ namespace simple_fs {
 				closedir(d);
 			}
 		}
-		std::sort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
+		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
 			return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path),
 				std::end(b.relative_path),
 				[](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
 		});
-
 		return accumulated_results;
 	}
 

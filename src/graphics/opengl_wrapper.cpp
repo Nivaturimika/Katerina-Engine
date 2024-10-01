@@ -3,6 +3,7 @@
 #include "simple_fs.hpp"
 #include "fonts.hpp"
 #include "bmfont.hpp"
+#include "pdqsort.h"
 
 namespace ogl {
 
@@ -395,7 +396,7 @@ namespace ogl {
 			}
 		});
 		// Eliminate duplicates
-		std::sort(state.flag_types.begin(), state.flag_types.end());
+		pdqsort(state.flag_types.begin(), state.flag_types.end());
 		state.flag_types.erase(std::unique(state.flag_types.begin(), state.flag_types.end()), state.flag_types.end());
 
 		// Automatically assign texture offsets to the flag_types

@@ -4,6 +4,7 @@
 #include "gui_common_elements.hpp"
 #include "prng.hpp"
 #include "text.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 
@@ -453,84 +454,76 @@ namespace ui {
 			}
 
 			switch(sort_type) {
-				case leader_select_sort::attack:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::attack:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_attack(state.world.leader_get_background(a)) + state.world.leader_trait_get_attack(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_attack(state.world.leader_get_background(b)) + state.world.leader_trait_get_attack(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::defense:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::defense:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_defense(state.world.leader_get_background(a)) + state.world.leader_trait_get_defense(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_defense(state.world.leader_get_background(b)) + state.world.leader_trait_get_defense(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::recon:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::recon:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_reconnaissance(state.world.leader_get_background(a)) + state.world.leader_trait_get_reconnaissance(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_reconnaissance(state.world.leader_get_background(b)) + state.world.leader_trait_get_reconnaissance(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::morale:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::morale:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_morale(state.world.leader_get_background(a)) + state.world.leader_trait_get_morale(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_morale(state.world.leader_get_background(b)) + state.world.leader_trait_get_morale(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::reliability:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::reliability:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_reliability(state.world.leader_get_background(a)) + state.world.leader_trait_get_reliability(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_reliability(state.world.leader_get_background(b)) + state.world.leader_trait_get_reliability(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::org:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::org:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_organisation(state.world.leader_get_background(a)) + state.world.leader_trait_get_organisation(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_organisation(state.world.leader_get_background(b)) + state.world.leader_trait_get_organisation(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::speed:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::speed:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_speed(state.world.leader_get_background(a)) + state.world.leader_trait_get_speed(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_speed(state.world.leader_get_background(b)) + state.world.leader_trait_get_speed(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
-				case leader_select_sort::experience:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+			case leader_select_sort::experience:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_experience(state.world.leader_get_background(a)) + state.world.leader_trait_get_experience(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_experience(state.world.leader_get_background(b)) + state.world.leader_trait_get_experience(state.world.leader_get_personality(b));
 					if(av != bv)
 						return av > bv;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				break;
 			}

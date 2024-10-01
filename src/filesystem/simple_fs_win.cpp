@@ -12,6 +12,7 @@
 #include "Memoryapi.h"
 #include "Shlobj.h"
 #include <cstdlib>
+#include "pdqsort.h"
 
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -278,7 +279,7 @@ namespace simple_fs {
 			}
 		}
 
-		std::sort(accumulated_results.begin(), accumulated_results.end(), [](unopened_file const& a, unopened_file const& b) {
+		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](unopened_file const& a, unopened_file const& b) {
 			return std::lexicographical_compare(std::begin(a.file_name), std::end(a.file_name), std::begin(b.file_name), std::end(b.file_name), list_files_compare_func);
 		});
 		return accumulated_results;
@@ -363,8 +364,8 @@ namespace simple_fs {
 			}
 		}
 
-		std::sort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
-		return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path), std::end(b.relative_path), [](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
+		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
+			return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path), std::end(b.relative_path), [](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
 		});
 		return accumulated_results;
 	}

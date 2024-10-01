@@ -446,30 +446,47 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			for(auto n : state.world.in_nation) {
-				if(n.get_owned_province_count() > 0)
-				row_contents.push_back(n);
+				if(n.get_owned_province_count() > 0) {
+					row_contents.push_back(n);
+				}
 			}
 			auto s = retrieve<picker_sort>(state, parent);
 			auto is_asc = retrieve<bool>(state, parent);
 			switch(s) {
 			case picker_sort::name:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return text::get_name_as_string(state, fatten(state.world, a)) < text::get_name_as_string(state, fatten(state.world, b));
+					auto av = text::get_name_as_string(state, fatten(state.world, a));
+					auto bv = text::get_name_as_string(state, fatten(state.world, b));
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case picker_sort::mil_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_military_rank(a) < state.world.nation_get_military_rank(b);
+					auto av = state.world.nation_get_military_rank(a);
+					auto bv = state.world.nation_get_military_rank(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case picker_sort::indust_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_industrial_rank(a) < state.world.nation_get_industrial_rank(b);
+					auto av = state.world.nation_get_industrial_rank(a);
+					auto bv = state.world.nation_get_industrial_rank(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case picker_sort::p_rank:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_prestige_rank(a) < state.world.nation_get_prestige_rank(b);
+					auto av = state.world.nation_get_prestige_rank(a);
+					auto bv = state.world.nation_get_prestige_rank(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			}
