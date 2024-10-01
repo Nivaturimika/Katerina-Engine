@@ -2089,6 +2089,8 @@ namespace ui {
 		}
 	}
 	void nation_script_button::on_create(sys::state& state) noexcept {
+		button_element_base::on_create(state);
+
 		auto gui_name = state.to_string_view(state.ui_defs.gui[base_definition].name);
 		std::string cmp_name = "gui_frame_" + std::string(gui_name);
 		for(int32_t i = 0; i < state.national_definitions.num_allocated_national_variables; i++) {
