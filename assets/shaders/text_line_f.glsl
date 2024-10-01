@@ -14,10 +14,18 @@ void main() {
 	outer_color = mix(inner_color, outer_color, text_size * 40.f);
 	vec4 color_in = texture(texture_sampler, vec2(tex_coord.xy));
 
-	if(color_in.r > 0.5f) {
+	float segment_1 = 0.5f;
+	float segment_2 = 0.475f;
+	if(text_size * 40.f <= 0.5f) {
+		segment_1 = 0.535f;
+	}/* else {
+		segment_1 = mix(0.535f, 0.5f, text_size * 40.f - 0.5f);
+	}*/
+
+	if(color_in.r > segment_1) {
 		frag_color = vec4(inner_color, 1.0f);
-	} else if(color_in.r > 0.475f) {
-		float t = (color_in.r - 0.475f) * (1.f / (0.5f - 0.475f));
+	} else if(color_in.r > segment_2) {
+		float t = (color_in.r - segment_2) / (segment_1 - segment_2);
 		frag_color = vec4(inner_color, t * t);
 		//frag_color = vec4(mix(inner_color, outer_color, 1.0f - (color_in.r - 0.5f) * 100.f), 1.0f);
 	} else {

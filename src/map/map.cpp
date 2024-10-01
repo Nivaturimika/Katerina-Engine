@@ -2232,7 +2232,7 @@ namespace map {
 			}
 			size = glm::pow(glm::golden_ratio<float>(), font_size_index / 5.f);
 
-			if(size < 10.f) {
+			if(size < 15.f) {
 				continue;
 			}
 
