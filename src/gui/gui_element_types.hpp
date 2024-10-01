@@ -528,7 +528,6 @@ namespace ui {
 		dcon::gui_def_id base_definition;
 
 		province_script_button(dcon::gui_def_id base_definition) : base_definition(base_definition) { }
-		void on_create(sys::state& state) noexcept override;
 		void button_action(sys::state& state) noexcept override;
 		void on_update(sys::state& state) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
