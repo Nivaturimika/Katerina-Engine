@@ -37,6 +37,15 @@ namespace ogl {
 		window::emit_error_message("OpenGL error:" + full_message, false);
 	}
 
+	std::unique_ptr<char[]> get_shader_log(GLuint shader) {
+		GLint length = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+		auto log = std::unique_ptr<char[]>(new char[static_cast<size_t>(length)]);
+		GLsizei written = 0;
+		glGetShaderInfoLog(shader, length, &written, log.get());
+		return log;
+	}
+
 	GLint compile_shader(std::string_view source, GLenum type) {
 		GLuint shader = glCreateShader(type);
 		if(!shader) {
@@ -51,8 +60,9 @@ namespace ogl {
 			"#extension GL_ARB_explicit_attrib_location : enable\r\n"
 			"#extension GL_ARB_shader_subroutine : enable\r\n"
 			"#extension GL_ARB_vertex_array_object : enable\r\n"
-			"#define M_PI 3.1415926535897932384626433832795\r\n"
-			"#define PI 3.1415926535897932384626433832795\r\n",
+			"#define M_PI 3.1415926535897932384626433832795f\r\n"
+			"#define PI 3.1415926535897932384626433832795f\r\n",
+			"#line 1\r\n",
 			s_source.c_str()
 		};
 		glShaderSource(shader, std::extent_v<decltype(texts)>, texts, nullptr);
@@ -61,16 +71,16 @@ namespace ogl {
 		GLint result;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if(result == GL_FALSE) {
-			GLint length = 0;
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-			auto log = std::unique_ptr<char[]>(new char[static_cast<size_t>(length)]);
-			GLsizei written = 0;
-			glGetShaderInfoLog(shader, length, &written, log.get());
-			notify_user_of_fatal_opengl_error(std::string("Shader failed to compile:\n") + log.get());
+			auto log = get_shader_log(shader);
+			notify_user_of_fatal_opengl_error(std::string("Shader failed to compile:\n") + (log.get() ? log.get() : "No log"));
 			//dispose of resource
 			glDeleteShader(shader);
 			return 0;
 		}
+#ifndef NDEBUG
+		auto log = get_shader_log(shader);
+		OutputDebugStringA(log.get() ? log.get() : "No log");
+#endif
 		return shader;
 	}
 
