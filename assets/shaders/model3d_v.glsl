@@ -14,8 +14,6 @@ uniform float time;
 uniform vec2 model_offset;
 uniform float target_facing;
 
-#define HAVE_ANIMATIONS 1
-
 #define MAX_BONES 100
 uniform mat4 bones_matrices[MAX_BONES];
 
@@ -29,19 +27,21 @@ vec3 rotate_target(vec3 v, vec3 k, float s) {
 }
 
 void main() {
-#ifndef HAVE_ANIMATIONS
 	vec3 world_pos = vertex_position;
-#elif
-	vec4 skin_pos = vec4(0.f);
-	for(int i = 0 ; i < 4; i++) {
-		if(bone_ids[i] == -1)
-			break;
-		vec4 local_pos = vec4(vertex_position, 1.f) * bones_matrices[bone_ids[i]];
-		skin_pos += local_pos * bone_weights[i];
+	//Animations
+	bool have_animations = false;
+	if(have_animations) {
+		vec4 skin_pos = vec4(0.f);
+		for(int i = 0 ; i < 4; i++) {
+			if(bone_ids[i] == -1)
+				break;
+			vec4 local_pos = vec4(vertex_position, 1.f) * bones_matrices[bone_ids[i]];
+			skin_pos += local_pos * bone_weights[i];
+		}
+		vec3 world_pos = skin_pos.xyz;
+		world_pos.z *= -1.f;
 	}
-	vec3 world_pos = skin_pos.xyz;
-	world_pos.z *= -1.f;
-#endif
+	//
 	world_pos.y *= -1.f;
 	world_pos = rotate_target(world_pos, vec3(0.f, 1.f, 0.f), target_facing - PI / 2.f);
 //
