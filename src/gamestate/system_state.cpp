@@ -1329,17 +1329,18 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		return dcon::unit_name_id(dcon::unit_name_id::value_base_t(unit_names_indices.size() - 1));
 	}
 	std::string_view state::to_string_view(dcon::unit_name_id tag) const {
-		if(!tag)
-			return std::string_view();
-		assert(size_t(tag.index()) < unit_names_indices.size());
-		auto start_position = unit_names.data() + unit_names_indices[tag.index()];
-		auto data_size = unit_names.size();
-		auto end_position = start_position;
-		for(; end_position < unit_names.data() + data_size; ++end_position) {
-			if(*end_position == 0)
-				break;
+		if(tag) {
+			assert(size_t(tag.index()) < unit_names_indices.size());
+			auto start_position = unit_names.data() + unit_names_indices[tag.index()];
+			auto data_size = unit_names.size();
+			auto end_position = start_position;
+			for(; end_position < unit_names.data() + data_size; ++end_position) {
+				if(*end_position == 0)
+					break;
+			}
+			return std::string_view(unit_names.data() + unit_names_indices[tag.index()], size_t(end_position - start_position));
 		}
-		return std::string_view(unit_names.data() + unit_names_indices[tag.index()], size_t(end_position - start_position));
+		return std::string_view();
 	}
 
 	dcon::trigger_key state::commit_trigger_data(std::vector<uint16_t> data) {
