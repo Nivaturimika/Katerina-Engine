@@ -1260,12 +1260,12 @@ namespace launcher {
 
 		std::string s_source(source);
 		GLchar const* texts[] = {
-			"#version 140\r\n",
-			"#extension GL_ARB_explicit_uniform_location : enable\r\n",
-			"#extension GL_ARB_explicit_attrib_location : enable\r\n",
-			"#extension GL_ARB_shader_subroutine : enable\r\n",
-			"#define M_PI 3.1415926535897932384626433832795\r\n",
-			"#define PI 3.1415926535897932384626433832795\r\n",
+			"#version 140\n",
+			"#extension GL_ARB_explicit_uniform_location : enable\n",
+			"#extension GL_ARB_explicit_attrib_location : enable\n",
+			"#extension GL_ARB_shader_subroutine : enable\n",
+			"#define M_PI 3.1415926535897932384626433832795f\n",
+			"#define PI 3.1415926535897932384626433832795f\n",
 			s_source.c_str()
 		};
 		glShaderSource(return_value, 7, texts, nullptr);
