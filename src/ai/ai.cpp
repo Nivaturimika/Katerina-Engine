@@ -12,6 +12,7 @@
 #include "triggers.hpp"
 #include "economy_factory.hpp"
 #include "economy_estimations.hpp"
+#include "pdqsort.h"
 
 namespace ai {
 
