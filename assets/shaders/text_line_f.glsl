@@ -18,9 +18,9 @@ void main() {
 	float segment_2 = 0.475f;
 	if(text_size * 40.f <= 0.5f) {
 		segment_1 = 0.535f;
-	}/* else {
-		segment_1 = mix(0.535f, 0.5f, text_size * 40.f - 0.5f);
-	}*/
+	} else {
+		segment_1 = mix(0.535f, 0.5f, clamp(text_size * 40.f - 0.5f, 0.f, 1.f));
+	}
 
 	if(color_in.r > segment_1) {
 		frag_color = vec4(inner_color, 1.0f);
