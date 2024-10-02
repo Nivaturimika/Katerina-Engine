@@ -191,8 +191,6 @@ namespace map {
 			glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_capital]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_screen_vertex) * map_data.capital_vertices.size(), map_data.capital_vertices.data(), GL_STATIC_DRAW);
 		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	dcon::nation_id get_top_overlord(sys::state& state, dcon::nation_id n) {
@@ -1146,19 +1144,16 @@ namespace map {
 		if(is_dragging) { // Drag the map with middlemouse
 			glm::vec2 map_pos;
 			screen_to_map(mouse_pos, screen_size, sys::projection_mode::flat, map_pos);
-
 			set_pos(pos + last_camera_drag_pos - glm::vec2(map_pos));
 		}
 		glm::vec2 mouse_diff = glm::abs(last_unit_box_drag_pos - mouse_pos);
-		if((mouse_diff.x > std::ceil(screen_size_x * 0.0025f) || mouse_diff.y > std::ceil(screen_size_y * 0.0025f))
-		&& left_mouse_down)
-		{
+		if((mouse_diff.x > std::ceil(screen_size_x * 0.0025f) || mouse_diff.y > std::ceil(screen_size_y * 0.0025f)) && left_mouse_down) {
 			auto pos1 = last_unit_box_drag_pos / screen_size;
 			auto pos2 = mouse_pos / screen_size;
-			auto pixel_size = glm::vec2(1) / screen_size;
+			auto pixel_size = glm::vec2(1.f) / screen_size;
 			map_data.set_drag_box(true, pos1, pos2, pixel_size);
 		} else {
-		map_data.set_drag_box(false, {}, {}, {});
+			map_data.set_drag_box(false, {}, {}, {});
 		}	
 	}
 
@@ -1260,13 +1255,13 @@ namespace map {
 	void map_state::on_lbutton_down(sys::state& state, int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y,
 		sys::key_modifiers mod) {
 		left_mouse_down = true;
-	map_data.set_drag_box(false, {}, {}, {});
+		map_data.set_drag_box(false, {}, {}, {});
 		last_unit_box_drag_pos = glm::vec2(x, y);
 	}
 
 	void map_state::on_lbutton_up(sys::state& state, int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y, sys::key_modifiers mod) {
 		left_mouse_down = false;
-	map_data.set_drag_box(false, {}, {}, {});
+		map_data.set_drag_box(false, {}, {}, {});
 		auto mouse_pos = glm::vec2(x, y);
 		glm::vec2 mouse_diff = glm::abs(last_unit_box_drag_pos - mouse_pos);
 		if(mouse_diff.x <= std::ceil(screen_size_x * 0.0025f) && mouse_diff.y <= std::ceil(screen_size_y * 0.0025f)) {
@@ -1284,14 +1279,13 @@ namespace map {
 				if(map_data.province_id_map[idx] < province::to_map_id(state.province_definitions.first_sea_province)) {
 					set_selected_province(province::from_map_id(map_data.province_id_map[idx]));
 				} else {
-				set_selected_province(dcon::province_id{});
+					set_selected_province(dcon::province_id{});
 				}
 			} else {
-			set_selected_province(dcon::province_id{});
+				set_selected_province(dcon::province_id{});
 			}
 		}
 	}
-
 
 	void map_state::on_rbutton_down(sys::state& state, int32_t x, int32_t y, int32_t screen_size_x, int32_t screen_size_y,
 		sys::key_modifiers mod) {

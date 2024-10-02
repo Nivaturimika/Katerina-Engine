@@ -612,64 +612,64 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					// Sound effects(tm)
 					if(settings_bits != 0 && local_player_nation && (c6->source == local_player_nation || c6->target == local_player_nation)) {
 						switch(base_type) {
-							case message_base_type::war:
+						case message_base_type::war:
 							sound::play_effect(*this, sound::get_declaration_of_war_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::peace_accepted:
+						case message_base_type::peace_accepted:
 							sound::play_effect(*this, sound::get_peace_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::tech:
+						case message_base_type::tech:
 							sound::play_effect(*this, sound::get_technology_finished_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::factory_complete:
+						case message_base_type::factory_complete:
 							sound::play_effect(*this, sound::get_factory_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::fort_complete:
+						case message_base_type::fort_complete:
 							sound::play_effect(*this, sound::get_fort_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::rr_complete:
+						case message_base_type::rr_complete:
 							sound::play_effect(*this, sound::get_railroad_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::naval_base_complete:
+						case message_base_type::naval_base_complete:
 							sound::play_effect(*this, sound::get_naval_base_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::electionstart:
-							case message_base_type::electiondone:
+						case message_base_type::electionstart:
+						case message_base_type::electiondone:
 							sound::play_effect(*this, sound::get_election_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::revolt:
+						case message_base_type::revolt:
 							sound::play_effect(*this, sound::get_revolt_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::army_built:
+						case message_base_type::army_built:
 							sound::play_effect(*this, sound::get_army_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::navy_built:
+						case message_base_type::navy_built:
 							sound::play_effect(*this, sound::get_navy_built_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::alliance_declined:
-							case message_base_type::ally_called_declined:
-							case message_base_type::crisis_join_offer_declined:
-							case message_base_type::crisis_resolution_declined:
-							case message_base_type::mil_access_declined:
-							case message_base_type::peace_rejected:
+						case message_base_type::alliance_declined:
+						case message_base_type::ally_called_declined:
+						case message_base_type::crisis_join_offer_declined:
+						case message_base_type::crisis_resolution_declined:
+						case message_base_type::mil_access_declined:
+						case message_base_type::peace_rejected:
 							sound::play_effect(*this, sound::get_decline_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::alliance_starts:
-							case message_base_type::ally_called_accepted:
-							case message_base_type::crisis_join_offer_accepted:
-							case message_base_type::crisis_resolution_accepted:
-							case message_base_type::mil_access_start:
+						case message_base_type::alliance_starts:
+						case message_base_type::ally_called_accepted:
+						case message_base_type::crisis_join_offer_accepted:
+						case message_base_type::crisis_resolution_accepted:
+						case message_base_type::mil_access_start:
 							sound::play_effect(*this, sound::get_accept_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::chat_message:
+						case message_base_type::chat_message:
 							sound::play_interface_sound(*this, sound::get_chat_message_sound(*this), user_settings.effects_volume * user_settings.master_volume);
 							break;
-							case message_base_type::province_event:
-							case message_base_type::national_event:
-							case message_base_type::major_event:
+						case message_base_type::province_event:
+						case message_base_type::national_event:
+						case message_base_type::major_event:
 							//Sound effect is played on above logic (free/non-free loop events above)
 							break;
-							default:
+						default:
 							break;
 						}
 					}
@@ -682,7 +682,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 				while(c7) {
 					if(ui_state.endof_navalcombat_windows.size() == 0) {
 						ui_state.endof_navalcombat_windows.push_back(ui::make_element_by_type<ui::naval_combat_end_popup>(*this,
-						ui_state.defs_by_name.find(lookup_key("endofnavalcombatpopup"))->second.definition));
+							ui_state.defs_by_name.find(lookup_key("endofnavalcombatpopup"))->second.definition));
 					}
 					//static_cast<ui::naval_combat_window*>(ui_state.navalcombat_windows.back().get())->messages.push_back(*c7);
 					static_cast<ui::naval_combat_end_popup*>(ui_state.endof_navalcombat_windows.back().get())->report = *c7;
@@ -740,10 +740,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					}
 					ui_state.tooltip->base_data.size.x = int16_t(container.used_width + 32);
 					ui_state.tooltip->base_data.size.y = int16_t(container.used_height + 32);
-					if(container.used_width > 0)
-					ui_state.tooltip->set_visible(*this, true);
-					else
-					ui_state.tooltip->set_visible(*this, false);
+					ui_state.tooltip->set_visible(*this, container.used_width > 0);
 				}
 			}
 		}
@@ -752,10 +749,10 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	void state::render() { // called to render the frame may (and should) delay returning until the frame is rendered, including
 		// waiting for vsync
 		if(!current_scene.get_root)
-		return;
+			return;
 
 		std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
-	if(ui_state.last_render_time == std::chrono::time_point<std::chrono::steady_clock>{}) {
+		if(ui_state.last_render_time == std::chrono::time_point<std::chrono::steady_clock>{}) {
 			ui_state.last_render_time = now;
 		}
 		if(ui_state.fps_timer > 20) {
@@ -831,10 +828,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					}
 					ui_state.tooltip->base_data.size.x = int16_t(container.used_width + 32);
 					ui_state.tooltip->base_data.size.y = int16_t(container.used_height + 32);
-					if(container.used_width > 0)
-					ui_state.tooltip->set_visible(*this, true);
-					else
-					ui_state.tooltip->set_visible(*this, false);
+					ui_state.tooltip->set_visible(*this, container.used_width > 0);
 				} else {
 					ui_state.tooltip->set_visible(*this, false);
 				}
@@ -861,10 +855,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			}
 			ui_state.tooltip->base_data.size.x = int16_t(container.used_width + 32);
 			ui_state.tooltip->base_data.size.y = int16_t(container.used_height + 32);
-			if(container.used_width > 0)
-			ui_state.tooltip->set_visible(*this, true);
-			else
-			ui_state.tooltip->set_visible(*this, false);
+			ui_state.tooltip->set_visible(*this, container.used_width > 0);
 		}
 
 		if(ui_state.last_tooltip && ui_state.tooltip->is_visible()) {
@@ -937,8 +928,8 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		if(current_scene.based_on_map && !mouse_probe.under_mouse && !tooltip_probe.under_mouse) {
 			dcon::province_id prov = map_state.get_province_under_mouse(*this, int32_t(mouse_x_position), int32_t(mouse_y_position), x_size, y_size);
 			if(((map_state.active_map_mode == map_mode::mode::political && !current_scene.overwrite_map_tooltip)
-			|| map_state.active_map_mode == map_mode::mode::terrain) && map_state.get_zoom() <= map::zoom_close) {
-			prov = dcon::province_id{};
+				|| map_state.active_map_mode == map_mode::mode::terrain) && map_state.get_zoom() <= map::zoom_close) {
+				prov = dcon::province_id{};
 			}
 			if(prov) {
 				auto container = text::create_columnar_layout(*this, ui_state.tooltip->internal_layout,
@@ -964,13 +955,13 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					auto mid_point = world.province_get_mid_point(prov);
 					auto map_pos = map_state.normalize_map_coord(mid_point);
 					auto screen_size =
-					glm::vec2{ float(x_size / user_settings.ui_scale), float(y_size / user_settings.ui_scale) };
+						glm::vec2{ float(x_size / user_settings.ui_scale), float(y_size / user_settings.ui_scale) };
 					glm::vec2 screen_pos;
 					if(!map_state.map_to_screen(*this, map_pos, screen_size, screen_pos)) {
 						ui_state.tooltip->set_visible(*this, false);
 					} else {
 						ui_state.tooltip->base_data.position =
-						ui::xy_pair{ int16_t(screen_pos.x - container.used_width / 2 - 8), int16_t(screen_pos.y + 3.5f * map_state.get_zoom()) };
+							ui::xy_pair{ int16_t(screen_pos.x - container.used_width / 2 - 8), int16_t(screen_pos.y + 3.5f * map_state.get_zoom()) };
 						ui_state.tooltip->set_visible(*this, true);
 					}
 					// Alternatively: just make it visible

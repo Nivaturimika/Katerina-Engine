@@ -153,8 +153,9 @@ namespace map {
 	void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& data) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		if(!data.empty())
-		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
+		if(!data.empty()) {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
+		}
 		glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex));
 		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, position_));
 		glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex, normal_direction_));
@@ -173,8 +174,9 @@ namespace map {
 	void create_textured_line_b_vbo(GLuint vbo, std::vector<textured_line_vertex_b>& data) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		if(!data.empty())
-		glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex_b) * data.size(), data.data(), GL_STATIC_DRAW);
+		if(!data.empty()) {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex_b) * data.size(), data.data(), GL_STATIC_DRAW);
+		}
 		// Bind the VBO to 0 of the VAO
 		glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex_b));
 		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, position_));
@@ -1608,27 +1610,31 @@ namespace map {
 
 	void display_data::set_drag_box(bool draw_box, glm::vec2 pos1, glm::vec2 pos2, glm::vec2 pixel_size) {
 		drag_box_vertices.clear();
-		if(!draw_box)
-		return;
+		if(draw_box) {
+			// Do not mindlessly update GPU data!
+			if(!drag_box_vertices.empty() && pos1.x == pos2.x && pos1.y == pos2.y)
+				return;
 
-		if(pos1.x > pos2.x)
-		std::swap(pos1.x, pos2.x);
-		if(pos1.y > pos2.y)
-		std::swap(pos1.y, pos2.y);
+			if(pos1.x > pos2.x) {
+				std::swap(pos1.x, pos2.x);
+			}
+			if(pos1.y > pos2.y) {
+				std::swap(pos1.y, pos2.y);
+			}
 
-		glm::vec2 size = pixel_size;
-		// Vertical lines
-	add_drag_box_line(drag_box_vertices, { pos1.x, pos1.y }, { pos1.x, pos2.y }, size, true);
-	add_drag_box_line(drag_box_vertices, { pos2.x, pos1.y }, { pos2.x, pos2.y }, size, true);
+			glm::vec2 size = pixel_size;
+			// Vertical lines
+			add_drag_box_line(drag_box_vertices, { pos1.x, pos1.y }, { pos1.x, pos2.y }, size, true);
+			add_drag_box_line(drag_box_vertices, { pos2.x, pos1.y }, { pos2.x, pos2.y }, size, true);
 
-		// Horizontal lines
-	add_drag_box_line(drag_box_vertices, { pos1.x, pos1.y }, { pos2.x, pos1.y }, size, false);
-	add_drag_box_line(drag_box_vertices, { pos1.x, pos2.y }, { pos2.x, pos2.y }, size, false);
+			// Horizontal lines
+			add_drag_box_line(drag_box_vertices, { pos1.x, pos1.y }, { pos2.x, pos1.y }, size, false);
+			add_drag_box_line(drag_box_vertices, { pos1.x, pos2.y }, { pos2.x, pos2.y }, size, false);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_drag_box]);
-		assert(!drag_box_vertices.empty());
-		glBufferData(GL_ARRAY_BUFFER, sizeof(screen_vertex) * drag_box_vertices.size(), &drag_box_vertices[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_drag_box]);
+			assert(!drag_box_vertices.empty());
+			glBufferData(GL_ARRAY_BUFFER, sizeof(screen_vertex) * drag_box_vertices.size(), &drag_box_vertices[0], GL_STATIC_DRAW);
+		}
 	}
 
 	void make_selection_quad(sys::state& state, std::vector<map::textured_screen_vertex>& buffer, glm::vec2 p) {
@@ -2109,7 +2115,6 @@ namespace map {
 		if(!railroad_vertices.empty()) {
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_railroad]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex) * railroad_vertices.size(), railroad_vertices.data(), GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 	}
 
@@ -2287,7 +2292,6 @@ namespace map {
 			dyn_text_line_counts.resize(text_line_texture_per_quad.size());
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_text_line]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * text_line_vertices.size(), &text_line_vertices[0], GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 	}
 
@@ -2407,7 +2411,6 @@ namespace map {
 			dyn_province_text_line_counts.resize(province_text_line_texture_per_quad.size());
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_province_text_line]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * province_text_line_vertices.size(), &province_text_line_vertices[0], GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 	}
 
