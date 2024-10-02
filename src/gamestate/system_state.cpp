@@ -1082,7 +1082,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			}
 		}
 		// Nudge, overriden by V2 to be 0 always
-	ui_defs.gui[ui_state.defs_by_name.find(lookup_key("decision_entry"))->second.definition].position = ui::xy_pair{ 0, 0 };
+		ui_defs.gui[ui_state.defs_by_name.find(lookup_key("decision_entry"))->second.definition].position = ui::xy_pair{ 0, 0 };
 		// Find the object id for the main_bg displayed (so we display it before the map)
 		ui_state.bg_gfx_id = ui_defs.gui[ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition].data.image.gfx_object;
 
@@ -1100,7 +1100,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			ui_state.nation_picker->add_child_to_front(std::move(new_elm));
 		}
 		map_mode::set_map_mode(*this, map_mode::mode::political);
-	
+
 		ui_state.tooltip_font = text::name_into_font_id(*this, "ToolTip_Font");
 	}
 	//
@@ -1116,7 +1116,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		auto end_position = start_position;
 		for(; end_position < key_data.data() + data_size; ++end_position) {
 			if(*end_position == 0)
-			break;
+				break;
 		}
 		return std::string_view(key_data.data() + tag.index(), size_t(end_position - start_position));
 	}
@@ -1128,7 +1128,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		auto end_position = start_position;
 		for(; end_position < locale_text_data.data() + data_size; ++end_position) {
 			if(*end_position == 0)
-			break;
+				break;
 		}
 		return std::string_view(locale_text_data.data() + tag, size_t(end_position - start_position));
 	}
@@ -1143,7 +1143,36 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		auto root_dir = get_root(common_fs);
 		auto assets_dir = open_directory(root_dir, NATIVE("assets"));
 		auto localisation_dir = open_directory(assets_dir, NATIVE("localisation"));
-		auto load_base_files = [&](int32_t column) {
+
+		uint32_t column = 0;
+		if(locale_name.starts_with("en")) {
+			column = 1;
+		} else if(locale_name.starts_with("fr")) {
+			column = 2;
+		} else if(locale_name.starts_with("de")) {
+			column = 3;
+		} else if(locale_name.starts_with("pl")) {
+			column = 4;
+		} else if(locale_name.starts_with("es")) {
+			column = 5;
+		} else if(locale_name.starts_with("it")) {
+			column = 6;
+		} else if(locale_name.starts_with("sv")) {
+			column = 7;
+		} else if(locale_name.starts_with("cs")) {
+			column = 8;
+		} else if(locale_name.starts_with("hu")) {
+			column = 9;
+		} else if(locale_name.starts_with("nl")) {
+			column = 10;
+		} else if(locale_name.starts_with("pt")) {
+			column = 11;
+		} else if(locale_name.starts_with("ru")) {
+			column = 12;
+		} else if(locale_name.starts_with("fi")) {
+			column = 13;
+		}
+		if(column) { //base game files
 			auto text_dir = open_directory(root_dir, NATIVE("localisation"));
 			for(auto& file : list_files(text_dir, NATIVE(".csv"))) {
 				if(auto ofile = open_file(file); ofile) {
@@ -1157,36 +1186,8 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					text::consume_csv_file(*this, content.data, content.file_size, column, false);
 				}
 			}
-		};
-
-		if(locale_name.starts_with("en")) {
-			load_base_files(1);
-		} else if(locale_name.starts_with("fr")) {
-			load_base_files(2);
-		} else if(locale_name.starts_with("de")) {
-			load_base_files(3);
-		} else if(locale_name.starts_with("pl")) {
-			load_base_files(4);
-		} else if(locale_name.starts_with("es")) {
-			load_base_files(5);
-		} else if(locale_name.starts_with("it")) {
-			load_base_files(6);
-		} else if(locale_name.starts_with("sv")) {
-			load_base_files(7);
-		} else if(locale_name.starts_with("cs")) {
-			load_base_files(8);
-		} else if(locale_name.starts_with("hu")) {
-			load_base_files(9);
-		} else if(locale_name.starts_with("nl")) {
-			load_base_files(10);
-		} else if(locale_name.starts_with("pt")) {
-			load_base_files(11);
-		} else if(locale_name.starts_with("ru")) {
-			load_base_files(12);
-		} else if(locale_name.starts_with("fi")) {
-			load_base_files(13);
 		}
-
+		//new files
 		auto locale_dir = open_directory(localisation_dir, simple_fs::utf8_to_native(locale_name));
 		for(auto& file : list_files(locale_dir, NATIVE(".csv"))) {
 			if(auto ofile = open_file(file); ofile) {
@@ -1197,10 +1198,11 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	}
 
 	bool state::key_is_localized(dcon::text_key tag) const {
-		if(!tag)
+		if(tag) {
+			assert(size_t(tag.index()) < key_data.size());
+			return locale_key_to_text_sequence.find(tag) != locale_key_to_text_sequence.end();
+		}
 		return false;
-		assert(size_t(tag.index()) < key_data.size());
-		return locale_key_to_text_sequence.find(tag) != locale_key_to_text_sequence.end();
 	}
 	bool state::key_is_localized(std::string_view key) const {
 		return locale_key_to_text_sequence.find(key) != locale_key_to_text_sequence.end();
@@ -1209,7 +1211,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		if(auto it = untrans_key_to_text_sequence.find(text); it != untrans_key_to_text_sequence.end()) {
 			return *it;
 		}
-	return dcon::text_key{};
+		return dcon::text_key{};
 	}
 
 	dcon::text_key state::add_key_win1252(std::string const& text) {
@@ -1219,8 +1221,9 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		std::string temp;
 		for(auto c : text) {
 			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7)
-			unicode = uint16_t('?'); // convert section symbol to ?
+			if(unicode == 0x00A7) {
+				unicode = uint16_t('?'); // convert section symbol to ?
+			}
 			if(unicode <= 0x007F) {
 				temp.push_back(char(unicode));
 			} else if(unicode <= 0x7FF) {
@@ -1240,20 +1243,21 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	}
 	dcon::text_key state::add_key_utf8(std::string_view new_text) {
 		auto ekey = lookup_key(new_text);
-		if(ekey)
-		return ekey;
+		if(ekey) {
+			return ekey;
+		}
 
 		auto start = key_data.size();
 		auto length = new_text.length();
-		if(length == 0)
+		if(length > 0) {
+			key_data.resize(start + length + 1, char(0));
+			std::copy_n(new_text.data(), length, key_data.data() + start);
+			key_data.back() = 0;
+			auto ret = dcon::text_key(dcon::text_key::value_base_t(start));
+			untrans_key_to_text_sequence.insert(ret);
+			return ret;
+		}
 		return dcon::text_key();
-		key_data.resize(start + length + 1, char(0));
-		std::copy_n(new_text.data(), length, key_data.data() + start);
-		key_data.back() = 0;
-
-		auto ret = dcon::text_key(dcon::text_key::value_base_t(start));
-		untrans_key_to_text_sequence.insert(ret);
-		return ret;
 	}
 	uint32_t state::add_locale_data_win1252(std::string const& text) {
 		return add_locale_data_win1252(std::string_view(text));
@@ -1262,8 +1266,9 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		auto start = locale_text_data.size();
 		for(auto c : text) {
 			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7)
-			unicode = uint16_t('?'); // convert section symbol to ?
+			if(unicode == 0x00A7) {
+				unicode = uint16_t('?'); // convert section symbol to ?
+			}
 			if(unicode <= 0x007F) {
 				locale_text_data.push_back(char(unicode));
 			} else if(unicode <= 0x7FF) {
@@ -1284,23 +1289,25 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	uint32_t state::add_locale_data_utf8(std::string_view new_text) {
 		auto start = locale_text_data.size();
 		auto length = new_text.length();
-		if(length == 0)
+		if(length > 0) {
+			locale_text_data.resize(start + length + 1, char(0));
+			std::copy_n(new_text.data(), length, locale_text_data.data() + start);
+			locale_text_data.back() = 0;
+			return uint32_t(start);
+		}
 		return 0;
-		locale_text_data.resize(start + length + 1, char(0));
-		std::copy_n(new_text.data(), length, locale_text_data.data() + start);
-		locale_text_data.back() = 0;
-		return uint32_t(start);
 	}
 
 	dcon::unit_name_id state::add_unit_name(std::string_view text) {
 		if(text.empty())
-		return dcon::unit_name_id();
+			return dcon::unit_name_id();
 
 		std::string temp;
 		for(auto c : text) {
 			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7)
-			unicode = uint16_t('?'); // convert section symbol to ?
+			if(unicode == 0x00A7) {
+				unicode = uint16_t('?'); // convert section symbol to ?
+			}
 			if(unicode <= 0x007F) {
 				temp.push_back(char(unicode));
 			} else if(unicode <= 0x7FF) {
@@ -1323,14 +1330,14 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	}
 	std::string_view state::to_string_view(dcon::unit_name_id tag) const {
 		if(!tag)
-		return std::string_view();
+			return std::string_view();
 		assert(size_t(tag.index()) < unit_names_indices.size());
 		auto start_position = unit_names.data() + unit_names_indices[tag.index()];
 		auto data_size = unit_names.size();
 		auto end_position = start_position;
 		for(; end_position < unit_names.data() + data_size; ++end_position) {
 			if(*end_position == 0)
-			break;
+				break;
 		}
 		return std::string_view(unit_names.data() + unit_names_indices[tag.index()], size_t(end_position - start_position));
 	}
@@ -1345,8 +1352,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			return dcon::trigger_key();
 		}
 
-		auto search_result = std::search(trigger_data.data() + 1, trigger_data.data() + trigger_data.size(),
-			std::boyer_moore_horspool_searcher(data.data(), data.data() + data.size()));
+		auto search_result = std::search(trigger_data.data() + 1, trigger_data.data() + trigger_data.size(), std::boyer_moore_horspool_searcher(data.data(), data.data() + data.size()));
 		if(search_result != trigger_data.data() + trigger_data.size()) {
 			auto const start = search_result - trigger_data.data();
 			auto it = std::find(trigger_data_indices.begin(), trigger_data_indices.end(), int32_t(start));
@@ -1379,8 +1385,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			return dcon::effect_key();
 		}
 
-		auto search_result = std::search(effect_data.data() + 1, effect_data.data() + effect_data.size(),
-			std::boyer_moore_horspool_searcher(data.data(), data.data() + data.size()));
+		auto search_result = std::search(effect_data.data() + 1, effect_data.data() + effect_data.size(), std::boyer_moore_horspool_searcher(data.data(), data.data() + data.size()));
 		if(search_result != effect_data.data() + effect_data.size()) {
 			auto const start = search_result - effect_data.data();
 			auto it = std::find(effect_data_indices.begin(), effect_data_indices.end(), int32_t(start));
@@ -1409,9 +1414,10 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		char buffer[sizeof(user_settings_s)];
 		char* ptr = &buffer[0];
 
-		#define US_SAVE(x) \
+#define US_SAVE(x) \
 		std::memcpy(ptr, &user_settings.x, sizeof(user_settings.x)); \
 		ptr += sizeof(user_settings.x);
+
 		US_SAVE(ui_scale);
 		US_SAVE(master_volume);
 		US_SAVE(music_volume);
@@ -1449,18 +1455,17 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		US_SAVE(UNUSED_UINT32_T);
 		US_SAVE(locale);
 		US_SAVE(map_counter_factor);
-		#undef US_SAVE
-
+#undef US_SAVE
 		simple_fs::write_file(settings_location, NATIVE("user_settings.dat"), &buffer[0], uint32_t(ptr - buffer));
 	}
+
 	void state::load_user_settings() {
 		auto settings_location = simple_fs::get_or_create_settings_directory();
-		auto settings_file = open_file(settings_location, NATIVE("user_settings.dat"));
-		if(settings_file) {
+		if(auto settings_file = open_file(settings_location, NATIVE("user_settings.dat")); settings_file) {
 			auto content = view_contents(*settings_file);
 			auto ptr = content.data;
 
-			#define US_LOAD(x) \
+#define US_LOAD(x) \
 			if(ptr > content.data + content.file_size - sizeof(user_settings.x)) break; \
 			std::memcpy(&user_settings.x, ptr, sizeof(user_settings.x)); \
 			ptr += sizeof(user_settings.x);
@@ -1503,30 +1508,30 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 				US_LOAD(UNUSED_UINT32_T);
 				US_LOAD(locale);
 				US_LOAD(map_counter_factor);
-				#undef US_LOAD
+#undef US_LOAD
 			} while(false);
 
 			//NaN will not get clamped, so use special std::isfinite test to set to reasonable values
 			if(!std::isfinite(user_settings.interface_volume)) user_settings.interface_volume = 0.0f;
 			user_settings.interface_volume = std::clamp(user_settings.interface_volume, 0.0f, 1.0f);
-		
+
 			if(!std::isfinite(user_settings.music_volume)) user_settings.music_volume = 0.0f;
 			user_settings.music_volume = std::clamp(user_settings.music_volume, 0.0f, 1.0f);
-		
+
 			if(!std::isfinite(user_settings.effects_volume)) user_settings.effects_volume = 0.0f;
 			user_settings.effects_volume = std::clamp(user_settings.effects_volume, 0.0f, 1.0f);
-		
+
 			if(!std::isfinite(user_settings.master_volume)) user_settings.master_volume = 0.0f;
 			user_settings.master_volume = std::clamp(user_settings.master_volume, 0.0f, 1.0f);
-		
+
 			if(user_settings.antialias_level > 16) user_settings.antialias_level = 0;
-		
+
 			if(!std::isfinite(user_settings.gaussianblur_level)) user_settings.gaussianblur_level = 1.0f;
 			user_settings.gaussianblur_level = std::clamp(user_settings.gaussianblur_level, 1.0f, 1.5f);
-		
+
 			if(!std::isfinite(user_settings.gamma)) user_settings.gamma = 0.5f;
 			user_settings.gamma = std::clamp(user_settings.gamma, 0.5f, 2.5f);
-		
+
 			if(!std::isfinite(user_settings.zoom_speed)) user_settings.zoom_speed = 15.0f;
 			user_settings.zoom_speed = std::clamp(user_settings.zoom_speed, 15.f, 25.f);
 		}
@@ -1569,7 +1574,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 		for(auto l : world.in_locale) {
 			auto ln = l.get_locale_name();
-		auto ln_sv = std::string_view{ (char const*)ln.begin(), ln.size() };
+			auto ln_sv = std::string_view{ (char const*)ln.begin(), ln.size() };
 			if(ln_sv == lname) {
 				font_collection.change_locale(*this, l);
 				locale_loaded = true;
@@ -1580,7 +1585,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		if(!locale_loaded) {
 			for(auto l : world.in_locale) {
 				auto ln = l.get_locale_name();
-			auto ln_sv = std::string_view{ (char const*)ln.begin(), ln.size() };
+				auto ln_sv = std::string_view{ (char const*)ln.begin(), ln.size() };
 				if(ln_sv == "en-US" || ln_sv == "en_US") {
 					font_collection.change_locale(*this, l);
 					locale_loaded = true;
@@ -1590,7 +1595,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		}
 
 		if(!locale_loaded) {
-		font_collection.change_locale(*this, dcon::locale_id{ 0 });
+			font_collection.change_locale(*this, dcon::locale_id{ 0 });
 		}
 	}
 
