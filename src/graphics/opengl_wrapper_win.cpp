@@ -32,29 +32,29 @@ namespace ogl {
 
 		auto handle_to_ogl_dc = wglCreateContext(window_dc);
 		wglMakeCurrent(window_dc, handle_to_ogl_dc);
-
-		if(glewInit() != 0) {
+		if(glewInit() != GLEW_OK) {
 			window::emit_error_message("GLEW failed to initialize", true);
 		}
 
-		if(!wglewIsSupported("WGL_ARB_create_context")) {
+		if(wglewIsSupported("WGL_ARB_create_context")) {
+			// Explicitly request for OpenGL 3.0
+			static const int attribs_3_0[] = {
+				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+				WGL_CONTEXT_FLAGS_ARB,
+	#ifndef NDEBUG
+				WGL_CONTEXT_DEBUG_BIT_ARB |
+	#endif
+				0,
+				WGL_CONTEXT_PROFILE_MASK_ARB,
+				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+				0
+			};
+			state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
+		} else {
 			window::emit_error_message("WGL_ARB_create_context not supported", true);
 		}
 
-		// Explicitly request for OpenGL 3.1
-		static const int attribs_3_1[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-			WGL_CONTEXT_FLAGS_ARB,
-			#ifndef NDEBUG
-			WGL_CONTEXT_DEBUG_BIT_ARB |
-			#endif
-			0,
-			WGL_CONTEXT_PROFILE_MASK_ARB,
-			WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			0
-		};
-		state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_1);
 		if(state.open_gl.context == nullptr) {
 			window::emit_error_message("Unable to create WGL context", true);
 		}
@@ -63,18 +63,18 @@ namespace ogl {
 		wglDeleteContext(handle_to_ogl_dc);
 
 		// wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
-		#ifndef NDEBUG
+#ifndef NDEBUG
 		glDebugMessageCallback(debug_callback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-		#endif
+#endif
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
+			OutputDebugStringA("WGL_EXT_swap_control_tear is on");
 			wglSwapIntervalEXT(-1);
 		} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
+			OutputDebugStringA("WGL_EXT_swap_control is on");
 			wglSwapIntervalEXT(1);
-		} else {
-			MessageBoxW(state.win_ptr->hwnd, L"WGL_EXT_swap_control_tear and WGL_EXT_swap_control not supported", L"OpenGL error", MB_OK);
 		}
 	}
 
