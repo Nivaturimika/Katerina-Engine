@@ -11,6 +11,7 @@
 #include "rebels.hpp"
 #include "triggers.hpp"
 #include "container_types.hpp"
+#include "pdqsort.h"
 
 namespace military {
 
@@ -34,7 +35,7 @@ namespace military {
 
 	void reset_unit_stats(sys::state& state) {
 		for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
-		dcon::unit_type_id uid = dcon::unit_type_id{dcon::unit_type_id::value_base_t(i)};
+			dcon::unit_type_id uid = dcon::unit_type_id{ dcon::unit_type_id::value_base_t(i) };
 			state.world.for_each_nation([&](dcon::nation_id nid) {
 				state.world.nation_get_unit_stats(nid, uid) = state.military_definitions.unit_base_definitions[uid];
 			});
@@ -582,7 +583,7 @@ namespace military {
 	bool defenders_have_non_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
 			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) == 0 && is_defender_wargoal(state, w, wg.get_wargoal()))
-			return true;
+				return true;
 		}
 		return false;
 	}
@@ -590,14 +591,14 @@ namespace military {
 	bool defenders_have_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
 			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0 && is_defender_wargoal(state, w, wg.get_wargoal()))
-			return true;
+				return true;
 		}
 		return false;
 	}
 	bool attackers_have_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
 			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0 && !is_defender_wargoal(state, w, wg.get_wargoal()))
-			return true;
+				return true;
 		}
 		return false;
 	}
@@ -657,7 +658,7 @@ namespace military {
 		Mobilized regiments come only from non-colonial provinces.
 		*/
 		if(fatten(state.world, p).get_is_colonial())
-		return 0;
+			return 0;
 
 		int32_t total = 0;
 		for(auto pop : state.world.province_get_pop_location(p)) {
@@ -670,80 +671,66 @@ namespace military {
 		return total;
 	}
 
-	int32_t regiments_possible_from_pop(sys::state& state, dcon::pop_id p) {
-		auto type = state.world.pop_get_poptype(p);
-		if(type == state.culture_definitions.soldiers) {
-			auto location = state.world.pop_get_province_from_pop_location(p);
-			if(state.world.province_get_is_colonial(location)) {
-				float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_colony_multiplier;
-				float minimum = state.defines.pop_min_size_for_regiment;
-
-				if(state.world.pop_get_size(p) >= minimum) {
-					return int32_t((state.world.pop_get_size(p) / divisor) + 1);
-				}
-				return 0;
-			} else if(!state.world.province_get_is_owner_core(location)) {
-				float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_noncore_multiplier;
-				float minimum = state.defines.pop_min_size_for_regiment;
-
-				if(state.world.pop_get_size(p) >= minimum) {
-					return int32_t((state.world.pop_get_size(p) / divisor) + 1);
-				}
-				return 0;
-			} else {
-				float divisor = state.defines.pop_size_per_regiment;
-				float minimum = state.defines.pop_min_size_for_regiment;
-
-				if(state.world.pop_get_size(p) >= minimum) {
-					return int32_t((state.world.pop_get_size(p) / divisor) + 1);
-				}
-				return 0;
-			}
-		} else { // mobilized
-			return int32_t(state.world.pop_get_size(p) * mobilization_size(state, nations::owner_of_pop(state, p)) / state.defines.pop_size_per_regiment);
+	int32_t mobilized_regiments_possible_from_pop(sys::state& state, dcon::pop_id p) {
+		/*
+		The number of regiments these pops can provide is determined by pop-size x mobilization-size /
+		define:POP_SIZE_PER_REGIMENT.
+		*/
+		float ps = state.world.pop_get_size(p) * mobilization_size(state, nations::owner_of_pop(state, p));
+		float pa = ps / state.defines.pop_min_size_for_regiment;
+		auto loc = state.world.pop_get_province_from_pop_location(p);
+		auto sid = state.world.province_get_state_membership(loc);
+		if(state.world.state_instance_get_capital(sid) != loc
+		&& state.world.nation_get_capital(state.world.province_get_nation_from_province_ownership(loc)) != loc) {
+			return 0;
 		}
+		return int32_t(std::floor(pa));
 	}
 
-	int32_t regiments_max_possible_from_province(sys::state& state, dcon::province_id p) {
+	int32_t professional_regiments_possible_from_pop(sys::state& state, dcon::pop_id p) {
 		/*
 		- A soldier pop must be at least define:POP_MIN_SIZE_FOR_REGIMENT to support any regiments
 		- If it is at least that large, then it can support one regiment per define:POP_SIZE_PER_REGIMENT x
 		define:POP_MIN_SIZE_FOR_REGIMENT_COLONY_MULTIPLIER (if it is located in a colonial province) x
 		define:POP_MIN_SIZE_FOR_REGIMENT_NONCORE_MULTIPLIER (if it is non-colonial but uncored)
 		*/
-		int32_t total = 0;
-		if(state.world.province_get_is_colonial(p)) {
+		auto location = state.world.pop_get_province_from_pop_location(p);
+		if(state.world.province_get_is_colonial(location)) {
 			float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_colony_multiplier;
 			float minimum = state.defines.pop_min_size_for_regiment;
-
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t((pop.get_pop().get_size() / divisor) + 1);
-					}
-				}
+			if(state.world.pop_get_size(p) >= minimum) {
+				return int32_t((state.world.pop_get_size(p) / divisor) + 1);
 			}
-		} else if(!state.world.province_get_is_owner_core(p)) {
+		} else if(!state.world.province_get_is_owner_core(location)) {
 			float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_noncore_multiplier;
 			float minimum = state.defines.pop_min_size_for_regiment;
-
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t((pop.get_pop().get_size() / divisor) + 1);
-					}
-				}
+			if(state.world.pop_get_size(p) >= minimum) {
+				return int32_t((state.world.pop_get_size(p) / divisor) + 1);
 			}
 		} else {
 			float divisor = state.defines.pop_size_per_regiment;
 			float minimum = state.defines.pop_min_size_for_regiment;
+			if(state.world.pop_get_size(p) >= minimum) {
+				return int32_t((state.world.pop_get_size(p) / divisor) + 1);
+			}
+		}
+		return 0;
+	}
 
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t((pop.get_pop().get_size() / divisor) + 1);
-					}
-				}
+	int32_t regiments_possible_from_pop(sys::state& state, dcon::pop_id p) {
+		auto type = state.world.pop_get_poptype(p);
+		if(type == state.culture_definitions.soldiers) {
+			return professional_regiments_possible_from_pop(state, p);
+		}
+		// mobilized
+		return mobilized_regiments_possible_from_pop(state, p);
+	}
+
+	int32_t regiments_max_possible_from_province(sys::state& state, dcon::province_id p) {
+		int32_t total = 0;
+		for(auto pop : state.world.province_get_pop_location(p)) {
+			if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers) {
+				total += professional_regiments_possible_from_pop(state, pop.get_pop());
 			}
 		}
 		return total;
@@ -759,48 +746,11 @@ namespace military {
 		return total;
 	}
 	int32_t main_culture_regiments_max_possible_from_province(sys::state& state, dcon::province_id p) {
-		/*
-		- A soldier pop must be at least define:POP_MIN_SIZE_FOR_REGIMENT to support any regiments
-		- If it is at least that large, then it can support one regiment per define:POP_SIZE_PER_REGIMENT x
-		define:POP_MIN_SIZE_FOR_REGIMENT_COLONY_MULTIPLIER (if it is located in a colonial province) x
-		define:POP_MIN_SIZE_FOR_REGIMENT_NONCORE_MULTIPLIER (if it is non-colonial but uncored)
-		*/
 		int32_t total = 0;
-		if(state.world.province_get_is_colonial(p)) {
-			float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_colony_multiplier;
-			float minimum = state.defines.pop_min_size_for_regiment;
-
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers &&
-					pop.get_pop().get_is_primary_or_accepted_culture()) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t((pop.get_pop().get_size() / divisor) + 1);
-					}
-				}
-			}
-		} else if(!state.world.province_get_is_owner_core(p)) {
-			float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_noncore_multiplier;
-			float minimum = state.defines.pop_min_size_for_regiment;
-
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers &&
-					pop.get_pop().get_is_primary_or_accepted_culture()) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t(pop.get_pop().get_size() / divisor);
-					}
-				}
-			}
-		} else {
-			float divisor = state.defines.pop_size_per_regiment;
-			float minimum = state.defines.pop_min_size_for_regiment;
-
-			for(auto pop : state.world.province_get_pop_location(p)) {
-				if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers &&
-					pop.get_pop().get_is_primary_or_accepted_culture()) {
-					if(pop.get_pop().get_size() >= minimum) {
-						total += int32_t(pop.get_pop().get_size() / divisor);
-					}
-				}
+		for(auto pop : state.world.province_get_pop_location(p)) {
+			if(pop.get_pop().get_poptype() == state.culture_definitions.soldiers
+			&& pop.get_pop().get_is_primary_or_accepted_culture()) {
+				total += professional_regiments_possible_from_pop(state, pop.get_pop());
 			}
 		}
 		return total;
@@ -844,7 +794,7 @@ namespace military {
 					}
 				}
 			}
-		return dcon::pop_id{};
+			return dcon::pop_id{};
 		} else if(!state.world.province_get_is_owner_core(p)) {
 			float divisor = state.defines.pop_size_per_regiment * state.defines.pop_min_size_for_regiment_noncore_multiplier;
 			float minimum = state.defines.pop_min_size_for_regiment;
@@ -862,7 +812,7 @@ namespace military {
 					}
 				}
 			}
-		return dcon::pop_id{};
+			return dcon::pop_id{};
 		} else {
 			float divisor = state.defines.pop_size_per_regiment;
 			float minimum = state.defines.pop_min_size_for_regiment;
@@ -880,7 +830,7 @@ namespace military {
 					}
 				}
 			}
-		return dcon::pop_id{};
+			return dcon::pop_id{};
 		}
 	}
 
@@ -899,9 +849,9 @@ namespace military {
 
 						if(amount > ((regs.end() - regs.begin()) + (building.end() - building.begin()))) {
 							if(require_accepted == pop.get_pop().get_is_primary_or_accepted_culture())
-							return pop.get_pop().id;
+								return pop.get_pop().id;
 							else
-							non_preferred = pop.get_pop().id;
+								non_preferred = pop.get_pop().id;
 						}
 					}
 				}
@@ -921,9 +871,9 @@ namespace military {
 
 						if(amount > ((regs.end() - regs.begin()) + (building.end() - building.begin()))) {
 							if(require_accepted == pop.get_pop().get_is_primary_or_accepted_culture())
-							return pop.get_pop().id;
+								return pop.get_pop().id;
 							else
-							non_preferred = pop.get_pop().id;
+								non_preferred = pop.get_pop().id;
 						}
 					}
 				}
@@ -974,19 +924,15 @@ namespace military {
 				The number of regiments these pops can provide is determined by pop-size x mobilization-size /
 				define:POP_SIZE_PER_REGIMENT.
 				*/
-				total += int32_t(pop.get_pop().get_size() * mobilization_size(state, nations::owner_of_pop(state, pop.get_pop())) / state.defines.pop_size_per_regiment);
+				total += mobilized_regiments_possible_from_pop(state, pop.get_pop());
 			}
 		}
 		return total;
 	}
 
 	int32_t mobilized_regiments_pop_limit(sys::state& state, dcon::nation_id n) {
-		int32_t total = 0;
-		for(auto p : state.world.nation_get_province_ownership(n)) {
-			if(p.get_province().get_is_colonial() == false)
-			total += mobilized_regiments_possible_from_province(state, p.get_province());
-		}
-		return total;
+		auto real_regs = std::max(state.world.nation_get_active_regiments(n), uint16_t(state.defines.min_mobilize_limit));
+		return int32_t(real_regs * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact));
 	}
 
 	void update_recruitable_regiments(sys::state& state, dcon::nation_id n) {
@@ -996,7 +942,7 @@ namespace military {
 		}
 	}
 	void update_all_recruitable_regiments(sys::state& state) {
-	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_recruitable_regiments(ids, ve::int_vector(0)); });
+		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_recruitable_regiments(ids, ve::int_vector(0)); });
 		state.world.for_each_province([&](dcon::province_id p) {
 			auto owner = state.world.province_get_nation_from_province_ownership(p);
 			if(owner) {
@@ -1005,7 +951,7 @@ namespace military {
 		});
 	}
 	void regenerate_total_regiment_counts(sys::state& state) {
-	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
+		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
 		state.world.for_each_army([&](dcon::army_id a) {
 			auto owner = state.world.army_get_controller_from_army_control(a);
 			if(owner) {
@@ -1111,7 +1057,7 @@ namespace military {
 						}
 						nb_level = std::max(nb_level, int32_t(p.get_province().get_building_level(economy::province_building_type::naval_base)));
 						if(nb_level > 0)
-						nb_was_core = p.get_province().get_is_owner_core();
+							nb_was_core = p.get_province().get_is_owner_core();
 					}
 				}
 				bool connected = si.get_state().get_capital().get_connected_region_id() == cap_region;
@@ -1119,14 +1065,14 @@ namespace military {
 				if(saw_coastal) {
 					if(nb_level > 0) {
 						if(nb_was_core || connected)
-						total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1));
+							total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1));
 						else
-						total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1)) * state.defines.naval_base_non_core_supply_score;
+							total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1)) * state.defines.naval_base_non_core_supply_score;
 					} else {
 						if(coast_was_core || connected)
-						total += state.defines.naval_base_supply_score_empty;
+							total += state.defines.naval_base_supply_score_empty;
 						else
-						total += 1.0f;
+							total += 1.0f;
 					}
 				}
 			}
@@ -1150,14 +1096,16 @@ namespace military {
 
 	float mobilization_size(sys::state const& state, dcon::nation_id n) {
 		// Mobilization size = national-modifier-to-mobilization-size + technology-modifier-to-mobilization-size
-		return state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_size);
+		//auto real_regs = std::max(state.world.nation_get_active_regiments(n), uint16_t(state.defines.min_mobilize_limit));
+		//return float(real_regs) * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_size);
+		return std::max(0.f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_size));
 	}
 	float mobilization_impact(sys::state const& state, dcon::nation_id n) {
 		// Mobilization impact = 1 - mobilization-size x (national-mobilization-economy-impact-modifier +
 		// technology-mobilization-impact-modifier), to a minimum of zero.
-		return std::clamp(1.0f - mobilization_size(state, n)
+		return std::max(1.0f - mobilization_size(state, n)
 			* state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact),
-			0.0f, 1.0f);
+			0.0f);
 	}
 
 	void update_cbs(sys::state& state) {
@@ -6989,39 +6937,38 @@ namespace military {
 
 	void start_mobilization(sys::state& state, dcon::nation_id n) {
 		if(state.world.nation_get_is_mobilized(n))
-		return;
+			return;
 
 		state.world.nation_set_is_mobilized(n, true);
 		/*
 		At most, national-mobilization-impact-modifier x (define:MIN_MOBILIZE_LIMIT v nation's-number-of-regiments regiments may be
 		created by mobilization).
 		*/
-		auto real_regs = std::max(int32_t(state.world.nation_get_active_regiments(n)), int32_t(state.defines.min_mobilize_limit));
-		state.world.nation_set_mobilization_remaining(n,
-			uint16_t(real_regs * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact)));
+		auto real_regs = std::max(state.world.nation_get_active_regiments(n), uint16_t(state.defines.min_mobilize_limit));
+		state.world.nation_set_mobilization_remaining(n, uint16_t(real_regs * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact)));
 
 		auto schedule_array = state.world.nation_get_mobilization_schedule(n);
 		schedule_array.clear();
 
 		for(auto pr : state.world.nation_get_province_ownership(n)) {
 			if(pr.get_province().get_is_colonial())
-			continue;
+				continue;
 			if(pr.get_province().get_nation_from_province_control() != n)
-			continue;
+				continue;
 			if(mobilized_regiments_possible_from_province(state, pr.get_province()) <= 0)
-			continue;
+				continue;
 
-		schedule_array.push_back(mobilization_order{ sys::date{}, pr.get_province().id });
+			schedule_array.push_back(mobilization_order{ sys::date{}, pr.get_province().id });
 		}
 
-		std::sort(schedule_array.begin(), schedule_array.end(),
-			[&, cap = state.world.nation_get_capital(n)](mobilization_order const& a, mobilization_order const& b) {
-				auto a_dist = province::direct_distance(state, a.where, cap);
-				auto b_dist = province::direct_distance(state, b.where, cap);
-				if(a_dist != b_dist)
-					return a_dist > b_dist;
-				return a.where.value < b.where.value;
-			});
+		pdqsort(schedule_array.begin(), schedule_array.end(), [&](auto const& a, auto const& b) {
+			auto cap = state.world.nation_get_capital(n);
+			auto a_dist = province::direct_distance(state, a.where, cap);
+			auto b_dist = province::direct_distance(state, b.where, cap);
+			if(a_dist != b_dist)
+				return a_dist > b_dist;
+			return a.where.value < b.where.value;
+		});
 
 		int32_t delay = 0;
 
@@ -7030,9 +6977,9 @@ namespace military {
 			Province by province, mobilization advances by define:MOBILIZATION_SPEED_BASE x (1 + define:MOBILIZATION_SPEED_RAILS_MULT x
 			average-railroad-level-in-state / 5) until it reaches 1
 			*/
-			auto province_speed = state.defines.mobilization_speed_base *
-													float(1.0f + state.defines.mobilization_speed_rails_mult *
-																					 (state.world.province_get_building_level(schedule_array[count].where, economy::province_building_type::railroad)) / 5.0f);
+			auto province_speed = state.defines.mobilization_speed_base
+				* float(1.0f + state.defines.mobilization_speed_rails_mult
+				* (state.world.province_get_building_level(schedule_array[count].where, economy::province_building_type::railroad)) / 5.0f);
 			auto days = std::max(1, int32_t(1.0f / province_speed));
 			delay += days;
 			schedule_array[count].when = state.current_date + delay;
@@ -7044,22 +6991,22 @@ namespace military {
 		if(state.current_crisis_mode == sys::crisis_mode::heating_up) {
 			for(auto& par : state.crisis_participants) {
 				if(!par.id)
-				break;
+					break;
 				if(par.id == n)
-				state.crisis_temperature += state.defines.crisis_temperature_on_mobilize;
+					state.crisis_temperature += state.defines.crisis_temperature_on_mobilize;
 			}
 		}
 		notification::post(state, notification::message{ [n = n](sys::state& state, text::layout_base& contents) {
 				text::add_line(state, contents, "msg_mobilize_start_1", text::variable_type::x, n);
 			},
 			"msg_mobilize_start_title",
-		n, dcon::nation_id{}, dcon::nation_id{},
+			n, dcon::nation_id{}, dcon::nation_id{},
 			sys::message_base_type::mobilization_start
 		});
 	}
 	void end_mobilization(sys::state& state, dcon::nation_id n) {
 		if(!state.world.nation_get_is_mobilized(n))
-		return;
+			return;
 
 		state.world.nation_set_is_mobilized(n, false);
 		state.world.nation_set_mobilization_remaining(n, 0);
@@ -7071,7 +7018,7 @@ namespace military {
 				auto pop = rg.get_regiment().get_pop_from_regiment_source();
 				if(!pop || pop.get_poptype() != state.culture_definitions.soldiers) {
 					rg.get_regiment().set_strength(0.0f);
-				rg.get_regiment().set_pop_from_regiment_source(dcon::pop_id{});
+					rg.get_regiment().set_pop_from_regiment_source(dcon::pop_id{});
 				}
 			}
 		}
@@ -7105,19 +7052,13 @@ namespace military {
 							*/
 							for(auto pop : state.world.province_get_pop_location(back.where)) {
 								if(pop_eligible_for_mobilization(state, pop.get_pop())) {
-									/*
-									The number of regiments these pops can provide is determined by pop-size x mobilization-size /
-									define:POP_SIZE_PER_REGIMENT.
-									*/
-									auto available = int32_t(pop.get_pop().get_size() * mobilization_size(state, n) / state.defines.pop_size_per_regiment);
+									auto available = mobilized_regiments_possible_from_pop(state, pop.get_pop());
 									if(available > 0) {
-
 										bool army_is_new = false;
-
 										auto a = [&]() {
 											for(auto ar : state.world.province_get_army_location(back.where)) {
 												if(ar.get_army().get_controller_from_army_control() == n)
-												return ar.get_army().id;
+													return ar.get_army().id;
 											}
 											auto new_army = fatten(state.world, state.world.create_army());
 											new_army.set_controller_from_army_control(n);
@@ -7128,7 +7069,7 @@ namespace military {
 										}();
 
 										while(available > 0 && to_mobilize > 0) {
-										auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ? state.military_definitions.infantry : state.military_definitions.irregular);
+											auto new_reg = military::create_new_regiment(state, dcon::nation_id{}, mob_infantry ? state.military_definitions.infantry : state.military_definitions.irregular);
 											state.world.regiment_set_org(new_reg, 0.1f);
 											state.world.try_create_army_membership(new_reg, a);
 											auto p = pop.get_pop();
@@ -7139,14 +7080,14 @@ namespace military {
 											--to_mobilize;
 										}
 										if(army_is_new) {
-										military::army_arrives_in_province(state, a, back.where, military::crossing_type::none, dcon::land_battle_id{});
-										military::move_land_to_merge(state, n, a, back.where, dcon::province_id{});
+											military::army_arrives_in_province(state, a, back.where, military::crossing_type::none, dcon::land_battle_id{});
+											military::move_land_to_merge(state, n, a, back.where, dcon::province_id{});
 										}
 									}
 								}
 
 								if(to_mobilize == 0)
-								break;
+									break;
 							}
 						}
 					}
@@ -7407,9 +7348,9 @@ namespace military {
 	bool pop_eligible_for_mobilization(sys::state& state, dcon::pop_id p) {
 		auto const pop = dcon::fatten(state.world, p);
 		return pop.get_poptype() != state.culture_definitions.soldiers
-		&& pop.get_poptype() != state.culture_definitions.slaves
-		&& pop.get_is_primary_or_accepted_culture()
-		&& pop.get_poptype().get_strata() == uint8_t(culture::pop_strata::poor);
+			&& pop.get_poptype() != state.culture_definitions.slaves
+			&& pop.get_is_primary_or_accepted_culture()
+			&& pop.get_poptype().get_strata() == uint8_t(culture::pop_strata::poor);
 	}
 
 } // namespace military

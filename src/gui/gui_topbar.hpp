@@ -701,26 +701,16 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 
 			auto issue_id = politics::get_issue_by_name(state, std::string_view("war_policy"));
-			int32_t possible_sum = 0;
-			int32_t raised_sum = 0;
 			auto fat_id = dcon::fatten(state.world, n);
-			for(auto prov_own : fat_id.get_province_ownership_as_nation()) {
-				auto prov = prov_own.get_province();
-				possible_sum += military::mobilized_regiments_possible_from_province(state, prov.id);
-			}
-			for(auto prov_own : fat_id.get_province_ownership_as_nation()) {
-				auto prov = prov_own.get_province();
-				raised_sum += military::mobilized_regiments_created_from_province(state, prov.id);
-			}
 			auto box = text::open_layout_box(contents, 0);
 			text::substitution_map sub2;
-			text::add_to_substitution_map(sub2, text::variable_type::curr, raised_sum);
+			text::add_to_substitution_map(sub2, text::variable_type::curr, military::total_regiments(state, fat_id));
 			// TODO - we (might) want to give the value the current war policy provides, though its more transparent perhaps to
 			// just give the NV + Mob. Impact Modifier?
-		text::add_to_substitution_map(sub2, text::variable_type::impact, text::fp_percentage{ (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact))});
+			text::add_to_substitution_map(sub2, text::variable_type::impact, text::fp_percentage{ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact) });
 			text::add_to_substitution_map(sub2, text::variable_type::policy, fat_id.get_issues(issue_id).get_name());
-			text::add_to_substitution_map(sub2, text::variable_type::units, possible_sum);
-			text::localised_single_sub_box(state, contents, box, std::string_view("topbar_mobilize_tooltip"), text::variable_type::curr, possible_sum);
+			text::add_to_substitution_map(sub2, text::variable_type::units, military::mobilized_regiments_pop_limit(state, fat_id));
+			text::localised_single_sub_box(state, contents, box, std::string_view("topbar_mobilize_tooltip"), text::variable_type::curr, military::mobilized_regiments_pop_limit(state, fat_id));
 			text::add_line_break_to_layout_box(state, contents, box);
 			text::localised_format_box(state, contents, box, std::string_view("mobilization_impact_limit_desc"), sub2);
 			text::add_line_break_to_layout_box(state, contents, box);
