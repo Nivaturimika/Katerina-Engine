@@ -18,81 +18,62 @@ uniform float time;
 
 vec4 gamma_correct(in vec4 colour);
 
-// sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
-// so each column has 8 tiles, and each row has 8 tiles too
-float xx = 1 / map_size.x;
-float yy = 1 / map_size.y;
-vec2 pix = vec2(xx, yy);
+#define COLOR_LIGHTNESS 1.5
 
 vec2 get_corrected_coords(vec2 coords) {
-	coords.y -= (1 - 1 / 1.3) * 3 / 5;
-	coords.y *= 1.3;
+	coords.y -= (1.f - 1.f / 1.3f) * 3.f / 5.f;
+	coords.y *= 1.3f;
 	return coords;
 }
 
-vec4 get_water_political() {
-	vec3 water_background = vec3(0.21, 0.38, 0.45);
-	vec3 color = water_background.rgb;
-
-	// The "foldable map" overlay effect
-	vec4 OverlayColor = texture(overlay, tex_coord * vec2(11.f, 11.f * map_size.y / map_size.x));
-	vec4 OutColor;
-	OutColor.r = OverlayColor.r < .5 ? (2. * OverlayColor.r * color.r) : (1. - 2. * (1. - OverlayColor.r) * (1. - color.r));
-	OutColor.g = OverlayColor.r < .5 ? (2. * OverlayColor.g * color.g) : (1. - 2. * (1. - OverlayColor.g) * (1. - color.g));
-	OutColor.b = OverlayColor.b < .5 ? (2. * OverlayColor.b * color.b) : (1. - 2. * (1. - OverlayColor.b) * (1. - color.b));
-	OutColor.a = OverlayColor.a;
-
-	return OutColor;
-}
-
-// The terrain color from the current texture coordinate offset with one pixel in the "corner" direction
-vec4 get_terrain(vec2 corner, vec2 offset) {
-	float index = texture(terrain_texture_sampler, floor(tex_coord * map_size + vec2(0.5, 0.5)) / map_size + 0.5 * pix * corner).r;
-	index = floor(index * 256);
-	float is_water = step(64, index);
-	vec4 colour = texture(terrainsheet_texture_sampler, vec3(offset, index));
-	return mix(colour, vec4(0.), is_water);
-}
-
-vec4 get_land_political_far() {
-	vec4 terrain = get_terrain(vec2(0, 0), vec2(0));
-	float is_land = terrain.a;
-	vec2 prov_id = texture(provinces_texture_sampler, tex_coord).xy;
-
-	// The primary and secondary map mode province colors
-	vec4 prov_color = texture(province_color, vec3(prov_id, 0.));
-	vec4 stripe_color = texture(province_color, vec3(prov_id, 1.));
-
-	vec2 stripe_coord = tex_coord * vec2(512., 512. * map_size.y / map_size.x);
-
-	// Mix together the primary and secondary colors with the stripes
-	float stripeFactor = texture(stripes_texture, stripe_coord).a;
-	float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
-	vec3 political = clamp(mix(prov_color, stripe_color, stripeFactor) + vec4(prov_highlight), 0.0, 1.0).rgb;
-	political = political - 0.7;
-
-	// The "foldable map" overlay effect
-	vec4 OverlayColor = texture(overlay, tex_coord * vec2(11., 11.*map_size.y/map_size.x));
-	vec4 OutColor;
-	OutColor.r = OverlayColor.r < .5 ? (2. * OverlayColor.r * political.r) : (1. - 2. * (1. - OverlayColor.r) * (1. - political.r));
-	OutColor.g = OverlayColor.r < .5 ? (2. * OverlayColor.g * political.g) : (1. - 2. * (1. - OverlayColor.g) * (1. - political.g));
-	OutColor.b = OverlayColor.b < .5 ? (2. * OverlayColor.b * political.b) : (1. - 2. * (1. - OverlayColor.b) * (1. - political.b));
-	OutColor.a = OverlayColor.a;
-
-	vec3 background = texture(colormap_political, get_corrected_coords(tex_coord)).rgb;
-	OutColor.rgb = mix(background, OutColor.rgb, 0.3);
-
-	OutColor.rgb *= 1.5;
-	OutColor.a = is_land;
-	return OutColor;
+// The "foldable map" overlay effect
+// Rewritten to be more time efficient
+vec4 get_overlay_color(vec4 color) {
+	vec2 a1 = vec2(11.f); //size of overlay
+	vec2 a2 = vec2(1.f, map_size.y / map_size.x);
+	vec2 a3 = a1 * a2;
+	//
+	vec4 overcolor = texture(overlay, tex_coord * a3);
+	vec4 t = overcolor * color;
+	vec4 u = 0.5 - (1.f - overcolor) * (1.f - color);
+	vec4 v = 2.f * mix(t, u, overcolor.r);
+	return vec4(v.r, v.g, v.b, 1.f);
 }
 
 // The terrain map
 // No province color is used here
 void main() {
-	vec4 terrain = get_land_political_far();
-	vec4 water = get_water_political();
-	frag_color.rgb = mix(water.rgb, terrain.rgb, min(1.f, floor(0.5f + terrain.a)));
+	// sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
+	// so each column has 8 tiles, and each row has 8 tiles too
+	float xx = 1.f / map_size.x;
+	float yy = 1.f / map_size.y;
+	vec2 t1 = floor(tex_coord * map_size + vec2(0.5f));
+	float index = floor(texture(terrain_texture_sampler, t1 / map_size).r * 256.f);
+	// Float 0 to 1, is_water_01 is only either 0 or 1
+	float is_water = step(64.f, index);
+	float is_water_01 = min(1.f, floor(0.5f + is_water));
+	vec4 out_color;
+	if(is_water_01 == 1.f) {
+		vec4 color = vec4(0.21f, 0.38f, 0.45f, 1.f);
+		out_color = get_overlay_color(color);
+	} else {
+		vec2 prov_id = texture(provinces_texture_sampler, tex_coord).xy;
+		// The primary and secondary map mode province colors
+		vec4 prov_color = texture(province_color, vec3(prov_id, 0.f));
+		vec4 stripe_color = texture(province_color, vec3(prov_id, 1.f));
+		vec2 stripe_coord = tex_coord * vec2(512.f) * vec2(1.f, map_size.y / map_size.x);
+		// Mix together the primary and secondary colors with the stripes
+		float stripe_factor = texture(stripes_texture, stripe_coord).a;
+		float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
+		vec4 political = mix(prov_color, stripe_color, stripe_factor) + vec4(prov_highlight);
+		political.rgb -= 0.7f;
+		vec4 background = texture(colormap_political, get_corrected_coords(tex_coord));
+		// Output color
+		out_color = get_overlay_color(political);
+		out_color = mix(background, out_color, 0.3f);
+		out_color *= COLOR_LIGHTNESS;
+	}
+	frag_color = out_color;
 	frag_color.a = 1.f;
 	frag_color = gamma_correct(frag_color);
 }

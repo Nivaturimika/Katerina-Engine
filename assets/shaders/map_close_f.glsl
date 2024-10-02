@@ -22,6 +22,8 @@ uniform vec2 map_size;
 uniform float time;
 vec4 gamma_correct(in vec4 colour);
 
+#define COLOR_LIGHTNESS 1.5
+
 // sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
 // so each column has 8 tiles, and each row has 8 tiles too
 float xx = 1 / map_size.x;
@@ -40,31 +42,31 @@ vec4 get_water_terrain()
 	vec2 prov_id = texture(provinces_texture_sampler, tex_coord).xy;
 
 	// Water effect taken from Vic2 fx/water/PixelShader_HoiWater_2_0
-	const float WRAP = 0.8;
-	const float WaveModOne = 3.0;
-	const float WaveModTwo = 4.0;
-	const float SpecValueOne = 8.0;
-	const float SpecValueTwo = 2.0;
-	const float vWaterTransparens = 1.0; //more transparance lets you see more of background
-	const float vColorMapFactor = 1.0f; //how much colormap
+	const float WRAP = 0.8f;
+	const float WaveModOne = 3.f;
+	const float WaveModTwo = 4.f;
+	const float SpecValueOne = 8.f;
+	const float SpecValueTwo = 2.f;
+	const float vWaterTransparens = 1.f; //more transparance lets you see more of background
+	const float vColorMapFactor = 1.f; //how much colormap
 
 	vec2 tex_coord = tex_coord;
 	vec2 corrected_coord = get_corrected_coords(tex_coord);
 	vec3 WorldColorColor = texture(colormap_water, corrected_coord).rgb;
-	if(corrected_coord.y > 1)
+	if(corrected_coord.y > 1.f) {
 		WorldColorColor = vec3(0.14, 0.23, 0.36);
-	if(corrected_coord.y < 0)
+	} else if(corrected_coord.y < 0.f) {
 		WorldColorColor = vec3(0.20, 0.35, 0.43);
-	tex_coord *= 100.;
-	tex_coord = tex_coord * 0.25 + time * 0.002;
+	}
+	tex_coord = tex_coord * 25.f + time * 0.002f;
 
-	const vec3 eyeDirection = vec3(0.0, 1.0, 1.0);
-	const vec3 lightDirection = vec3(0.0, 1.0, 1.0);
+	const vec3 eyeDirection = vec3(0.f, 1.f, 1.f);
+	const vec3 lightDirection = vec3(0.f, 1.f, 1.f);
 
-	vec2 coordA = tex_coord * 3 + vec2(0.10, 0.10);
-	vec2 coordB = tex_coord * 1 + vec2(0.00, 0.10);
-	vec2 coordC = tex_coord * 2 + vec2(0.00, 0.15);
-	vec2 coordD = tex_coord * 5 + vec2(0.00, 0.30);
+	vec2 coordA = tex_coord * 3.f + vec2(0.1f, 0.1f);
+	vec2 coordB = tex_coord * 1.f + vec2(0.0f, 0.1f);
+	vec2 coordC = tex_coord * 2.f + vec2(0.0f, 0.15f);
+	vec2 coordD = tex_coord * 5.f + vec2(0.0f, 0.3f);
 
 	// Uses textureNoTile for non repeting textures,
 	// probably unnecessarily expensive
@@ -80,7 +82,7 @@ vec4 get_water_terrain()
 	vBumpC.xyz + vBumpD.xyz) - WaveModTwo);
 
 	vec3 eyeDir = normalize(eyeDirection);
-	float NdotL = max(dot(eyeDir, (vBumpTex / 2)), 0);
+	float NdotL = max(dot(eyeDir, (vBumpTex / 2.f)), 0.f);
 
 	NdotL = clamp((NdotL + WRAP) / (1 + WRAP), 0.f, 1.f);
 	NdotL = mix(NdotL, 1.0, 0.0);
@@ -89,14 +91,12 @@ vec4 get_water_terrain()
 
 	vec3	reflVector = -reflect(lightDirection, vBumpTex);
 	float	specular = dot(normalize(reflVector), eyeDir);
-	specular = clamp(specular, 0.0, 1.0);
+	specular = clamp(specular, 0.f, 1.f);
 
 	specular = pow(specular, SpecValueOne);
 	OutColor += (specular / SpecValueTwo);
-	OutColor *= 1.5;
-
+	OutColor *= COLOR_LIGHTNESS;
 	OutColor *= texture(province_fow, prov_id).rgb;
-
 	return vec4(OutColor, vWaterTransparens);
 }
 
@@ -106,19 +106,18 @@ vec4 get_terrain(vec2 corner, vec2 offset) {
 	index = floor(index * 256);
 	float is_water = step(64, index);
 	vec4 colour = texture(terrainsheet_texture_sampler, vec3(offset, index));
-	return mix(colour, vec4(0.), is_water);
+	return mix(colour, vec4(0.f), is_water);
 }
 
 vec4 get_terrain_mix() {
 	// Pixel size on map texture
 	vec2 scaling = fract(tex_coord * map_size + vec2(0.5, 0.5));
+	vec2 offset = tex_coord / (16.f * pix);
 
-	vec2 offset = tex_coord / (16. * pix);
-
-	vec4 colourlu = get_terrain(vec2(-1, -1), offset);
-	vec4 colourld = get_terrain(vec2(-1, +1), offset);
-	vec4 colourru = get_terrain(vec2(+1, -1), offset);
-	vec4 colourrd = get_terrain(vec2(+1, +1), offset);
+	vec4 colourlu = get_terrain(vec2(-1.f, -1.f), offset);
+	vec4 colourld = get_terrain(vec2(-1.f, +1.f), offset);
+	vec4 colourru = get_terrain(vec2(+1.f, -1.f), offset);
+	vec4 colourrd = get_terrain(vec2(+1.f, +1.f), offset);
 
 	// Mix together the terrains based on close they are to the current texture coordinate
 	vec4 colour_u = mix(colourlu, colourru, scaling.x);
@@ -166,13 +165,11 @@ vec4 get_land_political_close() {
 	float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
 	vec3 political = clamp(mix(prov_color, stripe_color, stripeFactor) + vec4(prov_highlight), 0.0, 1.0).rgb;
 	political *= texture(province_fow, prov_id).rgb;
-	political = political - 0.7;
+	political = political - 0.7f;
 
 	// Mix together the terrain and map mode color
 	terrain.rgb = mix(terrain.rgb, political, 0.3);
-	terrain.rgb *= 1.5;
-	//terrain.rgb += vec3((test * 255) == id);
-	//terrain.r += ((abs(rel_coord.y) + abs(rel_coord.x)) > 0.5 ? 6 : 0) * 0.3;
+	terrain.rgb *= COLOR_LIGHTNESS;
 	return terrain;
 }
 
