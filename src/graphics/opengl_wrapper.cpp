@@ -9,23 +9,23 @@ namespace ogl {
 
 	std::string_view opengl_get_error_name(GLenum t) {
 		switch(t) {
-			case GL_INVALID_ENUM:
+		case GL_INVALID_ENUM:
 			return "GL_INVALID_ENUM";
-			case GL_INVALID_VALUE:
+		case GL_INVALID_VALUE:
 			return "GL_INVALID_VALUE";
-			case GL_INVALID_OPERATION:
+		case GL_INVALID_OPERATION:
 			return "GL_INVALID_OPERATION";
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
 			return "GL_INVALID_FRAMEBUFFER_OPERATION";
-			case GL_OUT_OF_MEMORY:
+		case GL_OUT_OF_MEMORY:
 			return "GL_OUT_OF_MEMORY";
-			case GL_STACK_UNDERFLOW:
+		case GL_STACK_UNDERFLOW:
 			return "GL_STACK_UNDERFLOW";
-			case GL_STACK_OVERFLOW:
+		case GL_STACK_OVERFLOW:
 			return "GL_STACK_OVERFLOW";
-			case GL_NO_ERROR:
+		case GL_NO_ERROR:
 			return "GL_NO_ERROR";
-			default:
+		default:
 			return "Unknown";
 		}
 	}
@@ -90,12 +90,12 @@ namespace ogl {
 
 		v_shader = compile_shader(vertex_shader, GL_VERTEX_SHADER);
 		if(!v_shader)
-		goto error_exit;
+			goto error_exit;
 
 		f_shader = compile_shader(fragment_shader, GL_FRAGMENT_SHADER);
 		if(!f_shader)
-		goto error_exit;
-	
+			goto error_exit;
+
 		lib_f_shader = compile_shader(
 		"uniform float gamma;\n"
 		"vec4 gamma_correct(vec4 colour) {\n"
@@ -103,7 +103,7 @@ namespace ogl {
 		"}\n"
 		"\n", GL_FRAGMENT_SHADER);
 		if(!lib_f_shader)
-		goto error_exit;
+			goto error_exit;
 
 		lib_v_shader = 0;
 		if(flags == 0) {
@@ -178,17 +178,17 @@ namespace ogl {
 		glDeleteShader(lib_v_shader);
 		glDeleteShader(lib_f_shader);
 		return return_value;
-		error_exit:
+	error_exit:
 		if(v_shader)
-		glDeleteShader(v_shader);
+			glDeleteShader(v_shader);
 		if(f_shader)
-		glDeleteShader(f_shader);
+			glDeleteShader(f_shader);
 		if(lib_v_shader)
-		glDeleteShader(lib_v_shader);
+			glDeleteShader(lib_v_shader);
 		if(lib_f_shader)
-		glDeleteShader(lib_f_shader);
+			glDeleteShader(lib_f_shader);
 		if(return_value)
-		glDeleteProgram(return_value);
+			glDeleteProgram(return_value);
 		return 0;
 	}
 
@@ -246,23 +246,23 @@ namespace ogl {
 
 	std::string_view framebuffer_error(GLenum e) {
 		switch(e) {
-			case GL_FRAMEBUFFER_UNDEFINED:
+		case GL_FRAMEBUFFER_UNDEFINED:
 			return "GL_FRAMEBUFFER_UNDEFINED";
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 			return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 			return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT ";
-			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
 			return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
-			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
 			return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
-			case GL_FRAMEBUFFER_UNSUPPORTED:
+		case GL_FRAMEBUFFER_UNSUPPORTED:
 			return "GL_FRAMEBUFFER_UNSUPPORTED";
-			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
 			return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
-			case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
 			return "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
-			default:
+		default:
 			break;
 		}
 		return "???";
@@ -270,9 +270,9 @@ namespace ogl {
 
 	void initialize_msaa(sys::state& state, int32_t size_x, int32_t size_y) {
 		if(state.user_settings.antialias_level == 0)
-		return;
+			return;
 		if(!size_x || !size_y)
-		return;
+			return;
 		glEnable(GL_MULTISAMPLE);
 		// setup screen VAO
 		static const float sq_vertices[] = {
@@ -355,25 +355,25 @@ namespace ogl {
 
 	void deinitialize_msaa(sys::state& state) {
 		if(!state.open_gl.msaa_enabled)
-		return;
+			return;
 
 		state.open_gl.msaa_enabled = false;
 		if(state.open_gl.msaa_texture)
-		glDeleteTextures(1, &state.open_gl.msaa_texture);
+			glDeleteTextures(1, &state.open_gl.msaa_texture);
 		if(state.open_gl.msaa_interbuffer)
-		glDeleteFramebuffers(1, &state.open_gl.msaa_framebuffer);
+			glDeleteFramebuffers(1, &state.open_gl.msaa_framebuffer);
 		if(state.open_gl.msaa_rbo)
-		glDeleteRenderbuffers(1, &state.open_gl.msaa_rbo);
+			glDeleteRenderbuffers(1, &state.open_gl.msaa_rbo);
 		if(state.open_gl.msaa_texcolorbuffer)
-		glDeleteTextures(1, &state.open_gl.msaa_texcolorbuffer);
+			glDeleteTextures(1, &state.open_gl.msaa_texcolorbuffer);
 		if(state.open_gl.msaa_framebuffer)
-		glDeleteFramebuffers(1, &state.open_gl.msaa_framebuffer);
+			glDeleteFramebuffers(1, &state.open_gl.msaa_framebuffer);
 		if(state.open_gl.msaa_vbo)
-		glDeleteBuffers(1, &state.open_gl.msaa_vbo);
+			glDeleteBuffers(1, &state.open_gl.msaa_vbo);
 		if(state.open_gl.msaa_vao)
-		glDeleteVertexArrays(1, &state.open_gl.msaa_vao);
+			glDeleteVertexArrays(1, &state.open_gl.msaa_vao);
 		if(state.open_gl.msaa_shader_program)
-		glDeleteProgram(state.open_gl.msaa_shader_program);
+			glDeleteProgram(state.open_gl.msaa_shader_program);
 		glDisable(GL_MULTISAMPLE);
 	}
 
@@ -402,7 +402,7 @@ namespace ogl {
 		// Automatically assign texture offsets to the flag_types
 		auto id = 0;
 		for(auto type : state.flag_types)
-		state.flag_type_map[uint32_t(type)] = uint8_t(id++);
+			state.flag_type_map[uint32_t(type)] = uint8_t(id++);
 		assert(state.flag_type_map[0] == 0); // default_flag
 
 		// Allocate textures for the flags
@@ -596,37 +596,37 @@ namespace ogl {
 
 	inline auto map_color_modification_to_index(color_modification e) {
 		switch(e) {
-			case color_modification::disabled:
+		case color_modification::disabled:
 			return parameters::disabled;
-			case color_modification::interactable:
+		case color_modification::interactable:
 			return parameters::interactable;
-			case color_modification::interactable_disabled:
+		case color_modification::interactable_disabled:
 			return parameters::interactable_disabled;
-			default:
-			case color_modification::none:
+		default:
+		case color_modification::none:
 			return parameters::enabled;
 		}
 	}
 
 	void bind_vertices_by_rotation(sys::state const& state, ui::rotation r, bool flipped, bool rtl) {
 		switch(r) {
-			case ui::rotation::upright:
+		case ui::rotation::upright:
 			if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
 			else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer, 0, sizeof(GLushort) * 4);
 			break;
-			case ui::rotation::r90_left:
+		case ui::rotation::r90_left:
 			if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_buffer: state.open_gl.global_square_left_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_buffer : state.open_gl.global_square_left_buffer, 0, sizeof(GLushort) * 4);
 			else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer, 0, sizeof(GLushort) * 4);
 			break;
-			case ui::rotation::r90_right:
+		case ui::rotation::r90_right:
 			if(!flipped)
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer, 0, sizeof(GLushort) * 4);
 			else
-			glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer, 0, sizeof(GLushort) * 4);
 			break;
 		}
 	}
@@ -643,8 +643,7 @@ namespace ogl {
 		glDrawArrays(GL_LINE_STRIP, 0, 4);
 	}
 
-	void render_textured_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
-		GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
+	void render_textured_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
 		glBindVertexArray(state.open_gl.global_square_vao);
 
 		bind_vertices_by_rotation(state, r, flipped, rtl);
@@ -652,7 +651,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::no_filter};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -665,7 +664,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, handle);
 
-	GLuint subroutines[2] = {parameters::enabled, parameters::no_filter};
+		GLuint subroutines[2] = {parameters::enabled, parameters::no_filter};
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -677,7 +676,7 @@ namespace ogl {
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-	GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::linegraph };
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::linegraph };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -700,14 +699,13 @@ namespace ogl {
 		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
 	}
 
-	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, float r, float g, float b,
-		lines& l) {
+	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, float r, float g, float b, lines& l) {
 		glBindVertexArray(state.open_gl.global_square_vao);
 
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-	GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::linegraph_color };
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::linegraph_color };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -1151,9 +1149,11 @@ namespace ogl {
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
 
-			for(int32_t x = 0; x < tiles_x; x++)
-			for(int32_t y = 0; y < tiles_y; y++)
-				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, GL_RGBA, GL_UNSIGNED_BYTE, ((uint32_t const*)image.data) + (x * p_dy * image.size_x + y * p_dx));
+			for(int32_t x = 0; x < tiles_x; x++) {
+				for(int32_t y = 0; y < tiles_y; y++) {
+					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, GL_RGBA, GL_UNSIGNED_BYTE, ((uint32_t const*)image.data) + (x * p_dy * image.size_x + y * p_dx));
+				}
+			}
 
 			set_gltex_parameters(texture_handle, GL_TEXTURE_2D_ARRAY, GL_LINEAR_MIPMAP_NEAREST, GL_REPEAT);
 			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);

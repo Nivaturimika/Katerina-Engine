@@ -1008,45 +1008,22 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		root_elm->impl_render(*this, 0, 0);
 
 		if(ui_state.tooltip->is_visible()) {
-			//TODO: make this accessible by in-game settings
-		constexpr static auto tooltip_delay = std::chrono::milliseconds{ 0 };
-			//show tooltip if timer going for longer than delay ( currently 0(zero) milliseconds )
-			if((std::chrono::steady_clock::now() - tooltip_timer) > tooltip_delay) {
-				//floating by mouse
-				if(user_settings.bind_tooltip_mouse) {
-					int32_t aim_x = int32_t(mouse_x_position / user_settings.ui_scale) + 10;
-					int32_t aim_y = int32_t(mouse_y_position / user_settings.ui_scale) + 10;
-					int32_t wsize_x = int32_t(x_size / user_settings.ui_scale);
-					int32_t wsize_y = int32_t(y_size / user_settings.ui_scale);
-					//this only works if the tooltip isnt bigger than the entire window, wont crash though
-					if(aim_x + ui_state.tooltip->base_data.size.x > wsize_x) {
-						aim_x = wsize_x - ui_state.tooltip->base_data.size.x;
-					}
-					if(aim_y + ui_state.tooltip->base_data.size.y > wsize_y) {
-						aim_y = wsize_y - ui_state.tooltip->base_data.size.y;
-					}
-					ui_state.tooltip->impl_render(*this, aim_x, aim_y);
-				} else {//tooltip centered over ui element
-					ui_state.tooltip->impl_render(*this, ui_state.tooltip->base_data.position.x, ui_state.tooltip->base_data.position.y);
+			//floating by mouse
+			if(user_settings.bind_tooltip_mouse) {
+				int32_t aim_x = int32_t(mouse_x_position / user_settings.ui_scale) + 10;
+				int32_t aim_y = int32_t(mouse_y_position / user_settings.ui_scale) + 10;
+				int32_t wsize_x = int32_t(x_size / user_settings.ui_scale);
+				int32_t wsize_y = int32_t(y_size / user_settings.ui_scale);
+				//this only works if the tooltip isnt bigger than the entire window, wont crash though
+				if(aim_x + ui_state.tooltip->base_data.size.x > wsize_x) {
+					aim_x = wsize_x - ui_state.tooltip->base_data.size.x;
 				}
-			} else { //this branch currently can't be taken since tooltip delay is hardcoded to 0ms.
-				//this branch is taken if tooltip timer hasn't surpassed tooltip delay.
-				//only start showing tooltip once mouse is hovered over same ui element for time period of tooltip_delay.
-				//all province tooltips are the same tooltip so first checks tooltip pointer and
-				//	then province id if hovering over province.
-				//this resets tooltip_timer if mouse has moved to a different ui element.
-				static auto last_tooltip = ui_state.last_tooltip;
-				static auto last_prov_id = map_state.get_province_under_mouse(*this, mouse_x_position, mouse_y_position, x_size, y_size);
-				if(last_tooltip != ui_state.last_tooltip) {
-					tooltip_timer = std::chrono::steady_clock::now();
-				} else if(!mouse_probe.under_mouse && !tooltip_probe.under_mouse) {
-					auto now_prov_id = map_state.get_province_under_mouse(*this, mouse_x_position, mouse_y_position, x_size, y_size);
-					if(last_prov_id != now_prov_id) {
-						tooltip_timer = std::chrono::steady_clock::now();
-					}
-					last_prov_id = now_prov_id;
+				if(aim_y + ui_state.tooltip->base_data.size.y > wsize_y) {
+					aim_y = wsize_y - ui_state.tooltip->base_data.size.y;
 				}
-				last_tooltip = ui_state.last_tooltip;
+				ui_state.tooltip->impl_render(*this, aim_x, aim_y);
+			} else {//tooltip centered over ui element
+				ui_state.tooltip->impl_render(*this, ui_state.tooltip->base_data.position.x, ui_state.tooltip->base_data.position.y);
 			}
 		} else { //if there is no tooltip to display, reset tooltip_timer
 			tooltip_timer = std::chrono::steady_clock::now();

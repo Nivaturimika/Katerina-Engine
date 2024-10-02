@@ -41,20 +41,18 @@ namespace map {
 	}
 
 	glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
-		auto pt = state.world.province_get_port_to(p);
-		if(!pt)
+		if(auto pt = state.world.province_get_port_to(p); pt) {
+			auto adj = state.world.get_province_adjacency_by_province_pair(p, pt);
+			assert(adj);
+			auto id = adj.index();
+			auto const& border = state.map_state.map_data.borders[id];
+			auto const& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
+			glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
+			glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
+			v1 /= 65535.f;
+			return v1 * map_size;
+		}
 		return glm::vec2{};
-
-		auto adj = state.world.get_province_adjacency_by_province_pair(p, pt);
-		assert(adj);
-		auto id = adj.index();
-		auto const& border = state.map_state.map_data.borders[id];
-		auto const& vertex = state.map_state.map_data.border_vertices[border.start_index + border.count / 2];
-		glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
-
-		glm::vec2 v1 = glm::vec2(vertex.position_.x, vertex.position_.y);
-		v1 /= 65535.f;
-		return v1 * map_size;
 	}
 
 	bool is_sea_province(sys::state& state, dcon::province_id prov_id) {

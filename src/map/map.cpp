@@ -662,7 +662,7 @@ namespace map {
 
 	void display_data::render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter) {
 		if(!loaded_map)
-		return;
+			return;
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -686,10 +686,16 @@ namespace map {
 			glViewport(0, 0, state.x_size, state.y_size);
 			auto const& gfx_def = state.ui_defs.gfx[state.ui_state.bg_gfx_id];
 			if(gfx_def.primary_texture_handle) {
-				ogl::render_textured_rect(state, ui::get_color_modification(false, false, false), 0.f, 0.f, float(state.x_size), float(state.y_size),
-				ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent()),
-				ui::rotation::upright, gfx_def.is_vertically_flipped(),
-				false);
+				auto texid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
+				if(texid) {
+					glBindVertexArray(state.open_gl.global_square_vao);
+					glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+					glUniform4f(state.open_gl.ui_shader_d_rect_uniform, 0.f, 0.f, float(state.x_size), float(state.y_size));
+					glBindTexture(GL_TEXTURE_2D, texid);
+					GLuint subroutines[2] = { ogl::parameters::enabled, ogl::parameters::no_filter };
+					glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
+					glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+				}
 			}
 		}
 
