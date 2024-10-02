@@ -680,10 +680,6 @@ namespace military {
 		float pa = ps / state.defines.pop_min_size_for_regiment;
 		auto loc = state.world.pop_get_province_from_pop_location(p);
 		auto sid = state.world.province_get_state_membership(loc);
-		if(state.world.state_instance_get_capital(sid) != loc
-		&& state.world.nation_get_capital(state.world.province_get_nation_from_province_ownership(loc)) != loc) {
-			return 0;
-		}
 		return int32_t(std::floor(pa));
 	}
 
@@ -906,10 +902,13 @@ namespace military {
 
 	int32_t mobilized_regiments_possible_from_province(sys::state& state, dcon::province_id p) {
 		/*
-		Mobilized regiments come only from unoccupied, non-colonial provinces.
+		Mobilized regiments come only from unoccupied, non-colonial provinces, and they must be the state capital or national capital.
 		*/
 		auto fp = fatten(state.world, p);
 		if(fp.get_is_colonial() || fp.get_nation_from_province_control() != fp.get_nation_from_province_ownership())
+			return 0;
+
+		if(fp.get_state_membership().get_capital() != p && fp.get_nation_from_province_ownership().get_capital() != p)
 			return 0;
 
 		int32_t total = 0;
