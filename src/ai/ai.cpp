@@ -18,7 +18,7 @@ namespace ai {
 	float estimate_strength(sys::state& state, dcon::nation_id n) {
 		float value = state.world.nation_get_military_score(n);
 		for(auto subj : state.world.nation_get_overlord_as_ruler(n))
-		value += subj.get_subject().get_military_score();
+			value += subj.get_subject().get_military_score();
 		return value;
 	}
 
@@ -3352,9 +3352,9 @@ namespace ai {
 					auto rules = n.get_combined_issue_rules();
 					if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
 						// Non-lf prioritize poor people
-						int max_poor_tax = int(10.f + 20.f * (1.f - poor_militancy));
-						int max_mid_tax = int(10.f + 50.f * (1.f - mid_militancy));
-						int max_rich_tax = int(10.f + 80.f * (1.f - rich_militancy));
+						int max_poor_tax = int(70.f + 30.f * (1.f - poor_militancy));
+						int max_mid_tax = int(80.f + 20.f * (1.f - mid_militancy));
+						int max_rich_tax = int(90.f + 10.f * (1.f - rich_militancy));
 						int max_social = int(100.f * poor_militancy);
 
 						// enough tax?
@@ -3396,9 +3396,9 @@ namespace ai {
 							}
 						}
 					} else {
-						int max_poor_tax = int(10.f + 80.f * (1.f - poor_militancy));
-						int max_mid_tax = int(10.f + 50.f * (1.f - mid_militancy));
-						int max_rich_tax = int(10.f + 20.f * (1.f - rich_militancy));
+						int max_poor_tax = int(90.f + 10.f * (1.f - poor_militancy));
+						int max_mid_tax = int(80.f + 20.f * (1.f - mid_militancy));
+						int max_rich_tax = int(70.f + 30.f * (1.f - rich_militancy));
 						int max_social = int(100.f * poor_militancy);
 
 						// enough tax?
