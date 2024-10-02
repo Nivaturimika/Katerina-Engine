@@ -943,9 +943,9 @@ namespace military {
 
 						if(amount > ((regs.end() - regs.begin()) + (building.end() - building.begin()))) {
 							if(require_accepted == pop.get_pop().get_is_primary_or_accepted_culture())
-							return pop.get_pop().id;
+								return pop.get_pop().id;
 							else
-							non_preferred = pop.get_pop().id;
+								non_preferred = pop.get_pop().id;
 						}
 					}
 				}
@@ -960,13 +960,10 @@ namespace military {
 		*/
 		auto fp = fatten(state.world, p);
 		if(fp.get_is_colonial() || fp.get_nation_from_province_control() != fp.get_nation_from_province_ownership())
-		return 0;
+			return 0;
 
 		int32_t total = 0;
 		// Mobilization size = national-modifier-to-mobilization-size + technology-modifier-to-mobilization-size
-		auto mobilization_size =
-			std::max(0.0f, fp.get_nation_from_province_ownership().get_modifier_values(sys::national_mod_offsets::mobilization_size));
-
 		for(auto pop : state.world.province_get_pop_location(p)) {
 			/*
 			In those provinces, mobilized regiments come from non-soldier, non-slave, poor-strata pops with a culture that is either
@@ -977,7 +974,7 @@ namespace military {
 				The number of regiments these pops can provide is determined by pop-size x mobilization-size /
 				define:POP_SIZE_PER_REGIMENT.
 				*/
-				total += int32_t(pop.get_pop().get_size() * mobilization_size / state.defines.pop_size_per_regiment);
+				total += int32_t(pop.get_pop().get_size() * mobilization_size(state, nations::owner_of_pop(state, pop.get_pop())) / state.defines.pop_size_per_regiment);
 			}
 		}
 		return total;
@@ -1158,8 +1155,8 @@ namespace military {
 	float mobilization_impact(sys::state const& state, dcon::nation_id n) {
 		// Mobilization impact = 1 - mobilization-size x (national-mobilization-economy-impact-modifier +
 		// technology-mobilization-impact-modifier), to a minimum of zero.
-		return std::clamp(1.0f - mobilization_size(state, n) *
-															 state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact),
+		return std::clamp(1.0f - mobilization_size(state, n)
+			* state.world.nation_get_modifier_values(n, sys::national_mod_offsets::mobilization_impact),
 			0.0f, 1.0f);
 	}
 
