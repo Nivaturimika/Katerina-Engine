@@ -38,8 +38,8 @@ namespace ogl {
 	}
 
 	GLint compile_shader(std::string_view source, GLenum type) {
-		GLuint return_value = glCreateShader(type);
-		if(!return_value) {
+		GLuint shader = glCreateShader(type);
+		if(!shader) {
 			notify_user_of_fatal_opengl_error("shader creation failed");
 			return 0;
 		}
@@ -55,38 +55,37 @@ namespace ogl {
 			"#define PI 3.1415926535897932384626433832795\r\n",
 			s_source.c_str()
 		};
-		glShaderSource(return_value, std::extent_v<decltype(texts)>, texts, nullptr);
-		glCompileShader(return_value);
+		glShaderSource(shader, std::extent_v<decltype(texts)>, texts, nullptr);
+		glCompileShader(shader);
 
 		GLint result;
-		glGetShaderiv(return_value, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if(result == GL_FALSE) {
-			GLint log_length = 0;
-			glGetShaderiv(return_value, GL_INFO_LOG_LENGTH, &log_length);
-
-			auto log = std::unique_ptr<char[]>(new char[static_cast<size_t>(log_length)]);
+			GLint length = 0;
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+			auto log = std::unique_ptr<char[]>(new char[static_cast<size_t>(length)]);
 			GLsizei written = 0;
-			glGetShaderInfoLog(return_value, log_length, &written, log.get());
+			glGetShaderInfoLog(shader, length, &written, log.get());
 			notify_user_of_fatal_opengl_error(std::string("Shader failed to compile:\n") + log.get());
 			//dispose of resource
-			glDeleteShader(result);
+			glDeleteShader(shader);
 			return 0;
 		}
-		return return_value;
+		return shader;
 	}
 
 	GLuint create_program(std::string_view vertex_shader, std::string_view fragment_shader, uint32_t flags) {
-		GLuint return_value = glCreateProgram();
-		if(return_value == 0) {
-			notify_user_of_fatal_opengl_error("program creation failed");
-		}
-
 		GLint result = 0;
 		GLint lib_v_shader = 0;
 		GLint lib_f_shader = 0;
 		GLint v_shader = 0;
 		GLint f_shader = 0;
 
+		GLuint program = glCreateProgram();
+		if(program == 0) {
+			notify_user_of_fatal_opengl_error("Program creation failed");
+			goto error_exit;
+		}
 
 		v_shader = compile_shader(vertex_shader, GL_VERTEX_SHADER);
 		if(!v_shader)
@@ -156,20 +155,19 @@ namespace ogl {
 			goto error_exit;
 		}
 
-		glAttachShader(return_value, v_shader);
-		glAttachShader(return_value, f_shader);
-		glAttachShader(return_value, lib_v_shader);
-		glAttachShader(return_value, lib_f_shader);
-		glLinkProgram(return_value);
-		glGetProgramiv(return_value, GL_LINK_STATUS, &result);
+		glAttachShader(program, v_shader);
+		glAttachShader(program, f_shader);
+		glAttachShader(program, lib_v_shader);
+		glAttachShader(program, lib_f_shader);
+		glLinkProgram(program);
+		glGetProgramiv(program, GL_LINK_STATUS, &result);
 		if(result == GL_FALSE) {
-			GLint logLen;
-			glGetProgramiv(return_value, GL_INFO_LOG_LENGTH, &logLen);
-
-			char* log = new char[static_cast<size_t>(logLen)];
-			GLsizei written;
-			glGetProgramInfoLog(return_value, logLen, &written, log);
-			notify_user_of_fatal_opengl_error(std::string("Program failed to link:\n") + log);
+			GLint length = 0;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+			auto log = std::unique_ptr<char[]>(new char[static_cast<size_t>(length)]);
+			GLsizei written = 0;
+			glGetProgramInfoLog(program, length, &written, log.get());
+			notify_user_of_fatal_opengl_error(std::string("Program failed to link:\n") + log.get());
 			goto error_exit;
 		}
 
@@ -177,7 +175,7 @@ namespace ogl {
 		glDeleteShader(f_shader);
 		glDeleteShader(lib_v_shader);
 		glDeleteShader(lib_f_shader);
-		return return_value;
+		return program;
 	error_exit:
 		if(v_shader)
 			glDeleteShader(v_shader);
@@ -187,8 +185,8 @@ namespace ogl {
 			glDeleteShader(lib_v_shader);
 		if(lib_f_shader)
 			glDeleteShader(lib_f_shader);
-		if(return_value)
-			glDeleteProgram(return_value);
+		if(program)
+			glDeleteProgram(program);
 		return 0;
 	}
 
@@ -344,10 +342,12 @@ namespace ogl {
 			auto vertex_content = view_contents(*msaa_vshader);
 			auto fragment_content = view_contents(*msaa_fshader);
 			state.open_gl.msaa_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size), 0);
-			state.open_gl.msaa_uniform_screen_size = glGetUniformLocation(state.open_gl.msaa_shader_program, "screen_size");
-			state.open_gl.msaa_uniform_gaussian_blur = glGetUniformLocation(state.open_gl.msaa_shader_program, "gaussian_radius");
+			if(state.open_gl.msaa_shader_program) {
+				state.open_gl.msaa_uniform_screen_size = glGetUniformLocation(state.open_gl.msaa_shader_program, "screen_size");
+				state.open_gl.msaa_uniform_gaussian_blur = glGetUniformLocation(state.open_gl.msaa_shader_program, "gaussian_radius");
+			}
 		} else {
-			notify_user_of_fatal_opengl_error("Unable to open a MSAA shaders file");
+			notify_user_of_fatal_opengl_error("Unable to open a MSAA shaders files");
 		}
 		state.open_gl.msaa_enabled = true;
 	}
@@ -501,20 +501,21 @@ namespace ogl {
 			auto vertex_content = view_contents(*ui_vshader);
 			auto fragment_content = view_contents(*ui_fshader);
 			state.open_gl.ui_shader_program = create_program(std::string_view(vertex_content.data, vertex_content.file_size), std::string_view(fragment_content.data, fragment_content.file_size) ,0);
+			if(state.open_gl.ui_shader_program) {
+				state.open_gl.ui_shader_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "texture_sampler");
+				state.open_gl.ui_shader_secondary_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "secondary_texture_sampler");
+				state.open_gl.ui_shader_screen_width_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "screen_width");
+				state.open_gl.ui_shader_screen_height_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "screen_height");
+				state.open_gl.ui_shader_gamma_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "gamma");
 
-			state.open_gl.ui_shader_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "texture_sampler");
-			state.open_gl.ui_shader_secondary_texture_sampler_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "secondary_texture_sampler");
-			state.open_gl.ui_shader_screen_width_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "screen_width");
-			state.open_gl.ui_shader_screen_height_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "screen_height");
-			state.open_gl.ui_shader_gamma_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "gamma");
-
-			state.open_gl.ui_shader_d_rect_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "d_rect");
-			state.open_gl.ui_shader_subroutines_index_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "subroutines_index");
-			state.open_gl.ui_shader_inner_color_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "inner_color");
-			state.open_gl.ui_shader_subrect_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "subrect");
-			state.open_gl.ui_shader_border_size_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "border_size");
+				state.open_gl.ui_shader_d_rect_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "d_rect");
+				state.open_gl.ui_shader_subroutines_index_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "subroutines_index");
+				state.open_gl.ui_shader_inner_color_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "inner_color");
+				state.open_gl.ui_shader_subrect_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "subrect");
+				state.open_gl.ui_shader_border_size_uniform = glGetUniformLocation(state.open_gl.ui_shader_program, "border_size");
+			}
 		} else {
-			notify_user_of_fatal_opengl_error("Unable to open a necessary shader file");
+			notify_user_of_fatal_opengl_error("Unable to open the UI shaders files");
 		}
 	}
 
@@ -602,8 +603,8 @@ namespace ogl {
 			return parameters::interactable;
 		case color_modification::interactable_disabled:
 			return parameters::interactable_disabled;
-		default:
 		case color_modification::none:
+		default:
 			return parameters::enabled;
 		}
 	}
@@ -635,7 +636,7 @@ namespace ogl {
 		glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-	GLuint subroutines[2] = { map_color_modification_to_index(color_modification::none), parameters::linegraph_color };
+		GLuint subroutines[2] = { map_color_modification_to_index(color_modification::none), parameters::linegraph_color };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 		glLineWidth(2.0f);
@@ -727,7 +728,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::barchart};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::barchart };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -738,7 +739,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::piechart};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::piechart };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -754,7 +755,7 @@ namespace ogl {
 		glUniform1f(state.open_gl.ui_shader_border_size_uniform, border_size);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::frame_stretch};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::frame_stretch };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -772,7 +773,7 @@ namespace ogl {
 		glBindTexture(GL_TEXTURE_2D, mask_texture_handle);
 		glActiveTexture(GL_TEXTURE0);
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::use_mask};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::use_mask };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -793,7 +794,7 @@ namespace ogl {
 		glBindTexture(GL_TEXTURE_2D, right_texture_handle);
 		glActiveTexture(GL_TEXTURE0);
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::progress_bar};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::progress_bar };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -810,7 +811,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-	GLuint subroutines[2] = {parameters::tint, parameters::no_filter};
+		GLuint subroutines[2] = { parameters::tint, parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -830,7 +831,7 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-	GLuint subroutines[2] = { parameters::alternate_tint, parameters::sub_sprite };
+		GLuint subroutines[2] = { parameters::alternate_tint, parameters::sub_sprite };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -848,20 +849,19 @@ namespace ogl {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-	GLuint subroutines[2] = {map_color_modification_to_index(enabled), parameters::sub_sprite};
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::sub_sprite };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-
 	GLuint get_flag_texture_handle_from_tag(sys::state& state, const char tag[3]) {
 		char ltag[3];
 		ltag[0] = char(toupper(tag[0]));
 		ltag[1] = char(toupper(tag[1]));
 		ltag[2] = char(toupper(tag[2]));
-	dcon::national_identity_id ident{};
+		dcon::national_identity_id ident{};
 		state.world.for_each_national_identity([&](dcon::national_identity_id id) {
 			auto curr = nations::int_to_tag(state.world.national_identity_get_identifying_int(id));
 			if(curr[0] == ltag[0] && curr[1] == ltag[1] && curr[2] == ltag[2]) {
@@ -874,7 +874,7 @@ namespace ogl {
 		}
 		auto fat_id = dcon::fatten(state.world, ident);
 		auto nation = fat_id.get_nation_from_identity_holder();
-	culture::flag_type flag_type = culture::flag_type{};
+		culture::flag_type flag_type = culture::flag_type{};
 		if(bool(nation.id) && nation.get_owned_province_count() != 0) {
 			flag_type = culture::get_current_flag_type(state, nation.id);
 		} else {
@@ -887,11 +887,11 @@ namespace ogl {
 		tag[0] = char(toupper(tag[0]));
 		tag[1] = char(toupper(tag[1]));
 		tag[2] = char(toupper(tag[2]));
-	dcon::national_identity_id ident{};
+		dcon::national_identity_id ident{};
 		state.world.for_each_national_identity([&](dcon::national_identity_id id) {
 			auto curr = nations::int_to_tag(state.world.national_identity_get_identifying_int(id));
 			if(curr[0] == tag[0] && curr[1] == tag[1] && curr[2] == tag[2])
-			ident = id;
+				ident = id;
 		});
 		return bool(ident);
 	}
@@ -902,30 +902,30 @@ namespace ogl {
 
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		switch(ico) {
-			case text::embedded_icon::army:
+		case text::embedded_icon::army:
 			scale = 1.3f;
-			glBindTexture(GL_TEXTURE_2D, state.open_gl.army_icon_tex );
+			glBindTexture(GL_TEXTURE_2D, state.open_gl.army_icon_tex);
 			break;
-			case text::embedded_icon::navy:
-			glBindTexture(GL_TEXTURE_2D,  state.open_gl.navy_icon_tex);
+		case text::embedded_icon::navy:
+			glBindTexture(GL_TEXTURE_2D, state.open_gl.navy_icon_tex);
 			scale = 1.3f;
 			break;
-			case text::embedded_icon::check:
+		case text::embedded_icon::check:
 			glBindTexture(GL_TEXTURE_2D, state.open_gl.checkmark_icon_tex);
 			icon_baseline += font_size * 0.1f;
 			break;
-			case text::embedded_icon::xmark:
-			{
-				GLuint false_icon = (state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan)
+		case text::embedded_icon::xmark:
+		{
+			GLuint false_icon = (state.user_settings.color_blind_mode == sys::color_blind_mode::deutan || state.user_settings.color_blind_mode == sys::color_blind_mode::protan)
 				? state.open_gl.color_blind_cross_icon_tex
 				: state.open_gl.cross_icon_tex;
-				glBindTexture(GL_TEXTURE_2D, false_icon);
-				icon_baseline += font_size * 0.1f;
-				break;
-			}
+			glBindTexture(GL_TEXTURE_2D, false_icon);
+			icon_baseline += font_size * 0.1f;
+			break;
+		}
 		}
 
-	GLuint icon_subroutines[2] = { map_color_modification_to_index(cmod), parameters::no_filter };
+		GLuint icon_subroutines[2] = { map_color_modification_to_index(cmod), parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, icon_subroutines[0], icon_subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, icon_subroutines); // must set all subroutines in one call
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, icon_baseline, scale * font_size, scale * font_size);
@@ -938,7 +938,7 @@ namespace ogl {
 
 		auto fat_id = dcon::fatten(state.world, ico.tag);
 		auto nation = fat_id.get_nation_from_identity_holder();
-	culture::flag_type flag_type = culture::flag_type{};
+		culture::flag_type flag_type = culture::flag_type{};
 		if(bool(nation.id) && nation.get_owned_province_count() != 0) {
 			flag_type = culture::get_current_flag_type(state, nation.id);
 		} else {
@@ -946,12 +946,12 @@ namespace ogl {
 		}
 		GLuint flag_texture_handle = ogl::get_flag_handle(state, ico.tag, flag_type);
 
-	GLuint icon_subroutines[2] = { map_color_modification_to_index(cmod), parameters::no_filter };
+		GLuint icon_subroutines[2] = { map_color_modification_to_index(cmod), parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, icon_subroutines[0], icon_subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, icon_subroutines); // must set all subroutines in one call
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		glBindTexture(GL_TEXTURE_2D, flag_texture_handle);
-		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, icon_baseline + font_size * 0.15f, 1.5f * font_size * 0.9f,  font_size * 0.9f);
+		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, icon_baseline + font_size * 0.15f, 1.5f * font_size * 0.9f, font_size * 0.9f);
 		glUniform4f(state.open_gl.ui_shader_subrect_uniform, 0.f, 1.f, 0.f, 1.f);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -959,9 +959,9 @@ namespace ogl {
 
 	void internal_text_render(sys::state& state, text::stored_glyphs const& txt, float x, float baseline_y, float size, text::font& f) {
 		if(f.textures.empty())
-		return; //edge case
+			return; //edge case
 
-	GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
+		GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 
 		unsigned int glyph_count = static_cast<unsigned int>(txt.glyph_info.size());
@@ -991,7 +991,7 @@ namespace ogl {
 
 		float adv = 1.0f / font.width; // Font texture atlas spacing.
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
-	GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::subsprite_b };
+		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::subsprite_b };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
@@ -1022,10 +1022,10 @@ namespace ogl {
 			float CurY = y + f.y_offset;
 			glUniform4f(state.open_gl.ui_shader_d_rect_uniform, CurX, CurY, float(f.width), float(f.height));
 			glUniform4f(state.open_gl.ui_shader_subrect_uniform,
-			float(f.x) / float(font.width) /* x offset */,
-			float(f.width) / float(font.width) /* x width */,
-			float(f.y) / float(font.width) /* y offset */,
-			float(f.height) / float(font.width) /* y height */
+				float(f.x) / float(font.width) /* x offset */,
+				float(f.width) / float(font.width) /* x width */,
+				float(f.y) / float(font.width) /* y offset */,
+				float(f.height) / float(font.width) /* y height */
 			);
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			x += f.x_advance;
@@ -1101,23 +1101,23 @@ namespace ogl {
 	GLuint make_gl_texture(uint8_t* data, uint32_t size_x, uint32_t size_y, uint32_t channels) {
 		GLuint texture_handle;
 		glGenTextures(1, &texture_handle);
-	const GLuint internalformats[] = { GL_R8, GL_RG8, GL_RGB8, GL_RGBA8 };
-	const GLuint formats[] = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
+		const GLuint internalformats[] = { GL_R8, GL_RG8, GL_RGB8, GL_RGBA8 };
+		const GLuint formats[] = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
 		if(texture_handle) {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
 			glTexStorage2D(GL_TEXTURE_2D, 1, internalformats[channels - 1], size_x, size_y);
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, formats[channels - 1], GL_UNSIGNED_BYTE, data);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-
 		return texture_handle;
 	}
+
 	GLuint make_gl_texture(simple_fs::directory const& dir, native_string_view file_name) {
-		auto file = open_file(dir, file_name);
-		if(!file)
+		if(auto f = open_file(dir, file_name); f) {
+			auto image = load_stb_image(*f);
+			return make_gl_texture(image.data, image.size_x, image.size_y, image.channels);
+		}
 		return 0;
-		auto image = load_stb_image(*file);
-		return make_gl_texture(image.data, image.size_x, image.size_y, image.channels);
 	}
 
 	void set_gltex_parameters(GLuint texture_handle, GLuint texture_type, GLuint filter, GLuint wrap) {
@@ -1142,19 +1142,17 @@ namespace ogl {
 		glGenTextures(1, &texture_handle);
 		if(texture_handle) {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
-
+			//
 			size_t p_dx = image.size_x / tiles_x; // Pixels of each tile in x
 			size_t p_dy = image.size_y / tiles_y; // Pixels of each tile in y
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GLsizei(p_dx), GLsizei(p_dy), GLsizei(tiles_x * tiles_y), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
-
 			for(int32_t x = 0; x < tiles_x; x++) {
 				for(int32_t y = 0; y < tiles_y; y++) {
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, GL_RGBA, GL_UNSIGNED_BYTE, ((uint32_t const*)image.data) + (x * p_dy * image.size_x + y * p_dx));
 				}
 			}
-
 			set_gltex_parameters(texture_handle, GL_TEXTURE_2D_ARRAY, GL_LINEAR_MIPMAP_NEAREST, GL_REPEAT);
 			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);

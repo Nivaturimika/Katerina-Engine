@@ -476,7 +476,7 @@ namespace map {
 			}
 			for(uint32_t i = 0; i < shader_count; i++) {
 				if(shaders[j][i] == 0)
-				continue;
+					continue;
 				shader_uniforms[j][i][uniform_provinces_texture_sampler] = glGetUniformLocation(shaders[j][i], "provinces_texture_sampler");
 				shader_uniforms[j][i][uniform_offset] = glGetUniformLocation(shaders[j][i], "offset");
 				shader_uniforms[j][i][uniform_aspect_ratio] = glGetUniformLocation(shaders[j][i], "aspect_ratio");
@@ -517,7 +517,10 @@ namespace map {
 				shader_uniforms[j][i][uniform_model_scale_rotation] = glGetUniformLocation(shaders[j][i], "model_scale_rotation");
 				shader_uniforms[j][i][uniform_model_proj_view] = glGetUniformLocation(shaders[j][i], "model_proj_view");
 			}
-			bone_matrices_uniform_array[j] = glGetUniformLocation(shaders[j][shader_map_standing_object], "bones_matrices");
+			//special bone matrix
+			if(shaders[j][shader_map_standing_object]) {
+				bone_matrices_uniform_array[j] = glGetUniformLocation(shaders[j][shader_map_standing_object], "bones_matrices");
+			}
 		}
 	}
 

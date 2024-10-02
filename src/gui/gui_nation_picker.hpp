@@ -49,7 +49,7 @@ namespace ui {
 		int16_t piechart_offset = 0;
 		element_base* overlay1 = nullptr;
 		element_base* overlay2 = nullptr;
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "player_shield") {
 				return make_element_by_type<flag_button>(state, id);
@@ -75,7 +75,7 @@ namespace ui {
 				// at left
 				auto aptr = make_element_by_type<nation_picker_cultures_chart>(state, id);
 				if(piechart_offset == 0)
-				piechart_offset = aptr->base_data.size.x + 4;
+					piechart_offset = aptr->base_data.size.x + 4;
 				aptr->base_data.position.x -= piechart_offset;
 				add_child_to_front(std::move(aptr));
 				// at middle
@@ -86,15 +86,15 @@ namespace ui {
 				cptr->base_data.position.x += piechart_offset;
 				// bring overlays on top
 				if(overlay1)
-				move_child_to_front(overlay1);
+					move_child_to_front(overlay1);
 				if(overlay2)
-				move_child_to_front(overlay2);
+					move_child_to_front(overlay2);
 				return cptr;
 			} else if(name == "selected_population_chart_overlay") {
 				// at left
 				auto aptr = make_element_by_type<image_element_base>(state, id);
 				if(piechart_offset == 0)
-				piechart_offset = aptr->base_data.size.x + 4;
+					piechart_offset = aptr->base_data.size.x + 4;
 				aptr->base_data.position.x -= piechart_offset;
 				overlay1 = aptr.get();
 				add_child_to_front(std::move(aptr));
@@ -160,22 +160,22 @@ namespace ui {
 		void button_action(sys::state& state) noexcept override {
 			save_item* i = retrieve< save_item*>(state, parent);
 			if(!i->is_new_game && i->file_name == state.loaded_save_file)
-			return;
+				return;
 
 			window::change_cursor(state, window::cursor_type::busy); //show busy cursor so player doesn't question
 
 			if(state.ui_state.request_window)
-			static_cast<ui::diplomacy_request_window*>(state.ui_state.request_window)->messages.clear();
+				static_cast<ui::diplomacy_request_window*>(state.ui_state.request_window)->messages.clear();
 			if(state.ui_state.msg_window)
-			static_cast<ui::message_window*>(state.ui_state.msg_window)->messages.clear();
+				static_cast<ui::message_window*>(state.ui_state.msg_window)->messages.clear();
 			if(state.ui_state.request_topbar_listbox)
-			static_cast<ui::diplomatic_message_topbar_listbox*>(state.ui_state.request_topbar_listbox)->messages.clear();
+				static_cast<ui::diplomatic_message_topbar_listbox*>(state.ui_state.request_topbar_listbox)->messages.clear();
 			if(state.ui_state.msg_log_window)
-			static_cast<ui::message_log_window*>(state.ui_state.msg_log_window)->messages.clear();
+				static_cast<ui::message_log_window*>(state.ui_state.msg_log_window)->messages.clear();
 			for(const auto& win : land_combat_end_popup::land_reports_pool)
-			win->set_visible(state, false);
+				win->set_visible(state, false);
 			for(const auto& win : naval_combat_end_popup::naval_reports_pool)
-			win->set_visible(state, false);
+				win->set_visible(state, false);
 			ui::clear_event_windows(state);
 
 			// initiate request (first need to set names)
@@ -203,25 +203,21 @@ namespace ui {
 			visible = !i->is_new_game && !i->is_bookmark();
 
 			if(!visible)
-			return;
+				return;
 
-			if(!bool(tag))
-			tag = state.national_definitions.rebel_id;
+			tag = tag ? tag : state.national_definitions.rebel_id;
 
 			culture::flag_type ft = culture::flag_type::default_flag;
 			if(gov) {
 				auto id = state.world.national_identity_get_government_flag_type(tag, gov);
-				if(id != 0)
-				ft = culture::flag_type(id - 1);
-				else
-				ft = culture::flag_type(state.world.government_type_get_flag(gov));
+				ft = culture::flag_type(id != 0 ? id - 1 : state.world.government_type_get_flag(gov));
 			}
 			flag_texture_handle = ogl::get_flag_handle(state, tag, ft);
 		}
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(!visible)
-			return;
+				return;
 
 			dcon::gfx_object_id gid;
 			if(base_data.get_element_type() == element_type::image) {
@@ -235,17 +231,17 @@ namespace ui {
 					auto mask_handle = ogl::get_texture_handle(state, dcon::texture_id(gfx_def.type_dependent - 1), true);
 					auto& mask_tex = state.open_gl.asset_textures[dcon::texture_id(gfx_def.type_dependent - 1)];
 					ogl::render_masked_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
-					float(x) + float(base_data.size.x - mask_tex.size_x) * 0.5f,
-					float(y) + float(base_data.size.y - mask_tex.size_y) * 0.5f,
-					float(mask_tex.size_x),
-					float(mask_tex.size_y),
-					flag_texture_handle, mask_handle, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
-					false);
+						float(x) + float(base_data.size.x - mask_tex.size_x) * 0.5f,
+						float(y) + float(base_data.size.y - mask_tex.size_y) * 0.5f,
+						float(mask_tex.size_x),
+						float(mask_tex.size_y),
+						flag_texture_handle, mask_handle, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+						false);
 				} else {
 					ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
-					float(x), float(y), float(base_data.size.x), float(base_data.size.y), flag_texture_handle, base_data.get_rotation(),
-					gfx_def.is_vertically_flipped(),
-					false);
+						float(x), float(y), float(base_data.size.x), float(base_data.size.y), flag_texture_handle, base_data.get_rotation(),
+						gfx_def.is_vertically_flipped(),
+						false);
 				}
 			}
 			image_element_base::render(state, x, y);
@@ -809,9 +805,7 @@ namespace ui {
 	class nation_picker_container : public window_element_base {
 		public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-			if(name == "frontend_chat_bg") {
-				return make_element_by_type<image_element_base>(state, id);
-			} else if(name == "lobby_chat_edit") {
+			if(name == "lobby_chat_edit") {
 				return make_element_by_type<invisible_element>(state, id);
 			} else if(name == "newgame_tab") {
 				return make_element_by_type<invisible_element>(state, id);
@@ -837,6 +831,18 @@ namespace ui {
 				auto ptr = make_element_by_type<nation_alice_readme_text>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_readme_text"))->second.definition);
 				add_child_to_front(std::move(ptr));
 				return make_element_by_type<invisible_element>(state, id);
+			} else if(name == "frontend_chat_bg") {
+				return make_element_by_type<partially_transparent_image>(state, id);
+			} else if(name == "frontend_lobby_leftbg") {
+				return make_element_by_type<partially_transparent_image>(state, id);
+			} else if(name == "frontend_lobby_rightbg") {
+				return make_element_by_type<partially_transparent_image>(state, id);
+			} else if(name == "frontend_chat_bg") {
+				return make_element_by_type<partially_transparent_image>(state, id);
+			} else if(name == "frontend_lobby_cornerleft") {
+				return make_element_by_type<partially_transparent_image>(state, id);
+			} else if(name == "frontend_lobby_cornerright") {
+				return make_element_by_type<partially_transparent_image>(state, id);
 			}
 			return nullptr;
 		}
