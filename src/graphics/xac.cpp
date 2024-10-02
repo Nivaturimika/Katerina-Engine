@@ -615,65 +615,65 @@ namespace emfx {
 			err.accumulated_errors += "Invalid XAC identifier on " + err.file_name + "\n";
 			return;
 		}
-		#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 		std::printf("XacFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
-		#endif
+#endif
 		while(start < end) {
 			auto const ch = parse_xac_any_binary<xac_chunk_header>(&start, end, err);
-			#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 			std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
-			#endif
+#endif
 			context.ignore_length = false; // Reset
 			const char* expected = start + ch.len;
 			switch(xac_chunk_type(ch.ident)) {
-				case xac_chunk_type::mesh:
+			case xac_chunk_type::mesh:
 				if(ch.version == 1) {
 					start = parse_xac_mesh_v1(context, start, end, err);
 				} else {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
-				case xac_chunk_type::metadata:
+			case xac_chunk_type::metadata:
 				if(ch.version == 2) {
 					start = parse_xac_metadata_v2(context, start, end, err);
 				} else {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
-				case xac_chunk_type::material_block:
+			case xac_chunk_type::material_block:
 				if(ch.version == 1) {
 					start = parse_xac_material_block_v1(context, start, end, err);
 				} else {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
-				case xac_chunk_type::material_3:
+			case xac_chunk_type::material_3:
 				if(ch.version == 2) {
 					start = parse_xac_material_v2(context, start, end, err);
 				} else {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
-				case xac_chunk_type::node_hierachy:
-				{
-					if(ch.version == 1) {
-						start = parse_xac_node_hierachy_v1(context, start, end, err);
-					} else {
-						err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-					}
-					break;
-					case xac_chunk_type::skinning:
-					if(ch.version == 3) {
-						start = parse_xac_skinning_v3(context, start, end, err);
-					} else {
-						err.accumulated_errors += "Unsupported version (" + err.file_name + ")\n";
-					}
-					break;
+			case xac_chunk_type::node_hierachy:
+			{
+				if(ch.version == 1) {
+					start = parse_xac_node_hierachy_v1(context, start, end, err);
+				} else {
+					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
-				default:
-				#ifdef XAC_DEBUG
+				break;
+			case xac_chunk_type::skinning:
+				if(ch.version == 3) {
+					start = parse_xac_skinning_v3(context, start, end, err);
+				} else {
+					err.accumulated_errors += "Unsupported version (" + err.file_name + ")\n";
+				}
+				break;
+			}
+			default:
+#ifdef XAC_DEBUG
 				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
-				#endif
+#endif
 				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
 				start += ch.len;
 				break;
@@ -683,7 +683,7 @@ namespace emfx {
 				start = expected;
 			}
 		}
-		#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 		for(const auto& node : context.nodes) {
 			std::printf("Node: %s\n", node.name.c_str());
 			std::printf("* Meshes: %zu\n", node.meshes.size());
@@ -696,7 +696,7 @@ namespace emfx {
 		}
 		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
 		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
-		#endif
+#endif
 	}
 
 	emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index) {
@@ -772,7 +772,7 @@ namespace emfx {
 	const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
 		uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&start, end, err);
 		for(uint32_t i = 0; i < num_sub_motions; i++) {
-		context.animations.push_back(xsm_animation{});
+			context.animations.push_back(xsm_animation{});
 			xsm_animation& anim = context.animations.back();
 			anim.pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
 			anim.bind_pose_rotation = parse_quat_16b(&start, end, err, context.use_quat_16);
@@ -800,7 +800,7 @@ namespace emfx {
 			for(uint32_t j = 0; j < num_rot_keys; j++) {
 				auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
 				auto time = parse_xac_any_binary<float>(&start, end, err);
-			anim.rotation_keys.push_back(xsm_animation_key{ kf, time });
+				anim.rotation_keys.push_back(xsm_animation_key{ kf, time });
 			}
 			for(uint32_t j = 0; j < num_scale_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&start, end, err);
@@ -809,7 +809,7 @@ namespace emfx {
 			for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
 				auto kf = parse_quat_16b(&start, end, err, context.use_quat_16);
 				auto time = parse_xac_any_binary<float>(&start, end, err);
-			anim.scale_rotation_keys.push_back(xsm_animation_key{ kf, time });
+				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf, time });
 			}
 		}
 		return nullptr;
@@ -823,25 +823,25 @@ namespace emfx {
 			return;
 		}
 		//context.use_quat_16 = h.multiply_order == 0;
-		#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 		std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
-		#endif
+#endif
 		while(start < end) {
 			auto const ch = parse_xac_any_binary<xsm_chunk_header>(&start, end, err);
-			#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 			std::printf(">>> Id=%u,ChunkVersion=%u(Len=%u)\n", ch.ident, ch.version, ch.len);
-			#endif
+#endif
 			context.ignore_length = false; // Reset
 			const char* expected = start + ch.len;
 			switch(xsm_chunk_type(ch.ident)) {
-				case xsm_chunk_type::bone_animation:
+			case xsm_chunk_type::bone_animation:
 				if(ch.version == 1) {
 					start = parse_xsm_bone_animation_v2(context, start, end, err);
 				} else {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
-				default:
+			default:
 				if(ch.ident == 0xc9) {
 					parse_xac_any_binary<float>(&start, end, err);
 					parse_xac_any_binary<float>(&start, end, err);
@@ -855,9 +855,9 @@ namespace emfx {
 					start = parse_xac_cstring(start, end, err);
 					start = parse_xac_cstring(start, end, err);
 				}
-				#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
-				#endif
+#endif
 				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(start - file_start)) + ") on " + err.file_name + "\n";
 				start += ch.len;
 				break;
@@ -867,31 +867,27 @@ namespace emfx {
 				start = expected;
 			}
 		}
-		#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
 		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
-		#endif
+#endif
 	}
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
 		auto& keys = position_keys;
-		auto kf = i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_position, 0.f } : keys.back();
-		return kf;
+		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_position, 0.f } : keys.back();
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
 		auto& keys = rotation_keys;
-		auto kf = i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f } : keys.back();
-		return kf;
+		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f } : keys.back();
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
 		auto& keys = scale_keys;
-		auto kf = i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_scale, 0.f } : keys.back();
-		return kf;
+		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_scale, 0.f } : keys.back();
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
 		auto& keys = scale_rotation_keys;
-		auto kf = i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f } : keys.back();
-		return kf;
+		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f } : keys.back();
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
@@ -977,5 +973,4 @@ namespace emfx {
 			}
 		}
 	}
-
 }
