@@ -904,8 +904,9 @@ namespace map {
 	void map_state::update(sys::state& state) {
 		std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
 		// Set the last_update_time if it hasn't been set yet
-	if(last_update_time == std::chrono::time_point<std::chrono::steady_clock>{})
-		last_update_time = now;
+		if(last_update_time == std::chrono::time_point<std::chrono::steady_clock>{}) {
+			last_update_time = now;
+		}
 
 		update_unit_arrows(state, map_data);
 
@@ -923,7 +924,7 @@ namespace map {
 		time_counter = (float)std::fmod(time_counter, 600.f); // Reset it after every 10 minutes
 
 		if((left_arrow_key_down xor right_arrow_key_down) or (up_arrow_key_down xor down_arrow_key_down)) {
-		glm::vec2 arrow_key_velocity_vector{};
+			glm::vec2 arrow_key_velocity_vector{};
 			if(left_arrow_key_down) {
 				arrow_key_velocity_vector.x -= 1.f;
 			} else if(right_arrow_key_down) {
@@ -937,13 +938,13 @@ namespace map {
 			arrow_key_velocity_vector = glm::normalize(arrow_key_velocity_vector);
 			arrow_key_velocity_vector *= 0.175f;
 			if(shift_key_down)
-			arrow_key_velocity_vector *= glm::e<float>();
+				arrow_key_velocity_vector *= glm::e<float>();
 			pos_velocity += arrow_key_velocity_vector;
 		}
 
 		if(state.user_settings.mouse_edge_scrolling) {
-		glm::vec2 mouse_pos_percent{ state.mouse_x_position / float(state.x_size), state.mouse_y_position / float(state.y_size) };
-		glm::vec2 cursor_velocity_vector{ 0.0f, 0.0f };
+			glm::vec2 mouse_pos_percent{ state.mouse_x_position / float(state.x_size), state.mouse_y_position / float(state.y_size) };
+			glm::vec2 cursor_velocity_vector{ 0.0f, 0.0f };
 
 			//check if mouse is at edge of screen, in order to move the map
 			if(mouse_pos_percent.x < 0.02f) {
@@ -956,7 +957,7 @@ namespace map {
 			} else if(mouse_pos_percent.y > 0.98f) {
 				cursor_velocity_vector.y += 1.f;
 			}
-	
+
 			// check if the vector length is not zero before normalizing
 			if(glm::length(cursor_velocity_vector) != 0.0f) {
 				cursor_velocity_vector = glm::normalize(cursor_velocity_vector);
@@ -974,8 +975,8 @@ namespace map {
 		pos.x = glm::mod(pos.x, 1.f);
 		pos.y = glm::clamp(pos.y, 0.f, 1.f);
 
-	glm::vec2 mouse_pos{ state.mouse_x_position, state.mouse_y_position };
-	glm::vec2 screen_size{ state.x_size, state.y_size };
+		glm::vec2 mouse_pos{ state.mouse_x_position, state.mouse_y_position };
+		glm::vec2 screen_size{ state.x_size, state.y_size };
 		glm::vec2 screen_center = screen_size / 2.f;
 		auto view_mode = current_view(state);
 		glm::vec2 pos_before_zoom;
@@ -989,27 +990,27 @@ namespace map {
 		glm::vec2 pos_after_zoom;
 		if(valid_pos && screen_to_map(mouse_pos, screen_size, view_mode, pos_after_zoom)) {
 			switch(state.user_settings.zoom_mode) {
-				case sys::map_zoom_mode::panning:
+			case sys::map_zoom_mode::panning:
 				pos += pos_before_zoom - pos_after_zoom;
 				break;
-				case sys::map_zoom_mode::inverted:
+			case sys::map_zoom_mode::inverted:
 				pos -= pos_before_zoom - pos_after_zoom;
 				break;
-				case sys::map_zoom_mode::to_cursor:
+			case sys::map_zoom_mode::to_cursor:
 				if(zoom_change < 0.f) {
 					pos -= pos_before_zoom - pos_after_zoom;
 				} else {
 					pos += pos_before_zoom - pos_after_zoom;
 				}
 				break;
-				case sys::map_zoom_mode::away_from_cursor:
+			case sys::map_zoom_mode::away_from_cursor:
 				if(zoom_change < 0.f) {
 					pos += pos_before_zoom - pos_after_zoom;
 				} else {
 					pos -= pos_before_zoom - pos_after_zoom;
 				}
 				break;
-				case sys::map_zoom_mode::centered:
+			case sys::map_zoom_mode::centered:
 				//no pos change
 				break;
 			}

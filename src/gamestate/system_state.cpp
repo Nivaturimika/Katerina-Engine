@@ -310,7 +310,6 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			auto mx = int32_t(x / user_settings.ui_scale);
 			auto my = int32_t(y / user_settings.ui_scale);
 			if(mx < ui_state.target_ul_bounds.x || mx > ui_state.target_lr_bounds.x || my < ui_state.target_ul_bounds.y || my > ui_state.target_lr_bounds.y) {
-
 				ui_state.mouse_sensitive_target->set_visible(*this, false);
 				ui_state.mouse_sensitive_target = nullptr;
 			}
@@ -354,11 +353,11 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		auto belongs_on_map = [&](ui::element_base* b) {
 			while(b != nullptr) {
 				if(b == ui_state.units_root.get())
-				return true;
+					return true;
 				if(b == ui_state.colonizations_root.get())
-				return true;
+					return true;
 				if(b == ui_state.rgos_root.get())
-				return true;
+					return true;
 				b = b->parent;
 			}
 			return false;
@@ -388,21 +387,27 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 		//TODO: move to according scenes
 		if(user_settings.wasd_for_map_movement) {
-			if(keycode == sys::virtual_key::W)
-			keycode = sys::virtual_key::UP;
-			else if(keycode == sys::virtual_key::A)
-			keycode = sys::virtual_key::LEFT;
-			else if(keycode == sys::virtual_key::S)
-			keycode = sys::virtual_key::DOWN;
-			else if(keycode == sys::virtual_key::D)
-			keycode = sys::virtual_key::RIGHT;
+			switch(keycode) {
+			case sys::virtual_key::W:
+				keycode = sys::virtual_key::UP;
+				break;
+			case sys::virtual_key::A:
+				keycode = sys::virtual_key::LEFT;
+				break;
+			case sys::virtual_key::S:
+				keycode = sys::virtual_key::DOWN;
+				break;
+			case sys::virtual_key::D:
+				keycode = sys::virtual_key::RIGHT;
+				break;
+			}
 		}
-
 		map_state.on_key_up(keycode, mod);
 	}
 	void state::on_text(char32_t c) { // c is win1250 codepage value
-		if(ui_state.edit_target)
-		ui_state.edit_target->on_text(*this, c);
+		if(ui_state.edit_target) {
+			ui_state.edit_target->on_text(*this, c);
+		}
 	}
 
 	inline constexpr int32_t tooltip_width = 400;
@@ -902,11 +907,13 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 					for(auto a : selected_armies) {
 						if(command::can_move_army(*this, local_player_nation, a, prov).empty()) {
 							fail = true;
+							break;
 						}
 					}
 					for(auto a : selected_navies) {
 						if(command::can_move_navy(*this, local_player_nation, a, prov).empty()) {
 							fail = true;
+							break;
 						}
 					}
 					if(!fail) {
@@ -3603,8 +3610,8 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 		diplomatic_message::update_pending(*this);
 
-	auto month_start = sys::year_month_day{ ymd_date.year, ymd_date.month, uint16_t(1) };
-	auto next_month_start = ymd_date.month != 12 ? sys::year_month_day{ ymd_date.year, uint16_t(ymd_date.month + 1), uint16_t(1) } : sys::year_month_day{ ymd_date.year + 1, uint16_t(1), uint16_t(1) };
+		auto month_start = sys::year_month_day{ ymd_date.year, ymd_date.month, uint16_t(1) };
+		auto next_month_start = ymd_date.month != 12 ? sys::year_month_day{ ymd_date.year, uint16_t(ymd_date.month + 1), uint16_t(1) } : sys::year_month_day{ ymd_date.year + 1, uint16_t(1), uint16_t(1) };
 		auto const days_in_month = uint32_t(sys::days_difference(month_start, next_month_start));
 
 		// pop update:
@@ -3621,170 +3628,170 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		// instead, the changes are saved to be applied only after all triggers have been evaluated
 		concurrency::parallel_for(0, 8, [&](int32_t index) {
 			switch(index) {
-				case 0:
-				{
-					auto o = uint32_t(ymd_date.day);
-					if(o >= days_in_month)
+			case 0:
+			{
+				auto o = uint32_t(ymd_date.day);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_ideologies(*this, o, days_in_month, idbuf);
-					break;
-				}
-				case 1:
-				{
-					auto o = uint32_t(ymd_date.day + 1);
-					if(o >= days_in_month)
+				demographics::update_ideologies(*this, o, days_in_month, idbuf);
+				break;
+			}
+			case 1:
+			{
+				auto o = uint32_t(ymd_date.day + 1);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_issues(*this, o, days_in_month, isbuf);
-					break;
-				}
-				case 2:
-				{
-					auto o = uint32_t(ymd_date.day + 6);
-					if(o >= days_in_month)
+				demographics::update_issues(*this, o, days_in_month, isbuf);
+				break;
+			}
+			case 2:
+			{
+				auto o = uint32_t(ymd_date.day + 6);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_type_changes(*this, o, days_in_month, pbuf);
-					break;
-				}
-				case 3:
-				{
-					auto o = uint32_t(ymd_date.day + 7);
-					if(o >= days_in_month)
+				demographics::update_type_changes(*this, o, days_in_month, pbuf);
+				break;
+			}
+			case 3:
+			{
+				auto o = uint32_t(ymd_date.day + 7);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_assimilation(*this, o, days_in_month, abuf);
-					break;
-				}
-				case 4:
-				{
-					auto o = uint32_t(ymd_date.day + 8);
-					if(o >= days_in_month)
+				demographics::update_assimilation(*this, o, days_in_month, abuf);
+				break;
+			}
+			case 4:
+			{
+				auto o = uint32_t(ymd_date.day + 8);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_internal_migration(*this, o, days_in_month, mbuf);
-					break;
-				}
-				case 5:
-				{
-					auto o = uint32_t(ymd_date.day + 9);
-					if(o >= days_in_month)
+				demographics::update_internal_migration(*this, o, days_in_month, mbuf);
+				break;
+			}
+			case 5:
+			{
+				auto o = uint32_t(ymd_date.day + 9);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_colonial_migration(*this, o, days_in_month, cmbuf);
-					break;
-				}
-				case 6:
-				{
-					auto o = uint32_t(ymd_date.day + 10);
-					if(o >= days_in_month)
+				demographics::update_colonial_migration(*this, o, days_in_month, cmbuf);
+				break;
+			}
+			case 6:
+			{
+				auto o = uint32_t(ymd_date.day + 10);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_immigration(*this, o, days_in_month, imbuf);
-					break;
-				}
-				case 7:
-				{
-					auto o = uint32_t(ymd_date.day + 11);
-					if(o >= days_in_month)
+				demographics::update_immigration(*this, o, days_in_month, imbuf);
+				break;
+			}
+			case 7:
+			{
+				auto o = uint32_t(ymd_date.day + 11);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_conversion(*this, o, days_in_month, rbuf);
-					break;
-				}
+				demographics::update_conversion(*this, o, days_in_month, rbuf);
+				break;
+			}
 			}
 		});
 
 		// apply in parallel where we can
 		concurrency::parallel_for(0, 8, [&](int32_t index) {
 			switch(index) {
-				case 0:
-				{
-					auto o = uint32_t(ymd_date.day + 0);
-					if(o >= days_in_month)
+			case 0:
+			{
+				auto o = uint32_t(ymd_date.day + 0);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::apply_ideologies(*this, o, days_in_month, idbuf);
-					break;
-				}
-				case 1:
-				{
-					auto o = uint32_t(ymd_date.day + 1);
-					if(o >= days_in_month)
+				demographics::apply_ideologies(*this, o, days_in_month, idbuf);
+				break;
+			}
+			case 1:
+			{
+				auto o = uint32_t(ymd_date.day + 1);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::apply_issues(*this, o, days_in_month, isbuf);
-					break;
-				}
-				case 2:
-				{
-					auto o = uint32_t(ymd_date.day + 2);
-					if(o >= days_in_month)
+				demographics::apply_issues(*this, o, days_in_month, isbuf);
+				break;
+			}
+			case 2:
+			{
+				auto o = uint32_t(ymd_date.day + 2);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_militancy(*this, o, days_in_month);
-					break;
-				}
-				case 3:
-				{
-					auto o = uint32_t(ymd_date.day + 3);
-					if(o >= days_in_month)
+				demographics::update_militancy(*this, o, days_in_month);
+				break;
+			}
+			case 3:
+			{
+				auto o = uint32_t(ymd_date.day + 3);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_consciousness(*this, o, days_in_month);
-					break;
-				}
-				case 4:
-				{
-					auto o = uint32_t(ymd_date.day + 4);
-					if(o >= days_in_month)
+				demographics::update_consciousness(*this, o, days_in_month);
+				break;
+			}
+			case 4:
+			{
+				auto o = uint32_t(ymd_date.day + 4);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_literacy(*this, o, days_in_month);
-					break;
-				}
-				case 5:
-				{
-					auto o = uint32_t(ymd_date.day + 5);
-					if(o >= days_in_month)
+				demographics::update_literacy(*this, o, days_in_month);
+				break;
+			}
+			case 5:
+			{
+				auto o = uint32_t(ymd_date.day + 5);
+				if(o >= days_in_month)
 					o -= days_in_month;
-					demographics::update_growth(*this, o, days_in_month);
-					break;
-				}
-				case 6:
+				demographics::update_growth(*this, o, days_in_month);
+				break;
+			}
+			case 6:
 				province::ve_for_each_land_province(*this,
 				[&](auto ids) { world.province_set_daily_net_migration(ids, ve::fp_vector{}); });
 				break;
-				case 7:
+			case 7:
 				province::ve_for_each_land_province(*this,
 				[&](auto ids) { world.province_set_daily_net_immigration(ids, ve::fp_vector{}); });
 				break;
 			}
 		});
-		 
+
 		// because they may add pops, these changes must be applied sequentially
 		{
 			auto o = uint32_t(ymd_date.day + 6);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_type_changes(*this, o, days_in_month, pbuf);
 		}
 		{
 			auto o = uint32_t(ymd_date.day + 7);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_assimilation(*this, o, days_in_month, abuf);
 		}
 		{
 			auto o = uint32_t(ymd_date.day + 8);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_internal_migration(*this, o, days_in_month, mbuf);
 		}
 		{
 			auto o = uint32_t(ymd_date.day + 9);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_colonial_migration(*this, o, days_in_month, cmbuf);
 		}
 		{
 			auto o = uint32_t(ymd_date.day + 10);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_immigration(*this, o, days_in_month, imbuf);
 		}
 		{
 			auto o = uint32_t(ymd_date.day + 11);
 			if(o >= days_in_month)
-			o -= days_in_month;
+				o -= days_in_month;
 			demographics::apply_conversion(*this, o, days_in_month, rbuf);
 		}
 
@@ -3796,64 +3803,64 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		// values updates pass 1 (mostly trivial things, can be done in parallel)
 		concurrency::parallel_for(0, 17, [&](int32_t index) {
 			switch(index) {
-				case 0:
+			case 0:
 				ai::refresh_home_ports(*this);
 				break;
-				case 1:
+			case 1:
 				// Instant research cheat
-				for(auto n: this->cheat_data.instant_research_nations) {
+				for(auto n : this->cheat_data.instant_research_nations) {
 					auto tech = this->world.nation_get_current_research(n);
 					if(tech.is_valid()) {
 						float points = culture::effective_technology_cost(*this, this->current_date.to_ymd(this->start_date).year, n, tech);
-						   					this->world.nation_set_research_points(n, points);
+						this->world.nation_set_research_points(n, points);
 					}
 				}
 				nations::update_research_points(*this);
 				break;
-				case 2:
+			case 2:
 				military::regenerate_land_unit_average(*this);
 				break;
-				case 3:
+			case 3:
 				military::regenerate_ship_scores(*this);
 				break;
-				case 4:
+			case 4:
 				nations::update_industrial_scores(*this);
 				break;
-				case 5:
+			case 5:
 				military::update_naval_supply_points(*this);
 				break;
-				case 6:
+			case 6:
 				military::update_all_recruitable_regiments(*this);
 				break;
-				case 7:
+			case 7:
 				military::regenerate_total_regiment_counts(*this);
 				break;
-				case 8:
+			case 8:
 				economy_rgo::update_rgo_employment(*this);
 				break;
-				case 9:
+			case 9:
 				economy_factory::update_factory_employment(*this);
 				break;
-				case 10:
+			case 10:
 				nations::update_administrative_efficiency(*this);
 				rebel::daily_update_rebel_organization(*this);
 				break;
-				case 11:
+			case 11:
 				military::daily_leaders_update(*this);
 				break;
-				case 12:
+			case 12:
 				politics::daily_party_loyalty_update(*this);
 				break;
-				case 13:
+			case 13:
 				nations::daily_update_flashpoint_tension(*this);
 				break;
-				case 14:
+			case 14:
 				military::update_ticking_war_score(*this);
 				break;
-				case 15:
+			case 15:
 				military::increase_dig_in(*this);
 				break;
-				case 16:
+			case 16:
 				military::update_blockade_status(*this);
 				break;
 			}
@@ -3896,123 +3903,123 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 		// Once per month updates, spread out over the month
 		switch(ymd_date.day) {
-			case 1:
+		case 1:
 			nations::update_monthly_points(*this);
 			economy_factory::prune_factories(*this);
 			break;
-			case 2:
+		case 2:
 			province::update_blockaded_cache(*this);
 			sys::update_modifier_effects(*this);
 			break;
-			case 3:
+		case 3:
 			military::monthly_leaders_update(*this);
 			ai::add_gw_goals(*this);
 			break;
-			case 4:
+		case 4:
 			military::reinforce_regiments(*this);
 			break;
-			case 5:
+		case 5:
 			rebel::update_movements(*this);
 			rebel::update_factions(*this);
 			break;
-			case 6:
+		case 6:
 			ai::form_alliances(*this);
 			break;
-			case 7:
+		case 7:
 			ai::update_ai_general_status(*this);
 			break;
-			case 8:
+		case 8:
 			military::apply_attrition(*this);
 			break;
-			case 9:
+		case 9:
 			military::repair_ships(*this);
 			break;
-			case 10:
+		case 10:
 			province::update_crimes(*this);
 			break;
-			case 11:
+		case 11:
 			province::update_nationalism(*this);
 			break;
-			case 12:
+		case 12:
 			ai::update_ai_research(*this);
 			rebel::update_armies(*this);
 			rebel::rebel_hunting_check(*this);
 			break;
-			case 13:
+		case 13:
 			ai::perform_influence_actions(*this);
 			break;
-			case 14:
+		case 14:
 			ai::update_focuses(*this);
 			//ai::perform_foreign_investments(*this);
 			break;
-			case 15:
+		case 15:
 			culture::discover_inventions(*this);
 			break;
-			case 16:
+		case 16:
 			ai::build_ships(*this);
 			break;
-			case 17:
+		case 17:
 			ai::update_land_constructions(*this);
 			break;
-			case 18:
+		case 18:
 			ai::update_ai_econ_construction(*this);
 			break;
-			case 19:
+		case 19:
 			ai::update_budget(*this);
 			break;
-			case 20:
+		case 20:
 			nations::monthly_flashpoint_update(*this);
 			break;
-			case 21:
+		case 21:
 			ai::update_ai_colony_starting(*this);
 			break;
-			case 22:
+		case 22:
 			ai::take_reforms(*this);
 			break;
-			case 23:
+		case 23:
 			ai::civilize(*this);
 			ai::make_war_decs(*this);
 			break;
-			case 24:
+		case 24:
 			rebel::execute_rebel_victories(*this);
 			rebel::update_armies(*this);
 			rebel::rebel_hunting_check(*this);
 			break;
-			case 25:
+		case 25:
 			rebel::execute_province_defections(*this);
 			break;
-			case 26:
+		case 26:
 			ai::make_peace_offers(*this);
 			break;
-			case 27:
+		case 27:
 			ai::update_crisis_leaders(*this);
 			break;
-			case 28:
+		case 28:
 			rebel::rebel_risings_check(*this);
 			break;
-			case 29:
+		case 29:
 			ai::update_war_intervention(*this);
 			break;
-			case 30:
+		case 30:
 			rebel::update_armies(*this);
 			rebel::rebel_hunting_check(*this);
 			break;
-			case 31:
+		case 31:
 			ai::update_cb_fabrication(*this);
 			ai::update_ai_ruling_party(*this);
 			break;
-			default:
+		default:
 			break;
 		}
 
 		military::apply_regiment_damage(*this);
-	
+
 		if(ymd_date.day == 1) {
 			if(ymd_date.month == 1) {
 				// yearly update : redo the upper house
 				for(auto n : world.in_nation) {
 					if(n.get_owned_province_count() != 0)
-					politics::recalculate_upper_house(*this, n);
+						politics::recalculate_upper_house(*this, n);
 				}
 
 				ai::update_influence_priorities(*this);
@@ -4097,20 +4104,20 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 		game_state_updated.store(true, std::memory_order::release);
 
 		switch(user_settings.autosaves) {
-			case autosave_frequency::none:
+		case autosave_frequency::none:
 			break;
-			case autosave_frequency::daily:
+		case autosave_frequency::daily:
 			write_save_file(*this, sys::save_type::autosave);
 			break;
-			case autosave_frequency::monthly:
+		case autosave_frequency::monthly:
 			if(ymd_date.day == 1)
-			write_save_file(*this, sys::save_type::autosave);
+				write_save_file(*this, sys::save_type::autosave);
 			break;
-			case autosave_frequency::yearly:
+		case autosave_frequency::yearly:
 			if(ymd_date.month == 1 && ymd_date.day == 1)
-			write_save_file(*this, sys::save_type::autosave);
+				write_save_file(*this, sys::save_type::autosave);
 			break;
-			default:
+		default:
 			break;
 		}
 	}
