@@ -3847,9 +3847,7 @@ namespace ui {
 			text::add_to_substitution_map(m, text::variable_type::date, ws.current_date + trigger::payload(tval[2]).signed_value);
 			text::localised_format_box(ws, layout, box, "add_modifier_until", m);
 			text::close_layout_box(layout, box);
-			if(ws.user_settings.spoilers) {
-				modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-			}
+			modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 			return 0;
 		}
 		uint32_t ef_add_province_modifier_no_duration(EFFECT_DISPLAY_PARAMS) {
@@ -3858,9 +3856,7 @@ namespace ui {
 			text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
 			text::localised_format_box(ws, layout, box, "add_modifier", m);
 			text::close_layout_box(layout, box);
-			if(ws.user_settings.spoilers) {
-				modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
-			}
+			modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 			return 0;
 		}
 		uint32_t ef_add_country_modifier(EFFECT_DISPLAY_PARAMS) {
