@@ -14,10 +14,9 @@ namespace parsers {
 };
 
 namespace map {
-
 	class map_state {
-		public:
-	map_state(){};
+	public:
+		map_state() { };
 
 		// Called to load the terrain and province map data
 		void load_map_data(parsers::scenario_building_context& context);
@@ -55,13 +54,13 @@ namespace map {
 		void set_selected_province(dcon::province_id prov_id);
 
 		map_mode::mode active_map_mode = map_mode::mode::terrain;
-	dcon::province_id selected_province = dcon::province_id{};
+		dcon::province_id selected_province = dcon::province_id{};
 
 		display_data map_data;
 		bool is_dragging = false;
 
 		// Last update time, used for smooth map movement
-	std::chrono::time_point<std::chrono::steady_clock> last_update_time{};
+		std::chrono::time_point<std::chrono::steady_clock> last_update_time{};
 
 		// Time in seconds, send to the map shader for animations
 		float time_counter = 0;

@@ -178,11 +178,13 @@ namespace map {
 			glBindBuffer(GL_ARRAY_BUFFER, map_data.vbo_array[map_data.vo_selection]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_screen_vertex) * map_data.selection_vertices.size(), map_data.selection_vertices.data(), GL_STATIC_DRAW);
 		}
+	}
 
+	void update_capitals(sys::state& state, display_data& map_data) {
 		map_data.capital_vertices.clear();
 		for(const auto n : state.world.in_nation) {
 			if(n.get_owned_province_count() > 0) {
-				map::make_selection_quad(state, map_data.capital_vertices, n.get_capital().get_mid_point());				
+				map::make_selection_quad(state, map_data.capital_vertices, n.get_capital().get_mid_point());
 			}
 		}
 		if(!map_data.capital_vertices.empty()) {
@@ -907,6 +909,10 @@ namespace map {
 		}
 
 		update_unit_arrows(state, map_data);
+
+		if(state.game_state_updated.load(std::memory_order::acquire)) {
+			update_capitals(state, map_data);
+		}
 
 		// Update railroads, only if railroads are being built and we have 'em enabled
 		if(state.user_settings.railroads_enabled && state.railroad_built.load(std::memory_order::acquire)) {
