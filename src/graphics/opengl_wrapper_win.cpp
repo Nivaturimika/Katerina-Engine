@@ -36,15 +36,16 @@ namespace ogl {
 			window::emit_error_message("GLEW failed to initialize", true);
 		}
 
-		if(wglewIsSupported("WGL_ARB_create_context")) {
+		bool v = false;
+		if(v && wglewIsSupported("WGL_ARB_create_context")) {
 			// Explicitly request for OpenGL 3.0
 			static const int attribs_3_0[] = {
 				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 				WGL_CONTEXT_FLAGS_ARB,
-	#ifndef NDEBUG
+#ifndef NDEBUG
 				WGL_CONTEXT_DEBUG_BIT_ARB |
-	#endif
+#endif
 				0,
 				WGL_CONTEXT_PROFILE_MASK_ARB,
 				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
@@ -52,7 +53,7 @@ namespace ogl {
 			};
 			state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
 		} else {
-			window::emit_error_message("WGL_ARB_create_context not supported", true);
+			state.open_gl.context = wglCreateContext(window_dc);
 		}
 
 		if(state.open_gl.context == nullptr) {
@@ -62,11 +63,15 @@ namespace ogl {
 		wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
 		wglDeleteContext(handle_to_ogl_dc);
 
-		// wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
 #ifndef NDEBUG
 		glDebugMessageCallback(debug_callback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+		//
+		std::string msg;
+		msg += "Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
+		msg += "Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
+		OutputDebugStringA(msg.c_str());
 #endif
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
