@@ -613,7 +613,7 @@ namespace map {
 				bool is_good = false;
 				for(size_t i = 0; i < good_centroids.size(); i++) {
 					if(closest == good_centroids[i])
-					is_good = true;
+						is_good = true;
 				}
 
 				if(is_good) {
@@ -728,36 +728,36 @@ namespace map {
 				// [ xn^0 xn^1 xn^2 xn^3 ] * [ x0^3 x1^3 ... xn^3 ] = [ d0 d1 d2 ... dn ]
 				glm::mat4x4 m0(0.f);
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				for(glm::length_t j = 0; j < m0.length(); j++)
-					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-						m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
+					for(glm::length_t j = 0; j < m0.length(); j++)
+						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+							m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				m0[i][i] += lambda;
+					m0[i][i] += lambda;
 				m0 = glm::inverse(m0); // m0 = (T(X)*X/n + I*lambda)^-1
 				glm::vec4 m1(0.f); // m1 = T(X)*Y / n
 				for(glm::length_t i = 0; i < m1.length(); i++)
-				for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-					m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
+					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+						m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
 				glm::vec4 mo(0.f); // mo = m1 * m0
 				for(glm::length_t i = 0; i < mo.length(); i++)
-				for(glm::length_t j = 0; j < mo.length(); j++)
-					mo[i] += m0[i][j] * m1[j];
+					for(glm::length_t j = 0; j < mo.length(); j++)
+						mo[i] += m0[i][j] * m1[j];
 				// y = a + bx + cx^2 + dx^3
 				// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 				auto poly_fn = [&](float x) {
 					return mo[0] * l_0 + mo[1] * x * l_1 + mo[2] * x * x * l_2 + mo[3] * x * x * x * l_3;
-				};
+					};
 				auto dx_fn = [&](float x) {
 					return mo[1] * l_1 + 2.f * mo[2] * x * l_2 + 3.f * mo[3] * x * x * l_3;
-				};
+					};
 				auto error_grad = [&](float x, float y) {
-					float error_linear = poly_fn(x) - y;				
+					float error_linear = poly_fn(x) - y;
 					return glm::vec4(error_linear * error_linear * error_linear * error_linear * error_linear * mo);
-				};
+					};
 
 				auto regularisation_grad = [&]() {
 					return glm::vec4(0, 0, mo[2] / 4.f, mo[3] / 6.f);
-				};
+					};
 
 				float xstep = (1.f / float(name_extent * 2.f));
 				for(float x = 0.f; x <= 1.f; x += xstep) {
@@ -767,15 +767,15 @@ namespace map {
 						break;
 					}
 					// Steep change in curve => use cuadratic
-					float dx = glm::abs(dx_fn(x) - dx_fn(x - xstep));
+					float dx = std::abs(dx_fn(x) - dx_fn(x - xstep));
 					if(dx / xstep >= 0.45f) {
 						use_quadratic = true;
 						break;
 					}
-				}			
+				}
 
 				if(!use_quadratic)
-				text_data.emplace_back(std::move(prepared_name), mo, basis, ratio);
+					text_data.emplace_back(std::move(prepared_name), mo, basis, ratio);
 			}
 
 			bool use_linear = false;
@@ -783,28 +783,28 @@ namespace map {
 				// Now lets try quadratic
 				glm::mat3x3 m0(0.f);
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				for(glm::length_t j = 0; j < m0.length(); j++)
-					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-						m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
+					for(glm::length_t j = 0; j < m0.length(); j++)
+						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+							m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				m0[i][i] += lambda;
+					m0[i][i] += lambda;
 				m0 = glm::inverse(m0); // m0 = (T(X)*X)^-1
 				glm::vec3 m1(0.f); // m1 = T(X)*Y
 				for(glm::length_t i = 0; i < m1.length(); i++)
-				for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-					m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
+					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+						m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
 				glm::vec3 mo(0.f); // mo = m1 * m0
 				for(glm::length_t i = 0; i < mo.length(); i++)
-				for(glm::length_t j = 0; j < mo.length(); j++)
-					mo[i] += m0[i][j] * m1[j];
+					for(glm::length_t j = 0; j < mo.length(); j++)
+						mo[i] += m0[i][j] * m1[j];
 				// y = a + bx + cx^2
 				// y = mo[0] + mo[1] * x + mo[2] * x * x
 				auto poly_fn = [&](float x) {
 					return mo[0] * l_0 + mo[1] * x * l_1 + mo[2] * x * x * l_2;
-				};
+					};
 				auto dx_fn = [&](float x) {
 					return mo[1] * l_1 + 2.f * mo[2] * x * l_2;
-				};
+					};
 				float xstep = (1.f / float(name_extent * 2.f));
 				for(float x = 0.f; x <= 1.f; x += xstep) {
 					float y = poly_fn(x);
@@ -813,40 +813,40 @@ namespace map {
 						break;
 					}
 					// Steep change in curve => use cuadratic
-					float dx = glm::abs(dx_fn(x) - dx_fn(x - xstep));
+					float dx = std::abs(dx_fn(x) - dx_fn(x - xstep));
 					if(dx / xstep >= 0.45f) {
 						use_linear = true;
 						break;
 					}
 				}
 				if(!use_linear)
-				text_data.emplace_back(std::move(prepared_name), glm::vec4(mo, 0.f), basis, ratio);
+					text_data.emplace_back(std::move(prepared_name), glm::vec4(mo, 0.f), basis, ratio);
 			}
 
 			if(state.user_settings.map_label == sys::map_label_mode::linear || use_linear) {
 				// Now lets try linear
 				glm::mat2x2 m0(0.f);
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				for(glm::length_t j = 0; j < m0.length(); j++)
-					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-						m0[i][j] += in_x[r][j] * w[r] * in_x[r][i];
+					for(glm::length_t j = 0; j < m0.length(); j++)
+						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+							m0[i][j] += in_x[r][j] * w[r] * in_x[r][i];
 				for(glm::length_t i = 0; i < m0.length(); i++)
-				m0[i][i] += lambda;
+					m0[i][i] += lambda;
 				m0 = glm::inverse(m0); // m0 = (T(X)*X)^-1
 				glm::vec2 m1(0.f); // m1 = T(X)*Y
 				for(glm::length_t i = 0; i < m1.length(); i++)
-				for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-					m1[i] += in_x[r][i] * w[r] * out_y[r];
+					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+						m1[i] += in_x[r][i] * w[r] * out_y[r];
 				glm::vec2 mo(0.f); // mo = m1 * m0
 				for(glm::length_t i = 0; i < mo.length(); i++)
-				for(glm::length_t j = 0; j < mo.length(); j++)
-					mo[i] += m0[i][j] * m1[j];
+					for(glm::length_t j = 0; j < mo.length(); j++)
+						mo[i] += m0[i][j] * m1[j];
 
 				// y = a + bx
 				// y = mo[0] + mo[1] * x
 				auto poly_fn = [&](float x) {
 					return mo[0] * l_0 + mo[1] * x * l_1;
-				};
+					};
 
 				// check if this is really better than taking the longest horizontal
 				// firstly check if we are already horizontal
