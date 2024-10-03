@@ -84,7 +84,6 @@ void main() {
 			out_color.g = mix(out_color.g, out_color.r, 0.075f);
 			out_color.b = mix(out_color.b, 1.f - out_color.r, 0.1f);
 			out_color.r *= 1.03f;
-			out_color = 0.75f * (out_color - 0.5f) + 0.5f;
 		}
 	}
 	frag_color = out_color;
