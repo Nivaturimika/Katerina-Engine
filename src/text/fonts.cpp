@@ -326,7 +326,7 @@ namespace text {
 					resolved = &(font_array.back());
 				} else {
 					#ifdef _WIN64
-					OutputDebugStringA("locale body font not found");
+					reports::write_debug("locale body font not found");
 					#endif
 				}
 			}
@@ -361,7 +361,7 @@ namespace text {
 					resolved = &(font_array.back());
 				} else {
 					#ifdef _WIN64
-					OutputDebugStringA("locale header font not found");
+					reports::write_debug("locale header font not found");
 					#endif
 				}
 			}
@@ -396,7 +396,7 @@ namespace text {
 					resolved = &(font_array.back());
 				} else {
 					#ifdef _WIN64
-					OutputDebugStringA("locale map font not found");
+					reports::write_debug("locale map font not found");
 					#endif
 				}
 			}
@@ -861,7 +861,7 @@ namespace text {
 			//para = ubidi_openSized(int32_t(temp_text.size()), 64, pErrorCode);
 			if(!para) {
 				#ifdef _WIN64
-				OutputDebugStringA("failure to get para");
+				reports::write_debug("failure to get para");
 				#endif
 				std::abort();
 			}

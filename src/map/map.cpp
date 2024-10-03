@@ -273,7 +273,7 @@ namespace map {
 	}
 
 	void display_data::create_meshes() {
-		OutputDebugStringA("Creating map static meshes\n");
+		reports::write_debug("Creating map static meshes\n");
 		{
 			std::vector<map_vertex> land_vertices;
 			glm::vec2 last_pos(0, 0);
@@ -421,7 +421,7 @@ namespace map {
 	}
 
 	void display_data::load_shaders(simple_fs::directory& root) {
-		OutputDebugStringA("Loading map shaders\n");
+		reports::write_debug("Loading map shaders\n");
 
 		// Map shaders
 		auto assets_dir = open_directory(root, NATIVE("assets"));
@@ -2424,7 +2424,7 @@ namespace map {
 		auto file = simple_fs::open_file(dir, file_name);
 		if(!bool(file)) {
 			auto full_message = std::string("Can't load DDS file ") + simple_fs::native_to_utf8(file_name) + "\n";
-			OutputDebugStringA(full_message.c_str());
+			reports::write_debug(full_message.c_str());
 			return 0;
 		}
 		auto content = simple_fs::view_contents(*file);
@@ -2437,9 +2437,9 @@ namespace map {
 		auto root = simple_fs::get_root(state.common_fs);
 		emfx::xsm_context anim_context{};
 		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
-			OutputDebugStringA("Loading XSM animation: ");
-			OutputDebugStringA(std::string(filename).c_str());
-			OutputDebugStringA("\n");
+			reports::write_debug("Loading XSM animation: ");
+			reports::write_debug(std::string(filename).c_str());
+			reports::write_debug("\n");
 
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
 			auto contents = simple_fs::view_contents(*cf);
@@ -2491,7 +2491,7 @@ namespace map {
 	}
 
 	void load_static_meshes(sys::state& state) {
-		OutputDebugStringA("Loading static meshes\n");
+		reports::write_debug("Loading static meshes\n");
 
 		struct static_mesh_vertex {
 			glm::vec3 position_;
@@ -2729,7 +2729,7 @@ namespace map {
 							}
 							if(has_invalid_bone_ids) {
 								#ifdef WIN32
-								OutputDebugStringA("Invalid bone ID");
+								reports::write_debug("Invalid bone ID");
 								#endif
 							}
 							vertex_offset += sub.num_vertices;
@@ -2809,7 +2809,7 @@ namespace map {
 	}
 
 	void display_data::load_map(sys::state& state) {
-		OutputDebugStringA("Loading map\n");
+		reports::write_debug("Loading map\n");
 		assert(!loaded_map);
 		loaded_map = true;
 
@@ -2925,7 +2925,7 @@ namespace map {
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		OutputDebugStringA("Generating province color and highlight textures\n");
+		reports::write_debug("Generating province color and highlight textures\n");
 		uint32_t province_size = state.world.province_size() + 1;
 		province_size += 256 - province_size % 256;
 
@@ -2940,7 +2940,7 @@ namespace map {
 		}
 		set_province_color(test_color);
 
-		OutputDebugStringA("Finished map loading\n");
+		reports::write_debug("Finished map loading\n");
 	}
 
 } // namespace map

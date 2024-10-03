@@ -78,7 +78,7 @@ namespace ogl {
 		}
 #ifndef NDEBUG
 		auto log = get_shader_log(shader);
-		OutputDebugStringA(log.get() ? log.get() : "No log");
+		reports::write_debug(log.get() ? log.get() : "No log");
 #endif
 		return shader;
 	}
@@ -200,7 +200,7 @@ namespace ogl {
 	}
 
 	void load_special_icons(sys::state& state) {
-		OutputDebugStringA("Loading special GFX icons\n");
+		reports::write_debug("Loading special GFX icons\n");
 
 		auto root = get_root(state.common_fs);
 		auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
@@ -283,7 +283,7 @@ namespace ogl {
 		if(!size_x || !size_y)
 			return;
 
-		OutputDebugStringA("Initializing MSAA\n");
+		reports::write_debug("Initializing MSAA\n");
 		glEnable(GL_MULTISAMPLE);
 		// setup screen VAO
 		static const float sq_vertices[] = {
@@ -370,7 +370,7 @@ namespace ogl {
 		if(!state.open_gl.msaa_enabled)
 			return;
 
-		OutputDebugStringA("Deinitializing MSAA\n");
+		reports::write_debug("Deinitializing MSAA\n");
 		state.open_gl.msaa_enabled = false;
 		if(state.open_gl.msaa_texture)
 			glDeleteTextures(1, &state.open_gl.msaa_texture);

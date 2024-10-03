@@ -1033,7 +1033,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 	void state::on_create() {
 		// Clear "center" property so they don't look messed up!
-		OutputDebugStringA("Creating game state\n");
+		reports::write_debug("Creating game state\n");
 		{
 			static const std::string_view elem_names[] = {
 				"state_info",

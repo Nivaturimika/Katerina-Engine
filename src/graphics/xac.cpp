@@ -873,12 +873,12 @@ namespace emfx {
 	fail_exit:
 #ifdef XAC_DEBUG
 		if(err.accumulated_errors.size() > 0) {
-			OutputDebugStringA("XSM Errors:\n");
-			OutputDebugStringA(err.accumulated_errors.c_str());
+			reports::write_debug("XSM Errors:\n");
+			reports::write_debug(err.accumulated_errors.c_str());
 		}
 		if(err.accumulated_warnings.size() > 0) {
-			OutputDebugStringA("XSM Warns:\n");
-			OutputDebugStringA(err.accumulated_warnings.c_str());
+			reports::write_debug("XSM Warns:\n");
+			reports::write_debug(err.accumulated_warnings.c_str());
 		}
 #endif
 	}

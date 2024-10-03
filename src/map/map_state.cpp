@@ -638,14 +638,14 @@ namespace map {
 			float limit = mse * 3;
 
 			//calculate radius
-			//OutputDebugStringA("\n");
-			//OutputDebugStringA("\n");
+			//reports::write_debug("\n");
+			//reports::write_debug("\n");
 			float right = 0.f;
 			float left = 0.f;
 			float top = 0.f;
 			float bottom = 0.f;
 			for(auto point : points) {
-				//OutputDebugStringA((std::to_string(point.x) + ", " + std::to_string(point.y) + ", \n").c_str());
+				//reports::write_debug((std::to_string(point.x) + ", " + std::to_string(point.y) + ", \n").c_str());
 				glm::vec2 current = point - center;
 				if((current.x > right) && (current.x * current.x < limit)) {
 					right = current.x;

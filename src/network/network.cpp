@@ -770,14 +770,14 @@ port_forwarder::port_forwarder() { }
 					}
 					#ifndef NDEBUG
 					auto msg = ("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer_header.type)));
-					OutputDebugStringA(msg.c_str());
+					reports::write_debug(msg.c_str());
 					#endif
 				});
 			}
 			if(r != 0) { // error
 				#if !defined(NDEBUG) && defined(_WIN32)
 				auto msg = ("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-				OutputDebugStringA(msg.c_str());
+				reports::write_debug(msg.c_str());
 				#endif
 				network::disconnect_client(state, client, false);
 			}
@@ -820,7 +820,7 @@ port_forwarder::port_forwarder() { }
 				socket_add_to_send_queue(client.send_buffer, buffer, size_t(length));
 				#ifndef NDEBUG
 				auto msg = ("host:send:save: " + std::to_string(uint32_t(length)));
-				OutputDebugStringA(msg.c_str());
+				reports::write_debug(msg.c_str());
 				#endif
 			}
 		}
@@ -877,7 +877,7 @@ port_forwarder::port_forwarder() { }
 			}
 			#ifndef NDEBUG
 			auto msg = ("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index()));
-			OutputDebugStringA(msg.c_str());
+			reports::write_debug(msg.c_str());
 			#endif
 			return;
 		}
@@ -907,7 +907,7 @@ port_forwarder::port_forwarder() { }
 					command_executed = true;
 					#ifndef NDEBUG
 					auto msg = ("host:receive:cmd: " + std::to_string(uint32_t(c->type)));
-					OutputDebugStringA(msg.c_str());
+					reports::write_debug(msg.c_str());
 					#endif
 				}
 				state.network_state.outgoing_commands.pop();
@@ -927,7 +927,7 @@ port_forwarder::port_forwarder() { }
 						if(r != 0) { // error
 							#if !defined(NDEBUG) && defined(_WIN32)
 							auto msg = ("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-							OutputDebugStringA(msg.c_str());
+							reports::write_debug(msg.c_str());
 							#endif
 							disconnect_client(state, client, false);
 							continue;
@@ -936,7 +936,7 @@ port_forwarder::port_forwarder() { }
 						#ifndef NDEBUG
 						if(old_size != client.early_send_buffer.size()) {
 							auto msg = ("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
-							OutputDebugStringA(msg.c_str());
+							reports::write_debug(msg.c_str());
 						}
 						#endif
 					}
@@ -947,7 +947,7 @@ port_forwarder::port_forwarder() { }
 						if(r != 0) { // error
 							#if !defined(NDEBUG) && defined(_WIN32)
 							auto msg = ("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-							OutputDebugStringA(msg.c_str());
+							reports::write_debug(msg.c_str());
 							#endif
 							disconnect_client(state, client, false);
 							continue;
@@ -956,7 +956,7 @@ port_forwarder::port_forwarder() { }
 						#ifndef NDEBUG
 						if(old_size != client.send_buffer.size()) {
 							auto msg = ("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
-							OutputDebugStringA(msg.c_str());
+							reports::write_debug(msg.c_str());
 						}
 						#endif
 					}
@@ -967,7 +967,7 @@ port_forwarder::port_forwarder() { }
 				/* Send our client's handshake */
 				int r = socket_recv(state.network_state.socket_fd, &state.network_state.s_hshake, sizeof(state.network_state.s_hshake), &state.network_state.recv_count, [&]() {
 					#ifndef NDEBUG
-					OutputDebugStringA("client:recv:handshake: OK");
+					reports::write_debug("client:recv:handshake: OK");
 					#endif
 					if(!state.scenario_checksum.is_equal(state.network_state.s_hshake.scenario_checksum)) {
 						bool found_match = false;
@@ -1030,7 +1030,7 @@ port_forwarder::port_forwarder() { }
 				int r = socket_recv(state.network_state.socket_fd, state.network_state.save_data.data(), state.network_state.save_data.size(), &state.network_state.recv_count, [&]() {
 					#ifndef NDEBUG
 					auto msg = ("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size())));
-					OutputDebugStringA(msg.c_str());
+					reports::write_debug(msg.c_str());
 					#endif
 					std::vector<dcon::nation_id> players;
 					for(const auto n : state.world.in_nation)
@@ -1105,7 +1105,7 @@ port_forwarder::port_forwarder() { }
 					}
 					#ifndef NDEBUG
 					auto msg = ("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer_header.type)));
-					OutputDebugStringA(msg.c_str());
+					reports::write_debug(msg.c_str());
 					#endif
 				});
 				if(r != 0) { // error
@@ -1121,7 +1121,7 @@ port_forwarder::port_forwarder() { }
 				while(c) {
 					#ifndef NDEBUG
 					auto msg = ("client:send:cmd: " + std::to_string(uint32_t(c->type)));
-					OutputDebugStringA(msg.c_str());
+					reports::write_debug(msg.c_str());
 					#endif
 					if(c->type == command::command_type::save_game) {
 						command::execute_command(state, *c);

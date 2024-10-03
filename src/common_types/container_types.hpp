@@ -314,3 +314,15 @@ namespace sys {
 	};
 
 } // namespace sys
+
+namespace reports {
+	void write_debug(const char* msg) {
+		if(msg) {
+#ifdef _WIN32
+			OutputDebugStringA(msg);
+#else
+			std::fprintf(stderr, "%s", msg);
+#endif
+		}
+	}
+}

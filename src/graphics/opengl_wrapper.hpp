@@ -178,7 +178,7 @@ enum class color_modification { none, disabled, interactable, interactable_disab
 		full_message += "\n";
 
 #ifdef _WIN64
-		OutputDebugStringA(full_message.c_str());
+		reports::write_debug(full_message.c_str());
 #else
 		printf("%s", full_message.c_str());
 #endif

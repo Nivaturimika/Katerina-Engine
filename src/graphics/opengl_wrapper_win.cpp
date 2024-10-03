@@ -70,13 +70,13 @@ namespace ogl {
 		std::string msg;
 		msg += "GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
 		msg += "GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
-		OutputDebugStringA(msg.c_str());
+		reports::write_debug(msg.c_str());
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
-			OutputDebugStringA("WGL_EXT_swap_control_tear is on");
+			reports::write_debug("WGL_EXT_swap_control_tear is on");
 			wglSwapIntervalEXT(-1);
 		} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
-			OutputDebugStringA("WGL_EXT_swap_control is on");
+			reports::write_debug("WGL_EXT_swap_control is on");
 			wglSwapIntervalEXT(1);
 		}
 	}
