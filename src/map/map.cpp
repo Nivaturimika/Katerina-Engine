@@ -470,14 +470,14 @@ namespace map {
 			"#define POLITICAL_LIGHTNESS 0.7f\n"
 			"#define POLITICAL_TERRAIN_MIX 0.3f\n"
 			"#define COLOR_LIGHTNESS 1.5f\n";
-		bool water_colormap = true;
+		bool water_colormap = false;
 		auto gfx_dir = open_directory(root, NATIVE("gfx"));
 		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
 		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
 			auto contents = simple_fs::view_contents(*f);
 			auto str = std::string(contents.data, contents.data + contents.file_size);
 			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
-				water_colormap = false;
+				water_colormap = true;
 			}
 		}
 
