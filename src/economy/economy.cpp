@@ -13,7 +13,6 @@
 #include "pdqsort.h"
 
 namespace economy {
-
 	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));

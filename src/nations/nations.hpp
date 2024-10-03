@@ -394,4 +394,8 @@ enum class status : uint8_t { great_power, secondary_power, civilized, westerniz
 
 	bool has_core_in_nation(sys::state& state, dcon::national_identity_id nid, dcon::nation_id m);
 
+	void inherit_nation(sys::state& state, dcon::nation_id n, dcon::nation_id who);
+	void annex_to_nation(sys::state& state, dcon::nation_id n, dcon::nation_id who);
+	void add_treasury(sys::state& state, dcon::nation_id n, float v);
+
 } // namespace nations

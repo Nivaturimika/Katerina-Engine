@@ -3346,40 +3346,40 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(tf_truce_with_tag) {
 		auto holder = ws.world.national_identity_get_nation_from_identity_holder(payload(tval[1]).tag_id);
 		auto result = ve::apply([&ws, holder](dcon::nation_id a) {
-			return military::has_truce_with(state, a, holder);
+			return military::has_truce_with(ws, a, holder);
 		}, to_nation(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_truce_with_from) {
 		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
-			return military::has_truce_with(state, a, b);
+			return military::has_truce_with(ws, a, b);
 		}, to_nation(primary_slot), to_nation(from_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_truce_with_this_nation) {
 		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
-			return military::has_truce_with(state, a, b);
+			return military::has_truce_with(ws, a, b);
 		}, to_nation(primary_slot), to_nation(this_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_truce_with_this_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(this_slot));
 		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
-			return military::has_truce_with(state, a, b);
+			return military::has_truce_with(ws, a, b);
 		}, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_truce_with_this_state) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(this_slot));
 		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
-			return military::has_truce_with(state, a, b);
+			return military::has_truce_with(ws, a, b);
 		}, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_truce_with_this_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(this_slot));
 		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
-			return military::has_truce_with(state, a, b);
+			return military::has_truce_with(ws, a, b);
 		}, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
@@ -3443,7 +3443,7 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_can_create_vassals) {
 		auto result = ve::apply([&ws](dcon::nation_id n) {
-			for(const auto tag : ws.in_national_identity) {
+			for(const auto tag : ws.world.in_national_identity) {
 				if(nations::can_release_as_vassal(ws, n, tag))
 					return true;
 			}
@@ -3674,7 +3674,7 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(tf_has_factories_nation) {
 		auto result = ve::apply([&ws](dcon::nation_id n) {
 			for(auto s : ws.world.nation_get_state_ownership(n)) {
-				auto b = economy_factory::has_factory(state, s.get_state());
+				auto b = economy_factory::has_factory(ws, s.get_state());
 				if(b)
 					return true;
 			}
@@ -4749,14 +4749,14 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_involved_in_crisis_nation) {
 		auto result = ve::apply([&ws](dcon::nation_id n) {
-			return nations::is_involved_in_crisis(state, n)
+			return nations::is_involved_in_crisis(ws, n);
 		}, to_nation(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_involved_in_crisis_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(primary_slot));
-		ve::apply([&ws](dcon::nation_id n) {
-			return nations::is_involved_in_crisis(state, n)
+		auto result = ve::apply([&ws](dcon::nation_id n) {
+			return nations::is_involved_in_crisis(ws, n);
 		}, owner);
 		return compare_to_true(tval[0], result);
 	}

@@ -3121,4 +3121,48 @@ namespace nations {
 		return false;
 	}
 
+	/*	Inherits a nation, as in the `inherit = x` effect
+		@param n Nation to receive
+		@param who Nation to inherit
+	*/
+	void inherit_nation(sys::state& state, dcon::nation_id n, dcon::nation_id who) {
+		if(!who || who == n)
+			return;
+		auto hprovs = state.world.nation_get_province_ownership(who);
+		auto sprovs = state.world.nation_get_province_ownership(n);
+		if(sprovs.begin() == sprovs.end()) {
+			nations::create_nation_based_on_template(state, n, who);
+		}
+		while(hprovs.begin() != hprovs.end()) {
+			province::change_province_owner(state, (*hprovs.begin()).get_province().id, n);
+		}
+	}
+
+	/*	Annexes a nation, as in the `annex_to = x` effect
+		@param n Nation to annex
+		@param who Nation to give annexed nation to
+	*/
+	void annex_to_nation(sys::state& state, dcon::nation_id n, dcon::nation_id who) {
+		if(!n || n == who)
+			return;
+		auto hprovs = state.world.nation_get_province_ownership(n);
+		auto sprovs = state.world.nation_get_province_ownership(who);
+		if(sprovs.begin() == sprovs.end()) {
+			nations::create_nation_based_on_template(state, who, n);
+		}
+		while(hprovs.begin() != hprovs.end()) {
+			province::change_province_owner(state, (*hprovs.begin()).get_province().id, who);
+		}
+	}
+
+
+	void add_treasury(sys::state& state, dcon::nation_id n, float v) {
+		auto& t = state.world.nation_get_stockpiles(n, economy::money);
+		if(state.world.nation_get_is_player_controlled(n)) {
+			t = t + v;
+		} else {
+			t = std::max(t + v, 0.0f); // temporary measure since there is no debt
+		}
+	}
+
 } // namespace nations
