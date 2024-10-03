@@ -200,6 +200,8 @@ namespace ogl {
 	}
 
 	void load_special_icons(sys::state& state) {
+		OutputDebugStringA("Loading special GFX icons\n");
+
 		auto root = get_root(state.common_fs);
 		auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
 
@@ -280,6 +282,8 @@ namespace ogl {
 			return;
 		if(!size_x || !size_y)
 			return;
+
+		OutputDebugStringA("Initializing MSAA\n");
 		glEnable(GL_MULTISAMPLE);
 		// setup screen VAO
 		static const float sq_vertices[] = {
@@ -366,6 +370,7 @@ namespace ogl {
 		if(!state.open_gl.msaa_enabled)
 			return;
 
+		OutputDebugStringA("Deinitializing MSAA\n");
 		state.open_gl.msaa_enabled = false;
 		if(state.open_gl.msaa_texture)
 			glDeleteTextures(1, &state.open_gl.msaa_texture);

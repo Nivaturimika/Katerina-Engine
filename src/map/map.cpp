@@ -22,6 +22,7 @@
 #include "province.hpp"
 #include "province_templates.hpp"
 #include "gui_element_types.hpp"
+#include "pdqsort.h"
 
 #include "xac.hpp"
 
@@ -272,6 +273,7 @@ namespace map {
 	}
 
 	void display_data::create_meshes() {
+		OutputDebugStringA("Creating map static meshes\n");
 		{
 			std::vector<map_vertex> land_vertices;
 			glm::vec2 last_pos(0, 0);
@@ -419,6 +421,8 @@ namespace map {
 	}
 
 	void display_data::load_shaders(simple_fs::directory& root) {
+		OutputDebugStringA("Loading map shaders\n");
+
 		// Map shaders
 		auto assets_dir = open_directory(root, NATIVE("assets"));
 		auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
@@ -528,57 +532,50 @@ namespace map {
 		float anim_time = std::fmod(time_counter, an.total_anim_time);
 		//
 		auto pos_index = an.get_position_key_index(anim_time);
-		auto pos1 = an.get_position_key(pos_index).value;
-		auto pos1_time = an.get_position_key(pos_index).time;
-		auto pos2 = an.get_position_key(pos_index + 1).value;
-		auto pos2_time = an.get_position_key(pos_index + 1).time;
+		auto pos1 = an.get_position_key(pos_index);
+		auto pos2 = an.get_position_key(pos_index + 1);
 		glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
 			glm::mix(
-				glm::vec3(pos1.x, pos1.y, pos1.z),
-				glm::vec3(pos2.x, pos2.y, pos2.z),
-				an.get_player_scale_factor(pos1_time, pos2_time, anim_time)
+				glm::vec3(pos1.value.x, pos1.value.y, pos1.value.z),
+				glm::vec3(pos2.value.x, pos2.value.y, pos2.value.z),
+				an.get_player_scale_factor(pos1.time, pos2.time, anim_time)
 			)
 		);
 		//
 		auto sca_index = an.get_scale_key_index(anim_time);
-		auto sca1 = an.get_scale_key(sca_index).value;
-		auto sca1_time = an.get_scale_key(sca_index).time;
-		auto sca2 = an.get_scale_key(sca_index + 1).value;
-		auto sca2_time = an.get_scale_key(sca_index + 1).time;
+		auto sca1 = an.get_scale_key(sca_index);
+		auto sca2 = an.get_scale_key(sca_index + 1);
 		glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
 			glm::mix(
-				glm::vec3(sca1.x, sca1.y, sca1.z),
-				glm::vec3(sca2.x, sca2.y, sca2.z),
-				an.get_player_scale_factor(sca1_time, sca2_time, anim_time)
+				glm::vec3(sca1.value.x, sca1.value.y, sca1.value.z),
+				glm::vec3(sca2.value.x, sca2.value.y, sca2.value.z),
+				an.get_player_scale_factor(sca1.time, sca2.time, anim_time)
 			)
 		);
 		//
 		auto rot_index = an.get_rotation_key_index(anim_time);
-		auto rot1 = an.get_rotation_key(rot_index).value;
-		auto rot1_time = an.get_rotation_key(rot_index).time;
-		auto rot2 = an.get_rotation_key(rot_index + 1).value;
-		auto rot2_time = an.get_rotation_key(rot_index + 1).time;
+		auto rot1 = an.get_rotation_key(rot_index);
+		auto rot2 = an.get_rotation_key(rot_index + 1);
 		glm::mat4x4 mr = glm::toMat4(glm::normalize(
 			glm::slerp(
-				glm::quat(rot1.x, rot1.y, rot1.z, rot1.w),
-				glm::quat(rot2.x, rot2.y, rot2.z, rot2.w),
-				an.get_player_scale_factor(rot1_time, rot2_time, anim_time)
+				glm::quat(rot1.value.x, rot1.value.y, rot1.value.z, rot1.value.w),
+				glm::quat(rot2.value.x, rot2.value.y, rot2.value.z, rot2.value.w),
+				an.get_player_scale_factor(rot1.time, rot2.time, anim_time)
 			)
 		));
 		//
 		auto rsc_index = an.get_scale_rotation_key_index(anim_time);
-		auto rsc1 = an.get_scale_rotation_key(rsc_index).value;
-		auto rsc1_time = an.get_scale_rotation_key(rsc_index).time;
-		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1).value;
-		auto rsc2_time = an.get_scale_rotation_key(rsc_index + 1).time;
+		auto rsc1 = an.get_scale_rotation_key(rsc_index);
+		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1);
 		glm::mat4x4 mu = glm::toMat4(glm::normalize(
 			glm::slerp(
-				glm::quat(rsc1.x, rsc1.y, rsc1.z, rsc1.w),
-				glm::quat(rsc2.x, rsc2.y, rsc2.z, rsc1.w),
-				an.get_player_scale_factor(rsc1_time, rsc2_time, anim_time)
+				glm::quat(rsc1.value.x, rsc1.value.y, rsc1.value.z, rsc1.value.w),
+				glm::quat(rsc2.value.x, rsc2.value.y, rsc2.value.z, rsc1.value.w),
+				an.get_player_scale_factor(rsc1.time, rsc2.time, anim_time)
 			)
 		));
-		return mt * ms * mr;
+		return mt * ms;
+		//return (mt * mr) * ms;
 	}
 
 	glm::mat4x4 get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, emfx::xsm_animation const& current, float time_counter) {
@@ -592,6 +589,7 @@ namespace map {
 				auto mp = get_hierachical_animation_bone(list, start, count, an, time_counter);
 				auto mc = get_animation_bone_matrix(current, time_counter);
 				//return mc;
+				//return mc * mp;
 				return mp * mc;
 			}
 		}
@@ -600,8 +598,7 @@ namespace map {
 
 	void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode) {
 		if(list.empty())
-		return;
-
+			return;
 		//remove dead
 		for(uint32_t i = 0; i < uint32_t(list.size()); i++) {
 			if(!list[i].emfx) {
@@ -621,7 +618,7 @@ namespace map {
 		glActiveTexture(GL_TEXTURE0);
 		for(const auto& obj : list) {
 			auto index = obj.emfx.index();
-		std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
+			std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(0.f) };
 			if(obj.anim == emfx::animation_type::idle) {
 				for(uint32_t k = 0; k < static_mesh_idle_animation_count[index]; k++) {
 					auto const& an = animations[k + static_mesh_idle_animation_start[index]];
@@ -1995,7 +1992,7 @@ namespace map {
 			continue;
 			valid_adj.push_back(adj.id);
 		}
-		std::sort(valid_adj.begin(), valid_adj.end(), [&](auto const a, auto const b) -> bool {
+		pdqsort(valid_adj.begin(), valid_adj.end(), [&](auto const a, auto const b) -> bool {
 			auto const ad = state.world.province_adjacency_get_distance(a);
 			auto const bd = state.world.province_adjacency_get_distance(b);
 			return ad < bd;
@@ -2063,7 +2060,7 @@ namespace map {
 					visited_adj[adj.id.index()] = true;
 					valid_adj.push_back(adj.id);
 				}
-				std::sort(valid_adj.begin(), valid_adj.end(), [&](auto const a, auto const b) -> bool {
+				pdqsort(valid_adj.begin(), valid_adj.end(), [&](auto const a, auto const b) -> bool {
 					auto const ad = state.world.province_adjacency_get_distance(a);
 					auto const bd = state.world.province_adjacency_get_distance(b);
 					return ad < bd;
@@ -2427,11 +2424,7 @@ namespace map {
 		auto file = simple_fs::open_file(dir, file_name);
 		if(!bool(file)) {
 			auto full_message = std::string("Can't load DDS file ") + simple_fs::native_to_utf8(file_name) + "\n";
-			#ifdef _WIN64
 			OutputDebugStringA(full_message.c_str());
-			#else
-			std::fprintf(stderr, "%s", full_message.c_str());
-			#endif
 			return 0;
 		}
 		auto content = simple_fs::view_contents(*file);
@@ -2442,8 +2435,12 @@ namespace map {
 
 	void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
 		auto root = simple_fs::get_root(state.common_fs);
-	emfx::xsm_context anim_context{};
+		emfx::xsm_context anim_context{};
 		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
+			OutputDebugStringA("Loading XSM animation: ");
+			OutputDebugStringA(std::string(filename).c_str());
+			OutputDebugStringA("\n");
+
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
 			auto contents = simple_fs::view_contents(*cf);
 			emfx::parse_xsm(anim_context, contents.data, contents.data + contents.file_size, err);
@@ -2451,13 +2448,13 @@ namespace map {
 			//
 			auto old_size = state.map_state.map_data.animations.size();
 			switch(at) {
-				case emfx::animation_type::idle:
+			case emfx::animation_type::idle:
 				state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
 				break;
-				case emfx::animation_type::move:
+			case emfx::animation_type::move:
 				state.map_state.map_data.static_mesh_move_animation_start[index] = uint32_t(old_size);
 				break;
-				case emfx::animation_type::attack:
+			case emfx::animation_type::attack:
 				state.map_state.map_data.static_mesh_attack_animation_start[index] = uint32_t(old_size);
 				break;
 			}
@@ -2494,15 +2491,16 @@ namespace map {
 	}
 
 	void load_static_meshes(sys::state& state) {
+		OutputDebugStringA("Loading static meshes\n");
+
 		struct static_mesh_vertex {
 			glm::vec3 position_;
 			glm::u8vec2 normal_;
 			glm::u16vec2 texture_coord_;
-		int8_t bone_ids[4] = { -1, -1, -1, -1 };
-		float bone_weights[4] = { 0.f, 0.f, 0.f, 0.f };
+			int8_t bone_ids[4] = { -1, -1, -1, -1 };
+			float bone_weights[4] = { 0.f, 0.f, 0.f, 0.f };
 		};
 		std::vector<static_mesh_vertex> static_mesh_vertices;
-
 		auto root = simple_fs::get_root(state.common_fs);
 		auto gfx_dir = simple_fs::open_directory(root, NATIVE("gfx"));
 		auto gfx_anims = simple_fs::open_directory(gfx_dir, NATIVE("anims"));
@@ -2811,6 +2809,7 @@ namespace map {
 	}
 
 	void display_data::load_map(sys::state& state) {
+		OutputDebugStringA("Loading map\n");
 		assert(!loaded_map);
 		loaded_map = true;
 
@@ -2830,12 +2829,9 @@ namespace map {
 		auto test_dir = simple_fs::open_directory(gfx_dir, NATIVE("test"));
 
 		glGenTextures(1, &textures[texture_diag_border_identifier]);
-		if(textures[texture_diag_border_identifier]) {
-			glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8UI, size_x, size_y);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+		glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
+		glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8UI, size_x, size_y);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
 		ogl::set_gltex_parameters(textures[texture_diag_border_identifier], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		textures[texture_terrain] = ogl::make_gl_texture(&terrain_id_map[0], size_x, size_y, 1);
@@ -2929,6 +2925,7 @@ namespace map {
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		OutputDebugStringA("Generating province color and highlight textures\n");
 		uint32_t province_size = state.world.province_size() + 1;
 		province_size += 256 - province_size % 256;
 
@@ -2942,6 +2939,8 @@ namespace map {
 			test_color[i] = 255;
 		}
 		set_province_color(test_color);
+
+		OutputDebugStringA("Finished map loading\n");
 	}
 
 } // namespace map

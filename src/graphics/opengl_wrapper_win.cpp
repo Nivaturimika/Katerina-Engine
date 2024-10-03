@@ -63,16 +63,14 @@ namespace ogl {
 		wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
 		wglDeleteContext(handle_to_ogl_dc);
 
-#ifndef NDEBUG
 		glDebugMessageCallback(debug_callback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
 		//
 		std::string msg;
-		msg += "Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
-		msg += "Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
+		msg += "GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
+		msg += "GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
 		OutputDebugStringA(msg.c_str());
-#endif
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
 			OutputDebugStringA("WGL_EXT_swap_control_tear is on");

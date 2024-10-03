@@ -1033,6 +1033,7 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 
 	void state::on_create() {
 		// Clear "center" property so they don't look messed up!
+		OutputDebugStringA("Creating game state\n");
 		{
 			static const std::string_view elem_names[] = {
 				"state_info",
@@ -1108,17 +1109,18 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 	//
 
 	std::string_view state::to_string_view(dcon::text_key tag) const {
-		if(!tag)
-		return std::string_view();
-		assert(size_t(tag.index()) < key_data.size());
-		auto start_position = key_data.data() + tag.index();
-		auto data_size = key_data.size();
-		auto end_position = start_position;
-		for(; end_position < key_data.data() + data_size; ++end_position) {
-			if(*end_position == 0)
-				break;
+		if(tag) {
+			assert(size_t(tag.index()) < key_data.size());
+			auto start_position = key_data.data() + tag.index();
+			auto data_size = key_data.size();
+			auto end_position = start_position;
+			for(; end_position < key_data.data() + data_size; ++end_position) {
+				if(*end_position == 0)
+					break;
+			}
+			return std::string_view(key_data.data() + tag.index(), size_t(end_position - start_position));
 		}
-		return std::string_view(key_data.data() + tag.index(), size_t(end_position - start_position));
+		return std::string_view();
 	}
 
 	std::string_view state::locale_string_view(uint32_t tag) const {

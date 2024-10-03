@@ -816,11 +816,12 @@ namespace emfx {
 	}
 
 	void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		//
 		const char* file_start = start;
 		auto const h = parse_xac_any_binary<xsm_header>(&start, end, err);
 		if(h.ident[0] != uint8_t('X') || h.ident[1] != uint8_t('S') || h.ident[2] != uint8_t('M') || h.ident[3] != uint8_t(' ')) {
 			err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
-			return;
+			goto fail_exit;
 		}
 		//context.use_quat_16 = h.multiply_order == 0;
 #ifdef XAC_DEBUG
@@ -841,20 +842,22 @@ namespace emfx {
 					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
 				}
 				break;
+			case xsm_chunk_type::metadata:
+			{
+				parse_xac_any_binary<float>(&start, end, err);
+				parse_xac_any_binary<float>(&start, end, err);
+				parse_xac_any_binary<uint32_t>(&start, end, err);
+				parse_xac_any_binary<uint8_t>(&start, end, err);
+				parse_xac_any_binary<uint8_t>(&start, end, err);
+				uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
+				context.use_quat_16 = (h.major_version == 2);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+				start = parse_xac_cstring(start, end, err);
+				break;
+			}
 			default:
-				if(ch.ident == 0xc9) {
-					parse_xac_any_binary<float>(&start, end, err);
-					parse_xac_any_binary<float>(&start, end, err);
-					parse_xac_any_binary<uint32_t>(&start, end, err);
-					parse_xac_any_binary<uint8_t>(&start, end, err);
-					parse_xac_any_binary<uint8_t>(&start, end, err);
-					uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
-					context.use_quat_16 = (h.major_version == 2);
-					start = parse_xac_cstring(start, end, err);
-					start = parse_xac_cstring(start, end, err);
-					start = parse_xac_cstring(start, end, err);
-					start = parse_xac_cstring(start, end, err);
-				}
 #ifdef XAC_DEBUG
 				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
 #endif
@@ -867,9 +870,16 @@ namespace emfx {
 				start = expected;
 			}
 		}
+	fail_exit:
 #ifdef XAC_DEBUG
-		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
-		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
+		if(err.accumulated_errors.size() > 0) {
+			OutputDebugStringA("XSM Errors:\n");
+			OutputDebugStringA(err.accumulated_errors.c_str());
+		}
+		if(err.accumulated_warnings.size() > 0) {
+			OutputDebugStringA("XSM Warns:\n");
+			OutputDebugStringA(err.accumulated_warnings.c_str());
+		}
 #endif
 	}
 
@@ -892,8 +902,7 @@ namespace emfx {
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
 		for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
-			if(time >= position_keys[i + 0].time
-			&& time <= position_keys[i + 1].time) {
+			if(time < position_keys[i + 1].time) {
 				return i;
 			}
 		}
@@ -901,8 +910,7 @@ namespace emfx {
 	}
 	uint32_t xsm_animation::get_rotation_key_index(float time) const {
 		for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
-			if(time >= rotation_keys[i + 0].time
-			&& time <= rotation_keys[i + 1].time) {
+			if(time < rotation_keys[i + 1].time) {
 				return i;
 			}
 		}
@@ -910,8 +918,7 @@ namespace emfx {
 	}
 	uint32_t xsm_animation::get_scale_key_index(float time) const {
 		for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
-			if(time >= scale_keys[i + 0].time
-			&& time <= scale_keys[i + 1].time) {
+			if(time < scale_keys[i + 1].time) {
 				return i;
 			}
 		}
@@ -919,8 +926,7 @@ namespace emfx {
 	}
 	uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
 		for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
-			if(time >= scale_rotation_keys[i + 0].time
-			&& time <= scale_rotation_keys[i + 1].time) {
+			if(time < scale_rotation_keys[i + 1].time) {
 				return i;
 			}
 		}
@@ -930,10 +936,11 @@ namespace emfx {
 	float xsm_animation::get_player_scale_factor(float t1, float t2, float time) const {
 		assert(t1 <= t2);
 		if(t1 == t2)
-		return 0.f;
+			return 0.f;
 		float mid_len = time - t1;
 		float frames_diff = t2 - t1;
 		float factor = mid_len / frames_diff;
+		//return factor;
 		//assert(factor >= 0.f && factor <= 1.f);
 		return std::clamp(factor, 0.f, 1.f);
 	}
