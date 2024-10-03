@@ -107,7 +107,7 @@ namespace ui {
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(state.user_settings.spoilers) {
-				return button_element_base::render(state, x, y);
+				button_element_base::render(state, x, y);
 			}
 		}
 
@@ -134,7 +134,7 @@ namespace ui {
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(state.user_settings.spoilers) {
-				return button_element_base::render(state, x, y);
+				button_element_base::render(state, x, y);
 			}
 		}
 
