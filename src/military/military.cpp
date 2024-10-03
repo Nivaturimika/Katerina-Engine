@@ -951,7 +951,6 @@ namespace military {
 	}
 	void regenerate_total_regiment_counts(sys::state& state) {
 		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
-		/*
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto num_regs = ve::apply([&](dcon::nation_id n) {
 				uint32_t count = 0;
@@ -966,18 +965,6 @@ namespace military {
 			});
 			state.world.nation_set_active_regiments(ids, num_regs);
 		});
-		*/
-		state.world.for_each_nation([&](dcon::nation_id n) {
-			uint16_t num_regs = 0;
-			for(const auto al : state.world.nation_get_army_control(n)) {
-				for(const auto reg : al.get_army().get_army_membership()) {
-					if(reg.get_regiment().get_pop_from_regiment_source().get_poptype() == state.culture_definitions.soldiers) {
-						++num_regs;
-					}
-				}
-			}
-			state.world.nation_set_active_regiments(n, num_regs);
-		});
 	}
 
 	void regenerate_land_unit_average(sys::state& state) {
@@ -987,8 +974,8 @@ namespace military {
 		*/
 		auto const max = state.military_definitions.unit_base_definitions.size();
 		state.world.for_each_nation([&](dcon::nation_id n) {
-			float total = 0;
-			float count = 0;
+			float total = 0.f;
+			float count = 0.f;
 
 			auto lo_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attack_modifier);
 			auto ld_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_defense_modifier);
@@ -1158,8 +1145,8 @@ namespace military {
 
 					n.set_constructing_cb_is_discovered(false);
 					n.set_constructing_cb_progress(0.0f);
-				n.set_constructing_cb_target(dcon::nation_id{});
-				n.set_constructing_cb_type(dcon::cb_type_id{});
+					n.set_constructing_cb_target(dcon::nation_id{});
+					n.set_constructing_cb_type(dcon::cb_type_id{});
 				}
 			}
 
