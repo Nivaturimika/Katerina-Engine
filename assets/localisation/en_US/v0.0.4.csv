@@ -89,3 +89,4 @@ unit_experience;Experience: $x$
 unit_select_only;Select
 ai_alliance_6;Doesn't own their cores
 topbar_budget_warning;You were unable to fully afford yesterday's target budget spending
+spectator_game;?bSpectator Game
