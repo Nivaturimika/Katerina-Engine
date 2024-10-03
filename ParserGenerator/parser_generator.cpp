@@ -199,11 +199,13 @@ void tokenize_file(std::stringstream& stream) {
 	}
 }
 
-std::optional<token> get_token(auto& it) {
+template<typename T>
+std::optional<token> get_token(T& it) {
 	return std::optional(*it++);
 }
 
-token get_specific_token(auto& it, bool& err_cond, token_type const& type) {
+template<typename T>
+token get_specific_token(T& it, bool& err_cond, token_type const& type) {
 	auto o = get_token(it);
 	if(!o.has_value()) {
 		// TODO: This is risky - but allows for accurate-ish reporting
@@ -550,7 +552,8 @@ std::string construct_match_tree_internal(V const& vector, F const& generator_ma
 	return output;
 }
 
-std::string construct_match_tree_outer(auto const& vector, auto const& generator_match, std::string_view const no_match) {
+template<typename T, typename U>
+std::string construct_match_tree_outer(T const& vector, U const& generator_match, std::string_view const no_match) {
 	auto const maxlen = max_length(vector);
 	std::string output = tabulate("switch(int32_t(cur.content.length())) {\n");
 	for(int32_t l = 1; l <= maxlen; ++l) {
