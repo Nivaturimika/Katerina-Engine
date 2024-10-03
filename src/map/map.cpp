@@ -1454,12 +1454,12 @@ namespace map {
 						}
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 						if(p1 == p2)
-						theta = -glm::pi<float>() / 2.f;
+							theta = -math::pi / 2.f;
 						auto lb = state.world.province_get_land_battle_location(p);
 						if(lb.begin() != lb.end()) {
 							emfx::animation_type at = emfx::animation_type::attack;
 							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, at);
-							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>(), at);
+							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi, at);
 						} else {
 							emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 							list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
@@ -1493,12 +1493,12 @@ namespace map {
 						}
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 						if(p1 == p2)
-						theta = -glm::pi<float>() / 2.f;
+							theta = -math::pi / 2.f;
 						auto lb = state.world.province_get_naval_battle_location(p);
 						if(lb.begin() != lb.end()) {
 							emfx::animation_type at = emfx::animation_type::attack;
-							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, at);
-							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -glm::pi<float>() / 2.f, at);
+							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, at);
+							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, at);
 						} else {
 							emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 							list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);

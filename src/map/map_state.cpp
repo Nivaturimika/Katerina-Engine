@@ -11,6 +11,7 @@
 #include "gui_graphics.hpp"
 #include "gui_element_base.hpp"
 #include "province_templates.hpp"
+#include "math_fns.hpp"
 
 #include <set>
 
@@ -1041,13 +1042,13 @@ namespace map {
 			pos += pos_before_keyboard_zoom - pos_after_keyboard_zoom;
 		}
 
-		globe_rotation = glm::rotate(glm::mat4(1.f), (0.25f - pos.x) * 2 * glm::pi<float>(), glm::vec3(0, 0, 1));
+		globe_rotation = glm::rotate(glm::mat4(1.f), (0.25f - pos.x) * 2.f * math::pi, glm::vec3(0, 0, 1));
 		// Rotation axis
 		glm::vec3 axis = glm::vec3(globe_rotation * glm::vec4(1, 0, 0, 0));
 		axis.z = 0;
 		axis = glm::normalize(axis);
 		axis.y *= -1;
-		globe_rotation = glm::rotate(globe_rotation, (-pos.y + 0.5f) * glm::pi<float>(), axis);
+		globe_rotation = glm::rotate(globe_rotation, (-pos.y + 0.5f) * math::pi, axis);
 
 		if(unhandled_province_selection) {
 			map_mode::update_map_mode(state);
@@ -1173,24 +1174,21 @@ namespace map {
 			glm::vec3 cursor_pos = glm::vec3(screen_pos.x, -10 * zoom, -screen_pos.y);
 			glm::vec3 cursor_direction = glm::vec3(0, 1, 0);
 			glm::vec3 sphere_center = glm::vec3(0, 0, 0);
-			float sphere_radius = zoom / glm::pi<float>();
+			float sphere_radius = zoom / math::pi;
 
 			glm::vec3 intersection_pos;
 			glm::vec3 intersection_normal;
 
-			if(glm::intersectRaySphere(cursor_pos, cursor_direction, sphere_center, sphere_radius, intersection_pos,
-			intersection_normal)) {
+			if(glm::intersectRaySphere(cursor_pos, cursor_direction, sphere_center, sphere_radius, intersection_pos, intersection_normal)) {
 				intersection_pos = glm::mat3(glm::inverse(globe_rotation)) * intersection_pos;
 				float theta = std::acos(std::clamp(intersection_pos.z / glm::length(intersection_pos), -1.f, 1.f));
 				float phi = std::atan2(intersection_pos.y, intersection_pos.x);
-				float pi = glm::pi<float>();
+				float pi = math::pi;
 				map_pos = glm::vec2((phi / (2 * pi)) + 0.5f, theta / pi);
 				return true;
 			}
 			return false;
 		} else if (view_mode == sys::projection_mode::globe_perspect) {
-			float pi = glm::pi<float>();
-
 			//normalize screen
 			screen_pos -= screen_size * 0.5f;
 			screen_pos /= -screen_size;
@@ -1198,8 +1196,8 @@ namespace map {
 			//perspective values
 			float near_plane = 0.1f;
 			float far_plane = 1.2f;
-			float right = near_plane * tan(pi / 6.f) / zoom * aspect_ratio * 2.f;
-			float top = near_plane * tan(pi / 6.f) / zoom * 2.f;
+			float right = near_plane * tan(math::pi / 6.f) / zoom * aspect_ratio * 2.f;
+			float top = near_plane * tan(math::pi / 6.f) / zoom * 2.f;
 
 			//transform screen plane to near plane
 			screen_pos.x *= right;
@@ -1211,7 +1209,7 @@ namespace map {
 			glm::vec3 cursor_pos = glm::vec3(screen_pos.x, screen_pos.y, -near_plane);
 			glm::vec3 cursor_direction = glm::normalize(cursor_pos);
 			glm::vec3 sphere_center = glm::vec3(0.f, 0.f, -1.2f);
-			float sphere_radius = 1.f / pi;
+			float sphere_radius = 1.f / math::pi;
 
 			glm::vec3 intersection_pos;
 			glm::vec3 intersection_normal;
@@ -1224,7 +1222,7 @@ namespace map {
 				intersection_pos = glm::mat3(glm::inverse(globe_rotation)) * intersection_pos;
 				float theta = std::acos(std::clamp(intersection_pos.z / glm::length(intersection_pos), -1.f, 1.f));
 				float phi = std::atan2(intersection_pos.y, intersection_pos.x);
-				map_pos = glm::vec2((phi / (2.f * pi)) + 0.5f, theta / pi);
+				map_pos = glm::vec2((phi / (2.f * math::pi)) + 0.5f, theta / math::pi);
 				return true;
 			}
 			return false;
@@ -1340,7 +1338,7 @@ namespace map {
 		return 0.f;
 		float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
 		z_factor *= v;
-		return std::sin(z_factor * glm::pi<float>() / 2.f) * glm::pi<float>() / 2.f;
+		return std::sin(z_factor * math::pi / 2.f) * math::pi / 2.f;
 	}
 
 	float map_state::get_zoom() const {
@@ -1364,8 +1362,8 @@ namespace map {
 			case sys::projection_mode::globe_ortho: {
 				glm::vec3 cartesian_coords;
 				float section = 200.f;
-				float angle_x1 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section) / section;
-				float angle_x2 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section + 1) / section;
+				float angle_x1 = 2.f * math::pi * std::floor(target_pos.x * section) / section;
+				float angle_x2 = 2.f * math::pi * std::floor(target_pos.x * section + 1) / section;
 				assert(std::isfinite(angle_x1));
 				assert(std::isfinite(angle_x2));
 				assert(std::isfinite(target_pos.x));
@@ -1373,12 +1371,12 @@ namespace map {
 				cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(target_pos.x * section, 1.f));
 				cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(target_pos.x * section, 1.f));
 
-				float angle_y = (1.f - target_pos.y) * glm::pi<float>();
+				float angle_y = (1.f - target_pos.y) * math::pi;
 				cartesian_coords.x *= std::sin(angle_y);
 				cartesian_coords.y *= std::sin(angle_y);
 				cartesian_coords.z = std::cos(angle_y);
 				cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
-				cartesian_coords /= glm::pi<float>();
+				cartesian_coords /= math::pi;
 				cartesian_coords.x *= -1.f;
 				cartesian_coords.y *= -1.f;
 				if(cartesian_coords.y > 0.f)
@@ -1396,8 +1394,8 @@ namespace map {
 			case sys::projection_mode::globe_perspect: {
 				glm::vec3 cartesian_coords;
 				float section = 200.f;
-				float angle_x1 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section) / section;
-				float angle_x2 = 2.f * glm::pi<float>() * std::floor(target_pos.x * section + 1) / section;
+				float angle_x1 = 2.f * math::pi * std::floor(target_pos.x * section) / section;
+				float angle_x2 = 2.f * math::pi * std::floor(target_pos.x * section + 1) / section;
 				assert(std::isfinite(angle_x1));
 				assert(std::isfinite(angle_x2));
 				assert(std::isfinite(target_pos.x));
@@ -1405,7 +1403,7 @@ namespace map {
 				cartesian_coords.x = std::lerp(std::cos(angle_x1), std::cos(angle_x2), std::fmod(target_pos.x * section, 1.f));
 				cartesian_coords.y = std::lerp(std::sin(angle_x1), std::sin(angle_x2), std::fmod(target_pos.x * section, 1.f));
 
-				float angle_y = (target_pos.y) * glm::pi<float>();
+				float angle_y = (target_pos.y) * math::pi;
 				cartesian_coords.x *= std::sin(angle_y);
 				cartesian_coords.y *= std::sin(angle_y);
 				cartesian_coords.z = std::cos(angle_y);
@@ -1417,7 +1415,7 @@ namespace map {
 				cartesian_coords = glm::mat3(globe_rotation) * cartesian_coords;
 				cartesian_coords.z *= -1;
 
-				cartesian_coords /= glm::pi<float>(); // Will make the zoom be the same for the globe and flat map
+				cartesian_coords /= math::pi; // Will make the zoom be the same for the globe and flat map
 				cartesian_coords.x *= -1;
 				cartesian_coords.z *= -1;
 
@@ -1430,11 +1428,11 @@ namespace map {
 				float near_plane = 0.1f;
 
 				// optimal far plane for culling out invisible part of a planet
-				constexpr float tangent_length_square = 1.2f * 1.2f - 1 / glm::pi<float>() / glm::pi<float>();
+				constexpr float tangent_length_square = 1.2f * 1.2f - 1 / math::pi / math::pi;
 				float far_plane = tangent_length_square / 1.2f;
 
-				float right = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
-				float top = near_plane * tan(glm::pi<float>() / 6.f) / zoom;
+				float right = near_plane * std::tan(math::pi / 6.f) / zoom;
+				float top = near_plane * std::tan(math::pi / 6.f) / zoom;
 
 				cartesian_coords.x *= near_plane / right;
 				cartesian_coords.y *= near_plane / top;
@@ -1533,12 +1531,12 @@ namespace map {
 				[a41 a42 a43 a44] [w]   [a41*x + a42*y + a43*z + a44*w]
 				*/
 				//x = a11 * x = a11 * (a*x + b*y + c*z) = a11*a*x + a11*b*y + a11*c*z
-				mvp[0][0] = -2.f * zoom / aspect_ratio / glm::pi<float>();
+				mvp[0][0] = -2.f * zoom / aspect_ratio / math::pi;
 				//y = a22 * y + a23 * z
 				mvp[1][1] = 0.f;
-				mvp[2][1] = -2.f * zoom / glm::pi<float>();
+				mvp[2][1] = -2.f * zoom / math::pi;
 				//z = a32 * y + a33 * z
-				mvp[1][2] = 2.f * zoom * 0.02f / glm::pi<float>();
+				mvp[1][2] = 2.f * zoom * 0.02f / math::pi;
 				mvp[2][2] = 1.f;
 				//w = a44 * w
 				mvp[3][3] = 1.f;
@@ -1565,20 +1563,20 @@ namespace map {
 				1/2 [ sin(2A + B) + cos(2A - B) ] + sin(B)
 				*/
 				float m_near = 0.1f;
-				float m_tangent_length_square = 1.2f * 1.2f - 1.f / glm::pi<float>() / glm::pi<float>();
+				float m_tangent_length_square = 1.2f * 1.2f - 1.f / math::pi / math::pi;
 				float m_far = m_tangent_length_square / 1.2f;
-				float m_right = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
-				float m_top = m_near * std::tan(glm::pi<float>() / 6.f) / zoom;
-				mvp[0][0] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_right * (1.f / aspect_ratio));
+				float m_right = m_near * std::tan(math::pi / 6.f) / zoom;
+				float m_top = m_near * std::tan(math::pi / 6.f) / zoom;
+				mvp[0][0] = -1.f * (1.f / math::pi) * (m_near / m_right * (1.f / aspect_ratio));
 				mvp[1][1] = 0.f;
 				//y = z * S
-				mvp[2][1] = -1.f * (1.f / glm::pi<float>()) * (m_near / m_top);
-				//mvp[3][1] = 1.2f * glm::pi<float>();
+				mvp[2][1] = -1.f * (1.f / math::pi) * (m_near / m_top);
+				//mvp[3][1] = 1.2f * math::pi;
 				//z = y * S = (y - 1.2f * pi) * S = y * S - 1.2f * pi * S
-				mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) / glm::pi<float>();
+				mvp[1][2] = (-(m_far + m_near) / (m_far - m_near)) / math::pi;
 				mvp[2][2] = 0.f;
-				mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * glm::pi<float>() * mvp[1][2];
-				mvp[1][3] = -1.f / glm::pi<float>(); //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
+				mvp[3][2] = -2.f * m_far * m_near / (m_far - m_near) - 1.2f * math::pi * mvp[1][2];
+				mvp[1][3] = -1.f / math::pi; //w = -(y - 1.2f * pi) / pi = -y / pi + 1.2f
 				mvp[3][3] = 1.2f;
 				mvp *= globe_rot4x4;
 				break;

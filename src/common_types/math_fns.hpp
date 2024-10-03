@@ -2,10 +2,8 @@
 #include <cmath>
 
 namespace math {
-
-	// TODO: all this functions need to be defined in terms of
-	// basic floating point operations (+, -, *, /)
-
+	// All this functions need to be defined in terms of basic floating point operations (+, -, *, /)
+	// otherwise they wont be deterministic!
 	inline constexpr float pi = 3.14159265358979323846f;
 
 	inline constexpr float internal_check(float x, float err, float lower, float upper) noexcept {
@@ -24,24 +22,24 @@ namespace math {
 		} else if(x > pi) {
 			x -= 2.f * pi;
 		}
-		    static const float coeffs[] = {
-			        -0.10132118f,          // x
-			         0.0066208798f,        // x^3
-			        -0.00017350505f,       // x^5
-			         0.0000025222919f,     // x^7
-			        -0.000000023317787f,   // x^9
-			         0.00000000013291342f, // x^11
+		static const float coeffs[] = {
+			-0.10132118f,          // x
+			0.0066208798f,        // x^3
+			-0.00017350505f,       // x^5
+			0.0000025222919f,     // x^7
+			-0.000000023317787f,   // x^9
+			0.00000000013291342f, // x^11
 		};
-		    float pi_major = 3.1415927f;
-		    float pi_minor = -0.00000008742278f;
-		    float x2 = x * x;
-		    float p11 = coeffs[5];
-		    float p9 = p11 * x2 + coeffs[4];
-		    float p7 = p9 * x2 + coeffs[3];
-		    float p5 = p7 * x2 + coeffs[2];
-		    float p3 = p5 * x2 + coeffs[1];
-		    float p1 = p3 * x2 + coeffs[0];
-		    float r = (x - pi_major - pi_minor) * (x + pi_major + pi_minor) * p1 * x;
+		float pi_major = 3.1415927f;
+		float pi_minor = -0.00000008742278f;
+		float x2 = x * x;
+		float p11 = coeffs[5];
+		float p9 = p11 * x2 + coeffs[4];
+		float p7 = p9 * x2 + coeffs[3];
+		float p5 = p7 * x2 + coeffs[2];
+		float p3 = p5 * x2 + coeffs[1];
+		float p1 = p3 * x2 + coeffs[0];
+		float r = (x - pi_major - pi_minor) * (x + pi_major + pi_minor) * p1 * x;
 		return internal_check(r, 0.0016f, -1.f, 1.f);
 	}
 
@@ -71,11 +69,10 @@ namespace math {
 		union {
 			float f;
 			int i;
-	} u = {x};
+		} u = { x };
 		u.i = 0x5f375a86 - (u.i >> 1);
 		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
 		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
 		return u.f * x;
 	}
-
 }
