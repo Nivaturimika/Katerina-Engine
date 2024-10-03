@@ -962,7 +962,7 @@ namespace military {
 					}
 				}
 				return count;
-			});
+			}, ids);
 			state.world.nation_set_active_regiments(ids, num_regs);
 		});
 	}
