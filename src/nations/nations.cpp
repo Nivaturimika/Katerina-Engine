@@ -1127,28 +1127,28 @@ namespace nations {
 
 	bool is_involved_in_crisis(sys::state const& state, dcon::nation_id n) {
 		if(n == state.primary_crisis_attacker)
-		return true;
+			return true;
 		if(n == state.primary_crisis_defender)
-		return true;
+			return true;
 		for(auto& par : state.crisis_participants) {
 			if(!par.id)
-			return false;
+				return false;
 			if(par.id == n)
-			return true;
+				return true;
 		}
-
 		return false;
 	}
+
 	bool is_committed_in_crisis(sys::state const& state, dcon::nation_id n) {
 		if(n == state.primary_crisis_attacker)
-		return true;
+			return true;
 		if(n == state.primary_crisis_defender)
-		return true;
+			return true;
 		for(auto& par : state.crisis_participants) {
 			if(!par.id)
-			return false;
+				return false;
 			if(par.id == n)
-			return !par.merely_interested;
+				return !par.merely_interested;
 		}
 		return false;
 	}

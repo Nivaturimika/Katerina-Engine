@@ -2018,8 +2018,7 @@ namespace military {
 		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, attacker);
 		if(rel) {
 			auto truce_ends = state.world.diplomatic_relation_get_truce_until(rel);
-			if(truce_ends && state.current_date < truce_ends)
-			return true;
+			return truce_ends && state.current_date < truce_ends;
 		}
 		return false;
 	}
