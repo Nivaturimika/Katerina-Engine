@@ -7,7 +7,6 @@
 #include "parsers.hpp"
 
 namespace emfx {
-
 	struct xac_vector2f {
 		float x = 0.f;
 		float y = 0.f;
@@ -27,16 +26,16 @@ namespace emfx {
 			y = y_;
 		}
 		xac_vector2f operator+(xac_vector2f const& o) const {
-		return xac_vector2f{ this->x + o.x, this->y + o.y };
+			return xac_vector2f{ this->x + o.x, this->y + o.y };
 		}
 		xac_vector2f operator-(xac_vector2f const& o) const {
-		return xac_vector2f{ this->x - o.x, this->y - o.y };
+			return xac_vector2f{ this->x - o.x, this->y - o.y };
 		}
 		xac_vector2f operator/(xac_vector2f const& o) const {
-		return xac_vector2f{ this->x / o.x, this->y / o.y };
+			return xac_vector2f{ this->x / o.x, this->y / o.y };
 		}
 		xac_vector2f operator*(xac_vector2f const& o) const {
-		return xac_vector2f{ this->x * o.x, this->y * o.y };
+			return xac_vector2f{ this->x * o.x, this->y * o.y };
 		}
 	};
 	struct xac_vector3f {
@@ -65,16 +64,16 @@ namespace emfx {
 			z = z_;
 		}
 		xac_vector3f operator+(xac_vector3f const& o) const {
-		return xac_vector3f{ this->x + o.x, this->y + o.y, this->z + o.z };
+			return xac_vector3f{ this->x + o.x, this->y + o.y, this->z + o.z };
 		}
 		xac_vector3f operator-(xac_vector3f const& o) const {
-		return xac_vector3f{ this->x - o.x, this->y - o.y, this->z - o.z };
+			return xac_vector3f{ this->x - o.x, this->y - o.y, this->z - o.z };
 		}
 		xac_vector3f operator/(xac_vector3f const& o) const {
-		return xac_vector3f{ this->x / o.x, this->y / o.y, this->z / o.z };
+			return xac_vector3f{ this->x / o.x, this->y / o.y, this->z / o.z };
 		}
 		xac_vector3f operator*(xac_vector3f const& o) const {
-		return xac_vector3f{ this->x * o.x, this->y * o.y, this->z * o.z };
+			return xac_vector3f{ this->x * o.x, this->y * o.y, this->z * o.z };
 		}
 	};
 	struct xac_vector4f {
@@ -106,16 +105,16 @@ namespace emfx {
 			w = w_;
 		}
 		xac_vector4f operator+(xac_vector4f const& o) const {
-		return xac_vector4f{ this->x + o.x, this->y + o.y, this->z + o.z, this->w + o.w };
+			return xac_vector4f{ this->x + o.x, this->y + o.y, this->z + o.z, this->w + o.w };
 		}
 		xac_vector4f operator-(xac_vector4f const& o) const {
-		return xac_vector4f{ this->x - o.x, this->y - o.y, this->z - o.z, this->w - o.w };
+			return xac_vector4f{ this->x - o.x, this->y - o.y, this->z - o.z, this->w - o.w };
 		}
 		xac_vector4f operator/(xac_vector4f const& o) const {
-		return xac_vector4f{ this->x / o.x, this->y / o.y, this->z / o.z, this->w / o.w };
+			return xac_vector4f{ this->x / o.x, this->y / o.y, this->z / o.z, this->w / o.w };
 		}
 		xac_vector4f operator*(xac_vector4f const& o) const {
-		return xac_vector4f{ this->x * o.x, this->y * o.y, this->z * o.z, this->w * o.w };
+			return xac_vector4f{ this->x * o.x, this->y * o.y, this->z * o.z, this->w * o.w };
 		}
 	};
 	struct xac_color_rgba {
@@ -151,7 +150,7 @@ namespace emfx {
 		{ 0.f, 0.f, 0.f, 0.f },
 		};
 		xac_vector4f row_as_vector4f(uint32_t n) const {
-		return xac_vector4f{ m[n][0], m[n][1], m[n][2], m[n][3] };
+			return xac_vector4f{ m[n][0], m[n][1], m[n][2], m[n][3] };
 		}
 	};
 
@@ -263,7 +262,7 @@ namespace emfx {
 	T parse_xac_any_binary(const char** start, const char* end, parsers::error_handler& err) {
 		if(*start + sizeof(T) >= end) {
 			err.accumulated_errors += "buffer overflow access! (" + err.file_name + ")\n";
-		return T{};
+			return T{};
 		}
 		T obj = *reinterpret_cast<const T*>(*start);
 		*start += sizeof(T);
@@ -278,7 +277,7 @@ namespace emfx {
 		int32_t reposition_node = 0;
 		uint8_t exporter_major_version = 0;
 		uint8_t exporter_minor_version = 0;
-	uint8_t unused[2] = { 0 };
+		uint8_t unused[2] = { 0 };
 		float retarget_root_offset = 0.f;
 	};
 
@@ -323,8 +322,8 @@ namespace emfx {
 		xac_vector4f scale_rotation;
 		xac_vector3f position;
 		xac_vector3f scale;
-	float unused[3] = { 0 };
-	uint32_t unknown[2] = { 0 };
+		float unused[3] = { 0 };
+		uint32_t unknown[2] = { 0 };
 		int32_t parent_id = -1;
 		uint32_t num_children = 0;
 		int32_t include_in_bounds_calc = 0;
@@ -340,7 +339,7 @@ namespace emfx {
 		uint32_t num_sub_meshes = 0;
 		uint32_t num_attribute_layers = 0;
 		uint8_t is_collision_mesh = 0;
-	uint8_t unused[3] = { 0 };
+		uint8_t unused[3] = { 0 };
 		// vertex blocks[vertex_block_count]
 	};
 	struct xac_vertex_block_v1_header {
@@ -348,7 +347,7 @@ namespace emfx {
 		uint32_t size = 0;
 		uint8_t keep_original = 0;
 		uint8_t is_scale_factor = 0;
-	uint8_t unused[2] = { 0, 0 };
+		uint8_t unused[2] = { 0, 0 };
 		// data[size * count];
 	};
 	enum class xac_vertex_block_v1_type : uint32_t {
@@ -373,13 +372,13 @@ namespace emfx {
 		uint32_t num_local_bones = 0;
 		uint32_t num_influences = 0;
 		uint8_t is_for_collision_mesh = 0;
-	uint8_t unused[3] = { 0, 0, 0 };
+		uint8_t unused[3] = { 0, 0, 0 };
 		// vertex blocks[vertex_block_count]
 	};
 	struct xac_skinning_v3_influence_entry {
 		float weight = 0.f;
 		int16_t bone_id = -1;
-	uint8_t unused[2] = { 0, 0 };
+		uint8_t unused[2] = { 0, 0 };
 	};
 	struct xac_skinning_v3_influence_range {
 		uint32_t first_influence_index = 0;
@@ -387,7 +386,7 @@ namespace emfx {
 	};
 
 	struct xac_header {
-	uint8_t ident[4] = { 'X', 'A', 'C', ' ' };
+		uint8_t ident[4] = { 'X', 'A', 'C', ' ' };
 		uint8_t major_version = 1;
 		uint8_t minor_version = 0;
 		uint8_t big_endian = 0;
@@ -457,8 +456,8 @@ namespace emfx {
 		bool use_quat_16 = false;
 		bool ignore_length = false;
 	};
-struct xsm_header : public xac_header { };
-struct xsm_chunk_header : public xac_chunk_header { };
+	struct xsm_header : public xac_header { };
+	struct xsm_chunk_header : public xac_chunk_header { };
 
 	void parse_xsm(xsm_context& context, const char* start, const char* end, parsers::error_handler& err);
 	void finish(xsm_context& context);
