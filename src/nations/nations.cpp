@@ -156,8 +156,7 @@ namespace nations {
 	}
 
 	void restore_cached_values(sys::state& state) {
-
-	state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_allies_count(ids, ve::int_vector()); });
+		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_allies_count(ids, ve::int_vector()); });
 		state.world.for_each_diplomatic_relation([&](dcon::diplomatic_relation_id id) {
 			if(state.world.diplomatic_relation_get_are_allied(id)) {
 				state.world.nation_get_allies_count(state.world.diplomatic_relation_get_related_nations(id, 0)) += uint16_t(1);
@@ -171,7 +170,7 @@ namespace nations {
 			for(auto v : state.world.nation_get_overlord_as_ruler(n)) {
 				++total;
 				if(v.get_subject().get_is_substate())
-				++substates_total;
+					++substates_total;
 			}
 			state.world.nation_set_vassals_count(n, uint16_t(total));
 			state.world.nation_set_substates_count(n, uint16_t(substates_total));
@@ -187,14 +186,12 @@ namespace nations {
 
 	void restore_unsaved_values(sys::state& state) {
 		state.world.nation_resize_demand_satisfaction(state.world.commodity_size());
-
-		for(auto n : state.world.in_nation)
-		n.set_is_great_power(false);
-
+		for(auto n : state.world.in_nation) {
+			n.set_is_great_power(false);
+		}
 		for(auto& gp : state.great_nations) {
 			state.world.nation_set_is_great_power(gp.nation, true);
 		}
-
 		state.world.for_each_gp_relationship([&](dcon::gp_relationship_id rel) {
 			if((influence::level_mask & state.world.gp_relationship_get_status(rel)) == influence::level_in_sphere) {
 				auto t = state.world.gp_relationship_get_influence_target(rel);
@@ -202,18 +199,16 @@ namespace nations {
 				state.world.nation_set_in_sphere_of(t, gp);
 			}
 		});
-
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto treasury = state.world.nation_get_stockpiles(ids, economy::money);
 			state.world.nation_set_last_treasury(ids, treasury);
 		});
-
 		restore_cached_values(state);
 	}
 
 	void generate_initial_state_instances(sys::state& state) {
 		for(int32_t i = 0; i < state.province_definitions.first_sea_province.index(); ++i) {
-		dcon::province_id pid{dcon::province_id::value_base_t(i)};
+			dcon::province_id pid{ dcon::province_id::value_base_t(i) };
 			auto owner = state.world.province_get_nation_from_province_ownership(pid);
 			if(owner && !(state.world.province_get_state_membership(pid))) {
 				auto state_instance = fatten(state.world, state.world.create_state_instance());
@@ -256,9 +251,8 @@ namespace nations {
 				not_on_capital &= state.world.nation_get_capital(n) != province;
 			});
 			return owns_a_core && not_on_capital && !state.world.nation_get_is_at_war(n);
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	bool identity_has_holder(sys::state const& state, dcon::national_identity_id ident) {
@@ -281,21 +275,23 @@ namespace nations {
 	}
 
 	bool global_national_state::is_global_flag_variable_set(dcon::global_flag_id id) const {
-		if(id)
-		return dcon::bit_vector_test(global_flag_variables.data(), id.index());
+		if(id) {
+			return dcon::bit_vector_test(global_flag_variables.data(), id.index());
+		}
 		return false;
 	}
 
 	void global_national_state::set_global_flag_variable(dcon::global_flag_id id, bool state) {
-		if(id)
-		dcon::bit_vector_set(global_flag_variables.data(), id.index(), state);
+		if(id) {
+			dcon::bit_vector_set(global_flag_variables.data(), id.index(), state);
+		}
 	}
 
 	dcon::text_key name_from_tag(sys::state& state, dcon::national_identity_id tag) {
 		auto holder = state.world.national_identity_get_nation_from_identity_holder(tag);
-		if(holder)
-		return text::get_name(state, holder);
-		else
+		if(holder) {
+			return text::get_name(state, holder);
+		}
 		return state.world.national_identity_get_name(tag);
 	}
 
@@ -331,17 +327,18 @@ namespace nations {
 
 		float sum_from_pops = 0;
 		auto total_pop = state.world.nation_get_demographics(n, demographics::total);
-		if(total_pop <= 0.0f)
-		return 0.0f;
+		if(total_pop <= 0.0f) {
+			return 0.0f;
+		}
 
 		state.world.for_each_pop_type([&](dcon::pop_type_id t) {
 			auto rp = state.world.pop_type_get_research_points(t);
 			if(rp > 0) {
-				sum_from_pops += rp * std::min(1.0f, state.world.nation_get_demographics(n, demographics::to_key(state, t)) /
-																							 (total_pop * state.world.pop_type_get_research_optimum(t)));
+				sum_from_pops += rp
+					* std::min(1.0f, state.world.nation_get_demographics(n, demographics::to_key(state, t))
+					/ (total_pop * state.world.pop_type_get_research_optimum(t)));
 			}
 		});
-
 		return std::max(0.0f, (sum_from_pops + rp_mod) * (rp_mod_mod + 1.0f));
 	}
 
@@ -362,8 +359,8 @@ namespace nations {
 				auto rp = state.world.pop_type_get_research_points(t);
 				if(rp > 0) {
 					sum_from_pops = ve::multiply_and_add(rp,
-						ve::min(1.0f, state.world.nation_get_demographics(ids, demographics::to_key(state, t)) /
-															(total_pop * state.world.pop_type_get_research_optimum(t))),
+						ve::min(1.0f, state.world.nation_get_demographics(ids, demographics::to_key(state, t))
+						/ (total_pop * state.world.pop_type_get_research_optimum(t))),
 						sum_from_pops);
 				}
 			});
@@ -374,8 +371,7 @@ namespace nations {
 			daily research points, for civs, or define:MAX_RESEARCH_POINTS for uncivs.
 			*/
 			auto current_points = state.world.nation_get_research_points(ids);
-			auto capped_value = ve::min(amount + current_points,
-				ve::select(state.world.nation_get_is_civilized(ids), ve::select(state.world.nation_get_current_research(ids) == dcon::technology_id{}, amount * 365.0f, amount + current_points), state.defines.max_research_points));
+			auto capped_value = ve::min(amount + current_points, ve::select(state.world.nation_get_is_civilized(ids), ve::select(state.world.nation_get_current_research(ids) == dcon::technology_id{}, amount * 365.0f, amount + current_points), state.defines.max_research_points));
 			state.world.nation_set_research_points(ids, capped_value);
 		});
 	}
@@ -404,27 +400,27 @@ namespace nations {
 		- For each country that the nation is invested in: define:INVESTMENT_SCORE_FACTOR x the amount invested x 0.05
 		*/
 
-		state.world.for_each_nation([&, iweight = state.defines.investment_score_factor](dcon::nation_id n) {
-			float sum = 0;
+		state.world.for_each_nation([&](dcon::nation_id n) {
+			float sum = 0.f;
 			if(state.world.nation_get_owned_province_count(n) != 0) {
 				for(auto si : state.world.nation_get_state_ownership(n)) {
-					float total_level = 0;
-					float worker_total =
-					si.get_state().get_demographics(demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker)) +
-					si.get_state().get_demographics(demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
-
-					float total_factory_capacity = 0;
+					float total_level = 0.f;
+					float worker_total = si.get_state().get_demographics(demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker))
+						+ si.get_state().get_demographics(demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
+					float total_factory_capacity = 0.f;
 					province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 						for(auto f : state.world.province_get_factory_location(p)) {
-							total_factory_capacity +=
-								float(f.get_factory().get_level() * f.get_factory().get_building_type().get_base_workforce());
-							total_level += float(f.get_factory().get_level());
+							auto level = float(f.get_factory().get_level());
+							total_factory_capacity += level * float(f.get_factory().get_building_type().get_base_workforce());
+							total_level += level;
 						}
 					});
-					if(total_factory_capacity > 0)
-					sum += 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.05f);
+					if(total_factory_capacity > 0) {
+						sum += 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.05f);
+					}
 				}
-				sum += nations::get_foreign_investment_as_gp(state, n) * iweight; /* investment factor is already multiplied by 0.05f on scenario creation */
+				/* investment factor is already multiplied by 0.05f on scenario creation */
+				sum += nations::get_foreign_investment_as_gp(state, n) * state.defines.investment_score_factor;
 	
 			}
 			float old_score = state.world.nation_get_industrial_score(n);
