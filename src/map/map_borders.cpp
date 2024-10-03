@@ -276,9 +276,9 @@ namespace map {
 
 		auto add_next = [&](int32_t i, int32_t j, bool& next_found) {
 			if(next_found)
-			return glm::ivec2(0, 0);
+				return glm::ivec2(0, 0);
 			if(visited[i + j * dat.size_x])
-			return glm::ivec2(0, 0);
+				return glm::ivec2(0, 0);
 			if(j % 2 == 0) {
 				if(order_indifferent_compare(prov_prim, prov_sec, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i - 1, j / 2)))) {
 					visited[i + j * dat.size_x] = true;
@@ -298,7 +298,7 @@ namespace map {
 			}
 
 			return glm::ivec2(0, 0);
-		};
+			};
 
 
 		points.push_back(glm::vec2(float(start_x) + (start_y % 2 == 0 ? 0.0f : 0.5f), 0.5f + float(start_y) / 2.0f));
@@ -311,7 +311,7 @@ namespace map {
 		// clockwise
 		do {
 			progress = false;
-		glm::ivec2 temp{ 0, 0 };
+			glm::ivec2 temp{ 0, 0 };
 
 			if(cur_y % 2 == 0) {
 				bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
@@ -367,7 +367,7 @@ namespace map {
 		progress = false;
 		do {
 			progress = false;
-		glm::ivec2 temp{ 0, 0 };
+			glm::ivec2 temp{ 0, 0 };
 
 			if(cur_y % 2 == 0) {
 				bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
@@ -420,7 +420,7 @@ namespace map {
 
 	void add_border_segment_vertices(display_data& dat, std::vector<glm::vec2> const& points) {
 		if(points.size() < 3)
-		return;
+			return;
 
 		auto first = dat.border_vertices.size();
 
@@ -482,7 +482,6 @@ namespace map {
 	}
 
 	void display_data::make_borders(sys::state& state, std::vector<bool>& visited) {
-
 		borders.resize(state.world.province_adjacency_size());
 		for(auto adj : state.world.in_province_adjacency) {
 			borders[adj.id.index()].adj = adj;
@@ -552,16 +551,16 @@ namespace map {
 
 		auto add_next = [&](int32_t i, int32_t j, bool& next_found) {
 			if(next_found)
-			return glm::ivec2(0, 0);
-			if(visited[i + j  * dat.size_x])
-			return glm::ivec2(0, 0);
+				return glm::ivec2(0, 0);
+			if(visited[i + j * dat.size_x])
+				return glm::ivec2(0, 0);
 			if(j % 2 == 0) {
 				if(coastal_point(state, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i - 1, j / 2)))) {
 					visited[i + j * dat.size_x] = true;
-				
+
 					// test for colinearity
 					// this works, but it can result in the border textures being "slanted" because the normals are carried over between two corners
-	
+
 					if(points.size() > 2) {
 						auto l = points[points.size() - 1];
 						auto n = points[points.size() - 2];
@@ -574,7 +573,7 @@ namespace map {
 							dropped_points_counter = 0;
 						}
 					}
-				
+
 					points.push_back(glm::vec2(float(i), 0.5f + float(j) / 2.0f));
 					next_found = true;
 					return glm::ivec2(i, j);
@@ -585,7 +584,7 @@ namespace map {
 
 					// test for colinearity
 					// this works, but it can result in the border textures being "slanted" because the normals are carried over between two corners
-				
+
 					if(points.size() > 2) {
 						auto l = points[points.size() - 1];
 						auto n = points[points.size() - 2];
@@ -598,7 +597,7 @@ namespace map {
 							dropped_points_counter = 0;
 						}
 					}
-				
+
 					points.push_back(glm::vec2(float(i) + 0.5f, 0.5f + float(j) / 2.0f));
 					next_found = true;
 					return glm::ivec2(i, j);
@@ -614,7 +613,7 @@ namespace map {
 		bool progress = false;
 		do {
 			progress = false;
-		glm::ivec2 temp{ 0, 0 };
+			glm::ivec2 temp{ 0, 0 };
 
 			if(start_y % 2 == 0) {
 				bool left_is_sea = dat.safe_get_province(glm::ivec2(start_x - 1, start_y / 2)) == 0 || province::from_map_id(dat.safe_get_province(glm::ivec2(start_x - 1, start_y / 2))).index() >= state.province_definitions.first_sea_province.index();
@@ -650,7 +649,7 @@ namespace map {
 
 	void add_coastal_loop_vertices(display_data& dat, std::vector<glm::vec2> const& points) {
 		if(points.size() < 3)
-		return;
+			return;
 
 		auto first = dat.coastal_vertices.size();
 		dat.coastal_starts.push_back(GLint(first));
@@ -661,7 +660,7 @@ namespace map {
 		float distance = 0.0f;
 
 		auto norm_pos = current_pos / glm::vec2(dat.size_x, dat.size_y);
-	auto old_pos = glm::vec2{ 0,0 };
+		auto old_pos = glm::vec2{ 0,0 };
 
 		dat.coastal_vertices.emplace_back(norm_pos, old_pos / glm::vec2(dat.size_x, dat.size_y), next_pos / glm::vec2(dat.size_x, dat.size_y), 0.0f, distance);
 		dat.coastal_vertices.emplace_back(norm_pos, next_pos / glm::vec2(dat.size_x, dat.size_y), old_pos / glm::vec2(dat.size_x, dat.size_y), 1.0f, distance);
@@ -759,17 +758,16 @@ namespace map {
 	// Set the river crossing bit for the province adjacencies
 	// Will march a line between each adjacent province centroid. If it hits a river it will set the bit
 	void load_river_crossings(parsers::scenario_building_context& context, std::vector<uint8_t> const& river_data, glm::ivec2 map_size) {
-		auto& world = context.state.world;
-		world.for_each_province_adjacency([&](dcon::province_adjacency_id id) {
-			auto frel = dcon::fatten(world, id);
+		context.state.world.for_each_province_adjacency([&](dcon::province_adjacency_id id) {
+			auto frel = dcon::fatten(context.state.world, id);
 			auto prov_a = frel.get_connected_provinces(0);
 			auto prov_b = frel.get_connected_provinces(1);
 
 			if(!prov_a || !prov_b)
-			return; // goto next
+				return; // goto next
 
-			glm::vec2 mid_point_a = world.province_get_mid_point(prov_a.id);
-			glm::vec2 mid_point_b = world.province_get_mid_point(prov_b.id);
+			glm::vec2 mid_point_a = context.state.world.province_get_mid_point(prov_a.id);
+			glm::vec2 mid_point_b = context.state.world.province_get_mid_point(prov_b.id);
 			glm::ivec2 tile_pos_a = glm::round(mid_point_a);
 			glm::ivec2 tile_pos_b = glm::round(mid_point_b);
 			glm::ivec2 diff = glm::abs(tile_pos_a - tile_pos_b);
@@ -777,7 +775,7 @@ namespace map {
 			bool is_river_crossing = false;
 			if(diff.x > diff.y) {
 				if(tile_pos_a.x > tile_pos_b.x)
-				std::swap(tile_pos_a, tile_pos_b);
+					std::swap(tile_pos_a, tile_pos_b);
 				int x_difference = std::max(tile_pos_b.x - tile_pos_a.x, 1);
 				int y_difference = tile_pos_a.y - tile_pos_b.y;
 				int min_y = std::min(tile_pos_a.y, tile_pos_b.y);
@@ -788,15 +786,15 @@ namespace map {
 						int y = tile_pos_b.y + int(y_difference * t) + k;
 						y = std::clamp(y, min_y, max_y);
 						if(x < 0 || y < 0)
-						continue;
+							continue;
 						is_river_crossing |= is_river(river_data[x + y * map_size.x]);
 					}
 					if(is_river_crossing)
-					break;
+						break;
 				}
 			} else {
 				if(tile_pos_a.y > tile_pos_b.y)
-				std::swap(tile_pos_a, tile_pos_b);
+					std::swap(tile_pos_a, tile_pos_b);
 				int y_difference = std::max(tile_pos_b.y - tile_pos_a.y, 1);
 				int x_difference = tile_pos_a.x - tile_pos_b.x;
 				int min_x = std::min(tile_pos_a.x, tile_pos_b.x);
@@ -807,17 +805,17 @@ namespace map {
 						int x = tile_pos_b.x + int(x_difference * t) + k;
 						x = std::clamp(x, min_x, max_x);
 						if(x < 0 || y < 0)
-						continue;
+							continue;
 						is_river_crossing |= is_river(river_data[x + y * map_size.x]);
 					}
 					if(is_river_crossing)
-					break;
+						break;
 				}
 			}
 
-			uint8_t& buffer = world.province_adjacency_get_type(id);
+			uint8_t& buffer = context.state.world.province_adjacency_get_type(id);
 			if(is_river_crossing)
-			buffer |= province::border::river_crossing_bit;
+				buffer |= province::border::river_crossing_bit;
 		});
 	}
 
@@ -832,60 +830,57 @@ namespace map {
 		std::vector<river_vertex> constructed;
 
 		if(old_x != -1 && old_y != -1) {
-		constructed.push_back(river_vertex{ float(old_x + 0.5f), float(old_y + 0.5f), false });
+			constructed.push_back(river_vertex{ float(old_x + 0.5f), float(old_y + 0.5f), false });
 		}
 
 		marked[x + y * size.x] = true;
 		auto process_non_merge = [&](int32_t xin, int32_t yin, bool& forward_found) {
 			if(xin >= 0 && yin >= 0 && xin < size.x && yin < size.y && (xin != old_x || yin != old_y) && is_river(river_data[xin + yin * size.x]) && !marked[xin + yin * size.x] && !is_river_merge(river_data[xin + yin * size.x]) && !is_river_source(river_data[xin + yin * size.x])) {
-
 				marked[xin + yin * size.x] = true;
 				if(!forward_found) {
 					forward_found = true;
-				return glm::ivec2{xin, yin};
+					return glm::ivec2{ xin, yin };
 				} else {
 					constructed.back().keep = true;
 					rivers.emplace_back(make_directional_river(xin, yin, rivers, river_data, terrain_data, marked, size, x, y));
 				}
 			}
-		return glm::ivec2{ 0, 0 };
+			return glm::ivec2{ 0, 0 };
 		};
 		auto process_merge = [&](int32_t xin, int32_t yin, bool& merge_found) {
 			if(merge_found)
-			return glm::ivec2{ 0, 0 };
-
+				return glm::ivec2{ 0, 0 };
 			if(xin >= 0 && yin >= 0 && xin < size.x && yin < size.y && (xin != old_x || yin != old_y) && is_river(river_data[xin + yin * size.x]) && !marked[xin + yin * size.x] && is_river_merge(river_data[xin + yin * size.x]) && !is_river_source(river_data[xin + yin * size.x])) {
-
 				marked[xin + yin * size.x] = true;
 				merge_found = true;
-			return glm::ivec2{ xin, yin };
+				return glm::ivec2{ xin, yin };
 			}
-		return glm::ivec2{ 0, 0 };
+			return glm::ivec2{ 0, 0 };
 		};
 		auto process_post_merge = [&](int32_t xin, int32_t yin, bool& forward_found) {
 			if(xin >= 0 && yin >= 0 && xin < size.x && yin < size.y && (xin != old_x || yin != old_y) && is_river(river_data[xin + yin * size.x]) && !is_river_merge(river_data[xin + yin * size.x]) && !is_river_source(river_data[xin + yin * size.x])) {
 				if(!forward_found) {
 					forward_found = true;
-				return glm::ivec2{ xin, yin };
+					return glm::ivec2{ xin, yin };
 				}
 			}
-		return glm::ivec2{ 0, 0 };
+			return glm::ivec2{ 0, 0 };
 		};
 		auto process_sea_extend = [&](int32_t xin, int32_t yin, bool& merge_found) {
 			if(merge_found)
-			return glm::ivec2{ 0, 0 };
+				return glm::ivec2{ 0, 0 };
 
 			if(xin >= 0 && yin >= 0 && xin < size.x && yin < size.y && (xin != old_x || yin != old_y) && terrain_data[xin + yin * size.x] == 255) {
 				merge_found = true;
-			return glm::ivec2{ xin, yin };
+				return glm::ivec2{ xin, yin };
 			}
-		return glm::ivec2{ 0, 0 };
+			return glm::ivec2{ 0, 0 };
 		};
 
 		bool forward_progress = false;
 		do {
 			forward_progress = false;
-		constructed.push_back(river_vertex{ float(x + 0.5f), float(y + 0.5f), false });
+			constructed.push_back(river_vertex{ float(x + 0.5f), float(y + 0.5f), false });
 
 			auto res = process_non_merge(x - 1, y, forward_progress);
 			res += process_non_merge(x + 1, y, forward_progress);
@@ -908,7 +903,7 @@ namespace map {
 		resb += process_merge(x, y + 1, merge_found);
 
 		if(merge_found) {
-		constructed.push_back(river_vertex{ float(resb.x + 0.5f), float(resb.y + 0.5f), false });
+			constructed.push_back(river_vertex{ float(resb.x + 0.5f), float(resb.y + 0.5f), false });
 
 			old_x = x;
 			old_y = y;
@@ -922,7 +917,7 @@ namespace map {
 			resc += process_post_merge(x, y + 1, post_progress);
 
 			if(post_progress) {
-			constructed.push_back(river_vertex{ float(resc.x + 0.5f), float(resc.y + 0.5f), false });
+				constructed.push_back(river_vertex{ float(resc.x + 0.5f), float(resc.y + 0.5f), false });
 			}
 		} else if(terrain_data[x + y * size.x] != 255) {
 			bool post_progress = false;
@@ -932,7 +927,7 @@ namespace map {
 			resc += process_sea_extend(x, y + 1, post_progress);
 
 			if(post_progress) {
-			constructed.push_back(river_vertex{ float(resc.x + 0.5f), float(resc.y + 0.5f), false });
+				constructed.push_back(river_vertex{ float(resc.x + 0.5f), float(resc.y + 0.5f), false });
 			}
 		}
 		if(!constructed.empty()) {
@@ -942,7 +937,7 @@ namespace map {
 		return constructed;
 	}
 
-	void display_data::create_curved_river_vertices(parsers::scenario_building_context & context, std::vector<uint8_t> const& river_data, std::vector<uint8_t> const& terrain_data) {
+	void display_data::create_curved_river_vertices(parsers::scenario_building_context& context, std::vector<uint8_t> const& river_data, std::vector<uint8_t> const& terrain_data) {
 
 		std::vector<std::vector<river_vertex>> rivers;
 
@@ -951,7 +946,7 @@ namespace map {
 		for(uint32_t y = 0; y < size_y; y++) {
 			for(uint32_t x = 0; x < size_x; x++) {
 				if(is_river_source(river_data[x + y * size_x]))
-				rivers.emplace_back(make_directional_river(x, y, rivers, river_data, terrain_data, marked, glm::ivec2(int32_t(size_x), int32_t(size_y))));
+					rivers.emplace_back(make_directional_river(x, y, rivers, river_data, terrain_data, marked, glm::ivec2(int32_t(size_x), int32_t(size_y))));
 			}
 		}
 		// remove empty rivers or rivers with 1 vertex
@@ -977,7 +972,7 @@ namespace map {
 					}
 				}
 				if(found_merge)
-				break;
+					break;
 			}
 		}
 
@@ -991,14 +986,14 @@ namespace map {
 
 			auto start_normal = glm::vec2(-prev_perpendicular.y, prev_perpendicular.x);
 			auto norm_pos = current_pos / glm::vec2(size_x, size_y);
-		river_vertices.emplace_back(textured_line_vertex{ norm_pos, +start_normal, 0.0f, distance });//C
-		river_vertices.emplace_back(textured_line_vertex{ norm_pos, -start_normal, 1.0f, distance });//D
+			river_vertices.emplace_back(textured_line_vertex{ norm_pos, +start_normal, 0.0f, distance });//C
+			river_vertices.emplace_back(textured_line_vertex{ norm_pos, -start_normal, 1.0f, distance });//D
 
 			for(auto i = river.size() - 1; i-- > 0;) {
 				if(!river[i].keep && i % 3 != 0) {
 					continue; // skip
 				}
-			glm::vec2 next_perpendicular{ 0.0f, 0.0f };
+				glm::vec2 next_perpendicular{ 0.0f, 0.0f };
 				next_pos = put_in_local(glm::vec2(river[i].x, river[i].y), current_pos, float(size_x));
 				if(i > 0) {
 					auto nexti = i - 1;
@@ -1012,7 +1007,7 @@ namespace map {
 					if(glm::length(temp) < 0.00001f) {
 						next_perpendicular = -a_per;
 					} else {
-					next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
+						next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
 						if(glm::dot(a_per, -next_perpendicular) < glm::dot(a_per, next_perpendicular)) {
 							next_perpendicular *= -1.0f;
 						}
@@ -1027,5 +1022,4 @@ namespace map {
 			river_counts.push_back(GLsizei(river_vertices.size() - river_starts.back()));
 		}
 	}
-
 }
