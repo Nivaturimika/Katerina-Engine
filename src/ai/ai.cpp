@@ -156,7 +156,7 @@ namespace ai {
 				alliance_targets.clear();
 				internal_get_alliance_targets(state, n, alliance_targets);
 				if(!alliance_targets.empty()) {
-					std::sort(alliance_targets.begin(), alliance_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					pdqsort(alliance_targets.begin(), alliance_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 						auto a_str = estimate_strength(state, a);
 						auto b_str = estimate_strength(state, b);
 						if(a_str != b_str)
@@ -196,7 +196,7 @@ namespace ai {
 					continue;
 				}
 
-				std::sort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto a_str = estimate_strength(state, a);
 					auto b_str = estimate_strength(state, b);
 					if(a_str != b_str)
@@ -425,7 +425,7 @@ namespace ai {
 				auto cost = std::max(1.0f, culture::effective_technology_cost(state, year, n, pt.id));
 				pt.weight = base / cost;
 			}
-			std::sort(potential.begin(), potential.end(), [&](potential_techs& a, potential_techs& b) {
+			pdqsort(potential.begin(), potential.end(), [&](potential_techs& a, potential_techs& b) {
 				if(a.weight != b.weight)
 					return a.weight > b.weight;
 				return a.id.index() > b.id.index();
@@ -456,19 +456,19 @@ namespace ai {
 
 		for(auto& n : state.great_nations) {
 			if(state.world.nation_get_is_player_controlled(n.nation))
-			continue;
+				continue;
 
 			static std::vector<weighted_nation> targets;
 			targets.clear();
 			for(auto t : state.world.in_nation) {
 				if(t.get_is_great_power())
-				continue;
+					continue;
 				if(t.get_owned_province_count() == 0)
-				continue;
+					continue;
 				if(t.get_in_sphere_of() == n.nation)
-				continue;
+					continue;
 				if(t.get_demographics(demographics::total) > state.defines.large_population_limit)
-				continue;
+					continue;
 
 				float weight = 0.0f;
 				for(auto c : state.world.in_commodity) {
@@ -547,12 +547,12 @@ namespace ai {
 				if(!is_reachable) {
 					weight *= 0.25f;
 				}
-			targets.push_back(weighted_nation{ t.id, weight });
+				targets.push_back(weighted_nation{ t.id, weight });
 			}
 
-			std::sort(targets.begin(), targets.end(), [](weighted_nation const& a, weighted_nation const& b) {
+			pdqsort(targets.begin(), targets.end(), [](weighted_nation const& a, weighted_nation const& b) {
 				if(a.weight != b.weight)
-				return a.weight > b.weight;
+					return a.weight > b.weight;
 				return a.id.index() < b.id.index();
 			});
 
@@ -560,19 +560,19 @@ namespace ai {
 			for(; i < 2 && i < targets.size(); ++i) {
 				auto rel = state.world.get_gp_relationship_by_gp_influence_pair(targets[i].id, n.nation);
 				if(!rel)
-				rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
+					rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
 				state.world.gp_relationship_get_status(rel) |= nations::influence::priority_three;
 			}
 			for(; i < 4 && i < targets.size(); ++i) {
 				auto rel = state.world.get_gp_relationship_by_gp_influence_pair(targets[i].id, n.nation);
 				if(!rel)
-				rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
+					rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
 				state.world.gp_relationship_get_status(rel) |= nations::influence::priority_two;
 			}
 			for(; i < 6 && i < targets.size(); ++i) {
 				auto rel = state.world.get_gp_relationship_by_gp_influence_pair(targets[i].id, n.nation);
 				if(!rel)
-				rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
+					rel = state.world.force_create_gp_relationship(targets[i].id, n.nation);
 				state.world.gp_relationship_get_status(rel) |= nations::influence::priority_one;
 			}
 		}
@@ -673,13 +673,12 @@ namespace ai {
 			for(auto si : n.get_state_ownership()) {
 				ordered_states.push_back(si.get_state().id);
 			}
-			std::sort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
+			pdqsort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
 				auto apop = state.world.state_instance_get_demographics(a, demographics::total);
 				auto bpop = state.world.state_instance_get_demographics(b, demographics::total);
 				if(apop != bpop)
 					return apop > bpop;
-				else
-					return a.index() < b.index();
+				return a.index() < b.index();
 			});
 			bool threatened = n.get_ai_is_threatened() || n.get_is_at_war();
 			for(uint32_t i = 0; num_focuses_total > 0 && i < ordered_states.size(); ++i) {
@@ -987,13 +986,12 @@ namespace ai {
 					if(si.get_state().get_capital().get_is_colonial() == false)
 						ordered_states.push_back(si.get_state().id);
 				}
-				std::sort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
+				pdqsort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
 					auto apop = state.world.state_instance_get_demographics(a, demographics::total);
 					auto bpop = state.world.state_instance_get_demographics(b, demographics::total);
 					if(apop != bpop)
 						return apop > bpop;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 
 				// try to upgrade factories first:
@@ -1154,13 +1152,12 @@ namespace ai {
 				}
 
 				auto cap = n.get_capital();
-				std::sort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
+				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
 					auto a_dist = province::sorting_distance(state, a, cap);
 					auto b_dist = province::sorting_distance(state, b, cap);
 					if(a_dist != b_dist)
 						return a_dist < b_dist;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 				if(!project_provs.empty()) {
 					auto si = state.world.province_get_state_membership(project_provs[0]);
@@ -1201,13 +1198,12 @@ namespace ai {
 						}
 					}
 					auto cap = n.get_capital();
-					std::sort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
+					pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
 						auto a_dist = province::sorting_distance(state, a, cap);
 						auto b_dist = province::sorting_distance(state, b, cap);
 						if(a_dist != b_dist)
 							return a_dist < b_dist;
-						else
-							return a.index() < b.index();
+						return a.index() < b.index();
 					});
 					for(uint32_t j = 0; j < project_provs.size() && max_projects > 0; ++j) {
 						auto new_proj = fatten(state.world, state.world.force_create_province_building_construction(project_provs[j], n));
@@ -1247,13 +1243,12 @@ namespace ai {
 				}
 
 				auto cap = n.get_capital();
-				std::sort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
+				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
 					auto a_dist = province::sorting_distance(state, a, cap);
 					auto b_dist = province::sorting_distance(state, b, cap);
 					if(a_dist != b_dist)
 						return a_dist < b_dist;
-					else
-						return a.index() < b.index();
+					return a.index() < b.index();
 				});
 
 				for(uint32_t i = 0; i < project_provs.size() && max_projects > 0; ++i) {
@@ -1629,13 +1624,12 @@ namespace ai {
 				}
 			}
 
-			std::sort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			pdqsort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
 				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
 				if(a_distance != b_distance)
 					return a_distance < b_distance;
-				else
-					return a.index() < b.index();
+				return a.index() < b.index();
 			});
 		}
 		if(state.world.nation_get_total_ports(for_nation) > 0 && state.world.nation_get_total_ports(within) > 0) {
@@ -1653,23 +1647,21 @@ namespace ai {
 					--last;
 				}
 			}
-			std::sort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			pdqsort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
 				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
 				if(a_distance != b_distance)
 					return a_distance < b_distance;
-				else
-					return a.index() < b.index();
+				return a.index() < b.index();
 			});
 		}
 		if(first < int32_t(result.size())) {
-			std::sort(result.begin() + first, result.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			pdqsort(result.begin() + first, result.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
 				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
 				if(a_distance != b_distance)
 					return a_distance < b_distance;
-				else
-					return a.index() < b.index();
+				return a.index() < b.index();
 			});
 		}
 	}
@@ -3605,12 +3597,11 @@ namespace ai {
 					}
 				}
 				auto cap = n.get_capital().id;
-				std::sort(owned_ports.begin(), owned_ports.end(), [&](dcon::province_id a, dcon::province_id b) {
+				pdqsort(owned_ports.begin(), owned_ports.end(), [&](dcon::province_id a, dcon::province_id b) {
 					auto a_dist = province::sorting_distance(state, a, cap);
 					auto b_dist = province::sorting_distance(state, b, cap);
 					if(a_dist != b_dist)
-					return a_dist < b_dist;
-					else
+						return a_dist < b_dist;
 					return a.index() < b.index();
 				});
 
@@ -4118,7 +4109,7 @@ namespace ai {
 		for(auto c : state.world.nation_get_province_control(n)) {
 			province_class cls = c.get_province().get_is_coast() ? province_class::coast : province_class::interior;
 			if(c.get_province() == cap)
-			cls = province_class::border;
+				cls = province_class::border;
 
 			for(auto padj : c.get_province().get_province_adjacency()) {
 				auto other = padj.get_connected_provinces(0) == c.get_province() ? padj.get_connected_provinces(1) : padj.get_connected_provinces(0);
@@ -4155,11 +4146,11 @@ namespace ai {
 							//
 							is_threat |= ovr.get_constructing_cb_target() == n;
 							for(auto cb : ovr.get_available_cbs())
-							is_threat |= cb.target == n;
+								is_threat |= cb.target == n;
 						} else {
 							is_threat |= n_controller.get_constructing_cb_target() == n;
 							for(auto cb : n_controller.get_available_cbs())
-							is_threat |= cb.target == n;
+								is_threat |= cb.target == n;
 						}
 					}
 					if(is_threat) {
@@ -4191,10 +4182,10 @@ namespace ai {
 					}
 				}
 			}
-		provinces.push_back(classified_province{ c.get_province().id, cls });
+			provinces.push_back(classified_province{ c.get_province().id, cls });
 		}
 
-		std::sort(provinces.begin(), provinces.end(), [&](classified_province& a, classified_province& b) {
+		pdqsort(provinces.begin(), provinces.end(), [&](classified_province& a, classified_province& b) {
 			if(a.c != b.c) {
 				return uint8_t(a.c) > uint8_t(b.c);
 			}
@@ -4223,7 +4214,7 @@ namespace ai {
 
 			for(; end_of_stage < provinces.size(); ++end_of_stage) {
 				if(uint8_t(provinces[end_of_stage].c) != stage)
-				break;
+					break;
 			}
 
 			uint32_t full_loops_through = 0;
@@ -4243,7 +4234,7 @@ namespace ai {
 						for(uint32_t k = uint32_t(guards_list.size()); k-- > 0;) {
 							auto guard_loc = state.world.army_get_location_from_army_location(guards_list[k]);
 							if(military::relative_attrition_amount(state, guards_list[k], p) >= 2.f)
-							continue; //too heavy
+								continue; //too heavy
 
 							/*
 							// this wont work because a unit could end up in, for example, a subject's region at the end of a war
@@ -4269,15 +4260,12 @@ namespace ai {
 							state.world.army_set_ai_province(nearest, p);
 							guards_list[nearest_index] = guards_list.back();
 							guards_list.pop_back();
-
 							guard_assigned = true;
 						}
 					}
 				}
-
 				++full_loops_through;
 			} while(guard_assigned);
-
 		}
 	}
 
@@ -4821,10 +4809,9 @@ namespace ai {
 				}
 			}
 		}
-		std::sort(potential_targets.begin(), potential_targets.end(), [&](army_target& a, army_target& b) {
+		pdqsort(potential_targets.begin(), potential_targets.end(), [&](army_target& a, army_target& b) {
 			if(a.minimal_distance != b.minimal_distance)
-			return a.minimal_distance < b.minimal_distance;
-			else
+				return a.minimal_distance < b.minimal_distance;
 			return a.location.index() < b.location.index();
 		});
 
@@ -4841,12 +4828,11 @@ namespace ai {
 			potential_targets[i].strength_estimate = estimate_enemy_defensive_force(state, potential_targets[i].location, n) + 0.00001f;
 
 			auto target_attack_force = potential_targets[i].strength_estimate;
-			std::sort(ready_armies.begin(), ready_armies.end(), [&](a_str const& a, a_str const& b) {
+			pdqsort(ready_armies.begin(), ready_armies.end(), [&](a_str const& a, a_str const& b) {
 				auto adist = province::sorting_distance(state, a.p, potential_targets[i].location);
 				auto bdist = province::sorting_distance(state, b.p, potential_targets[i].location);
 				if(adist != bdist)
-				return adist > bdist;
-				else
+					return adist > bdist;
 				return a.p.index() < b.p.index();
 			});
 

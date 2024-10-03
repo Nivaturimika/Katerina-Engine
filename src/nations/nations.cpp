@@ -449,17 +449,16 @@ namespace nations {
 
 		And then we add one point either per leader or per regiment, whichever is greater.
 		*/
-		float lp_factor = state.defines.alice_military_score_leadership_factor;
 		state.world.execute_serial_over_nation([&, disarm = state.defines.disarmament_army_hit](auto n) {
 			auto recruitable = ve::to_float(state.world.nation_get_recruitable_regiments(n));
 			auto active_regs = ve::to_float(state.world.nation_get_active_regiments(n));
-		auto is_disarmed = ve::apply([&](dcon::nation_id i) { return state.world.nation_get_disarmed_until(i) < state.current_date; }, n);
+			auto is_disarmed = ve::apply([&](dcon::nation_id i) { return state.world.nation_get_disarmed_until(i) < state.current_date; }, n);
 			auto disarm_factor = ve::select(is_disarmed, ve::fp_vector(disarm), ve::fp_vector(1.0f));
 			auto supply_mod = ve::max(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::supply_consumption) + 1.0f, 0.1f);
 			auto avg_land_score = state.world.nation_get_averge_land_unit_score(n);
 			auto num_leaders = ve::apply([&](dcon::nation_id i) {
 				auto gen_range = state.world.nation_get_leader_loyalty(i);
-				return float((gen_range.end() - gen_range.begin())) * lp_factor;
+				return float((gen_range.end() - gen_range.begin()));
 			}, n);
 			state.world.nation_set_military_score(n, ve::to_int((ve::min(recruitable, active_regs * 4.0f) * avg_land_score) * ((disarm_factor * supply_mod) / 7.0f) + state.world.nation_get_capital_ship_score(n) + ve::max(num_leaders, active_regs)));
 		});
@@ -476,25 +475,24 @@ namespace nations {
 			state.nations_by_rank[to_sort_count] = n;
 			++to_sort_count;
 		});
-		std::sort(state.nations_by_rank.begin(), state.nations_by_rank.begin() + to_sort_count,
-			[&](dcon::nation_id a, dcon::nation_id b) {
-				auto fa = fatten(state.world, a);
-				auto fb = fatten(state.world, b);
-				if((fa.get_owned_province_count() != 0) != (fb.get_owned_province_count() != 0)) {
-					return (fa.get_owned_province_count() != 0);
-				}
-				if(fa.get_is_civilized() != fb.get_is_civilized())
-					return fa.get_is_civilized();
-				if(bool(fa.get_overlord_as_subject().get_ruler()) != bool(fa.get_overlord_as_subject().get_ruler()))
-					return !bool(fa.get_overlord_as_subject().get_ruler());
-				auto a_score = fa.get_military_score() + fa.get_industrial_score() + prestige_score(state, a);
-				auto b_score = fb.get_military_score() + fb.get_industrial_score() + prestige_score(state, b);
-				if(a_score != b_score)
-					return a_score > b_score;
-				return a.index() > b.index(); // create a total order
-			});
+		pdqsort(state.nations_by_rank.begin(), state.nations_by_rank.begin() + to_sort_count, [&](dcon::nation_id a, dcon::nation_id b) {
+			auto fa = fatten(state.world, a);
+			auto fb = fatten(state.world, b);
+			if((fa.get_owned_province_count() != 0) != (fb.get_owned_province_count() != 0)) {
+				return (fa.get_owned_province_count() != 0);
+			}
+			if(fa.get_is_civilized() != fb.get_is_civilized())
+				return fa.get_is_civilized();
+			if(bool(fa.get_overlord_as_subject().get_ruler()) != bool(fa.get_overlord_as_subject().get_ruler()))
+				return !bool(fa.get_overlord_as_subject().get_ruler());
+			auto a_score = fa.get_military_score() + fa.get_industrial_score() + prestige_score(state, a);
+			auto b_score = fb.get_military_score() + fb.get_industrial_score() + prestige_score(state, b);
+			if(a_score != b_score)
+				return a_score > b_score;
+			return a.index() > b.index(); // create a total order
+		});
 		if(to_sort_count < state.nations_by_rank.size()) {
-		state.nations_by_rank[to_sort_count] = dcon::nation_id{};
+			state.nations_by_rank[to_sort_count] = dcon::nation_id{};
 		}
 		for(uint32_t i = 0; i < to_sort_count; ++i) {
 			state.world.nation_set_rank(state.nations_by_rank[i], uint16_t(i + 1));
@@ -511,60 +509,57 @@ namespace nations {
 				++to_sort_count;
 			}
 		});
-		std::sort(state.nations_by_industrial_score.begin(), state.nations_by_industrial_score.begin() + to_sort_count,
-			[&](dcon::nation_id a, dcon::nation_id b) {
-				auto fa = fatten(state.world, a);
-				auto fb = fatten(state.world, b);
-				if(fa.get_is_civilized() && !fb.get_is_civilized())
-					return true;
-				if(!fa.get_is_civilized() && fb.get_is_civilized())
-					return false;
-				if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
-					return false;
-				if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
-					return true;
-				auto a_score = fa.get_industrial_score();
-				auto b_score = fb.get_industrial_score();
-				if(a_score != b_score)
-					return a_score > b_score;
-				return a.index() > b.index();
-			});
-		std::sort(state.nations_by_military_score.begin(), state.nations_by_military_score.begin() + to_sort_count,
-			[&](dcon::nation_id a, dcon::nation_id b) {
-				auto fa = fatten(state.world, a);
-				auto fb = fatten(state.world, b);
-				if(fa.get_is_civilized() && !fb.get_is_civilized())
-					return true;
-				if(!fa.get_is_civilized() && fb.get_is_civilized())
-					return false;
-				if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
-					return false;
-				if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
-					return true;
-				auto a_score = fa.get_military_score();
-				auto b_score = fb.get_military_score();
-				if(a_score != b_score)
-					return a_score > b_score;
-				return a.index() > b.index();
-			});
-		std::sort(state.nations_by_prestige_score.begin(), state.nations_by_prestige_score.begin() + to_sort_count,
-			[&](dcon::nation_id a, dcon::nation_id b) {
-				auto fa = fatten(state.world, a);
-				auto fb = fatten(state.world, b);
-				if(fa.get_is_civilized() && !fb.get_is_civilized())
-					return true;
-				if(!fa.get_is_civilized() && fb.get_is_civilized())
-					return false;
-				if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
-					return false;
-				if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
-					return true;
-				auto a_score = prestige_score(state, a);
-				auto b_score = prestige_score(state, b);
-				if(a_score != b_score)
-					return a_score > b_score;
-				return a.index() > b.index();
-			});
+		pdqsort(state.nations_by_industrial_score.begin(), state.nations_by_industrial_score.begin() + to_sort_count, [&](dcon::nation_id a, dcon::nation_id b) {
+			auto fa = fatten(state.world, a);
+			auto fb = fatten(state.world, b);
+			if(fa.get_is_civilized() && !fb.get_is_civilized())
+				return true;
+			if(!fa.get_is_civilized() && fb.get_is_civilized())
+				return false;
+			if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
+				return false;
+			if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
+				return true;
+			auto a_score = fa.get_industrial_score();
+			auto b_score = fb.get_industrial_score();
+			if(a_score != b_score)
+				return a_score > b_score;
+			return a.index() > b.index();
+		});
+		pdqsort(state.nations_by_military_score.begin(), state.nations_by_military_score.begin() + to_sort_count, [&](dcon::nation_id a, dcon::nation_id b) {
+			auto fa = fatten(state.world, a);
+			auto fb = fatten(state.world, b);
+			if(fa.get_is_civilized() && !fb.get_is_civilized())
+				return true;
+			if(!fa.get_is_civilized() && fb.get_is_civilized())
+				return false;
+			if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
+				return false;
+			if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
+				return true;
+			auto a_score = fa.get_military_score();
+			auto b_score = fb.get_military_score();
+			if(a_score != b_score)
+				return a_score > b_score;
+			return a.index() > b.index();
+		});
+		pdqsort(state.nations_by_prestige_score.begin(), state.nations_by_prestige_score.begin() + to_sort_count, [&](dcon::nation_id a, dcon::nation_id b) {
+			auto fa = fatten(state.world, a);
+			auto fb = fatten(state.world, b);
+			if(fa.get_is_civilized() && !fb.get_is_civilized())
+				return true;
+			if(!fa.get_is_civilized() && fb.get_is_civilized())
+				return false;
+			if(bool(fa.get_overlord_as_subject()) && !bool(fa.get_overlord_as_subject()))
+				return false;
+			if(!bool(fa.get_overlord_as_subject()) && bool(fa.get_overlord_as_subject()))
+				return true;
+			auto a_score = prestige_score(state, a);
+			auto b_score = prestige_score(state, b);
+			if(a_score != b_score)
+				return a_score > b_score;
+			return a.index() > b.index();
+		});
 		for(uint32_t i = 0; i < to_sort_count; ++i) {
 			state.world.nation_set_industrial_rank(state.nations_by_industrial_score[i], uint16_t(i + 1));
 			state.world.nation_set_military_rank(state.nations_by_military_score[i], uint16_t(i + 1));
@@ -578,14 +573,11 @@ namespace nations {
 
 	void update_great_powers(sys::state& state) {
 		bool at_least_one_added = false;
-
 		for(auto i = state.great_nations.size(); i-- > 0;) {
 			if(state.world.nation_get_rank(state.great_nations[i].nation) <= uint16_t(state.defines.great_nations_count)) {
 				// is still a gp
 				state.great_nations[i].last_greatness = state.current_date;
-			} else if(state.great_nations[i].last_greatness + int32_t(state.defines.greatness_days) < state.current_date ||
-							state.world.nation_get_owned_province_count(state.great_nations[i].nation) == 0) {
-
+			} else if(state.great_nations[i].last_greatness + int32_t(state.defines.greatness_days) < state.current_date || state.world.nation_get_owned_province_count(state.great_nations[i].nation) == 0) {
 				auto n = state.great_nations[i].nation;
 				state.great_nations[i] = state.great_nations.back();
 				state.great_nations.pop_back();
@@ -601,7 +593,7 @@ namespace nations {
 				while(rels.begin() != rels.end()) {
 					auto rel = *(rels.begin());
 					if(rel.get_influence_target().get_in_sphere_of() == n)
-					rel.get_influence_target().set_in_sphere_of(dcon::nation_id{});
+						rel.get_influence_target().set_in_sphere_of(dcon::nation_id{});
 					state.world.delete_gp_relationship(rel);
 				}
 
@@ -622,9 +614,9 @@ namespace nations {
 				at_least_one_added = true;
 				state.world.nation_set_is_great_power(n, true);
 				state.great_nations.push_back(sys::great_nation(state.current_date, n));
-			state.world.nation_set_state_from_flashpoint_focus(n, dcon::state_instance_id{});
+				state.world.nation_set_state_from_flashpoint_focus(n, dcon::state_instance_id{});
 
-			state.world.nation_set_in_sphere_of(n, dcon::nation_id{});
+				state.world.nation_set_in_sphere_of(n, dcon::nation_id{});
 				auto rng = state.world.nation_get_gp_relationship_as_influence_target(n);
 				while(rng.begin() != rng.end()) {
 					state.world.delete_gp_relationship(*(rng.begin()));
@@ -643,7 +635,7 @@ namespace nations {
 			}
 		}
 		if(at_least_one_added) {
-			std::sort(state.great_nations.begin(), state.great_nations.end(), [&](sys::great_nation& a, sys::great_nation& b) {
+			pdqsort(state.great_nations.begin(), state.great_nations.end(), [&](sys::great_nation& a, sys::great_nation& b) {
 				return state.world.nation_get_rank(a.nation) < state.world.nation_get_rank(b.nation);
 			});
 		}

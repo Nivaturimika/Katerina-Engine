@@ -8,35 +8,46 @@
 #include "politics.hpp"
 #include "province_templates.hpp"
 #include "prng.hpp"
+#include "pdqsort.h"
 
 namespace rebel {
 
 	dcon::movement_id get_movement_by_position(sys::state& state, dcon::nation_id n, dcon::issue_option_id o) {
 		for(auto m : state.world.nation_get_movement_within(n)) {
 			if(m.get_movement().get_associated_issue_option() == o)
-			return m.get_movement().id;
+				return m.get_movement().id;
 		}
-	return dcon::movement_id{};
+		return dcon::movement_id{};
 	}
+
 	dcon::movement_id get_movement_by_independence(sys::state& state, dcon::nation_id n, dcon::national_identity_id i) {
 		for(auto m : state.world.nation_get_movement_within(n)) {
 			if(m.get_movement().get_associated_independence() == i)
-			return m.get_movement().id;
+				return m.get_movement().id;
 		}
-	return dcon::movement_id{};
+		return dcon::movement_id{};
 	}
 
 	dcon::rebel_faction_id get_faction_by_type(sys::state& state, dcon::nation_id n, dcon::rebel_type_id r) {
 		for(auto f : state.world.nation_get_rebellion_within(n)) {
 			if(f.get_rebels().get_type() == r)
-			return f.get_rebels().id;
+				return f.get_rebels().id;
 		}
-	return dcon::rebel_faction_id{};
+		return dcon::rebel_faction_id{};
+	}
+
+	float max_identity_nationalism_in_nation(sys::state& state, dcon::nation_id n, dcon::national_identity_id iid) {
+		float nmax = 0.f;
+		for(auto c : state.world.national_identity_get_core(iid)) {
+			if(c.get_province().get_nation_from_province_ownership() == n) {
+				nmax = std::max(nmax, c.get_province().get_nationalism());
+			}
+		}
+		return nmax;
 	}
 
 	void update_movement_values(sys::state& state) { // simply updates cached values
-
-	state.world.execute_serial_over_movement([&](auto ids) { state.world.movement_set_pop_support(ids, ve::fp_vector()); });
+		state.world.execute_serial_over_movement([&](auto ids) { state.world.movement_set_pop_support(ids, ve::fp_vector()); });
 		state.world.for_each_pop([&](dcon::pop_id p) {
 			if(auto m = state.world.pop_get_movement_from_pop_movement_membership(p); m) {
 				auto i = state.world.movement_get_associated_issue_option(m);
@@ -79,21 +90,10 @@ namespace rebel {
 			*/
 			auto host_nations = state.world.movement_get_nation_from_movement_within(ids);
 
-			auto host_max_nationalism = ve::apply(
-				[&](dcon::nation_id n, dcon::movement_id m) {
-					if(auto iid = state.world.movement_get_associated_independence(m); iid) {
-						float nmax = 0.0f;
-						for(auto c : state.world.national_identity_get_core(iid)) {
-							if(c.get_province().get_nation_from_province_ownership() == n) {
-								nmax = std::max(nmax, c.get_province().get_nationalism());
-							}
-						}
-						return nmax;
-					} else {
-						return 0.0f;
-					}
-				},
-				host_nations, ids);
+			auto host_max_nationalism = ve::apply([&](dcon::nation_id n, dcon::movement_id m) {
+				auto iid = state.world.movement_get_associated_independence(m);
+				return iid ? max_identity_nationalism_in_nation(state, n, iid) : 0.f;
+			}, host_nations, ids);
 			auto host_pculture = state.world.nation_get_primary_culture(host_nations);
 			auto host_cradicalism = ve::to_float(state.world.culture_get_radicalism(host_pculture));
 
@@ -791,7 +791,7 @@ namespace rebel {
 	void sort_hunting_targets(sys::state& state, impl::arm_str const& ar, std::vector<impl::prov_str>& rebel_provs) {
 		auto our_str = ar.str;
 		auto loc = state.world.army_get_location_from_army_location(ar.a);
-		std::sort(rebel_provs.begin(), rebel_provs.end(), [&](impl::prov_str const& a, impl::prov_str const& b) {
+		pdqsort(rebel_provs.begin(), rebel_provs.end(), [&](impl::prov_str const& a, impl::prov_str const& b) {
 			auto aa = 0.001f * -(our_str - a.str);
 			auto ab = 0.001f * -(our_str - b.str);
 			auto da = province::sorting_distance(state, a.p, loc) + aa;
@@ -815,9 +815,8 @@ namespace rebel {
 					&& !ar.get_army().get_battle_from_army_battle_participation()
 					&& !ar.get_army().get_navy_from_army_transport()
 					&& !ar.get_army().get_arrival_time()
-					&& loc.get_nation_from_province_control() == faction_owner
-					) {
-					rebel_hunters.push_back(impl::arm_str{ ar.get_army().id, ai::estimate_army_offensive_strength (state, ar.get_army()) });
+					&& loc.get_nation_from_province_control() == faction_owner) {
+						rebel_hunters.push_back(impl::arm_str{ ar.get_army().id, ai::estimate_army_offensive_strength(state, ar.get_army()) });
 					}
 				}
 
@@ -830,7 +829,7 @@ namespace rebel {
 					sort_hunting_targets(state, rh, rebel_provs);
 
 					auto closest_prov = rebel_provs[0].p;
-					std::sort(rebel_hunters.begin(), rebel_hunters.end(), [&](impl::arm_str const& a, impl::arm_str const& b) {
+					pdqsort(rebel_hunters.begin(), rebel_hunters.end(), [&](impl::arm_str const& a, impl::arm_str const& b) {
 						auto pa = state.world.army_get_location_from_army_location(a.a);
 						auto pb = state.world.army_get_location_from_army_location(b.a);
 						auto as = 0.001f * std::max<float>(a.str, 1.f);
@@ -838,8 +837,7 @@ namespace rebel {
 						auto da = province::sorting_distance(state, pa, closest_prov) + as;
 						auto db = province::sorting_distance(state, pb, closest_prov) + bs;
 						if(da != db)
-						return da < db;
-						else
+							return da < db;
 						return a.a.index() < b.a.index();
 					});
 
@@ -879,8 +877,7 @@ namespace rebel {
 			&& !a.get_navy_from_army_transport()
 			&& !a.get_arrival_time()
 			&& a.get_location_from_army_location() != a.get_ai_province()
-			&& a.get_location_from_army_location().get_province_control().get_nation() == a.get_location_from_army_location().get_province_ownership().get_nation())
-			{
+			&& a.get_location_from_army_location().get_province_control().get_nation() == a.get_location_from_army_location().get_province_ownership().get_nation()) {
 				if(auto path = province::make_land_path(state, a.get_location_from_army_location(), a.get_ai_province(), a.get_army_control().get_controller(), a); path.size() > 0) {
 					auto existing_path = state.world.army_get_path(a);
 					auto new_size = uint32_t(path.size());

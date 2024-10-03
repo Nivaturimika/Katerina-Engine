@@ -278,33 +278,57 @@ namespace ui {
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
 			switch(st) {
 			case ledger_sort_type::country_status:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return int32_t(nations::get_status(state, a)) < int32_t(nations::get_status(state, b));
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = int32_t(nations::get_status(state, a));
+					auto bv = int32_t(nations::get_status(state, b));
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case ledger_sort_type::military_score:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_military_score(a) < state.world.nation_get_military_score(b);
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = state.world.nation_get_military_score(a);
+					auto bv = state.world.nation_get_military_score(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case ledger_sort_type::industrial_score:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_industrial_score(a) < state.world.nation_get_industrial_score(b);
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = state.world.nation_get_industrial_score(a);
+					auto bv = state.world.nation_get_industrial_score(b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case ledger_sort_type::prestige:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return nations::prestige_score(state, a) < nations::prestige_score(state, b);
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = nations::prestige_score(state, a);
+					auto bv = nations::prestige_score(state, b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			case ledger_sort_type::total_score:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a) < state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a);
+					auto bv = state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			default:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					return text::produce_simple_string(state, text::get_name(state, a)) < text::produce_simple_string(state, text::get_name(state, b));
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto av = text::produce_simple_string(state, text::get_name(state, a));
+					auto bv = text::produce_simple_string(state, text::get_name(state, b));
+					if(av != bv)
+						return av < bv;
+					return a.index() < b.index();
 				});
 				break;
 			}

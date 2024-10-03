@@ -951,13 +951,32 @@ namespace military {
 	}
 	void regenerate_total_regiment_counts(sys::state& state) {
 		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
-		state.world.for_each_army([&](dcon::army_id a) {
-			auto owner = state.world.army_get_controller_from_army_control(a);
-			if(owner) {
-				auto regs_range = state.world.army_get_army_membership(a);
-				auto num_regs = regs_range.end() - regs_range.begin();
-				state.world.nation_get_active_regiments(owner) += uint16_t(num_regs);
+		/*
+		state.world.execute_serial_over_nation([&](auto ids) {
+			auto num_regs = ve::apply([&](dcon::nation_id n) {
+				uint32_t count = 0;
+				for(const auto al : state.world.nation_get_army_control(n)) {
+					for(const auto reg : al.get_army().get_army_membership()) {
+						if(reg.get_regiment().get_pop_from_regiment_source().get_poptype() == state.culture_definitions.soldiers) {
+							++count;
+						}
+					}
+				}
+				return count;
+			});
+			state.world.nation_set_active_regiments(ids, num_regs);
+		});
+		*/
+		state.world.for_each_nation([&](dcon::nation_id n) {
+			uint16_t num_regs = 0;
+			for(const auto al : state.world.nation_get_army_control(n)) {
+				for(const auto reg : al.get_army().get_army_membership()) {
+					if(reg.get_regiment().get_pop_from_regiment_source().get_poptype() == state.culture_definitions.soldiers) {
+						++num_regs;
+					}
+				}
 			}
+			state.world.nation_set_active_regiments(n, num_regs);
 		});
 	}
 
@@ -975,11 +994,11 @@ namespace military {
 			auto ld_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_defense_modifier);
 
 			for(uint32_t i = 2; i < max; ++i) {
-			dcon::unit_type_id u{dcon::unit_type_id::value_base_t(i)};
+				dcon::unit_type_id u{ dcon::unit_type_id::value_base_t(i) };
 				if((state.world.nation_get_active_unit(n, u) || state.military_definitions.unit_base_definitions[u].active) && state.military_definitions.unit_base_definitions[u].is_land) {
 					auto& reg_stats = state.world.nation_get_unit_stats(n, u);
-					total += ((reg_stats.defence_or_hull + ld_mod) + (reg_stats.attack_or_gun_power + lo_mod)) *
-								 state.military_definitions.unit_base_definitions[u].discipline_or_evasion;
+					total += ((reg_stats.defence_or_hull + ld_mod) + (reg_stats.attack_or_gun_power + lo_mod))
+						* state.military_definitions.unit_base_definitions[u].discipline_or_evasion;
 					++count;
 				}
 			}
@@ -992,10 +1011,9 @@ namespace military {
 		national-naval-attack-modifier) / 250
 		*/
 		state.world.for_each_nation([&](dcon::nation_id n) {
-			float total = 0;
+			float total = 0.f;
 			auto no_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_attack_modifier);
 			auto nd_mod = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::naval_defense_modifier);
-
 			for(auto nv : state.world.nation_get_navy_control(n)) {
 				for(auto shp : nv.get_navy().get_navy_membership()) {
 					if(state.military_definitions.unit_base_definitions[shp.get_ship().get_type()].capital) {
@@ -1041,7 +1059,7 @@ namespace military {
 		*/
 		state.world.for_each_nation([&](dcon::nation_id n) {
 			auto cap_region = state.world.province_get_connected_region_id(state.world.nation_get_capital(n));
-			float total = 0;
+			float total = 0.f;
 			for(auto si : state.world.nation_get_state_ownership(n)) {
 				auto d = state.world.state_instance_get_definition(si.get_state());
 				bool saw_coastal = false;
@@ -1059,19 +1077,16 @@ namespace military {
 							nb_was_core = p.get_province().get_is_owner_core();
 					}
 				}
-				bool connected = si.get_state().get_capital().get_connected_region_id() == cap_region;
 
+				bool connected = si.get_state().get_capital().get_connected_region_id() == cap_region;
 				if(saw_coastal) {
 					if(nb_level > 0) {
-						if(nb_was_core || connected)
-							total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1));
-						else
-							total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1)) * state.defines.naval_base_non_core_supply_score;
+						total += state.defines.naval_base_supply_score_base * float(1 << (nb_level - 1))
+							* ((nb_was_core || connected) ? 1.f : state.defines.naval_base_non_core_supply_score);
 					} else {
-						if(coast_was_core || connected)
-							total += state.defines.naval_base_supply_score_empty;
-						else
-							total += 1.0f;
+						total += (coast_was_core || connected)
+							? state.defines.naval_base_supply_score_empty
+							: 1.0f;
 					}
 				}
 			}
@@ -1083,7 +1098,7 @@ namespace military {
 		penalties (described elsewhere).
 		*/
 		state.world.for_each_nation([&](dcon::nation_id n) {
-			float total = 0;
+			float total = 0.f;
 			for(auto nv : state.world.nation_get_navy_control(n)) {
 				for(auto shp : nv.get_navy().get_navy_membership()) {
 					total += state.military_definitions.unit_base_definitions[shp.get_ship().get_type()].supply_consumption_score;
