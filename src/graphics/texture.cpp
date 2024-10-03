@@ -179,15 +179,15 @@ namespace ogl {
 			// }
 			/*	well, we know it is DXT1/3/5, because we checked above	*/
 			switch((header->sPixelFormat.dwFourCC >> 24) - '0') {
-				case 1:
+			case 1:
 				s3tc_format = SOIL_RGBA_S3TC_DXT1;
 				block_size = 8;
 				break;
-				case 3:
+			case 3:
 				s3tc_format = SOIL_RGBA_S3TC_DXT3;
 				block_size = 16;
 				break;
-				case 5:
+			case 5:
 				s3tc_format = SOIL_RGBA_S3TC_DXT5;
 				block_size = 16;
 				break;
@@ -218,7 +218,7 @@ namespace ogl {
 			/*  bind an OpenGL texture ID	*/
 			glBindTexture(GL_TEXTURE_2D, texid);
 			if(!texid)
-			return 0;
+				return 0;
 			/*	did I have MIPmaps?	*/
 			if(mipmaps > 0) {
 				/*	instruct OpenGL to use the MIPmaps	*/
@@ -244,65 +244,63 @@ namespace ogl {
 				/*	and remember, DXT uncompressed uses BGR(A), so swap to (A)BGR for ALL MIPmap levels	*/
 				std::unique_ptr<uint8_t[]> dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size]);
 				switch(block_size) {
-					case 4:
-					{
-						uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
-						uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
-						uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-						uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-						for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-							uint32_t data = *(uint32_t const*)(buffer + buffer_index + i);
-							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
-							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
-							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
-							uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
-							dds_dest_data[i + 0] = static_cast<uint8_t>(r);
-							dds_dest_data[i + 1] = static_cast<uint8_t>(g);
-							dds_dest_data[i + 2] = static_cast<uint8_t>(b);
-							dds_dest_data[i + 3] = static_cast<uint8_t>(a);
-						}
-						break;
+				case 4:
+				{
+					uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+					uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+					uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+					uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
+						uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i);
+						uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+						uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+						uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+						uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+						dds_dest_data[i + 0] = static_cast<uint8_t>(r);
+						dds_dest_data[i + 1] = static_cast<uint8_t>(g);
+						dds_dest_data[i + 2] = static_cast<uint8_t>(b);
+						dds_dest_data[i + 3] = static_cast<uint8_t>(a);
 					}
-					case 2:
-					{
-						dds_dest_data.reset();
-						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
-						uint16_t mr1 = uint16_t(header->sPixelFormat.dwRBitMask >> std::countr_zero(header->sPixelFormat.dwRBitMask));
-						float mr2 = mr1 == 0 ? 0.f : 255.f / float(mr1);
-						uint16_t mg1 = uint16_t(header->sPixelFormat.dwGBitMask >> std::countr_zero(header->sPixelFormat.dwGBitMask));
-						float mg2 = mg1 == 0 ? 0.f : 255.f / float(mg1);
-						uint16_t mb1 = uint16_t(header->sPixelFormat.dwBBitMask >> std::countr_zero(header->sPixelFormat.dwBBitMask));
-						float mb2 = mb1 == 0 ? 0.f : 255.f / float(mb1);
-						uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-						float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
-						//
-						uint16_t rmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
-						uint16_t gmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
-						uint16_t bmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-						uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-						for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-							uint16_t data = *(uint16_t const*)(buffer + buffer_index + i);
-							uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
-							uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
-							uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
-							uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
-							dds_dest_data[i * 2 + 0] = uint8_t(float(r) * mr2);
-							dds_dest_data[i * 2 + 1] = uint8_t(float(g) * mg2);
-							dds_dest_data[i * 2 + 2] = uint8_t(float(b) * mb2);
-							dds_dest_data[i * 2 + 3] = uint8_t(float(a) * ma2);
-						}
-						break;
+					break;
+				}
+				case 2:
+				{
+					dds_dest_data.reset();
+					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
+					uint16_t mr1 = uint16_t(header->sPixelFormat.dwRBitMask >> std::countr_zero(header->sPixelFormat.dwRBitMask));
+					float mr2 = mr1 == 0 ? 0.f : 255.f / float(mr1);
+					uint16_t mg1 = uint16_t(header->sPixelFormat.dwGBitMask >> std::countr_zero(header->sPixelFormat.dwGBitMask));
+					float mg2 = mg1 == 0 ? 0.f : 255.f / float(mg1);
+					uint16_t mb1 = uint16_t(header->sPixelFormat.dwBBitMask >> std::countr_zero(header->sPixelFormat.dwBBitMask));
+					float mb2 = mb1 == 0 ? 0.f : 255.f / float(mb1);
+					uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
+					//
+					uint16_t rmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+					uint16_t gmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+					uint16_t bmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+					uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
+						uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i);
+						uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+						uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+						uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+						uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+						dds_dest_data[i * 2 + 0] = uint8_t(float(r) * mr2);
+						dds_dest_data[i * 2 + 1] = uint8_t(float(g) * mg2);
+						dds_dest_data[i * 2 + 2] = uint8_t(float(b) * mb2);
+						dds_dest_data[i * 2 + 3] = uint8_t(float(a) * ma2);
 					}
-					default:
-					{
-						std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
-						for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-							uint8_t temp = dds_dest_data[i];
-							dds_dest_data[i] = dds_dest_data[i + 2];
-							dds_dest_data[i + 2] = temp;
-						}
-						break;
+					break;
+				}
+				default:
+				{
+					std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
+					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
+						std::swap(dds_dest_data[i], dds_dest_data[i + 2]);
 					}
+					break;
+				}
 				}
 				glTexImage2D(GL_TEXTURE_2D, 0, s3tc_format, width, height, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get());
 				uint32_t buffer_offset = dds_main_size * (block_size == 2 ? 2 : 1);
@@ -313,10 +311,10 @@ namespace ogl {
 					/*	upload this mipmap	*/
 					uint32_t mip_size = w * h * block_size;
 					switch(block_size) {
-						case 2:
+					case 2:
 						mip_size = w * h * 4;
 						break;
-						default:
+					default:
 						break;
 					}
 					glTexImage2D(GL_TEXTURE_2D, i, s3tc_format, w, h, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get() + buffer_offset);
@@ -458,85 +456,85 @@ namespace ogl {
 
 	native_string flag_type_to_name(sys::state& state, culture::flag_type type) {
 		switch(type) {
-			case culture::flag_type::count:
-			case culture::flag_type::default_flag:
+		case culture::flag_type::count:
+		case culture::flag_type::default_flag:
 			return NATIVE("");
-			case culture::flag_type::communist:
+		case culture::flag_type::communist:
 			return NATIVE("_communist");
-			case culture::flag_type::fascist:
+		case culture::flag_type::fascist:
 			return NATIVE("_fascist");
-			case culture::flag_type::monarchy:
+		case culture::flag_type::monarchy:
 			return NATIVE("_monarchy");
-			case culture::flag_type::republic:
+		case culture::flag_type::republic:
 			return NATIVE("_republic");
 			// Non-vanilla
-			case culture::flag_type::theocracy:
+		case culture::flag_type::theocracy:
 			return NATIVE("_theocracy");
-			case culture::flag_type::special:
+		case culture::flag_type::special:
 			return NATIVE("_special");
-			case culture::flag_type::spare:
+		case culture::flag_type::spare:
 			return NATIVE("_spare");
-			case culture::flag_type::populist:
+		case culture::flag_type::populist:
 			return NATIVE("_populist");
-			case culture::flag_type::realm:
+		case culture::flag_type::realm:
 			return NATIVE("_realm");
-			case culture::flag_type::other:
+		case culture::flag_type::other:
 			return NATIVE("_other");
-			case culture::flag_type::monarchy2:
+		case culture::flag_type::monarchy2:
 			return NATIVE("_monarchy2");
-			case culture::flag_type::monarchy3:
+		case culture::flag_type::monarchy3:
 			return NATIVE("_monarchy3");
-			case culture::flag_type::republic2:
+		case culture::flag_type::republic2:
 			return NATIVE("_republic2");
-			case culture::flag_type::republic3:
+		case culture::flag_type::republic3:
 			return NATIVE("_republic3");
-			case culture::flag_type::communist2:
+		case culture::flag_type::communist2:
 			return NATIVE("_communist2");
-			case culture::flag_type::communist3:
+		case culture::flag_type::communist3:
 			return NATIVE("_communist3");
-			case culture::flag_type::fascist2:
+		case culture::flag_type::fascist2:
 			return NATIVE("_fascist2");
-			case culture::flag_type::fascist3:
+		case culture::flag_type::fascist3:
 			return NATIVE("_fascist3");
-			case culture::flag_type::theocracy2:
+		case culture::flag_type::theocracy2:
 			return NATIVE("_theocracy2");
-			case culture::flag_type::theocracy3:
+		case culture::flag_type::theocracy3:
 			return NATIVE("_theocracy3");
-			case culture::flag_type::cosmetic_1:
+		case culture::flag_type::cosmetic_1:
 			return NATIVE("_cosmetic_1");
-			case culture::flag_type::cosmetic_2:
+		case culture::flag_type::cosmetic_2:
 			return NATIVE("_cosmetic_2");
-			case culture::flag_type::colonial:
+		case culture::flag_type::colonial:
 			return NATIVE("_colonial");
-			case culture::flag_type::nationalist:
+		case culture::flag_type::nationalist:
 			return NATIVE("_nationalist");
-			case culture::flag_type::sectarian:
+		case culture::flag_type::sectarian:
 			return NATIVE("_sectarian");
-			case culture::flag_type::socialist:
+		case culture::flag_type::socialist:
 			return NATIVE("_socialist");
-			case culture::flag_type::dominion:
+		case culture::flag_type::dominion:
 			return NATIVE("_dominion");
-			case culture::flag_type::agrarism:
+		case culture::flag_type::agrarism:
 			return NATIVE("_agrarism");
-			case culture::flag_type::national_syndicalist:
+		case culture::flag_type::national_syndicalist:
 			return NATIVE("_national_syndicalist");
-			case culture::flag_type::theocratic:
+		case culture::flag_type::theocratic:
 			return NATIVE("_theocratic");
-			case culture::flag_type::slot1:
+		case culture::flag_type::slot1:
 			return NATIVE("_slot1");
-			case culture::flag_type::slot2:
+		case culture::flag_type::slot2:
 			return NATIVE("_slot2");
-			case culture::flag_type::slot3:
+		case culture::flag_type::slot3:
 			return NATIVE("_slot3");
-			case culture::flag_type::slot4:
+		case culture::flag_type::slot4:
 			return NATIVE("_slot4");
-			case culture::flag_type::anarcho_liberal:
+		case culture::flag_type::anarcho_liberal:
 			return NATIVE("_anarcho_liberal");
-			case culture::flag_type::green:
+		case culture::flag_type::green:
 			return NATIVE("_green");
-			case culture::flag_type::traditionalist:
+		case culture::flag_type::traditionalist:
 			return NATIVE("_traditionalist");
-			case culture::flag_type::ultranationalist:
+		case culture::flag_type::ultranationalist:
 			return NATIVE("_ultranationalist");
 		}
 		return NATIVE("");
@@ -576,17 +574,17 @@ namespace ogl {
 	}
 
 	GLuint get_texture_handle(sys::state& state, dcon::texture_id id, bool keep_data) {
-		if(!id)
-		return 0;
-		if(state.open_gl.asset_textures[id].loaded) {
-			return state.open_gl.asset_textures[id].texture_handle;
-		} else { // load from file
+		if(id) {
+			if(state.open_gl.asset_textures[id].loaded) {
+				return state.open_gl.asset_textures[id].texture_handle;
+			}
+			// load from file
 			auto fname = state.ui_defs.textures[id];
 			auto fname_view = state.to_string_view(fname);
 			auto native_name = simple_fs::win1250_to_native(fname_view);
-
 			return load_file_and_return_handle(native_name, state.common_fs, state.open_gl.asset_textures[id], keep_data);
-		} // end else (not already loaded)
+		}
+		return 0;
 	}
 
 	data_texture::data_texture(int32_t sz, int32_t ch) {

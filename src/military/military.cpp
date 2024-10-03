@@ -935,25 +935,30 @@ namespace military {
 	}
 
 	void update_recruitable_regiments(sys::state& state, dcon::nation_id n) {
-		state.world.nation_set_recruitable_regiments(n, uint16_t(0));
+		int32_t count = 0;
 		for(auto p : state.world.nation_get_province_ownership(n)) {
-			state.world.nation_get_recruitable_regiments(n) += uint16_t(regiments_max_possible_from_province(state, p.get_province()));
+			count += regiments_max_possible_from_province(state, p.get_province());
 		}
+		state.world.nation_set_recruitable_regiments(n, uint16_t(count));
 	}
 	void update_all_recruitable_regiments(sys::state& state) {
-		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_recruitable_regiments(ids, ve::int_vector(0)); });
-		state.world.for_each_province([&](dcon::province_id p) {
-			auto owner = state.world.province_get_nation_from_province_ownership(p);
-			if(owner) {
-				state.world.nation_get_recruitable_regiments(owner) += uint16_t(regiments_max_possible_from_province(state, p));
-			}
+		//state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_recruitable_regiments(ids, ve::int_vector(0)); });
+		state.world.execute_serial_over_nation([&](auto ids) {
+			auto num_regs = ve::apply([&](dcon::nation_id n) {
+				int32_t count = 0;
+				for(const auto po : state.world.nation_get_province_ownership(n)) {
+					count += regiments_max_possible_from_province(state, po.get_province());
+				}
+				return count;
+			}, ids);
+			state.world.nation_set_recruitable_regiments(ids, num_regs);
 		});
 	}
 	void regenerate_total_regiment_counts(sys::state& state) {
-		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
+		//state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_active_regiments(ids, ve::int_vector(0)); });
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto num_regs = ve::apply([&](dcon::nation_id n) {
-				uint32_t count = 0;
+				int32_t count = 0;
 				for(const auto al : state.world.nation_get_army_control(n)) {
 					for(const auto reg : al.get_army().get_army_membership()) {
 						if(reg.get_regiment().get_pop_from_regiment_source().get_poptype() == state.culture_definitions.soldiers) {

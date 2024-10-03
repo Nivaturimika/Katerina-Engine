@@ -14,6 +14,7 @@
 #include "province_templates.hpp"
 #include "rebels.hpp"
 #include "economy_estimations.hpp"
+#include "pdqsort.h"
 
 namespace nations {
 
