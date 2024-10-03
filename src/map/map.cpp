@@ -412,12 +412,24 @@ namespace map {
 		return shader;
 	}
 
-	GLuint create_program(simple_fs::file& vshader_file, simple_fs::file& fshader_file, uint32_t flags) {
+	GLuint create_program(simple_fs::file& vshader_file, simple_fs::file& fshader_file, uint32_t flags, std::string_view sv = "") {
 		auto vshader_content = simple_fs::view_contents(vshader_file);
-		auto vshader_string = std::string_view(vshader_content.data, vshader_content.file_size);
 		auto fshader_content = simple_fs::view_contents(fshader_file);
-		auto fshader_string = std::string_view(fshader_content.data, fshader_content.file_size);
-		return ogl::create_program(vshader_string, fshader_string, flags);
+		if(sv.empty()) { //no header
+			auto vshader_string = std::string_view(vshader_content.data, vshader_content.file_size);
+			auto fshader_string = std::string_view(fshader_content.data, fshader_content.file_size);
+			return ogl::create_program(vshader_string, fshader_string, flags);
+		} else { //added header
+			auto vshader_string = std::string(vshader_content.data, vshader_content.file_size);
+			if(!sv.empty()) {
+				vshader_string = std::string(sv) + vshader_string;
+			}
+			auto fshader_string = std::string(fshader_content.data, fshader_content.file_size);
+			if(!sv.empty()) {
+				fshader_string = std::string(sv) + fshader_string;
+			}
+			return ogl::create_program(vshader_string, fshader_string, flags);
+		}
 	}
 
 	void display_data::load_shaders(simple_fs::directory& root) {
@@ -428,20 +440,7 @@ namespace map {
 		auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
 
 		auto map_vshader = try_load_shader(shaders_dir, NATIVE("map_v.glsl"));
-
-		bool water_colormap = true;
-		auto gfx_dir = open_directory(root, NATIVE("gfx"));
-		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
-		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
-			auto contents = simple_fs::view_contents(*f);
-			auto str = std::string(contents.data, contents.data + contents.file_size);
-			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
-				water_colormap = false;
-			}
-		}
-		auto map_far_fshader = water_colormap
-			? try_load_shader(shaders_dir, NATIVE("map_far2_f.glsl"))
-			: try_load_shader(shaders_dir, NATIVE("map_far_f.glsl"));
+		auto map_far_fshader = try_load_shader(shaders_dir, NATIVE("map_far_f.glsl"));
 
 		auto map_close_fshader = try_load_shader(shaders_dir, NATIVE("map_close_f.glsl"));
 		auto screen_vshader = try_load_shader(shaders_dir, NATIVE("screen_v.glsl"));
@@ -461,12 +460,33 @@ namespace map {
 		auto model3d_vshader = try_load_shader(shaders_dir, NATIVE("model3d_v.glsl"));
 		auto model3d_fshader = try_load_shader(shaders_dir, NATIVE("model3d_f.glsl"));
 
+		std::string_view vs_colormap_header =
+			"#define HAVE_WATER_COLORMAP true\n"
+			"#define POLITICAL_LIGHTNESS 0.5f\n"
+			"#define POLITICAL_TERRAIN_MIX 0.4f\n"
+			"#define COLOR_LIGHTNESS 1.5f\n";
+		std::string_view vs_no_colormap_header =
+			"#define HAVE_WATER_COLORMAP false\n"
+			"#define POLITICAL_LIGHTNESS 0.7f\n"
+			"#define POLITICAL_TERRAIN_MIX 0.3f\n"
+			"#define COLOR_LIGHTNESS 1.5f\n";
+		bool water_colormap = true;
+		auto gfx_dir = open_directory(root, NATIVE("gfx"));
+		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
+		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
+			auto contents = simple_fs::view_contents(*f);
+			auto str = std::string(contents.data, contents.data + contents.file_size);
+			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
+				water_colormap = false;
+			}
+		}
+
 		for(uint32_t j = 0; j < uint8_t(sys::projection_mode::num_of_modes); j++) {
 			if(map_vshader && map_far_fshader) {
-				shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j);
+				shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j, water_colormap ? vs_colormap_header : vs_no_colormap_header);
 			}
 			if(map_vshader && map_close_fshader) {
-				shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j);
+				shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j, water_colormap ? vs_colormap_header : vs_no_colormap_header);
 			}
 			if(tline_vshader && tlineb_fshader) {
 				shaders[j][shader_textured_line] = create_program(*tline_vshader, *tline_fshader, j);
