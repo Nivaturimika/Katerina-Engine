@@ -428,7 +428,21 @@ namespace map {
 		auto shaders_dir = open_directory(assets_dir, NATIVE("shaders"));
 
 		auto map_vshader = try_load_shader(shaders_dir, NATIVE("map_v.glsl"));
-		auto map_far_fshader = try_load_shader(shaders_dir, NATIVE("map_far_f.glsl"));
+
+		bool water_colormap = true;
+		auto gfx_dir = open_directory(root, NATIVE("gfx"));
+		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
+		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
+			auto contents = simple_fs::view_contents(*f);
+			auto str = std::string(contents.data, contents.data + contents.file_size);
+			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
+				water_colormap = false;
+			}
+		}
+		auto map_far_fshader = water_colormap
+			? try_load_shader(shaders_dir, NATIVE("map_far2_f.glsl"))
+			: try_load_shader(shaders_dir, NATIVE("map_far_f.glsl"));
+
 		auto map_close_fshader = try_load_shader(shaders_dir, NATIVE("map_close_f.glsl"));
 		auto screen_vshader = try_load_shader(shaders_dir, NATIVE("screen_v.glsl"));
 		auto selection_vshader = try_load_shader(shaders_dir, NATIVE("selection_v.glsl"));
