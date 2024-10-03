@@ -108,6 +108,7 @@ endif()
 # Include sub-projects.
 add_subdirectory(dependencies)
 add_subdirectory(ParserGenerator)
+add_subdirectory(DconGenerator)
 
 add_library(KatEngineCommon INTERFACE)
 target_compile_definitions(KatEngineCommon INTERFACE "PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\"")
@@ -184,7 +185,6 @@ else() # GCC or CLANG
 			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
 	endif()
 endif()
-target_link_libraries(KatEngineCommon INTERFACE dependency_DataContainer)
 target_link_libraries(KatEngineCommon INTERFACE libglew_static)
 target_link_libraries(KatEngineCommon INTERFACE stb_image)
 target_link_libraries(KatEngineCommon INTERFACE freetype)
@@ -352,7 +352,7 @@ set(CONTAINER_PATH ${PROJECT_SOURCE_DIR}/src/gamestate/dcon_generated)
 # The command to build the generated file
 add_custom_command(
 	OUTPUT ${CONTAINER_PATH}.hpp
-	COMMAND DCONGENERATOR ${CONTAINER_PATH}.txt
+	COMMAND DconGenerator ${CONTAINER_PATH}.txt
 	DEPENDS ${CONTAINER_PATH}.txt
 	VERBATIM)
 

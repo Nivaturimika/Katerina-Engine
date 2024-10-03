@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ve.hpp"
+
 namespace ve {
 
 	template<typename T>
