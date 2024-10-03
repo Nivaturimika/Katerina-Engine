@@ -78,21 +78,21 @@ namespace ui {
 	}
 
 	class decision_requirements : public button_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto id = retrieve<dcon::decision_id>(state, parent);
-			auto condition = state.world.decision_get_allow(id);
-			if(condition)
-			trigger_description(state, contents, condition, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			if(auto condition = state.world.decision_get_allow(id); condition) {
+				trigger_description(state, contents, condition, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			}
 		}
 	};
 
 	class decision_ai_will_do : public button_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
@@ -100,28 +100,54 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto id = retrieve<dcon::decision_id>(state, parent);
 			text::add_line(state, contents, "alice_ai_decision");
-			auto mkey = state.world.decision_get_ai_will_do(id);
-			if(mkey)
-			multiplicative_value_modifier_description(state, contents, mkey, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			if(auto mkey = state.world.decision_get_ai_will_do(id); mkey) {
+				multiplicative_value_modifier_description(state, contents, mkey, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			}
+		}
+
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(state.user_settings.spoilers) {
+				return button_element_base::render(state, x, y);
+			}
+		}
+
+		mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+			if(state.user_settings.spoilers) {
+				return button_element_base::impl_probe_mouse(state, x, y, type);
+			}
+			return mouse_probe{ nullptr, ui::xy_pair{} };
 		}
 	};
 
 	class decision_potential : public button_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto id = retrieve<dcon::decision_id>(state, parent);
-			auto potential = state.world.decision_get_potential(id);
-			if(potential)
-			trigger_description(state, contents, potential, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			if(auto potential = state.world.decision_get_potential(id); potential) {
+				trigger_description(state, contents, potential, trigger::to_generic(state.local_player_nation), trigger::to_generic(state.local_player_nation), -1);
+			}
+		}
+
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(state.user_settings.spoilers) {
+				return button_element_base::render(state, x, y);
+			}
+		}
+
+		mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
+			if(state.user_settings.spoilers) {
+				return button_element_base::impl_probe_mouse(state, x, y, type);
+			}
+			return mouse_probe{ nullptr, ui::xy_pair{} };
 		}
 	};
 
 	class make_decision : public button_element_base {
-		public:
+	public:
 		sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 			return sound::get_decision_sound(state);
 		}

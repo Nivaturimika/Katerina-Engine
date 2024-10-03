@@ -1101,7 +1101,7 @@ namespace ui {
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			auto mid_point = state.world.province_get_mid_point(prov);
 			auto map_pos = state.map_state.normalize_map_coord(mid_point);
-		auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
+			auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
 			glm::vec2 screen_pos;
 
 			if(!state.map_state.map_to_screen(state, map_pos, screen_size, screen_pos)) {
@@ -1117,9 +1117,8 @@ namespace ui {
 				visible = true;
 				impl_on_update(state);
 			}
-			
 
-		auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
 			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
@@ -1133,7 +1132,7 @@ namespace ui {
 		}
 
 		mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-		return mouse_probe{ nullptr, ui::xy_pair{} };
+			return mouse_probe{ nullptr, ui::xy_pair{} };
 		}
 	};
 
