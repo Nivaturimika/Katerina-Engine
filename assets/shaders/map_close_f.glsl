@@ -22,8 +22,6 @@ uniform vec2 map_size;
 uniform float time;
 vec4 gamma_correct(in vec4 colour);
 
-#define COLOR_LIGHTNESS 1.5
-
 // sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
 // so each column has 8 tiles, and each row has 8 tiles too
 float xx = 1 / map_size.x;
@@ -165,10 +163,10 @@ vec4 get_land_political_close() {
 	float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
 	vec3 political = clamp(mix(prov_color, stripe_color, stripeFactor) + vec4(prov_highlight), 0.0, 1.0).rgb;
 	political *= texture(province_fow, prov_id).rgb;
-	political = political - 0.7f;
+	political -= POLITICAL_LIGHTNESS;
 
 	// Mix together the terrain and map mode color
-	terrain.rgb = mix(terrain.rgb, political, 0.3);
+	terrain.rgb = mix(terrain.rgb, political, POLITICAL_TERRAIN_MIX);
 	terrain.rgb *= COLOR_LIGHTNESS;
 	return terrain;
 }

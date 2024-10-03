@@ -460,33 +460,43 @@ namespace map {
 		auto model3d_vshader = try_load_shader(shaders_dir, NATIVE("model3d_v.glsl"));
 		auto model3d_fshader = try_load_shader(shaders_dir, NATIVE("model3d_f.glsl"));
 
-		std::string_view vs_colormap_header =
-			"#define HAVE_WATER_COLORMAP true\n"
-			"#define POLITICAL_LIGHTNESS 0.5f\n"
-			"#define POLITICAL_TERRAIN_MIX 0.4f\n"
-			"#define COLOR_LIGHTNESS 1.5f\n";
-		std::string_view vs_no_colormap_header =
+		std::string_view vs_header =
 			"#define HAVE_WATER_COLORMAP false\n"
 			"#define POLITICAL_LIGHTNESS 0.7f\n"
 			"#define POLITICAL_TERRAIN_MIX 0.3f\n"
-			"#define COLOR_LIGHTNESS 1.5f\n";
-		bool water_colormap = false;
+			"#define COLOR_LIGHTNESS 1.5f\n"
+			"#define OVERLAY_MIX 1.0f\n";
 		auto gfx_dir = open_directory(root, NATIVE("gfx"));
 		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
 		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
 			auto contents = simple_fs::view_contents(*f);
 			auto str = std::string(contents.data, contents.data + contents.file_size);
 			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
-				water_colormap = true;
+				//has colormap
+				vs_header =
+					"#define HAVE_WATER_COLORMAP true\n"
+					"#define POLITICAL_LIGHTNESS 0.5f\n"
+					"#define POLITICAL_TERRAIN_MIX 0.4f\n"
+					"#define COLOR_LIGHTNESS 1.5f\n"
+					"#define OVERLAY_MIX 1.0f\n";
+			}
+			if(str.find("//The map is a flat plane") != std::string::npos) {
+				//belle cartographie compatibility
+				vs_header =
+					"#define HAVE_WATER_COLORMAP false\n"
+					"#define POLITICAL_LIGHTNESS 0.7f\n"
+					"#define POLITICAL_TERRAIN_MIX 0.5f\n"
+					"#define COLOR_LIGHTNESS 1.5f\n"
+					"#define OVERLAY_MIX 0.5f\n";
 			}
 		}
 
 		for(uint32_t j = 0; j < uint8_t(sys::projection_mode::num_of_modes); j++) {
 			if(map_vshader && map_far_fshader) {
-				shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j, water_colormap ? vs_colormap_header : vs_no_colormap_header);
+				shaders[j][shader_far_terrain] = create_program(*map_vshader, *map_far_fshader, j, vs_header);
 			}
 			if(map_vshader && map_close_fshader) {
-				shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j, water_colormap ? vs_colormap_header : vs_no_colormap_header);
+				shaders[j][shader_close_terrain] = create_program(*map_vshader, *map_close_fshader, j, vs_header);
 			}
 			if(tline_vshader && tlineb_fshader) {
 				shaders[j][shader_textured_line] = create_program(*tline_vshader, *tline_fshader, j);
