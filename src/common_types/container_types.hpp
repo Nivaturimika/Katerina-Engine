@@ -316,7 +316,7 @@ namespace sys {
 } // namespace sys
 
 namespace reports {
-	void write_debug(const char* msg) {
+	inline void write_debug(const char* msg) {
 		if(msg) {
 #ifdef _WIN32
 			OutputDebugStringA(msg);

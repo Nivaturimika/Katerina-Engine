@@ -82,21 +82,23 @@ namespace sound {
 	}
 
 	void initialize_sound_system(sys::state& state) {
+		reports::write_debug("Initializing sound system");
+
 		state.sound_ptr = std::make_unique<sound_impl>();
 
 		auto root_dir = simple_fs::get_root(state.common_fs);
 		auto const music_dir = simple_fs::open_directory(root_dir, NATIVE("music"));
 		for(auto const& mp3_file : simple_fs::list_files(music_dir, NATIVE(".mp3"))) {
-		audio_instance audio{};
+			audio_instance audio{};
 			audio.set_file(simple_fs::get_full_name(mp3_file));
 			state.sound_ptr->music_list.emplace_back(audio);
 			auto file_name = simple_fs::get_full_name(mp3_file);
 			if(parsers::native_has_fixed_suffix_ci(file_name.c_str(), file_name.c_str() + file_name.length(), NATIVE("thecoronation_titletheme.mp3")))
-			state.sound_ptr->first_music = int32_t(state.sound_ptr->music_list.size()) - 1;
+				state.sound_ptr->first_music = int32_t(state.sound_ptr->music_list.size()) - 1;
 		}
 		for(auto const& music_subdir : simple_fs::list_subdirectories(music_dir)) {
 			for(auto const& mp3_file : simple_fs::list_files(music_subdir, NATIVE(".mp3"))) {
-			audio_instance audio{};
+				audio_instance audio{};
 				audio.set_file(simple_fs::get_full_name(mp3_file));
 				state.sound_ptr->music_list.emplace_back(audio);
 			}
@@ -106,41 +108,41 @@ namespace sound {
 			audio_instance* audio;
 			native_string_view name;
 		} vanilla_sound_table[] = {
-		//{ &state.sound_ptr->click_sound, NATIVE("GI_ValidClick.wav") },
-		{ &state.sound_ptr->technology_finished_sound, NATIVE("UI_TechnologyFinished.wav") },
-		{ &state.sound_ptr->army_move_sound, NATIVE("GI_InfantryMove.wav") },
-		{ &state.sound_ptr->army_select_sound, NATIVE("GI_InfantrySelected.wav") },
-		{ &state.sound_ptr->navy_move_sound, NATIVE("UI_SailMove.wav") },
-		{ &state.sound_ptr->navy_select_sound, NATIVE("UI_SailSelected.wav") },
-		{ &state.sound_ptr->declaration_of_war_sound, NATIVE("DeclarationofWar.wav") },
-		{ &state.sound_ptr->chat_message_sound, NATIVE("GI_ChatMessage.wav") },
-		{ &state.sound_ptr->error_sound, NATIVE("GI_ErrorBlip.wav") },
-		{ &state.sound_ptr->peace_sound, NATIVE("Misc_Peace.wav") },
-		{ &state.sound_ptr->army_built_sound, NATIVE("UI_LandUnitFinished.wav") },
-		{ &state.sound_ptr->navy_built_sound, NATIVE("UI_NavalUnitFinished.wav") },
-		{ &state.sound_ptr->factory_built_sound, NATIVE("Misc_NewFactory.wav") },
-		{ &state.sound_ptr->revolt_sound, NATIVE("Misc_revolt.wav") },
-		{ &state.sound_ptr->fort_built_sound, NATIVE("Misc_Fortification.wav") },
-		{ &state.sound_ptr->railroad_built_sound, NATIVE("Misc_Infrastructure.wav") },
-		{ &state.sound_ptr->naval_base_built_sound, NATIVE("Misc_CoalingStation.wav") },
-		{ &state.sound_ptr->minor_event_sound, NATIVE("GI_MinorBlip.wav") },
-		{ &state.sound_ptr->major_event_sound, NATIVE("Misc_Attention.wav") },
-		{ &state.sound_ptr->decline_sound, NATIVE("GI_FailureBlip.wav") },
-		{ &state.sound_ptr->accept_sound, NATIVE("GI_SuccessBlip.wav") },
-		{ &state.sound_ptr->diplomatic_request_sound, NATIVE("GI_MessageWindow.wav") },
-		{ &state.sound_ptr->election_sound, NATIVE("Misc_ElectionHeld.wav") },
-		{ &state.sound_ptr->land_battle_sounds[0], NATIVE("Combat_Cavalry_1.wav") },
-		{ &state.sound_ptr->land_battle_sounds[1], NATIVE("Combat_Cavalry_2.wav") },
-		{ &state.sound_ptr->land_battle_sounds[2], NATIVE("Combat_Cavalry_3.wav") },
-		{ &state.sound_ptr->land_battle_sounds[3], NATIVE("Combat_Infantry_1.wav") },
-		{ &state.sound_ptr->land_battle_sounds[4], NATIVE("Combat_Infantry_2.wav") },
-		{ &state.sound_ptr->land_battle_sounds[5], NATIVE("Combat_Infantry_3.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[0], NATIVE("Combat_MajorShip_1.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[1], NATIVE("Combat_MajorShip_2.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[2], NATIVE("Combat_MajorShip_3.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[3], NATIVE("Combat_MinorShip_1.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[4], NATIVE("Combat_MinorShip_2.wav") },
-		{ &state.sound_ptr->naval_battle_sounds[5], NATIVE("Combat_MinorShip_3.wav") },
+			//{ &state.sound_ptr->click_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->technology_finished_sound, NATIVE("UI_TechnologyFinished.wav") },
+			{ &state.sound_ptr->army_move_sound, NATIVE("GI_InfantryMove.wav") },
+			{ &state.sound_ptr->army_select_sound, NATIVE("GI_InfantrySelected.wav") },
+			{ &state.sound_ptr->navy_move_sound, NATIVE("UI_SailMove.wav") },
+			{ &state.sound_ptr->navy_select_sound, NATIVE("UI_SailSelected.wav") },
+			{ &state.sound_ptr->declaration_of_war_sound, NATIVE("DeclarationofWar.wav") },
+			{ &state.sound_ptr->chat_message_sound, NATIVE("GI_ChatMessage.wav") },
+			{ &state.sound_ptr->error_sound, NATIVE("GI_ErrorBlip.wav") },
+			{ &state.sound_ptr->peace_sound, NATIVE("Misc_Peace.wav") },
+			{ &state.sound_ptr->army_built_sound, NATIVE("UI_LandUnitFinished.wav") },
+			{ &state.sound_ptr->navy_built_sound, NATIVE("UI_NavalUnitFinished.wav") },
+			{ &state.sound_ptr->factory_built_sound, NATIVE("Misc_NewFactory.wav") },
+			{ &state.sound_ptr->revolt_sound, NATIVE("Misc_revolt.wav") },
+			{ &state.sound_ptr->fort_built_sound, NATIVE("Misc_Fortification.wav") },
+			{ &state.sound_ptr->railroad_built_sound, NATIVE("Misc_Infrastructure.wav") },
+			{ &state.sound_ptr->naval_base_built_sound, NATIVE("Misc_CoalingStation.wav") },
+			{ &state.sound_ptr->minor_event_sound, NATIVE("GI_MinorBlip.wav") },
+			{ &state.sound_ptr->major_event_sound, NATIVE("Misc_Attention.wav") },
+			{ &state.sound_ptr->decline_sound, NATIVE("GI_FailureBlip.wav") },
+			{ &state.sound_ptr->accept_sound, NATIVE("GI_SuccessBlip.wav") },
+			{ &state.sound_ptr->diplomatic_request_sound, NATIVE("GI_MessageWindow.wav") },
+			{ &state.sound_ptr->election_sound, NATIVE("Misc_ElectionHeld.wav") },
+			{ &state.sound_ptr->land_battle_sounds[0], NATIVE("Combat_Cavalry_1.wav") },
+			{ &state.sound_ptr->land_battle_sounds[1], NATIVE("Combat_Cavalry_2.wav") },
+			{ &state.sound_ptr->land_battle_sounds[2], NATIVE("Combat_Cavalry_3.wav") },
+			{ &state.sound_ptr->land_battle_sounds[3], NATIVE("Combat_Infantry_1.wav") },
+			{ &state.sound_ptr->land_battle_sounds[4], NATIVE("Combat_Infantry_2.wav") },
+			{ &state.sound_ptr->land_battle_sounds[5], NATIVE("Combat_Infantry_3.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[0], NATIVE("Combat_MajorShip_1.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[1], NATIVE("Combat_MajorShip_2.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[2], NATIVE("Combat_MajorShip_3.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[3], NATIVE("Combat_MinorShip_1.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[4], NATIVE("Combat_MinorShip_2.wav") },
+			{ &state.sound_ptr->naval_battle_sounds[5], NATIVE("Combat_MinorShip_3.wav") },
 		};
 		auto const sound_directory = simple_fs::open_directory(root_dir, NATIVE("sound"));
 		for(const auto& e : vanilla_sound_table) {
@@ -151,33 +153,33 @@ namespace sound {
 			audio_instance* audio;
 			native_string_view name;
 		} new_sound_table[] = {
-		{ &state.sound_ptr->click_sound, NATIVE("NU_AltClick.wav") },
-		{ &state.sound_ptr->click_left_sound, NATIVE("NU_ClickL.wav") },
-		{ &state.sound_ptr->click_right_sound, NATIVE("NU_ClickR.wav") },
-		{ &state.sound_ptr->console_open_sound, NATIVE("NU_OpenConsole.wav") },
-		{ &state.sound_ptr->console_close_sound, NATIVE("NU_CloseConsole.wav") },
-		{ &state.sound_ptr->tab_budget_sound, NATIVE("NU_TabBudget.wav") },
-		{ &state.sound_ptr->hover_sound, NATIVE("NU_Hover.wav") },
-		{ &state.sound_ptr->checkbox_sound, NATIVE("NU_Checkbox.wav") },
-		{ &state.sound_ptr->enact_sound, NATIVE("NU_Enact.wav") },
-		{ &state.sound_ptr->subtab_sound, NATIVE("NU_Subtab.wav") },
-		{ &state.sound_ptr->delete_sound, NATIVE("NU_Delete.wav") },
-		{ &state.sound_ptr->autochoose_sound, NATIVE("NU_Autochoose.wav") },
-		{ &state.sound_ptr->tab_politics_sound, NATIVE("NU_TabPolitics.wav") },
-		{ &state.sound_ptr->tab_diplomacy_sound, NATIVE("NU_TabDiplomacy.wav") },
-		{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
-		{ &state.sound_ptr->tab_population_sound, NATIVE("NU_TabPopulation.wav") },
-		{ &state.sound_ptr->tab_production_sound, NATIVE("NU_TabProduction.wav") },
-		{ &state.sound_ptr->tab_technology_sound, NATIVE("NU_TabTechnology.wav") },
-		{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
-		{ &state.sound_ptr->event_sound, NATIVE("NU_Event.wav") },
-		{ &state.sound_ptr->decision_sound, NATIVE("NU_Decision.wav") },
-		{ &state.sound_ptr->pause_sound, NATIVE("NU_Pause.wav") },
-		{ &state.sound_ptr->unpause_sound, NATIVE("NU_Unpause.wav") },
-		{ &state.sound_ptr->province_select_sounds[0], NATIVE("NU_ProvSelect1.wav") },
-		{ &state.sound_ptr->province_select_sounds[1], NATIVE("NU_ProvSelect2.wav") },
-		{ &state.sound_ptr->province_select_sounds[2], NATIVE("NU_ProvSelect3.wav") },
-		{ &state.sound_ptr->province_select_sounds[3], NATIVE("NU_ProvSelect4.wav") },
+			{ &state.sound_ptr->click_sound, NATIVE("NU_AltClick.wav") },
+			{ &state.sound_ptr->click_left_sound, NATIVE("NU_ClickL.wav") },
+			{ &state.sound_ptr->click_right_sound, NATIVE("NU_ClickR.wav") },
+			{ &state.sound_ptr->console_open_sound, NATIVE("NU_OpenConsole.wav") },
+			{ &state.sound_ptr->console_close_sound, NATIVE("NU_CloseConsole.wav") },
+			{ &state.sound_ptr->tab_budget_sound, NATIVE("NU_TabBudget.wav") },
+			{ &state.sound_ptr->hover_sound, NATIVE("NU_Hover.wav") },
+			{ &state.sound_ptr->checkbox_sound, NATIVE("NU_Checkbox.wav") },
+			{ &state.sound_ptr->enact_sound, NATIVE("NU_Enact.wav") },
+			{ &state.sound_ptr->subtab_sound, NATIVE("NU_Subtab.wav") },
+			{ &state.sound_ptr->delete_sound, NATIVE("NU_Delete.wav") },
+			{ &state.sound_ptr->autochoose_sound, NATIVE("NU_Autochoose.wav") },
+			{ &state.sound_ptr->tab_politics_sound, NATIVE("NU_TabPolitics.wav") },
+			{ &state.sound_ptr->tab_diplomacy_sound, NATIVE("NU_TabDiplomacy.wav") },
+			{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
+			{ &state.sound_ptr->tab_population_sound, NATIVE("NU_TabPopulation.wav") },
+			{ &state.sound_ptr->tab_production_sound, NATIVE("NU_TabProduction.wav") },
+			{ &state.sound_ptr->tab_technology_sound, NATIVE("NU_TabTechnology.wav") },
+			{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
+			{ &state.sound_ptr->event_sound, NATIVE("NU_Event.wav") },
+			{ &state.sound_ptr->decision_sound, NATIVE("NU_Decision.wav") },
+			{ &state.sound_ptr->pause_sound, NATIVE("NU_Pause.wav") },
+			{ &state.sound_ptr->unpause_sound, NATIVE("NU_Unpause.wav") },
+			{ &state.sound_ptr->province_select_sounds[0], NATIVE("NU_ProvSelect1.wav") },
+			{ &state.sound_ptr->province_select_sounds[1], NATIVE("NU_ProvSelect2.wav") },
+			{ &state.sound_ptr->province_select_sounds[2], NATIVE("NU_ProvSelect3.wav") },
+			{ &state.sound_ptr->province_select_sounds[3], NATIVE("NU_ProvSelect4.wav") },
 		};
 		auto const assets_directory = simple_fs::open_directory(root_dir, NATIVE("\\assets"));
 		for(const auto& e : new_sound_table) {
@@ -196,14 +198,14 @@ namespace sound {
 	}
 
 	void play_effect(sys::state& state, audio_instance& s, float volume) {
-		if(state.sound_ptr->global_pause)
-		return;
-		state.sound_ptr->override_sound(state.sound_ptr->effect_sound, s, volume);
+		if(!state.sound_ptr->global_pause) {
+			state.sound_ptr->override_sound(state.sound_ptr->effect_sound, s, volume);
+		}
 	}
 	void play_interface_sound(sys::state& state, audio_instance& s, float volume) {
-		if(state.sound_ptr->global_pause)
-		return;
-		state.sound_ptr->override_sound(state.sound_ptr->interface_sound, s, volume);
+		if(!state.sound_ptr->global_pause) {
+			state.sound_ptr->override_sound(state.sound_ptr->interface_sound, s, volume);
+		}
 	}
 
 	void stop_music(sys::state& state) {

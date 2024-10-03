@@ -392,6 +392,8 @@ namespace ogl {
 	}
 
 	void initialize_opengl(sys::state& state) {
+		reports::write_debug("Initializing OpenGL context");
+
 		create_opengl_context(state);
 
 		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);

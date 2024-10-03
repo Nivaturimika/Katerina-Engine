@@ -1101,8 +1101,9 @@ void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
 			ui_state.nation_picker->add_child_to_front(std::move(new_elm));
 		}
 		map_mode::set_map_mode(*this, map_mode::mode::political);
-
 		ui_state.tooltip_font = text::name_into_font_id(*this, "ToolTip_Font");
+
+		reports::write_debug("Finished creating game state\n");
 	}
 	//
 	// string pool functions

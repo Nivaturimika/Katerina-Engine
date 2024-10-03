@@ -126,191 +126,204 @@ namespace window {
 			// setup opengl here
 			ogl::initialize_opengl(*create_state);
 
-		RECT crect{};
+			RECT crect{};
 			GetClientRect(hwnd, &crect);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)create_state);
 
+			reports::write_debug("Finished window creation");
 			return 0;
 		}
 
 		sys::state* state = (sys::state*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-		if(!state || !(state->win_ptr))
-		return DefWindowProcW(hwnd, message, wParam, lParam);
+		if(!state || !(state->win_ptr)) {
+			return DefWindowProcW(hwnd, message, wParam, lParam);
+		}
 
 		switch(message) {
-			case WM_CLOSE:
+		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) nullptr);
 			return 0;
-			case WM_DESTROY:
+		case WM_DESTROY:
 			ogl::shutdown_opengl(*state);
 			ReleaseDC(hwnd, state->win_ptr->opengl_window_dc);
 			PostQuitMessage(0);
 			return 0;
-			case WM_SETFOCUS:
+		case WM_SETFOCUS:
 			if(state->win_ptr->in_fullscreen)
-			SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOREDRAW | SWP_NOSIZE | SWP_NOMOVE);
+				SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOREDRAW | SWP_NOSIZE | SWP_NOMOVE);
 			if(state->user_settings.mute_on_focus_lost) {
 				sound::resume_all(*state);
 			}
 			return 0;
-			case WM_KILLFOCUS:
+		case WM_KILLFOCUS:
 			if(state->win_ptr->in_fullscreen)
-			SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOREDRAW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+				SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOREDRAW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 			if(state->user_settings.mute_on_focus_lost) {
 				sound::pause_all(*state);
 			}
 			return 0;
-			case WM_LBUTTONDOWN: {
-				SetCapture(hwnd);
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_lbutton_down(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				state->win_ptr->left_mouse_down = true;
-				return 0;
-			}
-			case WM_LBUTTONUP: {
-				ReleaseCapture();
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_lbutton_up(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				state->win_ptr->left_mouse_down = false;
-				return 0;
-			}
-			case WM_MOUSEMOVE: {
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_mouse_move(x, y, get_current_modifiers());
+		case WM_LBUTTONDOWN:
+		{
+			SetCapture(hwnd);
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_lbutton_down(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			state->win_ptr->left_mouse_down = true;
+			return 0;
+		}
+		case WM_LBUTTONUP:
+		{
+			ReleaseCapture();
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_lbutton_up(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			state->win_ptr->left_mouse_down = false;
+			return 0;
+		}
+		case WM_MOUSEMOVE:
+		{
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_mouse_move(x, y, get_current_modifiers());
 
-				if(wParam & MK_LBUTTON)
+			if(wParam & MK_LBUTTON)
 				state->on_mouse_drag(x, y, get_current_modifiers());
 
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				return 0;
-			}
-			case WM_RBUTTONDOWN: {
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_rbutton_down(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				return 0;
-			}
-			case WM_RBUTTONUP: {
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_rbutton_up(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				return 0;
-			}
-			case WM_MBUTTONDOWN: {
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_mbutton_down(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				return 0;
-			}
-			case WM_MBUTTONUP: {
-				auto x = GET_X_LPARAM(lParam);
-				auto y = GET_Y_LPARAM(lParam);
-				state->on_mbutton_up(x, y, get_current_modifiers());
-				state->mouse_x_position = x;
-				state->mouse_y_position = y;
-				return 0;
-			}
-			case WM_SIZE: {
-				window::window_state t = window::window_state::normal;
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			return 0;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_rbutton_down(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			return 0;
+		}
+		case WM_RBUTTONUP:
+		{
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_rbutton_up(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			return 0;
+		}
+		case WM_MBUTTONDOWN:
+		{
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_mbutton_down(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			return 0;
+		}
+		case WM_MBUTTONUP:
+		{
+			auto x = GET_X_LPARAM(lParam);
+			auto y = GET_Y_LPARAM(lParam);
+			state->on_mbutton_up(x, y, get_current_modifiers());
+			state->mouse_x_position = x;
+			state->mouse_y_position = y;
+			return 0;
+		}
+		case WM_SIZE:
+		{
+			window::window_state t = window::window_state::normal;
 
-				if(wParam == SIZE_MAXIMIZED) {
-					t = window_state::maximized;
-				} else if(wParam == SIZE_MINIMIZED) {
-					t = window_state::minimized;
-				} else if(wParam == SIZE_RESTORED) {
-					t = window_state::normal;
-				} else {
-					// other
-					break;
-				}
-
-				state->on_resize(LOWORD(lParam), HIWORD(lParam), t);
-				state->x_size = LOWORD(lParam);
-				state->y_size = HIWORD(lParam);
-
-				// TODO MAP CAMERA HERE CODE HERE
-			// state->map_camera = map::flat_camera(glm::vec2{ state->x_size, state->y_size }, glm::vec2{
-				// state->map_provinces_texture.size_x, state->map_provinces_texture.size_y });
-				return 0;
+			if(wParam == SIZE_MAXIMIZED) {
+				t = window_state::maximized;
+			} else if(wParam == SIZE_MINIMIZED) {
+				t = window_state::minimized;
+			} else if(wParam == SIZE_RESTORED) {
+				t = window_state::normal;
+			} else {
+				// other
+				break;
 			}
-			case WM_MOUSEWHEEL: {
-				state->on_mouse_wheel(state->mouse_x_position, state->mouse_y_position, get_current_modifiers(), (float)(GET_WHEEL_DELTA_WPARAM(wParam)) / 120.0f);
-				return 0;
-			}
-			case WM_KEYDOWN: // fallthrough
-			case WM_SYSKEYDOWN:
-			{
-				sys::virtual_key key = sys::virtual_key(wParam);
-				switch(key) {
-					case sys::virtual_key::RETURN: [[fallthrough]];
-					case sys::virtual_key::BACK: [[fallthrough]];
-					case sys::virtual_key::DELETE_KEY: [[fallthrough]];
-					case sys::virtual_key::LEFT: [[fallthrough]];
-					case sys::virtual_key::RIGHT: [[fallthrough]];
-					case sys::virtual_key::UP: [[fallthrough]];
-					case sys::virtual_key::DOWN:
-					break;
-					default:
-					if((HIWORD(lParam) & KF_REPEAT) != 0)
+
+			state->on_resize(LOWORD(lParam), HIWORD(lParam), t);
+			state->x_size = LOWORD(lParam);
+			state->y_size = HIWORD(lParam);
+
+			// TODO MAP CAMERA HERE CODE HERE
+		// state->map_camera = map::flat_camera(glm::vec2{ state->x_size, state->y_size }, glm::vec2{
+			// state->map_provinces_texture.size_x, state->map_provinces_texture.size_y });
+			return 0;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			state->on_mouse_wheel(state->mouse_x_position, state->mouse_y_position, get_current_modifiers(), (float)(GET_WHEEL_DELTA_WPARAM(wParam)) / 120.0f);
+			return 0;
+		}
+		case WM_KEYDOWN: // fallthrough
+		case WM_SYSKEYDOWN:
+		{
+			sys::virtual_key key = sys::virtual_key(wParam);
+			switch(key) {
+			case sys::virtual_key::RETURN: [[fallthrough]];
+			case sys::virtual_key::BACK: [[fallthrough]];
+			case sys::virtual_key::DELETE_KEY: [[fallthrough]];
+			case sys::virtual_key::LEFT: [[fallthrough]];
+			case sys::virtual_key::RIGHT: [[fallthrough]];
+			case sys::virtual_key::UP: [[fallthrough]];
+			case sys::virtual_key::DOWN:
+				break;
+			default:
+				if((HIWORD(lParam) & KF_REPEAT) != 0)
 					return 0;
-				}
-				state->on_key_down(sys::virtual_key(wParam), get_current_modifiers());
-				return 0;
 			}
-			case WM_SYSKEYUP:
-			case WM_KEYUP:
+			state->on_key_down(sys::virtual_key(wParam), get_current_modifiers());
+			return 0;
+		}
+		case WM_SYSKEYUP:
+		case WM_KEYUP:
 			state->on_key_up(sys::virtual_key(wParam), get_current_modifiers());
 			return 0;
-			case WM_CHAR: {
-				if(state->ui_state.edit_target) {
-					state->on_text(char32_t(wParam));
-				}
-				return 0;
+		case WM_CHAR:
+		{
+			if(state->ui_state.edit_target) {
+				state->on_text(char32_t(wParam));
 			}
-			case WM_PAINT:
-			case WM_DISPLAYCHANGE: {
-				PAINTSTRUCT ps;
-				BeginPaint(hwnd, &ps);
-				EndPaint(hwnd, &ps);
-				return 0;
-			}
-			case WM_DPICHANGED:
 			return 0;
-			case WM_GRAPHNOTIFY:
+		}
+		case WM_PAINT:
+		case WM_DISPLAYCHANGE:
+		{
+			PAINTSTRUCT ps;
+			BeginPaint(hwnd, &ps);
+			EndPaint(hwnd, &ps);
+			return 0;
+		}
+		case WM_DPICHANGED:
+			return 0;
+		case WM_GRAPHNOTIFY:
 			// this is the message that tells us there is a DirectShow event
 			sound::update_music_track(*state);
 			break;
-			case WM_NCCREATE:
-			{
-				if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
-					auto pSetProcessDpiAwarenessContext = (decltype(&SetProcessDpiAwarenessContext))GetProcAddress(hUser32dll, "SetProcessDpiAwarenessContext");
-					if(pSetProcessDpiAwarenessContext == NULL) {
-						// not present, so have to call this
-						auto pEnableNonClientDpiScaling = (decltype(&EnableNonClientDpiScaling))GetProcAddress(hUser32dll, "EnableNonClientDpiScaling");
-						if(pEnableNonClientDpiScaling != NULL) {
-							pEnableNonClientDpiScaling(hwnd); //windows 10
-						}
-						FreeLibrary(hUser32dll);
+		case WM_NCCREATE:
+		{
+			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+				auto pSetProcessDpiAwarenessContext = (decltype(&SetProcessDpiAwarenessContext))GetProcAddress(hUser32dll, "SetProcessDpiAwarenessContext");
+				if(pSetProcessDpiAwarenessContext == NULL) {
+					// not present, so have to call this
+					auto pEnableNonClientDpiScaling = (decltype(&EnableNonClientDpiScaling))GetProcAddress(hUser32dll, "EnableNonClientDpiScaling");
+					if(pEnableNonClientDpiScaling != NULL) {
+						pEnableNonClientDpiScaling(hwnd); //windows 10
 					}
+					FreeLibrary(hUser32dll);
 				}
-				break;
 			}
-			case WM_GETMINMAXINFO:
+			break;
+		}
+		case WM_GETMINMAXINFO:
 			LPMINMAXINFO info = (LPMINMAXINFO)lParam;
 			info->ptMinTrackSize.x = 640;
 			info->ptMinTrackSize.y = 400;
@@ -326,7 +339,7 @@ namespace window {
 		game_state.win_ptr->in_fullscreen = params.borderless_fullscreen;
 
 		// create window
-	WNDCLASSEXW wcex = {};
+		WNDCLASSEXW wcex = {};
 
 		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = CS_OWNDC;
@@ -344,18 +357,16 @@ namespace window {
 		}
 
 		DWORD win32Style = !params.borderless_fullscreen ?
-		(WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
-		: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+			(WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
+			: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(nullptr), &game_state);
-
 		if(!game_state.win_ptr->hwnd)
-		return;
+			return;
 
 		SetCursor(LoadCursor(NULL, IDC_ARROW));
 
 		if(!params.borderless_fullscreen) {
-
 			auto monitor_handle = MonitorFromWindow(game_state.win_ptr->hwnd, MONITOR_DEFAULTTOPRIMARY);
 			MONITORINFO mi;
 			mi.cbSize = sizeof(mi);
@@ -364,7 +375,7 @@ namespace window {
 			int left = (mi.rcWork.right - mi.rcWork.left) / 2 - game_state.win_ptr->creation_x_size / 2;
 			int top = (mi.rcWork.bottom - mi.rcWork.top) / 2 - game_state.win_ptr->creation_y_size / 2;
 
-		RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
+			RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
 			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
 				auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
 				if(pAdjustWindowRectExForDpi != NULL) {
@@ -383,13 +394,12 @@ namespace window {
 			SetWindowRgn(game_state.win_ptr->hwnd, NULL, TRUE);
 
 			if(params.initial_state == window_state::maximized)
-			ShowWindow(game_state.win_ptr->hwnd, SW_MAXIMIZE);
+				ShowWindow(game_state.win_ptr->hwnd, SW_MAXIMIZE);
 			else if(params.initial_state == window_state::minimized)
-			ShowWindow(game_state.win_ptr->hwnd, SW_MINIMIZE);
+				ShowWindow(game_state.win_ptr->hwnd, SW_MINIMIZE);
 			else
-			ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
+				ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
 		} else {
-
 			auto monitor_handle = MonitorFromWindow(game_state.win_ptr->hwnd, MONITOR_DEFAULTTOPRIMARY);
 			MONITORINFO mi;
 			mi.cbSize = sizeof(mi);
@@ -431,11 +441,10 @@ namespace window {
 					break;
 				}
 				if(game_state.ui_state.edit_target)
-				TranslateMessage(&msg);
+					TranslateMessage(&msg);
 				DispatchMessageW(&msg);
 			} else {
 				// Run game code
-
 				game_state.render();
 				SwapBuffers(game_state.win_ptr->opengl_window_dc);
 			}
@@ -450,25 +459,25 @@ namespace window {
 		if(state.win_ptr->cursors[uint8_t(type)] == HCURSOR(NULL)) {
 			native_string_view fname = NATIVE("normal.cur");
 			switch(type) {
-				case cursor_type::normal:
+			case cursor_type::normal:
 				fname = NATIVE("normal.cur");
 				break;
-				case cursor_type::busy:
+			case cursor_type::busy:
 				fname = NATIVE("busy.ani");
 				break;
-				case cursor_type::drag_select:
+			case cursor_type::drag_select:
 				fname = NATIVE("dragselect.ani");
 				break;
-				case cursor_type::hostile_move:
+			case cursor_type::hostile_move:
 				fname = NATIVE("attack_move.ani");
 				break;
-				case cursor_type::friendly_move:
+			case cursor_type::friendly_move:
 				fname = NATIVE("friendly_move.ani");
 				break;
-				case cursor_type::no_move:
+			case cursor_type::no_move:
 				fname = NATIVE("no_move.ani");
 				break;
-				default:
+			default:
 				fname = NATIVE("normal.cur");
 				break;
 			}
