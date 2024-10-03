@@ -496,7 +496,7 @@ namespace game_scene {
 
 
 	void nation_picker_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
-		if(state.ui_state.nation_picker->impl_on_key_down(state, keycode, mod) != ui::message_result::consumed) {
+		if(state.ui_state.nation_picker && state.ui_state.nation_picker->impl_on_key_down(state, keycode, mod) != ui::message_result::consumed) {
 			if(keycode == sys::virtual_key::ESCAPE) {
 				ui::show_main_menu_nation_picker(state);
 			} else if(keycode == sys::virtual_key::TAB) {
@@ -507,7 +507,7 @@ namespace game_scene {
 	}
 
 	void state_selector_hotkeys(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
-		if(state.ui_state.select_states_legend->impl_on_key_down(state, keycode, mod) != ui::message_result::consumed) {
+		if(state.ui_state.select_states_legend && state.ui_state.select_states_legend->impl_on_key_down(state, keycode, mod) != ui::message_result::consumed) {
 			state.map_state.on_key_down(keycode, mod);
 			if(keycode == sys::virtual_key::ESCAPE) {
 				state.state_selection->on_cancel(state);

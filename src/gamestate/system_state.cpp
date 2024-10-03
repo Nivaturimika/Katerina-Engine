@@ -288,7 +288,10 @@ namespace sys {
 		game_scene::on_lbutton_down(*this, x, y, mod);
 	}
 
-void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) { }
+	void state::on_rbutton_up(int32_t x, int32_t y, key_modifiers mod) {
+
+	}
+
 	void state::on_mbutton_up(int32_t x, int32_t y, key_modifiers mod) {
 		map_state.on_mbuttom_up(x, y, mod);
 	}
