@@ -11,10 +11,7 @@ namespace province {
 		return uint16_t(id.index() + 1);
 	}
 	inline constexpr dcon::province_id from_map_id(uint16_t id) {
-		if(id == 0)
-		return dcon::province_id();
-		else
-		return dcon::province_id(id - 1);
+		return id == 0 ? dcon::province_id() : dcon::province_id(id - 1);
 	}
 
 	struct global_provincial_state {
@@ -136,5 +133,8 @@ namespace province {
 
 	void set_province_controller(sys::state& state, dcon::province_id p, dcon::nation_id n);
 	void set_province_controller(sys::state& state, dcon::province_id p, dcon::rebel_faction_id rf);
+
+	void change_building_level(sys::state& state, dcon::province_id p, economy::province_building_type t, int32_t v);
+	void change_life_rating(sys::state& state, dcon::province_id p, int32_t amount);
 
 } // namespace province

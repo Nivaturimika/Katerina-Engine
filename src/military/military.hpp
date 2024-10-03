@@ -487,4 +487,7 @@ void navy_arrives_in_province(sys::state& state, dcon::navy_id n, dcon::province
 	void move_navy_to_merge(sys::state& state, dcon::nation_id by, dcon::navy_id a, dcon::province_id start, dcon::province_id dest);
 	bool pop_eligible_for_mobilization(sys::state& state, dcon::pop_id p);
 
+	void add_available_casus_belli(sys::state& state, dcon::nation_id n, dcon::nation_id target, dcon::cb_type_id cb, int32_t months);
+	void remove_available_casus_belli(sys::state& state, dcon::nation_id n, dcon::nation_id target, dcon::cb_type_id cb);
+
 } // namespace military

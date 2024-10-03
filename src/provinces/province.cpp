@@ -1082,11 +1082,14 @@ namespace province {
 	}
 
 	bool has_core(sys::state& state, dcon::province_id p, dcon::national_identity_id n) {
+		/*
 		for(auto core : state.world.province_get_core(p)) {
 			if(core.get_identity() == n)
 			return true;
 		}
 		return false;
+		*/
+		return bool(state.world.get_core_by_prov_tag_key(p, n));
 	}
 
 	bool can_start_colony(sys::state& state, dcon::nation_id n, dcon::state_definition_id d) {
@@ -2131,7 +2134,7 @@ namespace province {
 	void restore_distances(sys::state& state) {
 		for(auto p : state.world.in_province) {
 			auto tile_pos = p.get_mid_point();
-		auto scaled_pos = tile_pos / glm::vec2{float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y)};
+			auto scaled_pos = tile_pos / glm::vec2{float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y)};
 
 			glm::vec3 new_world_pos;
 			float angle_x = 2 * scaled_pos.x * math::pi;
@@ -2149,6 +2152,22 @@ namespace province {
 			auto dist = direct_distance(state, adj.get_connected_provinces(0), adj.get_connected_provinces(1));
 			adj.set_distance(dist);
 		}
+	}
+
+	/*	Increases the building level in a given province
+		@param t Type of building
+		@param v Amount to increase
+	*/
+	void change_building_level(sys::state& state, dcon::province_id p, economy::province_building_type t, int32_t v) {
+		auto owner = state.world.province_get_nation_from_province_ownership(p);
+		auto max_lvl = int32_t(state.world.nation_get_max_building_level(owner, t));
+		auto& building_level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
+		building_level = uint8_t(std::clamp(building_level + uint8_t(v), 0, max_lvl));
+	}
+
+	void change_life_rating(sys::state& state, dcon::province_id p, int32_t amount) {
+		auto new_lf = int32_t(state.world.province_get_life_rating(p)) + amount;
+		state.world.province_set_life_rating(p, uint8_t(std::clamp(new_lf, 0, 255)));
 	}
 
 } // namespace province

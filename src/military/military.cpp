@@ -7358,4 +7358,18 @@ namespace military {
 			&& pop.get_poptype().get_strata() == uint8_t(culture::pop_strata::poor);
 	}
 
+	void add_available_casus_belli(sys::state& state, dcon::nation_id n, dcon::nation_id target, dcon::cb_type_id cb, int32_t months) {
+		military::available_cb ac{ months > 0 ? state.current_date + 31 * months : sys::date{}, n, cb };
+		state.world.nation_get_available_cbs(n).push_back(ac);
+	}
+
+	void remove_available_casus_belli(sys::state& state, dcon::nation_id n, dcon::nation_id target, dcon::cb_type_id cb) {
+		auto cbs = state.world.nation_get_available_cbs(n);
+		for(uint32_t i = cbs.size(); i-- > 0;) {
+			if(cbs.at(i).cb_type == cb && cbs.at(i).target == target) {
+				cbs.remove_at(i);
+			}
+		}
+	}
+
 } // namespace military

@@ -887,53 +887,49 @@ namespace effect {
 		auto union_tags = ws.world.culture_group_get_identity_from_cultural_union_of(cg);
 		auto group_holders = ws.world.national_identity_get_nation_from_identity_holder(union_tags);
 		if(group_holders)
-		return apply_subeffects(tval, ws, trigger::to_generic(group_holders), this_slot, from_slot, r_hi, r_lo, els);
+			return apply_subeffects(tval, ws, trigger::to_generic(group_holders), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_overlord_scope(EFFECT_PARAMTERS) {
 		auto overlord = ws.world.nation_get_overlord_as_subject(trigger::to_nation(primary_slot));
-		auto on = ws.world.overlord_get_ruler(overlord);
-		if(on)
-		return apply_subeffects(tval, ws, trigger::to_generic(on), this_slot, from_slot, r_hi, r_lo, els);
+		if(auto on = ws.world.overlord_get_ruler(overlord); on)
+			return apply_subeffects(tval, ws, trigger::to_generic(on), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_sphere_owner_scope(EFFECT_PARAMTERS) {
 		auto sphere_leader = ws.world.nation_get_in_sphere_of(trigger::to_nation(primary_slot));
 		if(sphere_leader)
-		return apply_subeffects(tval, ws, trigger::to_generic(sphere_leader), this_slot, from_slot, r_hi, r_lo, els);
+			return apply_subeffects(tval, ws, trigger::to_generic(sphere_leader), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_independence_scope(EFFECT_PARAMTERS) {
 		auto rtag = ws.world.rebel_faction_get_defection_target(trigger::to_rebel(primary_slot));
 		auto rnation = ws.world.national_identity_get_nation_from_identity_holder(rtag);
 		if(rnation)
-		return apply_subeffects(tval, ws, trigger::to_generic(rnation), this_slot, from_slot, r_hi, r_lo, els);
+			return apply_subeffects(tval, ws, trigger::to_generic(rnation), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_flashpoint_tag_scope(EFFECT_PARAMTERS) {
 		auto ctag = ws.world.state_instance_get_flashpoint_tag(trigger::to_state(primary_slot));
 		auto rnation = ws.world.national_identity_get_nation_from_identity_holder(ctag);
 		if(rnation)
-		return apply_subeffects(tval, ws, trigger::to_generic(rnation), this_slot, from_slot, r_hi, r_lo, els);
+			return apply_subeffects(tval, ws, trigger::to_generic(rnation), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_crisis_state_scope(EFFECT_PARAMTERS) {
-		auto cstate = ws.crisis_state;
-		if(cstate)
-		return apply_subeffects(tval, ws, trigger::to_generic(cstate), this_slot, from_slot, r_hi, r_lo, els);
+		if(auto cstate = ws.crisis_state; cstate)
+			return apply_subeffects(tval, ws, trigger::to_generic(cstate), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_state_scope_province(EFFECT_PARAMTERS) {
-		auto state = ws.world.province_get_state_membership(trigger::to_prov(primary_slot));
-		if(state)
-		return apply_subeffects(tval, ws, trigger::to_generic(state), this_slot, from_slot, r_hi, r_lo, els);
+		if(auto state = ws.world.province_get_state_membership(trigger::to_prov(primary_slot)); state)
+			return apply_subeffects(tval, ws, trigger::to_generic(state), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_state_scope_pop(EFFECT_PARAMTERS) {
 		auto pop_province = ws.world.pop_get_province_from_pop_location(trigger::to_pop(primary_slot));
-		auto state = ws.world.province_get_state_membership(pop_province);
-		if(state)
-		return apply_subeffects(tval, ws, trigger::to_generic(state), this_slot, from_slot, r_hi, r_lo, els);
+		if(auto state = ws.world.province_get_state_membership(pop_province); state)
+			return apply_subeffects(tval, ws, trigger::to_generic(state), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t es_tag_scope(EFFECT_PARAMTERS) {
@@ -942,29 +938,27 @@ namespace effect {
 			auto tag = trigger::payload(tval[3]).tag_id;
 			auto tag_holder = ws.world.national_identity_get_nation_from_identity_holder(tag);
 			if(tag_holder && trigger::evaluate(ws, limit, trigger::to_generic(tag_holder), this_slot, from_slot))
-			return apply_subeffects(tval, ws, trigger::to_generic(tag_holder), this_slot, from_slot, r_hi, r_lo, els);
-			return 0;
+				return apply_subeffects(tval, ws, trigger::to_generic(tag_holder), this_slot, from_slot, r_hi, r_lo, els);
 		} else {
 			auto tag = trigger::payload(tval[2]).tag_id;
 			auto tag_holder = ws.world.national_identity_get_nation_from_identity_holder(tag);
 			if(tag_holder)
-			return apply_subeffects(tval, ws, trigger::to_generic(tag_holder), this_slot, from_slot, r_hi, r_lo, els);
-			return 0;
+				return apply_subeffects(tval, ws, trigger::to_generic(tag_holder), this_slot, from_slot, r_hi, r_lo, els);
 		}
+		return 0;
 	}
 	uint32_t es_integer_scope(EFFECT_PARAMTERS) {
 		if((tval[0] & effect::scope_has_limit) != 0) {
 			auto limit = trigger::payload(tval[2]).tr_id;
 			auto prov = trigger::payload(tval[3]).prov_id;
 			if(prov && trigger::evaluate(ws, limit, trigger::to_generic(prov), this_slot, from_slot))
-			return apply_subeffects(tval, ws, trigger::to_generic(prov), this_slot, from_slot, r_hi, r_lo, els);
-			return 0;
+				return apply_subeffects(tval, ws, trigger::to_generic(prov), this_slot, from_slot, r_hi, r_lo, els);
 		} else {
 			auto prov = trigger::payload(tval[2]).prov_id;
 			if(prov)
-			return apply_subeffects(tval, ws, trigger::to_generic(prov), this_slot, from_slot, r_hi, r_lo, els);
-			return 0;
+				return apply_subeffects(tval, ws, trigger::to_generic(prov), this_slot, from_slot, r_hi, r_lo, els);
 		}
+		return 0;
 	}
 	uint32_t es_pop_type_scope_nation(EFFECT_PARAMTERS) {
 		uint32_t i = 0;
@@ -1093,7 +1087,9 @@ namespace effect {
 	}
 	uint32_t ef_add_core_tag_state(EFFECT_PARAMTERS) {
 		auto tag = trigger::payload(tval[1]).tag_id;
-	province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) { province::add_core(ws, p, tag); });
+		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
+			province::add_core(ws, p, tag);
+		});
 		return 0;
 	}
 	uint32_t ef_add_core_int(EFFECT_PARAMTERS) {
@@ -1118,22 +1114,19 @@ namespace effect {
 	uint32_t ef_add_core_this_state(EFFECT_PARAMTERS) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot));
 		if(owner)
-		return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_this_pop(EFFECT_PARAMTERS) {
 		auto owner = nations::owner_of_pop(ws, trigger::to_pop(this_slot));
 		if(owner)
-		return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_from_province(EFFECT_PARAMTERS) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot));
 		if(owner)
-		return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_from_nation(EFFECT_PARAMTERS) {
@@ -1147,36 +1140,33 @@ namespace effect {
 
 	uint32_t ef_add_core_state_this_nation(EFFECT_PARAMTERS) {
 		auto tag = ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(this_slot));
-		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot),
-				[&](dcon::province_id p) { province::add_core(ws, p, tag); });
+		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
+			province::add_core(ws, p, tag);
+		});
 		return 0;
 	}
 	uint32_t ef_add_core_state_this_province(EFFECT_PARAMTERS) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot));
 		if(owner)
-		return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_state_this_state(EFFECT_PARAMTERS) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot));
 		if(owner)
-		return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_state_this_pop(EFFECT_PARAMTERS) {
 		auto owner = nations::owner_of_pop(ws, trigger::to_pop(this_slot));
 		if(owner)
-		return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_state_from_province(EFFECT_PARAMTERS) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot));
 		if(owner)
-		return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
-		else
+			return ef_add_core_state_this_nation(tval, ws, primary_slot, trigger::to_generic(owner), 0, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_add_core_state_from_nation(EFFECT_PARAMTERS) {
@@ -1475,12 +1465,12 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_life_rating(EFFECT_PARAMTERS) {
-		ws.world.province_set_life_rating(trigger::to_prov(primary_slot), uint8_t(std::clamp(int32_t(ws.world.province_get_life_rating(trigger::to_prov(primary_slot))) + trigger::payload(tval[1]).signed_value, 0, 255)));
+		province::change_life_rating(ws, trigger::to_prov(primary_slot), trigger::payload(tval[1]).signed_value);
 		return 0;
 	}
 	uint32_t ef_life_rating_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			ws.world.province_set_life_rating(p, uint8_t(std::clamp(int32_t(ws.world.province_get_life_rating(p)) + trigger::payload(tval[1]).signed_value, 0, 255)));
+			province::change_life_rating(ws, p, trigger::payload(tval[1]).signed_value);
 		});
 		return 0;
 	}
@@ -2032,19 +2022,13 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_infrastructure(EFFECT_PARAMTERS) {
-		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot), economy::province_building_type::railroad);
-		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value),
-		0,
-		int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)), economy::province_building_type::railroad))));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::railroad, int32_t(trigger::payload(tval[1]).signed_value));
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
 	}
 	uint32_t ef_infrastructure_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			auto& building_level = ws.world.province_get_building_level(p, economy::province_building_type::railroad);
-			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value),
-			0,
-			int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p), economy::province_building_type::railroad))));
+			province::change_building_level(ws, p, economy::province_building_type::railroad, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
@@ -2863,10 +2847,7 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_fort(EFFECT_PARAMTERS) {
-		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot), economy::province_building_type::fort);
-		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value),
-		0,
-		int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)), economy::province_building_type::fort))));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::fort, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_naval_base(EFFECT_PARAMTERS) {
@@ -2879,19 +2860,16 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_bank(EFFECT_PARAMTERS) {
-		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot), economy::province_building_type::bank);
-		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)), economy::province_building_type::bank))));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::bank, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_university(EFFECT_PARAMTERS) {
-		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot), economy::province_building_type::university);
-		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)), economy::province_building_type::university))));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::university, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_fort_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			auto& building_level = ws.world.province_get_building_level(p, economy::province_building_type::fort);
-			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p), economy::province_building_type::fort))));
+			province::change_building_level(ws, p, economy::province_building_type::fort, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
@@ -2910,15 +2888,13 @@ namespace effect {
 	}
 	uint32_t ef_bank_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			auto& building_level = ws.world.province_get_building_level(p, economy::province_building_type::bank);
-			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p), economy::province_building_type::bank))));
+			province::change_building_level(ws, p, economy::province_building_type::bank, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
 	uint32_t ef_university_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			auto& building_level = ws.world.province_get_building_level(p, economy::province_building_type::university);
-			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p), economy::province_building_type::university))));
+			province::change_building_level(ws, p, economy::province_building_type::university, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
@@ -2930,19 +2906,19 @@ namespace effect {
 	}
 	uint32_t ef_trigger_revolt_state(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(primary_slot)); owner)
-		rebel::trigger_revolt(ws, owner, trigger::payload(tval[1]).reb_id, trigger::payload(tval[4]).ideo_id,
+			rebel::trigger_revolt(ws, owner, trigger::payload(tval[1]).reb_id, trigger::payload(tval[4]).ideo_id,
 				trigger::payload(tval[2]).cul_id, trigger::payload(tval[3]).rel_id);
 		return 0;
 	}
 	uint32_t ef_trigger_revolt_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		rebel::trigger_revolt(ws, owner, trigger::payload(tval[1]).reb_id, trigger::payload(tval[4]).ideo_id,
+			rebel::trigger_revolt(ws, owner, trigger::payload(tval[1]).reb_id, trigger::payload(tval[4]).ideo_id,
 				trigger::payload(tval[2]).cul_id, trigger::payload(tval[3]).rel_id);
 		return 0;
 	}
 	uint32_t ef_diplomatic_influence(EFFECT_PARAMTERS) {
 		if(auto holder = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id); holder)
-		nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), holder,
+			nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), holder,
 				float(trigger::payload(tval[2]).signed_value));
 		return 0;
 	}
@@ -2953,7 +2929,7 @@ namespace effect {
 	}
 	uint32_t ef_diplomatic_influence_this_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)); owner)
-		nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), owner,
+			nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), owner,
 				float(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
@@ -2964,13 +2940,13 @@ namespace effect {
 	}
 	uint32_t ef_diplomatic_influence_from_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot)); owner)
-		nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), owner,
+			nations::adjust_influence_with_overflow(ws, trigger::to_nation(primary_slot), owner,
 				float(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_relation(EFFECT_PARAMTERS) {
 		if(auto holder = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id); holder)
-		nations::adjust_relationship(ws, trigger::to_nation(primary_slot), holder, float(trigger::payload(tval[2]).signed_value));
+			nations::adjust_relationship(ws, trigger::to_nation(primary_slot), holder, float(trigger::payload(tval[2]).signed_value));
 		return 0;
 	}
 	uint32_t ef_relation_this_nation(EFFECT_PARAMTERS) {
@@ -2980,7 +2956,7 @@ namespace effect {
 	}
 	uint32_t ef_relation_this_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)); owner)
-		nations::adjust_relationship(ws, trigger::to_nation(primary_slot), owner, float(trigger::payload(tval[1]).signed_value));
+			nations::adjust_relationship(ws, trigger::to_nation(primary_slot), owner, float(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_relation_from_nation(EFFECT_PARAMTERS) {
@@ -2990,7 +2966,7 @@ namespace effect {
 	}
 	uint32_t ef_relation_from_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot)); owner)
-		nations::adjust_relationship(ws, trigger::to_nation(primary_slot), owner, float(trigger::payload(tval[1]).signed_value));
+			nations::adjust_relationship(ws, trigger::to_nation(primary_slot), owner, float(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_add_province_modifier(EFFECT_PARAMTERS) {
@@ -2999,7 +2975,7 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_add_province_modifier_no_duration(EFFECT_PARAMTERS) {
-	sys::add_modifier_to_province(ws, trigger::to_prov(primary_slot), trigger::payload(tval[1]).mod_id, sys::date{});
+		sys::add_modifier_to_province(ws, trigger::to_prov(primary_slot), trigger::payload(tval[1]).mod_id, sys::date{});
 		return 0;
 	}
 	uint32_t ef_add_province_modifier_state(EFFECT_PARAMTERS) {
@@ -3010,7 +2986,7 @@ namespace effect {
 	}
 	uint32_t ef_add_province_modifier_state_no_duration(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-		sys::add_modifier_to_province(ws, p, trigger::payload(tval[1]).mod_id, sys::date{});
+			sys::add_modifier_to_province(ws, p, trigger::payload(tval[1]).mod_id, sys::date{});
 		});
 		return 0;
 	}
@@ -3020,87 +2996,67 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_add_country_modifier_no_duration(EFFECT_PARAMTERS) {
-	sys::add_modifier_to_nation(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).mod_id, sys::date{});
+		sys::add_modifier_to_nation(ws, trigger::to_nation(primary_slot), trigger::payload(tval[1]).mod_id, sys::date{});
 		return 0;
 	}
 	uint32_t ef_casus_belli_tag(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
 		auto tag_target = trigger::payload(tval[3]).tag_id;
-
 		if(auto holder = ws.world.national_identity_get_nation_from_identity_holder(tag_target); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_casus_belli_int(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::payload(tval[3]).prov_id); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_casus_belli_this_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
-		ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-		.push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(this_slot), type });
-
+		military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), trigger::to_nation(this_slot), type, months);
 		return 0;
 	}
 	uint32_t ef_casus_belli_this_state(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_casus_belli_this_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_casus_belli_this_pop(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = nations::owner_of_pop(ws, trigger::to_pop(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_casus_belli_from_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
-		ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-		.push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(from_slot), type });
-
+		military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), trigger::to_nation(from_slot), type, months);
 		return 0;
 	}
 	uint32_t ef_casus_belli_from_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot)); holder) {
-			ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot))
-			.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, holder, type });
+			military::add_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type, months);
 		}
 		return 0;
 	}
@@ -3108,179 +3064,118 @@ namespace effect {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
 		auto tag_target = trigger::payload(tval[3]).tag_id;
-
 		if(auto holder = ws.world.national_identity_get_nation_from_identity_holder(tag_target); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_int(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::payload(tval[3]).prov_id); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_this_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
-		ws.world.nation_get_available_cbs(trigger::to_nation(this_slot))
-		.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+		military::add_available_casus_belli(ws, trigger::to_nation(this_slot), trigger::to_nation(primary_slot), type, months);
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_this_state(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_this_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_this_pop(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = nations::owner_of_pop(ws, trigger::to_pop(this_slot)); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-				military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_from_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
-		ws.world.nation_get_available_cbs(trigger::to_nation(from_slot))
-		.push_back(military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+		military::add_available_casus_belli(ws, trigger::to_nation(from_slot), trigger::to_nation(primary_slot), type, months);
 		return 0;
 	}
 	uint32_t ef_add_casus_belli_from_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto months = trigger::payload(tval[2]).signed_value;
-
 		if(auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot)); holder) {
-			ws.world.nation_get_available_cbs(holder).push_back(
-			military::available_cb{ months > 0 ? ws.current_date + 31 * months : sys::date{}, trigger::to_nation(primary_slot), type });
+			military::add_available_casus_belli(ws, holder, trigger::to_nation(primary_slot), type, months);
 		}
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_tag(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto tag_target = trigger::payload(tval[2]).tag_id;
-
 		auto holder = ws.world.national_identity_get_nation_from_identity_holder(tag_target);
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_int(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::payload(tval[2]).prov_id);
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_this_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = trigger::to_nation(this_slot);
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_this_state(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot));
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_this_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot));
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_this_pop(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = nations::owner_of_pop(ws, trigger::to_pop(this_slot));
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_from_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = trigger::to_nation(from_slot);
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_remove_casus_belli_from_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot));
-		auto cbs = ws.world.nation_get_available_cbs(trigger::to_nation(primary_slot));
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == holder)
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_tag(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
 		auto tag_target = trigger::payload(tval[2]).tag_id;
-
 		auto holder = ws.world.national_identity_get_nation_from_identity_holder(tag_target);
 		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
+			military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		}
 		return 0;
 	}
@@ -3289,86 +3184,50 @@ namespace effect {
 
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::payload(tval[2]).prov_id);
 		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
+			military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		}
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_this_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = trigger::to_nation(this_slot);
-		auto cbs = ws.world.nation_get_available_cbs(holder);
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_this_state(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot));
 		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
+			military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		}
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_this_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot));
 		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
+			military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		}
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_this_pop(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = nations::owner_of_pop(ws, trigger::to_pop(this_slot));
 		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
+			military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		}
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_from_nation(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = trigger::to_nation(from_slot);
-		auto cbs = ws.world.nation_get_available_cbs(holder);
-		for(uint32_t i = cbs.size(); i-- > 0;) {
-			if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-			cbs.remove_at(i);
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 	uint32_t ef_this_remove_casus_belli_from_province(EFFECT_PARAMTERS) {
 		auto type = trigger::payload(tval[1]).cb_id;
-
 		auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot));
-		if(holder) {
-			auto cbs = ws.world.nation_get_available_cbs(holder);
-			for(uint32_t i = cbs.size(); i-- > 0;) {
-				if(cbs.at(i).cb_type == type && cbs.at(i).target == trigger::to_nation(primary_slot))
-				cbs.remove_at(i);
-			}
-		}
+		military::remove_available_casus_belli(ws, trigger::to_nation(primary_slot), holder, type);
 		return 0;
 	}
 
@@ -3503,9 +3362,9 @@ namespace effect {
 	uint32_t ef_war_this_nation(EFFECT_PARAMTERS) {
 		auto target = trigger::to_nation(this_slot);
 		if(ws.world.nation_get_owned_province_count(target) == 0 || ws.world.nation_get_owned_province_count(trigger::to_nation(primary_slot)) == 0)
-		return 0;
+			return 0;
 		if(target == trigger::to_nation(primary_slot))
-		return 0;
+			return 0;
 		auto war = military::find_war_between(ws, trigger::to_nation(primary_slot), target);
 		if(!war) {
 			military::remove_from_common_allied_wars(ws, trigger::to_nation(primary_slot), target);
@@ -3823,11 +3682,9 @@ namespace effect {
 		auto& s = ws.world.pop_get_demographics(trigger::to_pop(primary_slot), pop_demographics::to_key(ws, i));
 		float new_total = 1.0f - s + std::max(0.0f, s + factor);
 		s = std::max(0.0f, s + factor);
-
 		for(auto j : ws.world.in_ideology) {
 			ws.world.pop_get_demographics(trigger::to_pop(primary_slot), pop_demographics::to_key(ws, j)) /= new_total;
 		}
-
 		return 0;
 	}
 	uint32_t ef_upper_house(EFFECT_PARAMTERS) {
@@ -3838,11 +3695,9 @@ namespace effect {
 		auto& u = ws.world.nation_get_upper_house(trigger::to_nation(primary_slot), i);
 		float new_total = 100.0f - u + std::max(0.0f, u + 100.0f * amount);
 		u = std::max(0.0f, u + 100.0f * amount);
-
 		for(auto j : ws.world.in_ideology) {
 			ws.world.nation_get_upper_house(trigger::to_nation(primary_slot), j) *= 100.0f / (new_total);
 		}
-
 		return 0;
 	}
 	uint32_t ef_scaled_militancy_issue(EFFECT_PARAMTERS) {
@@ -4252,11 +4107,9 @@ namespace effect {
 		auto& s = ws.world.pop_get_demographics(trigger::to_pop(primary_slot), pop_demographics::to_key(ws, t));
 		auto new_total = 1.0f - s + std::max(0.0f, s + factor);
 		s = std::max(0.0f, s + factor);
-
 		for(auto i : ws.world.in_issue_option) {
 			ws.world.pop_get_demographics(trigger::to_pop(primary_slot), pop_demographics::to_key(ws, i)) /= new_total;
 		}
-
 		return 0;
 	}
 	uint32_t ef_dominant_issue_nation(EFFECT_PARAMTERS) {
@@ -4279,8 +4132,7 @@ namespace effect {
 	}
 	uint32_t ef_add_war_goal(EFFECT_PARAMTERS) {
 		if(auto w = military::find_war_between(ws, trigger::to_nation(primary_slot), trigger::to_nation(from_slot)); w) {
-			military::add_wargoal(ws, w, trigger::to_nation(from_slot), trigger::to_nation(primary_slot), trigger::payload(tval[1]).cb_id,
-				dcon::state_definition_id{}, dcon::national_identity_id{}, trigger::to_nation(primary_slot));
+			military::add_wargoal(ws, w, trigger::to_nation(from_slot), trigger::to_nation(primary_slot), trigger::payload(tval[1]).cb_id, dcon::state_definition_id{}, dcon::national_identity_id{}, trigger::to_nation(primary_slot));
 		}
 		return 0;
 	}
@@ -4593,12 +4445,12 @@ namespace effect {
 	uint32_t ef_annex_to_null_nation(EFFECT_PARAMTERS) {
 		auto sprovs = ws.world.nation_get_province_ownership(trigger::to_nation(primary_slot));
 		while(sprovs.begin() != sprovs.end()) {
-		province::change_province_owner(ws, (*sprovs.begin()).get_province().id, dcon::nation_id{});
+			province::change_province_owner(ws, (*sprovs.begin()).get_province().id, dcon::nation_id{});
 		}
 		return 0;
 	}
 	uint32_t ef_annex_to_null_province(EFFECT_PARAMTERS) {
-	province::change_province_owner(ws, trigger::to_prov(primary_slot), dcon::nation_id{ });
+		province::change_province_owner(ws, trigger::to_prov(primary_slot), dcon::nation_id{ });
 		return 0;
 	}
 
@@ -4713,7 +4565,7 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_fop_change_province_name(EFFECT_PARAMTERS) {
-	dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
+		dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 		ws.world.province_set_name(trigger::payload(tval[3]).prov_id, name);
 		ws.province_name_changed.store(true, std::memory_order::release); //update names
 		return 0;
