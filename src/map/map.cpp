@@ -461,11 +461,13 @@ namespace map {
 		auto model3d_fshader = try_load_shader(shaders_dir, NATIVE("model3d_f.glsl"));
 
 		std::string_view vs_header =
-			"#define HAVE_WATER_COLORMAP false\n"
+			"#define HAVE_COLOR_COLORMAP true\n"
+			"#define HAVE_WATER_COLORMAP true\n"
 			"#define POLITICAL_LIGHTNESS 0.7f\n"
 			"#define POLITICAL_TERRAIN_MIX 0.3f\n"
 			"#define COLOR_LIGHTNESS 1.5f\n"
-			"#define OVERLAY_MIX 1.0f\n";
+			"#define OVERLAY_MIX 1.0f\n"
+			"#define HSV_CORRECT false\n";
 		auto gfx_dir = open_directory(root, NATIVE("gfx"));
 		auto fx_dir = open_directory(gfx_dir, NATIVE("fx"));
 		if(auto f = simple_fs::open_file(fx_dir, NATIVE("terrain_2_0.fx")); f) {
@@ -474,20 +476,24 @@ namespace map {
 			if(str.find("//y1 = ((y1*2.0f + ColorColor))/3.0f;") != std::string::npos) {
 				//has colormap
 				vs_header =
+					"#define HAVE_COLOR_COLORMAP true\n"
 					"#define HAVE_WATER_COLORMAP true\n"
 					"#define POLITICAL_LIGHTNESS 0.5f\n"
 					"#define POLITICAL_TERRAIN_MIX 0.4f\n"
 					"#define COLOR_LIGHTNESS 1.5f\n"
-					"#define OVERLAY_MIX 1.0f\n";
+					"#define OVERLAY_MIX 1.0f\n"
+					"#define HSV_CORRECT false\n";
 			}
 			if(str.find("//The map is a flat plane") != std::string::npos) {
 				//belle cartographie compatibility
 				vs_header =
+					"#define HAVE_COLOR_COLORMAP true\n"
 					"#define HAVE_WATER_COLORMAP false\n"
-					"#define POLITICAL_LIGHTNESS 0.7f\n"
+					"#define POLITICAL_LIGHTNESS 0.5f\n"
 					"#define POLITICAL_TERRAIN_MIX 0.5f\n"
 					"#define COLOR_LIGHTNESS 1.5f\n"
-					"#define OVERLAY_MIX 0.5f\n";
+					"#define OVERLAY_MIX 0.25f\n"
+					"#define HSV_CORRECT true\n";
 			}
 		}
 

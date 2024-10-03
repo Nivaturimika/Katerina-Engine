@@ -39,38 +39,6 @@ vec4 get_overlay_color(vec4 color) {
 	return vec4(v.r, v.g, v.b, 1.f);
 }
 
-vec3 Hue(float H) {
-	float R = abs(H * 6 - 3) - 1;
-	float G = 2 - abs(H * 6 - 2);
-	float B = 2 - abs(H * 6 - 4);
-	vec3 c = vec3(R, G, B);
-	return c;
-	//return c * vec3(0.299f, 0.587f, 0.114f);
-}
-vec3 HSVtoRGB(vec3 HSV) {
-	return ((Hue(HSV.x) - 1) * HSV.y + 1) * HSV.z;
-}
-vec3 RGBtoHSV(vec3 RGB) {
-	vec3 HSV = vec3(0);
-	HSV.z = max(RGB.r, max(RGB.g, RGB.b));
-	float M = min(RGB.r, min(RGB.g, RGB.b));
-	float C = HSV.z - M;
-	if (C != 0) {
-		HSV.y = C / HSV.z;
-		vec3 Delta = (HSV.z - RGB) / C;
-		Delta.rgb -= Delta.brg;
-		Delta.rg += vec2(2, 4);
-		if (RGB.r >= HSV.z)
-			HSV.x = Delta.b;
-		else if (RGB.g >= HSV.z)
-			HSV.x = Delta.r;
-		else
-			HSV.x = Delta.g;
-		HSV.x = mod(HSV.x / 6, 1.f);
-	}
-	return HSV;
-}
-
 // The terrain map
 // No province color is used here
 void main() {
@@ -103,11 +71,21 @@ void main() {
 		float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
 		vec4 political = mix(prov_color, stripe_color, stripe_factor) + vec4(prov_highlight);
 		political.rgb -= POLITICAL_LIGHTNESS;
-		vec4 background = texture(colormap_political, get_corrected_coords(tex_coord));
 		// Output color
 		out_color = get_overlay_color(political);
-		out_color = mix(background, out_color, POLITICAL_TERRAIN_MIX);
+		if(HAVE_COLOR_COLORMAP) {
+			vec4 background = texture(colormap_political, get_corrected_coords(tex_coord));
+			out_color = mix(background, out_color, POLITICAL_TERRAIN_MIX);
+		}
 		out_color *= COLOR_LIGHTNESS;
+		if(HSV_CORRECT) {
+			out_color = mix(out_color, vec4(0.83f, 0.78f, 0.44f, 0.f), 0.1f);
+			out_color = mix(out_color, out_color.rrrr, 0.15f);
+			out_color.g = mix(out_color.g, out_color.r, 0.075f);
+			out_color.b = mix(out_color.b, 1.f - out_color.r, 0.1f);
+			out_color.r *= 1.03f;
+			out_color = 0.75f * (out_color - 0.5f) + 0.5f;
+		}
 	}
 	frag_color = out_color;
 	frag_color.a = 1.f;
