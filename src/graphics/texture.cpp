@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION 1
 #define STBI_NO_STDIO 1
 #define STBI_NO_LINEAR 1
-#define STBI_NO_JPEG 1
+//#define STBI_NO_JPEG 1
 //#define STBI_NO_PNG 1
 //#define STBI_NO_BMP 1
 #define STBI_NO_PSD 1
@@ -382,60 +382,64 @@ namespace ogl {
 
 	GLuint load_file_and_return_handle(native_string const& native_name, simple_fs::file_system const& fs, texture& asset_texture, bool keep_data) {
 		auto name_length = native_name.length();
+		auto ext_pos = native_name.find_last_of('.');
 
 		auto root = get_root(fs);
 		if(name_length > 4) { // try loading as a dds
 			auto dds_name = native_name;
-			if(auto pos = dds_name.find_last_of('.'); pos != native_string::npos) {
-				dds_name[pos + 1] = NATIVE('d');
-				dds_name[pos + 2] = NATIVE('d');
-				dds_name[pos + 3] = NATIVE('s');
-				dds_name.resize(pos + 4);
+			if(ext_pos != native_string::npos) {
+				dds_name[ext_pos + 1] = NATIVE('d');
+				dds_name[ext_pos + 2] = NATIVE('d');
+				dds_name[ext_pos + 3] = NATIVE('s');
+				dds_name.resize(ext_pos + 4);
 			}
-			if(auto file = open_file(root, dds_name); file) {
-				auto content = simple_fs::view_contents(*file);
-				reports::write_debug(("Loading DDS: " + simple_fs::native_to_utf8(dds_name)).c_str());
-
+			if(auto f = open_file(root, dds_name); f) {
+				auto content = simple_fs::view_contents(*f);
+				reports::write_debug(("Loading DDS texture: " + simple_fs::native_to_utf8(dds_name) + "\n").c_str());
 				uint32_t w = 0;
 				uint32_t h = 0;
 				asset_texture.texture_handle = SOIL_direct_load_DDS_from_memory(reinterpret_cast<uint8_t const*>(content.data), content.file_size, w, h, 0);
-
 				if(asset_texture.texture_handle) {
 					asset_texture.channels = 4;
 					asset_texture.size_x = int32_t(w);
 					asset_texture.size_y = int32_t(h);
-					asset_texture.loaded = true;
-
 					if(keep_data) {
 						asset_texture.data = static_cast<uint8_t*>(STBI_MALLOC(4 * w * h));
 						glGetTextureImage(asset_texture.texture_handle, 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<int32_t>(4 * w * h), asset_texture.data);
 					}
+					asset_texture.loaded = true;
 					return asset_texture.texture_handle;
 				}
 			}
 		}
 
-		auto file = open_file(root, native_name);
-		if(!file && name_length > 4) {
+		auto f = open_file(root, native_name);
+		if(!f && name_length > 4) {
 			auto png_name = native_name;
-			if(auto pos = png_name.find_last_of('.'); pos != native_string::npos) {
-				png_name[pos + 1] = NATIVE('p');
-				png_name[pos + 2] = NATIVE('n');
-				png_name[pos + 3] = NATIVE('g');
-				png_name.resize(pos + 4);
+			if(ext_pos != native_string::npos) {
+				png_name[ext_pos + 1] = NATIVE('p');
+				png_name[ext_pos + 2] = NATIVE('n');
+				png_name[ext_pos + 3] = NATIVE('g');
+				png_name.resize(ext_pos + 4);
 			}
-			file = open_file(root, png_name);
+			f = open_file(root, png_name);
+			if(!f) {
+				auto dds_name = native_name;
+				if(ext_pos != native_string::npos) {
+					dds_name[ext_pos + 1] = NATIVE('d');
+					dds_name[ext_pos + 2] = NATIVE('d');
+					dds_name[ext_pos + 3] = NATIVE('s');
+					dds_name.resize(ext_pos + 4);
+				}
+				f = open_file(root, dds_name);
+			}
 		}
-		if(file) {
-			auto content = simple_fs::view_contents(*file);
-
+		if(f) {
+			auto content = simple_fs::view_contents(*f);
+			reports::write_debug(("Loading texture: " + simple_fs::native_to_utf8(simple_fs::get_full_name(*f)) + "\n").c_str());
 			int32_t file_channels = 4;
-
 			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
-
 			asset_texture.channels = 4;
-			asset_texture.loaded = true;
-
 			glGenTextures(1, &asset_texture.texture_handle);
 			if(asset_texture.texture_handle) {
 				glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
@@ -450,12 +454,11 @@ namespace ogl {
 
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
-
 			if(!keep_data) {
 				STBI_FREE(asset_texture.data);
 				asset_texture.data = nullptr;
 			}
-
+			asset_texture.loaded = true;
 			return asset_texture.texture_handle;
 		}
 		asset_texture.loaded = true; // because we tried to load it (and failed) and trying again will be wasteful
