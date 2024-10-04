@@ -719,7 +719,7 @@ namespace economy_factory {
 				if(money_made < min_wages) {
 					auto difference = min_wages - money_made;
 					assert(difference > 0.0f);
-					if(state.world.nation_get_stockpiles(n, economy::money) > difference || economy::can_take_loans(state, nation_id)) {
+					if(state.world.nation_get_stockpiles(n, economy::money) > difference || economy::can_take_loans(state, n)) {
 						state.world.factory_set_full_profit(f, min_wages);
 						state.world.nation_get_stockpiles(n, economy::money) -= difference;
 						state.world.nation_get_subsidies_spending(n) += difference;
@@ -728,7 +728,7 @@ namespace economy_factory {
 						state.world.factory_set_subsidized(f, false);
 					}
 				} else {
-					state.world.factory_set_full_profit(factory_id, money_made);
+					state.world.factory_set_full_profit(f, money_made);
 				}
 			}
 		}
