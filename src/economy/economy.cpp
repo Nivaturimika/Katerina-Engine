@@ -2661,11 +2661,42 @@ namespace economy {
 	commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c) {
 		auto commodity = dcon::fatten(state.world, c);
 		if(commodity.get_rgo_amount() > 0.f && (commodity.get_artisan_output_amount() > 0.f || commodity.get_key_factory()))
-		return commodity_production_type::both;
+			return commodity_production_type::both;
 		else if(commodity.get_key_factory())
-		return commodity_production_type::derivative;
+			return commodity_production_type::derivative;
 		else
-		return commodity_production_type::primary;
+			return commodity_production_type::primary;
 	}
 
+	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset) {
+		float total = 0.f;
+		for(uint32_t i = 0; i < economy::commodity_set::set_size && cset.commodity_type[i]; ++i) {
+			total += cset.commodity_amounts[i] * economy::commodity_effective_price(state, n, cset.commodity_type[i]);
+		}
+		return total;
+	}
+
+	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset) {
+		float total = 0.f;
+		for(uint32_t i = 0; i < economy::small_commodity_set::set_size && cset.commodity_type[i]; ++i) {
+			total += cset.commodity_amounts[i] * economy::commodity_effective_price(state, n, cset.commodity_type[i]);
+		}
+		return total;
+	}
+
+	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset) {
+		float total = 1.f;
+		for(uint32_t i = 0; i < economy::commodity_set::set_size && cset.commodity_type[i]; ++i) {
+			total = std::min(total, state.world.nation_get_demand_satisfaction(state, n, cset.commodity_type[i]));
+		}
+		return total;
+	}
+
+	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset) {
+		float total = 1.f;
+		for(uint32_t i = 0; i < economy::small_commodity_set::set_size && cset.commodity_type[i]; ++i) {
+			total = std::min(total, state.world.nation_get_demand_satisfaction(state, n, cset.commodity_type[i]));
+		}
+		return total;
+	}
 } // namespace economy

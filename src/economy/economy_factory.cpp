@@ -97,17 +97,17 @@ namespace economy_factory {
 		return (pop_project ? pop_factory_modifier : (2.0f - admin_efficiency)) * factory_modifier;
 	}
 
-	float factory_desired_raw_profit(dcon::factory_fat_id factory_fat_id, float spendings) {
-		return spendings * (1.2f + factory_fat_id.get_secondary_employment() * factory_fat_id.get_level() / 150.f);
+	float factory_desired_raw_profit(sys::state& state, dcon::factory_id f, float spendings) {
+		return spendings * (1.2f + state.world.factory_get_secondary_employment(f) * state.world.factory_get_level(f) / 150.f);
 	}
 
-	float factory_efficiency_input_total_cost(sys::state& state, dcon::nation_id nation_id, dcon::factory_type_fat_id factory_type_fat_id) {
+	float factory_efficiency_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft) {
 		float efficiency_input_total = 0.0f;
-		auto& efficiency_inputs = factory_type_fat_id.get_efficiency_inputs();
+		auto& efficiency_inputs = state.world.factory_type_get_efficiency_inputs(ft);
 		for(uint32_t i = 0; i < economy::small_commodity_set::set_size; ++i) {
 			if(efficiency_inputs.commodity_type[i]) {
 				efficiency_input_total += efficiency_inputs.commodity_amounts[i]
-					* economy::commodity_effective_price(state, nation_id, efficiency_inputs.commodity_type[i]);
+					* economy::commodity_effective_price(state, n, efficiency_inputs.commodity_type[i]);
 			} else {
 				break;
 			}
@@ -115,11 +115,11 @@ namespace economy_factory {
 		return efficiency_input_total;
 	}
 
-	float factory_full_production_quantity(sys::state const& state, dcon::factory_id factory_id, dcon::nation_id nation_id, float mobilization_impact) {
-		auto factory_fat_id = fatten(state.world, factory_id);
+	float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n, float mobilization_impact) {
+		auto factory_fat_id = fatten(state.world, f);
 		auto factory_type_fat_id = factory_fat_id.get_building_type();
-		float throughput_multiplier = (state.world.nation_get_factory_goods_throughput(nation_id, factory_type_fat_id.get_output()) + 1.0f);
-		float output_multiplier = state.world.nation_get_factory_goods_output(nation_id, factory_type_fat_id.get_output())
+		float throughput_multiplier = (state.world.nation_get_factory_goods_throughput(n, factory_type_fat_id.get_output()) + 1.0f);
+		float output_multiplier = state.world.nation_get_factory_goods_output(n, factory_type_fat_id.get_output())
 			+ 1.0f
 			+ factory_fat_id.get_secondary_employment()
 			* (1.0f - state.economy_definitions.craftsmen_fraction)
@@ -148,12 +148,12 @@ namespace economy_factory {
 			+ owner_fraction * -2.5f));
 	}
 
-	float factory_input_total_cost(sys::state& state, dcon::nation_id nation_id, dcon::factory_type_fat_id factory_type_fat_id) {
+	float factory_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft) {
 		float input_total = 0.0f;
-		auto& inputs = factory_type_fat_id.get_inputs();
+		auto& inputs = state.world.factory_type_get_inputs(ft);
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(inputs.commodity_type[i]) {
-				input_total += inputs.commodity_amounts[i] * economy::commodity_effective_price(state, nation_id, inputs.commodity_type[i]);
+				input_total += inputs.commodity_amounts[i] * economy::commodity_effective_price(state, n, inputs.commodity_type[i]);
 			} else {
 				break;
 			}
@@ -162,21 +162,21 @@ namespace economy_factory {
 	}
 
 
-	float factory_max_employment(sys::state const& state, dcon::factory_id factory_id) {
-		return state.defines.alice_factory_per_level_employment * state.world.factory_get_level(factory_id);
+	float factory_max_employment(sys::state const& state, dcon::factory_id f) {
+		auto ft = state.world.factory_get_building_type(f);
+		return state.world.factory_type_get_base_workforce(ft) * float(state.world.factory_get_level(f));
 	}
 
-	float factory_max_production_scale(sys::state& state, dcon::factory_fat_id factory_fat_id, float mobilization_impact, bool occupied) {
-		return factory_fat_id.get_primary_employment() * factory_fat_id.get_level() * (occupied ? 0.1f : 1.0f) * std::max(0.0f, mobilization_impact);
+	float factory_max_production_scale(sys::state& state, dcon::factory_id f, float mobilization_impact, bool occupied) {
+		return state.world.factory_get_primary_employment(f) * state.world.factory_get_level(f) * (occupied ? 0.1f : 1.0f) * std::max(0.0f, mobilization_impact);
 	}
 
-
-	float factory_min_input_available(sys::state& state, dcon::nation_id nation_id, dcon::factory_type_fat_id factory_type_fat_id) {
+	float factory_min_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft) {
 		float min_input_available = 1.0f;
-		auto& inputs = factory_type_fat_id.get_inputs();
+		auto& inputs = state.world.factory_type_get_inputs(ft);
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(inputs.commodity_type[i]) {
-				min_input_available = std::min(min_input_available, state.world.nation_get_demand_satisfaction(nation_id, inputs.commodity_type[i]));
+				min_input_available = std::min(min_input_available, state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]));
 			} else {
 				break;
 			}
@@ -184,12 +184,12 @@ namespace economy_factory {
 		return min_input_available;
 	}
 
-	float factory_min_efficiency_input_available(sys::state& state, dcon::nation_id nation_id, dcon::factory_type_fat_id factory_type_fat_id) {
+	float factory_min_efficiency_input_available(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft) {
 		float min_efficiency_input_available = 1.0f;
-		auto& efficiency_inputs = factory_type_fat_id.get_efficiency_inputs();
+		auto& efficiency_inputs = state.world.factory_type_get_efficiency_inputs(ft);
 		for(uint32_t i = 0; i < economy::small_commodity_set::set_size; ++i) {
 			if(efficiency_inputs.commodity_type[i]) {
-				min_efficiency_input_available = std::min(min_efficiency_input_available, state.world.nation_get_demand_satisfaction(nation_id, efficiency_inputs.commodity_type[i]));
+				min_efficiency_input_available = std::min(min_efficiency_input_available, state.world.nation_get_demand_satisfaction(n, efficiency_inputs.commodity_type[i]));
 			} else {
 				break;
 			}
@@ -657,7 +657,7 @@ namespace economy_factory {
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
 			+ input_multiplier * efficiency_input_total * min_efficiency_input_available * min_input_available;
 
-		float desired_profit = factory_desired_raw_profit(factory_fat_id, spendings);
+		float desired_profit = factory_desired_raw_profit(state, factory_fat_id, spendings);
 		float max_pure_profit = profit - spendings;
 		state.world.factory_set_unprofitable(factory_id, !(max_pure_profit > 0.0f));
 

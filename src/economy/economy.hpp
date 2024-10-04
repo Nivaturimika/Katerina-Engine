@@ -179,11 +179,10 @@ namespace economy {
 	float pop_laborer_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
 
 	struct rgo_workers_breakdown {
-		float paid_workers;
-		float slaves;
-		float total;
+		float paid_workers = 0.f;
+		float slaves = 0.f;
+		float total = 0.f;
 	};
-
 	
 	void daily_update(sys::state& state, bool initiate_building);
 	void resolve_constructions(sys::state& state);
@@ -197,8 +196,6 @@ namespace economy {
 	float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	float nation_total_imports(sys::state& state, dcon::nation_id n);
 	float pop_income(sys::state& state, dcon::pop_id p);
-
-	
 
 	struct construction_status {
 		float progress = 0.0f; // in range [0,1)
@@ -215,11 +212,6 @@ namespace economy {
 
 	int32_t most_recent_price_record_index(sys::state& state);
 	int32_t previous_price_record_index(sys::state& state);
-	//int32_t most_recent_gdp_record_index(sys::state& state);
-	//int32_t previous_gdp_record_index(sys::state& state);
-
-	//float gdp_adjusted(sys::state& state, dcon::nation_id n);
-
 	
 	void go_bankrupt(sys::state& state, dcon::nation_id n);
 	dcon::modifier_id get_province_selector_modifier(sys::state& state);
@@ -235,5 +227,8 @@ namespace economy {
 	float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
 	void register_domestic_supply(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
+
+	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset);
+	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset);
 
 } // namespace economy
