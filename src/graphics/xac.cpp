@@ -855,6 +855,7 @@ namespace emfx {
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
+				context.ignore_length = true; //yeah fuck it no length fuck it
 				break;
 			}
 			default:

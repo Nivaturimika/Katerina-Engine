@@ -2487,10 +2487,8 @@ namespace map {
 		auto root = simple_fs::get_root(state.common_fs);
 		emfx::xsm_context anim_context{};
 		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
-			reports::write_debug("Loading XSM animation: ");
-			reports::write_debug(std::string(filename).c_str());
-			reports::write_debug("\n");
-
+			reports::write_debug(("Loading XSM animation: " + std::string(filename) + "\n").c_str());
+			//
 			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
 			auto contents = simple_fs::view_contents(*cf);
 			emfx::parse_xsm(anim_context, contents.data, contents.data + contents.file_size, err);
@@ -2527,13 +2525,13 @@ namespace map {
 				}
 			}
 			switch(at) {
-				case emfx::animation_type::idle:
+			case emfx::animation_type::idle:
 				state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
 				break;
-				case emfx::animation_type::move:
+			case emfx::animation_type::move:
 				state.map_state.map_data.static_mesh_move_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
 				break;
-				case emfx::animation_type::attack:
+			case emfx::animation_type::attack:
 				state.map_state.map_data.static_mesh_attack_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
 				break;
 			}
