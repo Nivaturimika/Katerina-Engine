@@ -37,14 +37,13 @@ namespace economy_factory {
 	}
 
 
-	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id nation_id) {
-		auto state_building_construction = state.world.nation_get_state_building_construction(nation_id);
+	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n) {
+		auto state_building_construction = state.world.nation_get_state_building_construction(n);
 		return state_building_construction.begin() != state_building_construction.end();
 	}
 
-	bool nation_has_closed_factories(sys::state& state, dcon::nation_id nation_id) { // TODO - should be "good" now
-		auto nation_fat_id = dcon::fatten(state.world, nation_id);
-		for(auto province_owner : nation_fat_id.get_province_ownership()) {
+	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n) { // TODO - should be "good" now
+		for(auto province_owner : state.world.nation_get_province_ownership(n)) {
 			auto province = province_owner.get_province();
 			for(auto factory_location : province.get_factory_location()) {
 				auto production_scale = factory_location.get_factory().get_production_scale();
@@ -57,12 +56,12 @@ namespace economy_factory {
 	}
 
 
-	bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id state_instance_id, dcon::factory_type_id factory_type_id) {
-		auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
-		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id)) {
-			if(state_membership_id.get_province().get_state_membership() == state_instance_id) {
+	bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id sid, dcon::factory_type_id f) {
+		auto sdef = state.world.state_instance_get_definition(sid);
+		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(sdef)) {
+			if(state_membership_id.get_province().get_state_membership() == sid) {
 				for(auto factory_location_fat_id : state_membership_id.get_province().get_factory_location()) {
-					if(factory_location_fat_id.get_factory().get_building_type() == factory_type_id)
+					if(factory_location_fat_id.get_factory().get_building_type() == f)
 						return true;
 				}
 			}
@@ -71,18 +70,20 @@ namespace economy_factory {
 	}
 
 	bool state_contains_factory(sys::state& state, dcon::state_instance_id state_instance_id, dcon::factory_type_id factory_type_id) {
-		auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
-		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id)) {
+		auto sdef = state.world.state_instance_get_definition(state_instance_id);
+		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if(state_membership_id.get_province().get_state_membership() == state_instance_id) {
-				for(auto factory_location_fat_id : state_membership_id.get_province().get_factory_location()) {
-					if(factory_location_fat_id.get_factory().get_building_type() == factory_type_id)
+				for(auto fl : state_membership_id.get_province().get_factory_location()) {
+					if(fl.get_factory().get_building_type() == factory_type_id) {
 						return true;
+					}
 				}
 			}
 		}
-		for(auto state_building_construction_fat_id : state.world.state_instance_get_state_building_construction(state_instance_id)) {
-			if(state_building_construction_fat_id.get_type() == factory_type_id)
+		for(auto sbc : state.world.state_instance_get_state_building_construction(state_instance_id)) {
+			if(sbc.get_type() == factory_type_id) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -131,22 +132,20 @@ namespace economy_factory {
 	}
 
 
-	float factory_input_multiplier(sys::state& state, dcon::factory_fat_id factory_fat_id, dcon::nation_id nation_id, dcon::province_id province_id, dcon::state_instance_id state_instance_id) {
-		float total_workers = factory_max_employment(state, factory_fat_id);
+	float factory_input_multiplier(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id sid) {
+		float total_workers = factory_max_employment(state, f);
 		float small_size_effect = 1.f;
 		float small_bound = 5.f * state.defines.alice_factory_per_level_employment;
 		if(total_workers < small_bound) {
 			small_size_effect = 0.5f + total_workers / small_bound * 0.5f;
 		}
-
-		float total_state_pop = std::max(0.0001f, state.world.state_instance_get_demographics(state_instance_id, demographics::total));
-		float capitalists = state.world.state_instance_get_demographics(state_instance_id, demographics::to_key(state, state.culture_definitions.capitalists));
+		float total_state_pop = std::max(0.001f, state.world.state_instance_get_demographics(sid, demographics::total));
+		float capitalists = state.world.state_instance_get_demographics(sid, demographics::to_key(state, state.culture_definitions.capitalists));
 		float owner_fraction = total_state_pop > 0.f ? std::min(0.05f, capitalists / total_state_pop) : 0.0f;
-
 		return small_size_effect * std::max(0.1f, (state.defines.alice_inputs_base_factor
-					+ state.world.province_get_modifier_values(province_id, sys::provincial_mod_offsets::local_factory_input)
-					+ state.world.nation_get_modifier_values(nation_id, sys::national_mod_offsets::factory_input)
-					+ owner_fraction * -2.5f));
+			+ state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_factory_input)
+			+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_input)
+			+ owner_fraction * -2.5f));
 	}
 
 	float factory_input_total_cost(sys::state& state, dcon::nation_id nation_id, dcon::factory_type_fat_id factory_type_fat_id) {
@@ -244,11 +243,11 @@ namespace economy_factory {
 	}
 
 
-	float nation_factory_consumption(sys::state& state, dcon::nation_id nation_id, dcon::commodity_id commodity_id) {
-		auto mobilization_impact = military::mobilization_impact(state, nation_id);
+	float nation_factory_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+		auto mobilization_impact = military::mobilization_impact(state, n);
 
 		auto factory_consumption_amount = 0.f;
-		for(const auto po : state.world.nation_get_province_ownership(nation_id)) {
+		for(const auto po : state.world.nation_get_province_ownership(n)) {
 			auto occupied = po.get_province().get_nation_from_province_control() != po.get_province().get_nation_from_province_ownership();
 			for(const auto fl : po.get_province().get_factory_location()) {
 				auto f = fl.get_factory();
@@ -260,18 +259,18 @@ namespace economy_factory {
 				float max_production_scale = factory_max_production_scale(state, f, mobilization_impact, occupied);
 				float current_workers = total_workers * max_production_scale;
 				//inputs
-				float input_total = factory_input_total_cost(state, nation_id, ft);
-				float min_input_available = factory_min_input_available(state, nation_id, ft);
+				float input_total = factory_input_total_cost(state, n, ft);
+				float min_input_available = factory_min_input_available(state, n, ft);
 				//modifiers
-				float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, nation_id, province_fat_id, state_instance_fat_id));
-				float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, nation_id, province_fat_id, state_instance_fat_id) + f.get_triggered_modifiers());
+				float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, province_fat_id, state_instance_fat_id));
+				float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, province_fat_id, state_instance_fat_id) + f.get_triggered_modifiers());
 				float effective_production_scale = std::min(f.get_production_scale() * f.get_level(), max_production_scale);
 				//
 				auto const& inputs = ft.get_inputs();
 				float input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_input_available * 0.9f);
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
 					if(inputs.commodity_type[i]) {
-						if(inputs.commodity_type[i] == commodity_id) {
+						if(inputs.commodity_type[i] == c) {
 							factory_consumption_amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
 						}
 					} else {
@@ -280,14 +279,14 @@ namespace economy_factory {
 				}
 				//
 				auto const& efficiency_inputs = ft.get_efficiency_inputs();
-				float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, ft);
-				float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, ft);
-				auto const modifier_values = state.world.nation_get_modifier_values(nation_id, sys::national_mod_offsets::factory_maintenance) + 1.0f;
+				float efficiency_input_total = factory_efficiency_input_total_cost(state, n, ft);
+				float min_efficiency_input_available = factory_min_efficiency_input_available(state, n, ft);
+				auto const modifier_values = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_maintenance) + 1.0f;
 				float efficiency_input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_efficiency_input_available * 0.9f);
 				for(uint32_t i = 0; i < economy::small_commodity_set::set_size; ++i) {
-					if(efficiency_inputs.commodity_type[i] == commodity_id) {
-						if(efficiency_inputs.commodity_type[i] == commodity_id) {
-							economy::register_intermediate_demand(state, nation_id, efficiency_inputs.commodity_type[i], modifier_values * efficiency_input_scale * efficiency_inputs.commodity_amounts[i] * (0.1f + min_efficiency_input_available * 0.9f));
+					if(efficiency_inputs.commodity_type[i]) {
+						if(efficiency_inputs.commodity_type[i] == c) {
+							economy::register_intermediate_demand(state, n, efficiency_inputs.commodity_type[i], modifier_values * efficiency_input_scale * efficiency_inputs.commodity_amounts[i] * (0.1f + min_efficiency_input_available * 0.9f));
 						}
 					} else {
 						break;
@@ -298,40 +297,43 @@ namespace economy_factory {
 		return factory_consumption_amount;
 	}
 
-	float pop_factory_min_wage(sys::state& state, dcon::nation_id nation_id, float min_wage_factor) {
-		float employed = state.world.nation_get_demographics(nation_id, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
-		float total = state.world.nation_get_demographics(nation_id, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
+	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
+		float employed = state.world.nation_get_demographics(n, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
+		float total = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
 		float unemployement_crisis_measures = 1.f;
 		if(total > 0.f) {
 			unemployement_crisis_measures = employed / total;
 		}
-		float life_needs_cost = state.world.nation_get_life_needs_costs(nation_id, state.culture_definitions.primary_factory_worker);
-		float everyday_needs_cost = state.world.nation_get_everyday_needs_costs(nation_id, state.culture_definitions.primary_factory_worker);
+		float life_needs_cost = state.world.nation_get_life_needs_costs(n, state.culture_definitions.primary_factory_worker);
+		float everyday_needs_cost = state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.primary_factory_worker);
 		return min_wage_factor * (life_needs_cost + everyday_needs_cost) * 1.1f * unemployement_crisis_measures * unemployement_crisis_measures * unemployement_crisis_measures;
 	}
 
 
-	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id factory_type_id, dcon::state_instance_id state_instance_id) {
-		auto factory_type_fat_id = fatten(state.world, factory_type_id);
-		auto nation_id = state.world.state_instance_get_nation_from_state_ownership(state_instance_id);
+	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid) {
+		auto factory_type_fat_id = fatten(state.world, ft);
+		auto nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		float sum = 1.f;
 		for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
-			if(auto bonus_trigger = factory_type_fat_id.get_bonus_trigger()[i]; bonus_trigger && trigger::evaluate(state, bonus_trigger, trigger::to_generic(state_instance_id), trigger::to_generic(nation_id), 0)) {
+			if(auto bonus_trigger = factory_type_fat_id.get_bonus_trigger()[i]; bonus_trigger && trigger::evaluate(state, bonus_trigger, trigger::to_generic(sid), trigger::to_generic(nation_id), 0)) {
 				sum += factory_type_fat_id.get_bonus_amount()[i];
 			}
 		}
 		return sum;
 	}
 
-	float update_factory_scale(sys::state& state, dcon::factory_fat_id factory_fat_id, float max_production_scale, float raw_profit, float desired_raw_profit) {
-		float total_workers = factory_max_employment(state, factory_fat_id);
+	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit) {
+		auto factory_fat_id = dcon::fatten(state.world, f);
+		auto ft = state.world.factory_get_building_type(f);
+
+		float total_workers = factory_max_employment(state, f);
 		float several_workers_scale = 10.f / total_workers;
 		// we don't want for factories to change "world balance" too much individually
 		// when relative production is high, we want to reduce our speed
 		// for example, if relative production is 1.0, then we want to clamp our speed with ~0.01 or something small like this;
 		// and if relative production is ~0, then clamps are not needed
 		float relative_production_amount =
-			state.world.factory_type_get_output_amount(factory_fat_id.get_building_type())
+			state.world.factory_type_get_output_amount(ft)
 			/ (
 				state.world.commodity_get_total_production(factory_fat_id.get_building_type().get_output())
 				+ state.world.commodity_get_total_real_demand(factory_fat_id.get_building_type().get_output())
@@ -339,37 +341,31 @@ namespace economy_factory {
 			);
 
 		float relative_modifier = (1.f / (relative_production_amount + 0.01f)) / 1000.f;
-
 		float effective_production_scale = 0.0f;
-		if(state.world.factory_get_subsidized(factory_fat_id)) {
-			auto new_production_scale = std::min(1.0f, factory_fat_id.get_production_scale() + several_workers_scale * factory_fat_id.get_level() * 10.f);
-			factory_fat_id.set_production_scale(new_production_scale);
-			return std::min(new_production_scale * factory_fat_id.get_level(), max_production_scale);
+		float new_production_scale = 0.0f;
+		if(state.world.factory_get_subsidized(f)) {
+			new_production_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + several_workers_scale * state.world.factory_get_level(f) * 10.f);
+		} else {
+			float over_profit_ratio = (raw_profit) / (desired_raw_profit + 0.0001f) - 1.f;
+			float under_profit_ratio = (desired_raw_profit) / (raw_profit + 0.0001f) - 1.f;
+			float speed_modifier = (over_profit_ratio - under_profit_ratio);
+			float speed = economy::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
+			speed = std::clamp(speed, -relative_modifier, relative_modifier);
+			new_production_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
 		}
-
-		float over_profit_ratio = (raw_profit) / (desired_raw_profit + 0.0001f) - 1.f;
-		float under_profit_ratio = (desired_raw_profit) / (raw_profit + 0.0001f) - 1.f;
-		float speed_modifier = (over_profit_ratio - under_profit_ratio);
-		float speed = economy::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
-
-		speed = std::clamp(speed, -relative_modifier, relative_modifier);
-
-		auto new_production_scale = std::clamp(factory_fat_id.get_production_scale() + speed, 0.f, 1.f);
-		factory_fat_id.set_production_scale(new_production_scale);
-		return std::min(new_production_scale * factory_fat_id.get_level(), max_production_scale);
+		state.world.factory_set_production_scale(f, new_production_scale);
+		return std::min(new_production_scale * state.world.factory_get_level(f), max_production_scale);
 	}
-
-
 
 	int32_t factory_priority(sys::state const& state, dcon::factory_id factory_id) {
-		return (state.world.factory_get_priority_low(factory_id) ? 1 : 0) + (state.world.factory_get_priority_high(factory_id) ? 2 : 0);
+		return (state.world.factory_get_priority_low(factory_id) ? 1 : 0)
+			+ (state.world.factory_get_priority_high(factory_id) ? 2 : 0);
 	}
 
-
-	int32_t state_built_factory_count(sys::state& state, dcon::state_instance_id state_instance_id) {
-		dcon::nation_id nation_id = state.world.state_instance_get_nation_from_state_ownership(state_instance_id);
+	int32_t state_built_factory_count(sys::state& state, dcon::state_instance_id sid) {
+		dcon::nation_id nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		int32_t number_of_factories = 0;
-		auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
+		auto state_definition_fat_id = state.world.state_instance_get_definition(sid);
 		for(auto state_membership_fat_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id))
 			if(state_membership_fat_id.get_province().get_nation_from_province_ownership() == nation_id)
 				number_of_factories += int32_t(state.world.province_get_factory_location(state_membership_fat_id.get_province()).end() - state.world.province_get_factory_location(state_membership_fat_id.get_province()).begin());
@@ -378,16 +374,16 @@ namespace economy_factory {
 		return number_of_factories;
 	}
 
-	int32_t state_factory_count(sys::state& state, dcon::state_instance_id state_instance_id) {
-		dcon::nation_id nationd_id = state.world.state_instance_get_nation_from_state_ownership(state_instance_id);
+	int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid) {
+		dcon::nation_id nationd_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		int32_t number_of_factories = 0;
-		auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
+		auto state_definition_fat_id = state.world.state_instance_get_definition(sid);
 		for(auto state_membership_fat_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id))
 			if(state_membership_fat_id.get_province().get_nation_from_province_ownership() == nationd_id) {
 				auto factory_location_range = state_membership_fat_id.get_province().get_factory_location();
 				number_of_factories += int32_t(factory_location_range.end() - factory_location_range.begin());
 			}
-		for(auto state_building_construction_fat_id : state.world.state_instance_get_state_building_construction(state_instance_id))
+		for(auto state_building_construction_fat_id : state.world.state_instance_get_state_building_construction(sid))
 			if(state_building_construction_fat_id.get_is_upgrade() == false)
 				++number_of_factories;
 		// For new factories: no more than defines:FACTORIES_PER_STATE existing + under construction new factories must be
@@ -620,7 +616,7 @@ namespace economy_factory {
 		//modifiers
 		float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, p, sid));
 		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, p, sid) + state.world.factory_get_triggered_modifiers(f));
-		float output_multiplier = std::max(0.f, factory_output_multiplier(state, ft, n, p));
+		float output_multiplier = std::max(0.f, factory_output_multiplier(state, f, n, p));
 		return state.world.factory_type_get_output_amount(ft)
 			* (0.75f + 0.25f * min_efficiency_input_available)
 			* throughput_multiplier
@@ -705,31 +701,31 @@ namespace economy_factory {
 		state.world.factory_set_full_profit(factory_id, pure_profit);
 	}
 
-	void update_single_factory_production(sys::state& state, dcon::factory_id factory_id, dcon::nation_id nation_id, float expected_min_wage) {
-		auto factory_production = state.world.factory_get_actual_production(factory_id);
+	void update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage) {
+		auto factory_production = state.world.factory_get_actual_production(f);
 		if(factory_production > 0.f) {
-			auto factory_fat_id = fatten(state.world, factory_id);
+			auto factory_fat_id = fatten(state.world, f);
 			auto factory_type_fat_id = factory_fat_id.get_building_type();
 
-			auto money_made = state.world.factory_get_full_profit(factory_id);
+			auto money_made = state.world.factory_get_full_profit(f);
 
-			state.world.factory_set_actual_production(factory_id, factory_production);
-			economy::register_domestic_supply(state, nation_id, factory_type_fat_id.get_output(), factory_production);
+			state.world.factory_set_actual_production(f, factory_production);
+			economy::register_domestic_supply(state, n, factory_type_fat_id.get_output(), factory_production);
 
 			if(!factory_fat_id.get_subsidized()) {
-				state.world.factory_set_full_profit(factory_id, money_made);
+				state.world.factory_set_full_profit(f, money_made);
 			} else {
 				float min_wages = expected_min_wage * factory_fat_id.get_level() * factory_fat_id.get_primary_employment() * state.defines.alice_factory_per_level_employment;
 				if(money_made < min_wages) {
 					auto difference = min_wages - money_made;
 					assert(difference > 0.0f);
-					if(state.world.nation_get_stockpiles(nation_id, economy::money) > difference || economy::can_take_loans(state, nation_id)) {
-						state.world.factory_set_full_profit(factory_id, min_wages);
-						state.world.nation_get_stockpiles(nation_id, economy::money) -= difference;
-						state.world.nation_get_subsidies_spending(nation_id) += difference;
+					if(state.world.nation_get_stockpiles(n, economy::money) > difference || economy::can_take_loans(state, nation_id)) {
+						state.world.factory_set_full_profit(f, min_wages);
+						state.world.nation_get_stockpiles(n, economy::money) -= difference;
+						state.world.nation_get_subsidies_spending(n) += difference;
 					} else {
-						state.world.factory_set_full_profit(factory_id, std::max(money_made, 0.0f));
-						factory_fat_id.set_subsidized(false);
+						state.world.factory_set_full_profit(f, std::max(money_made, 0.0f));
+						state.world.factory_set_subsidized(f, false);
 					}
 				} else {
 					state.world.factory_set_full_profit(factory_id, money_made);
