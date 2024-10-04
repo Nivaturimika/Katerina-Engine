@@ -5406,55 +5406,47 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(tf_variable_issue_group_name_nation) {
 		auto option = payload(tval[2]).opt_id;
 		auto issue = payload(tval[1]).iss_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_issues(to_nation(primary_slot), issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_issue_group_name_state) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot));
 		auto option = payload(tval[2]).opt_id;
 		auto issue = payload(tval[1]).iss_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_issues(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_issue_group_name_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot));
 		auto option = payload(tval[2]).opt_id;
 		auto issue = payload(tval[1]).iss_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_issues(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_issue_group_name_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(primary_slot));
 		auto option = payload(tval[2]).opt_id;
 		auto issue = payload(tval[1]).iss_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_issues(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_reform_group_name_nation) {
 		auto option = payload(tval[2]).ropt_id;
 		auto issue = payload(tval[1]).ref_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_reforms(to_nation(primary_slot), issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_reform_group_name_state) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot));
 		auto option = payload(tval[2]).ropt_id;
 		auto issue = payload(tval[1]).ref_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_reforms(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_reform_group_name_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot));
 		auto option = payload(tval[2]).ropt_id;
 		auto issue = payload(tval[1]).ref_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_reforms(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_reform_group_name_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(primary_slot));
 		auto option = payload(tval[2]).ropt_id;
 		auto issue = payload(tval[1]).ref_id;
-		;
 		return compare_values_eq(tval[0], ws.world.nation_get_reforms(owner, issue), option);
 	}
 	TRIGGER_FUNCTION(tf_variable_pop_type_name_nation) {

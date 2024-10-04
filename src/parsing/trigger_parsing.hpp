@@ -5816,8 +5816,65 @@ namespace parsers {
 
 		void any_value(std::string_view label, association_type a, std::string_view value, error_handler& err, int32_t line,
 			trigger_building_context& context) {
-		std::string str_label{label};
-			if(auto it = context.outer_context.map_of_technologies.find(str_label);
+			std::string str_label{ label };
+			if(auto itg = context.outer_context.map_of_ioptions.find(str_label); itg != context.outer_context.map_of_ioptions.end()) {
+				if(context.main_slot == trigger::slot_contents::nation)
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_nation | association_to_trigger_code(a)));
+				else if(context.main_slot == trigger::slot_contents::pop)
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_pop | association_to_trigger_code(a)));
+				else if(context.main_slot == trigger::slot_contents::province)
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_province | association_to_trigger_code(a)));
+				else if(context.main_slot == trigger::slot_contents::state)
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_state | association_to_trigger_code(a)));
+				else {
+					err.accumulated_errors += "named issue option trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
+				context.compiled_trigger.push_back(trigger::payload(itg->second.id).value);
+				context.add_float_to_payload(parse_float(value, line, err) / 100.0f);
+			} else if(auto itf = context.outer_context.map_of_iissues.find(str_label); itf != context.outer_context.map_of_iissues.end()) {
+				if(auto itopt = context.outer_context.map_of_ioptions.find(std::string(value));
+					itopt != context.outer_context.map_of_ioptions.end()) {
+					if(context.main_slot == trigger::slot_contents::nation)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_nation | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::pop)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_pop | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::province)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_province | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::state)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_state | association_to_bool_code(a)));
+					else {
+						err.accumulated_errors += "named issue trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+						return;
+					}
+					context.compiled_trigger.push_back(trigger::payload(itf->second).value);
+					context.compiled_trigger.push_back(trigger::payload(itopt->second.id).value);
+				} else {
+					err.accumulated_errors += "named issue trigger used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
+			} else if(auto ith = context.outer_context.map_of_reforms.find(str_label); ith != context.outer_context.map_of_reforms.end()) {
+				if(auto itopt = context.outer_context.map_of_roptions.find(std::string(value));
+					itopt != context.outer_context.map_of_roptions.end()) {
+					if(context.main_slot == trigger::slot_contents::nation)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_nation | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::pop)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_pop | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::province)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_province | association_to_bool_code(a)));
+					else if(context.main_slot == trigger::slot_contents::state)
+						context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_state | association_to_bool_code(a)));
+					else {
+						err.accumulated_errors += "named reform trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+						return;
+					}
+					context.compiled_trigger.push_back(trigger::payload(ith->second).value);
+					context.compiled_trigger.push_back(trigger::payload(itopt->second.id).value);
+				} else {
+					err.accumulated_errors += "named reform trigger used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
+			} else if(auto it = context.outer_context.map_of_technologies.find(str_label);
 				it != context.outer_context.map_of_technologies.end()) {
 				if(context.main_slot == trigger::slot_contents::nation) {
 					bool bvalue = parse_bool(value, line, err);
@@ -5831,12 +5888,11 @@ namespace parsers {
 					bool bvalue = parse_bool(value, line, err);
 					context.compiled_trigger.push_back(uint16_t(trigger::technology_pop | association_to_bool_code(a, bvalue)));
 					context.compiled_trigger.push_back(trigger::payload(it->second.id).value);
-				} else  {
+				} else {
 					err.accumulated_errors += "named technology trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
-			} else if(auto itb = context.outer_context.map_of_inventions.find(str_label);
-							itb != context.outer_context.map_of_inventions.end()) {
+			} else if(auto itb = context.outer_context.map_of_inventions.find(str_label); itb != context.outer_context.map_of_inventions.end()) {
 				if(context.main_slot == trigger::slot_contents::nation) {
 					bool bvalue = parse_bool(value, line, err);
 					context.compiled_trigger.push_back(uint16_t(trigger::invention | association_to_bool_code(a, bvalue)));
@@ -5853,116 +5909,47 @@ namespace parsers {
 					err.accumulated_errors += "named invention trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
-			} else if(auto itc = context.outer_context.map_of_ideologies.find(str_label);
-							itc != context.outer_context.map_of_ideologies.end()) {
+			} else if(auto itc = context.outer_context.map_of_ideologies.find(str_label); itc != context.outer_context.map_of_ideologies.end()) {
 				if(context.main_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_nation | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_nation | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::pop)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_pop | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_pop | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::province)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_province | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_province | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::state)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_state | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_ideology_name_state | association_to_trigger_code(a)));
 				else {
-					err.accumulated_errors +=
-						"named ideology trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					err.accumulated_errors += "named ideology trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 				context.compiled_trigger.push_back(trigger::payload(itc->second.id).value);
 				context.add_float_to_payload(parse_float(value, line, err));
-			} else if(auto itd = context.outer_context.map_of_poptypes.find(str_label);
-							itd != context.outer_context.map_of_poptypes.end()) {
+			} else if(auto itd = context.outer_context.map_of_poptypes.find(str_label); itd != context.outer_context.map_of_poptypes.end()) {
 				if(context.main_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_nation | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_nation | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::pop)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_pop | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_pop | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::province)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_province | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_province | association_to_trigger_code(a)));
 				else if(context.main_slot == trigger::slot_contents::state)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_state | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_pop_type_name_state | association_to_trigger_code(a)));
 				else {
-					err.accumulated_errors +=
-						"named pop type trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					err.accumulated_errors += "named pop type trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 				context.compiled_trigger.push_back(trigger::payload(itd->second).value);
 				context.add_float_to_payload(parse_float(value, line, err));
-			} else if(auto ite = context.outer_context.map_of_commodity_names.find(str_label);
-							ite != context.outer_context.map_of_commodity_names.end()) {
+			} else if(auto ite = context.outer_context.map_of_commodity_names.find(str_label); ite != context.outer_context.map_of_commodity_names.end()) {
 				if(context.main_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_good_name | association_to_trigger_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::variable_good_name | association_to_trigger_code(a)));
 				else {
-					err.accumulated_errors +=
-						"named commodity trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					err.accumulated_errors += "named commodity trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 				context.compiled_trigger.push_back(trigger::payload(ite->second).value);
 				context.add_float_to_payload(parse_float(value, line, err));
-			} else if(auto itg = context.outer_context.map_of_ioptions.find(str_label); itg != context.outer_context.map_of_ioptions.end()) {
-				if(context.main_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_nation | association_to_trigger_code(a)));
-				else if(context.main_slot == trigger::slot_contents::pop)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_pop | association_to_trigger_code(a)));
-				else if(context.main_slot == trigger::slot_contents::province)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_province | association_to_trigger_code(a)));
-				else if(context.main_slot == trigger::slot_contents::state)
-				context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_name_state | association_to_trigger_code(a)));
-				else {
-					err.accumulated_errors +=
-						"named issue option trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-					return;
-				}
-				context.compiled_trigger.push_back(trigger::payload(itg->second.id).value);
-				context.add_float_to_payload(parse_float(value, line, err) / 100.0f);
-			} else if(auto itf = context.outer_context.map_of_iissues.find(str_label); itf != context.outer_context.map_of_iissues.end()) {
-				if(auto itopt = context.outer_context.map_of_ioptions.find(std::string(value));
-					itopt != context.outer_context.map_of_ioptions.end()) {
-					if(context.main_slot == trigger::slot_contents::nation)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_nation | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::pop)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_pop | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::province)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_province | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::state)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_issue_group_name_state | association_to_bool_code(a)));
-					else {
-						err.accumulated_errors +=
-							"named issue trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-						return;
-					}
-					context.compiled_trigger.push_back(trigger::payload(itf->second).value);
-					context.compiled_trigger.push_back(trigger::payload(itopt->second.id).value);
-				} else {
-					err.accumulated_errors +=
-						"named issue trigger used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-					return;
-				}
-			} else if(auto ith = context.outer_context.map_of_reforms.find(str_label); ith != context.outer_context.map_of_reforms.end()) {
-				if(auto itopt = context.outer_context.map_of_roptions.find(std::string(value));
-					itopt != context.outer_context.map_of_roptions.end()) {
-					if(context.main_slot == trigger::slot_contents::nation)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_nation | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::pop)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_pop | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::province)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_province | association_to_bool_code(a)));
-					else if(context.main_slot == trigger::slot_contents::state)
-					context.compiled_trigger.push_back(uint16_t(trigger::variable_reform_group_name_state | association_to_bool_code(a)));
-					else {
-						err.accumulated_errors +=
-							"named reform trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-						return;
-					}
-					context.compiled_trigger.push_back(trigger::payload(ith->second).value);
-					context.compiled_trigger.push_back(trigger::payload(itopt->second.id).value);
-				} else {
-					err.accumulated_errors +=
-						"named reform trigger used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-					return;
-				}
 			} else {
-				err.accumulated_errors +=
-					"unknown key: " + str_label + " found in trigger(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "unknown key: " + str_label + " found in trigger(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		}
