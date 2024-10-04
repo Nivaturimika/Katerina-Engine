@@ -231,4 +231,7 @@ namespace economy {
 	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset);
 	float commodity_set_effective_cost(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset);
 
+	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset);
+	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset);
+
 } // namespace economy

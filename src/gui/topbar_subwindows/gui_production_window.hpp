@@ -591,25 +591,30 @@ namespace ui {
 			float throughput_multiplier = economy_factory::factory_throughput_multiplier(state, type, n, p, s);
 			float output_multiplier = economy_factory::factory_output_multiplier(state, fac, n, p);
 
-			float max_production_scale = economy_factory::factory_max_production_scale(
-			state,
-			fac,
-			mobilization_impact,
-			p_fat.get_nation_from_province_control() != n
-			);
-
+			float max_production_scale = economy_factory::factory_max_production_scale(state, fac, mobilization_impact, p_fat.get_nation_from_province_control() != n);
 			float effective_production_scale = std::min(fac.get_production_scale() * fac.get_level(), max_production_scale);
-
 			auto amount = (0.75f + 0.25f * min_e_input_available) * min_input_available * state.world.factory_get_production_scale(fid);
 
 			text::add_line(state, contents, "factory_stats_1", text::variable_type::val, text::fp_percentage{ amount });
 			text::add_line(state, contents, "factory_stats_2", text::variable_type::val, text::fp_percentage{ state.world.factory_get_production_scale(fid) });
 			text::add_line(state, contents, "factory_stats_3", text::variable_type::val, text::fp_one_place{ state.world.factory_get_actual_production(fid) }, text::variable_type::x, type.get_output().get_name());
 			text::add_line(state, contents, "factory_stats_4", text::variable_type::val, text::fp_currency{ state.world.factory_get_full_profit(fid) });
+
+			text::add_line(state, contents, "factory_stats_7", text::variable_type::x, text::fp_percentage{ economy_factory::factory_input_multiplier(state, fac, n, p, s) });
+			text::add_line(state, contents, "factory_stats_8", text::variable_type::x, text::fp_percentage{ economy_factory::factory_output_multiplier(state, fac, n, p) });
+			text::add_line(state, contents, "factory_stats_9", text::variable_type::x, text::fp_percentage{ economy_factory::factory_throughput_multiplier(state, type, n, p, s) });
+			text::add_line(state, contents, "factory_stats_10", text::variable_type::x, text::fp_percentage{ economy_factory::sum_of_factory_triggered_modifiers(state, type, s) });
+			text::add_line(state, contents, "factory_stats_11", text::variable_type::x, text::fp_percentage{ economy_factory::factory_throughput_multiplier(state, type, n, p, s) + economy_factory::sum_of_factory_triggered_modifiers(state, type, s) });
+
+			for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
+				if(auto b1 = state.world.factory_type_get_bonus_trigger(type)[i]; b1) {
+					text::add_line(state, contents, "alice_factory_bonus", text::variable_type::x, text::fp_four_places{ state.world.factory_type_get_bonus_amount(type)[i] });
+					ui::trigger_description(state, contents, b1, trigger::to_generic(s), trigger::to_generic(n), 0);
+				}
+			}
+
 			text::add_line_break_to_layout(state, contents);
 			text::add_line(state, contents, "factory_stats_5");
-
-			float total_expenses = 0.f;
 
 			int position_demand_sat = 100;
 			int position_amount = 180;
@@ -638,14 +643,12 @@ namespace ui {
 
 				float amount = base_amount * input_multiplier * throughput_multiplier * min_input_available * effective_production_scale;
 				float cost = economy::commodity_effective_price(state, n, cid) * amount;
-				total_expenses += cost;
-
 				text::add_to_layout_box(state, contents, amount_box, text::fp_two_places{ amount });
 				text::add_to_layout_box(state, contents, cost_box, text::fp_currency{ -cost }, text::text_color::red);
 
 				text::add_to_layout_box(state, contents, box, std::string(" "));
 				text::close_layout_box(contents, box);
-				};
+			};
 
 			auto e_input_cost_line = [&](dcon::commodity_id cid, float base_amount) {
 				auto box = text::open_layout_box(contents);
@@ -670,12 +673,11 @@ namespace ui {
 
 				float amount = base_amount * input_multiplier * min_e_input_available * min_input_available * effective_production_scale;
 				float cost = economy::commodity_effective_price(state, n, cid) * amount;
-				total_expenses += cost;
 				text::add_to_layout_box(state, contents, amount_box, text::fp_two_places{ amount });
 				text::add_to_layout_box(state, contents, cost_box, text::fp_currency{ -cost }, text::text_color::red);
 				text::add_to_layout_box(state, contents, box, std::string(" "));
 				text::close_layout_box(contents, box);
-				};
+			};
 			auto named_money_line = [&](std::string_view loc, float value) {
 				auto box = text::open_layout_box(contents);
 				text::layout_box name_entry = box;
@@ -686,8 +688,7 @@ namespace ui {
 				text::add_to_layout_box(state, contents, cost, text::fp_currency{ value }, value >= 0.f ? text::text_color::green : text::text_color::red);
 				text::add_to_layout_box(state, contents, box, std::string(" "));
 				text::close_layout_box(contents, box);
-				};
-
+			};
 			auto output_cost_line = [&](dcon::commodity_id cid, float base_amount) {
 				auto box = text::open_layout_box(contents);
 				text::layout_box name_entry = box;
@@ -703,7 +704,7 @@ namespace ui {
 				text::add_to_layout_box(state, contents, cost, text::fp_currency{ output_cost }, text::text_color::green);
 				text::add_to_layout_box(state, contents, box, std::string(" "));
 				text::close_layout_box(contents, box);
-				};
+			};
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				if(inputs.commodity_type[i]) {
 					input_cost_line(inputs.commodity_type[i], inputs.commodity_amounts[i]);
@@ -722,17 +723,18 @@ namespace ui {
 			}
 			text::add_line_break_to_layout(state, contents);
 			auto const min_wage_factor = economy::pop_min_wage_factor(state, n);
-			float factory_min_wage = economy_factory::pop_factory_min_wage(state, n, min_wage_factor);
-			float wage_estimation = factory_min_wage
-				* state.defines.alice_factory_per_level_employment
-				/ state.defines.ke_needs_scaling_factor
-				* effective_production_scale;
-			total_expenses += wage_estimation;
-			named_money_line("factory_stats_wage", -wage_estimation);
+			float expected_min_wage = economy_factory::pop_factory_min_wage(state, n, min_wage_factor)
+				* state.world.factory_type_get_base_workforce(type);
+
+			float spendings = expected_min_wage
+				+ input_multiplier * throughput_multiplier * input_total * min_input_available
+				+ input_multiplier * e_input_total * min_e_input_available * min_input_available;
+
+			named_money_line("factory_stats_wage", -expected_min_wage);
 			text::add_line_break_to_layout(state, contents);
-			named_money_line("factory_stats_expenses", -total_expenses);
+			named_money_line("factory_stats_expenses", -spendings);
 			output_cost_line(type.get_output(), type.get_output_amount());
-			float desired_income = economy_factory::factory_desired_raw_profit(state, fac, total_expenses);
+			float desired_income = economy_factory::factory_desired_raw_profit(state, fac, spendings);
 			named_money_line("factory_stats_desired_income", desired_income);
 		}
 	};

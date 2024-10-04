@@ -2687,7 +2687,7 @@ namespace economy {
 	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::commodity_set const& cset) {
 		float total = 1.f;
 		for(uint32_t i = 0; i < economy::commodity_set::set_size && cset.commodity_type[i]; ++i) {
-			total = std::min(total, state.world.nation_get_demand_satisfaction(state, n, cset.commodity_type[i]));
+			total = std::min(total, state.world.nation_get_demand_satisfaction(n, cset.commodity_type[i]));
 		}
 		return total;
 	}
@@ -2695,7 +2695,7 @@ namespace economy {
 	float commodity_set_total_satisfaction(sys::state& state, dcon::nation_id n, economy::small_commodity_set const& cset) {
 		float total = 1.f;
 		for(uint32_t i = 0; i < economy::small_commodity_set::set_size && cset.commodity_type[i]; ++i) {
-			total = std::min(total, state.world.nation_get_demand_satisfaction(state, n, cset.commodity_type[i]));
+			total = std::min(total, state.world.nation_get_demand_satisfaction(n, cset.commodity_type[i]));
 		}
 		return total;
 	}

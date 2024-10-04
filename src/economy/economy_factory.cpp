@@ -249,6 +249,7 @@ namespace economy_factory {
 		return factory_consumption_amount;
 	}
 
+	/* Returns the minimum wage that should be paid **for a single pop unit** (scale it with base workforce) */
 	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor) {
 		float employed = state.world.nation_get_demographics(n, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
 		float total = state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
@@ -407,9 +408,9 @@ namespace economy_factory {
 				auto production_type = state.world.factory_get_building_type(deletion_choice);
 				state.world.delete_factory(deletion_choice);
 
-				for(auto state_building_construction_fat_id : state.world.state_instance_get_state_building_construction(sid)) {
-					if(state_building_construction_fat_id.get_type() == production_type) {
-						state.world.delete_state_building_construction(state_building_construction_fat_id);
+				for(auto sbc : state.world.state_instance_get_state_building_construction(state_instance_fat_id)) {
+					if(sbc.get_type() == production_type) {
+						state.world.delete_state_building_construction(sbc);
 						break;
 					}
 				}
@@ -606,7 +607,7 @@ namespace economy_factory {
 		float profit = total_production * state.world.commodity_get_current_price(factory_type_fat_id.get_output());
 
 		//this value represents spendings if 1 lvl of this factory is filled with workers
-		float spendings = expected_min_wage
+		float spendings = expected_min_wage * state.world.factory_type_get_base_workforce(factory_type_fat_id)
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
 			+ input_multiplier * efficiency_input_total * min_efficiency_input_available * min_input_available;
 
