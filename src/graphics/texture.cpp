@@ -111,14 +111,17 @@ namespace ogl {
 
 		/*	validate the header (warning, "goto"'s ahead, shield your eyes!!)	*/
 		if(header->dwMagic != (('D' << 0) | ('D' << 8) | ('S' << 16) | (' ' << 24))) {
+			reports::write_debug("Invalid DDS header checksum\n");
 			return 0;
 		}
 		if(header->dwSize != 124) {
+			reports::write_debug("Invalid DDS header size\n");
 			return 0;
 		}
 		/*	I need all of these	*/
 		flag = ALICE_DDSD_CAPS | ALICE_DDSD_HEIGHT | ALICE_DDSD_WIDTH | ALICE_DDSD_PIXELFORMAT;
 		if((header->dwFlags & flag) != flag) {
+			reports::write_debug("Invalid DDS capabilities\n");
 			return 0;
 		}
 		/*	According to the MSDN spec, the dwFlags should contain
@@ -126,10 +129,12 @@ namespace ogl {
 		uncompressed.  Some DDS writers do not conform to the
 		spec, so I need to make my reader more tolerant	*/
 		if(header->sPixelFormat.dwSize != 32) {
+			reports::write_debug("Invalid DDS pixel format size\n");
 			return 0;
 		}
 		/*	I need one of these	*/
 		if((header->sPixelFormat.dwFlags & (ALICE_DDPF_FOURCC | ALICE_DDPF_RGB | ALICE_DDPF_ALPHAPIXELS)) == 0) {
+			reports::write_debug("Invalid DDS pixel format flags\n");
 			return 0;
 		}
 		/*	make sure it is a type we can upload	*/
@@ -137,12 +142,15 @@ namespace ogl {
 		!((header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24))) ||
 			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24))) ||
 			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
+			reports::write_debug("Invalid DDS flag saying DXT but with no DXT CC\n");
 			return 0;
 		}
 		if((header->sCaps.dwCaps1 & ALICE_DDSCAPS_TEXTURE) == 0) {
+			reports::write_debug("No texture capability\n");
 			return 0;
 		}
 		if((header->sCaps.dwCaps2 & ALICE_DDSCAPS2_CUBEMAP) != 0) {
+			reports::write_debug("Insupported cubemap DDS\n");
 			return 0;
 		}
 		/*	OK, validated the header, let's load the image data	*/
@@ -384,9 +392,9 @@ namespace ogl {
 				dds_name[pos + 3] = NATIVE('s');
 				dds_name.resize(pos + 4);
 			}
-			auto file = open_file(root, dds_name);
-			if(file) {
+			if(auto file = open_file(root, dds_name); file) {
 				auto content = simple_fs::view_contents(*file);
+				reports::write_debug(("Loading DDS: " + simple_fs::native_to_utf8(dds_name)).c_str());
 
 				uint32_t w = 0;
 				uint32_t h = 0;
