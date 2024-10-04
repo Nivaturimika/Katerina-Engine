@@ -245,43 +245,43 @@ namespace economy_factory {
 
 
 	float nation_factory_consumption(sys::state& state, dcon::nation_id nation_id, dcon::commodity_id commodity_id) {
+		auto mobilization_impact = military::mobilization_impact(state, nation_id);
+
 		auto factory_consumption_amount = 0.f;
-		for(const auto province_ownership_fat_id : state.world.nation_get_province_ownership(nation_id)) {
-			for(const auto factory_location_fat_id : province_ownership_fat_id.get_province().get_factory_location()) {
-				auto factory_fat_id = factory_location_fat_id.get_factory();
-				auto factory_type_fat_id = factory_location_fat_id.get_factory().get_building_type();
-				auto occupied = province_ownership_fat_id.get_province().get_nation_from_province_control() != province_ownership_fat_id.get_province().get_nation_from_province_ownership();
-				auto mobilization_impact = military::mobilization_impact(state, nation_id);
-				auto province_fat_id = province_ownership_fat_id.get_province();
-				auto state_instance_fat_id = province_ownership_fat_id.get_province().get_state_membership();
+		for(const auto po : state.world.nation_get_province_ownership(nation_id)) {
+			auto occupied = po.get_province().get_nation_from_province_control() != po.get_province().get_nation_from_province_ownership();
+			for(const auto fl : po.get_province().get_factory_location()) {
+				auto f = fl.get_factory();
+				auto ft = fl.get_factory().get_building_type();
+				auto province_fat_id = po.get_province();
+				auto state_instance_fat_id = po.get_province().get_state_membership();
 				//
-				float total_workers = factory_max_employment(state, factory_fat_id);
-				float several_workers_scale = 10.f / total_workers;
-				float max_production_scale = factory_max_production_scale(state, factory_fat_id, mobilization_impact, occupied);
+				float total_workers = factory_max_employment(state, f);
+				float max_production_scale = factory_max_production_scale(state, f, mobilization_impact, occupied);
 				float current_workers = total_workers * max_production_scale;
 				//inputs
-				float input_total = factory_input_total_cost(state, nation_id, factory_type_fat_id);
-				float min_input_available = factory_min_input_available(state, nation_id, factory_type_fat_id);
+				float input_total = factory_input_total_cost(state, nation_id, ft);
+				float min_input_available = factory_min_input_available(state, nation_id, ft);
 				//modifiers
-				float input_multiplier = std::max(0.f, factory_input_multiplier(state, factory_fat_id, nation_id, province_fat_id, state_instance_fat_id));
-				float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, factory_type_fat_id, nation_id, province_fat_id, state_instance_fat_id) + factory_fat_id.get_triggered_modifiers());
-				float effective_production_scale = std::min(factory_fat_id.get_production_scale() * factory_fat_id.get_level(), max_production_scale);
+				float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, nation_id, province_fat_id, state_instance_fat_id));
+				float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, nation_id, province_fat_id, state_instance_fat_id) + f.get_triggered_modifiers());
+				float effective_production_scale = std::min(f.get_production_scale() * f.get_level(), max_production_scale);
 				//
-				auto const& inputs = factory_type_fat_id.get_inputs();
+				auto const& inputs = ft.get_inputs();
 				float input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_input_available * 0.9f);
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
 					if(inputs.commodity_type[i]) {
 						if(inputs.commodity_type[i] == commodity_id) {
-							factory_consumption_amount += inputs.commodity_amounts[i] * factory_location_fat_id.get_factory().get_actual_production();
+							factory_consumption_amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
 						}
 					} else {
 						break;
 					}
 				}
 				//
-				auto const& efficiency_inputs = factory_type_fat_id.get_efficiency_inputs();
-				float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, factory_type_fat_id);
-				float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, factory_type_fat_id);
+				auto const& efficiency_inputs = ft.get_efficiency_inputs();
+				float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, ft);
+				float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, ft);
 				auto const modifier_values = state.world.nation_get_modifier_values(nation_id, sys::national_mod_offsets::factory_maintenance) + 1.0f;
 				float efficiency_input_scale = input_multiplier * throughput_multiplier * effective_production_scale * (0.1f + min_efficiency_input_available * 0.9f);
 				for(uint32_t i = 0; i < economy::small_commodity_set::set_size; ++i) {
@@ -330,8 +330,7 @@ namespace economy_factory {
 		// when relative production is high, we want to reduce our speed
 		// for example, if relative production is 1.0, then we want to clamp our speed with ~0.01 or something small like this;
 		// and if relative production is ~0, then clamps are not needed
-		float relative_production_amount
-			=
+		float relative_production_amount =
 			state.world.factory_type_get_output_amount(factory_fat_id.get_building_type())
 			/ (
 				state.world.commodity_get_total_production(factory_fat_id.get_building_type().get_output())
@@ -611,6 +610,23 @@ namespace economy_factory {
 		});
 	}
 
+	/*	Obtains the total production from a factory (assuming it is fully employed)
+	*/
+	float total_employed_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::state_instance_id sid, dcon::province_id p) {
+		auto ft = state.world.factory_get_building_type(f);
+		//inputs
+		float min_input_available = factory_min_input_available(state, n, ft);
+		float min_efficiency_input_available = factory_min_efficiency_input_available(state, n, ft);
+		//modifiers
+		float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, p, sid));
+		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, p, sid) + state.world.factory_get_triggered_modifiers(f));
+		float output_multiplier = std::max(0.f, factory_output_multiplier(state, ft, n, p));
+		return state.world.factory_type_get_output_amount(ft)
+			* (0.75f + 0.25f * min_efficiency_input_available)
+			* throughput_multiplier
+			* output_multiplier
+			* min_input_available;
+	}
 	
 	void update_single_factory_consumption(sys::state& state, dcon::factory_id factory_id, dcon::nation_id nation_id, dcon::province_id province_id, dcon::state_instance_id state_instance_id, float mobilization_impact, float expected_min_wage, bool occupied) {
 		auto factory_fat_id = fatten(state.world, factory_id);
@@ -623,37 +639,27 @@ namespace economy_factory {
 		assert(state_instance_id);
 
 		float total_workers = factory_max_employment(state, factory_id);
-		float several_workers_scale = 10.f / total_workers;
 		float max_production_scale = factory_max_production_scale(state, factory_fat_id, mobilization_impact, occupied);
 		float current_workers = total_workers * max_production_scale;
 
 		//inputs
-
 		float input_total = factory_input_total_cost(state, nation_id, factory_type_fat_id);
 		float min_input_available = factory_min_input_available(state, nation_id, factory_type_fat_id);
 		float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, factory_type_fat_id);
 		float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, factory_type_fat_id);
 
 		//modifiers
-
 		float input_multiplier = std::max(0.f, factory_input_multiplier(state, factory_fat_id, nation_id, province_id, state_instance_id));
 		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, factory_type_fat_id, nation_id, province_id, state_instance_id) + factory_fat_id.get_triggered_modifiers());
 		float output_multiplier = std::max(0.f, factory_output_multiplier(state, factory_fat_id, nation_id, province_id));
 
-		//this value represents total production if 1 lvl of this factory is filled with workers
-		float total_production = factory_type_fat_id.get_output_amount()
-			* (0.75f + 0.25f * min_efficiency_input_available)
-			* throughput_multiplier
-			* output_multiplier
-			* min_input_available;
+		float total_production = total_employed_factory_production(state, factory_id, nation_id, state_instance_id, province_id);
 
 		//this value represents raw profit if 1 lvl of this factory is filled with workers
-		float profit =
-			total_production
-			* state.world.commodity_get_current_price(factory_type_fat_id.get_output());
+		float profit = total_production * state.world.commodity_get_current_price(factory_type_fat_id.get_output());
 
 		//this value represents spendings if 1 lvl of this factory is filled with workers
-		float spendings = expected_min_wage * state.defines.alice_factory_per_level_employment
+		float spendings = expected_min_wage
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
 			+ input_multiplier * efficiency_input_total * min_efficiency_input_available * min_input_available;
 

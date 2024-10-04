@@ -1327,24 +1327,14 @@ namespace economy {
 			update_national_artisan_consumption(state, n, artisan_min_wage, mobilization_impact);
 
 			for(auto p : state.world.nation_get_province_ownership(n)) {
+				bool is_occupied = p.get_province().get_nation_from_province_control() != n;
 				for(auto f : state.world.province_get_factory_location(p.get_province())) {
 					// factory
-
-					economy_factory::update_single_factory_consumption(
-					state,
-					f.get_factory(),
-					n,
-					p.get_province(),
-					p.get_province().get_state_membership(),
-					mobilization_impact,
-					factory_min_wage,
-					p.get_province().get_nation_from_province_control() != n // is occupied
-					);
+					economy_factory::update_single_factory_consumption(state, f.get_factory(), n, p.get_province(), p.get_province().get_state_membership(), mobilization_impact, factory_min_wage, is_occupied);
 				}
-
 				// rgo
 				bool is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(p.get_province()));
-				economy_rgo::update_province_rgo_consumption(state, p.get_province(), n, mobilization_impact, is_mine ? laborer_min_wage : farmer_min_wage, p.get_province().get_nation_from_province_control() != n);
+				economy_rgo::update_province_rgo_consumption(state, p.get_province(), n, mobilization_impact, is_mine ? laborer_min_wage : farmer_min_wage, is_occupied);
 			}
 
 			update_pop_consumption(state, n, base_demand, invention_factor);
