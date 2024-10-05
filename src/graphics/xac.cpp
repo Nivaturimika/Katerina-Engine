@@ -823,7 +823,6 @@ namespace emfx {
 			err.accumulated_errors += "Invalid XSM identifier on " + err.file_name + "\n";
 			goto fail_exit;
 		}
-		//context.use_quat_16 = h.multiply_order == 0;
 #ifdef XAC_DEBUG
 		std::printf("XsmFile-> version %u.%u, totalSize=%u\n", h.major_version, h.minor_version, uint32_t(end - start));
 #endif
@@ -836,11 +835,8 @@ namespace emfx {
 			const char* expected = start + ch.len;
 			switch(xsm_chunk_type(ch.ident)) {
 			case xsm_chunk_type::bone_animation:
-				if(ch.version == 1) {
-					start = parse_xsm_bone_animation_v2(context, start, end, err);
-				} else {
-					err.accumulated_errors += "unsupported version " + err.file_name + "\n";
-				}
+				context.use_quat_16 = (ch.version == 2); //v1 is 32-bits, v2 is 16-bits
+				start = parse_xsm_bone_animation_v2(context, start, end, err);
 				break;
 			case xsm_chunk_type::metadata:
 			{
@@ -850,7 +846,6 @@ namespace emfx {
 				parse_xac_any_binary<uint8_t>(&start, end, err);
 				parse_xac_any_binary<uint8_t>(&start, end, err);
 				uint32_t pad = parse_xac_any_binary<uint16_t>(&start, end, err);
-				context.use_quat_16 = (h.major_version == 2);
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
 				start = parse_xac_cstring(start, end, err);
