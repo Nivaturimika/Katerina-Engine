@@ -108,6 +108,7 @@ set to one or more of the following values.	*/
 		/*	try reading in the header */
 		DDS_header const* header = reinterpret_cast<DDS_header const*>(buffer);
 		uint32_t buffer_index = sizeof(DDS_header);
+		uint32_t palette_index = buffer_index;
 
 		/*	validate the header (warning, "goto"'s ahead, shield your eyes!!)	*/
 		if(header->dwMagic != (('D' << 0) | ('D' << 8) | ('S' << 16) | (' ' << 24))) {
@@ -181,6 +182,7 @@ set to one or more of the following values.	*/
 				s3tc_format_layout = GL_RGB;
 				block_size = 1;
 				// skip the palette
+				palette_index = buffer_index;
 				buffer_index += 4 * 256;
 			}
 			dds_main_size = width * height * block_size;
@@ -256,11 +258,15 @@ set to one or more of the following values.	*/
 				case 1:
 				{
 					reports::write_debug("Experimental paletted DDS used\n");
-					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 3]);
-					for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
-						dds_dest_data[i * 3 + 0] = buffer[buffer_index + i];
-						dds_dest_data[i * 3 + 1] = buffer[buffer_index + i];
-						dds_dest_data[i * 3 + 2] = buffer[buffer_index + i];
+					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[width * (height + 1) * 3]);
+					for(uint32_t x = 0; x < width; x++) {
+						for(uint32_t y = 0; y <= height; y++) {
+							uint8_t pidx = buffer[buffer_index + x + y * (width - 1)];
+							uint32_t idx = x + y * width;
+							dds_dest_data[idx * 3 + 0] = buffer[palette_index + pidx * 4 + 0];
+							dds_dest_data[idx * 3 + 1] = buffer[palette_index + pidx * 4 + 1];
+							dds_dest_data[idx * 3 + 2] = buffer[palette_index + pidx * 4 + 2];
+						}
 					}
 					//std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
 					break;
