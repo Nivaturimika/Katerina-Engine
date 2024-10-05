@@ -120,12 +120,13 @@ namespace map {
 	};
 
 	struct text_line_generator_data {
-	text_line_generator_data() { };
-	text_line_generator_data(text::stored_glyphs&& text_, glm::vec4 coeff_, glm::vec2 basis_, glm::vec2 ratio_) : text(std::move(text_)), coeff{ coeff_ }, basis{ basis_ }, ratio{ ratio_ } { };
+		text_line_generator_data() { };
+		text_line_generator_data(text::stored_glyphs&& text_, glm::vec4 coeff_, glm::vec2 basis_, glm::vec2 ratio_, dcon::nation_id n_) : text(std::move(text_)), coeff{ coeff_ }, basis{ basis_ }, ratio{ ratio_ }, n{ n_ } { };
 		text::stored_glyphs text;
-	glm::vec4 coeff{0.f};
-	glm::vec2 basis{0.f};
-	glm::vec2 ratio{0.f};
+		glm::vec4 coeff;
+		glm::vec2 basis;
+		glm::vec2 ratio;
+		dcon::nation_id n;
 	};
 
 	struct border {
@@ -206,11 +207,14 @@ namespace map {
 		std::vector<curved_line_vertex> other_objective_unit_arrow_vertices;
 		std::vector<GLint> other_objective_unit_arrow_starts;
 		std::vector<GLsizei> other_objective_unit_arrow_counts;
-		//
+		/* Country/Region labels */
 		std::vector<GLuint> text_line_texture_per_quad;
-		std::vector<GLuint> province_text_line_texture_per_quad;
 		std::vector<text_line_vertex> text_line_vertices;
+		std::vector<dcon::nation_id> text_line_tagged_vertices;
+		/* Province labels */
+		std::vector<GLuint> province_text_line_texture_per_quad;
 		std::vector<text_line_vertex> province_text_line_vertices;
+		/* Flat map billboards */
 		std::vector<screen_vertex> drag_box_vertices;
 		std::vector<textured_screen_vertex> selection_vertices;
 		std::vector<textured_screen_vertex> capital_vertices;

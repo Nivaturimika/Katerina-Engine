@@ -2177,6 +2177,7 @@ namespace map {
 	void display_data::set_text_lines(sys::state& state, std::vector<text_line_generator_data> const& data) {
 		text_line_vertices.clear();
 		text_line_texture_per_quad.clear();
+		text_line_tagged_vertices.clear();
 
 		const auto map_x_scaling = float(size_x) / float(size_y);
 		auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
@@ -2308,10 +2309,10 @@ namespace map {
 					float tx = float(gso.texture_slot & 7) * step;
 					float ty = float((gso.texture_slot & 63) >> 3) * step;
 
+					text_line_tagged_vertices.push_back(e.n);
 					text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
 					text_line_vertices.emplace_back(p0, glm::vec2(-1, -1), shader_direction, glm::vec2(tx, ty + step), real_text_size);
 					text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
-
 					text_line_vertices.emplace_back(p0, glm::vec2(1, -1), shader_direction, glm::vec2(tx + step, ty + step), real_text_size);
 					text_line_vertices.emplace_back(p0, glm::vec2(1, 1), shader_direction, glm::vec2(tx + step, ty), real_text_size);
 					text_line_vertices.emplace_back(p0, glm::vec2(-1, 1), shader_direction, glm::vec2(tx, ty), real_text_size);
@@ -2334,6 +2335,7 @@ namespace map {
 				for(uint32_t j = 0; j < uint32_t(text_line_texture_per_quad.size() - i - 1); j++) {
 					if(text_line_texture_per_quad[j] < text_line_texture_per_quad[j + 1]) {
 						std::swap(text_line_texture_per_quad[j], text_line_texture_per_quad[j + 1]);
+						std::swap(text_line_tagged_vertices[j], text_line_tagged_vertices[j + 1]);
 						map::text_line_vertex tmp[6];
 						std::memcpy(tmp, &text_line_vertices[(j + 1) * 6], sizeof(tmp));
 						std::memcpy(&text_line_vertices[(j + 1) * 6], &text_line_vertices[j * 6], sizeof(tmp));
@@ -2341,13 +2343,14 @@ namespace map {
 						swapped = true;
 					}
 				}
-				if(!swapped)
+				if(!swapped) {
 					break;
+				}
 			}
 			dyn_text_line_starts.resize(text_line_texture_per_quad.size());
 			dyn_text_line_counts.resize(text_line_texture_per_quad.size());
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_text_line]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * text_line_vertices.size(), &text_line_vertices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(text_line_vertex) * text_line_vertices.size(), &text_line_vertices[0], GL_DYNAMIC_DRAW);
 		}
 	}
 
