@@ -20,49 +20,50 @@
 
 namespace ogl {
 
-	// DDS loader taken from SOIL2
+// DDS loader taken from SOIL2
 
-	#define ALICE_DDSD_CAPS 0x00000001
-	#define ALICE_DDSD_HEIGHT 0x00000002
-	#define ALICE_DDSD_WIDTH 0x00000004
-	#define ALICE_DDSD_PITCH 0x00000008
-	#define ALICE_DDSD_PIXELFORMAT 0x00001000
-	#define ALICE_DDSD_MIPMAPCOUNT 0x00020000
-	#define ALICE_DDSD_LINEARSIZE 0x00080000
-	#define ALICE_DDSD_DEPTH 0x00800000
+#define DDSD_CAPS 0x00000001
+#define DDSD_HEIGHT 0x00000002
+#define DDSD_WIDTH 0x00000004
+#define DDSD_PITCH 0x00000008
+#define DDSD_PIXELFORMAT 0x00001000
+#define DDSD_MIPMAPCOUNT 0x00020000
+#define DDSD_LINEARSIZE 0x00080000
+#define DDSD_DEPTH 0x00800000
 
-	/*	DirectDraw Pixel Format	*/
-	#define ALICE_DDPF_ALPHAPIXELS 0x00000001
-	#define ALICE_DDPF_FOURCC 0x00000004
-	#define ALICE_DDPF_RGB 0x00000040
+/*	DirectDraw Pixel Format	*/
+#define DDPF_ALPHAPIXELS 0x00000001
+#define DDPF_FOURCC 0x00000004
+#define DDPF_RGB 0x00000040
+#define DDPF_PALETTEINDEXED8 0x00000020
 
-	/*	The dwCaps1 member of the ALICE_DDSCAPS2 structure can be
-	set to one or more of the following values.	*/
-	#define ALICE_DDSCAPS_COMPLEX 0x00000008
-	#define ALICE_DDSCAPS_TEXTURE 0x00001000
-	#define ALICE_DDSCAPS_MIPMAP 0x00400000
+/*	The dwCaps1 member of the DDSCAPS2 structure can be
+set to one or more of the following values.	*/
+#define DDSCAPS_COMPLEX 0x00000008
+#define DDSCAPS_TEXTURE 0x00001000
+#define DDSCAPS_MIPMAP 0x00400000
 
-	/*	The dwCaps2 member of the ALICE_DDSCAPS2 structure can be
-		set to one or more of the following values.		*/
-	#define ALICE_DDSCAPS2_CUBEMAP 0x00000200
-	#define ALICE_DDSCAPS2_CUBEMAP_POSITIVEX 0x00000400
-	#define ALICE_DDSCAPS2_CUBEMAP_NEGATIVEX 0x00000800
-	#define ALICE_DDSCAPS2_CUBEMAP_POSITIVEY 0x00001000
-	#define ALICE_DDSCAPS2_CUBEMAP_NEGATIVEY 0x00002000
-	#define ALICE_DDSCAPS2_CUBEMAP_POSITIVEZ 0x00004000
-	#define ALICE_DDSCAPS2_CUBEMAP_NEGATIVEZ 0x00008000
-	#define ALICE_DDSCAPS2_VOLUME 0x00200000
+/*	The dwCaps2 member of the DDSCAPS2 structure can be
+	set to one or more of the following values.		*/
+#define DDSCAPS2_CUBEMAP 0x00000200
+#define DDSCAPS2_CUBEMAP_POSITIVEX 0x00000400
+#define DDSCAPS2_CUBEMAP_NEGATIVEX 0x00000800
+#define DDSCAPS2_CUBEMAP_POSITIVEY 0x00001000
+#define DDSCAPS2_CUBEMAP_NEGATIVEY 0x00002000
+#define DDSCAPS2_CUBEMAP_POSITIVEZ 0x00004000
+#define DDSCAPS2_CUBEMAP_NEGATIVEZ 0x00008000
+#define DDSCAPS2_VOLUME 0x00200000
 
-	#define SOIL_GL_SRGB 0x8C40
-	#define SOIL_GL_SRGB_ALPHA 0x8C42
-	#define SOIL_RGB_S3TC_DXT1 0x83F0
-	#define SOIL_RGBA_S3TC_DXT1 0x83F1
-	#define SOIL_RGBA_S3TC_DXT3 0x83F2
-	#define SOIL_RGBA_S3TC_DXT5 0x83F3
+#define SOIL_GL_SRGB 0x8C40
+#define SOIL_GL_SRGB_ALPHA 0x8C42
+#define SOIL_RGB_S3TC_DXT1 0x83F0
+#define SOIL_RGBA_S3TC_DXT1 0x83F1
+#define SOIL_RGBA_S3TC_DXT3 0x83F2
+#define SOIL_RGBA_S3TC_DXT5 0x83F3
 
-	#define SOIL_TEXTURE_WRAP_R 0x8072
-	#define SOIL_CLAMP_TO_EDGE 0x812F
-	#define SOIL_REFLECTION_MAP 0x8512
+#define SOIL_TEXTURE_WRAP_R 0x8072
+#define SOIL_CLAMP_TO_EDGE 0x812F
+#define SOIL_REFLECTION_MAP 0x8512
 
 	typedef struct {
 		unsigned int dwMagic;
@@ -100,7 +101,6 @@ namespace ogl {
 	GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint32_t buffer_length, uint32_t& width, uint32_t& height, int soil_flags) {
 		/*	file reading variables	*/
 		uint32_t block_size = 16;
-		uint32_t flag;
 		if(buffer_length < sizeof(DDS_header)) {
 			return 0;
 		}
@@ -119,13 +119,13 @@ namespace ogl {
 			return 0;
 		}
 		/*	I need all of these	*/
-		flag = ALICE_DDSD_CAPS | ALICE_DDSD_HEIGHT | ALICE_DDSD_WIDTH | ALICE_DDSD_PIXELFORMAT;
+		uint32_t flag = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
 		if((header->dwFlags & flag) != flag) {
 			reports::write_debug("Invalid DDS capabilities\n");
 			return 0;
 		}
 		/*	According to the MSDN spec, the dwFlags should contain
-		ALICE_DDSD_LINEARSIZE if it's compressed, or ALICE_DDSD_PITCH if
+		DDSD_LINEARSIZE if it's compressed, or DDSD_PITCH if
 		uncompressed.  Some DDS writers do not conform to the
 		spec, so I need to make my reader more tolerant	*/
 		if(header->sPixelFormat.dwSize != 32) {
@@ -133,30 +133,31 @@ namespace ogl {
 			return 0;
 		}
 		/*	I need one of these	*/
-		if((header->sPixelFormat.dwFlags & (ALICE_DDPF_FOURCC | ALICE_DDPF_RGB | ALICE_DDPF_ALPHAPIXELS)) == 0) {
-			reports::write_debug("Invalid DDS pixel format flags\n");
+		bool is_alpha = (header->sPixelFormat.dwFlags & (DDPF_ALPHAPIXELS)) != 0;
+		bool uncompressed = (header->sPixelFormat.dwFlags & DDPF_FOURCC) == 0;
+		if((header->sPixelFormat.dwFlags & (DDPF_FOURCC | DDPF_RGB | DDPF_PALETTEINDEXED8)) == 0) {
+			reports::write_debug(("Invalid DDS pixel format flags" + std::to_string(header->sPixelFormat.dwFlags) + "\n").c_str());
 			return 0;
 		}
 		/*	make sure it is a type we can upload	*/
-		if((header->sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) &&
+		if((header->sPixelFormat.dwFlags & DDPF_FOURCC) &&
 		!((header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24))) ||
 			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24))) ||
 			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
 			reports::write_debug("Invalid DDS flag saying DXT but with no DXT CC\n");
 			return 0;
 		}
-		if((header->sCaps.dwCaps1 & ALICE_DDSCAPS_TEXTURE) == 0) {
+		if((header->sCaps.dwCaps1 & DDSCAPS_TEXTURE) == 0) {
 			reports::write_debug("No texture capability\n");
 			return 0;
 		}
-		if((header->sCaps.dwCaps2 & ALICE_DDSCAPS2_CUBEMAP) != 0) {
+		if((header->sCaps.dwCaps2 & DDSCAPS2_CUBEMAP) != 0) {
 			reports::write_debug("Insupported cubemap DDS\n");
 			return 0;
 		}
 		/*	OK, validated the header, let's load the image data	*/
 		width = header->dwWidth;
 		height = header->dwHeight;
-		bool uncompressed = (header->sPixelFormat.dwFlags & ALICE_DDPF_FOURCC) == 0;
 		GLint s3tc_format = 0; //How we want to give it to shaders
 		GLint s3tc_format_layout = 0; //How's it laid on memory
 		GLint s3tc_type = GL_UNSIGNED_BYTE;
@@ -165,7 +166,7 @@ namespace ogl {
 			s3tc_format = GL_RGB;
 			s3tc_format_layout = GL_RGB;
 			block_size = 3;
-			if(header->sPixelFormat.dwFlags & ALICE_DDPF_ALPHAPIXELS) {
+			if(is_alpha) {
 				s3tc_format = GL_RGBA;
 				s3tc_format_layout = GL_RGBA;
 				block_size = 4;
@@ -175,16 +176,16 @@ namespace ogl {
 					block_size = 2;
 				}
 			}
+			if((header->sPixelFormat.dwFlags & DDPF_PALETTEINDEXED8) != 0) {
+				s3tc_format = GL_RGB;
+				s3tc_format_layout = GL_RGB;
+				block_size = 1;
+				// skip the palette
+				buffer_index += 4 * 256;
+			}
 			dds_main_size = width * height * block_size;
 		} else {
 			/*	can we even handle direct uploading to OpenGL DXT compressed images?	*/
-			//
-			// TODO: properly restore this check
-			//
-
-			// if(query_DXT_capability() != SOIL_CAPABILITY_PRESENT) {
-				//	return 0;
-			// }
 			/*	well, we know it is DXT1/3/5, because we checked above	*/
 			switch((header->sPixelFormat.dwFourCC >> 24) - '0') {
 			case 1:
@@ -204,7 +205,7 @@ namespace ogl {
 		}
 		uint32_t dds_full_size = dds_main_size;
 		uint32_t mipmaps = 0;
-		if((header->sCaps.dwCaps1 & ALICE_DDSCAPS_MIPMAP) != 0 && (header->dwMipMapCount > 1)) {
+		if((header->sCaps.dwCaps1 & DDSCAPS_MIPMAP) != 0 && (header->dwMipMapCount > 1)) {
 			mipmaps = header->dwMipMapCount - 1;
 			for(uint32_t i = 1; i <= mipmaps; ++i) {
 				uint32_t w = std::max<uint32_t>(width >> i, 1);
@@ -252,52 +253,90 @@ namespace ogl {
 				/*	and remember, DXT uncompressed uses BGR(A), so swap to (A)BGR for ALL MIPmap levels	*/
 				std::unique_ptr<uint8_t[]> dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size]);
 				switch(block_size) {
-				case 4:
+				case 1:
 				{
-					uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
-					uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
-					uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-					uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-						uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i);
-						uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
-						uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
-						uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
-						uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
-						dds_dest_data[i + 0] = static_cast<uint8_t>(r);
-						dds_dest_data[i + 1] = static_cast<uint8_t>(g);
-						dds_dest_data[i + 2] = static_cast<uint8_t>(b);
-						dds_dest_data[i + 3] = static_cast<uint8_t>(a);
+					reports::write_debug("Experimental paletted DDS used\n");
+					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 3]);
+					for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+						dds_dest_data[i * 3 + 0] = buffer[buffer_index + i];
+						dds_dest_data[i * 3 + 1] = buffer[buffer_index + i];
+						dds_dest_data[i * 3 + 2] = buffer[buffer_index + i];
 					}
+					//std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
 					break;
 				}
 				case 2:
 				{
 					dds_dest_data.reset();
-					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
 					uint16_t mr1 = uint16_t(header->sPixelFormat.dwRBitMask >> std::countr_zero(header->sPixelFormat.dwRBitMask));
 					float mr2 = mr1 == 0 ? 0.f : 255.f / float(mr1);
 					uint16_t mg1 = uint16_t(header->sPixelFormat.dwGBitMask >> std::countr_zero(header->sPixelFormat.dwGBitMask));
 					float mg2 = mg1 == 0 ? 0.f : 255.f / float(mg1);
 					uint16_t mb1 = uint16_t(header->sPixelFormat.dwBBitMask >> std::countr_zero(header->sPixelFormat.dwBBitMask));
 					float mb2 = mb1 == 0 ? 0.f : 255.f / float(mb1);
-					uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-					float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
 					//
 					uint16_t rmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
 					uint16_t gmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
 					uint16_t bmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-					uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-						uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i);
-						uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
-						uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
-						uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
-						uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
-						dds_dest_data[i * 2 + 0] = uint8_t(float(r) * mr2);
-						dds_dest_data[i * 2 + 1] = uint8_t(float(g) * mg2);
-						dds_dest_data[i * 2 + 2] = uint8_t(float(b) * mb2);
-						dds_dest_data[i * 2 + 3] = uint8_t(float(a) * ma2);
+					if(is_alpha) {
+						uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+						float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
+						uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+						//
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i * block_size);
+							uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+							dds_dest_data[i * 4 + 0] = uint8_t(float(r) * mr2);
+							dds_dest_data[i * 4 + 1] = uint8_t(float(g) * mg2);
+							dds_dest_data[i * 4 + 2] = uint8_t(float(b) * mb2);
+							dds_dest_data[i * 4 + 3] = uint8_t(float(a) * ma2);
+						}
+					} else {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i * block_size);
+							uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							dds_dest_data[i * 3 + 0] = uint8_t(float(r) * mr2);
+							dds_dest_data[i * 3 + 1] = uint8_t(float(g) * mg2);
+							dds_dest_data[i * 3 + 2] = uint8_t(float(b) * mb2);
+						}
+					}
+					break;
+				}
+				case 4:
+				{
+					uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+					uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+					uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+					if(is_alpha) {
+						uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i * block_size);
+							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+							dds_dest_data[i * 4 + 0] = static_cast<uint8_t>(r);
+							dds_dest_data[i * 4 + 1] = static_cast<uint8_t>(g);
+							dds_dest_data[i * 4 + 2] = static_cast<uint8_t>(b);
+							dds_dest_data[i * 4 + 3] = static_cast<uint8_t>(a);
+						}
+					} else {
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i * block_size);
+							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							dds_dest_data[i * 3 + 0] = static_cast<uint8_t>(r);
+							dds_dest_data[i * 3 + 1] = static_cast<uint8_t>(g);
+							dds_dest_data[i * 3 + 2] = static_cast<uint8_t>(b);
+						}
 					}
 					break;
 				}
