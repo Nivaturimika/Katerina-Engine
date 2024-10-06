@@ -432,7 +432,7 @@ namespace economy {
 			state.world.for_each_commodity([&](dcon::commodity_id c) {
 				auto local_supply = state.world.nation_get_domestic_market_pool(n, c);
 				auto leader_supply = state.world.nation_get_domestic_market_pool(sl, c);
-				state.world.nation_set_domestic_market_pool(n, (1.0f - share) * local_supply + leader_supply);
+				state.world.nation_set_domestic_market_pool(n, c, (1.0f - share) * local_supply + leader_supply);
 			});
 		}
 	}
