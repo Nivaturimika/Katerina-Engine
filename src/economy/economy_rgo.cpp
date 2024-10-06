@@ -109,13 +109,13 @@ namespace economy_rgo {
 			}
 			state.world.province_set_rgo_employment(p, employment_ratio);
 	
-			auto slave_fraction = (slave_pool > current_employment) ? current_employment / slave_pool : 0.0f;
-			auto free_fraction = std::max(0.0f, (worker_pool > current_employment - slave_pool) ? (current_employment - slave_pool) / std::max(worker_pool, 0.01f) : 0.0f);
+			auto slave_fraction = 1.0f;
+			auto free_fraction = total_employed / max_employment_total;
 	
 			assert(slave_fraction >= 0.f && slave_fraction <= 1.f);
 			assert(free_fraction >= 0.f && free_fraction <= 1.f);
 	
-			assert(slave_fraction + free_fraction <= 1.f);
+			assert(slave_fraction + free_fraction <= 2.f);
 	
 			for(auto pop : state.world.province_get_pop_location(p)) {
 				auto pt = pop.get_pop().get_poptype();
