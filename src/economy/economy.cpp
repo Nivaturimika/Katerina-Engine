@@ -1736,7 +1736,7 @@ namespace economy {
 						for(auto const pl : state.world.province_get_pop_location(p)) {
 							if(pl.get_pop().get_poptype().get_is_paid_rgo_worker()) {
 								if(pl.get_pop().get_employment() > 0.0f) {
-									pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * per_worker_profit * (pl.get_pop().get_employment() /pl.get_pop().get_size()));
+									pl.get_pop().set_savings(pl.get_pop().get_savings() + per_worker_profit * pl.get_pop().get_employment());
 									assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 								}
 							}
@@ -1750,10 +1750,10 @@ namespace economy {
 				province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 					for(auto pl : state.world.province_get_pop_location(p)) {
 						if(state.culture_definitions.primary_factory_worker == pl.get_pop().get_poptype()) {
-							pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * profit.per_primary_worker * (pl.get_pop().get_employment() / pl.get_pop().get_size()));
+							pl.get_pop().set_savings(pl.get_pop().get_savings() + profit.per_primary_worker * pl.get_pop().get_employment());
 							assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 						} else if(state.culture_definitions.secondary_factory_worker == pl.get_pop().get_poptype()) {
-							pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * profit.per_secondary_worker * (pl.get_pop().get_employment() / pl.get_pop().get_size()));
+							pl.get_pop().set_savings(pl.get_pop().get_savings() + profit.per_secondary_worker * pl.get_pop().get_employment());
 							assert(std::isfinite(pl.get_pop().get_savings()) && pl.get_pop().get_savings() >= 0);
 						} else if(state.culture_definitions.capitalists == pl.get_pop().get_poptype()) {
 							pl.get_pop().set_savings(pl.get_pop().get_savings() + pl.get_pop().get_size() * profit.per_owner);
