@@ -425,9 +425,15 @@ namespace economy {
 	void give_sphere_leader_production(sys::state& state, dcon::nation_id n) {
 		if(auto sl = state.world.nation_get_in_sphere_of(n); sl) {
 			/* - Every nation in a sphere(after the above has been calculated for the entire sphere) has their effective domestic
-			 supply set to (1 - its-share-factor) x original-domestic-supply + sphere-leader's-domestic supply */
+			 supply set to (1 - its-share-factor) x original-domestic-supply + sphere-leader's-domestic supply
+
+			 Yep here it be, the sphere dup bug! */
 			float share = sphere_leader_share_factor(state, sl, n);
-		state.world.for_each_commodity([&](dcon::commodity_id c) { state.world.nation_get_domestic_market_pool(n, c) *= (1.0f - share); });
+			state.world.for_each_commodity([&](dcon::commodity_id c) {
+				auto local_supply = state.world.nation_get_domestic_market_pool(n, c);
+				auto leader_supply = state.world.nation_get_domestic_market_pool(sl, c);
+				state.world.nation_set_domestic_market_pool(n, (1.0f - share) * local_supply + leader_supply);
+			});
 		}
 	}
 
