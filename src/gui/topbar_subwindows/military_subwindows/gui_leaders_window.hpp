@@ -71,6 +71,13 @@ namespace ui {
 			auto name = state.world.leader_get_background(l).get_name();
 			set_text(state, text::produce_simple_string(state, name));
 		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			display_leader_attributes(state, retrieve<dcon::leader_id>(state, parent), contents, 0);
+		}
 	};
 	class leader_name_text : public simple_text_element_base {
 		public:
@@ -78,6 +85,13 @@ namespace ui {
 			auto l = retrieve<dcon::leader_id>(state, parent);
 			auto name = state.world.leader_get_name(l);
 			set_text(state, std::string(state.to_string_view(name)));
+		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			display_leader_attributes(state, retrieve<dcon::leader_id>(state, parent), contents, 0);
 		}
 	};
 	class leader_location_text : public simple_text_element_base {
