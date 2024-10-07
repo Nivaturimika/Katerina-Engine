@@ -813,24 +813,17 @@ namespace launcher {
 		int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
 		SetPixelFormat(window_dc, pixel_format, &pfd);
 
-		auto handle_to_ogl_dc = wglCreateContext(window_dc);
-		wglMakeCurrent(window_dc, handle_to_ogl_dc);
-
-		if(glewInit() != 0) {
-			window::emit_error_message("GLEW failed to initialize", true);
-		}
-
 		if(wglewIsSupported("WGL_ARB_create_context")) {
-			// Explicitly request for OpenGL 3.0
-			static const int attribs_3_0[] = {
-				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			// Explicitly request for OpenGL 2.0
+			static const int attribs_2_0[] = {
+				WGL_CONTEXT_MAJOR_VERSION_ARB, 2,
 				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 				WGL_CONTEXT_FLAGS_ARB, 0,
 				WGL_CONTEXT_PROFILE_MASK_ARB,
 				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			opengl_context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
+			opengl_context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_2_0);
 		} else {
 			opengl_context = wglCreateContext(window_dc);
 		}
@@ -838,14 +831,16 @@ namespace launcher {
 			window::emit_error_message("Unable to create WGL context", true);
 		}
 		wglMakeCurrent(window_dc, HGLRC(opengl_context));
-		wglDeleteContext(handle_to_ogl_dc);
+		if(glewInit() != 0) {
+			window::emit_error_message("GLEW failed to initialize", true);
+		}
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
+			reports::write_debug("WGL_EXT_swap_control_tear is on");
 			wglSwapIntervalEXT(-1);
 		} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
+			reports::write_debug("WGL_EXT_swap_control is on");
 			wglSwapIntervalEXT(1);
-		} else {
-			window::emit_error_message("WGL_EXT_swap_control_tear and WGL_EXT_swap_control not supported", true);
 		}
 	}
 

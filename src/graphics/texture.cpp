@@ -545,7 +545,7 @@ set to one or more of the following values.	*/
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
 			if(!keep_data) {
-				reports::write_debug("texture is not marked persistent in RAM");
+				reports::write_debug("Texture is not marked persistent in RAM\n");
 				STBI_FREE(asset_texture.data);
 				asset_texture.data = nullptr;
 			}
