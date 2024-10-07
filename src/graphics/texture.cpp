@@ -159,17 +159,15 @@ set to one or more of the following values.	*/
 		/*	OK, validated the header, let's load the image data	*/
 		width = header->dwWidth;
 		height = header->dwHeight;
+		uint32_t pitch = (width * 8 + 7) / 8;
+
 		GLint s3tc_format = 0; //How we want to give it to shaders
 		GLint s3tc_format_layout = 0; //How's it laid on memory
 		GLint s3tc_type = GL_UNSIGNED_BYTE;
 		uint32_t dds_main_size = 0;
 		if(uncompressed) {
-			s3tc_format = GL_RGB;
-			s3tc_format_layout = GL_RGB;
 			block_size = 3;
 			if(is_alpha) {
-				s3tc_format = GL_RGBA;
-				s3tc_format_layout = GL_RGBA;
 				block_size = 4;
 				if(header->sPixelFormat.dwRGBBitCount == 16) {
 					//s3tc_format_layout = GL_RGBA;
@@ -178,13 +176,12 @@ set to one or more of the following values.	*/
 				}
 			}
 			if((header->sPixelFormat.dwFlags & DDPF_PALETTEINDEXED8) != 0) {
-				s3tc_format = GL_RGB;
-				s3tc_format_layout = GL_RGB;
 				block_size = 1;
 				// skip the palette
 				palette_index = buffer_index;
 				buffer_index += 4 * 256;
 			}
+			pitch = (width * (header->sPixelFormat.dwRGBBitCount) + 7) / 8;
 			dds_main_size = width * height * block_size;
 		} else {
 			/*	can we even handle direct uploading to OpenGL DXT compressed images?	*/
@@ -205,6 +202,7 @@ set to one or more of the following values.	*/
 			}
 			dds_main_size = ((width + 3) >> 2) * ((height + 3) >> 2) * block_size;
 		}
+
 		uint32_t dds_full_size = dds_main_size;
 		uint32_t mipmaps = 0;
 		if((header->sCaps.dwCaps1 & DDSCAPS_MIPMAP) != 0 && (header->dwMipMapCount > 1)) {
@@ -250,46 +248,55 @@ set to one or more of the following values.	*/
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, SOIL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			}
-			/*	upload the main chunk	*/
+			/*	upload the main chunk */
 			if(uncompressed) {
+				/* TODO: make keep_rgba return false if we can compress it to 3-components without affecting alignment */
+				bool keep_rgba = true;
 				/*	and remember, DXT uncompressed uses BGR(A), so swap to (A)BGR for ALL MIPmap levels	*/
 				std::unique_ptr<uint8_t[]> dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size]);
 				switch(block_size) {
 				case 1:
 				{
 					reports::write_debug("Experimental paletted DDS used\n");
-					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[width * (height + 1) * 3]);
-					for(uint32_t x = 0; x < width; x++) {
-						for(uint32_t y = 0; y <= height; y++) {
-							uint8_t pidx = buffer[buffer_index + x + y * (width - 1)];
-							uint32_t idx = x + y * width;
-							dds_dest_data[idx * 3 + 0] = buffer[palette_index + pidx * 4 + 0];
-							dds_dest_data[idx * 3 + 1] = buffer[palette_index + pidx * 4 + 1];
-							dds_dest_data[idx * 3 + 2] = buffer[palette_index + pidx * 4 + 2];
+					if(keep_rgba) {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint8_t pidx = buffer[buffer_index + i];
+							dds_dest_data[i * 4 + 0] = buffer[palette_index + pidx * 4 + 0];
+							dds_dest_data[i * 4 + 1] = buffer[palette_index + pidx * 4 + 1];
+							dds_dest_data[i * 4 + 2] = buffer[palette_index + pidx * 4 + 2];
+							dds_dest_data[i * 4 + 3] = is_alpha ? buffer[palette_index + pidx * 4 + 3] : 0xff;
 						}
+						s3tc_format = s3tc_format_layout = GL_RGBA;
+					} else {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 3]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							uint8_t pidx = buffer[buffer_index + i];
+							dds_dest_data[i * 3 + 0] = buffer[palette_index + pidx * 4 + 0];
+							dds_dest_data[i * 3 + 1] = buffer[palette_index + pidx * 4 + 1];
+							dds_dest_data[i * 3 + 2] = buffer[palette_index + pidx * 4 + 2];
+						}
+						s3tc_format = s3tc_format_layout = GL_RGB;
 					}
-					//std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
 					break;
 				}
 				case 2:
 				{
-					dds_dest_data.reset();
+					reports::write_debug("Experimental 16-bits DDS used\n");
 					uint16_t mr1 = uint16_t(header->sPixelFormat.dwRBitMask >> std::countr_zero(header->sPixelFormat.dwRBitMask));
 					float mr2 = mr1 == 0 ? 0.f : 255.f / float(mr1);
 					uint16_t mg1 = uint16_t(header->sPixelFormat.dwGBitMask >> std::countr_zero(header->sPixelFormat.dwGBitMask));
 					float mg2 = mg1 == 0 ? 0.f : 255.f / float(mg1);
 					uint16_t mb1 = uint16_t(header->sPixelFormat.dwBBitMask >> std::countr_zero(header->sPixelFormat.dwBBitMask));
 					float mb2 = mb1 == 0 ? 0.f : 255.f / float(mb1);
-					//
+					uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
 					uint16_t rmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
 					uint16_t gmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
 					uint16_t bmask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-					if(is_alpha) {
-						uint16_t ma1 = uint16_t(header->sPixelFormat.dwAlphaBitMask >> std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-						float ma2 = ma1 == 0 ? 0.f : 255.f / float(ma1);
-						uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
-						//
-						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
+					uint16_t amask_zeros = uint16_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					if(keep_rgba) {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i * block_size);
 							uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
@@ -299,19 +306,61 @@ set to one or more of the following values.	*/
 							dds_dest_data[i * 4 + 0] = uint8_t(float(r) * mr2);
 							dds_dest_data[i * 4 + 1] = uint8_t(float(g) * mg2);
 							dds_dest_data[i * 4 + 2] = uint8_t(float(b) * mb2);
-							dds_dest_data[i * 4 + 3] = uint8_t(float(a) * ma2);
+							dds_dest_data[i * 4 + 3] = is_alpha ? uint8_t(float(a) * ma2) : 0xff;
 						}
+						s3tc_format = s3tc_format_layout = GL_RGBA;
 					} else {
-						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[dds_full_size * 2]);
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 3]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							uint16_t data = *reinterpret_cast<uint16_t const*>(buffer + buffer_index + i * block_size);
 							uint16_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
 							uint16_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
 							uint16_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint16_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
 							dds_dest_data[i * 3 + 0] = uint8_t(float(r) * mr2);
 							dds_dest_data[i * 3 + 1] = uint8_t(float(g) * mg2);
 							dds_dest_data[i * 3 + 2] = uint8_t(float(b) * mb2);
 						}
+						s3tc_format = s3tc_format_layout = GL_RGB;
+					}
+					break;
+				}
+				case 3:
+				{
+					reports::write_debug("Experimental 24-bits DDS used\n");
+					uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
+					uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
+					uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
+					uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					if(keep_rgba) {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							auto ptr = buffer + buffer_index + i * block_size;
+							uint32_t data = uint32_t((ptr[0] << 16) | (ptr[1] << 8) | ptr[2]);
+							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+							dds_dest_data[i * 4 + 0] = static_cast<uint8_t>(r);
+							dds_dest_data[i * 4 + 1] = static_cast<uint8_t>(g);
+							dds_dest_data[i * 4 + 2] = static_cast<uint8_t>(b);
+							dds_dest_data[i * 4 + 3] = is_alpha ? static_cast<uint8_t>(a) : 0xff;
+						}
+						s3tc_format = s3tc_format_layout = GL_RGBA;
+					} else {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 3]);
+						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
+							auto ptr = buffer + buffer_index + i * block_size;
+							uint32_t data = uint32_t((ptr[0] << 16) | (ptr[1] << 8) | ptr[2]);
+							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
+							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
+							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
+							dds_dest_data[i * 3 + 0] = static_cast<uint8_t>(r);
+							dds_dest_data[i * 3 + 1] = static_cast<uint8_t>(g);
+							dds_dest_data[i * 3 + 2] = static_cast<uint8_t>(b);
+						}
+						s3tc_format = s3tc_format_layout = GL_RGB;
 					}
 					break;
 				}
@@ -320,8 +369,9 @@ set to one or more of the following values.	*/
 					uint32_t rmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwRBitMask));
 					uint32_t gmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwGBitMask));
 					uint32_t bmask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwBBitMask));
-					if(is_alpha) {
-						uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					uint32_t amask_zeros = uint32_t(std::countr_zero(header->sPixelFormat.dwAlphaBitMask));
+					if(keep_rgba) {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i * block_size);
 							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
@@ -331,48 +381,43 @@ set to one or more of the following values.	*/
 							dds_dest_data[i * 4 + 0] = static_cast<uint8_t>(r);
 							dds_dest_data[i * 4 + 1] = static_cast<uint8_t>(g);
 							dds_dest_data[i * 4 + 2] = static_cast<uint8_t>(b);
-							dds_dest_data[i * 4 + 3] = static_cast<uint8_t>(a);
+							dds_dest_data[i * 4 + 3] = is_alpha ? static_cast<uint8_t>(a) : 0xff;
 						}
+						s3tc_format = s3tc_format_layout = GL_RGBA;
 					} else {
+						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 3]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							uint32_t data = *reinterpret_cast<uint32_t const*>(buffer + buffer_index + i * block_size);
 							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
 							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
 							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
+							uint32_t a = (data & header->sPixelFormat.dwAlphaBitMask) >> amask_zeros;
 							dds_dest_data[i * 3 + 0] = static_cast<uint8_t>(r);
 							dds_dest_data[i * 3 + 1] = static_cast<uint8_t>(g);
 							dds_dest_data[i * 3 + 2] = static_cast<uint8_t>(b);
 						}
+						s3tc_format = s3tc_format_layout = GL_RGB;
 					}
 					break;
 				}
 				default:
 				{
-					std::memcpy(dds_dest_data.get(), buffer + buffer_index, dds_full_size);
-					for(uint32_t i = 0; i < dds_full_size; i += block_size) {
-						std::swap(dds_dest_data[i], dds_dest_data[i + 2]);
-					}
+					reports::write_debug(("Experimental " + std::to_string(block_size) + " DDS block size used\n").c_str());
+					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
 					break;
 				}
 				}
 				glTexImage2D(GL_TEXTURE_2D, 0, s3tc_format, width, height, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get());
-				uint32_t buffer_offset = dds_main_size * (block_size == 2 ? 2 : 1);
+				buffer_index += (dds_main_size / block_size) * (keep_rgba ? 4 : 3);
 				/*	upload the mipmaps, if we have them	*/
 				for(uint32_t i = 1; i <= mipmaps; ++i) {
 					uint32_t w = std::max<uint32_t>(width >> i, 1);
 					uint32_t h = std::max<uint32_t>(height >> i, 1);
 					/*	upload this mipmap	*/
-					uint32_t mip_size = w * h * block_size;
-					switch(block_size) {
-					case 2:
-						mip_size = w * h * 4;
-						break;
-					default:
-						break;
-					}
-					glTexImage2D(GL_TEXTURE_2D, i, s3tc_format, w, h, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get() + buffer_offset);
+					uint32_t mip_size = w * h * (keep_rgba ? 4 : 3);
+					glTexImage2D(GL_TEXTURE_2D, i, s3tc_format, w, h, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get() + buffer_index);
 					/*	and move to the next mipmap	*/
-					buffer_offset += mip_size;
+					buffer_index += mip_size;
 				}
 			} else {
 				glCompressedTexImage2D(GL_TEXTURE_2D, 0, s3tc_format, width, height, 0, dds_main_size, buffer + buffer_index);
