@@ -562,8 +562,8 @@ namespace text {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				textures.push_back(texid);
-				uint32_t clearvalue = 0;
-				glClearTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, &clearvalue);
+				//uint32_t clearvalue = 0;
+				//glClearTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, &clearvalue);
 			} else {
 				assert(textures.size() > 0);
 				texid = textures.back();
