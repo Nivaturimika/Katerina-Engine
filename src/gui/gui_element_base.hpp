@@ -98,9 +98,11 @@ enum class mouse_probe_type { click, tooltip, scroll };
 	virtual void move_child_to_front(element_base* child) noexcept { }
 	virtual void move_child_to_back(element_base* child) noexcept { }
 		virtual void add_child_to_front(std::unique_ptr<element_base> child) noexcept {
+			reports::write_debug("Virtual add_child_to_front called");
 			std::abort();
 		}
 		virtual void add_child_to_back(std::unique_ptr<element_base> child) noexcept {
+			reports::write_debug("Virtual add_child_to_back called");
 			std::abort();
 		}
 		virtual element_base* get_child_by_name(sys::state const& state, std::string_view name) noexcept {

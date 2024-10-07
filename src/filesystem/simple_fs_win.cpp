@@ -515,9 +515,7 @@ namespace simple_fs {
 
 	void write_file(directory const& dir, native_string_view file_name, char const* file_data, uint32_t file_size) {
 		if(dir.parent_system) {
-			#ifdef WIN32
-			MessageBoxA(NULL, "Fatal assert", "undefined parent system", MB_OK);
-			#endif
+			reports::write_debug("Undefined parent system");
 			std::abort();
 		}
 

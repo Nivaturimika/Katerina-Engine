@@ -384,19 +384,19 @@ port_forwarder::port_forwarder() { }
 
 	static socket_t socket_init_server(bool as_v6, struct sockaddr_storage& server_address) {
 		socket_t socket_fd = static_cast<socket_t>(socket(as_v6 ? AF_INET6 : AF_INET, SOCK_STREAM, IPPROTO_TCP));
-		#ifdef _WIN64
+#ifdef _WIN64
 		if(socket_fd == static_cast<socket_t>(INVALID_SOCKET)) {
 			window::emit_error_message("Network socket error: " + get_last_error_msg(), true);
 		}
-		#else
+#else
 		if(socket_fd < 0)
-		std::abort();
-		#endif
+			std::abort();
+#endif
 		struct timeval timeout;
 		timeout.tv_sec = 60;
 		timeout.tv_usec = 0;
 		int opt = 1;
-		#ifdef _WIN64
+#ifdef _WIN64
 		if(setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt))) {
 			window::emit_error_message("Network setsockopt [reuseaddr] error: " + get_last_error_msg(), true);
 		}
@@ -406,7 +406,7 @@ port_forwarder::port_forwarder() { }
 		if(setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)) < 0) {
 			window::emit_error_message("Network setsockopt [sndtimeo] error: " + get_last_error_msg(), true);
 		}
-		#else
+#else
 		if(setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
 			std::abort();
 		}
@@ -416,7 +416,7 @@ port_forwarder::port_forwarder() { }
 		if(setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
 			std::abort();
 		}
-		#endif
+#endif
 		if(as_v6) {
 			struct sockaddr_in6 v6_server_address;
 			v6_server_address.sin6_addr = IN6ADDR_ANY_INIT;
@@ -436,10 +436,10 @@ port_forwarder::port_forwarder() { }
 		if(listen(socket_fd, SOMAXCONN) < 0) {
 			window::emit_error_message("Network listen error: " + get_last_error_msg(), true);
 		}
-		#ifdef _WIN64
+#ifdef _WIN64
 		u_long mode = 1; // 1 to enable non-blocking socket
 		ioctlsocket(socket_fd, FIONBIO, &mode);
-		#endif
+#endif
 		return socket_fd;
 	}
 

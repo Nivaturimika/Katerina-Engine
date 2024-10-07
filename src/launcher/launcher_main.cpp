@@ -837,7 +837,6 @@ namespace launcher {
 		if(opengl_context == nullptr) {
 			window::emit_error_message("Unable to create WGL context", true);
 		}
-
 		wglMakeCurrent(window_dc, HGLRC(opengl_context));
 		wglDeleteContext(handle_to_ogl_dc);
 
@@ -860,7 +859,6 @@ namespace launcher {
 		for(int32_t i = 0; i < ui_list_end; ++i) {
 			if(mouse_x >= ui_rects[i].x && mouse_x < ui_rects[i].x + ui_rects[i].width
 			&& mouse_y >= ui_rects[i].y && mouse_y < ui_rects[i].y + ui_rects[i].height) {
-
 				if(obj_under_mouse != i) {
 					obj_under_mouse = i;
 					return true;
@@ -1986,110 +1984,110 @@ static GLuint sub_square_buffers[64] = { 0 };
 				//	localised_strings = &ar_localised_strings[0];
 				//	font_set_load = 2;
 				//	break;
-				case 0x0002:
+			case 0x0002:
 				localised_strings = &bg_localised_strings[0];
 				font_set_load = 3;
 				break;
-				case 0x0003:
+			case 0x0003:
 				localised_strings = &ca_localised_strings[0];
 				break;
-				case 0x0004:
+			case 0x0004:
 				localised_strings = &zh_localised_strings[0];
 				font_set_load = 1;
 				break;
-				case 0x0005:
+			case 0x0005:
 				localised_strings = &cs_localised_strings[0];
 				break;
-				case 0x0006:
+			case 0x0006:
 				localised_strings = &da_localised_strings[0];
 				break;
-				case 0x0007:
+			case 0x0007:
 				localised_strings = &de_localised_strings[0];
 				break;
-				case 0x0008:
+			case 0x0008:
 				localised_strings = &el_localised_strings[0];
 				break;
-				case 0x0009:
+			case 0x0009:
 				localised_strings = &en_localised_strings[0];
 				break;
-				case 0x000A:
+			case 0x000A:
 				localised_strings = &es_localised_strings[0];
 				break;
-				case 0x000B:
+			case 0x000B:
 				localised_strings = &fi_localised_strings[0];
 				break;
-				case 0x000C:
+			case 0x000C:
 				localised_strings = &fr_localised_strings[0];
 				break;
 				//case 0x000D:
 				//	localised_strings = &he_localised_strings[0];
 				//	break;
-				case 0x000E:
+			case 0x000E:
 				localised_strings = &hu_localised_strings[0];
 				break;
-				case 0x000F:
+			case 0x000F:
 				//localised_strings = &is_localised_strings[0];
 				break;
-				case 0x0010:
+			case 0x0010:
 				localised_strings = &it_localised_strings[0];
 				break;
-				case 0x0011:
+			case 0x0011:
 				//localised_strings = &ja_localised_strings[0];
 				break;
-				case 0x0012:
+			case 0x0012:
 				//localised_strings = &ko_localised_strings[0];
 				break;
-				case 0x0016:
+			case 0x0016:
 				localised_strings = &po_localised_strings[0];
 				break;
-				case 0x0013:
+			case 0x0013:
 				localised_strings = &nl_localised_strings[0];
 				break;
-				case 0x0014:
+			case 0x0014:
 				localised_strings = &no_localised_strings[0];
 				break;
-				case 0x0015:
+			case 0x0015:
 				localised_strings = &pl_localised_strings[0];
 				break;
-				case 0x0018:
+			case 0x0018:
 				localised_strings = &ro_localised_strings[0];
 				break;
-				case 0x0019:
+			case 0x0019:
 				localised_strings = &ru_localised_strings[0];
 				font_set_load = 3;
 				break;
-				case 0x001C:
+			case 0x001C:
 				localised_strings = &sq_localised_strings[0];
 				break;
-				case 0x001D:
+			case 0x001D:
 				localised_strings = &sv_localised_strings[0];
 				break;
-				case 0x001F:
+			case 0x001F:
 				localised_strings = &tr_localised_strings[0];
 				break;
-				case 0x0022:
+			case 0x0022:
 				localised_strings = &uk_localised_strings[0];
 				font_set_load = 3;
 				break;
-				case 0x0025:
+			case 0x0025:
 				localised_strings = &et_localised_strings[0];
 				break;
-				case 0x0026:
+			case 0x0026:
 				localised_strings = &lv_localised_strings[0];
 				break;
-				case 0x0027:
+			case 0x0027:
 				localised_strings = &lt_localised_strings[0];
 				break;
-				case 0x002A:
+			case 0x002A:
 				localised_strings = &vi_localised_strings[0];
 				break;
-				case 0x002B:
+			case 0x002B:
 				localised_strings = &hy_localised_strings[0];
 				break;
-				case 0x0039:
+			case 0x0039:
 				localised_strings = &hi_localised_strings[0];
 				break;
-				default:
+			default:
 				break;
 			}
 			if(font_set_load == 0) {
@@ -2172,7 +2170,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 				if(of) {
 					auto content = view_contents(*of);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
-				mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
+					mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
 				}
 			}
 
@@ -2185,7 +2183,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 					auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
 					if(desc.count != 0) {
 						max_scenario_count = std::max(desc.count, max_scenario_count);
-					scenario_files.push_back(scenario_file{ simple_fs::get_file_name(f) , desc });
+						scenario_files.push_back(scenario_file{ simple_fs::get_file_name(f) , desc });
 					}
 				}
 			}

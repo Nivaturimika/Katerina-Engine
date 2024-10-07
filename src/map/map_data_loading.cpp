@@ -69,9 +69,7 @@ namespace map {
 			size_x = h->bcWidth;
 			size_y = h->bcHeight;
 		} else {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "unknown map bitmap type", MB_OK);
-			#endif
+			reports::write_debug("Unknown map bitmap type");
 			std::abort();
 		}
 

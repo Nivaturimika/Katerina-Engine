@@ -199,7 +199,7 @@ namespace ui {
 					}
 				}
 			} else {
-				std::abort(); // should be impossible: neither is war leader
+				//std::abort(); // should be impossible: neither is war leader
 			}
 		
 			update(state);
