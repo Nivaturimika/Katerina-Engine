@@ -1847,7 +1847,7 @@ class button_press_notification { };
 	};
 
 	class commodity_image : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			frame = int32_t(state.world.commodity_get_icon(retrieve<dcon::commodity_id>(state, parent)));
 		}
@@ -1858,7 +1858,7 @@ class button_press_notification { };
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			if(!com)
-			return;
+				return;
 
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto p = retrieve<dcon::province_id>(state, parent);
@@ -1871,17 +1871,17 @@ class button_press_notification { };
 			if(bool(n)) {
 				auto commodity_mod_description = [&](float value, std::string_view locale_base_name, std::string_view locale_farm_base_name) {
 					if(value == 0.f)
-					return;
+						return;
 					auto box = text::open_layout_box(contents, 0);
 					text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_name(com)), text::text_color::white);
 					text::add_space_to_layout_box(state, contents, box);
 					text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_is_mine(com) ? locale_base_name : locale_farm_base_name), text::text_color::white);
-				text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
+					text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
 					text::add_space_to_layout_box(state, contents, box);
 					auto color = value > 0.f ? text::text_color::green : text::text_color::red;
 					text::add_to_layout_box(state, contents, box, (value > 0.f ? "+" : "") + text::format_percentage(value, 1), color);
 					text::close_layout_box(contents, box);
-				};
+					};
 				commodity_mod_description(state.world.nation_get_factory_goods_output(n, com), "tech_output", "tech_output");
 				commodity_mod_description(state.world.nation_get_rgo_goods_output(n, com), "tech_mine_output", "tech_farm_output");
 				commodity_mod_description(state.world.nation_get_rgo_size(n, com), "tech_mine_size", "tech_farm_size");
@@ -1928,14 +1928,13 @@ class button_press_notification { };
 					}
 				}
 			}
-
 			for(const auto tid : state.world.in_technology) {
 				if(state.world.nation_get_active_technologies(n, tid)) {
 					bool have_header = false;
 					auto commodity_technology_mod_description = [&](auto const& list, std::string_view locale_base_name, std::string_view locale_farm_base_name) {
 						for(const auto mod : list) {
 							if(mod.type != com || mod.amount == 0.f)
-							return;
+								return;
 							auto box = text::open_layout_box(contents, 0);
 							if(!have_header) {
 								text::add_to_layout_box(state, contents, box, state.world.technology_get_name(tid), text::text_color::yellow);
@@ -1946,13 +1945,13 @@ class button_press_notification { };
 							text::add_to_layout_box(state, contents, box, name);
 							text::add_space_to_layout_box(state, contents, box);
 							text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_is_mine(mod.type) ? locale_base_name : locale_farm_base_name), text::text_color::white);
-						text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
+							text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
 							text::add_space_to_layout_box(state, contents, box);
 							auto color = mod.amount > 0.f ? text::text_color::green : text::text_color::red;
 							text::add_to_layout_box(state, contents, box, (mod.amount > 0.f ? "+" : "") + text::format_percentage(mod.amount, 1), color);
 							text::close_layout_box(contents, box);
 						}
-					};
+						};
 					commodity_technology_mod_description(state.world.technology_get_factory_goods_output(tid), "tech_output", "tech_output");
 					commodity_technology_mod_description(state.world.technology_get_rgo_goods_output(tid), "tech_mine_output", "tech_farm_output");
 					commodity_technology_mod_description(state.world.technology_get_rgo_size(tid), "tech_mine_size", "tech_farm_size");
@@ -1964,7 +1963,7 @@ class button_press_notification { };
 					auto commodity_invention_mod_description = [&](auto const& list, std::string_view locale_base_name, std::string_view locale_farm_base_name) {
 						for(const auto mod : list) {
 							if(mod.type != com || mod.amount == 0.f)
-							return;
+								return;
 							auto box = text::open_layout_box(contents, 0);
 							if(!have_header) {
 								text::add_to_layout_box(state, contents, box, state.world.invention_get_name(iid), text::text_color::yellow);
@@ -1975,7 +1974,7 @@ class button_press_notification { };
 							text::add_to_layout_box(state, contents, box, name);
 							text::add_space_to_layout_box(state, contents, box);
 							text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_is_mine(mod.type) ? locale_base_name : locale_farm_base_name), text::text_color::white);
-						text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
+							text::add_to_layout_box(state, contents, box, std::string{ ":" }, text::text_color::white);
 							text::add_space_to_layout_box(state, contents, box);
 							auto color = mod.amount > 0.f ? text::text_color::green : text::text_color::red;
 							text::add_to_layout_box(state, contents, box, (mod.amount > 0.f ? "+" : "") + text::format_percentage(mod.amount, 1), color);

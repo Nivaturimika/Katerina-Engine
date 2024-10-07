@@ -552,14 +552,14 @@ namespace ui {
 		}
 	
 		void button_action(sys::state& state) noexcept override {
-		trade_details_select_commodity payload{retrieve<dcon::commodity_id>(state, parent)};
+			trade_details_select_commodity payload{ retrieve<dcon::commodity_id>(state, parent) };
 			send<trade_details_select_commodity>(state, state.ui_state.trade_subwindow, payload);
 		}
 
 		void button_right_action(sys::state& state) noexcept override {
-		trade_details_select_commodity payload{ retrieve<dcon::commodity_id>(state, parent) };
+			trade_details_select_commodity payload{ retrieve<dcon::commodity_id>(state, parent) };
 			send<trade_details_select_commodity>(state, state.ui_state.trade_subwindow, payload);
-		Cyto::Any dt_payload = trade_details_open_window{ retrieve<dcon::commodity_id>(state, parent) };
+			Cyto::Any dt_payload = trade_details_open_window{ retrieve<dcon::commodity_id>(state, parent) };
 			state.ui_state.trade_subwindow->impl_get(state, dt_payload);
 		}
 
@@ -582,9 +582,9 @@ namespace ui {
 				text::add_line(state, contents, "alice_commodity_eprice", text::variable_type::x, text::format_money(economy::commodity_effective_price(state, state.local_player_nation, com)));
 				text::add_line_break_to_layout(state, contents);
 			}
-		text::add_line(state, contents, "trade_commodity_report_1", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_total_real_demand(com) });
-		text::add_line(state, contents, "trade_commodity_report_2", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_total_production(com) });
-		text::add_line(state, contents, "trade_commodity_report_4", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_global_market_pool(com) });
+			text::add_line(state, contents, "trade_commodity_report_1", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_total_real_demand(com) });
+			text::add_line(state, contents, "trade_commodity_report_2", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_total_production(com) });
+			text::add_line(state, contents, "trade_commodity_report_4", text::variable_type::x, text::fp_one_place{ state.world.commodity_get_global_market_pool(com) });
 			text::add_line_break_to_layout(state, contents);
 
 			struct tagged_value {
@@ -596,14 +596,14 @@ namespace ui {
 			producers.clear();
 			for(auto n : state.world.in_nation) {
 				if(n.get_domestic_market_pool(com) >= 0.05f) {
-				producers.push_back(tagged_value{ n.get_domestic_market_pool(com), n.id });
+					producers.push_back(tagged_value{ n.get_domestic_market_pool(com), n.id });
 				}
 			}
 			if(producers.size() > 0) {
-			std::sort(producers.begin(), producers.end(), [](auto const& a, auto const& b) { return a.v > b.v; });
+				std::sort(producers.begin(), producers.end(), [](auto const& a, auto const& b) { return a.v > b.v; });
 				{
 					auto box = text::open_layout_box(contents, 0);
-				text::substitution_map sub{};
+					text::substitution_map sub{};
 					text::add_to_substitution_map(sub, text::variable_type::value, std::min(int32_t(state.defines.great_nations_count), int32_t(producers.size())));
 					text::localised_format_box(state, contents, box, "alice_trade_top_producers", sub);
 					text::close_layout_box(contents, box);
@@ -611,11 +611,11 @@ namespace ui {
 				for(uint32_t i = 0; i < producers.size() && i < state.defines.great_nations_count; ++i) {
 					auto box = text::open_layout_box(contents, 15);
 					auto ident = state.world.nation_get_identity_from_identity_holder(producers[i].n);
-				text::add_to_layout_box(state, contents, box, text::embedded_flag{ ident ? ident : state.national_definitions.rebel_id });
+					text::add_to_layout_box(state, contents, box, text::embedded_flag{ ident ? ident : state.national_definitions.rebel_id });
 					text::add_space_to_layout_box(state, contents, box);
 					text::add_to_layout_box(state, contents, box, text::get_name(state, producers[i].n));
 					text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, text::fp_one_place{ producers[i].v });
+					text::add_to_layout_box(state, contents, box, text::fp_one_place{ producers[i].v });
 					text::close_layout_box(contents, box);
 				}
 				text::add_line_break_to_layout(state, contents);
@@ -632,7 +632,7 @@ namespace ui {
 				float f_total = 0.0f;
 				for(auto f : state.world.in_factory) {
 					if(f.get_building_type().get_output() == com)
-					f_total += f.get_actual_production();
+						f_total += f.get_actual_production();
 				}
 				float total = r_total + a_total + f_total;
 				if(r_total > 0.f) {
@@ -654,15 +654,15 @@ namespace ui {
 					text::add_line(state, contents, "alice_artisan_trade_prod",
 					text::variable_type::x, text::fp_one_place{ a_total },
 					text::variable_type::y, text::fp_percentage{ a_total / total });
-				text::add_line(state, contents, "w_artisan_profit", text::variable_type::x, text::fp_one_place{ economy::base_artisan_profit(state, state.local_player_nation, com) * economy::artisan_scale_limit(state, state.local_player_nation, com) });
-				text::add_line(state, contents, "w_artisan_distribution", text::variable_type::x, text::fp_one_place{ economy::get_artisan_distribution_slow(state, state.local_player_nation, com) * 100.f });
+					text::add_line(state, contents, "w_artisan_profit", text::variable_type::x, text::fp_one_place{ economy::base_artisan_profit(state, state.local_player_nation, com) * economy::artisan_scale_limit(state, state.local_player_nation, com) });
+					text::add_line(state, contents, "w_artisan_distribution", text::variable_type::x, text::fp_one_place{ economy::get_artisan_distribution_slow(state, state.local_player_nation, com) * 100.f });
 				}
 				if(f_total > 0.f) {
 					text::add_line(state, contents, "alice_factory_trade_prod",
 					text::variable_type::x, text::fp_one_place{ f_total },
 					text::variable_type::y, text::fp_percentage{ f_total / total });
 				}
-			text::add_line(state, contents, "alice_all_trade_prod", text::variable_type::x, text::fp_one_place{ total });
+				text::add_line(state, contents, "alice_all_trade_prod", text::variable_type::x, text::fp_one_place{ total });
 			} else {
 				text::add_line(state, contents, "alice_trade_no_producers");
 			}
@@ -726,9 +726,36 @@ namespace ui {
 		}
 	};
 
+	class trade_commodity_icon : public button_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			frame = int32_t(state.world.commodity_get_icon(retrieve<dcon::commodity_id>(state, parent)));
+		}
+
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto com = retrieve<dcon::commodity_id>(state, parent);
+			if(!com)
+				return;
+			auto box = text::open_layout_box(contents, 0);
+			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_name(com)), text::text_color::yellow);
+			text::close_layout_box(contents, box);
+		}
+
+		void button_action(sys::state& state) noexcept override {
+			trade_details_select_commodity payload{ retrieve<dcon::commodity_id>(state, parent) };
+			send<trade_details_select_commodity>(state, state.ui_state.trade_subwindow, payload);
+			Cyto::Any dt_payload = trade_details_open_window{ retrieve<dcon::commodity_id>(state, parent) };
+			state.ui_state.trade_subwindow->impl_get(state, dt_payload);
+		}
+	};
+
 	class trade_commodity_entry : public window_element_base {
-		public:
-	dcon::commodity_id commodity_id{};
+	public:
+		dcon::commodity_id commodity_id{};
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "entry_button") {
 				return make_element_by_type<trade_commodity_entry_button>(state, id);
