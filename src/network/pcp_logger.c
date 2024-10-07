@@ -49,8 +49,10 @@ pcp_loglvl_e pcp_log_level=PCP_MAX_LOG_LEVEL;
 
 void pcp_logger_init(void)
 {
-    char *env, *ret;
-    env = getenv("PCP_LOG_LEVEL");
+    char *env = NULL;
+    char *ret = NULL;
+    size_t count = 0;
+    _dupenv_s(&env, &count, "PCP_LOG_LEVEL");
     if(env) {
         long lvl=strtol(env, &ret, 0);
         if ((ret) && (!*ret) && (lvl>=0) && (lvl<=PCP_MAX_LOG_LEVEL)) {

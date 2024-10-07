@@ -7,6 +7,7 @@
 
 namespace ogl {
 	void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, GLchar const* message, void const*) {
+#if 0
 		std::string source_str;
 		switch(source) {
 		case GL_DEBUG_SOURCE_API:
@@ -86,6 +87,7 @@ namespace ogl {
 		full_message += message;
 		full_message += "\n";
 		reports::write_debug(full_message.c_str());
+#endif
 	}
 
 	std::string_view opengl_get_error_name(GLenum t) {
@@ -357,6 +359,8 @@ namespace ogl {
 	}
 
 	void initialize_msaa(sys::state& state, int32_t size_x, int32_t size_y) {
+		state.user_settings.antialias_level = 0;
+
 		if(state.user_settings.antialias_level == 0)
 			return;
 		if(!size_x || !size_y)
@@ -475,7 +479,7 @@ namespace ogl {
 
 		create_opengl_context(state);
 
-		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+		//glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 		glEnable(GL_LINE_SMOOTH);
 
 		load_shaders(state); // create shaders
@@ -626,13 +630,11 @@ namespace ogl {
 
 		glGenVertexArrays(1, &state.open_gl.global_square_vao);
 		glBindVertexArray(state.open_gl.global_square_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 4, 0); // position
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 4, (const void*)(sizeof(GLshort) * 2)); // texture coordinates
 		glEnableVertexAttribArray(0); // position
 		glEnableVertexAttribArray(1); // texture coordinates
-		glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLshort) * 4);
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, 0); // position
-		glVertexAttribFormat(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 2); // texture coordinates
-		glVertexAttribBinding(0, 0);																				 // position -> to array zero
-		glVertexAttribBinding(1, 0);																				 // texture coordinates -> to array zero
 
 		glGenBuffers(1, &state.open_gl.global_square_left_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_buffer);
@@ -705,24 +707,25 @@ namespace ogl {
 	}
 
 	void bind_vertices_by_rotation(sys::state const& state, ui::rotation r, bool flipped, bool rtl) {
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		switch(r) {
 		case ui::rotation::upright:
 			if(!flipped)
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer);
 			else
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer);
 			break;
 		case ui::rotation::r90_left:
 			if(!flipped)
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_buffer : state.open_gl.global_square_left_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_left_buffer : state.open_gl.global_square_left_buffer);
 			else
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer);
 			break;
 		case ui::rotation::r90_right:
 			if(!flipped)
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer);
 			else
-				glBindVertexBuffer(0, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer, 0, sizeof(GLushort) * 4);
+				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer);
 			break;
 		}
 	}
@@ -741,7 +744,6 @@ namespace ogl {
 
 	void render_textured_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
 		glBindVertexArray(state.open_gl.global_square_vao);
-
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -756,7 +758,7 @@ namespace ogl {
 
 	void render_textured_rect_direct(sys::state const& state, float x, float y, float width, float height, uint32_t handle) {
 		glBindVertexArray(state.open_gl.global_square_vao);
-		glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, handle);
 
@@ -768,7 +770,6 @@ namespace ogl {
 	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
 		lines& l) {
 		glBindVertexArray(state.open_gl.global_square_vao);
-
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -830,7 +831,7 @@ namespace ogl {
 
 	void render_piechart(sys::state const& state, color_modification enabled, float x, float y, float size, data_texture& t) {
 		glBindVertexArray(state.open_gl.global_square_vao);
-		glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
 
@@ -995,6 +996,7 @@ namespace ogl {
 		float scale = 1.f;
 		float icon_baseline = baseline_y + (f.internal_ascender / 64.f * font_size) - font_size;
 
+		glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		switch(ico) {
 		case text::embedded_icon::army:
@@ -1056,9 +1058,9 @@ namespace ogl {
 		if(f.textures.empty())
 			return; //edge case
 
+		glBindVertexArray(state.open_gl.global_square_vao);
 		GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-
 		unsigned int glyph_count = static_cast<unsigned int>(txt.glyph_info.size());
 		for(unsigned int i = 0; i < glyph_count; i++) {
 			hb_codepoint_t glyphid = txt.glyph_info[i].codepoint;
@@ -1066,7 +1068,7 @@ namespace ogl {
 			float x_advance = float(txt.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 			float x_offset = float(txt.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
 			float y_offset = float(gso.y) - float(txt.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-			glBindVertexBuffer(0, state.open_gl.sub_square_buffers[gso.texture_slot & 63], 0, sizeof(GLushort) * 4);
+			glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[gso.texture_slot & 63]);
 			assert(uint32_t(gso.texture_slot >> 6) < f.textures.size());
 			assert(f.textures[gso.texture_slot >> 6]);
 			glBindTexture(GL_TEXTURE_2D, f.textures[gso.texture_slot >> 6]);
@@ -1085,6 +1087,7 @@ namespace ogl {
 		uint32_t count = uint32_t(codepoints.length());
 
 		float adv = 1.0f / font.width; // Font texture atlas spacing.
+		glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::subsprite_b };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
@@ -1177,7 +1180,7 @@ namespace ogl {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLushort) * count * 4, tmp_buffer.data());
 			pending_data_update = false;
 		}
-		glBindVertexBuffer(0, buffer_handle, 0, sizeof(GLushort) * 4);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
 	}
 
 	bool msaa_enabled(sys::state const& state) {
@@ -1200,9 +1203,7 @@ namespace ogl {
 		const GLuint formats[] = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
 		if(texture_handle) {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
-			glTexStorage2D(GL_TEXTURE_2D, 1, internalformats[channels - 1], size_x, size_y);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, formats[channels - 1], GL_UNSIGNED_BYTE, data);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformats[channels - 1], size_x, size_y, 0, formats[channels - 1], GL_UNSIGNED_BYTE, data);
 		}
 		return texture_handle;
 	}
@@ -1241,17 +1242,14 @@ namespace ogl {
 			size_t p_dx = image.size_x / tiles_x; // Pixels of each tile in x
 			size_t p_dy = image.size_y / tiles_y; // Pixels of each tile in y
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GLsizei(p_dx), GLsizei(p_dy), GLsizei(tiles_x * tiles_y), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
-			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
+			//glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
+			//glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
 			for(int32_t x = 0; x < tiles_x; x++) {
 				for(int32_t y = 0; y < tiles_y; y++) {
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, GL_RGBA, GL_UNSIGNED_BYTE, ((uint32_t const*)image.data) + (x * p_dy * image.size_x + y * p_dx));
 				}
 			}
 			set_gltex_parameters(texture_handle, GL_TEXTURE_2D_ARRAY, GL_LINEAR_MIPMAP_NEAREST, GL_REPEAT);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 		}
 		return texture_handle;
 	}

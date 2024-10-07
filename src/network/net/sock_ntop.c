@@ -67,10 +67,9 @@ char *sock_ntop(const struct sockaddr *sa, socklen_t salen)
             if (inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) == NULL)
                 return (NULL);
             if (ntohs(sin->sin_port) != 0) {
-                snprintf(portstr, sizeof(portstr) - 1, ":%d",
-                        ntohs(sin->sin_port));
+                sprintf_s(portstr, sizeof(portstr) - 1, ":%d", ntohs(sin->sin_port));
                 portstr[sizeof(portstr) - 1]='\0';
-                strcat(str, portstr);
+                strcat_s(str, sizeof(str), portstr);
             }
             return (str);
         }
@@ -85,10 +84,9 @@ char *sock_ntop(const struct sockaddr *sa, socklen_t salen)
                     sizeof(str) - 1) == NULL)
                 return (NULL);
             if (ntohs(sin6->sin6_port) != 0) {
-                snprintf(portstr, sizeof(portstr), "]:%d",
-                        ntohs(sin6->sin6_port));
+                sprintf_s(portstr, sizeof(portstr), "]:%d", ntohs(sin6->sin6_port));
                 portstr[sizeof(portstr) - 1]='\0';
-                strcat(str, portstr);
+                strcat_s(str, sizeof(str), portstr);
                 return (str);
             }
             return (str + 1);
@@ -96,9 +94,7 @@ char *sock_ntop(const struct sockaddr *sa, socklen_t salen)
 #endif
 
         default:
-            snprintf(str, sizeof(str) - 1,
-                    "sock_ntop: unknown AF_xxx: %d, len %d", sa->sa_family,
-                    salen);
+            sprintf_s(str, sizeof(str) - 1, "sock_ntop: unknown AF_xxx: %d, len %d", sa->sa_family, salen);
             str[sizeof(str) - 1]='\0';
             return (str);
     }

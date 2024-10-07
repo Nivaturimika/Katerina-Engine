@@ -130,9 +130,9 @@ namespace text {
 
 	int bm_font::get_kerning_pair(char first, char second) const {
 		uint16_t index = (uint16_t(first) << 8) | uint16_t(second);
-		if(auto it = kernings.find(index); it != kernings.end())
-		return it->second;
-		else
+		if(auto it = kernings.find(index); it != kernings.end()) {
+			return it->second;
+		}
 		return 0;
 	}
 
@@ -186,8 +186,9 @@ namespace text {
 	}
 
 	bm_font::~bm_font() {
-		if(ftexid)
-		glDeleteTextures(1, &ftexid);
+		if(ftexid) {
+			glDeleteTextures(1, &ftexid);
+		}
 	}
 
 	bm_font const& get_bm_font(sys::state& state, uint16_t font_handle) {

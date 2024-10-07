@@ -12,7 +12,7 @@
 
 #include "Windows.h"
 #include "Windowsx.h"
-#include "wglew.h"
+#include "glad.h"
 #include "sound.hpp"
 
 #define WM_GRAPHNOTIFY (WM_APP + 1)

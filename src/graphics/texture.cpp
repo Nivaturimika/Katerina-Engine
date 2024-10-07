@@ -1,6 +1,7 @@
 #include "texture.hpp"
 #include "system_state.hpp"
 #include "simple_fs.hpp"
+#include "glad.h"
 
 #define STB_IMAGE_IMPLEMENTATION 1
 #define STBI_NO_STDIO 1
@@ -15,7 +16,6 @@
 #define STBI_NO_PIC 1
 #define STBI_NO_PNM 1
 #define STBI_NO_THREAD_LOCALS 1
-
 #include "stb_image.h"
 
 namespace ogl {
@@ -531,15 +531,12 @@ set to one or more of the following values.	*/
 			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
 			asset_texture.channels = 4;
 			glGenTextures(1, &asset_texture.texture_handle);
-			if(asset_texture.texture_handle) {
-				glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
-				glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, asset_texture.size_x, asset_texture.size_y);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, asset_texture.size_x, asset_texture.size_y, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			}
+			glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, asset_texture.size_x, asset_texture.size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			if(keep_data) {
 				reports::write_debug("Texture is marked persistent in RAM\n");
 			} else {
@@ -693,22 +690,19 @@ set to one or more of the following values.	*/
 
 		glGenTextures(1, &texture_handle);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
-
-		if(channels == 3) {
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, size, 1);
-		} else if(channels == 4) {
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, size, 1);
+		if(channels == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		} else if(channels == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 		} else if(channels == 2) {
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RG8, size, 1);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size, 1, 0, GL_RG, GL_UNSIGNED_BYTE, NULL);
 		} else {
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, size, 1);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, size, 1, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	data_texture::~data_texture() {
@@ -719,10 +713,10 @@ set to one or more of the following values.	*/
 	uint32_t data_texture::handle() {
 		if(data && data_updated) {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
-			if(channels == 3) {
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size, 1, GL_RGB, GL_UNSIGNED_BYTE, data);
-			} else if(channels == 4) {
+			if(channels == 4) {
 				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			} else if(channels == 3) {
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size, 1, GL_RGB, GL_UNSIGNED_BYTE, data);
 			} else if(channels == 2) {
 				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size, 1, GL_RG, GL_UNSIGNED_BYTE, data);
 			} else {
@@ -756,30 +750,23 @@ set to one or more of the following values.	*/
 
 	font_texture_result make_font_texture(simple_fs::file& f) {
 		auto content = simple_fs::view_contents(f);
-
 		int32_t file_channels = 4;
 		int32_t size_x = 0;
 		int32_t size_y = 0;
 		uint8_t* data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(size_x), &(size_y), &file_channels, 4);
-		uint32_t ftexid = 0;
-
-		glGenTextures(1, &ftexid);
-		if(data && ftexid) {
+		GLuint ftexid = 0;
+		if(data) {
+			glGenTextures(1, &ftexid);
 			glBindTexture(GL_TEXTURE_2D, ftexid);
-
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, size_x, size_y);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size_x, size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			// TODO: Change to GL_LINEAR dynamically when scaling up
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			STBI_FREE(data);
 		}
-
-		STBI_FREE(data);
-
-	return font_texture_result{ ftexid, uint32_t(size_x) };
+		return font_texture_result{ uint32_t(ftexid), uint32_t(size_x) };
 	}
 
 } // namespace ogl

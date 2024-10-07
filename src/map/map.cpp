@@ -157,19 +157,15 @@ namespace map {
 		if(!data.empty()) {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
 		}
-		glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex));
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, position_));
-		glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex, normal_direction_));
-		glVertexAttribFormat(2, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex, texture_coord_));
-		glVertexAttribFormat(3, 1, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex, distance_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex));
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_line_vertex), (const void*)offsetof(textured_line_vertex, position_));
+		glVertexAttribPointer(1, 2, GL_SHORT, GL_TRUE, sizeof(textured_line_vertex), (const void*)offsetof(textured_line_vertex, normal_direction_));
+		glVertexAttribPointer(2, 1, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(textured_line_vertex), (const void*)offsetof(textured_line_vertex, texture_coord_));
+		glVertexAttribPointer(3, 1, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_line_vertex), (const void*)offsetof(textured_line_vertex, distance_));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
-		glVertexAttribBinding(2, 0);
-		glVertexAttribBinding(3, 0);
 	}
 
 	void create_textured_line_b_vbo(GLuint vbo, std::vector<textured_line_vertex_b>& data) {
@@ -179,93 +175,72 @@ namespace map {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(textured_line_vertex_b) * data.size(), data.data(), GL_STATIC_DRAW);
 		}
 		// Bind the VBO to 0 of the VAO
-		glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex_b));
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, position_));
-		glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, previous_point_));
-		glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, next_point_));
-		glVertexAttribFormat(3, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(textured_line_vertex_b, texture_coord_));
-		glVertexAttribFormat(4, 1, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_line_vertex_b, distance_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(textured_line_vertex_b));
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_line_vertex_b), (const void*)offsetof(textured_line_vertex_b, position_));
+		glVertexAttribPointer(1, 2, GL_SHORT, GL_TRUE, sizeof(textured_line_vertex_b), (const void*)offsetof(textured_line_vertex_b, previous_point_));
+		glVertexAttribPointer(2, 2, GL_SHORT, GL_TRUE, sizeof(textured_line_vertex_b), (const void*)offsetof(textured_line_vertex_b, next_point_));
+		glVertexAttribPointer(3, 1, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(textured_line_vertex_b), (const void*)offsetof(textured_line_vertex_b, texture_coord_));
+		glVertexAttribPointer(4, 1, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_line_vertex_b), (const void*)offsetof(textured_line_vertex_b, distance_));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
-		glVertexAttribBinding(2, 0);
-		glVertexAttribBinding(3, 0);
-		glVertexAttribBinding(4, 0);
 	}
 
 	void create_unit_arrow_vbo(GLuint vbo, std::vector<curved_line_vertex>& data) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		if(!data.empty())
-		glBufferData(GL_ARRAY_BUFFER, sizeof(curved_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
+		if(!data.empty()) {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(curved_line_vertex) * data.size(), data.data(), GL_STATIC_DRAW);
+		}
 		// Bind the VBO to 0 of the VAO
-		glBindVertexBuffer(0, vbo, 0, sizeof(curved_line_vertex));
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, position_));
-		glVertexAttribFormat(1, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, normal_direction_));
-		glVertexAttribFormat(2, 2, GL_SHORT, GL_TRUE, offsetof(curved_line_vertex, direction_));
-		glVertexAttribFormat(3, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(curved_line_vertex, texture_coord_));
-		glVertexAttribFormat(4, 1, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(curved_line_vertex, type_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(curved_line_vertex));
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(curved_line_vertex), (const void*)offsetof(curved_line_vertex, position_));
+		glVertexAttribPointer(1, 2, GL_SHORT, GL_TRUE, sizeof(curved_line_vertex), (const void*)offsetof(curved_line_vertex, normal_direction_));
+		glVertexAttribPointer(2, 2, GL_SHORT, GL_TRUE, sizeof(curved_line_vertex), (const void*)offsetof(curved_line_vertex, direction_));
+		glVertexAttribPointer(3, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(curved_line_vertex), (const void*)offsetof(curved_line_vertex, texture_coord_));
+		glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(curved_line_vertex), (const void*)offsetof(curved_line_vertex, type_));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
-		glVertexAttribBinding(2, 0);
-		glVertexAttribBinding(3, 0);
-		glVertexAttribBinding(4, 0);
 	}
 
 	void create_text_line_vbo(GLuint vbo) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		// Bind the VBO to 0 of the VAO
-		glBindVertexBuffer(0, vbo, 0, sizeof(text_line_vertex));
-		glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, position_));
-		glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, normal_direction_));
-		glVertexAttribFormat(2, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, direction_));
-		glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, texture_coord_));
-		glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, offsetof(text_line_vertex, thickness_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(text_line_vertex));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(text_line_vertex), (const void*)offsetof(text_line_vertex, position_));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(text_line_vertex), (const void*)offsetof(text_line_vertex, normal_direction_));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(text_line_vertex), (const void*)offsetof(text_line_vertex, direction_));
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(text_line_vertex), (const void*)offsetof(text_line_vertex, texture_coord_));
+		glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(text_line_vertex), (const void*)offsetof(text_line_vertex, thickness_));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
-		glVertexAttribBinding(2, 0);
-		glVertexAttribBinding(3, 0);
-		glVertexAttribBinding(4, 0);
 	}
 
 	void create_drag_box_vbo(GLuint vbo) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		// Bind the VBO to 0 of the VAO
-		glBindVertexBuffer(0, vbo, 0, sizeof(screen_vertex));
-		// Set up vertex attribute format for the position
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(screen_vertex, position_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(screen_vertex));
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(screen_vertex), (const void*)offsetof(screen_vertex, position_));
 		glEnableVertexAttribArray(0);
-		glVertexAttribBinding(0, 0);
 	}
 
 	void create_textured_quad_vbo(GLuint vbo) {
 		// Create and populate the border VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		// Bind the VBO to 0 of the VAO
-		glBindVertexBuffer(0, vbo, 0, sizeof(textured_screen_vertex));
-		// Set up vertex attribute format for the position
-		glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_screen_vertex, position_));
-		glVertexAttribFormat(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(textured_screen_vertex, texcoord_));
+		//glBindVertexBuffer(0, vbo, 0, sizeof(textured_screen_vertex));
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_screen_vertex), (const void*)offsetof(textured_screen_vertex, position_));
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(textured_screen_vertex), (const void*)offsetof(textured_screen_vertex, texcoord_));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
 	}
 
 	void display_data::create_border_ogl_objects() {
@@ -302,10 +277,8 @@ namespace map {
 			glBindVertexArray(vao_array[vo_land]);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_land]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(map_vertex) * land_vertices.size(), land_vertices.data(), GL_STATIC_DRAW);
-			glBindVertexBuffer(0, vbo_array[vo_land], 0, sizeof(map_vertex));
-			glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
+			glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(map_vertex), (const void*)offsetof(map_vertex, position_));
 			glEnableVertexAttribArray(0);
-			glVertexAttribBinding(0, 0);
 		}
 		{
 			std::vector<map_vertex> land_vertices;
@@ -335,10 +308,8 @@ namespace map {
 			glBindVertexArray(vao_array[vo_land_globe]);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_land_globe]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(map_vertex) * land_vertices.size(), land_vertices.data(), GL_STATIC_DRAW);
-			glBindVertexBuffer(0, vbo_array[vo_land_globe], 0, sizeof(map_vertex));
-			glVertexAttribFormat(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(map_vertex, position_));
+			glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(map_vertex), (const void*)offsetof(map_vertex, position_));
 			glEnableVertexAttribArray(0);
-			glVertexAttribBinding(0, 0);
 		}
 
 		// Fill and bind the VAOs and VBOs
@@ -739,7 +710,7 @@ namespace map {
 				auto texid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
 				if(texid) {
 					glBindVertexArray(state.open_gl.global_square_vao);
-					glBindVertexBuffer(0, state.open_gl.global_square_buffer, 0, sizeof(GLushort) * 4);
+					glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 					glUniform4f(state.open_gl.ui_shader_d_rect_uniform, 0.f, 0.f, float(state.x_size), float(state.y_size));
 					glBindTexture(GL_TEXTURE_2D, texid);
 					GLuint subroutines[2] = { ogl::parameters::enabled, ogl::parameters::no_filter };
@@ -1588,10 +1559,8 @@ namespace map {
 		glGenTextures(1, &texture_handle);
 		if(texture_handle) {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
-
 			// Create a texture with only one byte color
-			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RG8, size_x, size_y);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, GL_RG, GL_UNSIGNED_BYTE, &province_index[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size_x, size_y, 0, GL_RG, GL_UNSIGNED_BYTE, &province_index[0]);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			ogl::set_gltex_parameters(texture_handle, GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 		}
@@ -2840,22 +2809,18 @@ namespace map {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(static_mesh_vertex) * static_mesh_vertices.size(), &static_mesh_vertices[0], GL_STATIC_DRAW);
 		}
 		glBindVertexArray(state.map_state.map_data.vao_array[state.map_state.map_data.vo_static_mesh]);
-		glBindVertexBuffer(0, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh], 0, sizeof(static_mesh_vertex)); // Bind the VBO to 0 of the VAO
-		glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(static_mesh_vertex, position_)); // Set up vertex attribute format for the position
-		glVertexAttribFormat(1, 2, GL_UNSIGNED_BYTE, GL_TRUE, offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
-		glVertexAttribFormat(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
-		glVertexAttribIPointer(3, 4, GL_BYTE, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_ids));
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (void*)offsetof(static_mesh_vertex, bone_weights));
+		glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);
+		//glBindVertexBuffer(0, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh], 0, sizeof(static_mesh_vertex)); // Bind the VBO to 0 of the VAO
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, position_)); // Set up vertex attribute format for the position
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
+		glVertexAttribPointer(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
+		glVertexAttribIPointer(3, 4, GL_BYTE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, bone_ids));
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, bone_weights));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
-		glVertexAttribBinding(0, 0);
-		glVertexAttribBinding(1, 0);
-		glVertexAttribBinding(2, 0);
-		//glVertexAttribBinding(3, 0);
-		//glVertexAttribBinding(4, 0);
 		glBindVertexArray(0);
 	}
 
@@ -2881,8 +2846,7 @@ namespace map {
 
 		glGenTextures(1, &textures[texture_diag_border_identifier]);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8UI, size_x, size_y);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_x, size_y, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, size_x, size_y, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
 		ogl::set_gltex_parameters(textures[texture_diag_border_identifier], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		textures[texture_terrain] = ogl::make_gl_texture(&terrain_id_map[0], size_x, size_y, 1);
@@ -2959,19 +2923,19 @@ namespace map {
 		// province_color is an array of 2 textures, one for province and the other for stripes
 		glGenTextures(1, &texture_arrays[texture_array_province_color]);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture_arrays[texture_array_province_color]);
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 256, 256, 2);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, 256, 256, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		ogl::set_gltex_parameters(texture_arrays[texture_array_province_color], GL_TEXTURE_2D_ARRAY, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		// Get the province_highlight handle
 		glGenTextures(1, &textures[texture_province_highlight]);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 256, 256);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		ogl::set_gltex_parameters(textures[texture_province_highlight], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		// Get the province_fow handle
 		glGenTextures(1, &textures[texture_province_fow]);
 		glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 256, 256);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		ogl::set_gltex_parameters(textures[texture_province_fow], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
