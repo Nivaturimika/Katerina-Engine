@@ -23,6 +23,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"src/map/map_borders.cpp"
 	"src/map/map.cpp"
 	"src/graphics/xac.cpp"
+	"src/graphics/glad.cpp"
 )
 
 list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
@@ -185,8 +186,6 @@ else() # GCC or CLANG
 			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
 	endif()
 endif()
-target_link_libraries(KatEngineCommon INTERFACE libglew_static)
-target_link_libraries(KatEngineCommon INTERFACE stb_image)
 target_link_libraries(KatEngineCommon INTERFACE freetype)
 target_link_libraries(KatEngineCommon INTERFACE harfbuzz)
 target_link_libraries(KatEngineCommon INTERFACE glm)
@@ -225,7 +224,6 @@ target_include_directories(KatEngineCommon INTERFACE
 	${PROJECT_SOURCE_DIR}/src/military
 	${PROJECT_SOURCE_DIR}/src/scripting
 	${PROJECT_SOURCE_DIR}/src/zstd
-	"${glew_SOURCE_DIR}/include/GL"
 	"ankerl")
 
 target_link_libraries(KatEngine PRIVATE KatEngineCommon)
