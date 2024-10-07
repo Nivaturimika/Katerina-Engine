@@ -1648,7 +1648,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 
 	void render() {
 		if(!opengl_context)
-		return;
+			return;
 
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -1933,7 +1933,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 
 			auto xoffset = list_text_right_align - base_text_extent(mod_ref.name_.data(), uint32_t(mod_ref.name_.length()), 14, fonts[0]);
 
-		launcher::ogl::render_new_text(mod_ref.name_.data(), launcher::ogl::color_modification::none, xoffset, 75.0f + 7.0f + i * ui_row_height, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+			launcher::ogl::render_new_text(mod_ref.name_.data(), launcher::ogl::color_modification::none, xoffset, 75.0f + 7.0f + i * ui_row_height, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 		}
 
 		SwapBuffers(opengl_window_dc);
@@ -2155,6 +2155,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 					f = simple_fs::peek_file(root, NATIVE("victoria2.exe"));
 					if(!f) {
 						game_dir_not_found = true;
+						reports::write_debug("Game directory not found\n");
 					}
 				}
 			}
@@ -2189,9 +2190,9 @@ static GLuint sub_square_buffers[64] = { 0 };
 			std::sort(scenario_files.begin(), scenario_files.end(), [](scenario_file const& a, scenario_file const& b) {
 				return a.ident.count > b.ident.count;
 			});
-
 			find_scenario_file();
 
+			reports::write_debug("Finished launcher setup\n");
 			return 1;
 		} else {
 			switch(message) {
@@ -2243,37 +2244,35 @@ static GLuint sub_square_buffers[64] = { 0 };
 					return 0;
 				}
 				case WM_NCCALCSIZE:
-				if(wParam == TRUE)
-				return 0;
-				break;
+					if(wParam == TRUE)
+						return 0;
+					break;
 				case WM_NCHITTEST:
 				{
-				POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+					POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 					RECT rcWindow;
 					GetWindowRect(hwnd, &rcWindow);
 
 					if(ptMouse.x <= int32_t(rcWindow.left + caption_width * scaling_factor)
 					&& ptMouse.y <= int32_t(rcWindow.top + caption_height * scaling_factor)) {
-
 						return HTCAPTION;
-					} else {
-						return HTCLIENT;
 					}
+					return HTCLIENT;
 				}
 				case WM_PAINT:
 				case WM_DISPLAYCHANGE:
 				{
+					reports::write_debug("Start redraw\n");
 					PAINTSTRUCT ps;
 					BeginPaint(hwnd, &ps);
-
 					render();
-
 					EndPaint(hwnd, &ps);
+					reports::write_debug("Finished redraw\n");
 					return 0;
 				}
 				case WM_DESTROY:
-				PostQuitMessage(0);
-				return 1;
+					PostQuitMessage(0);
+					return 1;
 				case WM_KEYDOWN:
 				if(GetKeyState(VK_CONTROL) & 0x8000) {
 					if(wParam == L'v' || wParam == L'V') {

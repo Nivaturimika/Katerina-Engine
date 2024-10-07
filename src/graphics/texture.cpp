@@ -533,19 +533,16 @@ set to one or more of the following values.	*/
 			glGenTextures(1, &asset_texture.texture_handle);
 			if(asset_texture.texture_handle) {
 				glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
-
 				glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, asset_texture.size_x, asset_texture.size_y);
 				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, asset_texture.size_x, asset_texture.size_y, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
-
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-				glBindTexture(GL_TEXTURE_2D, 0);
 			}
-			if(!keep_data) {
-				reports::write_debug("Texture is not marked persistent in RAM\n");
+			if(keep_data) {
+				reports::write_debug("Texture is marked persistent in RAM\n");
+			} else {
 				STBI_FREE(asset_texture.data);
 				asset_texture.data = nullptr;
 			}
