@@ -3439,6 +3439,7 @@ namespace parsers {
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
 				err.accumulated_errors += "has_country_modifier trigger supplied with an invalid modifier \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 			}
 		}
 		void has_province_modifier(association_type a, std::string_view value, error_handler& err, int32_t line,
