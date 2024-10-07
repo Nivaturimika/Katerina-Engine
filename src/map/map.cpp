@@ -1561,7 +1561,6 @@ namespace map {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
 			// Create a texture with only one byte color
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size_x, size_y, 0, GL_RG, GL_UNSIGNED_BYTE, &province_index[0]);
-			glBindTexture(GL_TEXTURE_2D, 0);
 			ogl::set_gltex_parameters(texture_handle, GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 		}
 		return texture_handle;
@@ -1575,12 +1574,10 @@ namespace map {
 		}
 		uint32_t rows = ((uint32_t)prov_color.size()) / 256;
 		uint32_t left_on_last_row = ((uint32_t)prov_color.size()) % 256;
-
 		uint32_t x = 0;
 		uint32_t y = 0;
 		uint32_t width = 256;
 		uint32_t height = rows;
-
 		if(layers == 1) {
 			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[0]);
 		} else {
@@ -1589,19 +1586,15 @@ namespace map {
 				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, x, y, i, width, height / layers, 1, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[i * (prov_color.size() / layers)]);
 			}
 		}
-
 		x = 0;
 		y = rows;
 		width = left_on_last_row;
 		height = 1;
-
 		// SCHOMBERT: added a conditional to block reading from after the end in the case it is evenly divisible by 256
 		// SCHOMBERT: that looks right to me, but I don't fully understand the intent
-		if(left_on_last_row > 0 && layers == 1)
-		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[rows * 256]);
-
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if(left_on_last_row > 0 && layers == 1) {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[rows * 256]);
+		}
 	}
 
 	void display_data::set_selected_province(sys::state& state, dcon::province_id prov_id) {
@@ -2937,8 +2930,6 @@ namespace map {
 		glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		ogl::set_gltex_parameters(textures[texture_province_fow], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
 
 		reports::write_debug("Generating province color and highlight textures\n");
 		uint32_t province_size = state.world.province_size() + 1;

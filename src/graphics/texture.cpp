@@ -723,7 +723,6 @@ set to one or more of the following values.	*/
 				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size, 1, GL_RED, GL_UNSIGNED_BYTE, data);
 			}
 			data_updated = false;
-			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		return texture_handle;
 	}

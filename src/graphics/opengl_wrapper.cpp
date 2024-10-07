@@ -359,8 +359,6 @@ namespace ogl {
 	}
 
 	void initialize_msaa(sys::state& state, int32_t size_x, int32_t size_y) {
-		state.user_settings.antialias_level = 0;
-
 		if(state.user_settings.antialias_level == 0)
 			return;
 		if(!size_x || !size_y)
@@ -737,7 +735,6 @@ namespace ogl {
 		GLuint subroutines[2] = { map_color_modification_to_index(color_modification::none), parameters::linegraph_color };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-		glLineWidth(2.0f);
 		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 1.f, 0.f, 0.f);
 		glDrawArrays(GL_LINE_STRIP, 0, 4);
 	}
@@ -767,8 +764,7 @@ namespace ogl {
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
-		lines& l) {
+	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, lines& l) {
 		glBindVertexArray(state.open_gl.global_square_vao);
 		l.bind_buffer();
 
@@ -777,12 +773,9 @@ namespace ogl {
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
-		if(state.user_settings.color_blind_mode != sys::color_blind_mode::none
-		&& state.user_settings.color_blind_mode != sys::color_blind_mode::achroma) {
-			glLineWidth(4.0f);
-			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
-			glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
-		}
+		glLineWidth(4.0f);
+		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
+		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
 		glLineWidth(2.0f);
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::achroma) {
 			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
@@ -798,7 +791,6 @@ namespace ogl {
 
 	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, float r, float g, float b, lines& l) {
 		glBindVertexArray(state.open_gl.global_square_vao);
-
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -806,12 +798,9 @@ namespace ogl {
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
-		if(state.user_settings.color_blind_mode != sys::color_blind_mode::none
-		&& state.user_settings.color_blind_mode != sys::color_blind_mode::achroma) {
-			glLineWidth(4.0f);
-			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
-			glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
-		}
+		glLineWidth(4.0f);
+		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
+		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
 		glLineWidth(2.0f);
 		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, r, g, b);
 		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
@@ -1146,38 +1135,36 @@ namespace ogl {
 	}
 
 	void lines::set_y(float* v) {
-		for(int32_t i = 0; i < static_cast<int32_t>(count); ++i) {
-			buffer[i * 4] = static_cast<float>(i) / static_cast<float>(count - 1);
-			buffer[i * 4 + 1] = 1.0f - v[i];
-			buffer[i * 4 + 2] = 0.5f;
-			buffer[i * 4 + 3] = v[i];
+		for(uint32_t i = 0; i < count; ++i) {
+			buffer[i * 4 + 0] = float(i) / float(count - 1); //pos x
+			buffer[i * 4 + 1] = 1.0f - v[i]; //pos y
+			buffer[i * 4 + 2] = 0.5f; //tex x
+			buffer[i * 4 + 3] = v[i]; //tex y
 		}
 		pending_data_update = true;
 	}
 
 	void lines::set_default_y() {
-		for(int32_t i = 0; i < static_cast<int32_t>(count); ++i) {
-			buffer[i * 4] = static_cast<float>(i) / static_cast<float>(count - 1);
-			buffer[i * 4 + 1] = 0.5f;
-			buffer[i * 4 + 2] = 0.5f;
-			buffer[i * 4 + 3] = 0.5f;
+		for(uint32_t i = 0; i < count; ++i) {
+			buffer[i * 4 + 0] = float(i) / float(count - 1); //pos x
+			buffer[i * 4 + 1] = 0.5f; //pos y
+			buffer[i * 4 + 2] = 0.5f; //tex x
+			buffer[i * 4 + 3] = 0.5f; //tex y
 		}
 		pending_data_update = true;
 	}
 
 	void lines::bind_buffer() {
-		if(buffer_handle == 0) {
-			glGenBuffers(1, &buffer_handle);
-			glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * count * 4, nullptr, GL_DYNAMIC_DRAW);
-		}
 		if(buffer && pending_data_update) {
+			if(buffer_handle == 0) {
+				glGenBuffers(1, &buffer_handle);
+			}
 			std::vector<GLushort> tmp_buffer(count * 4);
 			for(uint32_t i = 0; i < count * 4; i++) {
-				tmp_buffer[i] = GLushort(buffer[i] * 65535.f);
+				tmp_buffer[i] = GLshort(buffer[i] * 65535.f);
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLushort) * count * 4, tmp_buffer.data());
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 4 * count, tmp_buffer.data(), GL_DYNAMIC_DRAW);
 			pending_data_update = false;
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
@@ -1250,6 +1237,8 @@ namespace ogl {
 				}
 			}
 			set_gltex_parameters(texture_handle, GL_TEXTURE_2D_ARRAY, GL_LINEAR_MIPMAP_NEAREST, GL_REPEAT);
+			//glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			//glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 		}
 		return texture_handle;
 	}

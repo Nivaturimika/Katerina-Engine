@@ -406,9 +406,9 @@ namespace map {
 					break; //no fix
 				}
 
-				std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
-					return char(toupper(ch));
-				});
+				//std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
+				//	return char(toupper(ch));
+				//});
 
 				float rough_box_left = std::numeric_limits<float>::max();
 				float rough_box_right = 0.f;

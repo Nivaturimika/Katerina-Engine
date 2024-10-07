@@ -693,8 +693,6 @@ namespace ui {
 				scaled_datapoints[i] = (datapoints[i] - min) / y_height;
 			}
 		}
-
-
 		lines.set_y(scaled_datapoints.data());
 	}
 
