@@ -2,8 +2,6 @@ include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 add_subdirectory(catch2)
-add_subdirectory(glew)
-add_subdirectory(stb)
 add_subdirectory(glm)
 add_subdirectory(freetype)
 add_subdirectory(icu)
