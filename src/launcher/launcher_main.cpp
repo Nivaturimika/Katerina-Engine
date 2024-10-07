@@ -68,10 +68,7 @@
 #include <shellapi.h>
 #include <shellscalingapi.h>
 #include "Objbase.h"
-#ifndef GLEW_STATIC
-#define GLEW_STATIC
-#endif
-#include "glew.h"
+#include "glad.h"
 #include "wglew.h"
 #include <cassert>
 #include "fonts.hpp"
@@ -815,8 +812,8 @@ namespace launcher {
 
 		HGLRC tmp = wglCreateContext(window_dc);
 		wglMakeCurrent(window_dc, tmp);
-		if(glewInit() != 0) {
-			window::emit_error_message("GLEW failed to initialize", true);
+		if(gladLoadGL(wglGetProcAddress) == 0) {
+			window::emit_error_message("GLAD failed to initialize", true);
 		}
 		if(wglewIsSupported("WGL_ARB_create_context")) {
 			// Explicitly request for OpenGL 3.0
@@ -832,8 +829,11 @@ namespace launcher {
 		} else {
 			opengl_context = wglCreateContext(window_dc);
 		}
-		if(opengl_context == nullptr) {
-			window::emit_error_message("Unable to create WGL context", true);
+		if(opengl_context == NULL) {
+			opengl_context = wglCreateContext(window_dc);
+			if(opengl_context == NULL) {
+				window::emit_error_message("Unable to create WGL context", true);
+			}
 		}
 		wglMakeCurrent(window_dc, HGLRC(opengl_context));
 		wglDeleteContext(tmp);

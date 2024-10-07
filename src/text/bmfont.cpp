@@ -43,9 +43,9 @@ aaedev@gmail.com 2012
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <glew.h>
 #include <string>
 #include <stdarg.h>
+#include "glad.h"
 #include "bmfont.hpp"
 #include "texture.hpp"
 #include "fonts.hpp"

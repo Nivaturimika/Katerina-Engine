@@ -3,10 +3,7 @@
 #include <string>
 #include <string_view>
 
-#ifndef GLEW_STATIC
-#define GLEW_STATIC
-#endif
-#include "glew.h"
+#include "glad.h"
 
 #include "container_types.hpp"
 #include "texture.hpp"

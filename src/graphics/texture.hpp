@@ -1,11 +1,7 @@
 #pragma once
 
 #include "container_types.hpp"
-
-#ifndef GLEW_STATIC
-#define GLEW_STATIC
-#endif
-#include "glew.h"
+#include "glad.h"
 
 namespace ogl {
 

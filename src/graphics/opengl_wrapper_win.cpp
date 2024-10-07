@@ -1,4 +1,5 @@
 #include "wglew.h"
+#include "glad.h"
 
 #include <cassert>
 
@@ -32,8 +33,8 @@ namespace ogl {
 
 		HGLRC tmp = wglCreateContext(window_dc);
 		wglMakeCurrent(window_dc, tmp);
-		if(glewInit() != GLEW_OK) {
-			window::emit_error_message("GLEW failed to initialize", true);
+		if(gladLoadGL(wglGetProcAddress) == 0) {
+			window::emit_error_message("GLAD failed to initialize", true);
 		}
 		if(wglewIsSupported("WGL_ARB_create_context")) {
 			// Explicitly request for OpenGL 3.0
@@ -49,12 +50,13 @@ namespace ogl {
 				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
-		} else {
+			state.open_gl.context = wglCreateContextAttribsARB(window_dc, NULL, attribs_3_0);
+		} 
+		if(state.open_gl.context == NULL) {
 			state.open_gl.context = wglCreateContext(window_dc);
-		}
-		if(state.open_gl.context == nullptr) {
-			window::emit_error_message("Unable to create WGL context", true);
+			if(state.open_gl.context == NULL) {
+				window::emit_error_message("Unable to create WGL context", true);
+			}
 		}
 		wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
 		wglDeleteContext(tmp);

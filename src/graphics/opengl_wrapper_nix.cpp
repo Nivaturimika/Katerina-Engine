@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include "glad.h"
 #include <string>
 
 namespace ogl {
@@ -9,8 +9,8 @@ namespace ogl {
 		glfwMakeContextCurrent(state.win_ptr->window);
 		glfwSwapInterval(1); // Vsync option
 
-		if(glewInit() != GLEW_OK) {
-			window::emit_error_message("GLEW failed to initialize", true);
+		if(gladLoadGL(wglGetProcAddress) == 0) {
+			window::emit_error_message("GLAD failed to initialize", true);
 		}
 #ifndef NDEBUG
 		glEnable(GL_DEBUG_OUTPUT);

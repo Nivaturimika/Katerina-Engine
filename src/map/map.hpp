@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef GLEW_STATIC
-#define GLEW_STATIC
-#endif
-#include "glew.h"
+#include "glad.h"
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 

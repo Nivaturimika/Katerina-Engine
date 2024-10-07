@@ -471,7 +471,7 @@ namespace ogl {
 	}
 
 	void initialize_opengl(sys::state& state) {
-		reports::write_debug("Initializing OpenGL context");
+		reports::write_debug("Initializing OpenGL context\n");
 
 		create_opengl_context(state);
 
