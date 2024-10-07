@@ -1229,16 +1229,16 @@ namespace ogl {
 			size_t p_dx = image.size_x / tiles_x; // Pixels of each tile in x
 			size_t p_dy = image.size_y / tiles_y; // Pixels of each tile in y
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GLsizei(p_dx), GLsizei(p_dy), GLsizei(tiles_x * tiles_y), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			//glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
-			//glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, image.size_x);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, image.size_y);
 			for(int32_t x = 0; x < tiles_x; x++) {
 				for(int32_t y = 0; y < tiles_y; y++) {
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, GL_RGBA, GL_UNSIGNED_BYTE, ((uint32_t const*)image.data) + (x * p_dy * image.size_x + y * p_dx));
 				}
 			}
 			set_gltex_parameters(texture_handle, GL_TEXTURE_2D_ARRAY, GL_LINEAR_MIPMAP_NEAREST, GL_REPEAT);
-			//glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-			//glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 		}
 		return texture_handle;
 	}
