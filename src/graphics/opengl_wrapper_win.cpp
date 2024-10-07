@@ -30,10 +30,15 @@ namespace ogl {
 		int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
 		SetPixelFormat(window_dc, pixel_format, &pfd);
 
+		HGLRC tmp = wglCreateContext(window_dc);
+		wglMakeCurrent(window_dc, tmp);
+		if(glewInit() != GLEW_OK) {
+			window::emit_error_message("GLEW failed to initialize", true);
+		}
 		if(wglewIsSupported("WGL_ARB_create_context")) {
 			// Explicitly request for OpenGL 3.0
-			static const int attribs_2_0[] = {
-				WGL_CONTEXT_MAJOR_VERSION_ARB, 2,
+			static const int attribs_3_0[] = {
+				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 				WGL_CONTEXT_FLAGS_ARB,
 #ifndef NDEBUG
@@ -44,7 +49,7 @@ namespace ogl {
 				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0
 			};
-			state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_2_0);
+			state.open_gl.context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
 		} else {
 			state.open_gl.context = wglCreateContext(window_dc);
 		}
@@ -52,9 +57,7 @@ namespace ogl {
 			window::emit_error_message("Unable to create WGL context", true);
 		}
 		wglMakeCurrent(window_dc, HGLRC(state.open_gl.context));
-		if(glewInit() != GLEW_OK) {
-			window::emit_error_message("GLEW failed to initialize", true);
-		}
+		wglDeleteContext(tmp);
 
 		glDebugMessageCallback(debug_callback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
@@ -66,10 +69,10 @@ namespace ogl {
 		reports::write_debug(msg.c_str());
 
 		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
-			reports::write_debug("WGL_EXT_swap_control_tear is on");
+			reports::write_debug("WGL_EXT_swap_control_tear is on\n");
 			wglSwapIntervalEXT(-1);
 		} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
-			reports::write_debug("WGL_EXT_swap_control is on");
+			reports::write_debug("WGL_EXT_swap_control is on\n");
 			wglSwapIntervalEXT(1);
 		}
 	}
