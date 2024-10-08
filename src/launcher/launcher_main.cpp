@@ -69,7 +69,6 @@
 #include <shellscalingapi.h>
 #include "Objbase.h"
 #include "glad.h"
-#include "wglew.h"
 #include <cassert>
 #include "fonts.hpp"
 #include "texture.hpp"
@@ -810,40 +809,38 @@ namespace launcher {
 		int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
 		SetPixelFormat(window_dc, pixel_format, &pfd);
 
-		HGLRC tmp = wglCreateContext(window_dc);
-		wglMakeCurrent(window_dc, tmp);
-		if(gladLoadGL(wglGetProcAddress) == 0) {
-			window::emit_error_message("GLAD failed to initialize", true);
-		}
-		if(wglewIsSupported("WGL_ARB_create_context")) {
-			// Explicitly request for OpenGL 3.0
-			static const int attribs_3_0[] = {
-				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-				WGL_CONTEXT_FLAGS_ARB, 0,
-				WGL_CONTEXT_PROFILE_MASK_ARB,
-				WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-				0
-			};
-			opengl_context = wglCreateContextAttribsARB(window_dc, nullptr, attribs_3_0);
-		} else {
-			opengl_context = wglCreateContext(window_dc);
-		}
-		if(opengl_context == NULL) {
-			opengl_context = wglCreateContext(window_dc);
+		auto gl_lib = LoadLibraryW(L"opengl32.dll");
+		if(gl_lib) {
+			opengl_context = ((decltype(&wglCreateContext))GetProcAddress(gl_lib, "wglCreateContext"))(window_dc);
 			if(opengl_context == NULL) {
 				window::emit_error_message("Unable to create WGL context", true);
 			}
-		}
-		wglMakeCurrent(window_dc, HGLRC(opengl_context));
-		wglDeleteContext(tmp);
-
-		if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
-			reports::write_debug("WGL_EXT_swap_control_tear is on\n");
-			wglSwapIntervalEXT(-1);
-		} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
-			reports::write_debug("WGL_EXT_swap_control is on\n");
-			wglSwapIntervalEXT(1);
+			((decltype(&wglMakeCurrent))GetProcAddress(gl_lib, "wglMakeCurrent"))(window_dc, HGLRC(opengl_context));
+			if(gladLoadGL() == 0) {
+				window::emit_error_message("GLAD failed to initialize", true);
+			}
+#if 0
+			glDebugMessageCallback(debug_callback, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+#endif
+			//
+			std::string msg;
+			msg += "GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
+			msg += "GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
+			reports::write_debug(msg.c_str());
+			/*
+			if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
+				reports::write_debug("WGL_EXT_swap_control_tear is on\n");
+				wglSwapIntervalEXT(-1);
+			} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
+				reports::write_debug("WGL_EXT_swap_control is on\n");
+				wglSwapIntervalEXT(1);
+			}
+			*/
+			FreeLibrary(gl_lib);
+		} else {
+			window::emit_error_message("Opengl32.dll is missing", true);
 		}
 	}
 
@@ -1410,7 +1407,8 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 	static GLuint global_square_right_flipped_buffer = 0;
 	static GLuint global_square_left_flipped_buffer = 0;
 
-static GLuint sub_square_buffers[64] = { 0 };
+	static GLuint sub_square_buffers[64] = { 0 };
+	static GLuint sub_square_arrays[64] = { 0 };
 
 	void load_global_squares() {
 		reports::write_debug("Loading global squares\n");
@@ -1420,50 +1418,26 @@ static GLuint sub_square_buffers[64] = { 0 };
 		// Populate the position buffer
 		glBindBuffer(GL_ARRAY_BUFFER, global_square_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_data, GL_STATIC_DRAW);
-
 		glGenVertexArrays(1, &global_square_vao);
 		glBindVertexArray(global_square_vao);
 		glEnableVertexAttribArray(0); // position
 		glEnableVertexAttribArray(1); // texture coordinates
-
-		glBindVertexBuffer(0, global_square_buffer, 0, sizeof(GLfloat) * 4);
-
-		glVertexAttribFormat(0, 2, GL_FLOAT, GL_FALSE, 0);					 // position
-		glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2);	// texture coordinates
-		glVertexAttribBinding(0, 0);											// position -> to array zero
-		glVertexAttribBinding(1, 0);											 // texture coordinates -> to array zero
-
-		glGenBuffers(1, &global_square_left_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, global_square_left_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_data, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &global_square_right_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, global_square_right_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_data, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &global_square_right_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, global_square_right_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_right_flipped_data, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &global_square_left_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, global_square_left_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_left_flipped_data, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &global_square_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, global_square_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_square_flipped_data, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0); // position
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (const void*)(sizeof(GLfloat) * 2)); // texture coordinates
 
 		glGenBuffers(64, sub_square_buffers);
+		glGenVertexArrays(64, sub_square_arrays);
 		for(uint32_t i = 0; i < 64; ++i) {
-			glBindBuffer(GL_ARRAY_BUFFER, sub_square_buffers[i]);
-
 			float const cell_x = static_cast<float>(i & 7) / 8.0f;
 			float const cell_y = static_cast<float>((i >> 3) & 7) / 8.0f;
-
-			GLfloat global_sub_square_data[16] = { 0.0f, 0.0f, cell_x, cell_y, 0.0f, 1.0f, cell_x, cell_y + 1.0f / 8.0f, 1.0f, 1.0f,
-				cell_x + 1.0f / 8.0f, cell_y + 1.0f / 8.0f, 1.0f, 0.0f, cell_x + 1.0f / 8.0f, cell_y };
-
+			GLfloat global_sub_square_data[16] = { 0.0f, 0.0f, cell_x, cell_y, 0.0f, 1.0f, cell_x, cell_y + 1.0f / 8.0f, 1.0f, 1.0f, cell_x + 1.0f / 8.0f, cell_y + 1.0f / 8.0f, 1.0f, 0.0f, cell_x + 1.0f / 8.0f, cell_y };
+			glBindBuffer(GL_ARRAY_BUFFER, sub_square_buffers[i]);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, global_sub_square_data, GL_STATIC_DRAW);
+			glBindVertexArray(sub_square_arrays[i]);
+			glEnableVertexAttribArray(0); // position
+			glEnableVertexAttribArray(1); // texture coordinates
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0); // position
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (const void*)(sizeof(GLfloat) * 2)); // texture coordinates
 		}
 	}
 
@@ -1523,29 +1497,6 @@ static GLuint sub_square_buffers[64] = { 0 };
 			}
 		}
 
-		void bind_vertices_by_rotation(ui::rotation r, bool flipped) {
-			switch(r) {
-				case ui::rotation::upright:
-				if(!flipped)
-				glBindVertexBuffer(0, global_square_buffer, 0, sizeof(GLfloat) * 4);
-				else
-				glBindVertexBuffer(0, global_square_flipped_buffer, 0, sizeof(GLfloat) * 4);
-				break;
-				case ui::rotation::r90_left:
-				if(!flipped)
-				glBindVertexBuffer(0, global_square_left_buffer, 0, sizeof(GLfloat) * 4);
-				else
-				glBindVertexBuffer(0, global_square_left_flipped_buffer, 0, sizeof(GLfloat) * 4);
-				break;
-				case ui::rotation::r90_right:
-				if(!flipped)
-				glBindVertexBuffer(0, global_square_right_buffer, 0, sizeof(GLfloat) * 4);
-				else
-				glBindVertexBuffer(0, global_square_right_flipped_buffer, 0, sizeof(GLfloat) * 4);
-				break;
-			}
-		}
-
 		void render_textured_rect(color_modification enabled, int32_t ix, int32_t iy, int32_t iwidth, int32_t iheight, GLuint texture_handle, ui::rotation r, bool flipped) {
 			float x = float(ix);
 			float y = float(iy);
@@ -1553,8 +1504,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 			float height = float(iheight);
 
 			glBindVertexArray(global_square_vao);
-
-			bind_vertices_by_rotation(r, flipped);
+			glBindBuffer(0, global_square_buffer);
 
 			glUniform4f(glGetUniformLocation(ui_shader_program, "d_rect"), x, y, width, height);
 			// glUniform4f(glGetUniformLocation(ui_shader_program, "d_rect"), 0, 0, width, height);
@@ -1588,7 +1538,8 @@ static GLuint sub_square_buffers[64] = { 0 };
 				float x_offset = float(glyph_pos[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
 				float y_offset = float(gso.y) - float(glyph_pos[i].y_offset) / (float((1 << 6) * text::magnification_factor));
 				if(glyphid != FT_Get_Char_Index(f.font_face, ' ')) {
-					glBindVertexBuffer(0, sub_square_buffers[f.glyph_positions[glyphid].texture_slot & 63], 0, sizeof(GLfloat) * 4);
+					glBindBuffer(GL_ARRAY_BUFFER, sub_square_buffers[f.glyph_positions[glyphid].texture_slot & 63]);
+					glBindVertexArray(sub_square_arrays[f.glyph_positions[glyphid].texture_slot & 63]);
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, f.textures[f.glyph_positions[glyphid].texture_slot >> 6]);
 					glUniform4f(glGetUniformLocation(ui_shader_program, "d_rect"), x + x_offset * size / 64.f, baseline_y + y_offset * size / 64.f, size, size);
@@ -1601,8 +1552,7 @@ static GLuint sub_square_buffers[64] = { 0 };
 		void render_new_text(std::string_view sv, color_modification enabled, float x, float y, float size, color3f const& c, ::text::font& f) {
 			glUniform3f(glGetUniformLocation(ui_shader_program, "inner_color"), c.r, c.g, c.b);
 			glUniform1f(glGetUniformLocation(ui_shader_program, "border_size"), 0.08f * 16.0f / size);
-
-		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::filter };
+			GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::filter };
 			glUniform2ui(glGetUniformLocation(ui_shader_program, "subroutines_index"), subroutines[0], subroutines[1]);
 			//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 			internal_text_render(sv, x, y + size, size, f);
