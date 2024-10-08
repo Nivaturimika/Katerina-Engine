@@ -1813,7 +1813,7 @@ class button_press_notification { };
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::factory_id>(state, parent);
 			auto profit = state.world.factory_get_full_profit(content);
-			auto text = text::prettify_currency(profit);
+			auto text = text::prettify_currency(std::abs(profit));
 			// Create colour
 			auto contents = text::create_endless_layout(state, internal_layout,
 			text::layout_parameters{0, 0, static_cast<int16_t>(base_data.size.x), static_cast<int16_t>(base_data.size.y),
