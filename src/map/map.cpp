@@ -709,7 +709,7 @@ namespace map {
 			if(gfx_def.primary_texture_handle) {
 				auto texid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
 				if(texid) {
-					glBindVertexArray(state.open_gl.global_square_vao);
+					glBindVertexArray(state.open_gl.global_square_vao[0]);
 					glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 					glUniform4f(state.open_gl.ui_shader_d_rect_uniform, 0.f, 0.f, float(state.x_size), float(state.y_size));
 					glBindTexture(GL_TEXTURE_2D, texid);

@@ -1000,7 +1000,6 @@ namespace sys {
 		glViewport(0, 0, x_size, y_size);
 		glDepthRange(-1.0f, 1.0f);
 		//consistently kept state throughought the entire UI rendering
-		glBindVertexArray(open_gl.global_square_vao);
 		glActiveTexture(GL_TEXTURE0);
 
 		ui_state.under_mouse = mouse_probe.under_mouse;

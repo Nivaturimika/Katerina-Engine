@@ -477,7 +477,7 @@ namespace ogl {
 
 		create_opengl_context(state);
 
-		//glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 		glEnable(GL_LINE_SMOOTH);
 
 		load_shaders(state); // create shaders
@@ -512,81 +512,6 @@ namespace ogl {
 		initialize_msaa(state, window::creation_parameters().size_x, window::creation_parameters().size_y);
 	}
 
-	static const GLushort global_square_data[] = {
-		0, 0, 0, 0,
-		0, 65535, 0, 65535,
-		65535, 65535, 65535, 65535,
-		65535, 0, 65535, 0
-	};
-	static const GLushort global_square_right_data[] = {
-		0, 0, 0, 65535,
-		0, 65535, 65535, 65535,
-		65535, 65535, 65535, 0,
-		65535, 0, 0, 0
-	};
-	static const GLushort global_square_left_data[] = {
-		0, 0, 65535, 0,
-		0, 65535, 0, 0,
-		65535, 65535, 0, 65535,
-		65535, 0, 65535, 65535
-	};
-	static const GLushort global_square_flipped_data[] = {
-		0, 0, 0, 65535,
-		0, 65535, 0, 0,
-		65535, 65535, 65535, 0,
-		65535, 0, 65535, 65535
-	};
-	static const GLushort global_square_right_flipped_data[] = {
-		0, 0, 0, 0,
-		0, 65535, 65535, 0,
-		65535, 65535, 65535, 65535,
-		65535, 0, 0, 65535
-	};
-	static const GLushort global_square_left_flipped_data[] = {
-		0, 0, 65535, 65535,
-		0, 65535, 0, 65535,
-		65535, 65535, 0, 0,
-		65535, 0, 65535, 0
-	};
-
-	//RTL squares
-	static const GLushort global_rtl_square_data[] = {
-		0, 0, 65535, 0,
-		0, 65535, 65535, 65535,
-		65535, 65535, 0, 65535,
-		65535, 0, 0, 0
-	};
-	static const GLushort global_rtl_square_right_data[] = {
-		0, 65535, 65535, 0,
-		0, 0, 0, 0,
-		65535, 0, 0, 65535,
-		65535, 65535, 65535, 65535
-	};
-	static const GLushort global_rtl_square_left_data[] = {
-		0, 0, 0, 0,
-		0, 65535, 65535, 0,
-		65535, 65535, 65535, 65535,
-		65535, 0, 0, 65535
-	};
-	static const GLushort global_rtl_square_flipped_data[] = {
-		0, 0, 65535, 65535,
-		0, 65535, 65535, 0,
-		65535, 65535, 0, 0,
-		65535, 0, 0, 65535
-	};
-	static const GLushort global_rtl_square_right_flipped_data[] = {
-		0, 0, 65535, 0,
-		0, 65535, 0, 0,
-		65535, 65535, 0, 65535,
-		65535, 0, 65535, 65535
-	};
-	static const GLushort global_rtl_square_left_flipped_data[] = {
-		0, 0, 0, 65535,
-		0, 65535, 65535, 65535,
-		65535, 65535, 65535, 0,
-		65535, 0, 0, 0
-	};
-
 	void load_shaders(sys::state& state) {
 		auto root = get_root(state.common_fs);
 
@@ -616,68 +541,134 @@ namespace ogl {
 		}
 	}
 
-	void load_global_squares(sys::state& state) {
-		// Populate the position buffer
-		glGenBuffers(1, &state.open_gl.global_square_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 16, global_square_data, GL_STATIC_DRAW);
-		//RTL version
-		glGenBuffers(1, &state.open_gl.global_rtl_square_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 16, global_rtl_square_data, GL_STATIC_DRAW);
-
-		glGenVertexArrays(1, &state.open_gl.global_square_vao);
-		glBindVertexArray(state.open_gl.global_square_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
-		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 4, 0); // position
-		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLshort) * 4, (const void*)(sizeof(GLshort) * 2)); // texture coordinates
+	void load_global_square(GLuint vao, GLuint vbo, GLushort const* data) {
+		assert(vao && vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, data, GL_STATIC_DRAW);
+		glBindVertexArray(vao);
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, 0); // position
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, (const void*)(sizeof(GLushort) * 2)); // texture coordinates
 		glEnableVertexAttribArray(0); // position
 		glEnableVertexAttribArray(1); // texture coordinates
+	}
+
+	void load_global_squares(sys::state& state) {
+		static const GLushort global_square_data[] = {
+			0, 0, 0, 0,
+			0, 65535, 0, 65535,
+			65535, 65535, 65535, 65535,
+			65535, 0, 65535, 0
+		};
+		static const GLushort global_square_right_data[] = {
+			0, 0, 0, 65535,
+			0, 65535, 65535, 65535,
+			65535, 65535, 65535, 0,
+			65535, 0, 0, 0
+		};
+		static const GLushort global_square_left_data[] = {
+			0, 0, 65535, 0,
+			0, 65535, 0, 0,
+			65535, 65535, 0, 65535,
+			65535, 0, 65535, 65535
+		};
+		static const GLushort global_square_flipped_data[] = {
+			0, 0, 0, 65535,
+			0, 65535, 0, 0,
+			65535, 65535, 65535, 0,
+			65535, 0, 65535, 65535
+		};
+		static const GLushort global_square_right_flipped_data[] = {
+			0, 0, 0, 0,
+			0, 65535, 65535, 0,
+			65535, 65535, 65535, 65535,
+			65535, 0, 0, 65535
+		};
+		static const GLushort global_square_left_flipped_data[] = {
+			0, 0, 65535, 65535,
+			0, 65535, 0, 65535,
+			65535, 65535, 0, 0,
+			65535, 0, 65535, 0
+		};
+		//RTL squares
+		static const GLushort global_rtl_square_data[] = {
+			0, 0, 65535, 0,
+			0, 65535, 65535, 65535,
+			65535, 65535, 0, 65535,
+			65535, 0, 0, 0
+		};
+		static const GLushort global_rtl_square_right_data[] = {
+			0, 65535, 65535, 0,
+			0, 0, 0, 0,
+			65535, 0, 0, 65535,
+			65535, 65535, 65535, 65535
+		};
+		static const GLushort global_rtl_square_left_data[] = {
+			0, 0, 0, 0,
+			0, 65535, 65535, 0,
+			65535, 65535, 65535, 65535,
+			65535, 0, 0, 65535
+		};
+		static const GLushort global_rtl_square_flipped_data[] = {
+			0, 0, 65535, 65535,
+			0, 65535, 65535, 0,
+			65535, 65535, 0, 0,
+			65535, 0, 0, 65535
+		};
+		static const GLushort global_rtl_square_right_flipped_data[] = {
+			0, 0, 65535, 0,
+			0, 65535, 0, 0,
+			65535, 65535, 0, 65535,
+			65535, 0, 65535, 65535
+		};
+		static const GLushort global_rtl_square_left_flipped_data[] = {
+			0, 0, 0, 65535,
+			0, 65535, 65535, 65535,
+			65535, 65535, 65535, 0,
+			65535, 0, 0, 0
+		};
+
+		glGenVertexArrays(64 + 12, state.open_gl.global_square_vao);
+
+		// Populate the position buffer
+		glGenBuffers(1, &state.open_gl.global_square_buffer);
+		load_global_square(state.open_gl.global_square_vao[0], state.open_gl.global_square_buffer, global_square_data);
 
 		glGenBuffers(1, &state.open_gl.global_square_left_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_left_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[1], state.open_gl.global_square_left_buffer, global_square_left_data);
 
 		glGenBuffers(1, &state.open_gl.global_square_right_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_right_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[2], state.open_gl.global_square_right_buffer, global_square_right_data);
 
 		glGenBuffers(1, &state.open_gl.global_square_right_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_right_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_right_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[3], state.open_gl.global_square_right_flipped_buffer, global_square_right_flipped_data);
 
 		glGenBuffers(1, &state.open_gl.global_square_left_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_left_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_left_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[4], state.open_gl.global_square_left_flipped_buffer, global_square_left_flipped_data);
 
 		glGenBuffers(1, &state.open_gl.global_square_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_square_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[5], state.open_gl.global_square_flipped_buffer, global_square_flipped_data);
 
 		//RTL mode squares
+		glGenBuffers(1, &state.open_gl.global_rtl_square_buffer);
+		load_global_square(state.open_gl.global_square_vao[6], state.open_gl.global_rtl_square_buffer, global_rtl_square_data);
+
 		glGenBuffers(1, &state.open_gl.global_rtl_square_left_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_left_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[7], state.open_gl.global_rtl_square_left_buffer, global_rtl_square_left_data);
 
 		glGenBuffers(1, &state.open_gl.global_rtl_square_right_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_right_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[8], state.open_gl.global_rtl_square_right_buffer, global_rtl_square_right_data);
 
 		glGenBuffers(1, &state.open_gl.global_rtl_square_right_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_right_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_right_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[9], state.open_gl.global_rtl_square_right_flipped_buffer, global_rtl_square_right_flipped_data);
 
 		glGenBuffers(1, &state.open_gl.global_rtl_square_left_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_left_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_left_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[10], state.open_gl.global_rtl_square_left_flipped_buffer, global_rtl_square_left_flipped_data);
 
 		glGenBuffers(1, &state.open_gl.global_rtl_square_flipped_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_rtl_square_flipped_buffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_rtl_square_flipped_data, GL_STATIC_DRAW);
+		load_global_square(state.open_gl.global_square_vao[11], state.open_gl.global_rtl_square_flipped_buffer, global_rtl_square_flipped_data);
 
 		glGenBuffers(64, state.open_gl.sub_square_buffers);
 		for(uint32_t i = 0; i < 64; ++i) {
-			glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[i]);
 			float const cell_x = static_cast<float>(i & 7) / 8.0f;
 			float const cell_y = static_cast<float>((i >> 3) & 7) / 8.0f;
 			GLushort global_sub_square_data[] = {
@@ -686,7 +677,7 @@ namespace ogl {
 				65535, 65535, uint16_t((cell_x + 1.0f / 8.0f) * 65535.f), uint16_t((cell_y + 1.0f / 8.0f) * 65535.f),
 				65535, 0, uint16_t((cell_x + 1.0f / 8.0f) * 65535.f), uint16_t((cell_y) * 65535.f)
 			};
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16, global_sub_square_data, GL_STATIC_DRAW);
+			load_global_square(state.open_gl.global_square_vao[12 + i], state.open_gl.sub_square_buffers[i], global_sub_square_data);
 		}
 	}
 
@@ -705,42 +696,49 @@ namespace ogl {
 	}
 
 	void bind_vertices_by_rotation(sys::state const& state, ui::rotation r, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
 		switch(r) {
 		case ui::rotation::upright:
-			if(!flipped)
+			if(!flipped) {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 6 : 0]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_buffer : state.open_gl.global_square_buffer);
-			else
+			} else {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 11 : 5]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_flipped_buffer : state.open_gl.global_square_flipped_buffer);
+			}
 			break;
 		case ui::rotation::r90_left:
-			if(!flipped)
+			if(!flipped) {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 7 : 1]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_left_buffer : state.open_gl.global_square_left_buffer);
-			else
+			} else {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 10 : 4]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_left_flipped_buffer : state.open_gl.global_square_left_flipped_buffer);
+			}
 			break;
 		case ui::rotation::r90_right:
-			if(!flipped)
+			if(!flipped) {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 8 : 2]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_right_buffer : state.open_gl.global_square_right_buffer);
-			else
+			} else {
+				glBindVertexArray(state.open_gl.global_square_vao[rtl ? 9 : 3]);
 				glBindBuffer(GL_ARRAY_BUFFER, rtl ? state.open_gl.global_rtl_square_right_flipped_buffer : state.open_gl.global_square_right_flipped_buffer);
+			}
 			break;
 		}
 	}
 
 	void render_simple_rect(sys::state const& state, float x, float y, float width, float height, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		GLuint subroutines[2] = { map_color_modification_to_index(color_modification::none), parameters::linegraph_color };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 1.f, 0.f, 0.f);
+		glLineWidth(2.0f);
 		glDrawArrays(GL_LINE_STRIP, 0, 4);
 	}
 
 	void render_textured_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -754,7 +752,7 @@ namespace ogl {
 	}
 
 	void render_textured_rect_direct(sys::state const& state, float x, float y, float width, float height, uint32_t handle) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		glBindVertexArray(state.open_gl.global_square_vao[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, handle);
@@ -765,7 +763,7 @@ namespace ogl {
 	}
 
 	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, lines& l) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -790,7 +788,7 @@ namespace ogl {
 	}
 
 	void render_linegraph(sys::state const& state, color_modification enabled, float x, float y, float width, float height, float r, float g, float b, lines& l) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		l.bind_buffer();
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -808,7 +806,7 @@ namespace ogl {
 
 	void render_barchart(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
 		data_texture& t, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
@@ -819,7 +817,7 @@ namespace ogl {
 	}
 
 	void render_piechart(sys::state const& state, color_modification enabled, float x, float y, float size, data_texture& t) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
@@ -833,7 +831,7 @@ namespace ogl {
 
 	void render_bordered_rect(sys::state const& state, color_modification enabled, float border_size, float x, float y, float width,
 		float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -845,12 +843,7 @@ namespace ogl {
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_masked_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
-		GLuint texture_handle, GLuint mask_texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
-
-		bind_vertices_by_rotation(state, r, flipped, rtl);
-
+	void render_masked_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, GLuint mask_texture_handle, ui::rotation r, bool flipped, bool rtl) {
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
@@ -862,13 +855,12 @@ namespace ogl {
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_progress_bar(sys::state const& state, color_modification enabled, float progress, float x, float y, float width,
-		float height, GLuint left_texture_handle, GLuint right_texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
-
+	void render_progress_bar(sys::state const& state, color_modification enabled, float progress, float x, float y, float width, float height, GLuint left_texture_handle, GLuint right_texture_handle, ui::rotation r, bool flipped, bool rtl) {
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
@@ -882,13 +874,11 @@ namespace ogl {
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::progress_bar };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_tinted_textured_rect(sys::state const& state, float x, float y, float width, float height, float r, float g, float b,
-		GLuint texture_handle, ui::rotation rot, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+	void render_tinted_textured_rect(sys::state const& state, float x, float y, float width, float height, float r, float g, float b, GLuint texture_handle, ui::rotation rot, bool flipped, bool rtl) {
+		//glBindVertexArray(state.open_gl.global_square_vao);
 
 		bind_vertices_by_rotation(state, rot, flipped, rtl);
 
@@ -903,10 +893,8 @@ namespace ogl {
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_tinted_subsprite(sys::state const& state, int frame, int total_frames, float x, float y,
-		float width, float height, float r, float g, float b, GLuint texture_handle, ui::rotation rot, bool flipped,
-		bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+	void render_tinted_subsprite(sys::state const& state, int frame, int total_frames, float x, float y, float width, float height, float r, float g, float b, GLuint texture_handle, ui::rotation rot, bool flipped, bool rtl) {
+		//glBindVertexArray(state.open_gl.global_square_vao);
 
 		bind_vertices_by_rotation(state, rot, flipped, rtl);
 
@@ -923,9 +911,8 @@ namespace ogl {
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_subsprite(sys::state const& state, color_modification enabled, int frame, int total_frames, float x, float y,
-		float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		glBindVertexArray(state.open_gl.global_square_vao);
+	void render_subsprite(sys::state const& state, color_modification enabled, int frame, int total_frames, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
+		//glBindVertexArray(state.open_gl.global_square_vao);
 
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
@@ -985,7 +972,7 @@ namespace ogl {
 		float scale = 1.f;
 		float icon_baseline = baseline_y + (f.internal_ascender / 64.f * font_size) - font_size;
 
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		switch(ico) {
 		case text::embedded_icon::army:
@@ -1047,7 +1034,7 @@ namespace ogl {
 		if(f.textures.empty())
 			return; //edge case
 
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		GLuint subroutines[2] = { map_color_modification_to_index(ogl::color_modification::none), parameters::filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		unsigned int glyph_count = static_cast<unsigned int>(txt.glyph_info.size());
@@ -1076,7 +1063,7 @@ namespace ogl {
 		uint32_t count = uint32_t(codepoints.length());
 
 		float adv = 1.0f / font.width; // Font texture atlas spacing.
-		glBindVertexArray(state.open_gl.global_square_vao);
+		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, ui::rotation::upright, false, false);
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::subsprite_b };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
@@ -1158,15 +1145,26 @@ namespace ogl {
 		if(buffer && pending_data_update) {
 			if(buffer_handle == 0) {
 				glGenBuffers(1, &buffer_handle);
+				glGenVertexArrays(1, &array_handle);
 			}
 			std::vector<GLushort> tmp_buffer(count * 4);
-			for(uint32_t i = 0; i < count * 4; i++) {
-				tmp_buffer[i] = GLshort(buffer[i] * 65535.f);
+			for(uint32_t i = 0; i < count; i++) {
+				tmp_buffer[i * 4 + 0] = GLushort(buffer[i * 4 + 0] * 65535.f);
+				tmp_buffer[i * 4 + 1] = GLushort(buffer[i * 4 + 1] * 65535.f);
+				tmp_buffer[i * 4 + 2] = GLushort(buffer[i * 4 + 2] * 65535.f);
+				tmp_buffer[i * 4 + 3] = GLushort(buffer[i * 4 + 3] * 65535.f);
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLshort) * 4 * count, tmp_buffer.data(), GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 4 * count, tmp_buffer.data(), GL_DYNAMIC_DRAW);
 			pending_data_update = false;
+			//
+			glBindVertexArray(array_handle);
+			glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, 0); // position
+			glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, (const void*)(sizeof(GLushort) * 2)); // texture coordinates
+			glEnableVertexAttribArray(0); // position
+			glEnableVertexAttribArray(1); // texture coordinates
 		}
+		glBindVertexArray(array_handle);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
 	}
 
