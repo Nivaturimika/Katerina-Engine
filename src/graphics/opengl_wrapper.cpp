@@ -833,8 +833,7 @@ namespace ogl {
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void render_bordered_rect(sys::state const& state, color_modification enabled, float border_size, float x, float y, float width,
-		float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
+	void render_bordered_rect(sys::state const& state, color_modification enabled, float border_size, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
 		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 
@@ -848,6 +847,7 @@ namespace ogl {
 	}
 
 	void render_masked_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, GLuint mask_texture_handle, ui::rotation r, bool flipped, bool rtl) {
+		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
