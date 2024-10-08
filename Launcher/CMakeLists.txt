@@ -20,6 +20,7 @@ add_executable(KatEngine_Launcher WIN32
 	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
 	"${PROJECT_SOURCE_DIR}/src/alice.rc"
 	${LAUNCHER_ASSET_FILES})
 

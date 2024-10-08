@@ -845,8 +845,12 @@ namespace launcher {
 	}
 
 	void shutdown_opengl() {
-		wglMakeCurrent(opengl_window_dc, nullptr);
-		wglDeleteContext(HGLRC(opengl_context));
+		auto gl_lib = LoadLibraryW(L"opengl32.dll");
+		if(gl_lib) {
+			((decltype(&wglMakeCurrent))GetProcAddress(gl_lib, "wglMakeCurrent"))(opengl_window_dc, NULL);
+			((decltype(&wglDeleteContext))GetProcAddress(gl_lib, "wglDeleteContext"))(HGLRC(opengl_context));
+			FreeLibrary(gl_lib);
+		}
 		opengl_context = nullptr;
 	}
 
