@@ -771,9 +771,11 @@ namespace ogl {
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
-		glLineWidth(4.0f);
-		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
-		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
+		if(state.user_settings.color_blind_mode != sys::color_blind_mode::none) {
+			glLineWidth(4.0f);
+			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
+			glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
+		}
 		glLineWidth(2.0f);
 		if(state.user_settings.color_blind_mode == sys::color_blind_mode::achroma) {
 			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
@@ -796,9 +798,11 @@ namespace ogl {
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
 		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 
-		glLineWidth(4.0f);
-		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
-		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
+		if(state.user_settings.color_blind_mode != sys::color_blind_mode::none) {
+			glLineWidth(4.0f);
+			glUniform3f(state.open_gl.ui_shader_inner_color_uniform, 0.f, 0.f, 0.f);
+			glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
+		}
 		glLineWidth(2.0f);
 		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, r, g, b);
 		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
