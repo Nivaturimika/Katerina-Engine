@@ -406,6 +406,8 @@ namespace map {
 					break; //no fix
 				}
 
+				
+
 				std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
 					return char(toupper(ch));
 				});

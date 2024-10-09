@@ -33,7 +33,7 @@ namespace ui {
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("provinceview_totalpop"), text::substitution_map{});
+			text::localised_format_box(state, contents, box, std::string_view("provinceview_totalpop"), text::substitution_map{});
 			text::close_layout_box(contents, box);
 		}
 	};
@@ -911,9 +911,7 @@ namespace ui {
 	};
 
 	class pop_left_side_state_window : public window_element_base {
-		province_colony_button* colonial_icon = nullptr;
-
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "poplistbutton") {
 				return make_element_by_type<pop_left_side_button<dcon::state_instance_id>>(state, id);
@@ -922,9 +920,7 @@ namespace ui {
 			} else if(name == "poplist_numpops") {
 				return make_element_by_type<popwin_state_population>(state, id);
 			} else if(name == "colonial_state_icon") {
-				auto ptr = make_element_by_type<province_colony_button>(state, id);
-				colonial_icon = ptr.get();
-				return ptr;
+				return make_element_by_type<province_colony_button>(state, id);
 			} else if(name == "state_focus") {
 				return make_element_by_type<pop_national_focus_button>(state, id);
 			} else if(name == "expand") {
@@ -934,11 +930,6 @@ namespace ui {
 			} else {
 				return nullptr;
 			}
-		}
-
-		void on_update(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::state_instance_id>(state, parent);
-			if(colonial_icon) colonial_icon->set_visible(state, state.world.province_get_is_colonial(state.world.state_instance_get_capital(content)));
 		}
 	};
 	class pop_left_side_province_window : public window_element_base {
@@ -962,32 +953,34 @@ namespace ui {
 		pop_left_side_country_window* country_window = nullptr;
 		pop_left_side_state_window* state_window = nullptr;
 		pop_left_side_province_window* province_window = nullptr;
-
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			listbox_row_element_base<pop_left_side_data>::on_create(state);
 
-			auto ptr1 = make_element_by_type<pop_left_side_country_window>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_country"))->second.definition);
+			auto ptr1 = make_element_by_type<pop_left_side_country_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_country"))->second.definition);
 			country_window = ptr1.get();
 			add_child_to_back(std::move(ptr1));
 
-			auto ptr2 = make_element_by_type<pop_left_side_state_window>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_state"))->second.definition);
+			auto ptr2 = make_element_by_type<pop_left_side_state_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_state"))->second.definition);
 			state_window = ptr2.get();
 			add_child_to_back(std::move(ptr2));
 
-			auto ptr3 = make_element_by_type<pop_left_side_province_window>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_province"))->second.definition);
+			auto ptr3 = make_element_by_type<pop_left_side_province_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("poplistitem_province"))->second.definition);
 			province_window = ptr3.get();
 			add_child_to_back(std::move(ptr3));
 			// After this, the widget will be immediately set by the parent
 		}
 
 		void on_update(sys::state& state) noexcept override {
-			if(country_window) country_window->set_visible(state, std::holds_alternative<dcon::nation_id>(content));
-			if(state_window) state_window->set_visible(state, std::holds_alternative<dcon::state_instance_id>(content));
-			if(province_window) province_window->set_visible(state, std::holds_alternative<dcon::province_id>(content));
+			if(country_window) {
+				country_window->set_visible(state, std::holds_alternative<dcon::nation_id>(content));
+			}
+			if(state_window) {
+				state_window->set_visible(state, std::holds_alternative<dcon::state_instance_id>(content));
+			}
+			if(province_window) {
+				province_window->set_visible(state, std::holds_alternative<dcon::province_id>(content));
+			}
 		}
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
@@ -996,15 +989,15 @@ namespace ui {
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::province_id>()) {
 				if(std::holds_alternative<dcon::province_id>(content))
-				payload.emplace<dcon::province_id>(std::get<dcon::province_id>(content));
+					payload.emplace<dcon::province_id>(std::get<dcon::province_id>(content));
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::state_instance_id>()) {
 				if(std::holds_alternative<dcon::state_instance_id>(content))
-				payload.emplace<dcon::state_instance_id>(std::get<dcon::state_instance_id>(content));
+					payload.emplace<dcon::state_instance_id>(std::get<dcon::state_instance_id>(content));
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::nation_id>()) {
 				if(std::holds_alternative<dcon::nation_id>(content))
-				payload.emplace<dcon::nation_id>(std::get<dcon::nation_id>(content));
+					payload.emplace<dcon::nation_id>(std::get<dcon::nation_id>(content));
 				return message_result::consumed;
 			}
 			return listbox_row_element_base<pop_left_side_data>::get(state, payload);
@@ -1030,11 +1023,11 @@ namespace ui {
 	class pop_distribution_piechart : public piechart<T> {
 		void iterate_one_pop(sys::state& state, dcon::pop_id pop_id) {
 			auto const weight_fn = [&](T id, float weight) {
-			auto it = std::find_if(this->distribution.begin(), this->distribution.end(), [id](auto& e) { return e.key == id;  });
+				auto it = std::find_if(this->distribution.begin(), this->distribution.end(), [id](auto& e) { return e.key == id;  });
 				if(it != this->distribution.end())
-				it->value += weight;
+					it->value += weight;
 				else
-				this->distribution.emplace_back(id, weight);
+					this->distribution.emplace_back(id, weight);
 			};
 
 			if constexpr(std::is_same_v<T, dcon::issue_option_id>) {

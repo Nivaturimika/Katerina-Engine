@@ -1082,10 +1082,21 @@ namespace sys {
 				}
 			}
 		}
-		// Nudge, overriden by V2 to be 0 always
-		ui_defs.gui[ui_state.defs_by_name.find(lookup_key("decision_entry"))->second.definition].position = ui::xy_pair{ 0, 0 };
-		// Find the object id for the main_bg displayed (so we display it before the map)
-		ui_state.bg_gfx_id = ui_defs.gui[ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition].data.image.gfx_object;
+		{ // Nudge, overriden by V2 to be 0 always
+			auto gdef = ui_state.defs_by_name.find(lookup_key("decision_entry"))->second.definition;
+			if(!gdef) {
+				gdef = ui_state.defs_by_name.find(lookup_key("decision_window"))->second.definition;
+			}
+			if(gdef) {
+				ui_defs.gui[gdef].position = ui::xy_pair{ 0, 0 };
+			}
+		}
+		{ // Find the object id for the main_bg displayed (so we display it before the map)
+			auto gdef = ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition;
+			if(gdef) {
+				ui_state.bg_gfx_id = ui_defs.gui[gdef].data.image.gfx_object;
+			}
+		}
 
 		ui_state.nation_picker = ui::make_element_by_type<ui::nation_picker_container>(*this, ui_state.defs_by_name.find(lookup_key("lobby"))->second.definition);
 		{
@@ -1559,8 +1570,9 @@ namespace sys {
 		user_settings.ui_scale = new_scale;
 		ui_state.root->base_data.size.x = int16_t(x_size / user_settings.ui_scale);
 		ui_state.root->base_data.size.y = int16_t(y_size / user_settings.ui_scale);
-		if(ui_state.outliner_window)
-		ui_state.outliner_window->impl_on_update(*this);
+		if(ui_state.outliner_window) {
+			ui_state.outliner_window->impl_on_update(*this);
+		}
 		// TODO move windows
 	}
 
