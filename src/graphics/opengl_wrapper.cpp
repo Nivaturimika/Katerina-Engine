@@ -1048,6 +1048,7 @@ namespace ogl {
 			float x_advance = float(txt.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 			float x_offset = float(txt.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
 			float y_offset = float(gso.y) - float(txt.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
+			glBindVertexArray(state.open_gl.global_square_vao[12 + (gso.texture_slot & 63)]);
 			glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.sub_square_buffers[gso.texture_slot & 63]);
 			assert(uint32_t(gso.texture_slot >> 6) < f.textures.size());
 			assert(f.textures[gso.texture_slot >> 6]);
