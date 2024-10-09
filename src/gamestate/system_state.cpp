@@ -1092,7 +1092,7 @@ namespace sys {
 			}
 		}
 		{ // Find the object id for the main_bg displayed (so we display it before the map)
-			auto it = ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition;
+			auto it = ui_state.defs_by_name.find(lookup_key("bg_main_menus"));
 			if(it != ui_state.defs_by_name.end()) {
 				ui_state.bg_gfx_id = ui_defs.gui[it->second.definition].data.image.gfx_object;
 			}
