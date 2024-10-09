@@ -1540,56 +1540,10 @@ namespace ui {
 		}
 	};
 
-	class stockpile_buy_from_stockpile_hint : public button_element_base {
-		uint8_t index = 0;
-		uint8_t subindex = 0;
-		uint8_t click_amount = 0;
-		public:
-		void on_create(sys::state& state) noexcept override {
-			button_element_base::on_create(state);
-			subindex = 0;
-			if(state.network_mode != sys::network_mode_type::single_player) {
-				index = 3;
-			} else {
-				index = uint8_t(state.game_seed % 3);
-			}
-		}
-
-		void on_update(sys::state& state) noexcept override {
-
-		}
-
-		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			if(index == 1 && subindex == 2) {
-				return; //no render
-			}
-			button_element_base::render(state, x, y);
-		}
-
-		void button_action(sys::state& state) noexcept override {
-			if(index == 1) {
-				click_amount++;
-				if(click_amount >= 10)
-				subindex = 1;
-				if(click_amount >= 15)
-				subindex = 2;
-			}
-		}
-
-		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-			return tooltip_behavior::variable_tooltip;
-		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			std::string key = "alice_stockpile_button_" + std::to_string(index) + "_" + std::to_string(subindex);
-			text::add_line(state, contents, key);
-		}
-	};
-
 	class trade_window : public window_element_base {
 		trade_flow_window* trade_flow_win = nullptr;
 		trade_details_window* details_win = nullptr;
-	dcon::commodity_id commodity_id{1};
+		dcon::commodity_id commodity_id{1};
 
 		trade_market_activity_listbox* list_ma = nullptr;
 		trade_stockpile_listbox* list_sp = nullptr;
@@ -1601,14 +1555,11 @@ namespace ui {
 		public:
 		void on_create(sys::state& state) noexcept override {
 			window_element_base::on_create(state);
-
-			auto btn = make_element_by_type<stockpile_buy_from_stockpile_hint>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_buy_from_stockpile"))->second.definition);
-			add_child_to_front(std::move(btn));
-
-			auto ptr = make_element_by_type<trade_flow_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("trade_flow"))->second.definition);
-			trade_flow_win = ptr.get();
-			add_child_to_front(std::move(ptr));
-
+			auto ptr = make_element_by_type<trade_flow_window>(state, "trade_flow");
+			if(ptr.get()) {
+				trade_flow_win = static_cast<trade_flow_window*>(ptr.get());
+				add_child_to_front(std::move(ptr));
+			}
 			set_visible(state, false);
 		}
 
@@ -1702,8 +1653,10 @@ namespace ui {
 				return message_result::consumed;
 			} else if(payload.holds_type<trade_details_open_window>()) {
 				commodity_id = any_cast<trade_details_open_window>(payload).commodity_id;
-				trade_flow_win->set_visible(state, true);
-				trade_flow_win->impl_on_update(state);
+				if(trade_flow_win) {
+					trade_flow_win->set_visible(state, true);
+					trade_flow_win->impl_on_update(state);
+				}
 				return message_result::consumed;
 			} else if(payload.holds_type<trade_details_select_commodity>()) {
 				commodity_id = any_cast<trade_details_select_commodity>(payload).commodity_id;

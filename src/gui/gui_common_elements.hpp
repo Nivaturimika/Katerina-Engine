@@ -2273,7 +2273,7 @@ struct national_focus_overwrite_close { };
 			auto start = make_element_by_type<window_element_base>(state, "focuscategory_start");
 			auto current_pos = start->base_data.position;
 			auto step = make_element_by_type<window_element_base>(state, "focuscategory_step");
-			auto step_y = step->base_data.position.y;
+			auto step_y = step ? step->base_data.position.y : 64; //TODO: is it hardcoded?
 
 			for(uint8_t i = 1; i <= uint8_t(nations::focus_type::massive_promotion_focus); i++) {
 				bool is_unused = true;
@@ -2283,12 +2283,13 @@ struct national_focus_overwrite_close { };
 						break;
 					}
 				}
-				if(is_unused)
-				continue;
+				if(is_unused) {
+					continue;
+				}
 
 				auto ptr = make_element_by_type<national_focus_category>(state, "focus_category");
 				ptr->base_data.position = current_pos;
-			current_pos = xy_pair{current_pos.x, int16_t(current_pos.y + step_y)};
+				current_pos = xy_pair{current_pos.x, int16_t(current_pos.y + step_y)};
 
 				Cyto::Any foc_type_payload = nations::focus_type(i);
 				ptr->impl_set(state, foc_type_payload);
@@ -2418,6 +2419,12 @@ struct national_focus_overwrite_close { };
 		void button_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
 			command::upgrade_colony_to_state(state, state.local_player_nation, content);
+		}
+
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(visible) {
+				standard_state_instance_button::render(state, x, y);
+			}
 		}
 
 		message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {

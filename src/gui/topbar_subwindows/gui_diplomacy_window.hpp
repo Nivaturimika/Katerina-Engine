@@ -1960,13 +1960,13 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				auto ptr = make_element_by_type<overlapping_sphere_flags>(state, id);
 				ptr->base_data.position.y -= 8; // Nudge
 				return ptr;
-			} else if(name == "gp_prestige") {
+			} else if(name == "gp_prestige" || name == "country_prestige") {
 				return make_element_by_type<nation_prestige_text>(state, id);
-			} else if(name == "gp_economic") {
+			} else if(name == "gp_economic" || name == "country_economic") {
 				return make_element_by_type<nation_industry_score_text>(state, id);
-			} else if(name == "gp_military") {
+			} else if(name == "gp_military" || name == "country_military") {
 				return make_element_by_type<nation_military_score_text>(state, id);
-			} else if(name == "gp_total") {
+			} else if(name == "gp_total" || name == "country_total") {
 				return make_element_by_type<nation_total_score_text>(state, id);
 			} else {
 				return nullptr;
@@ -2128,29 +2128,31 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				add_child_to_front(std::move(new_winc));
 			}
 
-			auto new_win4 = make_element_by_type<diplomacy_setup_peace_dialog>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("setuppeacedialog"))->second.definition);
-			new_win4->set_visible(state, false);
-			setup_peace_win = new_win4.get();
-			add_child_to_front(std::move(new_win4));
-
-			auto new_win5 = make_element_by_type<diplomacy_make_cb_window>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("makecbdialog"))->second.definition);
-			new_win5->set_visible(state, false);
-			make_cb_win = new_win5.get();
-			add_child_to_front(std::move(new_win5));
-
-			auto new_win6 = make_element_by_type<crisis_resolution_dialog>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("setuppeacedialog"))->second.definition);
-			new_win6->set_visible(state, false);
-			crisis_backdown_win = new_win6.get();
-			add_child_to_front(std::move(new_win6));
-
-			if(state.great_nations.size() > 1) {
-			Cyto::Any payload = element_selection_wrapper<dcon::nation_id>{ state.great_nations[0].nation };
-				impl_get(state, payload);
+			auto new_win4 = make_element_by_type<diplomacy_setup_peace_dialog>(state, "setuppeacedialog");
+			if(new_win4.get()) {
+				new_win4->set_visible(state, false);
+				setup_peace_win = static_cast<diplomacy_setup_peace_dialog*>(new_win4.get());
+				add_child_to_front(std::move(new_win4));
 			}
 
+			auto new_win5 = make_element_by_type<diplomacy_make_cb_window>(state, "makecbdialog");
+			if(new_win5.get()) {
+				new_win5->set_visible(state, false);
+				make_cb_win = static_cast<diplomacy_make_cb_window*>(new_win5.get());
+				add_child_to_front(std::move(new_win5));
+			}
+
+			auto new_win6 = make_element_by_type<crisis_resolution_dialog>(state, "setuppeacedialog");
+			if(new_win6.get()) {
+				new_win6->set_visible(state, false);
+				crisis_backdown_win = static_cast<crisis_resolution_dialog*>(new_win6.get());
+				add_child_to_front(std::move(new_win6));
+			}
+
+			if(state.great_nations.size() > 1) {
+				Cyto::Any payload = element_selection_wrapper<dcon::nation_id>{ state.great_nations[0].nation };
+				impl_get(state, payload);
+			}
 			set_visible(state, false);
 		}
 
@@ -2290,21 +2292,22 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		}
 
 		void hide_tabs(sys::state& state) {
-			war_listbox->set_visible(state, false);
-			casus_belli_window->set_visible(state, false);
-			crisis_window->set_visible(state, false);
-			for(auto e : gp_infos)
-			e->set_visible(state, false);
+			if(war_listbox) war_listbox->set_visible(state, false);
+			if(casus_belli_window) casus_belli_window->set_visible(state, false);
+			if(crisis_window) crisis_window->set_visible(state, false);
+			for(auto e : gp_infos) {
+				e->set_visible(state, false);
+			}
 		}
 
 		void on_hide(sys::state& state) noexcept override {
-			offer_goal_win->set_visible(state, false);
-			action_dialog_win->set_visible(state, false);
-			declare_war_win->set_visible(state, false);
-			setup_peace_win->set_visible(state, false);
-			make_cb_win->set_visible(state, false);
-			crisis_backdown_win->set_visible(state, false);
-			gp_action_dialog_win->set_visible(state, false);
+			if(offer_goal_win) offer_goal_win->set_visible(state, false);
+			if(action_dialog_win) action_dialog_win->set_visible(state, false);
+			if(declare_war_win) declare_war_win->set_visible(state, false);
+			if(setup_peace_win) setup_peace_win->set_visible(state, false);
+			if(make_cb_win) make_cb_win->set_visible(state, false);
+			if(crisis_backdown_win) crisis_backdown_win->set_visible(state, false);
+			if(gp_action_dialog_win) gp_action_dialog_win->set_visible(state, false);
 		}
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
@@ -2312,25 +2315,32 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				auto enum_val = any_cast<diplomacy_window_tab>(payload);
 				hide_tabs(state);
 				switch(enum_val) {
-					case diplomacy_window_tab::great_powers:
-					for(auto e : gp_infos)
+				case diplomacy_window_tab::great_powers:
+					for(auto e : gp_infos) {
 						e->set_visible(state, true);
+					}
 					break;
-					case diplomacy_window_tab::wars:
-					war_listbox->set_visible(state, true);
+				case diplomacy_window_tab::wars:
+					if(war_listbox) {
+						war_listbox->set_visible(state, true);
+					}
 					break;
-					case diplomacy_window_tab::casus_belli:
-					casus_belli_window->set_visible(state, true);
+				case diplomacy_window_tab::casus_belli:
+					if(casus_belli_window) {
+						casus_belli_window->set_visible(state, true);
+					}
 					break;
-					case diplomacy_window_tab::crisis:
-					crisis_window->set_visible(state, true);
+				case diplomacy_window_tab::crisis:
+					if(crisis_window) {
+						crisis_window->set_visible(state, true);
+					}
 					break;
 				}
 				active_tab = enum_val;
 				country_facts->impl_on_update(state);
 				return message_result::consumed;
 			} else if(payload.holds_type<dip_tab_request>()) {
-			payload.emplace<dip_tab_request>(dip_tab_request{ active_tab });
+				payload.emplace<dip_tab_request>(dip_tab_request{ active_tab });
 				return message_result::consumed;
 			} else if(payload.holds_type<country_sort_setting>()) {
 				payload.emplace<country_sort_setting>(sort);
@@ -2351,7 +2361,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::modifier_id>()) {
 				auto temp_c = any_cast<dcon::modifier_id>(payload);
-			filter.continent = filter.continent == temp_c ? dcon::modifier_id{} : temp_c;
+				filter.continent = filter.continent == temp_c ? dcon::modifier_id{} : temp_c;
 				country_listbox->impl_on_update(state);
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::nation_id>()) {
@@ -2364,108 +2374,116 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				return message_result::consumed;
 			} else if(payload.holds_type<open_offer_window>()) {
 				auto offer_to = any_cast<open_offer_window>(payload).to;
-
-				offer_goal_win->set_visible(state, false);
-				offer_goal_win->reset_window(state, offer_to);
-				offer_goal_win->set_visible(state, true);
-
+				if(offer_goal_win) {
+					offer_goal_win->set_visible(state, false);
+					offer_goal_win->reset_window(state, offer_to);
+					offer_goal_win->set_visible(state, true);
+				}
 			} else if(payload.holds_type<trigger_gp_choice>()) {
 				auto action = any_cast<trigger_gp_choice>(payload).action;
-
-				action_dialog_win->set_visible(state, false);
-				declare_war_win->set_visible(state, false);
-				setup_peace_win->set_visible(state, false);
-				make_cb_win->set_visible(state, false);
-				crisis_backdown_win->set_visible(state, false);
-
-				gp_action_dialog_win->set_visible(state, false);
-				gp_action_dialog_win->action_target = facts_nation_id;
-				gp_action_dialog_win->current_action = action;
-				gp_action_dialog_win->set_visible(state, true); // this will also force an update
-
+				if(action_dialog_win) action_dialog_win->set_visible(state, false);
+				if(declare_war_win) declare_war_win->set_visible(state, false);
+				if(setup_peace_win) setup_peace_win->set_visible(state, false);
+				if(make_cb_win) make_cb_win->set_visible(state, false);
+				if(crisis_backdown_win) crisis_backdown_win->set_visible(state, false);
+				if(gp_action_dialog_win) {
+					gp_action_dialog_win->set_visible(state, false);
+					gp_action_dialog_win->action_target = facts_nation_id;
+					gp_action_dialog_win->current_action = action;
+					gp_action_dialog_win->set_visible(state, true); // this will also force an update
+				}
 			} else if(payload.holds_type<diplomacy_action>()) {
 				auto v = any_cast<diplomacy_action>(payload);
-				gp_action_dialog_win->set_visible(state, false);
-				action_dialog_win->set_visible(state, false);
-				declare_war_win->set_visible(state, false);
-				setup_peace_win->set_visible(state, false);
-				make_cb_win->set_visible(state, false);
-				crisis_backdown_win->set_visible(state, false);
+				if(gp_action_dialog_win) gp_action_dialog_win->set_visible(state, false);
+				if(action_dialog_win) action_dialog_win->set_visible(state, false);
+				if(declare_war_win) declare_war_win->set_visible(state, false);
+				if(setup_peace_win) setup_peace_win->set_visible(state, false);
+				if(make_cb_win) make_cb_win->set_visible(state, false);
+				if(crisis_backdown_win) crisis_backdown_win->set_visible(state, false);
 				Cyto::Any new_payload = facts_nation_id;
 				auto fat = dcon::fatten(state.world, facts_nation_id);
 				switch(v) {
-					case diplomacy_action::add_to_sphere:
+				case diplomacy_action::add_to_sphere:
 					command::add_to_sphere(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::military_access:
+				case diplomacy_action::military_access:
 					command::ask_for_military_access(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::cancel_military_access:
+				case diplomacy_action::cancel_military_access:
 					command::cancel_military_access(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::give_military_access:
+				case diplomacy_action::give_military_access:
 					// TODO: Give military access
 					break;
-					case diplomacy_action::cancel_give_military_access:
+				case diplomacy_action::cancel_give_military_access:
 					command::cancel_given_military_access(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::increase_relations:
+				case diplomacy_action::increase_relations:
 					command::increase_relations(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::decrease_relations:
+				case diplomacy_action::decrease_relations:
 					command::decrease_relations(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::war_subsidies:
+				case diplomacy_action::war_subsidies:
 					command::give_war_subsidies(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::cancel_war_subsidies:
+				case diplomacy_action::cancel_war_subsidies:
 					command::cancel_war_subsidies(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::ally:
+				case diplomacy_action::ally:
 					command::ask_for_alliance(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::cancel_ally:
+				case diplomacy_action::cancel_ally:
 					command::cancel_alliance(state, state.local_player_nation, facts_nation_id);
 					break;
-					case diplomacy_action::call_ally:
+				case diplomacy_action::call_ally:
 					for(auto war_par : fat.get_war_participant()) {
 						command::call_to_arms(state, state.local_player_nation, facts_nation_id,
 							dcon::fatten(state.world, war_par).get_war().id);
 					}
 					break;
-					case diplomacy_action::remove_from_sphere:
-					gp_action_dialog_win->set_visible(state, true);
-					gp_action_dialog_win->impl_set(state, new_payload);
-					gp_action_dialog_win->impl_set(state, payload);
-					gp_action_dialog_win->impl_on_update(state);
+				case diplomacy_action::remove_from_sphere:
+					if(gp_action_dialog_win) {
+						gp_action_dialog_win->set_visible(state, true);
+						gp_action_dialog_win->impl_set(state, new_payload);
+						gp_action_dialog_win->impl_set(state, payload);
+						gp_action_dialog_win->impl_on_update(state);
+					}
 					break;
-					case diplomacy_action::declare_war:
-					case diplomacy_action::add_wargoal:
-					declare_war_win->set_visible(state, false);
-					declare_war_win->reset_window(state);
-					declare_war_win->set_visible(state, true);
-				
+				case diplomacy_action::declare_war:
+				case diplomacy_action::add_wargoal:
+					if(declare_war_win) {
+						declare_war_win->set_visible(state, false);
+						declare_war_win->reset_window(state);
+						declare_war_win->set_visible(state, true);
+					}
 					break;
-					case diplomacy_action::make_peace:
-					setup_peace_win->open_window(state);
-					setup_peace_win->set_visible(state, true);
-					setup_peace_win->impl_set(state, new_payload);
-					setup_peace_win->impl_set(state, payload);
-					setup_peace_win->impl_on_update(state);
+				case diplomacy_action::make_peace:
+					if(setup_peace_win) {
+						setup_peace_win->open_window(state);
+						setup_peace_win->set_visible(state, true);
+						setup_peace_win->impl_set(state, new_payload);
+						setup_peace_win->impl_set(state, payload);
+						setup_peace_win->impl_on_update(state);
+					}
 					break;
-					case diplomacy_action::justify_war:
-					make_cb_win->impl_set(state, new_payload);
-					make_cb_win->impl_set(state, payload);
-					make_cb_win->set_visible(state, true);
+				case diplomacy_action::justify_war:
+					if(make_cb_win) {
+						make_cb_win->impl_set(state, new_payload);
+						make_cb_win->impl_set(state, payload);
+						make_cb_win->set_visible(state, true);
+					}
 					break;
-					case diplomacy_action::crisis_backdown:
-					crisis_backdown_win->open_window(state);
-					crisis_backdown_win->set_visible(state, true);
-					crisis_backdown_win->impl_on_update(state);
+				case diplomacy_action::crisis_backdown:
+					if(crisis_backdown_win) {
+						crisis_backdown_win->open_window(state);
+						crisis_backdown_win->set_visible(state, true);
+						crisis_backdown_win->impl_on_update(state);
+					}
 					break;
-					case diplomacy_action::crisis_support:
+				case diplomacy_action::crisis_support:
 					break;
-					default:
+				default:
 					action_dialog_win->set_visible(state, true);
 					action_dialog_win->impl_set(state, new_payload);
 					action_dialog_win->impl_set(state, payload);

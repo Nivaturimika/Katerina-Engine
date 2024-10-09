@@ -1759,8 +1759,9 @@ namespace ui {
 		bool open_foreign_invest = false;
 
 		void set_visible_vector_elements(sys::state& state, std::vector<element_base*>& elements, bool v) noexcept {
-			for(auto element : elements)
-			element->set_visible(state, v);
+			for(auto element : elements) {
+				element->set_visible(state, v);
+			}
 		}
 
 		void hide_sub_windows(sys::state& state) noexcept {
@@ -1771,8 +1772,7 @@ namespace ui {
 			set_visible_vector_elements(state, investment_nation, false);
 		}
 
-		public:
-
+	public:
 		void on_create(sys::state& state) noexcept override {
 			generic_tabbed_window::on_create(state);
 
@@ -1784,72 +1784,78 @@ namespace ui {
 
 				bool is_empty = true;
 				for(auto id : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money)
-					continue;
+					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money) {
+						continue;
+					}
 					is_empty = false;
 				}
-				if(is_empty)
-				continue;
+				if(is_empty) {
+					continue;
+				}
 
 				commodity_offset.x = base_commodity_offset.x;
 
 				// Place legend for this category...
-				auto ptr = make_element_by_type<production_goods_category_name>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("production_goods_name"))->second.definition);
-				ptr->base_data.position = commodity_offset;
-				Cyto::Any payload = curr_commodity_group;
-				ptr->impl_set(state, payload);
-				ptr->set_visible(state, false);
-				commodity_offset.y += ptr->base_data.size.y;
-				good_elements.push_back(ptr.get());
-				add_child_to_front(std::move(ptr));
+				auto ptr = make_element_by_type<production_goods_category_name>(state, "production_goods_name");
+				if(ptr.get()) {
+					ptr->base_data.position = commodity_offset;
+					Cyto::Any payload = curr_commodity_group;
+					ptr->impl_set(state, payload);
+					ptr->set_visible(state, false);
+					commodity_offset.y += ptr->base_data.size.y;
+					good_elements.push_back(ptr.get());
+					add_child_to_front(std::move(ptr));
+				}
 
 				int16_t cell_height = 0;
 				// Place infoboxes for each of the goods...
 				for(auto id : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money)
-					continue;
-
-					auto info_ptr = make_element_by_type<production_good_info>(state,
-						state.ui_state.defs_by_name.find(state.lookup_key("production_info"))->second.definition);
-					info_ptr->base_data.position = commodity_offset;
-					info_ptr->set_visible(state, false);
-
-					int16_t cell_width = info_ptr->base_data.size.x;
-					cell_height = info_ptr->base_data.size.y;
-
-					commodity_offset.x += cell_width;
-					if(commodity_offset.x + cell_width >= base_data.size.x) {
-						commodity_offset.x = base_commodity_offset.x;
-						commodity_offset.y += cell_height;
+					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money) {
+						continue;
 					}
-
-					info_ptr.get()->commodity_id = id;
-
-					good_elements.push_back(info_ptr.get());
-					add_child_to_front(std::move(info_ptr));
+					auto info_ptr = make_element_by_type<production_good_info>(state, "production_info");
+					if(info_ptr.get()) {
+						info_ptr->base_data.position = commodity_offset;
+						info_ptr->set_visible(state, false);
+						int16_t cell_width = info_ptr->base_data.size.x;
+						cell_height = info_ptr->base_data.size.y;
+						commodity_offset.x += cell_width;
+						if(commodity_offset.x + cell_width >= base_data.size.x) {
+							commodity_offset.x = base_commodity_offset.x;
+							commodity_offset.y += cell_height;
+						}
+						static_cast<production_good_info*>(info_ptr.get())->commodity_id = id;
+						good_elements.push_back(info_ptr.get());
+						add_child_to_front(std::move(info_ptr));
+					}
 				}
 				// Has atleast 1 good on this row? skip to next row then...
-				if(commodity_offset.x > base_commodity_offset.x)
-				commodity_offset.y += cell_height;
+				if(commodity_offset.x > base_commodity_offset.x) {
+					commodity_offset.y += cell_height;
+				}
 			}
 
 			{
 				auto ptr = make_element_by_type<national_focus_window>(state, "state_focus_window");
-				ptr->set_visible(state, false);
 				nf_win = ptr.get();
-				add_child_to_front(std::move(ptr));
+				if(nf_win) {
+					nf_win->set_visible(state, false);
+					add_child_to_front(std::move(ptr));
+				}
 			}
 
-			auto win = make_element_by_type<factory_build_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("build_factory"))->second.definition);
-			build_win = win.get();
-			add_child_to_front(std::move(win));
+			auto win = make_element_by_type<factory_build_window>(state, "build_factory");
+			if(win.get()) {
+				build_win = static_cast<factory_build_window*>(win.get());
+				add_child_to_front(std::move(win));
+			}
 
-			auto win2 = make_element_by_type<project_investment_window>(state,
-				state.ui_state.defs_by_name.find(state.lookup_key("invest_project_window"))->second.definition);
-			win2->set_visible(state, false);
-			project_window = win2.get();
-			add_child_to_front(std::move(win2));
+			auto win2 = make_element_by_type<project_investment_window>(state, "invest_project_window");
+			if(win2.get()) {
+				project_window = static_cast<project_investment_window*>(win2.get());
+				project_window->set_visible(state, false);
+				add_child_to_front(std::move(win2));
+			}
 
 			show_output_commodity = std::unique_ptr<bool[]>(new bool[state.world.commodity_size()]);
 			set_visible(state, false);
@@ -1955,39 +1961,51 @@ namespace ui {
 				active_tab = enum_val;
 				hide_sub_windows(state);
 				switch(enum_val) {
-					case production_window_tab::factories:
+				case production_window_tab::factories:
 					set_visible_vector_elements(state, factory_elements, true);
 					break;
-					case production_window_tab::investments:
+				case production_window_tab::investments:
 					set_visible_vector_elements(state, investment_brow_elements, true);
-					foreign_invest_win->set_visible(state, open_foreign_invest);
+					if(foreign_invest_win) {
+						foreign_invest_win->set_visible(state, open_foreign_invest);
+					}
 					break;
-					case production_window_tab::projects:
+				case production_window_tab::projects:
 					set_visible_vector_elements(state, project_elements, true);
 					break;
-					case production_window_tab::goods:
+				case production_window_tab::goods:
 					set_visible_vector_elements(state, good_elements, true);
 					break;
 				}
 				return message_result::consumed;
 			} else if(payload.holds_type<production_foreign_invest_target>()) {
-			payload.emplace<production_foreign_invest_target>(production_foreign_invest_target{ foreign_invest_win->curr_nation });
+				if(foreign_invest_win) {
+					payload.emplace<production_foreign_invest_target>(production_foreign_invest_target{ foreign_invest_win->curr_nation });
+				}
 				return message_result::consumed;
 			} else if(payload.holds_type<open_investment_nation>()) {
 				hide_sub_windows(state);
 				auto target = any_cast<open_investment_nation>(payload).id;
 				active_tab = production_window_tab::investments;
-				foreign_invest_win->curr_nation = target;
+				if(foreign_invest_win) {
+					foreign_invest_win->curr_nation = target;
+				}
 				set_visible_vector_elements(state, investment_nation, true);
 				return message_result::consumed;
 			} else if(payload.holds_type<production_sort_order>()) {
 				auto sort_type = any_cast<production_sort_order>(payload);
-				state_listbox->sort_order = sort_type;
-				if(state_listbox->is_visible())
-				state_listbox->impl_on_update(state);
-				state_listbox_invest->sort_order = sort_type;
-				if(state_listbox_invest->is_visible())
-				state_listbox_invest->impl_on_update(state);
+				if(state_listbox) {
+					state_listbox->sort_order = sort_type;
+					if(state_listbox->is_visible()) {
+						state_listbox->impl_on_update(state);
+					}
+				}
+				if(state_listbox_invest) {
+					state_listbox_invest->sort_order = sort_type;
+					if(state_listbox_invest->is_visible()) {
+						state_listbox_invest->impl_on_update(state);
+					}
+				}
 			} else if(payload.holds_type<dcon::state_instance_id>()) {
 				payload.emplace<dcon::state_instance_id>(focus_state);
 				return message_result::consumed;
@@ -1995,12 +2013,16 @@ namespace ui {
 				auto data = any_cast<production_selection_wrapper>(payload);
 				focus_state = data.data;
 				if(data.is_build) {
-					build_win->set_visible(state, true);
-					move_child_to_front(build_win);
+					if(build_win) {
+						build_win->set_visible(state, true);
+						move_child_to_front(build_win);
+					}
 				} else {
-					nf_win->set_visible(state, true);
-					nf_win->base_data.position = data.focus_pos;
-					move_child_to_front(nf_win);
+					if(nf_win) {
+						nf_win->set_visible(state, true);
+						nf_win->base_data.position = data.focus_pos;
+						move_child_to_front(nf_win);
+					}
 				}
 				impl_on_update(state);
 				return message_result::consumed;
@@ -2024,13 +2046,17 @@ namespace ui {
 			} else if(payload.holds_type<element_selection_wrapper<production_action>>()) {
 				auto content = any_cast<element_selection_wrapper<production_action>>(payload).data;
 				switch(content) {
-					case production_action::investment_window:
-					project_window->is_visible() ? project_window->set_visible(state, false) : project_window->set_visible(state, true);
+				case production_action::investment_window:
+					if(project_window) {
+						project_window->is_visible() ? project_window->set_visible(state, false) : project_window->set_visible(state, true);
+					}
 					break;
-					case production_action::foreign_invest_window:
-					foreign_invest_win->is_visible() ? foreign_invest_win->set_visible(state, false) : foreign_invest_win->set_visible(state, true);
+				case production_action::foreign_invest_window:
+					if(foreign_invest_win) {
+						foreign_invest_win->is_visible() ? foreign_invest_win->set_visible(state, false) : foreign_invest_win->set_visible(state, true);
+					}
 					break;
-					default:
+				default:
 					break;
 				}
 				impl_on_update(state);
@@ -2038,13 +2064,14 @@ namespace ui {
 			} else if(payload.holds_type<element_selection_wrapper<dcon::nation_id>>()) {
 				foreign_nation = any_cast<element_selection_wrapper<dcon::nation_id>>(payload).data;
 				open_foreign_invest = true;
-				foreign_invest_win->set_visible(state, true);
+				if(foreign_invest_win) {
+					foreign_invest_win->set_visible(state, true);
+				}
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::nation_id>()) {
-				if(foreign_invest_win->is_visible())
-				payload.emplace<dcon::nation_id>(foreign_nation);
-				else
-				payload.emplace<dcon::nation_id>(state.local_player_nation);
+				if(foreign_invest_win) {
+					payload.emplace<dcon::nation_id>(foreign_invest_win->is_visible() ? foreign_nation : state.local_player_nation);
+				}
 				return message_result::consumed;
 			}
 			return message_result::unseen;

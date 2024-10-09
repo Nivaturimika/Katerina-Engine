@@ -589,12 +589,16 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 			generic_tabbed_window::on_create(state);
 			{
 				auto ptr = make_element_by_type<politics_ruling_party_window>(state, "party_window");
-				add_child_to_front(std::move(ptr));
+				if(ptr.get()) {
+					add_child_to_front(std::move(ptr));
+				}
 			}
 			{
 				auto ptr = make_element_by_type<politics_release_nation_window>(state, "releaseconfirm");
-				release_win = ptr.get();
-				add_child_to_front(std::move(ptr));
+				if(ptr.get()) {
+					release_win = ptr.get();
+					add_child_to_front(std::move(ptr));
+				}
 			}
 			set_visible(state, false);
 		}
@@ -699,21 +703,20 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 			}
 		}
 		void on_update(sys::state& state) noexcept override {
-			if(state.world.nation_get_is_civilized(state.local_player_nation) && unciv_reforms_win->is_visible()) {
-				unciv_reforms_win->set_visible(state, false);
-				reforms_win->set_visible(state, true);
-			} else if(!state.world.nation_get_is_civilized(state.local_player_nation) && reforms_win->is_visible()) {
-				reforms_win->set_visible(state, false);
-				unciv_reforms_win->set_visible(state, true);
+			if(unciv_reforms_win) {
+				unciv_reforms_win->set_visible(state, !state.world.nation_get_is_civilized(state.local_player_nation));
+			}
+			if(reforms_win) {
+				reforms_win->set_visible(state, state.world.nation_get_is_civilized(state.local_player_nation));
 			}
 		}
 
 		void hide_sub_windows(sys::state& state) {
-			reforms_win->set_visible(state, false);
-			unciv_reforms_win->set_visible(state, false);
-			decision_win->set_visible(state, false);
-			movements_win->set_visible(state, false);
-			release_nation_win->set_visible(state, false);
+			if(reforms_win) reforms_win->set_visible(state, false);
+			if(unciv_reforms_win) unciv_reforms_win->set_visible(state, false);
+			if(decision_win) decision_win->set_visible(state, false);
+			if(movements_win) movements_win->set_visible(state, false);
+			if(release_nation_win) release_nation_win->set_visible(state, false);
 		}
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
@@ -721,21 +724,28 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 				auto enum_val = any_cast<politics_window_tab>(payload);
 				hide_sub_windows(state);
 				switch(enum_val) {
-					case politics_window_tab::reforms:
-					if(state.world.nation_get_is_civilized(state.local_player_nation)) {
-						reforms_win->set_visible(state, true);
-					} else {
-						unciv_reforms_win->set_visible(state, true);
+				case politics_window_tab::reforms:
+					if(reforms_win) {
+						reforms_win->set_visible(state, state.world.nation_get_is_civilized(state.local_player_nation));
+					}
+					if(unciv_reforms_win) {
+						unciv_reforms_win->set_visible(state, !state.world.nation_get_is_civilized(state.local_player_nation));
 					}
 					break;
-					case politics_window_tab::movements:
-					movements_win->set_visible(state, true);
+				case politics_window_tab::movements:
+					if(movements_win) {
+						movements_win->set_visible(state, true);
+					}
 					break;
-					case politics_window_tab::decisions:
-					decision_win->set_visible(state, true);
+				case politics_window_tab::decisions:
+					if(decision_win) {
+						decision_win->set_visible(state, true);
+					}
 					break;
-					case politics_window_tab::releasables:
-					release_nation_win->set_visible(state, true);
+				case politics_window_tab::releasables:
+					if(release_nation_win) {
+						release_nation_win->set_visible(state, true);
+					}
 					break;
 				}
 				active_tab = enum_val;
@@ -748,39 +758,49 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 				return message_result::consumed;
 			} else if(payload.holds_type<release_emplace_wrapper>()) {
 				release_nation_id = any_cast<release_emplace_wrapper>(payload).content;
-				release_win->set_visible(state, true);
-				move_child_to_front(release_win);
+				if(release_win) {
+					release_win->set_visible(state, true);
+					move_child_to_front(release_win);
+				}
 				return message_result::consumed;
 			} else if(payload.holds_type<politics_issue_sort_order>()) {
-				auto enum_val = any_cast<politics_issue_sort_order>(payload);
-				switch(enum_val) {
+				if(issues_listbox) {
+					auto enum_val = any_cast<politics_issue_sort_order>(payload);
+					switch(enum_val) {
 					case politics_issue_sort_order::name:
-					std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_name = text::get_name_as_string(state, dcon::fatten(state.world, a));
 							auto b_name = text::get_name_as_string(state, dcon::fatten(state.world, b));
-							return a_name < b_name;
+							if(a_name != b_name)
+								return a_name < b_name;
+							return a.index() < b.index();
 						});
-					issues_listbox->update(state);
-					break;
+						issues_listbox->update(state);
+						break;
 					case politics_issue_sort_order::popular_support:
-					std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_support = politics::get_popular_support(state, state.local_player_nation, a);
 							auto b_support = politics::get_popular_support(state, state.local_player_nation, b);
-							return a_support > b_support;
+							if(a_support != b_support)
+								return a_support < b_support;
+							return a.index() < b.index();
 						});
-					issues_listbox->update(state);
-					break;
+						issues_listbox->update(state);
+						break;
 					case politics_issue_sort_order::voter_support:
-					std::sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_support = politics::get_voter_support(state, state.local_player_nation, a);
 							auto b_support = politics::get_voter_support(state, state.local_player_nation, b);
-							return a_support > b_support;
+							if(a_support != b_support)
+								return a_support < b_support;
+							return a.index() < b.index();
 						});
-					issues_listbox->update(state);
-					break;
+						issues_listbox->update(state);
+						break;
+					}
 				}
 				return message_result::consumed;
 			}

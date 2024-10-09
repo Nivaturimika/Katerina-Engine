@@ -2282,11 +2282,11 @@ namespace ui {
 		}
 
 		void on_update(sys::state& state) noexcept override {
-			header_window->impl_on_update(state);
-			foreign_details_window->impl_on_update(state);
-			local_details_window->impl_on_update(state);
-			local_buildings_window->impl_on_update(state);
-			colony_window->impl_on_update(state);
+			if(header_window) header_window->impl_on_update(state);
+			if(foreign_details_window) foreign_details_window->impl_on_update(state);
+			if(local_details_window) local_details_window->impl_on_update(state);
+			if(local_buildings_window) local_buildings_window->impl_on_update(state);
+			if(colony_window) colony_window->impl_on_update(state);
 
 			//Hide unit builder if not our province
 			auto n = state.world.province_get_nation_from_province_ownership(active_province);

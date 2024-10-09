@@ -1661,6 +1661,9 @@ namespace ui {
 		int16_t subwindow_y_size = 0;
 		while(current_y + subwindow_y_size <= base_data.size.y) {
 			auto ptr = make_element_by_type<RowWinT>(state, get_row_element_name());
+			if(ptr.get() == nullptr) {
+				break; //unable to make children
+			}
 			row_windows.push_back(static_cast<RowWinT*>(ptr.get()));
 			int16_t offset = ptr->base_data.position.y;
 			ptr->base_data.position.y += current_y;
@@ -1669,10 +1672,11 @@ namespace ui {
 			add_child_to_front(std::move(ptr));
 		}
 		auto ptr = make_element_by_type<standard_listbox_scrollbar<RowWinT, RowConT>>(state, "standardlistbox_slider");
-		list_scrollbar = static_cast<standard_listbox_scrollbar<RowWinT, RowConT>*>(ptr.get());
-		add_child_to_front(std::move(ptr));
-		list_scrollbar->scale_to_parent();
-
+		if(ptr.get()) {
+			list_scrollbar = static_cast<standard_listbox_scrollbar<RowWinT, RowConT>*>(ptr.get());
+			add_child_to_front(std::move(ptr));
+			list_scrollbar->scale_to_parent();
+		}
 		update(state);
 	}
 
