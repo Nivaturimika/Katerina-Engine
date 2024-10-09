@@ -1145,13 +1145,13 @@ namespace launcher {
 				if(obj_under_mouse == ui_obj_host_game) {
 					temp_command_line += NATIVE(" -host");
 					temp_command_line += NATIVE(" -name ");
-					temp_command_line += simple_fs::utf8_to_native(player_name);
+					temp_command_line += text::utf8_to_native(player_name);
 				} else if(obj_under_mouse == ui_obj_join_game) {
 					temp_command_line += NATIVE(" -join");
 					temp_command_line += NATIVE(" ");
-					temp_command_line += simple_fs::utf8_to_native(ip_addr);
+					temp_command_line += text::utf8_to_native(ip_addr);
 					temp_command_line += NATIVE(" -name ");
-					temp_command_line += simple_fs::utf8_to_native(player_name);
+					temp_command_line += text::utf8_to_native(player_name);
 
 					// IPv6 address
 					if(!ip_addr.empty() && ::strchr(ip_addr.c_str(), ':') != nullptr) {
@@ -1161,7 +1161,7 @@ namespace launcher {
 
 				if(!password.empty()) {
 					temp_command_line += NATIVE(" -password ");
-					temp_command_line += simple_fs::utf8_to_native(password);
+					temp_command_line += text::utf8_to_native(password);
 				}
 
 				STARTUPINFO si;

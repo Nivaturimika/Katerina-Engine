@@ -17,8 +17,6 @@
 #pragma comment(lib, "Shlwapi.lib")
 
 namespace simple_fs {
-
-	static UINT default_codepage = CP_UTF8; // default is UTF8
 	static native_string steam_path;
 
 	native_string get_steam_path() {
@@ -39,10 +37,6 @@ namespace simple_fs {
 
 	void identify_global_system_properties() {
 		steam_path = get_steam_path();
-		CPINFO cp_info;
-		if(GetCPInfo(CP_UTF8, &cp_info) == FALSE) {
-			default_codepage = CP_ACP;
-		}
 	}
 
 	file::~file() {
@@ -101,9 +95,9 @@ namespace simple_fs {
 	}
 
 	std::optional<file> open_file(unopened_file const& f) {
-	std::optional<file> result(file{f.absolute_path});
+		std::optional<file> result(file{ f.absolute_path });
 		if(!result->content.data) {
-		result = std::optional<file>{};
+			result = std::optional<file>{};
 		}
 		return result;
 	}
@@ -118,7 +112,7 @@ namespace simple_fs {
 	}
 
 	void add_relative_root(file_system& fs, native_string_view root_path) {
-	WCHAR module_name[MAX_PATH] = {};
+		WCHAR module_name[MAX_PATH] = {};
 		int32_t path_used = GetModuleFileNameW(nullptr, module_name, MAX_PATH);
 		while(path_used >= 0 && module_name[path_used] != L'\\') {
 			module_name[path_used] = 0;
@@ -171,8 +165,9 @@ namespace simple_fs {
 	namespace impl {
 		bool contains_non_ascii(native_char const* str) {
 			for(auto c = str; *c != 0; ++c) {
-				if(int32_t(*c) > 127 || int32_t(*c) < 0)
-				return true;
+				if(int32_t(*c) > 127 || int32_t(*c) < 0) {
+					return true;
+				}
 			}
 			return false;
 		}
@@ -621,30 +616,6 @@ namespace simple_fs {
 			CreateDirectoryW(base_path.c_str(), nullptr);
 		}
 		return directory(nullptr, base_path);
-	}
-
-	native_string win1250_to_native(std::string_view data_in) {
-		native_string result;
-		for(auto ch : data_in) {
-			result += native_char(text::win1250toUTF16(ch));
-		}
-		return result;
-	}
-
-	native_string utf8_to_native(std::string_view str) {
-		if(str.empty())
-		return native_string(NATIVE(""));
-		auto buffer = std::unique_ptr<WCHAR[]>(new WCHAR[str.length() * 2]);
-		auto chars_written = MultiByteToWideChar(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
-		return native_string(buffer.get(), size_t(chars_written));
-	}
-
-	std::string native_to_utf8(native_string_view str) {
-		if(str.empty())
-		return std::string("");
-		auto buffer = std::unique_ptr<char[]>(new char[str.length() * 4]);
-		auto chars_written = WideCharToMultiByte(default_codepage, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), NULL, NULL);
-		return std::string(buffer.get(), size_t(chars_written));
 	}
 
 	std::string remove_double_backslashes(std::string_view data_in) {

@@ -485,7 +485,7 @@ set to one or more of the following values.	*/
 			}
 			if(auto f = open_file(root, dds_name); f) {
 				auto content = simple_fs::view_contents(*f);
-				reports::write_debug(("Loading DDS texture: " + simple_fs::native_to_utf8(dds_name) + "\n").c_str());
+				reports::write_debug(("Loading DDS texture: " + text::native_to_utf8(dds_name) + "\n").c_str());
 				uint32_t w = 0;
 				uint32_t h = 0;
 				asset_texture.texture_handle = SOIL_direct_load_DDS_from_memory(reinterpret_cast<uint8_t const*>(content.data), content.file_size, w, h, 0);
@@ -526,7 +526,7 @@ set to one or more of the following values.	*/
 		}
 		if(f) {
 			auto content = simple_fs::view_contents(*f);
-			reports::write_debug(("Loading texture: " + simple_fs::native_to_utf8(simple_fs::get_full_name(*f)) + "\n").c_str());
+			reports::write_debug(("Loading texture: " + text::native_to_utf8(simple_fs::get_full_name(*f)) + "\n").c_str());
 			int32_t file_channels = 4;
 			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
 			asset_texture.channels = 4;
@@ -652,7 +652,7 @@ set to one or more of the following values.	*/
 			file_str += NATIVE_DIR_SEPARATOR;
 			file_str += NATIVE("flags");
 			file_str += NATIVE_DIR_SEPARATOR;
-			file_str += simple_fs::win1250_to_native(nations::int_to_tag(state.world.national_identity_get_identifying_int(masq_nat_id)));
+			file_str += text::win1250_to_native(nations::int_to_tag(state.world.national_identity_get_identifying_int(masq_nat_id)));
 			native_string default_file_str = file_str;
 			file_str += flag_type_to_name(state, type);
 			GLuint p_tex = load_file_and_return_handle(file_str + NATIVE(".png"), state.common_fs, state.open_gl.asset_textures[id], false);
@@ -677,7 +677,7 @@ set to one or more of the following values.	*/
 			// load from file
 			auto fname = state.ui_defs.textures[id];
 			auto fname_view = state.to_string_view(fname);
-			auto native_name = simple_fs::win1250_to_native(fname_view);
+			auto native_name = text::win1250_to_native(fname_view);
 			return load_file_and_return_handle(native_name, state.common_fs, state.open_gl.asset_textures[id], keep_data);
 		}
 		return 0;

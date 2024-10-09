@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 	if(argc >= 2) {
 		#ifndef NDEBUG
 		{
-			auto msg = std::string("Loading scenario  ") + simple_fs::native_to_utf8(argv[1]);
+			auto msg = std::string("Loading scenario  ") + text::native_to_utf8(argv[1]);
 			window::emit_error_message(msg, false);
 		}
 		#endif
@@ -21,18 +21,18 @@ int main(int argc, char **argv) {
 				game_state.network_mode = sys::network_mode_type::client;
 				game_state.network_state.ip_address = "127.0.0.1";
 				if(i + 1 < argc) {
-					game_state.network_state.ip_address = simple_fs::native_to_utf8(native_string(argv[i + 1]));
+					game_state.network_state.ip_address = text::native_to_utf8(native_string(argv[i + 1]));
 					i++;
 				}
 			} else if(native_string(argv[i]) == NATIVE("-name")) {
 				if(i + 1 < argc) {
-					std::string nickname = simple_fs::native_to_utf8(native_string(argv[i + 1]));
+					std::string nickname = text::native_to_utf8(native_string(argv[i + 1]));
 					memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
 					i++;
 				}
 			} else if(native_string(argv[i]) == NATIVE("-password")) {
 				if(i + 1 < argc) {
-					auto str = simple_fs::native_to_utf8(native_string(argv[i + 1]));
+					auto str = text::native_to_utf8(native_string(argv[i + 1]));
 					std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
 					std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
 					i++;
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 		if(sys::try_read_scenario_and_save_file(game_state, argv[1])) {
 			game_state.fill_unsaved_data();
 		} else {
-			auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(argv[1]) + " could not be read";
+			auto msg = std::string("Scenario file ") + text::native_to_utf8(argv[1]) + " could not be read";
 			window::emit_error_message(msg, true);
 			return 0;
 		}

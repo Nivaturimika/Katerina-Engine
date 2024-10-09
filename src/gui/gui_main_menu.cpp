@@ -782,7 +782,7 @@ void projection_mode_right::on_update(sys::state& state) noexcept { }
 	send(state, parent, notify_setting_update{});
 	}
 	void music_player_display::on_update(sys::state& state) noexcept {
-		set_text(state, simple_fs::native_to_utf8(sound::get_current_track_name(state)));
+		set_text(state, text::native_to_utf8(sound::get_current_track_name(state)));
 	}
 
 } // namespace ui

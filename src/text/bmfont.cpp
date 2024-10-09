@@ -121,7 +121,7 @@ namespace text {
 		auto content = simple_fs::view_contents(f);
 		parsers::error_handler err("");
 		parsers::scenario_building_context context(state);
-		err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(f));
+		err.file_name = text::native_to_utf8(simple_fs::get_full_name(f));
 		parsers::token_generator gen(content.data, content.data + content.file_size);
 		parsers::bmfont_file_context bmfont_file_context(context, *this);
 		parsers::parse_bmfont_file(gen, err, bmfont_file_context);
@@ -229,8 +229,8 @@ namespace text {
 			auto root = get_root(state.common_fs);
 			auto gfx_dir = open_directory(root, NATIVE("gfx"));
 			auto font_dir = open_directory(gfx_dir, NATIVE("fonts"));
-			auto font_def = open_file(font_dir, simple_fs::win1250_to_native(fname + ".fnt"));
-			auto font_image = open_file(font_dir, simple_fs::win1250_to_native(fname + ".tga"));
+			auto font_def = open_file(font_dir, text::win1250_to_native(fname + ".fnt"));
+			auto font_image = open_file(font_dir, text::win1250_to_native(fname + ".tga"));
 			if(!bool(font_def) || !bool(font_image)) {
 				auto result = state.font_collection.bitmap_fonts.insert_or_assign(font_handle, bm_font());
 				return result.first->second;

@@ -5696,19 +5696,19 @@ namespace command {
 		bool loaded = false;
 		if(is_new_game) {
 			if(!sys::try_read_scenario_as_save_file(state, state.loaded_scenario_file)) {
-				auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
+				auto msg = std::string("Scenario file ") + text::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
 				ui::popup_error_window(state, "Scenario Error", msg);
 			} else {
 				loaded = true;
 			}
 		} else {
 			if(!sys::try_read_save_file(state, file_name)) {
-				auto msg = std::string("Save file ") + simple_fs::native_to_utf8(file_name) + " could not be loaded.";
+				auto msg = std::string("Save file ") + text::native_to_utf8(file_name) + " could not be loaded.";
 				ui::popup_error_window(state, "Save Error", msg);
 				state.save_list_updated.store(true, std::memory_order::release); //update savefile list
 				//try loading save from scenario so we atleast have something to work on
 				if(!sys::try_read_scenario_as_save_file(state, state.loaded_scenario_file)) {
-					auto msg2 = std::string("Scenario file ") + simple_fs::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
+					auto msg2 = std::string("Scenario file ") + text::native_to_utf8(state.loaded_scenario_file) + " could not be loaded.";
 					ui::popup_error_window(state, "Scenario Error", msg2);
 				} else {
 					loaded = true;

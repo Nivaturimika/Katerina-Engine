@@ -528,26 +528,6 @@ namespace simple_fs {
 		return directory(nullptr, path);
 	}
 
-	native_string win1250_to_native(std::string_view data_in) {
-		std::string result;
-		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
-		for(auto ch : data_in) {
-			if(ch >= 0)
-			result += ch;
-			else
-			result += converter.to_bytes(text::win1250toUTF16(ch));
-		}
-		return result;
-	}
-
-	native_string utf8_to_native(std::string_view str) {
-		return std::string(str);
-	}
-
-	std::string native_to_utf8(native_string_view str) {
-		return std::string(str);
-	}
-
 	std::string remove_double_backslashes(std::string_view data_in) {
 		std::string res;
 		res.reserve(data_in.size());

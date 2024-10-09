@@ -1191,7 +1191,7 @@ namespace sys {
 			}
 		}
 		//new files
-		auto locale_dir = open_directory(localisation_dir, simple_fs::utf8_to_native(locale_name));
+		auto locale_dir = open_directory(localisation_dir, text::utf8_to_native(locale_name));
 		for(auto& file : list_files(locale_dir, NATIVE(".csv"))) {
 			if(auto ofile = open_file(file); ofile) {
 				auto content = view_contents(*ofile);
@@ -1221,25 +1221,7 @@ namespace sys {
 		return add_key_win1252(std::string_view(text));
 	}
 	dcon::text_key state::add_key_win1252(std::string_view text) {
-		std::string temp;
-		for(auto c : text) {
-			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7) {
-				unicode = uint16_t('?'); // convert section symbol to ?
-			}
-			if(unicode <= 0x007F) {
-				temp.push_back(char(unicode));
-			} else if(unicode <= 0x7FF) {
-				temp.push_back(char(0xC0 | uint8_t(0x1F & (unicode >> 6))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			} else { // if unicode <= 0xFFFF
-				temp.push_back(char(0xE0 | uint8_t(0x0F & (unicode >> 12))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & (unicode >> 6))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			}
-		}
-		assert(temp[temp.size()] == '\0');
-		return add_key_utf8(temp);
+		return add_key_utf8(text::win1250_to_utf8(text));
 	}
 	dcon::text_key state::add_key_utf8(std::string const& new_text) {
 		return add_key_utf8(std::string_view(new_text.data()));
@@ -1249,7 +1231,6 @@ namespace sys {
 		if(ekey) {
 			return ekey;
 		}
-
 		auto start = key_data.size();
 		auto length = new_text.length();
 		if(length > 0) {
@@ -1267,21 +1248,9 @@ namespace sys {
 	}
 	uint32_t state::add_locale_data_win1252(std::string_view text) {
 		auto start = locale_text_data.size();
-		for(auto c : text) {
-			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7) {
-				unicode = uint16_t('?'); // convert section symbol to ?
-			}
-			if(unicode <= 0x007F) {
-				locale_text_data.push_back(char(unicode));
-			} else if(unicode <= 0x7FF) {
-				locale_text_data.push_back(char(0xC0 | uint8_t(0x1F & (unicode >> 6))));
-				locale_text_data.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			} else { // if unicode <= 0xFFFF
-				locale_text_data.push_back(char(0xE0 | uint8_t(0x0F & (unicode >> 12))));
-				locale_text_data.push_back(char(0x80 | uint8_t(0x3F & (unicode >> 6))));
-				locale_text_data.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			}
+		auto tmp = text::win1250_to_utf8(text);
+		for(const auto c : tmp) {
+			locale_text_data.push_back(c);
 		}
 		locale_text_data.push_back(0);
 		return uint32_t(start);
@@ -1302,34 +1271,16 @@ namespace sys {
 	}
 
 	dcon::unit_name_id state::add_unit_name(std::string_view text) {
-		if(text.empty())
-			return dcon::unit_name_id();
-
-		std::string temp;
-		for(auto c : text) {
-			auto unicode = text::win1250toUTF16(c);
-			if(unicode == 0x00A7) {
-				unicode = uint16_t('?'); // convert section symbol to ?
-			}
-			if(unicode <= 0x007F) {
-				temp.push_back(char(unicode));
-			} else if(unicode <= 0x7FF) {
-				temp.push_back(char(0xC0 | uint8_t(0x1F & (unicode >> 6))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			} else { // if unicode <= 0xFFFF
-				temp.push_back(char(0xE0 | uint8_t(0x0F & (unicode >> 12))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & (unicode >> 6))));
-				temp.push_back(char(0x80 | uint8_t(0x3F & unicode)));
-			}
+		std::string temp = text::win1250_to_utf8(text);
+		if(temp.size() > 0) {
+			auto start = unit_names.size();
+			unit_names.resize(start + temp.length() + 1, char(0));
+			std::copy_n(temp.data(), temp.length(), unit_names.data() + start);
+			unit_names.back() = 0;
+			unit_names_indices.push_back(int32_t(start));
+			return dcon::unit_name_id(dcon::unit_name_id::value_base_t(unit_names_indices.size() - 1));
 		}
-		assert(temp.size() > 0);
-		assert(temp[temp.size()] == '\0');
-		auto start = unit_names.size();
-		unit_names.resize(start + temp.length() + 1, char(0));
-		std::copy_n(temp.data(), temp.length(), unit_names.data() + start);
-		unit_names.back() = 0;
-		unit_names_indices.push_back(int32_t(start));
-		return dcon::unit_name_id(dcon::unit_name_id::value_base_t(unit_names_indices.size() - 1));
+		return dcon::unit_name_id();
 	}
 	std::string_view state::to_string_view(dcon::unit_name_id tag) const {
 		if(tag) {
@@ -1338,8 +1289,9 @@ namespace sys {
 			auto data_size = unit_names.size();
 			auto end_position = start_position;
 			for(; end_position < unit_names.data() + data_size; ++end_position) {
-				if(*end_position == 0)
+				if(*end_position == 0) {
 					break;
+				}
 			}
 			return std::string_view(unit_names.data() + unit_names_indices[tag.index()], size_t(end_position - start_position));
 		}
@@ -1545,7 +1497,7 @@ namespace sys {
 		auto saves = simple_fs::get_or_create_save_game_directory();
 		uint64_t max_timestamp = 0;
 		for(int32_t i = 0; i < sys::max_autosaves; ++i) {
-			auto asfile = simple_fs::open_file(saves, native_string(NATIVE("autosave_")) + simple_fs::utf8_to_native(std::to_string(i)) + native_string(NATIVE(".bin")));
+			auto asfile = simple_fs::open_file(saves, native_string(NATIVE("autosave_")) + text::utf8_to_native(std::to_string(i)) + native_string(NATIVE(".bin")));
 			if(asfile) {
 				auto content = simple_fs::view_contents(*asfile);
 				save_header header;
@@ -1572,7 +1524,7 @@ namespace sys {
 				auto contents = simple_fs::view_contents(*def_file);
 				auto ld_name = simple_fs::get_full_name(ld);
 				auto dir_lname = ld_name.substr(ld_name.find_last_of(NATIVE_DIR_SEPARATOR) + 1);
-				parsers::add_locale(*this, simple_fs::native_to_utf8(dir_lname), contents.data, contents.data + contents.file_size);
+				parsers::add_locale(*this, text::native_to_utf8(dir_lname), contents.data, contents.data + contents.file_size);
 			}
 		}
 
@@ -1631,7 +1583,7 @@ namespace sys {
 					break;
 				}
 			}
-			auto utf8typename = simple_fs::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
+			auto utf8typename = text::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
 
 			auto name_id = text::find_or_add_key(context.state, utf8typename, true);
 			auto type_id = state.world.create_pop_type();
@@ -1873,7 +1825,7 @@ namespace sys {
 				auto opened_file = open_file(countries);
 				if(opened_file) {
 					auto content = view_contents(*opened_file);
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_national_identity_file(gen, err, context);
 				}
@@ -2086,7 +2038,7 @@ namespace sys {
 				auto opened_file = open_file(em_file);
 				if(opened_file) {
 					auto content = view_contents(*opened_file);
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_event_modifiers_file(gen, err, context);
 				}
@@ -2101,7 +2053,7 @@ namespace sys {
 				auto opened_file = open_file(defines_file);
 				if(opened_file) {
 					auto content = view_contents(*opened_file);
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					defines.parse_file(*this, std::string_view(content.data, content.data + content.file_size), err);
 				}
 			}
@@ -2255,7 +2207,7 @@ namespace sys {
 				auto i_file = open_file(invf);
 				if(i_file) {
 					auto content = view_contents(*i_file);
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_file_name(invf));
+					err.file_name = text::native_to_utf8(simple_fs::get_file_name(invf));
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_inventions_file(gen, err, invention_context);
 					context.tech_and_invention_files.emplace_back(std::move(*i_file));
@@ -2271,7 +2223,7 @@ namespace sys {
 				auto opened_file = open_file(unit_file);
 				if(opened_file) {
 					auto content = view_contents(*opened_file);
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_unit_file(gen, err, context);
 				}
@@ -2350,7 +2302,7 @@ namespace sys {
 			auto opened_file = open_file(st_file);
 			if(opened_file) {
 				auto content = view_contents(*opened_file);
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_scripted_trigger_file(gen, err, context);
 			}
@@ -2358,7 +2310,7 @@ namespace sys {
 
 		// load country files
 		world.for_each_national_identity([&](dcon::national_identity_id i) {
-			auto country_file = open_file(common, simple_fs::win1250_to_native(context.file_names_for_idents[i]));
+			auto country_file = open_file(common, text::win1250_to_native(context.file_names_for_idents[i]));
 			if(country_file) {
 			parsers::country_file_context c_context{ context, i };
 				auto content = view_contents(*country_file);
@@ -2379,14 +2331,14 @@ namespace sys {
 				for(auto province_file : list_files(subdir, NATIVE(".csv"))) {
 					auto opened_file = open_file(province_file);
 					if(opened_file) {
-						err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+						err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 						auto content = view_contents(*opened_file);
 						parsers::parse_csv_province_history_file(*this, content.data, content.data + content.file_size, err, context);
 					}
 				}
 
 				for(auto prov_file : list_files(subdir, NATIVE(".txt"))) {
-					auto file_name = simple_fs::native_to_utf8(get_file_name(prov_file));
+					auto file_name = text::native_to_utf8(get_file_name(prov_file));
 					auto name_start = file_name.c_str();
 					auto name_end = name_start + file_name.length();
 					// exclude files starting with "~" for example
@@ -2404,7 +2356,7 @@ namespace sys {
 						break;
 					}
 
-					err.file_name = simple_fs::native_to_utf8(get_full_name(prov_file));
+					err.file_name = text::native_to_utf8(get_full_name(prov_file));
 					auto province_id = parsers::parse_int(std::string_view(value_start, value_end), 0, err);
 					if(province_id > 0 && uint32_t(province_id) < context.original_id_to_prov_id_map.size()) {
 						auto opened_file = open_file(prov_file);
@@ -2450,7 +2402,7 @@ namespace sys {
 				for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
 					auto opened_file = open_file(pop_file);
 					if(opened_file) {
-						err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+						err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 						auto content = view_contents(*opened_file);
 						parsers::token_generator gen(content.data, content.data + content.file_size);
 						parsers::parse_pop_history_file(gen, err, context);
@@ -2462,7 +2414,7 @@ namespace sys {
 				for(auto pop_file : list_files(date_directory, NATIVE(".csv"))) {
 					auto opened_file = open_file(pop_file);
 					if(opened_file) {
-						err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+						err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 						auto content = view_contents(*opened_file);
 						parsers::parse_csv_pop_history_file(*this, content.data, content.data + content.file_size, err, context);
 					}
@@ -2474,7 +2426,7 @@ namespace sys {
 		{
 			auto poptypes = open_directory(root, NATIVE("poptypes"));
 			for(auto pr : context.map_of_poptypes) {
-				auto opened_file = open_file(poptypes, simple_fs::utf8_to_native(pr.first + ".txt"));
+				auto opened_file = open_file(poptypes, text::utf8_to_native(pr.first + ".txt"));
 				if(opened_file) {
 					err.file_name = pr.first + ".txt";
 					auto content = view_contents(*opened_file);
@@ -2659,7 +2611,7 @@ namespace sys {
 			for(auto decision_file : list_files(decisions, NATIVE(".txt"))) {
 				auto opened_file = open_file(decision_file);
 				if(opened_file) {
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					auto content = view_contents(*opened_file);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_decision_file(gen, err, context);
@@ -2673,7 +2625,7 @@ namespace sys {
 			for(auto event_file : list_files(events, NATIVE(".txt"))) {
 				auto opened_file = open_file(event_file);
 				if(opened_file) {
-					err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 					auto content = view_contents(*opened_file);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_event_file(gen, err, context);
@@ -2689,7 +2641,7 @@ namespace sys {
 			for(auto news_file : list_files(news_dir, NATIVE(".txt"))) {
 				auto opened_file = open_file(news_file);
 				if(opened_file) {
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(simple_fs::get_full_name(*opened_file));
 					auto content = view_contents(*opened_file);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_news_file(gen, err, parsers::news_context{ context });
@@ -2702,7 +2654,7 @@ namespace sys {
 			for(auto tutorial_file : list_files(tutorial_dir, NATIVE(".txt"))) {
 				auto opened_file = open_file(tutorial_file);
 				if(opened_file) {
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(simple_fs::get_full_name(*opened_file));
 					auto content = view_contents(*opened_file);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_tutorial_file(gen, err, context);
@@ -2714,7 +2666,7 @@ namespace sys {
 			auto bp_dir = open_directory(root, NATIVE("battleplans"));
 			for(auto file : list_files(bp_dir, NATIVE(".txt"))) {
 				if(auto f = open_file(file); f) {
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*f));
+					err.file_name = text::native_to_utf8(simple_fs::get_full_name(*f));
 					auto content = view_contents(*f);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_battleplan_settings_file(gen, err, context);
@@ -2729,7 +2681,7 @@ namespace sys {
 				auto opened_file = open_file(dip_file);
 				if(opened_file) {
 					auto content = view_contents(*opened_file);
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(simple_fs::get_full_name(*opened_file));
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_diplomacy_file(gen, err, context);
 				}
@@ -2759,7 +2711,7 @@ namespace sys {
 					}
 				}
 				if(last - start_of_name >= 6) {
-					auto utf8name = simple_fs::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
+					auto utf8name = text::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
 
 					if(auto it = context.map_of_ident_names.find(nations::tag_to_int(utf8name[0], utf8name[1], utf8name[2]));
 						it != context.map_of_ident_names.end()) {
@@ -2791,7 +2743,7 @@ namespace sys {
 		{
 			auto oob_dir = open_directory(history, NATIVE("units"));
 			for(auto oob_file_name : context.map_of_oob_files_per_nation) {
-				auto fname = simple_fs::utf8_to_native(oob_file_name.second);
+				auto fname = text::utf8_to_native(oob_file_name.second);
 				assert(!fname.empty());
 				if(fname[0] == '/' || fname[0] == '\\')
 				fname.erase(0, 1);
@@ -2804,7 +2756,7 @@ namespace sys {
 					parsers::oob_file_context new_context{ context, holder };
 						auto opened_file = simple_fs::open_file(*oob_file);
 						if(opened_file) {
-							err.file_name = simple_fs::native_to_utf8(fname);
+							err.file_name = text::native_to_utf8(fname);
 							auto content = view_contents(*opened_file);
 							parsers::token_generator gen(content.data, content.data + content.file_size);
 							parsers::parse_oob_file(gen, err, new_context);
@@ -2826,7 +2778,7 @@ namespace sys {
 				if(opened_file) {
 				parsers::war_history_context new_context{ context };
 
-					err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*opened_file));
+					err.file_name = text::native_to_utf8(simple_fs::get_full_name(*opened_file));
 					auto content = view_contents(*opened_file);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					parsers::parse_war_history_file(gen, err, new_context);
@@ -3136,9 +3088,9 @@ namespace sys {
 			auto gfx_dir = open_directory(root, NATIVE("gfx"));
 			auto flags_dir = open_directory(gfx_dir, NATIVE("flags"));
 			for(auto nid : world.in_national_identity) {
-				native_string tag_native = simple_fs::win1250_to_native(nations::int_to_tag(nid.get_identifying_int()));
+				native_string tag_native = text::win1250_to_native(nations::int_to_tag(nid.get_identifying_int()));
 				if(auto f = simple_fs::peek_file(flags_dir, tag_native + NATIVE(".tga")); !f) {
-					err.accumulated_warnings += "Flag missing " + simple_fs::native_to_utf8(tag_native) + ".tga\n";
+					err.accumulated_warnings += "Flag missing " + text::native_to_utf8(tag_native) + ".tga\n";
 				}
 				std::array<bool, size_t(culture::flag_type::count)> has_reported;
 				std::fill(has_reported.begin(), has_reported.end(), false);
@@ -3148,7 +3100,7 @@ namespace sys {
 						file_str += ogl::flag_type_to_name(*this, culture::flag_type(g.get_flag()));
 						file_str += NATIVE(".tga");
 						if(auto f = simple_fs::peek_file(flags_dir, file_str); !f) {
-							err.accumulated_warnings += "Flag missing " + simple_fs::native_to_utf8(file_str) + "\n";
+							err.accumulated_warnings += "Flag missing " + text::native_to_utf8(file_str) + "\n";
 						}
 						has_reported[g.get_flag()] = true;
 					}

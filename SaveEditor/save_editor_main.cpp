@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 
-	auto oos_file_1 = open_file(dir, simple_fs::utf8_to_native(argv[1]));
+	auto oos_file_1 = open_file(dir, text::utf8_to_native(argv[1]));
 	if(!bool(oos_file_1))
 		return EXIT_FAILURE;
 	auto contents_1 = simple_fs::view_contents(*oos_file_1);
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 			std::printf("%s.%s.%s,%zu\n", header_1.object_name_start, header_1.property_name_start, header_1.type_name_start, static_cast<size_t>(size1));
 		});
 	} else {
-		auto oos_file_2 = open_file(dir, simple_fs::utf8_to_native(argv[2]));
+		auto oos_file_2 = open_file(dir, text::utf8_to_native(argv[2]));
 		if(!bool(oos_file_2))
 			return EXIT_FAILURE;
 		auto contents_2 = simple_fs::view_contents(*oos_file_2);

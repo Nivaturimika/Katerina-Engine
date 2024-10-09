@@ -918,11 +918,11 @@ namespace parsers {
 
 		if(!context.state.world.decision_get_image(new_decision)) {
 			std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\decisions\\") + [&]() {
-				if(peek_file(decisions, simple_fs::utf8_to_native(name) + NATIVE(".dds"))) {
+				if(peek_file(decisions, text::utf8_to_native(name) + NATIVE(".dds"))) {
 					return std::string(name) + ".tga";
-				} else if(peek_file(decisions, simple_fs::utf8_to_native(name) + NATIVE(".tga"))) {
+				} else if(peek_file(decisions, text::utf8_to_native(name) + NATIVE(".tga"))) {
 					return std::string(name) + ".tga";
-				} else if(peek_file(decisions, simple_fs::utf8_to_native(name) + NATIVE(".png"))) {
+				} else if(peek_file(decisions, text::utf8_to_native(name) + NATIVE(".png"))) {
 					return std::string(name) + ".tga";
 				} else {
 					return std::string("noimage.tga");

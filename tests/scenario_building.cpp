@@ -105,7 +105,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 			auto it = context.map_of_ident_names.find(name_num);
 			REQUIRE(it != context.map_of_ident_names.end());
 			auto id = it->second;
-			auto file_name = simple_fs::win1250_to_native(context.file_names_for_idents[id]);
+			auto file_name = text::win1250_to_native(context.file_names_for_idents[id]);
 			REQUIRE(file_name == NATIVE("countries/Mexico.txt"));
 		}
 	}
@@ -641,7 +641,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 			auto opened_file = open_file(unit_file);
 			if (opened_file) {
 				auto content = view_contents(*opened_file);
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_unit_file(gen, err, context);
 			}
@@ -707,7 +707,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 	state->world.national_identity_resize_government_flag_type(state->world.government_type_size());
 	{
 		state->world.for_each_national_identity([&](dcon::national_identity_id i) {
-			auto file_name = simple_fs::win1250_to_native(context.file_names_for_idents[i]);
+			auto file_name = text::win1250_to_native(context.file_names_for_idents[i]);
 			auto country_file = open_file(common, file_name);
 			if (country_file) {
 				parsers::country_file_context c_context{context, i};
@@ -741,7 +741,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		auto prov_history = open_directory(history, NATIVE("provinces"));
 		for (auto subdir : list_subdirectories(prov_history)) {
 			for (auto prov_file : list_files(subdir, NATIVE(".txt"))) {
-				auto file_name = simple_fs::native_to_utf8(get_full_name(prov_file));
+				auto file_name = text::native_to_utf8(get_full_name(prov_file));
 				auto name_begin = file_name.c_str();
 				auto name_end = name_begin + file_name.length();
 				for (; --name_end > name_begin;) {
@@ -798,12 +798,12 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		auto pop_history = open_directory(history, NATIVE("pops"));
 		auto startdate = sys::date(0).to_ymd(state->start_date);
 		auto start_dir_name = std::to_string(startdate.year) + "." + std::to_string(startdate.month) + "." + std::to_string(startdate.day);
-		auto date_directory = open_directory(pop_history, simple_fs::utf8_to_native(start_dir_name));
+		auto date_directory = open_directory(pop_history, text::utf8_to_native(start_dir_name));
 
 		for (auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
 			auto opened_file = open_file(pop_file);
 			if (opened_file) {
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				auto content = view_contents(*opened_file);
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_pop_history_file(gen, err, context);
@@ -830,7 +830,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 	{
 		auto poptypes = open_directory(root, NATIVE("poptypes"));
 		for (auto pr : context.map_of_poptypes) {
-			auto opened_file = open_file(poptypes, simple_fs::utf8_to_native(pr.first + ".txt"));
+			auto opened_file = open_file(poptypes, text::utf8_to_native(pr.first + ".txt"));
 			if (opened_file) {
 				err.file_name = pr.first + ".txt";
 				auto content = view_contents(*opened_file);
@@ -1097,7 +1097,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		for (auto decision_file : list_files(decisions, NATIVE(".txt"))) {
 			auto opened_file = open_file(decision_file);
 			if (opened_file) {
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				auto content = view_contents(*opened_file);
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_decision_file(gen, err, context);
@@ -1113,7 +1113,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 		for (auto event_file : list_files(events, NATIVE(".txt"))) {
 			auto opened_file = open_file(event_file);
 			if (opened_file) {
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				auto content = view_contents(*opened_file);
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_event_file(gen, err, context);
@@ -1142,7 +1142,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 				}
 			}
 			if (last - start_of_name >= 6 && file_name.ends_with(NATIVE("_oob.txt"))) {
-				auto utf8name = simple_fs::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
+				auto utf8name = text::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
 
 				if (auto it = context.map_of_ident_names.find(nations::tag_to_int(utf8name[0], utf8name[1], utf8name[2])); it != context.map_of_ident_names.end()) {
 					auto holder = context.state.world.national_identity_get_nation_from_identity_holder(it->second);
@@ -1193,7 +1193,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 			auto opened_file = open_file(dip_file);
 			if(opened_file) {
 				auto content = view_contents(*opened_file);
-				err.file_name = simple_fs::native_to_utf8(simple_fs::get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(simple_fs::get_full_name(*opened_file));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_diplomacy_file(gen, err, context);
 			}
@@ -1234,7 +1234,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 				}
 			}
 			if (last - start_of_name >= 6) {
-				auto utf8name = simple_fs::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
+				auto utf8name = text::native_to_utf8(native_string_view(start_of_name, last - start_of_name));
 
 				if (auto it = context.map_of_ident_names.find(nations::tag_to_int(utf8name[0], utf8name[1], utf8name[2])); it != context.map_of_ident_names.end()) {
 					auto holder = context.state.world.national_identity_get_nation_from_identity_holder(it->second);
@@ -1275,7 +1275,7 @@ TEST_CASE("Scenario building", "[req-game-files]") {
 			if (opened_file) {
 				parsers::war_history_context new_context{context};
 
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*opened_file));
+				err.file_name = text::native_to_utf8(get_full_name(*opened_file));
 				auto content = view_contents(*opened_file);
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_war_history_file(gen, err, new_context);

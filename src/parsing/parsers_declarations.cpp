@@ -2311,9 +2311,9 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto gfx = open_directory(root, NATIVE("gfx"));
 		auto pictures = open_directory(gfx, NATIVE("pictures"));
 		auto decisions = open_directory(pictures, NATIVE("decisions"));
-		if(!peek_file(decisions, simple_fs::utf8_to_native(value) + NATIVE(".dds")).has_value()
-		&& !peek_file(decisions, simple_fs::utf8_to_native(value) + NATIVE(".tga")).has_value()
-		&& !peek_file(decisions, simple_fs::utf8_to_native(value) + NATIVE(".png")).has_value()) {
+		if(!peek_file(decisions, text::utf8_to_native(value) + NATIVE(".dds")).has_value()
+		&& !peek_file(decisions, text::utf8_to_native(value) + NATIVE(".tga")).has_value()
+		&& !peek_file(decisions, text::utf8_to_native(value) + NATIVE(".png")).has_value()) {
 			err.accumulated_warnings += "Picture " + std::string(value) + " does not exist " + " (" + err.file_name + ")\n";
 			return; // Picture not found
 		}
@@ -3089,7 +3089,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto root = simple_fs::get_root(context.outer_context.state.common_fs);
 		auto common_dir = simple_fs::open_directory(root, NATIVE("common"));
 		auto countries_dir = simple_fs::open_directory(common_dir, NATIVE("templates"));
-		if(auto f = simple_fs::open_file(countries_dir, simple_fs::utf8_to_native(value)); f) {
+		if(auto f = simple_fs::open_file(countries_dir, text::utf8_to_native(value)); f) {
 			auto content = simple_fs::view_contents(*f);
 			err.file_name = std::string(value);
 			parsers::token_generator gen(content.data, content.data + content.file_size);
@@ -3145,11 +3145,11 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto events = open_directory(pictures, NATIVE("events"));
 
 		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\events\\") + [&]() {
-			if(peek_file(events, simple_fs::utf8_to_native(name) + NATIVE(".tga"))) {
+			if(peek_file(events, text::utf8_to_native(name) + NATIVE(".tga"))) {
 				return std::string(name) + ".tga";
-			} else if(peek_file(events, simple_fs::utf8_to_native(name) + NATIVE(".dds"))) {
+			} else if(peek_file(events, text::utf8_to_native(name) + NATIVE(".dds"))) {
 				return std::string(name) + ".tga";
-			} else if(peek_file(events, simple_fs::utf8_to_native(name) + NATIVE(".png"))) {
+			} else if(peek_file(events, text::utf8_to_native(name) + NATIVE(".png"))) {
 				return std::string(name) + ".tga";
 			} else {
 				return std::string("GFX_event_no_image.tga");
@@ -3217,7 +3217,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto all_images = simple_fs::list_files(leaders, NATIVE(".dds"));
 		for(auto i : all_images) {
 			auto native_name = simple_fs::get_file_name(i);
-			auto uname = simple_fs::native_to_utf8(native_name);
+			auto uname = text::native_to_utf8(native_name);
 
 			bool admiral = false;
 			std::string group_name;
@@ -3457,7 +3457,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		for(auto replace_path : replace_paths) {
 			native_string path_block = simple_fs::list_roots(fs)[0];
 			path_block += NATIVE_DIR_SEPARATOR;
-			path_block += simple_fs::correct_slashes(simple_fs::utf8_to_native(replace_path));
+			path_block += simple_fs::correct_slashes(text::utf8_to_native(replace_path));
 			if(path_block.back() != NATIVE_DIR_SEPARATOR)
 			path_block += NATIVE_DIR_SEPARATOR;
 
@@ -3466,7 +3466,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 
 		native_string mod_path = simple_fs::list_roots(fs)[0];
 		mod_path += NATIVE_DIR_SEPARATOR;
-		mod_path += simple_fs::correct_slashes(simple_fs::utf8_to_native(path_));
+		mod_path += simple_fs::correct_slashes(text::utf8_to_native(path_));
 		add_root(fs, mod_path);
 	}
 

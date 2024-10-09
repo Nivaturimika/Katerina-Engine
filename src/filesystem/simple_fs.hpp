@@ -31,7 +31,6 @@ namespace simple_fs {
 #ifdef _WIN64
 // WINDOWS typedefs go here
 #include "simple_fs_types_win.hpp"
-
 #else
 // LINUX typedefs go here
 #include "simple_fs_types_nix.hpp"
@@ -81,15 +80,6 @@ namespace simple_fs {
 	directory get_or_create_scenario_directory();
 	directory get_or_create_settings_directory();
 	directory get_or_create_data_dumps_directory();
-
-	// necessary for reading paths out of data from inside older paradox files:
-	// even on linux, this must do something, because win1250 isn't ascii or utf8
-	native_string win1250_to_native(std::string_view data_in);
-
-	// necessary for reading paths out of data from inside files we may create:
-	// on linux, this just has to call the string constructor
-	native_string utf8_to_native(std::string_view data_in);
-	std::string native_to_utf8(native_string_view data_in);
 
 	std::string remove_double_backslashes(std::string_view data_in); // unfortunately, paradox decided to escape their paths ...
 	native_string correct_slashes(native_string_view path);

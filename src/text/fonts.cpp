@@ -316,7 +316,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
+				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
 				if(ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);
@@ -351,7 +351,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
+				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
 				if(ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);
@@ -386,7 +386,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, simple_fs::utf8_to_native(fname));
+				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
 				if(ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);

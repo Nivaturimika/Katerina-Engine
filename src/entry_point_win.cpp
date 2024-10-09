@@ -252,18 +252,18 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					game_state.network_mode = sys::network_mode_type::client;
 					game_state.network_state.ip_address = "127.0.0.1";
 					if(i + 1 < num_params) {
-						game_state.network_state.ip_address = simple_fs::native_to_utf8(native_string(parsed_cmd[i + 1]));
+						game_state.network_state.ip_address = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
 						i++;
 					}
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-name")) {
 					if(i + 1 < num_params) {
-						std::string nickname = simple_fs::native_to_utf8(native_string(parsed_cmd[i + 1]));
+						std::string nickname = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
 						memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
 						i++;
 					}
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-password")) {
 					if(i + 1 < num_params) {
-						auto str = simple_fs::native_to_utf8(native_string(parsed_cmd[i + 1]));
+						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
 						std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
 						std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
 						i++;
@@ -278,7 +278,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					headless_repeat = true;
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
 					if(i + 1 < num_params) {
-						auto str = simple_fs::native_to_utf8(native_string(parsed_cmd[i + 1]));
+						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
 						headless_speed = std::atoi(str.c_str());
 						i++;
 					}
@@ -302,7 +302,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 							game_state.fill_unsaved_data();
 							loaded_scenario = true;
 						} else {
-							auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
+							auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
 							window::emit_error_message(msg, true);
 						}
 					}
@@ -372,7 +372,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					game_state.fill_unsaved_data();
 					loaded_scenario = true;
 				} else {
-					auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(selected_scenario_file) + " could not be read";
+					auto msg = std::string("Scenario file ") + text::native_to_utf8(selected_scenario_file) + " could not be read";
 					window::emit_error_message(msg, true);
 				}
 			}
@@ -402,7 +402,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					if(sys::try_read_scenario_and_save_file(game_state, parsed_cmd[1])) {
 						game_state.fill_unsaved_data();
 					} else {
-						auto msg = std::string("Scenario file ") + simple_fs::native_to_utf8(parsed_cmd[1]) + " could not be read";
+						auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[1]) + " could not be read";
 						window::emit_error_message(msg, true);
 						return 0;
 					}

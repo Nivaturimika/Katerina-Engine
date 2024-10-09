@@ -192,7 +192,7 @@ TEST_CASE("gfx game files parsing", "[parsers]") {
 			auto ofile = open_file(file);
 			if (ofile) {
 				auto content = view_contents(*ofile);
-				err.file_name = simple_fs::native_to_utf8(get_full_name(*ofile));
+				err.file_name = text::native_to_utf8(get_full_name(*ofile));
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_gfx_files(gen, err, test_context);
 			}
@@ -243,7 +243,7 @@ TEST_CASE("gfx game files parsing", "[parsers]") {
 					auto ofile = open_file(file);
 					if (ofile) {
 						auto content = view_contents(*ofile);
-						err.file_name = simple_fs::native_to_utf8(get_full_name(*ofile));
+						err.file_name = text::native_to_utf8(get_full_name(*ofile));
 						parsers::token_generator gen(content.data, content.data + content.file_size);
 						parsers::parse_gui_files(gen, err, test_context);
 					}

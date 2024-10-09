@@ -175,7 +175,7 @@ port_forwarder::port_forwarder() { }
 
 					BSTR proto = SysAllocString(L"TCP");
 					BSTR desc = SysAllocString(L"Katerina Engine Host");
-					auto tmpwstr = simple_fs::utf8_to_native(found_locals[0].address);
+					auto tmpwstr = text::utf8_to_native(found_locals[0].address);
 					BSTR local_host = SysAllocString(tmpwstr.c_str());
 					VARIANT_BOOL enabled = VARIANT_TRUE;
 
@@ -287,7 +287,7 @@ port_forwarder::port_forwarder() { }
 		err_msg += "Technical details: ";
 		err_msg += std::to_string(err);
 		err_msg += " => ";
-		err_msg += simple_fs::native_to_utf8(err_text);
+		err_msg += text::native_to_utf8(err_text);
 		return err_msg;
 		#else
 		return std::string("Dummy");

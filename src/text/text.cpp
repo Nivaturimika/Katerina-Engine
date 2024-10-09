@@ -13,37 +13,37 @@
 namespace text {
 	text_color char_to_color(char in) {
 		switch(in) {
-			case 'W':
+		case 'W':
 			return text_color::white;
-			case 'G':
+		case 'G':
 			return text_color::green;
-			case 'R':
+		case 'R':
 			return text_color::red;
-			case 'Y':
+		case 'Y':
 			return text_color::yellow;
-			case 'b':
+		case 'b':
 			return text_color::black;
-			case 'B':
+		case 'B':
 			return text_color::light_blue;
-			case 'g':
+		case 'g':
 			return text_color::dark_blue;
-			case 'L':
+		case 'L':
 			return text_color::lilac;
-			case 'O':
+		case 'O':
 			return text_color::orange;
-			case 'l':
+		case 'l':
 			return text_color::light_grey;
-			case 'C':
+		case 'C':
 			return text_color::dark_red;
-			case 'J':
+		case 'J':
 			return text_color::dark_green;
-			case 's':
+		case 's':
 			return text_color::gold;
-			case 'I':
+		case 'I':
 			return text_color::brown;
-			case '!':
+		case '!':
 			return text_color::reset;
-			default:
+		default:
 			return text_color::unspecified;
 		}
 	}
@@ -80,12 +80,12 @@ namespace text {
 	size_t size_from_utf8(char const* start, char const*) {
 		uint8_t b = uint8_t(start[0]);
 		return ((b & 0x80) == 0) ? 1 : ((b & 0xE0) == 0xC0) ? 2
-		: ((b & 0xF0) == 0xE0) ? 3 : ((b & 0xF8) == 0xF0) ? 4
-		: 1;
+			: ((b & 0xF0) == 0xE0) ? 3 : ((b & 0xF8) == 0xF0) ? 4
+			: 1;
 	}
 	bool codepoint_is_space(uint32_t c) noexcept {
 		return (c == 0x3000 || c == 0x205F || c == 0x202F || c == 0x2029 || c == 0x2028 || c == 0x00A0
-		|| c == 0x0085 || c <= 0x0020 || (0x2000 <= c && c <= 0x200A));
+			|| c == 0x0085 || c <= 0x0020 || (0x2000 <= c && c <= 0x200A));
 	}
 	bool codepoint_is_line_break(uint32_t c) noexcept {
 		return  c == 0x2029 || c == 0x2028 || c == uint32_t('\n') || c == uint32_t('\r');
@@ -93,13 +93,13 @@ namespace text {
 
 	void consume_csv_file(sys::state& state, char const* file_content, uint32_t file_size, int32_t target_column, bool as_unicode) {
 		auto cpos = file_content;
-
 		if(as_unicode) {
 			if(file_size >= 3) {
 				// skip utf8 BOM if present
 				// 0xEF, 0xBB, 0xBF)
-				if(int(file_content[0]) == 0xEF && int(file_content[1]) == 0xBB && int(file_content[2]) == 0xBF)
-				cpos += 3;
+				if(int(file_content[0]) == 0xEF && int(file_content[1]) == 0xBB && int(file_content[2]) == 0xBF) {
+					cpos += 3;
+				}
 			}
 			while(cpos < file_content + file_size) {
 				cpos = parsers::parse_fixed_amount_csv_values<14>(cpos, file_content + file_size, ';', [&](std::string_view const* values) {
@@ -121,11 +121,13 @@ namespace text {
 
 	template<size_t N>
 	bool is_fixed_token_ci(std::string_view v, char const (&t)[N]) {
-		if(v.length() != (N - 1))
-		return false;
-		for(unsigned int i = 0; i < N - 1; ++i) {
-			if(tolower(v[i]) != t[i])
+		if(v.length() != (N - 1)) {
 			return false;
+		}
+		for(unsigned int i = 0; i < N - 1; ++i) {
+			if(tolower(v[i]) != t[i]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -134,20 +136,20 @@ namespace text {
 
 	variable_type variable_type_from_name(std::string_view v) {
 		if(v.length() == 1) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(d)
 			CT_STRING_ENUM(m)
 			CT_STRING_ENUM(n)
 			CT_STRING_ENUM(x)
 			CT_STRING_ENUM(y)
 		} else if(v.length() == 2) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(gp)
 			CT_STRING_ENUM(nf)
 			CT_STRING_ENUM(to)
 			CT_STRING_ENUM(we)
 		} else if(v.length() == 3) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(adj)
 			CT_STRING_ENUM(avg)
 			CT_STRING_ENUM(bac)
@@ -202,7 +204,7 @@ namespace text {
 			CT_STRING_ENUM(war)
 			CT_STRING_ENUM(who)
 		} else if(v.length() == 4) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(army)
 			CT_STRING_ENUM(base)
 			CT_STRING_ENUM(brig)
@@ -252,7 +254,7 @@ namespace text {
 			CT_STRING_ENUM(what)
 			CT_STRING_ENUM(year)
 		} else if(v.length() == 5) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(actor)
 			CT_STRING_ENUM(bonus)
 			CT_STRING_ENUM(casus)
@@ -300,7 +302,7 @@ namespace text {
 			CT_STRING_ENUM(which)
 			CT_STRING_ENUM(years)
 		} else if(v.length() == 6) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(action)
 			CT_STRING_ENUM(active)
 			CT_STRING_ENUM(amount)
@@ -339,7 +341,7 @@ namespace text {
 			CT_STRING_ENUM(versus)
 			CT_STRING_ENUM(winner)
 		} else if(v.length() == 7) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(against)
 			CT_STRING_ENUM(allowed)
 			CT_STRING_ENUM(attunit)
@@ -384,7 +386,7 @@ namespace text {
 			CT_STRING_ENUM(cavalry)
 			CT_STRING_ENUM(special)
 		} else if(v.length() == 8) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(agressor)
 			CT_STRING_ENUM(attacker)
 			CT_STRING_ENUM(building)
@@ -424,7 +426,7 @@ namespace text {
 			CT_STRING_ENUM(totalimm)
 			CT_STRING_ENUM(infantry)
 		} else if(v.length() == 9) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(army_name)
 			CT_STRING_ENUM(commander)
 			CT_STRING_ENUM(countries)
@@ -448,7 +450,7 @@ namespace text {
 			CT_STRING_ENUM(union_adj)
 			CT_STRING_ENUM(yesterday)
 		} else if(v.length() == 10) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(countryadj)
 			CT_STRING_ENUM(crisisarea)
 			CT_STRING_ENUM(government)
@@ -472,7 +474,7 @@ namespace text {
 			CT_STRING_ENUM(unemployed)
 			CT_STRING_ENUM(value_int1)
 		} else if(v.length() == 11) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(anyprovince)
 			CT_STRING_ENUM(country_adj)
 			CT_STRING_ENUM(countryname)
@@ -489,7 +491,7 @@ namespace text {
 			CT_STRING_ENUM(fromcapital)
 			CT_STRING_ENUM(thiscountry)
 		} else if(v.length() == 12) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(construction)
 			CT_STRING_ENUM(crisistarget)
 			CT_STRING_ENUM(date_short_0)
@@ -501,7 +503,7 @@ namespace text {
 			CT_STRING_ENUM(provincename)
 			CT_STRING_ENUM(spheremaster)
 		} else if(v.length() == 13) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(chief_of_navy)
 			CT_STRING_ENUM(continentname)
 			CT_STRING_ENUM(engineerunits)
@@ -521,7 +523,7 @@ namespace text {
 			CT_STRING_ENUM(fromcontinent)
 			CT_STRING_ENUM(fromstatename)
 		} else if(v.length() == 14) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(cb_target_name)
 			CT_STRING_ENUM(chief_of_staff)
 			CT_STRING_ENUM(countryculture)
@@ -532,46 +534,46 @@ namespace text {
 			CT_STRING_ENUM(strings_list_4)
 			CT_STRING_ENUM(target_country)
 		} else if(v.length() == 15) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(base_percentage)
 			CT_STRING_ENUM(crisistaker_adj)
 			CT_STRING_ENUM(fromcountry_adj)
 			CT_STRING_ENUM(provinceculture)
 		} else if(v.length() == 16) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(crisistarget_adj)
 			CT_STRING_ENUM(engineermaxunits)
 			CT_STRING_ENUM(provincereligion)
 			CT_STRING_ENUM(spheremaster_adj)
 		} else if(v.length() == 17) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(culture_last_name)
 		} else if(v.length() == 18) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(cb_target_name_adj)
 			CT_STRING_ENUM(head_of_government)
 			CT_STRING_ENUM(crisisattacker_adj)
 			CT_STRING_ENUM(crisisdefender_adj)
 			CT_STRING_ENUM(culture_first_name)
 		} else if(v.length() == 19) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(culture_group_union)
 			CT_STRING_ENUM(numspecialfactories)
 			CT_STRING_ENUM(crisistaker_capital)
 		} else if(v.length() == 20) {
-		if(false) { }
+			if(false) { }
 		} else if(v.length() == 21) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(crisistaker_continent)
 		} else if(v.length() == 22) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(crisisattacker_capital)
 			CT_STRING_ENUM(crisisdefender_capital)
 			CT_STRING_ENUM(spheremaster_union_adj)
 		} else if(v.length() == 23) {
-		if(false) { }
+			if(false) { }
 		} else if(v.length() == 24) {
-		if(false) { }
+			if(false) { }
 			CT_STRING_ENUM(crisisattacker_continent)
 			CT_STRING_ENUM(crisisdefender_continent)
 		} else if(is_fixed_token_ci(v, "invested_in_us_message")) {
@@ -2198,5 +2200,75 @@ namespace text {
 	void single_line_layout::add_text(sys::state& state, dcon::text_key source_text) {
 		add_to_layout_box(state, *this, box, source_text);
 	}
+
+	std::string win1250_to_utf8(std::string_view s) {
+		if(s.size() > 0) {
+			std::string temp;
+			for(auto const c : s) {
+				auto uc = text::win1250toUTF16(c);
+				if(uc == 0x00A7) {
+					uc = uint16_t('?'); // convert section symbol to ?
+				}
+				if(uc <= 0x007F) {
+					temp.push_back(char(uc));
+				} else if(uc <= 0x7FF) {
+					temp.push_back(char(0xC0 | uint8_t(0x1F & (uc >> 6))));
+					temp.push_back(char(0x80 | uint8_t(0x3F & uc)));
+				} else { // if uc <= 0xFFFF
+					temp.push_back(char(0xE0 | uint8_t(0x0F & (uc >> 12))));
+					temp.push_back(char(0x80 | uint8_t(0x3F & (uc >> 6))));
+					temp.push_back(char(0x80 | uint8_t(0x3F & uc)));
+				}
+			}
+			assert(temp[temp.size()] == '\0');
+			return temp;
+		}
+		return std::string("");
+	}
+
+#ifdef _WIN64
+	native_string win1250_to_native(std::string_view data_in) {
+		native_string result;
+		for(auto ch : data_in) {
+			result += native_char(text::win1250toUTF16(ch));
+		}
+		return result;
+	}
+
+	native_string utf8_to_native(std::string_view str) {
+		if(str.size() > 0) {
+			auto buffer = std::unique_ptr<WCHAR[]>(new WCHAR[str.length() * 2]);
+			auto chars_written = MultiByteToWideChar(CP_UTF8, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 2));
+			return native_string(buffer.get(), size_t(chars_written));
+		}
+		return native_string(NATIVE(""));
+	}
+
+	std::string native_to_utf8(native_string_view str) {
+		if(str.size() > 0) {
+			auto buffer = std::unique_ptr<char[]>(new char[str.length() * 4]);
+			auto chars_written = WideCharToMultiByte(CP_UTF8, 0, str.data(), int32_t(str.length()), buffer.get(), int32_t(str.length() * 4), NULL, NULL);
+			return std::string(buffer.get(), size_t(chars_written));
+		}
+		return std::string("");
+	}
+#else
+	native_string win1250_to_native(std::string_view data_in) {
+		std::string result;
+		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
+		for(auto const ch : data_in) {
+			result += ch >= 0 ? ch : converter.to_bytes(text::win1250toUTF16(ch));
+		}
+		return result;
+	}
+
+	native_string utf8_to_native(std::string_view str) {
+		return std::string(str);
+	}
+
+	std::string native_to_utf8(native_string_view str) {
+		return std::string(str);
+	}
+#endif
 
 } // namespace text

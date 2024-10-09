@@ -303,7 +303,7 @@ namespace parsers {
 		// read sub file
 		auto root = get_root(context.state.common_fs);
 		auto tech_folder = open_directory(root, NATIVE("technologies"));
-		auto tech_file = open_file(tech_folder, simple_fs::win1250_to_native(name) + NATIVE(".txt"));
+		auto tech_file = open_file(tech_folder, text::win1250_to_native(name) + NATIVE(".txt"));
 		if(tech_file) {
 			auto content = view_contents(*tech_file);
 			err.file_name = std::string(name) + ".txt";
@@ -342,11 +342,11 @@ namespace parsers {
 		auto tech = open_directory(pictures, NATIVE("tech"));
 
 		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\tech\\") + [&]() {
-			if(peek_file(tech, simple_fs::utf8_to_native(name) + NATIVE(".tga"))) {
+			if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".tga"))) {
 				return std::string(name) + ".tga";
-			} else if(peek_file(tech, simple_fs::utf8_to_native(name) + NATIVE(".dds"))) {
+			} else if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".dds"))) {
 				return std::string(name) + ".tga";
-			} else if(peek_file(tech, simple_fs::utf8_to_native(name) + NATIVE(".png"))) {
+			} else if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".png"))) {
 				return std::string(name) + ".png";
 			} else {
 				return std::string("noimage.tga");

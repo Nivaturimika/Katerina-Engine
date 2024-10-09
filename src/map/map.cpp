@@ -2438,7 +2438,7 @@ namespace map {
 	GLuint load_dds_texture(simple_fs::directory const& dir, native_string_view file_name, int soil_flags = ogl::SOIL_FLAG_TEXTURE_REPEATS) {
 		auto file = simple_fs::open_file(dir, file_name);
 		if(!bool(file)) {
-			auto full_message = std::string("Can't load DDS file ") + simple_fs::native_to_utf8(file_name) + "\n";
+			auto full_message = std::string("Can't load DDS file ") + text::native_to_utf8(file_name) + "\n";
 			reports::write_debug(full_message.c_str());
 			return 0;
 		}
@@ -2451,10 +2451,10 @@ namespace map {
 	void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
 		auto root = simple_fs::get_root(state.common_fs);
 		emfx::xsm_context anim_context{};
-		if(auto cf = simple_fs::open_file(root, simple_fs::win1250_to_native(filename)); cf) {
+		if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
 			reports::write_debug(("Loading XSM animation: " + std::string(filename) + "\n").c_str());
 			//
-			parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*cf)));
+			parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
 			auto contents = simple_fs::view_contents(*cf);
 			emfx::parse_xsm(anim_context, contents.data, contents.data + contents.file_size, err);
 			emfx::finish(anim_context);
@@ -2676,8 +2676,8 @@ namespace map {
 			}
 
 			auto actorfile = state.to_string_view(emfx_obj.actorfile);
-			if(auto f = simple_fs::open_file(root, simple_fs::win1250_to_native(actorfile)); f) {
-				parsers::error_handler err(simple_fs::native_to_utf8(simple_fs::get_full_name(*f)));
+			if(auto f = simple_fs::open_file(root, text::win1250_to_native(actorfile)); f) {
+				parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*f)));
 				auto contents = simple_fs::view_contents(*f);
 			emfx::xac_context context{};
 				emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
@@ -2754,7 +2754,7 @@ namespace map {
 								auto const& mat = context.materials[sub.material_id];
 								auto const& layer = get_diffuse_layer(mat);
 								if(!layer.texture.empty()) {
-									native_string fname = simple_fs::win1250_to_native(layer.texture) + NATIVE(".dds");
+									native_string fname = text::win1250_to_native(layer.texture) + NATIVE(".dds");
 									GLuint texid = load_dds_texture(gfx_anims, fname, 0);
 									if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
 										state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
