@@ -1083,18 +1083,18 @@ namespace sys {
 			}
 		}
 		{ // Nudge, overriden by V2 to be 0 always
-			auto gdef = ui_state.defs_by_name.find(lookup_key("decision_entry"))->second.definition;
-			if(!gdef) {
-				gdef = ui_state.defs_by_name.find(lookup_key("decision_window"))->second.definition;
+			auto it = ui_state.defs_by_name.find(lookup_key("decision_entry"));
+			if(it == ui_state.defs_by_name.end()) {
+				it = ui_state.defs_by_name.find(lookup_key("decision_window"));
 			}
-			if(gdef) {
-				ui_defs.gui[gdef].position = ui::xy_pair{ 0, 0 };
+			if(it != ui_state.defs_by_name.end()) {
+				ui_defs.gui[it->second.definition].position = ui::xy_pair{ 0, 0 };
 			}
 		}
 		{ // Find the object id for the main_bg displayed (so we display it before the map)
-			auto gdef = ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition;
-			if(gdef) {
-				ui_state.bg_gfx_id = ui_defs.gui[gdef].data.image.gfx_object;
+			auto it = ui_state.defs_by_name.find(lookup_key("bg_main_menus"))->second.definition;
+			if(it != ui_state.defs_by_name.end()) {
+				ui_state.bg_gfx_id = ui_defs.gui[it->second.definition].data.image.gfx_object;
 			}
 		}
 
