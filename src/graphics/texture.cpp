@@ -490,6 +490,12 @@ set to one or more of the following values.	*/
 				uint32_t h = 0;
 				asset_texture.texture_handle = SOIL_direct_load_DDS_from_memory(reinterpret_cast<uint8_t const*>(content.data), content.file_size, w, h, 0);
 				if(asset_texture.texture_handle) {
+					glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 					asset_texture.channels = 4;
 					asset_texture.size_x = int32_t(w);
 					asset_texture.size_y = int32_t(h);

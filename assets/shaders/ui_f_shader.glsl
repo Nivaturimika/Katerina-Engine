@@ -47,31 +47,21 @@ vec4 progress_bar(vec2 tc) {
 }
 //layout(index = 8) subroutine(font_function_class)
 vec4 frame_stretch(vec2 tc) {
-	float realx = tc.x * d_rect.z;
-	float realy = tc.y * d_rect.w;
-	vec2 tsize = textureSize(texture_sampler, 0);
-	float xout = 0.0;
-	float yout = 0.0;
-	if(realx <= border_size)
-		xout = realx / tsize.x;
-	else if(realx >= (d_rect.z - border_size))
-		xout = (1.0 - border_size / tsize.x) + (border_size - (d_rect.z - realx))  / tsize.x;
-	else
-		xout = border_size / tsize.x + (1.0 - 2.0 * border_size / tsize.x) * (realx - border_size) / (d_rect.z * 2.0 * border_size);
-	if(realy <= border_size)
-		yout = realy / tsize.y;
-	else if(realy >= (d_rect.w - border_size))
-		yout = (1.0 - border_size / tsize.y) + (border_size - (d_rect.w - realy))  / tsize.y;
-	else
-		yout = border_size / tsize.y + (1.0 - 2.0 * border_size / tsize.y) * (realy - border_size) / (d_rect.w * 2.0 * border_size);
-	return texture(texture_sampler, vec2(xout, yout));
+	vec2 real = vec2(tc.xy * d_rect.zw);
+	vec2 tsize = vec2(textureSize(texture_sampler, 0).xy);
+	vec2 r0 = real / tsize;
+	vec2 r1 = (1.0 - border_size / tsize) + (border_size - (d_rect.zw - real)) / tsize;
+	vec2 r2 = border_size / tsize + (1.f - 2.f * border_size / tsize) * (real - border_size) / (d_rect.zw * 2.f * border_size);
+	float vx = (real.x <= border_size) ? r0.x : (real.x >= (d_rect.z - border_size) ? r1.x : r2.x);
+	float vy = (real.y <= border_size) ? r0.y : (real.y >= (d_rect.w - border_size) ? r1.y : r2.y);
+	return texture(texture_sampler, vec2(vx, vy));
 }
 //layout(index = 9) subroutine(font_function_class)
 vec4 piechart(vec2 tc) {
-	if(((tc.x - 0.5) * (tc.x - 0.5) + (tc.y - 0.5) * (tc.y - 0.5)) > 0.25)
+	if(((tc.x - 0.5) * (tc.x - 0.5) + (tc.y - 0.5) * (tc.y - 0.5)) > 0.25) {
 		return vec4(0.0, 0.0, 0.0, 0.0);
-	else
-		return texture(texture_sampler, vec2((atan((tc.y - 0.5), (tc.x - 0.5) ) + M_PI) / (2.0 * M_PI), 0.5));
+	}
+	return texture(texture_sampler, vec2((atan((tc.y - 0.5), (tc.x - 0.5)) + M_PI) / (2.0 * M_PI), 0.5));
 }
 //layout(index = 10) subroutine(font_function_class)
 vec4 barchart(vec2 tc) {

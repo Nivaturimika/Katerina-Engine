@@ -80,13 +80,10 @@ namespace ui {
 
 			for(auto& file : all_gui_files) {
 				auto file_name = get_full_name(file);
-				if(!parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(),
-						 NATIVE("confirmbuild.gui")) &&
-					!parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("convoys.gui")) &&
-					!parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(),
-							NATIVE("brigadeview.gui"))) {
-					auto ofile = open_file(file);
-					if(ofile) {
+				if(!parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("confirmbuild.gui"))
+				&& !parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("convoys.gui"))
+				&& !parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("brigadeview.gui"))) {
+					if(auto ofile = open_file(file); ofile) {
 						auto content = view_contents(*ofile);
 						err.file_name = text::native_to_utf8(get_full_name(*ofile));
 						parsers::token_generator gen(content.data, content.data + content.file_size);

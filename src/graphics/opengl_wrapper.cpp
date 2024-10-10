@@ -808,9 +808,7 @@ namespace ogl {
 		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(l.count));
 	}
 
-	void render_barchart(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
-		data_texture& t, ui::rotation r, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
+	void render_barchart(sys::state const& state, color_modification enabled, float x, float y, float width, float height, data_texture& t, ui::rotation r, bool flipped, bool rtl) {
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
@@ -821,22 +819,18 @@ namespace ogl {
 	}
 
 	void render_piechart(sys::state const& state, color_modification enabled, float x, float y, float size, data_texture& t) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
+		glBindVertexArray(state.open_gl.global_square_vao[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, size, size);
 		glBindTexture(GL_TEXTURE_2D, t.handle());
 
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::piechart };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
 	void render_bordered_rect(sys::state const& state, color_modification enabled, float border_size, float x, float y, float width, float height, GLuint texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
-
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glUniform1f(state.open_gl.ui_shader_border_size_uniform, border_size);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
@@ -849,7 +843,6 @@ namespace ogl {
 	void render_masked_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height, GLuint texture_handle, GLuint mask_texture_handle, ui::rotation r, bool flipped, bool rtl) {
 		bind_vertices_by_rotation(state, r, flipped, rtl);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
-
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, mask_texture_handle);
@@ -857,19 +850,13 @@ namespace ogl {
 
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::use_mask };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
-		//glBindVertexArray(state.open_gl.global_square_vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
 	void render_progress_bar(sys::state const& state, color_modification enabled, float progress, float x, float y, float width, float height, GLuint left_texture_handle, GLuint right_texture_handle, ui::rotation r, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
 		bind_vertices_by_rotation(state, r, flipped, rtl);
-
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glUniform1f(state.open_gl.ui_shader_border_size_uniform, progress);
-
 		glBindTexture(GL_TEXTURE_2D, left_texture_handle);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, right_texture_handle);
@@ -877,29 +864,20 @@ namespace ogl {
 
 		GLuint subroutines[2] = { map_color_modification_to_index(enabled), parameters::progress_bar };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
 	void render_tinted_textured_rect(sys::state const& state, float x, float y, float width, float height, float r, float g, float b, GLuint texture_handle, ui::rotation rot, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
-
 		bind_vertices_by_rotation(state, rot, flipped, rtl);
-
 		glUniform3f(state.open_gl.ui_shader_inner_color_uniform, r, g, b);
 		glUniform4f(state.open_gl.ui_shader_d_rect_uniform, x, y, width, height);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
-
 		GLuint subroutines[2] = { parameters::tint, parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
 	void render_tinted_subsprite(sys::state const& state, int frame, int total_frames, float x, float y, float width, float height, float r, float g, float b, GLuint texture_handle, ui::rotation rot, bool flipped, bool rtl) {
-		//glBindVertexArray(state.open_gl.global_square_vao);
-
 		bind_vertices_by_rotation(state, rot, flipped, rtl);
 
 		auto const scale = 1.0f / static_cast<float>(total_frames);
@@ -910,8 +888,6 @@ namespace ogl {
 
 		GLuint subroutines[2] = { parameters::alternate_tint, parameters::sub_sprite };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, subroutines[0], subroutines[1]);
-		//glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines); // must set all subroutines in one call
-
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
