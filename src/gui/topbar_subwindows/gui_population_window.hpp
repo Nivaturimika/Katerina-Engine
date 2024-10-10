@@ -7,6 +7,7 @@
 #include "color.hpp"
 #include "triggers.hpp"
 #include "gui_province_window.hpp"
+#include "prng.hpp"
 
 namespace ui {
 
