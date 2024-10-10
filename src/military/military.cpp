@@ -15,7 +15,7 @@
 
 namespace military {
 
-	constexpr inline float str_dam_mul = 0.01f;
+	constexpr inline float str_dam_mul = 0.05f;
 
 	template auto province_is_blockaded<ve::tagged_vector<dcon::province_id>>(sys::state const&, ve::tagged_vector<dcon::province_id>);
 	template auto province_is_under_siege<ve::tagged_vector<dcon::province_id>>(sys::state const&, ve::tagged_vector<dcon::province_id>);
