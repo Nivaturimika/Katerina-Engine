@@ -15,7 +15,7 @@ namespace ui {
 		}
 
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, element_selection_wrapper<bool>{Left});
+			send(state, parent, element_selection_wrapper<bool>{Left});
 		}
 	};
 
@@ -24,9 +24,9 @@ namespace ui {
 	};
 
 	class message_dismiss_button : public button_element_base {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, message_dismiss_notification{});
+			send(state, parent, message_dismiss_notification{});
 		}
 	};
 
@@ -38,90 +38,57 @@ namespace ui {
 		}
 	};
 
-
-	class message_body_text_internal : public simple_multiline_body_text {
-		virtual void populate_layout(sys::state& state, text::endless_layout& contents) noexcept override {
-			auto msg = retrieve< notification::message*>(state, parent);
+	class message_body_text : public scrollable_text {
+		void populate_layout(sys::state& state, text::endless_layout& contents) noexcept {
+			auto msg = retrieve<notification::message*>(state, parent);
 			if(msg) {
 				msg->body(state, contents);
 			}
 		}
-	};
-
-	class message_body_text : public window_element_base {
-		protected:
-		multiline_text_scrollbar* text_scrollbar = nullptr;
-		message_body_text_internal* delegate = nullptr;
-		public:
-		void on_create(sys::state& state) noexcept override;
-		message_result get(sys::state& state, Cyto::Any& payload) noexcept override;
-		void on_update(sys::state& state) noexcept override;
-		message_result on_scroll(sys::state& state, int32_t x, int32_t y, float amount, sys::key_modifiers mods) noexcept override;
-		message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
-			return message_result::consumed;
+	public:
+		void on_create(sys::state& state) noexcept override {
+			base_data.size.x = 500 - (base_data.position.x * 2) - 8;
+			base_data.size.y = 18 * 6;
+			scrollable_text::on_create(state);
+		}
+		void on_update(sys::state& state) noexcept override {
+			text::alignment align = text::alignment::left;
+			switch(base_data.data.text.get_alignment()) {
+			case ui::alignment::right:
+				align = text::alignment::right;
+				break;
+			case ui::alignment::centered:
+				align = text::alignment::center;
+				break;
+			default:
+				break;
+			}
+			auto border = base_data.data.text.border_size;
+			auto content = retrieve<diplomatic_message::message>(state, parent);
+			auto color = delegate->black_text ? text::text_color::black : text::text_color::white;
+			auto container = text::create_endless_layout(state,
+			delegate->internal_layout,
+			text::layout_parameters{
+				border.x,
+				border.y,
+				int16_t(base_data.size.x - border.x * 2),
+				int16_t(base_data.size.y - border.y * 2),
+				base_data.data.text.font_handle,
+				0,
+				align,
+				color,
+				false });
+			populate_layout(state, container);
 		}
 	};
-
-
-	void message_body_text::on_create(sys::state& state) noexcept {
-		base_data.size.x = 500 - (base_data.position.x * 2) - 8;
-		base_data.size.y = 18 * 6;
-
-		auto res = std::make_unique<message_body_text_internal>();
-		std::memcpy(&(res->base_data), &(base_data), sizeof(ui::element_data));
-		make_size_from_graphics(state, res->base_data);
-		res->base_data.data.text_common.font_handle = text::name_into_font_id(state, "garamond_16");
-		res->base_data.position.x = 0;
-		res->base_data.position.y = 0;
-		res->on_create(state);
-		delegate = res.get();
-		add_child_to_front(std::move(res));
-
-		auto ptr = make_element_by_type<multiline_text_scrollbar>(state, "standardlistbox_slider");
-		text_scrollbar = static_cast<multiline_text_scrollbar*>(ptr.get());
-		add_child_to_front(std::move(ptr));
-		text_scrollbar->scale_to_parent();
-	}
-
-	void message_body_text::on_update(sys::state& state) noexcept {
-		if(delegate->internal_layout.number_of_lines > delegate->visible_lines) {
-			text_scrollbar->set_visible(state, true);
-			text_scrollbar->change_settings(state,
-				mutable_scrollbar_settings{ 0, delegate->internal_layout.number_of_lines - delegate->visible_lines, 0, 0, false });
-		} else {
-			text_scrollbar->set_visible(state, false);
-			delegate->current_line = 0;
-		}
-	}
-
-	message_result message_body_text::on_scroll(sys::state& state, int32_t x, int32_t y, float amount, sys::key_modifiers mods) noexcept {
-		if(delegate->internal_layout.number_of_lines > delegate->visible_lines) {
-			text_scrollbar->update_scaled_value(state, text_scrollbar->scaled_value() + std::clamp(-amount, -1.f, 1.f));
-			delegate->current_line = int32_t(text_scrollbar->scaled_value());
-			return message_result::consumed;
-		} else {
-			return message_result::unseen;
-		}
-	}
-
-	message_result message_body_text::get(sys::state& state, Cyto::Any& payload) noexcept {
-		if(payload.holds_type<multiline_text_scroll_event>()) {
-			auto event = any_cast<multiline_text_scroll_event>(payload);
-			delegate->current_line = event.new_value;
-			return message_result::consumed;
-		} else {
-			return message_result::unseen;
-		}
-	}
 
 	class message_flag_button : public flag_button {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
-			base_data.position.y -= 6;
-			base_data.size.y += 32;
-
 			base_data.position.x += 8;
+			base_data.position.y -= 6;
 			base_data.size.x -= 16;
+			base_data.size.y += 32;
 		}
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
@@ -157,26 +124,23 @@ namespace ui {
 
 		void on_create(sys::state& state) noexcept override {
 			window_element_base::on_create(state);
-		xy_pair cur_pos{0, 0};
+			xy_pair cur_pos{0, 0};
 			{
-				auto ptr = make_element_by_type<message_lr_button<false>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("alice_left_right_button"))->second.definition);
+				auto ptr = make_element_by_type<message_lr_button<false>>(state, "alice_left_right_button");
 				cur_pos.x = base_data.size.x - (ptr->base_data.size.x * 2);
 				cur_pos.y = ptr->base_data.size.y * 1;
 				ptr->base_data.position = cur_pos;
 				add_child_to_front(std::move(ptr));
 			}
 			{
-				auto ptr = make_element_by_type<message_count_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("alice_page_count"))->second.definition);
+				auto ptr = make_element_by_type<message_count_text>(state, "alice_page_count");
 				cur_pos.x -= ptr->base_data.size.x;
 				ptr->base_data.position = cur_pos;
-				count_text = ptr.get();
+				count_text = static_cast<simple_text_element_base*>(ptr.get());
 				add_child_to_front(std::move(ptr));
 			}
 			{
-				auto ptr = make_element_by_type<message_lr_button<true>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("alice_left_right_button"))->second.definition);
+				auto ptr = make_element_by_type<message_lr_button<true>>(state, "alice_left_right_button");
 				cur_pos.x -= ptr->base_data.size.x;
 				ptr->base_data.position = cur_pos;
 				add_child_to_front(std::move(ptr));
@@ -241,10 +205,11 @@ namespace ui {
 		}
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-			if(index >= int32_t(messages.size()))
-			index = 0;
-			else if(index < 0)
-			index = int32_t(messages.size()) - 1;
+			if(index >= int32_t(messages.size())) {
+				index = 0;
+			} else if(index < 0) {
+				index = int32_t(messages.size()) - 1;
+			}
 
 			if(payload.holds_type<dcon::nation_id>()) {
 				if(messages.empty()) {
