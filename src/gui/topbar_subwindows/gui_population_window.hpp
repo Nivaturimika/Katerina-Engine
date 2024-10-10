@@ -392,16 +392,15 @@ namespace ui {
 					}
 				}
 			} else if(state.world.pop_type_get_is_paid_rgo_worker(pt)) {
-				for(const auto c : state.world.in_commodity) {
-					auto const v = state.world.nation_get_rgo_goods_output(nations::owner_of_pop(state, content), c);
-					if(v != 0.f) {
-						clist.push_back(c);
-					}
+				auto p = state.world.pop_get_province_from_pop_location(content);
+				auto const v = state.world.nation_get_rgo_goods_output(nations::owner_of_pop(state, content), c);
+				if(state.world.province_get_rgo(p) && v != 0.f) {
+					clist.push_back(state.world.province_get_rgo(p));
 				}
 			}
 			if(!clist.empty()) {
 				auto rval = rng::get_random(state, uint32_t(state.current_date.value), uint32_t(content.value));
-				auto in_range = rng::reduce(uint32_t(rval), clist.size());
+				auto in_range = rng::reduce(uint32_t(rval), uint32_t(clist.size()));
 				frame = clist[in_range].index();
 			}
 		}
