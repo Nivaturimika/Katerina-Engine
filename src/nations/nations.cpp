@@ -3165,9 +3165,9 @@ namespace nations {
 		}
 	}
 
-	bool has_country_modifier(sys::state& state, dcon::nation_id n, dcon::modifier_id m) {
+	bool has_country_modifier(sys::state& state, dcon::nation_id n, dcon::modifier_id mod) {
 		for(auto m : state.world.nation_get_current_modifiers(n)) {
-			if(m.mod_id == m) {
+			if(m.mod_id == mod) {
 				return true;
 			}
 		}
