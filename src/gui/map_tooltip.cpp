@@ -585,7 +585,7 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "im_em_header");
-			text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(owner) });
+				text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(owner) });
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, text::get_name(state, owner.id));
 				text::close_layout_box(contents, box);
@@ -607,18 +607,16 @@ namespace ui {
 				last_owner = owner;
 				total_pos = 0.0f;
 				total_neg = 0.0f;
-				std::vector<float> last_value;
+				auto last_value = ve::vectorizable_buffer<float, dcon::nation_id>(state.world.nation_size());
 				demographics::estimate_directed_immigration(state, owner, last_value);
 				migration_values.clear();
-				for(uint32_t i = uint32_t(last_value.size()); i-- > 0; ) {
-					if(last_value[i] == 0.f)
-					continue;
-				dcon::nation_id in{ dcon::nation_id::value_base_t(i) };
-				migration_values.push_back(nation_and_value{ last_value[i], in });
-					if(last_value[i] > 0.f)
-					total_pos += last_value[i];
-					else
-					total_neg += last_value[i];
+				for(uint32_t i = uint32_t(state.world.nation_size()); i-- > 0; ) {
+					dcon::nation_id in{ dcon::nation_id::value_base_t(i) };
+					auto const v = last_value.get(in);
+					if(v != 0.f) {
+						v > 0.f ? total_pos += v : total_neg += v;
+						migration_values.push_back(nation_and_value{ v, in });
+					}
 				}
 				pdqsort(migration_values.begin(), migration_values.end(), [](nation_and_value const& a, nation_and_value const& b) {
 					if(a.v < 0.f && b.v < 0.f)
@@ -630,14 +628,14 @@ namespace ui {
 			if(!migration_values.empty()) {
 				float total_accounted_for = 0.0f;
 				uint32_t start_neg_index = 0;
-				bool has_neg_migration = migration_values[0].v < 0.f;
 				bool has_pos_migration = migration_values[0].v > 0.f;
+				bool has_neg_migration = migration_values[0].v < 0.f;
 				if(has_pos_migration) {
 					text::add_line_break_to_layout(state, contents);
 					{
-					text::substitution_map sub{};
+						text::substitution_map sub{};
 						text::add_to_substitution_map(sub, text::variable_type::x, int32_t(total_pos));
-					text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
+						text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
 						auto box = text::open_layout_box(contents);
 						text::localised_format_box(state, contents, box, "monthly_immigration_lab", sub);
 						text::close_layout_box(contents, box);
@@ -653,7 +651,7 @@ namespace ui {
 							auto box = text::open_layout_box(contents);
 							text::add_to_layout_box(state, contents, box, int64_t(migration_values[i].v), text::text_color::green);
 							text::add_space_to_layout_box(state, contents, box);
-						text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(migration_values[i].n) });
+							text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(migration_values[i].n) });
 							text::add_space_to_layout_box(state, contents, box);
 							text::add_to_layout_box(state, contents, box, text::get_name(state, migration_values[i].n));
 							text::close_layout_box(contents, box);
@@ -670,9 +668,9 @@ namespace ui {
 				if(has_neg_migration) {
 					text::add_line_break_to_layout(state, contents);
 					{
-					text::substitution_map sub{};
+						text::substitution_map sub{};
 						text::add_to_substitution_map(sub, text::variable_type::x, int32_t(-total_neg));
-					text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
+						text::add_to_substitution_map(sub, text::variable_type::y, text::int_wholenum{ 10 });
 						auto box = text::open_layout_box(contents);
 						text::localised_format_box(state, contents, box, "monthly_emigration_lab", sub);
 						text::close_layout_box(contents, box);
@@ -685,7 +683,7 @@ namespace ui {
 						auto box = text::open_layout_box(contents);
 						text::add_to_layout_box(state, contents, box, int64_t(-migration_values[i].v), text::text_color::red);
 						text::add_space_to_layout_box(state, contents, box);
-					text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(migration_values[i].n) });
+						text::add_to_layout_box(state, contents, box, text::embedded_flag{ state.world.nation_get_identity_from_identity_holder(migration_values[i].n) });
 						text::add_space_to_layout_box(state, contents, box);
 						text::add_to_layout_box(state, contents, box, text::get_name(state, migration_values[i].n));
 						text::close_layout_box(contents, box);

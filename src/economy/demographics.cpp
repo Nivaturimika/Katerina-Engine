@@ -2118,20 +2118,14 @@ namespace demographics {
 		});
 	}
 
-	void estimate_directed_immigration(sys::state& state, dcon::nation_id n, std::vector<float>& national_amounts) {
-		auto sz = state.world.nation_size();
-		national_amounts.resize(sz);
-		for(auto& v : national_amounts) {
-			v = 0.0f;
-		}
-
+	void estimate_directed_immigration(sys::state& state, dcon::nation_id n, ve::vectorizable_buffer<float, dcon::nation_id>& national_amounts) {
 		auto ymd_date = state.current_date.to_ymd(state.start_date);
 		auto month_start = sys::year_month_day{ ymd_date.year, ymd_date.month, uint16_t(1) };
 		auto next_month_start = ymd_date.month != 12 ? sys::year_month_day{ ymd_date.year, uint16_t(ymd_date.month + 1), uint16_t(1) } : sys::year_month_day{ ymd_date.year + 1, uint16_t(1), uint16_t(1) };
 		auto const days_in_month = uint32_t(sys::days_difference(month_start, next_month_start));
-
 		//this is unsafe, but it's fine since it's for UI only
-		concurrency::parallel_for(uint32_t(0), uint32_t(state.world.nation_size()), [&](uint32_t index) {
+		auto const sz = uint32_t(state.world.nation_size());
+		concurrency::parallel_for(uint32_t(0), uint32_t(sz), [&](uint32_t index) {
 			dcon::nation_id o{ dcon::nation_id::value_base_t(index) };
 			for(const auto po : state.world.nation_get_province_ownership(o)) {
 				for(const auto pl : po.get_province().get_pop_location()) {
@@ -2148,9 +2142,9 @@ namespace demographics {
 						int32_t day_adjustment = day_of_month - int32_t(ymd_date.day);
 						auto target = impl::get_immigration_target(state, owners, ids, state.current_date + day_adjustment);
 						if(owners == n && target && uint32_t(target.index()) < sz) {
-							national_amounts[uint32_t(target.index())] -= est_amount;
+							national_amounts.set(target, national_amounts.get(target) - est_amount);
 						} else if(target == n && uint32_t(owners.index()) < sz) {
-							national_amounts[uint32_t(owners.index())] += est_amount;
+							national_amounts.set(owners, national_amounts.get(owners) + est_amount);
 						}
 					}
 				}
