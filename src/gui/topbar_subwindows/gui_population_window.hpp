@@ -369,10 +369,9 @@ namespace ui {
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto content = retrieve<dcon::pop_id>(state, parent);
-
 			auto fat_id = dcon::fatten(state.world, content);
 			auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, std::string_view("pop_daily_money"), text::variable_type::val, text::fp_currency{state.world.pop_get_savings(fat_id.id)});
+			text::localised_single_sub_box(state, contents, box, std::string_view("pop_daily_money"), text::variable_type::val, text::fp_currency{state.world.pop_get_savings(fat_id.id)});
 			text::close_layout_box(contents, box);
 		}
 	};
@@ -381,7 +380,29 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::pop_id>(state, parent);
-
+			frame = 0;
+			auto const pt = state.world.pop_get_poptype(content);
+			std::vector<dcon::commodity_id> clist;
+			if(pt == state.culture_definitions.artisans) {
+				for(const auto c : state.world.in_commodity) {
+					auto const v = state.world.nation_get_artisan_actual_production(nations::owner_of_pop(state, content), c);
+					if(v != 0.f) {
+						clist.push_back(c);
+					}
+				}
+			} else if(state.world.pop_type_get_is_paid_rgo_worker(pt)) {
+				for(const auto c : state.world.in_commodity) {
+					auto const v = state.world.nation_get_rgo_goods_output(nations::owner_of_pop(state, content), c);
+					if(v != 0.f) {
+						clist.push_back(c);
+					}
+				}
+			}
+			if(!clist.empty()) {
+				auto rval = rng::get_random(state, uint32_t(state.current_date.value), uint32_t(content.value));
+				auto in_range = rng::reduce(uint32_t(rval), clist.size());
+				frame = clist[in_range].index();
+			}
 		}
 	};
 
