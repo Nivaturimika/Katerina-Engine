@@ -410,25 +410,18 @@ namespace nations {
 					float total_factory_capacity = 0.f;
 					province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 						for(auto f : state.world.province_get_factory_location(p)) {
-							auto level = float(f.get_factory().get_level());
-							total_factory_capacity += level * float(f.get_factory().get_building_type().get_base_workforce());
-							total_level += level;
+							total_factory_capacity += float(f.get_factory().get_level() * f.get_factory().get_building_type().get_base_workforce());
+							total_level += float(f.get_factory().get_level());
 						}
 					});
 					if(total_factory_capacity > 0) {
-						sum += 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.05f);
+						sum += 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.001f);
 					}
 				}
 				/* investment factor is already multiplied by 0.05f on scenario creation */
 				sum += nations::get_foreign_investment_as_gp(state, n) * state.defines.investment_score_factor;
-	
 			}
-			float old_score = state.world.nation_get_industrial_score(n);
-			if(old_score == 0) {
-				state.world.nation_set_industrial_score(n, uint16_t(sum));
-			} else {
-				state.world.nation_set_industrial_score(n, uint16_t(0.1f * sum + 0.9f * old_score));
-			}
+			state.world.nation_set_industrial_score(n, uint16_t(sum));
 		});
 	}
 

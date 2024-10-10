@@ -602,12 +602,11 @@ class button_press_notification { };
 				float total_factory_capacity = 0;
 				province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 					for(auto f : state.world.province_get_factory_location(p)) {
-						total_factory_capacity +=
-						float(f.get_factory().get_level() * f.get_factory().get_building_type().get_base_workforce());
+						total_factory_capacity += float(f.get_factory().get_level() * f.get_factory().get_building_type().get_base_workforce());
 						total_level += float(f.get_factory().get_level());
 					}
 				});
-				float per_state = 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.05f);
+				float per_state = 4.0f * total_level * std::max(std::min(1.0f, worker_total / total_factory_capacity), 0.001f);
 				if(per_state > 0.f) {
 					auto box = text::open_layout_box(contents);
 					text::layout_box name_entry = box;
@@ -615,22 +614,16 @@ class button_press_notification { };
 					text::layout_box workers_entry = box;
 					text::layout_box max_workers_entry = box;
 					text::layout_box score_box = box;
-
 					name_entry.x_size /= 10;
 					text::add_to_layout_box(state, contents, name_entry, text::get_short_state_name(state, si.get_state()).substr(0, 20), text::text_color::yellow);
-				
 					level_entry.x_position += 150;
-				text::add_to_layout_box(state, contents, level_entry, text::int_wholenum{ int32_t(total_level) });
-
+					text::add_to_layout_box(state, contents, level_entry, text::int_wholenum{ int32_t(total_level) });
 					workers_entry.x_position += 180;
-				text::add_to_layout_box(state, contents, workers_entry, text::int_wholenum{ int32_t(worker_total) });
-
+					text::add_to_layout_box(state, contents, workers_entry, text::int_wholenum{ int32_t(worker_total) });
 					max_workers_entry.x_position += 250;
-				text::add_to_layout_box(state, contents, max_workers_entry, text::int_wholenum{ int32_t(total_factory_capacity) });
-
+					text::add_to_layout_box(state, contents, max_workers_entry, text::int_wholenum{ int32_t(total_factory_capacity) });
 					score_box.x_position += 350;
-				text::add_to_layout_box(state, contents, score_box, text::fp_two_places{ per_state });
-
+					text::add_to_layout_box(state, contents, score_box, text::fp_two_places{ per_state });
 					//text::localised_format_box(state, contents, box, std::string_view("alice_indscore_1"), sub);
 					text::add_to_layout_box(state, contents, box, std::string(" "));
 					text::close_layout_box(contents, box);
@@ -641,9 +634,9 @@ class button_press_notification { };
 			text::add_line(state, contents, "industry_score_explain_2", text::variable_type::x, text::fp_four_places{ iweight });
 				for(auto ur : state.world.nation_get_unilateral_relationship_as_source(n)) {
 					if(ur.get_foreign_investment() > 0.f) {
-					text::substitution_map sub{};
+						text::substitution_map sub{};
 						text::add_to_substitution_map(sub, text::variable_type::x, ur.get_target());
-					text::add_to_substitution_map(sub, text::variable_type::y, text::fp_currency{ ur.get_foreign_investment() });
+						text::add_to_substitution_map(sub, text::variable_type::y, text::fp_currency{ ur.get_foreign_investment() });
 						auto box = text::open_layout_box(contents);
 						text::localised_format_box(state, contents, box, std::string_view("industry_score_explain_3"), sub);
 						text::close_layout_box(contents, box);
