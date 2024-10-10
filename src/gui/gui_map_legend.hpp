@@ -11,7 +11,7 @@ namespace ui {
 		std::string get_title_from_mode(map_mode::mode v) {
 			return "mapmode_" + std::to_string(uint32_t(v));
 		}
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			set_text(state, text::produce_simple_string(state, get_title_from_mode(state.map_state.active_map_mode)));
 		}
@@ -19,33 +19,33 @@ namespace ui {
 	class map_legend_gradient_image : public image_element_base {
 		int16_t get_frame_from_mode(map_mode::mode v) {
 			switch(v) {
-				case map_mode::mode::migration:
-				case map_mode::mode::rank:
-				case map_mode::mode::relation:
-				case map_mode::mode::rgo_output:
-				case map_mode::mode::supply:
-				case map_mode::mode::admin:
-				case map_mode::mode::civilization_level:
-				case map_mode::mode::colonial:
-				case map_mode::mode::literacy:
-				case map_mode::mode::growth:
-				case map_mode::mode::income:
-				case map_mode::mode::employment:
-				case map_mode::mode::life_needs:
-				case map_mode::mode::everyday_needs:
-				case map_mode::mode::luxury_needs:
-				case map_mode::mode::mobilization:
-				case map_mode::mode::officers:
-				case map_mode::mode::life_rating:
-				case map_mode::mode::clerk_to_craftsmen_ratio:
+			case map_mode::mode::migration:
+			case map_mode::mode::rank:
+			case map_mode::mode::relation:
+			case map_mode::mode::rgo_output:
+			case map_mode::mode::supply:
+			case map_mode::mode::admin:
+			case map_mode::mode::civilization_level:
+			case map_mode::mode::colonial:
+			case map_mode::mode::literacy:
+			case map_mode::mode::growth:
+			case map_mode::mode::income:
+			case map_mode::mode::employment:
+			case map_mode::mode::life_needs:
+			case map_mode::mode::everyday_needs:
+			case map_mode::mode::luxury_needs:
+			case map_mode::mode::mobilization:
+			case map_mode::mode::officers:
+			case map_mode::mode::life_rating:
+			case map_mode::mode::clerk_to_craftsmen_ratio:
 				return 1;
-				case map_mode::mode::conciousness:
-				case map_mode::mode::militancy:
-				case map_mode::mode::population:
-				case map_mode::mode::crisis:
-				case map_mode::mode::revolt:
+			case map_mode::mode::conciousness:
+			case map_mode::mode::militancy:
+			case map_mode::mode::population:
+			case map_mode::mode::crisis:
+			case map_mode::mode::revolt:
 				return 3;
-				default:
+			default:
 				return 0;
 			}
 		}
@@ -117,7 +117,7 @@ namespace ui {
 		}
 
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
-		auto new_position = xy_pair{ int16_t((state.ui_state.root->base_data.size.x - base_data.size.x) / 2), int16_t((state.ui_state.root->base_data.size.y - base_data.size.y) - (state.ui_state.msg_log_window->is_visible() ? state.ui_state.msg_log_window->base_data.size.y + 54 : 12)) };
+			auto new_position = xy_pair{ int16_t((state.ui_state.root->base_data.size.x - base_data.size.x) / 2), int16_t((state.ui_state.root->base_data.size.y - base_data.size.y) - (state.ui_state.msg_log_window->is_visible() ? state.ui_state.msg_log_window->base_data.size.y + 54 : 12)) };
 			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}
@@ -179,7 +179,7 @@ namespace ui {
 		}
 
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
-		auto new_position = xy_pair{ int16_t((state.ui_state.root->base_data.size.x - base_data.size.x) / 2), int16_t((state.ui_state.root->base_data.size.y - base_data.size.y) - (state.ui_state.msg_log_window->is_visible() ? state.ui_state.msg_log_window->base_data.size.y + 54 : 12)) };
+			auto new_position = xy_pair{ int16_t((state.ui_state.root->base_data.size.x - base_data.size.x) / 2), int16_t((state.ui_state.root->base_data.size.y - base_data.size.y) - (state.ui_state.msg_log_window->is_visible() ? state.ui_state.msg_log_window->base_data.size.y + 54 : 12)) };
 			base_data.position = new_position;
 			window_element_base::impl_render(state, new_position.x, new_position.y);
 		}

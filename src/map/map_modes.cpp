@@ -935,143 +935,143 @@ namespace map_mode {
 		}
 
 		switch(mode) {
-			case mode::state_select:
+		case mode::state_select:
 			prov_color = select_states_map_from(state);
 			break;
-			case mode::terrain:
+		case mode::terrain:
 			state.map_state.set_terrain_map_mode();
 			return;
-			case mode::political:
+		case mode::political:
 			prov_color = political_map_from(state);
 			break;
-			case mode::region:
+		case mode::region:
 			prov_color = region_map_from(state);
 			break;
-			case mode::population:
+		case mode::population:
 			prov_color = population_map_from(state);
 			break;
-			case mode::nationality:
+		case mode::nationality:
 			prov_color = nationality_map_from(state);
 			break;
-			case mode::sphere:
+		case mode::sphere:
 			prov_color = sphere_map_from(state);
 			break;
-			case mode::diplomatic:
+		case mode::diplomatic:
 			prov_color = diplomatic_map_from(state);
 			break;
-			case mode::rank:
+		case mode::rank:
 			prov_color = rank_map_from(state);
 			break;
-			case mode::recruitment:
+		case mode::recruitment:
 			prov_color = recruitment_map_from(state);
 			break;
-			case mode::supply:
+		case mode::supply:
 			prov_color = supply_map_from(state);
 			break;
-			case mode::relation:
+		case mode::relation:
 			prov_color = relation_map_from(state);
 			break;
-			case mode::civilization_level:
+		case mode::civilization_level:
 			prov_color = civilization_level_map_from(state);
 			break;
-			case mode::migration:
+		case mode::migration:
 			prov_color = migration_map_from(state);
 			break;
-			case mode::infrastructure:
+		case mode::infrastructure:
 			prov_color = infrastructure_map_from(state);
 			break;
-			case mode::revolt:
+		case mode::revolt:
 			prov_color = revolt_map_from(state);
 			break;
-			case mode::party_loyalty:
+		case mode::party_loyalty:
 			prov_color = party_loyalty_map_from(state);
 			break;
-			case mode::admin:
+		case mode::admin:
 			prov_color = admin_map_from(state);
 			break;
-			case mode::naval:
+		case mode::naval:
 			prov_color = naval_map_from(state);
 			break;
-			case mode::national_focus:
+		case mode::national_focus:
 			prov_color = national_focus_map_from(state);
 			break;
-			case mode::crisis:
+		case mode::crisis:
 			prov_color = crisis_map_from(state);
 			break;
-			case mode::colonial:
+		case mode::colonial:
 			prov_color = colonial_map_from(state);
 			break;
-			case mode::rgo_output:
+		case mode::rgo_output:
 			prov_color = rgo_output_map_from(state);
 			break;
-			case mode::religion:
+		case mode::religion:
 			prov_color = religion_map_from(state);
 			break;
-			case mode::issues:
+		case mode::issues:
 			prov_color = issue_map_from(state);
 			break;
-			case mode::ideology:
+		case mode::ideology:
 			prov_color = ideology_map_from(state);
 			break;
-			case mode::fort:
+		case mode::fort:
 			prov_color = fort_map_from(state);
 			break;
-			case mode::income:
+		case mode::income:
 			prov_color = income_map_from(state);
 			break;
-			case mode::conciousness:
+		case mode::conciousness:
 			prov_color = con_map_from(state);
 			break;
-			case mode::militancy:
+		case mode::militancy:
 			prov_color = militancy_map_from(state);
 			break;
-			case mode::literacy:
+		case mode::literacy:
 			prov_color = literacy_map_from(state);
 			break;
-			case mode::employment:
+		case mode::employment:
 			prov_color = employment_map_from(state);
 			break;
-			case mode::factories:
+		case mode::factories:
 			prov_color = factory_map_from(state);
 			break;
-			case mode::growth:
+		case mode::growth:
 			prov_color = growth_map_from(state);
 			break;
 			//even newer mapmodes
-			case mode::players:
+		case mode::players:
 			prov_color = players_map_from(state);
 			break;
-			case mode::life_needs:
+		case mode::life_needs:
 			prov_color = life_needs_map_from(state);
 			break;
-			case mode::everyday_needs:
+		case mode::everyday_needs:
 			prov_color = everyday_needs_map_from(state);
 			break;
-			case mode::luxury_needs:
+		case mode::luxury_needs:
 			prov_color = luxury_needs_map_from(state);
 			break;
-			case mode::life_rating:
+		case mode::life_rating:
 			prov_color = life_rating_map_from(state);
 			break;
-			case mode::clerk_to_craftsmen_ratio:
+		case mode::clerk_to_craftsmen_ratio:
 			prov_color = ctc_map_from(state);
 			break;
-			case mode::crime:
+		case mode::crime:
 			prov_color = crime_map_from(state);
 			break;
-			case mode::rally:
+		case mode::rally:
 			prov_color = rally_map_from(state);
 			break;
-			case mode::officers:
+		case mode::officers:
 			prov_color = officers_map_from(state);
 			break;
-			case mode::mobilization:
+		case mode::mobilization:
 			prov_color = mobilization_map_from(state);
 			break;
-			case mode::workforce:
+		case mode::workforce:
 			prov_color = workforce_map_from(state);
 			break;
-			default:
+		default:
 			return;
 		}
 
