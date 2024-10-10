@@ -738,11 +738,11 @@ namespace ui {
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-			if(!com)
-				return;
-			auto box = text::open_layout_box(contents, 0);
-			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_name(com)), text::text_color::yellow);
-			text::close_layout_box(contents, box);
+			if(com) {
+				auto box = text::open_layout_box(contents, 0);
+				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, state.world.commodity_get_name(com)), text::text_color::yellow);
+				text::close_layout_box(contents, box);
+			}
 		}
 
 		void button_action(sys::state& state) noexcept override {
@@ -760,7 +760,7 @@ namespace ui {
 			if(name == "entry_button") {
 				return make_element_by_type<trade_commodity_entry_button>(state, id);
 			} else if(name == "goods_type") {
-				return make_element_by_type<commodity_image>(state, id);
+				return make_element_by_type<trade_commodity_icon>(state, id);
 			} else if(name == "price") {
 				return make_element_by_type<commodity_price_text>(state, id);
 			} else if(name == "trend_indicator") {
