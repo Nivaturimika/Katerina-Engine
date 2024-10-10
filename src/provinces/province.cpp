@@ -1082,13 +1082,6 @@ namespace province {
 	}
 
 	bool has_core(sys::state& state, dcon::province_id p, dcon::national_identity_id n) {
-		/*
-		for(auto core : state.world.province_get_core(p)) {
-			if(core.get_identity() == n)
-			return true;
-		}
-		return false;
-		*/
 		return bool(state.world.get_core_by_prov_tag_key(p, n));
 	}
 

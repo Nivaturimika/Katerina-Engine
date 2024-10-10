@@ -398,4 +398,6 @@ enum class status : uint8_t { great_power, secondary_power, civilized, westerniz
 	void annex_to_nation(sys::state& state, dcon::nation_id n, dcon::nation_id who);
 	void add_treasury(sys::state& state, dcon::nation_id n, float v);
 
+	bool has_country_modifier(sys::state& state, dcon::nation_id n, dcon::modifier_id m);
+
 } // namespace nations

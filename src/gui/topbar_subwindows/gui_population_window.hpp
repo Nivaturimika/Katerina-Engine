@@ -376,6 +376,15 @@ namespace ui {
 			text::close_layout_box(contents, box);
 		}
 	};
+
+	class pop_production_icon : public image_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto content = retrieve<dcon::pop_id>(state, parent);
+
+		}
+	};
+
 	class pop_size_text : public simple_text_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
@@ -2094,6 +2103,8 @@ namespace ui {
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "pops_pop_entry_bg") {
 				return make_element_by_type<show_pop_detail_button>(state, id);
+			} else if(name == "pop_producing_icon") {
+				return make_element_by_type<pop_production_icon>(state, id);
 			} else if(name == "pop_size") {
 				return make_element_by_type<pop_size_text>(state, id);
 			} else if(name == "pop_nation") {

@@ -20,19 +20,19 @@ namespace trigger {
 	template<typename A, typename B>
 	[[nodiscard]] auto compare_values(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
 		switch(trigger_code & trigger::association_mask) {
-			case trigger::association_eq:
+		case trigger::association_eq:
 			return value_a == value_b;
-			case trigger::association_gt:
+		case trigger::association_gt:
 			return value_a > value_b;
-			case trigger::association_lt:
+		case trigger::association_lt:
 			return value_a < value_b;
-			case trigger::association_le:
+		case trigger::association_le:
 			return value_a <= value_b;
-			case trigger::association_ne:
+		case trigger::association_ne:
 			return value_a != value_b;
-			case trigger::association_ge:
+		case trigger::association_ge:
 			return value_a >= value_b;
-			default:
+		default:
 			return value_a >= value_b;
 		}
 	}
@@ -40,19 +40,19 @@ namespace trigger {
 	template<typename A, typename B>
 	[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
 		switch(trigger_code & trigger::association_mask) {
-			case trigger::association_eq:
+		case trigger::association_eq:
 			return value_a == value_b;
-			case trigger::association_gt:
+		case trigger::association_gt:
 			return value_a != value_b;
-			case trigger::association_lt:
+		case trigger::association_lt:
 			return value_a != value_b;
-			case trigger::association_le:
+		case trigger::association_le:
 			return value_a == value_b;
-			case trigger::association_ne:
+		case trigger::association_ne:
 			return value_a != value_b;
-			case trigger::association_ge:
+		case trigger::association_ge:
 			return value_a == value_b;
-			default:
+		default:
 			return value_a == value_b;
 		}
 	}
@@ -60,19 +60,19 @@ namespace trigger {
 	template<typename B>
 	[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, dcon::nation_fat_id value_a, B value_b) -> decltype(value_a.id == value_b) {
 		switch(trigger_code & trigger::association_mask) {
-			case trigger::association_eq:
+		case trigger::association_eq:
 			return value_a.id == value_b;
-			case trigger::association_gt:
+		case trigger::association_gt:
 			return value_a.id != value_b;
-			case trigger::association_lt:
+		case trigger::association_lt:
 			return value_a.id != value_b;
-			case trigger::association_le:
+		case trigger::association_le:
 			return value_a.id == value_b;
-			case trigger::association_ne:
+		case trigger::association_ne:
 			return value_a.id != value_b;
-			case trigger::association_ge:
+		case trigger::association_ge:
 			return value_a.id == value_b;
-			default:
+		default:
 			return value_a.id == value_b;
 		}
 	}
@@ -80,38 +80,38 @@ namespace trigger {
 	template<typename A>
 	[[nodiscard]] auto compare_to_true(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
 		switch(trigger_code & trigger::association_mask) {
-			case trigger::association_eq:
+		case trigger::association_eq:
 			return value_a;
-			case trigger::association_gt:
+		case trigger::association_gt:
 			return !value_a;
-			case trigger::association_lt:
+		case trigger::association_lt:
 			return !value_a;
-			case trigger::association_le:
+		case trigger::association_le:
 			return value_a;
-			case trigger::association_ne:
+		case trigger::association_ne:
 			return !value_a;
-			case trigger::association_ge:
+		case trigger::association_ge:
 			return value_a;
-			default:
+		default:
 			return value_a;
 		}
 	}
 	template<typename A>
 	[[nodiscard]] auto compare_to_false(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
 		switch(trigger_code & trigger::association_mask) {
-			case trigger::association_eq:
+		case trigger::association_eq:
 			return !value_a;
-			case trigger::association_gt:
+		case trigger::association_gt:
 			return value_a;
-			case trigger::association_lt:
+		case trigger::association_lt:
 			return value_a;
-			case trigger::association_le:
+		case trigger::association_le:
 			return !value_a;
-			case trigger::association_ne:
+		case trigger::association_ne:
 			return value_a;
-			case trigger::association_ge:
+		case trigger::association_ge:
 			return !value_a;
-			default:
+		default:
 			return !value_a;
 		}
 	}
@@ -123,10 +123,8 @@ namespace trigger {
 			} v;
 			float f;
 		} pack_float;
-
 		pack_float.v.low = data[0];
 		pack_float.v.high = data[1];
-
 		return pack_float.f;
 	}
 	int32_t read_int32_t_from_payload(uint16_t const* data) {
@@ -137,10 +135,8 @@ namespace trigger {
 			} v;
 			int32_t f;
 		} pack_float;
-
 		pack_float.v.low = data[0];
 		pack_float.v.high = data[1];
-
 		return pack_float.f;
 	}
 
@@ -2332,29 +2328,17 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_has_country_modifier) {
 		auto const mod = trigger::payload(tval[1]).mod_id;
-		auto result = ve::apply(
-			[&ws, mod](dcon::nation_id n) {
-				for(auto m : ws.world.nation_get_current_modifiers(n)) {
-					if(m.mod_id == mod)
-						return true;
-				}
-				return false;
-			},
-			to_nation(primary_slot));
+		auto result = ve::apply([&ws, mod](dcon::nation_id n) {
+			return nations::has_country_modifier(ws, n, mod);
+		}, to_nation(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_country_modifier_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot));
 		auto const mod = trigger::payload(tval[1]).mod_id;
-		auto result = ve::apply(
-			[&ws, mod](dcon::nation_id n) {
-				for(auto m : ws.world.nation_get_current_modifiers(n)) {
-					if(m.mod_id == mod)
-						return true;
-				}
-				return false;
-			},
-			owner);
+		auto result = ve::apply([&ws, mod](dcon::nation_id n) {
+			return nations::has_country_modifier(ws, n, mod);
+		}, owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_province_modifier) {
@@ -2371,12 +2355,10 @@ struct empty_mask { };
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_region) {
-		return compare_values_eq(tval[0], ws.world.province_get_state_from_abstract_state_membership(to_prov(primary_slot)),
-			trigger::payload(tval[1]).state_id);
+		return compare_values_eq(tval[0], ws.world.province_get_state_from_abstract_state_membership(to_prov(primary_slot)), trigger::payload(tval[1]).state_id);
 	}
 	TRIGGER_FUNCTION(tf_region_state) {
-		return compare_values_eq(tval[0], ws.world.state_instance_get_definition(to_state(primary_slot)),
-			trigger::payload(tval[1]).state_id);
+		return compare_values_eq(tval[0], ws.world.state_instance_get_definition(to_state(primary_slot)), trigger::payload(tval[1]).state_id);
 	}
 	TRIGGER_FUNCTION(tf_region_pop) {
 		return compare_values_eq(tval[0], ws.world.province_get_state_from_abstract_state_membership(ws.world.pop_get_province_from_pop_location(to_pop(primary_slot))), trigger::payload(tval[1]).state_id);
@@ -2436,22 +2418,19 @@ struct empty_mask { };
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_tag_tag) {
-		return compare_values_eq(tval[0], ws.world.nation_get_identity_from_identity_holder(to_nation(primary_slot)),
-			trigger::payload(tval[1]).tag_id);
+		return compare_values_eq(tval[0], ws.world.nation_get_identity_from_identity_holder(to_nation(primary_slot)), trigger::payload(tval[1]).tag_id);
 	}
 	TRIGGER_FUNCTION(tf_tag_this_nation) {
 		return compare_values_eq(tval[0], to_nation(primary_slot), to_nation(this_slot));
 	}
 	TRIGGER_FUNCTION(tf_tag_this_province) {
-		return compare_values_eq(tval[0], to_nation(primary_slot),
-			ws.world.province_get_nation_from_province_ownership(to_prov(this_slot)));
+		return compare_values_eq(tval[0], to_nation(primary_slot), ws.world.province_get_nation_from_province_ownership(to_prov(this_slot)));
 	}
 	TRIGGER_FUNCTION(tf_tag_from_nation) {
 		return compare_values_eq(tval[0], to_nation(primary_slot), to_nation(from_slot));
 	}
 	TRIGGER_FUNCTION(tf_tag_from_province) {
-		return compare_values_eq(tval[0], to_nation(primary_slot),
-			ws.world.province_get_nation_from_province_ownership(to_prov(from_slot)));
+		return compare_values_eq(tval[0], to_nation(primary_slot), ws.world.province_get_nation_from_province_ownership(to_prov(from_slot)));
 	}
 	TRIGGER_FUNCTION(tf_tag_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(primary_slot));
@@ -2488,35 +2467,25 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_neighbour_tag) {
 		auto tag_holder = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
-		auto result =
-			ve::apply([&ws, tag_holder](dcon::nation_id n) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, tag_holder)); },
-					to_nation(primary_slot));
+		auto result = ve::apply([&ws, tag_holder](dcon::nation_id n) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, tag_holder)); }, to_nation(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_neighbour_this) {
-		auto result = ve::apply(
-			[&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); },
-			to_nation(primary_slot), to_nation(this_slot));
+		auto result = ve::apply([&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); }, to_nation(primary_slot), to_nation(this_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_neighbour_from) {
-		auto result = ve::apply(
-			[&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); },
-			to_nation(primary_slot), to_nation(from_slot));
+		auto result = ve::apply([&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); }, to_nation(primary_slot), to_nation(from_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_neighbour_this_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(this_slot));
-		auto result = ve::apply(
-			[&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); },
-			to_nation(primary_slot), owner);
+		auto result = ve::apply([&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); }, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_neighbour_from_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(from_slot));
-		auto result = ve::apply(
-			[&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); },
-			to_nation(primary_slot), owner);
+		auto result = ve::apply([&ws](dcon::nation_id n, dcon::nation_id o) { return bool(ws.world.get_nation_adjacency_by_nation_adjacency_pair(n, o)); }, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_country_units_in_state_from) {
@@ -2626,9 +2595,8 @@ struct empty_mask { };
 			[&ws](dcon::province_id p) {
 				int32_t total = 0;
 				for(auto a : ws.world.province_get_army_location(p)) {
-					for(auto u : a.get_army().get_army_membership()) {
-						++total;
-					}
+					auto memb = a.get_army().get_army_membership();
+					total += int32_t(memb.end() - memb.begin());
 				}
 				return total;
 			},
@@ -2732,20 +2700,17 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_war_with_this_province) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(this_slot));
-	auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); },
-			to_nation(primary_slot), owner);
+		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); }, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_war_with_this_state) {
 		auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(this_slot));
-	auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); },
-			to_nation(primary_slot), owner);
+		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); }, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_war_with_this_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(this_slot));
-	auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); },
-			to_nation(primary_slot), owner);
+		auto result = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) { return military::are_at_war(ws, a, b); }, to_nation(primary_slot), owner);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_unit_in_battle) {
@@ -2778,16 +2743,13 @@ struct empty_mask { };
 		return compare_values(tval[0], ws.world.nation_get_active_regiments(to_nation(primary_slot)), int32_t(tval[1]));
 	}
 	TRIGGER_FUNCTION(tf_money) {
-		return compare_values(tval[0], ws.world.nation_get_stockpiles(to_nation(primary_slot), economy::money),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], ws.world.nation_get_stockpiles(to_nation(primary_slot), economy::money), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_money_province) {
-		return compare_values(tval[0], ws.world.nation_get_stockpiles(ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot)), economy::money),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], ws.world.nation_get_stockpiles(ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot)), economy::money), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_lost_national) {
-		return compare_values(tval[0], 1.0f - ws.world.nation_get_revanchism(to_nation(primary_slot)),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], 1.0f - ws.world.nation_get_revanchism(to_nation(primary_slot)), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_is_vassal) {
 		return compare_to_true(tval[0], ws.world.overlord_get_ruler(ws.world.nation_get_overlord_as_subject(to_nation(primary_slot))) != dcon::nation_id());
@@ -2815,20 +2777,13 @@ struct empty_mask { };
 		return compare_to_true(tval[0], ws.world.ideology_get_enabled(trigger::payload(tval[1]).ideo_id));
 	}
 	TRIGGER_FUNCTION(tf_political_reform_want_nation) {
-		return compare_values(tval[0],
-			ws.world.nation_get_demographics(to_nation(primary_slot), demographics::political_reform_desire) *
-					ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::political_reform_desire) * ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_political_reform_want_pop) {
-		return compare_values(tval[0], ws.world.pop_get_political_reform_desire(to_pop(primary_slot)),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], ws.world.pop_get_political_reform_desire(to_pop(primary_slot)), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_social_reform_want_nation) {
-		return compare_values(tval[0],
-			ws.world.nation_get_demographics(to_nation(primary_slot), demographics::social_reform_desire) *
-					ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
-			read_float_from_payload(tval + 1));
+		return compare_values(tval[0], ws.world.nation_get_demographics(to_nation(primary_slot), demographics::social_reform_desire) * ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)), read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_social_reform_want_pop) {
 		return compare_values(tval[0], ws.world.pop_get_social_reform_desire(to_pop(primary_slot)), read_float_from_payload(tval + 1));
