@@ -189,26 +189,26 @@ namespace ui {
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			switch(Sort) {
-				case production_sort_order::name:
+			case production_sort_order::name:
 				text::add_line(state, contents, "sort_by_name");
 				break;
-				case production_sort_order::factories:
+			case production_sort_order::factories:
 				text::add_line(state, contents, "sort_by_factories");
 				break;
-				case production_sort_order::infrastructure:
+			case production_sort_order::infrastructure:
 				text::add_line(state, contents, "sort_by_infrastructure");
 				break;
-				case production_sort_order::focus:
+			case production_sort_order::focus:
 				text::add_line(state, contents, "sort_by_focus");
 				break;
-				case production_sort_order::owners:
+			case production_sort_order::owners:
 				text::add_line(state, contents, "sort_by_capitalists");
 				break;
-				case production_sort_order::primary_workers:
-				case production_sort_order::secondary_workers:
+			case production_sort_order::primary_workers:
+			case production_sort_order::secondary_workers:
 				text::add_line(state, contents, "sort_by_unemployed_workers");
 				break;
-				default:
+			default:
 				break;
 			}
 		}

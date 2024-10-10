@@ -499,10 +499,10 @@ factory_upgrade_condition_9;The factory is not already being upgraded
 factory_upgrade_condition_10;The factory is not at max level
 factory_delete_header;Delete factory
 factory_delete_not_allowed;The ruling party does not allow us to delete factories
-factory_stats_1;This factory is currently operating at $val$ capacity
-factory_stats_2;This factory is targeting $val$ capacity
-factory_stats_3;It produced $val$ units of $x$ in the previous day
-factory_stats_4;It made a profit of $val$ in the previous day
+factory_stats_1;This factory is currently operating at ?Y$val$?! capacity
+factory_stats_2;This factory is targeting ?Y$val$?! capacity
+factory_stats_3;It produced ?Y$val$?! units of ?Y$x$?! in the previous day
+factory_stats_4;It made a profit of ?G$val$?! in the previous day
 factory_stats_5;Inputs availability:
 factory_stats_6;Efficiency inputs availability:
 factory_stats_wage;Wage:
@@ -510,7 +510,7 @@ factory_stats_expenses;Total expenses
 factory_stats_desired_income;Desired raw profit
 speed;$val$ kph
 shift_to_hold_open;Hold ?YSHIFT?! to keep this window open, ?YSHIFT-Right-click?! to build this in every state (but not expand)
-factory_upgrade_shortcuts;?YSHIFT-Left-click?W upgrade ?Gall?!S factories in a state\n?YSHIFT-Right-click?W upgrade ?Gall profitable?W factories in a state\n?YCTRL-Left-click?W upgrade ?Gall?W factories in a nation\n?YCTRL-Right-click?W upgrade ?Gall profitable?W factories in a nation\n?YCTRL-SHIFT-Left-click?W upgrade ?Gall profitable with full employment?W factories in a state\n?YCTRL-SHIFT-Right-click?W upgrade ?Gall profitable with full employment?W factories in a state
+factory_upgrade_shortcuts;?YSHIFT-Left-click?! upgrade ?Gall?! factories in a state\n?YSHIFT-Right-click?! upgrade ?Gall profitable?! factories in a state\n?YCTRL-Left-click?! upgrade ?Gall?! factories in a nation\n?YCTRL-Right-click?! upgrade ?Gall profitable?! factories in a nation\n?YCTRL-SHIFT-Left-click?! upgrade ?Gall profitable with full employment?! factories in a state\n?YCTRL-SHIFT-Right-click?! upgrade ?Gall profitable with full employment?! factories in a state
 blank_org_gain;organization gain
 plurality_change_reason;(based on the average consciousness)
 revanchism_reason;Based on the number of unowned cores (cores with your primary culture count for more)
