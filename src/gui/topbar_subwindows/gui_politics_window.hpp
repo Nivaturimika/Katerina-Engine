@@ -703,11 +703,13 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 			}
 		}
 		void on_update(sys::state& state) noexcept override {
-			if(unciv_reforms_win) {
-				unciv_reforms_win->set_visible(state, !state.world.nation_get_is_civilized(state.local_player_nation));
-			}
-			if(reforms_win) {
-				reforms_win->set_visible(state, state.world.nation_get_is_civilized(state.local_player_nation));
+			if((unciv_reforms_win && unciv_reforms_win->is_visible()) || (reforms_win && reforms_win->is_visible())) {
+				if(unciv_reforms_win) {
+					unciv_reforms_win->set_visible(state, !state.world.nation_get_is_civilized(state.local_player_nation));
+				}
+				if(reforms_win) {
+					reforms_win->set_visible(state, state.world.nation_get_is_civilized(state.local_player_nation));
+				}
 			}
 		}
 
