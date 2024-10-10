@@ -247,43 +247,42 @@ namespace ui {
 
 		void impl_on_update(sys::state& state) noexcept override {
 			on_update(state);
-			if(!populated)
-			return;
-
-			for(auto& c : children) {
-				if(c->is_visible()) {
-					c->impl_on_update(state);
+			if(populated) {
+				for(auto& c : children) {
+					if(c->is_visible()) {
+						c->impl_on_update(state);
+					}
 				}
 			}
 		}
 
 		void on_update(sys::state& state) noexcept override {
 			if constexpr(PosAtPort) {
-			army = dcon::army_id{};
-			navy = dcon::navy_id{};
+				army = dcon::army_id{};
+				navy = dcon::navy_id{};
 				for(auto al : state.world.province_get_navy_location_as_location(prov)) {
 					if(al.get_navy()) {
 						navy = al.get_navy();
 						if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
-						break;
+							break;
 					}
 				}
 			} else {
-			army = dcon::army_id{};
+				army = dcon::army_id{};
 				for(auto al : state.world.province_get_army_location_as_location(prov)) {
 					if(!al.get_army().get_navy_from_army_transport() && al.get_army()) {
 						army = al.get_army();
 						if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
-						break;
+							break;
 					}
 				}
-			navy = dcon::navy_id{};
+				navy = dcon::navy_id{};
 				if(prov.index() >= state.province_definitions.first_sea_province.index()) {
 					for(auto al : state.world.province_get_navy_location_as_location(prov)) {
 						if(al.get_navy()) {
 							navy = al.get_navy();
 							if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
-							break;
+								break;
 						}
 					}
 				}
@@ -297,12 +296,13 @@ namespace ui {
 				if constexpr(PosAtPort) {
 					glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 					glm::vec2 v = map::get_port_location(state, prov) / map_size;
+					v.y -= 2.5f / float(state.map_state.map_data.size_y);
 					map_pos = glm::vec2(v.x, 1.f - v.y);
 				} else {
 					auto mid_point = state.world.province_get_mid_point(prov);
 					map_pos = state.map_state.normalize_map_coord(mid_point);
 				}
-			auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
+				auto screen_size = glm::vec2{ float(state.x_size / state.user_settings.ui_scale), float(state.y_size / state.user_settings.ui_scale) };
 				glm::vec2 screen_pos;
 				if(!state.map_state.map_to_screen(state, map_pos, screen_size, screen_pos)) {
 					visible = false;
@@ -313,7 +313,7 @@ namespace ui {
 					return;
 				}
 				visible = true;
-			auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
+				auto new_position = xy_pair{ int16_t(screen_pos.x), int16_t(screen_pos.y) };
 				new_position.x += 7 - base_data.size.x / 2;
 				new_position.y -= 22;
 				base_data.position = new_position;
