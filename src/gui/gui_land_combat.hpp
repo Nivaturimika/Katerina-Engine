@@ -945,43 +945,41 @@ namespace ui {
 
 		void on_create(sys::state& state) noexcept override {
 			window_element_base::on_create(state);
-			auto def = state.ui_state.defs_by_name.find(state.lookup_key("counter"))->second.definition;
-			for(int32_t i = 0; i < 30; ++i) {
-				int32_t s = (i < 15) ? 28 - i * 2 : (i - 15) * 2 + 1;
-				{
-					auto win = make_element_by_type<counter_ico>(state, def);
-					win->slot = s;
-					win->rank = regiment_rank::attacker_back;
-					win->base_data.position.x = int16_t(21 + i * 12);
-					win->base_data.position.y = int16_t(231);
-					add_child_to_front(std::move(win));
-				}
-				{
-					auto win = make_element_by_type<counter_ico>(state, def);
-					win->slot = s;
-					win->rank = regiment_rank::attacker_front;
-					win->base_data.position.x = int16_t(21 + i * 12);
-					win->base_data.position.y = int16_t(231 + 12);
-					add_child_to_front(std::move(win));
-				}
-				{
-					auto win = make_element_by_type<counter_ico>(state, def);
-					win->slot = s;
-					win->rank = regiment_rank::defender_front;
-					win->base_data.position.x = int16_t(21 + i * 12);
-					win->base_data.position.y = int16_t(321);
-					add_child_to_front(std::move(win));
-				}
-				{
-					auto win = make_element_by_type<counter_ico>(state, def);
-					win->slot = s;
-					win->rank = regiment_rank::defender_back;
-					win->base_data.position.x = int16_t(21 + i * 12);
-					win->base_data.position.y = int16_t(321 + 12);
-					add_child_to_front(std::move(win));
+			auto it = state.ui_state.defs_by_name.find(state.lookup_key("counter"));
+			if(it != state.ui_state.defs_by_name.end()) {
+				auto def = it->second.definition;
+				for(int32_t i = 0; i < 30; ++i) {
+					int32_t s = (i < 15) ? 28 - i * 2 : (i - 15) * 2 + 1;
+					//
+					auto win1 = make_element_by_type<counter_ico>(state, def);
+					win1->slot = s;
+					win1->rank = regiment_rank::attacker_back;
+					win1->base_data.position.x = int16_t(21 + i * 12);
+					win1->base_data.position.y = int16_t(231);
+					add_child_to_front(std::move(win1));
+					//
+					auto win2 = make_element_by_type<counter_ico>(state, def);
+					win2->slot = s;
+					win2->rank = regiment_rank::attacker_front;
+					win2->base_data.position.x = int16_t(21 + i * 12);
+					win2->base_data.position.y = int16_t(231 + 12);
+					add_child_to_front(std::move(win2));
+					//
+					auto win3 = make_element_by_type<counter_ico>(state, def);
+					win3->slot = s;
+					win3->rank = regiment_rank::defender_front;
+					win3->base_data.position.x = int16_t(21 + i * 12);
+					win3->base_data.position.y = int16_t(321);
+					add_child_to_front(std::move(win3));
+					//
+					auto win4 = make_element_by_type<counter_ico>(state, def);
+					win4->slot = s;
+					win4->rank = regiment_rank::defender_back;
+					win4->base_data.position.x = int16_t(21 + i * 12);
+					win4->base_data.position.y = int16_t(321 + 12);
+					add_child_to_front(std::move(win4));
 				}
 			}
-
 		}
 
 		void on_update(sys::state& state) noexcept override {

@@ -569,9 +569,9 @@ namespace ui {
 		void on_create(sys::state& state) noexcept override {
 			listbox2_base<outliner_data>::on_create(state);
 
-			auto ptr = make_element_by_type<image_element_base>(state, state.ui_state.defs_by_name.find(state.lookup_key("outliner_bottom"))->second.definition);
+			auto ptr = make_element_by_type<image_element_base>(state, "outliner_bottom");
 			ptr->set_visible(state, true);
-			bottom_image = ptr.get();
+			bottom_image = static_cast<image_element_base*>(ptr.get());
 			add_child_to_back(std::move(ptr));
 		}
 

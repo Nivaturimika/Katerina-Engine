@@ -570,19 +570,19 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 	}
 
 	void poptype_file::is_slave(association_type, bool value, error_handler& err, int32_t line, poptype_context& context) {
-		if(value)
-		context.outer_context.state.culture_definitions.slaves = context.id;
-	}
-
-	void poptype_file::allowed_to_vote(association_type, bool value, error_handler& err, int32_t line, poptype_context& context) {
-		if(value == false) {
-			context.outer_context.state.world.pop_type_set_voting_forbidden(context.id, true);
+		if(value) {
+			context.outer_context.state.culture_definitions.slaves = context.id;
 		}
 	}
 
+	void poptype_file::allowed_to_vote(association_type, bool value, error_handler& err, int32_t line, poptype_context& context) {
+		context.outer_context.state.world.pop_type_set_voting_forbidden(context.id, !value);
+	}
+
 	void poptype_file::can_be_recruited(association_type, bool value, error_handler& err, int32_t line, poptype_context& context) {
-		if(value)
-		context.outer_context.state.culture_definitions.soldiers = context.id;
+		if(value) {
+			context.outer_context.state.culture_definitions.soldiers = context.id;
+		}
 	}
 
 	void poptype_file::state_capital_only(association_type, bool value, error_handler& err, int32_t line, poptype_context& context) {

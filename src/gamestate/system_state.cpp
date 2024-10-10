@@ -51,10 +51,10 @@ namespace ui {
 	void create_in_game_windows(sys::state& state) {
 		state.ui_state.lazy_load_in_game = true;
 		//
-		state.ui_state.select_states_legend = ui::make_element_by_type<ui::map_state_select_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("alice_select_legend_window"))->second.definition);
+		state.ui_state.select_states_legend = ui::make_element_by_type<ui::map_state_select_window>(state, "alice_select_legend_window");
 		state.ui_state.end_screen = std::make_unique<ui::container_base>();
 		{
-			auto ewin = ui::make_element_by_type<ui::end_window>(state, state.ui_state.defs_by_name.find(state.lookup_key("back_end"))->second.definition);
+			auto ewin = ui::make_element_by_type<ui::end_window>(state, "back_end");
 			state.ui_state.end_screen->add_child_to_front(std::move(ewin));
 		}
 
@@ -202,7 +202,7 @@ namespace ui {
 			}
 		}
 		{
-			auto win = make_element_by_type<unit_reorg_window<dcon::army_id, dcon::regiment_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+			auto win = make_element_by_type<unit_reorg_window<dcon::army_id, dcon::regiment_id>>(state, "reorg_window");
 			if(win.get()) {
 				win->set_visible(state, false);
 				state.ui_state.army_reorg_window = win.get();
@@ -210,7 +210,7 @@ namespace ui {
 			}
 		}
 		{
-			auto win = make_element_by_type<unit_reorg_window<dcon::navy_id, dcon::ship_id>>(state, state.ui_state.defs_by_name.find(state.lookup_key("reorg_window"))->second.definition);
+			auto win = make_element_by_type<unit_reorg_window<dcon::navy_id, dcon::ship_id>>(state, "reorg_window");
 			if(win.get()) {
 				win->set_visible(state, false);
 				state.ui_state.navy_reorg_window = win.get();
@@ -720,8 +720,7 @@ namespace sys {
 				auto* c7 = naval_battle_reports.front();
 				while(c7) {
 					if(ui_state.endof_navalcombat_windows.size() == 0) {
-						ui_state.endof_navalcombat_windows.push_back(ui::make_element_by_type<ui::naval_combat_end_popup>(*this,
-							ui_state.defs_by_name.find(lookup_key("endofnavalcombatpopup"))->second.definition));
+						ui_state.endof_navalcombat_windows.push_back(ui::make_element_by_type<ui::naval_combat_end_popup>(*this, "endofnavalcombatpopup"));
 					}
 					//static_cast<ui::naval_combat_window*>(ui_state.navalcombat_windows.back().get())->messages.push_back(*c7);
 					static_cast<ui::naval_combat_end_popup*>(ui_state.endof_navalcombat_windows.back().get())->report = *c7;
@@ -1131,7 +1130,7 @@ namespace sys {
 			}
 		}
 
-		ui_state.nation_picker = ui::make_element_by_type<ui::nation_picker_container>(*this, ui_state.defs_by_name.find(lookup_key("lobby"))->second.definition);
+		ui_state.nation_picker = ui::make_element_by_type<ui::nation_picker_container>(*this, "lobby");
 		{
 			auto window = ui::make_element_by_type<ui::console_window>(*this, "console_wnd");
 			if(window.get()) {

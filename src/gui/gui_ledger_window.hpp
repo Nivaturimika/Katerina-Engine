@@ -124,7 +124,7 @@ namespace ui {
 
 			auto button_def = state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_button"))->second.definition;
 
-		xy_pair cell_offset{ int16_t(24), 0 };
+			xy_pair cell_offset{ int16_t(24), 0 };
 			auto cell_width = (972 - cell_offset.x) / 8;
 			auto apply_offset = [&](auto& ptr) {
 				ptr->base_data.position = cell_offset;
@@ -191,12 +191,11 @@ namespace ui {
 			listbox_row_element_base::on_create(state);
 			// Country flag
 			{
-				auto ptr =
-					make_element_by_type<flag_button>(state, state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_flag"))->second.definition);
-				country_flag = ptr.get();
+				auto ptr = make_element_by_type<flag_button>(state, "ledger_default_flag");
+				country_flag = static_cast<flag_button*>(ptr.get());
 				add_child_to_front(std::move(ptr));
 			}
-		xy_pair cell_offset{int16_t(country_flag->base_data.position.x + country_flag->base_data.size.x), 0};
+			xy_pair cell_offset{int16_t(country_flag->base_data.position.x + country_flag->base_data.size.x), 0};
 			auto cell_width = (972 - cell_offset.x) / 6;
 			auto apply_offset = [&](auto& ptr) {
 				ptr->base_data.position = cell_offset;
@@ -205,43 +204,37 @@ namespace ui {
 			};
 			// Country name
 			{
-				auto ptr = make_element_by_type<generic_name_text<dcon::nation_id>>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<generic_name_text<dcon::nation_id>>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
 			// Country status
 			{
-				auto ptr = make_element_by_type<nation_status_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<nation_status_text>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
 			// Military score
 			{
-				auto ptr = make_element_by_type<nation_military_score_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<nation_military_score_text>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
 			// Industrial score
 			{
-				auto ptr = make_element_by_type<nation_industry_score_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<nation_industry_score_text>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
 			// Prestige
 			{
-				auto ptr = make_element_by_type<nation_prestige_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<nation_prestige_text>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
 			// Total score
 			{
-				auto ptr = make_element_by_type<nation_total_score_text>(state,
-					state.ui_state.defs_by_name.find(state.lookup_key("ledger_default_textbox"))->second.definition);
+				auto ptr = make_element_by_type<nation_total_score_text>(state, "ledger_default_textbox");
 				apply_offset(ptr);
 				add_child_to_front(std::move(ptr));
 			}
