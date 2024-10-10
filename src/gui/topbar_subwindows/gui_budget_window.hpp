@@ -1758,7 +1758,7 @@ namespace ui {
 			} else if(name == "chart_1") {
 				return make_element_by_type<pop_satisfaction_piechart<culture::pop_strata::middle>>(state, id);
 			} else if(name == "chart_2") {
-				return make_element_by_type<pop_satisfaction_piechart<culture::pop_strata::rich>>(state, id);
+				return make_element_by_type<pop_satisfaction_piechart<culture::pop_strata::rich>>(state, id) ;
 			} else if(name == "nat_stock_val") {
 				auto ptr = make_element_by_type<budget_actual_stockpile_spending_text>(state, id);
 				ptr->expense = true;

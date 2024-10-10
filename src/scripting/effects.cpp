@@ -2685,31 +2685,34 @@ namespace effect {
 	}
 	uint32_t ef_assimilate_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner) {
-			auto owner_c = ws.world.nation_get_primary_culture(owner);
-			for(auto pop : ws.world.province_get_pop_location(trigger::to_prov(primary_slot))) {
-				pop.get_pop().set_culture(owner_c);
-				pop.get_pop().set_is_primary_or_accepted_culture(true);
+			if(auto owner_c = ws.world.nation_get_primary_culture(owner); owner_c) {
+				for(auto pop : ws.world.province_get_pop_location(trigger::to_prov(primary_slot))) {
+					pop.get_pop().set_culture(owner_c);
+					pop.get_pop().set_is_primary_or_accepted_culture(true);
+				}
 			}
 		}
 		return 0;
 	}
 	uint32_t ef_assimilate_state(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(primary_slot)); owner) {
-			auto owner_c = ws.world.nation_get_primary_culture(owner);
-			province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-				for(auto pop : ws.world.province_get_pop_location(p)) {
-					pop.get_pop().set_culture(owner_c);
-					pop.get_pop().set_is_primary_or_accepted_culture(true);
-				}
-			});
+			if(auto owner_c = ws.world.nation_get_primary_culture(owner); owner_c) {
+				province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
+					for(auto pop : ws.world.province_get_pop_location(p)) {
+						pop.get_pop().set_culture(owner_c);
+						pop.get_pop().set_is_primary_or_accepted_culture(true);
+					}
+				});
+			}
 		}
 		return 0;
 	}
 	uint32_t ef_assimilate_pop(EFFECT_PARAMTERS) {
 		if(auto owner = nations::owner_of_pop(ws, trigger::to_pop(primary_slot)); owner) {
-			auto owner_c = ws.world.nation_get_primary_culture(owner);
-			ws.world.pop_set_culture(trigger::to_pop(primary_slot), owner_c);
-			ws.world.pop_set_is_primary_or_accepted_culture(trigger::to_pop(primary_slot), true);
+			if(auto owner_c = ws.world.nation_get_primary_culture(owner); owner_c) {
+				ws.world.pop_set_culture(trigger::to_pop(primary_slot), owner_c);
+				ws.world.pop_set_is_primary_or_accepted_culture(trigger::to_pop(primary_slot), true);
+			}
 		}
 		return 0;
 	}
