@@ -34,11 +34,18 @@ vec2 get_corrected_coords(vec2 coords) {
 	return coords;
 }
 
+vec2 get_rounded_tex_coords(vec2 tex_coords) {
+	vec2 rounded_tex_coords = (floor(tex_coord * map_size) + vec2(0.5, 0.5)) / map_size;
+	vec2 rel_coord = tex_coord * map_size - floor(tex_coord * map_size) - vec2(0.5);
+	uint test = texture(diag_border_identifier, rounded_tex_coords).x;
+	int shift = int(sign(rel_coord.x) + 2 * sign(rel_coord.y) + 3);
+	rounded_tex_coords.y += ((int(test >> shift) & 1) != 0) && (abs(rel_coord.x) + abs(rel_coord.y) > 0.5) ? sign(rel_coord.y) / map_size.y : 0;
+	return rounded_tex_coords;
+}
+
 // The water effect
 vec4 get_water_terrain()
 {
-	vec2 prov_id = texture(provinces_texture_sampler, tex_coord).xy;
-
 	// Water effect taken from Vic2 fx/water/PixelShader_HoiWater_2_0
 	const float WRAP = 0.8f;
 	const float WaveModOne = 3.f;
@@ -50,6 +57,8 @@ vec4 get_water_terrain()
 
 	vec2 tex_coord = tex_coord;
 	vec2 corrected_coord = get_corrected_coords(tex_coord);
+	vec2 rounded_tex_coords = get_rounded_tex_coords(tex_coord);
+	vec2 prov_id = texture(provinces_texture_sampler, rounded_tex_coords).xy;
 	vec3 WorldColorColor = texture(colormap_water, corrected_coord).rgb;
 	if(corrected_coord.y > 1.f) {
 		WorldColorColor = vec3(0.14, 0.23, 0.36);
@@ -138,18 +147,11 @@ vec4 get_land_political_close() {
 
 	// Make the terrain a gray scale color
 	const vec3 GREYIFY = vec3( 0.212671, 0.715160, 0.072169 );
-    float grey = dot( terrain.rgb, GREYIFY );
+	float grey = dot( terrain.rgb, GREYIFY );
 	terrain.rgb = vec3(grey);
 
 	vec2 tex_coords = tex_coord;
-	vec2 rounded_tex_coords = (floor(tex_coord * map_size) + vec2(0.5, 0.5)) / map_size;
-
-	vec2 rel_coord = tex_coord * map_size - floor(tex_coord * map_size) - vec2(0.5);
-	uint test = texture(diag_border_identifier, rounded_tex_coords).x;
-	int shift = int(sign(rel_coord.x) + 2 * sign(rel_coord.y) + 3);
-
-	rounded_tex_coords.y += ((int(test >> shift) & 1) != 0) && (abs(rel_coord.x) + abs(rel_coord.y) > 0.5) ? sign(rel_coord.y) / map_size.y : 0;
-
+	vec2 rounded_tex_coords = get_rounded_tex_coords(tex_coords);
 	vec2 prov_id = texture(provinces_texture_sampler, rounded_tex_coords).xy;
 
 	// The primary and secondary map mode province colors
