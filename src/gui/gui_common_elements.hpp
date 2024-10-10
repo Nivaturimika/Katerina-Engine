@@ -2461,7 +2461,7 @@ struct national_focus_overwrite_close { };
 	};
 
 	template<country_list_filter category>
-	class category_filter_button : public right_click_button_element_base {
+	class category_filter_button : public button_element_base {
 		public:
 		void button_action(sys::state& state) noexcept final {
 			send(state, parent, category);

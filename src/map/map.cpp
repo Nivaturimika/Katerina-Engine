@@ -81,9 +81,9 @@ namespace duplicates {
 	}
 
 	glm::vec2 get_navy_location(sys::state& state, dcon::province_id prov_id) {
-		if(is_sea_province(state, prov_id))
-		return state.world.province_get_mid_point(prov_id);
-		else
+		if(is_sea_province(state, prov_id)) {
+			return state.world.province_get_mid_point(prov_id);
+		}
 		return get_port_location(state, prov_id);
 	}
 
@@ -1345,9 +1345,9 @@ namespace map {
 						auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
 						if(units.begin() == units.end() && level > 0) {
 							auto p1 = duplicates::get_navy_location(state, p);
-							auto p2 = state.world.province_get_mid_point(p);
-							auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-							list.emplace_back(model_naval_base[level], p1, -theta, emfx::animation_type::idle);
+							auto p2 = state.world.province_get_mid_point(state.world.province_get_port_to(p));
+							auto theta = glm::atan(p1.y - p2.y, p1.x - p2.x);
+							list.emplace_back(model_naval_base[level], p1, theta, emfx::animation_type::idle);
 						}
 					}
 				});
@@ -1358,9 +1358,9 @@ namespace map {
 						auto const level = state.world.province_get_building_level(p, economy::province_building_type::naval_base);
 						if(units.begin() != units.end() && level > 0) {
 							auto p1 = duplicates::get_navy_location(state, p);
-							auto p2 = state.world.province_get_mid_point(p);
-							auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-							list.emplace_back(model_naval_base_ships[level], p1, -theta, emfx::animation_type::idle);
+							auto p2 = state.world.province_get_mid_point(state.world.province_get_port_to(p));
+							auto theta = glm::atan(p1.y - p2.y, p1.x - p2.x);
+							list.emplace_back(model_naval_base_ships[level], p1, theta, emfx::animation_type::idle);
 						}
 					}
 				});

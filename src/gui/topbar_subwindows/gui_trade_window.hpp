@@ -527,7 +527,7 @@ namespace ui {
 	dcon::commodity_id commodity_id{};
 	};
 
-	class trade_commodity_entry_button : public tinted_right_click_button_element_base {
+	class trade_commodity_entry_button : public tinted_button_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);

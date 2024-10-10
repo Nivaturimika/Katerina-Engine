@@ -886,13 +886,13 @@ namespace ui {
 		}
 	};
 
-	class pop_national_focus_button : public right_click_button_element_base {
-		public:
+	class pop_national_focus_button : public button_element_base {
+	public:
 		int32_t get_icon_frame(sys::state& state) noexcept {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
 			return bool(state.world.state_instance_get_owner_focus(content).id)
-								? state.world.state_instance_get_owner_focus(content).get_icon() - 1
-								: 0;
+				? state.world.state_instance_get_owner_focus(content).get_icon() - 1
+				: 0;
 		}
 
 		void on_update(sys::state& state) noexcept override {
@@ -907,7 +907,7 @@ namespace ui {
 		void button_action(sys::state& state) noexcept override;
 		void button_right_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
-		command::set_national_focus(state, state.local_player_nation, content, dcon::national_focus_id{});
+			command::set_national_focus(state, state.local_player_nation, content, dcon::national_focus_id{});
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -924,7 +924,7 @@ namespace ui {
 			auto content = state.world.state_instance_get_owner_focus(sid);
 			if(bool(content)) {
 				auto fat_nf = dcon::fatten(state.world, content);
-			text::add_to_layout_box(state, contents, box, state.world.national_focus_get_name(content), text::substitution_map{});
+				text::add_to_layout_box(state, contents, box, state.world.national_focus_get_name(content), text::substitution_map{});
 				text::add_line_break_to_layout_box(state, contents, box);
 				auto color = text::text_color::white;
 				if(fat_nf.get_promotion_type()) {

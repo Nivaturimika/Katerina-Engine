@@ -432,41 +432,40 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		}
 	}
 
-	class diplomacy_priority_button : public right_click_button_element_base {
+	class diplomacy_priority_button : public button_element_base {
 		static std::string_view get_prio_key(uint8_t f) {
 			switch(f & nations::influence::priority_mask) {
-				case nations::influence::priority_zero:
+			case nations::influence::priority_zero:
 				return "diplomacy_prio_none";
-				case nations::influence::priority_one:
+			case nations::influence::priority_one:
 				return "diplomacy_prio_low";
-				case nations::influence::priority_two:
+			case nations::influence::priority_two:
 				return "diplomacy_prio_middle";
-				case nations::influence::priority_three:
+			case nations::influence::priority_three:
 				return "diplomacy_prio_high";
 			}
 			return "diplomacy_prio_none";
 		}
-
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto nation_id = retrieve<dcon::nation_id>(state, parent);
 
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(nation_id, state.local_player_nation);
 			uint8_t rel_flags = bool(rel) ? state.world.gp_relationship_get_status(rel) : 0;
 			switch(rel_flags & nations::influence::priority_mask) {
-				case nations::influence::priority_zero:
+			case nations::influence::priority_zero:
 				frame = 0;
 				disabled = !command::can_change_influence_priority(state, state.local_player_nation, nation_id, 1);
 				break;
-				case nations::influence::priority_one:
+			case nations::influence::priority_one:
 				frame = 1;
 				disabled = !command::can_change_influence_priority(state, state.local_player_nation, nation_id, 2);
 				break;
-				case nations::influence::priority_two:
+			case nations::influence::priority_two:
 				frame = 2;
 				disabled = !command::can_change_influence_priority(state, state.local_player_nation, nation_id, 3);
 				break;
-				case nations::influence::priority_three:
+			case nations::influence::priority_three:
 				frame = 3;
 				disabled = !command::can_change_influence_priority(state, state.local_player_nation, nation_id, 0);
 				break;
@@ -479,16 +478,16 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(nation_id, state.local_player_nation);
 			uint8_t rel_flags = bool(rel) ? state.world.gp_relationship_get_status(rel) : 0;
 			switch(rel_flags & nations::influence::priority_mask) {
-				case nations::influence::priority_zero:
+			case nations::influence::priority_zero:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 1);
 				break;
-				case nations::influence::priority_one:
+			case nations::influence::priority_one:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 2);
 				break;
-				case nations::influence::priority_two:
+			case nations::influence::priority_two:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 3);
 				break;
-				case nations::influence::priority_three:
+			case nations::influence::priority_three:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 0);
 				break;
 			}
@@ -499,16 +498,16 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(nation_id, state.local_player_nation);
 			uint8_t rel_flags = bool(rel) ? state.world.gp_relationship_get_status(rel) : 0;
 			switch(rel_flags & nations::influence::priority_mask) {
-				case nations::influence::priority_zero:
+			case nations::influence::priority_zero:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 3);
 				break;
-				case nations::influence::priority_one:
+			case nations::influence::priority_one:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 0);
 				break;
-				case nations::influence::priority_two:
+			case nations::influence::priority_two:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 1);
 				break;
-				case nations::influence::priority_three:
+			case nations::influence::priority_three:
 				command::change_influence_priority(state, state.local_player_nation, nation_id, 2);
 				break;
 			}
@@ -520,7 +519,6 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto nation_id = retrieve<dcon::nation_id>(state, parent);
-		
 			if(!nations::is_great_power(state, state.local_player_nation)) {
 				text::add_line(state, contents, "diplomacy_cannot_set_prio");
 			} else if(nations::is_great_power(state, nation_id)) {
@@ -528,7 +526,6 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 			} else {
 				explain_influence(state, nation_id, contents);
 			}
-			
 			auto box = text::open_layout_box(contents, 0);
 			text::add_divider_to_layout_box(state, contents, box);
 			text::localised_format_box(state, contents, box, std::string_view("diplomacy_set_prio_desc"));
@@ -571,7 +568,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				return make_element_by_type<nation_player_relations_text>(state, id);
 			} else if(name.substr(0, 10) == "country_gp") {
 				auto ptr = make_element_by_type<nation_gp_opinion_text>(state, id);
-			ptr->rank = uint16_t(std::stoi(std::string{name.substr(10)}));
+				ptr->rank = uint16_t(std::stoi(std::string{ name.substr(10) }));
 				return ptr;
 			} else {
 				return nullptr;

@@ -274,7 +274,7 @@ namespace ui {
 			auto controller = prov_fat.get_province_control_as_province().get_nation();
 			auto rebel_faction = prov_fat.get_province_rebel_control_as_province().get_rebel_faction();
 			if(!controller && !rebel_faction)
-			return;
+				return;
 			auto box = text::open_layout_box(contents, 0);
 			text::localised_format_box(state, contents, box, std::string_view("pv_controller"));
 			text::add_space_to_layout_box(state, contents, box);
@@ -287,15 +287,15 @@ namespace ui {
 		}
 	};
 
-	class province_national_focus_button : public right_click_button_element_base {
-		public:
+	class province_national_focus_button : public button_element_base {
+	public:
 		int32_t get_icon_frame(sys::state& state) noexcept {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
 			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation)
-			return state.world.national_focus_get_icon(state.national_definitions.flashpoint_focus) - 1;
+				return state.world.national_focus_get_icon(state.national_definitions.flashpoint_focus) - 1;
 			return bool(state.world.state_instance_get_owner_focus(content).id)
-			? state.world.state_instance_get_owner_focus(content).get_icon() - 1
-			: 0;
+				? state.world.state_instance_get_owner_focus(content).get_icon() - 1
+				: 0;
 		}
 
 		void on_update(sys::state& state) noexcept override {
@@ -305,14 +305,14 @@ namespace ui {
 				disabled = nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
 			}
 			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation)
-			disabled = false;
+				disabled = false;
 			frame = get_icon_frame(state);
 		}
 
 		void button_action(sys::state& state) noexcept override;
 		void button_right_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
-		command::set_national_focus(state, state.local_player_nation, content, dcon::national_focus_id{});
+			command::set_national_focus(state, state.local_player_nation, content, dcon::national_focus_id{});
 		}
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
@@ -328,7 +328,7 @@ namespace ui {
 			auto content = state.world.state_instance_get_owner_focus(sid);
 			if(bool(content)) {
 				auto fat_nf = dcon::fatten(state.world, content);
-			text::add_to_layout_box(state, contents, box, state.world.national_focus_get_name(content), text::substitution_map{});
+				text::add_to_layout_box(state, contents, box, state.world.national_focus_get_name(content), text::substitution_map{});
 				text::add_line_break_to_layout_box(state, contents, box);
 				auto color = text::text_color::white;
 				if(fat_nf.get_promotion_type()) {

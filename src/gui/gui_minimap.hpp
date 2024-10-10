@@ -172,21 +172,21 @@ struct notify_template_select {};
 			set_text(state, "(" + std::to_string(amount) + ") " + name);
 		}
 	};
-	class macro_builder_unit_button : public right_click_button_element_base {
-		public:
+	class macro_builder_unit_button : public button_element_base {
+	public:
 		void button_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::unit_type_id>(state, parent);
 			if(state.ui_state.current_template.amounts[content.index()] < 255) {
 				state.ui_state.current_template.amounts[content.index()] += 1;
 			}
-		send(state, parent, notify_setting_update{});
+			send(state, parent, notify_setting_update{});
 		}
 		void button_right_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::unit_type_id>(state, parent);
 			if(state.ui_state.current_template.amounts[content.index()] > 0) {
 				state.ui_state.current_template.amounts[content.index()] -= 1;
 			}
-		send(state, parent, notify_setting_update{});
+			send(state, parent, notify_setting_update{});
 		}
 	};
 	class macro_builder_unit_entry : public listbox_row_element_base<dcon::unit_type_id> {

@@ -8,7 +8,7 @@
 
 namespace ui {
 
-	class military_mob_button : public right_click_button_element_base {
+	class military_mob_button : public button_element_base {
 		public:
 		void button_action(sys::state& state) noexcept override {
 			command::toggle_mobilization(state, state.local_player_nation);

@@ -117,7 +117,7 @@ namespace ui {
 struct message_setting_changed_notification { };
 
 	template<int32_t category>
-	class message_handling_buton : public right_click_button_element_base {
+	class message_handling_buton : public button_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto base_index = retrieve<int32_t>(state, parent);
