@@ -37,7 +37,7 @@ namespace military {
 		for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
 			dcon::unit_type_id uid = dcon::unit_type_id{ dcon::unit_type_id::value_base_t(i) };
 			state.world.for_each_nation([&](dcon::nation_id nid) {
-				state.world.nation_get_unit_stats(nid, uid) = state.military_definitions.unit_base_definitions[uid];
+				state.world.nation_set_unit_stats(nid, uid, state.military_definitions.unit_base_definitions[uid]);
 			});
 		}
 	}
@@ -5299,14 +5299,14 @@ namespace military {
 					auto& def_stats = state.world.nation_get_unit_stats(tech_def_nation, state.world.regiment_get_type(def_front[i]));
 
 					auto str_damage = str_dam_mul
-					* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
-					(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
-					* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
+						* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod
+						/ (defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
+						* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
 					auto org_damage = str_dam_mul
-					* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod /
-					(defender_fort * defender_org_bonus * def_stats.discipline_or_evasion *
-					(1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
-					* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
+						* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * att_stats.support * attacker_mod
+						/ (defender_fort * defender_org_bonus * def_stats.discipline_or_evasion
+						* (1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
+						* (state.world.regiment_get_experience(def_front[i]) * 0.1f + 1.f);
 
 					// gain experience
 					auto leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();

@@ -2210,7 +2210,7 @@ namespace map {
 				curve_length = 2.f * glm::length(glm::vec2(height * ratio.y, result_interval * ratio.x));
 			} else {
 				for(float x = left; x <= right; x += x_step) {
-					curve_length += 2.0f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
+					curve_length += 2.f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
 				}
 			}
 
@@ -2251,7 +2251,7 @@ namespace map {
 				float x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 				float x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
 				float y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-				if(glyphid != FT_Get_Char_Index(f.font_face, ' ')) {
+				if(true) {
 					// Add up baseline and kerning offsets
 					glm::vec2 glyph_positions{ x_offset / 64.f, -y_offset / 64.f };
 
@@ -2282,7 +2282,7 @@ namespace map {
 				}
 				float glyph_advance = x_advance * size / 64.f;
 				for(float glyph_length = 0.f; ; x += x_step) {
-					auto added_distance = 2.0f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
+					auto added_distance = 2.f * glm::length(glm::vec2(x_step * ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * ratio.y));
 					if(glyph_length + added_distance >= glyph_advance + letter_spacing_map) {
 						x += x_step * (glyph_advance + letter_spacing_map - glyph_length) / added_distance;
 						break;
@@ -2330,25 +2330,23 @@ namespace map {
 				continue;
 
 			auto effective_ratio = e.ratio.x * map_x_scaling / e.ratio.y;
-
 			float text_length = f.text_extent(state, e.text, 0, uint32_t(e.text.glyph_info.size()), 1);
-			if(!std::isfinite(text_length) || text_length == 0.f)
-			continue;
+			if(!std::isfinite(text_length) || text_length == 0.f) {
+				continue;
+			}
 
 			// y = a + bx + cx^2 + dx^3
 			// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 			auto poly_fn = [&](float x) {
 				return e.coeff[0] + e.coeff[1] * x + e.coeff[2] * x * x + e.coeff[3] * x * x * x;
 			};
-			float x_step = (1.f / float(e.text.glyph_info.size() * 32.f));
+			float x_step = (1.f / float(e.text.glyph_info.size() * 16.f));
 			float curve_length = 0.f; //width of whole string polynomial
-			for(float x = 0.f; x <= 1.f; x += x_step)
-			curve_length += 2.0f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
+			for(float x = 0.f; x <= 1.f; x += x_step) {
+				curve_length += 2.0f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
+			}
 
 			float size = (curve_length / text_length) * 0.85f;
-			if(size > 200.0f) {
-				size = 200.0f + (size - 200.0f) * 0.5f;
-			}
 			auto real_text_size = size / (size_x * 2.0f);
 			float margin = (curve_length - text_length * size) / 2.0f;
 			float x = 0.f;
@@ -2368,8 +2366,8 @@ namespace map {
 				float x_advance = float(gso.x_advance);
 				float x_offset = float(e.text.glyph_info[i].x_offset) / 4.f + float(gso.x);
 				float y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / 4.f;
-				if(glyphid != FT_Get_Char_Index(f.font_face, ' ')) {
-				glm::vec2 glyph_positions{ x_offset / 64.f, -y_offset / 64.f };
+				if(true) {
+					glm::vec2 glyph_positions{ x_offset / 64.f, -y_offset / 64.f };
 					auto dpoly_fn = [&](float x) {
 						// y = a + 1bx^1 + 1cx^2 + 1dx^3
 						// y = 0 + 1bx^0 + 2cx^1 + 3dx^2
@@ -2425,8 +2423,9 @@ namespace map {
 						swapped = true;
 					}
 				}
-				if(!swapped)
-				break;
+				if(!swapped) {
+					break;
+				}
 			}
 			dyn_province_text_line_starts.resize(province_text_line_texture_per_quad.size());
 			dyn_province_text_line_counts.resize(province_text_line_texture_per_quad.size());
