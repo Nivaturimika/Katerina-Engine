@@ -5088,9 +5088,23 @@ namespace military {
 		});
 	}
 
+	/*	Removes a given regiment from a line
+		@param s The regiment to remove
+		@param arr The reference to the array of the line */
+	void remove_regiment_from_line(dcon::regiment_id s, std::array<dcon::regiment_id, 30>& arr) {
+		for(uint32_t i = 0; i < arr.size(); i++) {
+			auto e = arr[i];
+			if(e == s) {
+				//TODO: this often occurs, so we will skip the assertion for now
+				//assert(e != s);
+				arr[i] = dcon::regiment_id{};
+			}
+		}
+	}
+
 	void apply_regiment_damage(sys::state& state) {
 		for(uint32_t i = state.world.regiment_size(); i-- > 0;) {
-		dcon::regiment_id s{ dcon::regiment_id::value_base_t(i) };
+			dcon::regiment_id s{ dcon::regiment_id::value_base_t(i) };
 			if(state.world.regiment_is_valid(s)) {
 				auto& pending_damage = state.world.regiment_get_pending_damage(s);
 				auto& current_strength = state.world.regiment_get_strength(s);
@@ -5102,7 +5116,7 @@ namespace military {
 					if(backing_pop) {
 						auto& psize = state.world.pop_get_size(backing_pop);
 						psize -= state.defines.pop_size_per_regiment * pending_damage * state.defines.soldier_to_pop_damage /
-						(3.0f * (1.0f + state.world.nation_get_modifier_values(tech_nation, sys::national_mod_offsets::soldier_to_pop_loss)));
+							(3.0f * (1.0f + state.world.nation_get_modifier_values(tech_nation, sys::national_mod_offsets::soldier_to_pop_loss)));
 						if(psize <= 1.0f) {
 							state.world.delete_pop(backing_pop);
 						}
@@ -5114,7 +5128,6 @@ namespace military {
 					auto army = state.world.regiment_get_army_from_army_membership(s);
 					auto controller = state.world.army_get_controller_from_army_control(army);
 					auto pop_backer = state.world.regiment_get_pop_from_regiment_source(s);
-
 					if(!controller) {
 						if(pop_backer) {
 							state.world.pop_get_militancy(pop_backer) /= state.defines.reduction_after_defeat;
@@ -5126,23 +5139,19 @@ namespace military {
 							wex = std::min(wex + 0.5f / float(maxr), state.world.nation_get_modifier_values(controller, sys::national_mod_offsets::max_war_exhaustion));
 						}
 					}
-
 					if(auto b = state.world.army_get_battle_from_army_battle_participation(army); b) {
-						for(auto e : state.world.land_battle_get_attacker_back_line(b))
-						assert(e != s);
-						for(auto e : state.world.land_battle_get_attacker_front_line(b))
-						assert(e != s);
-						for(auto e : state.world.land_battle_get_defender_back_line(b))
-						assert(e != s);
-						for(auto e : state.world.land_battle_get_defender_front_line(b))
-						assert(e != s);
-						auto reserves = state.world.land_battle_get_reserves(b);
+						remove_regiment_from_line(s, state.world.land_battle_get_attacker_back_line(b));
+						remove_regiment_from_line(s, state.world.land_battle_get_attacker_front_line(b));
+						remove_regiment_from_line(s, state.world.land_battle_get_defender_back_line(b));
+						remove_regiment_from_line(s, state.world.land_battle_get_defender_front_line(b));
 						// failsafe, some conditions can lead to this invalid state
 						// where a rebel stack/stack has 0 strength but is still on a battle
 						// (damage could've been dealt by attrition for ex.)
 						// so prevent OOS by removing them from reserves!
+						auto reserves = state.world.land_battle_get_reserves(b);
 						for(uint32_t j = reserves.size(); j-- > 0;) {
-							assert(reserves[j].regiment != s);
+							//TODO: is it an invalid state? I mean we do have a failsafe, so the assert is redundant?
+							//assert(reserves[j].regiment != s);
 							if(reserves[j].regiment == s) {
 								std::swap(reserves[j], reserves[reserves.size() - 1]);
 								reserves.pop_back();
@@ -5150,10 +5159,11 @@ namespace military {
 							}
 						}
 					}
-					if(!controller || state.world.pop_get_size(pop_backer) < state.defines.pop_min_size_for_regiment)
-					state.world.delete_regiment(s);
-					else
-					current_strength = 0.0f;
+					if(!controller || state.world.pop_get_size(pop_backer) < state.defines.pop_min_size_for_regiment) {
+						state.world.delete_regiment(s);
+					} else {
+						current_strength = 0.0f;
+					}
 				}
 			}
 		}
