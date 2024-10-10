@@ -207,7 +207,7 @@ namespace demographics {
 	float get_estimated_internal_migration(sys::state& state, dcon::pop_id n);
 	float get_estimated_colonial_migration(sys::state& state, dcon::pop_id n);
 	float get_estimated_emigration(sys::state& state, dcon::pop_id n);
-	void estimate_directed_immigration(sys::state& state, dcon::nation_id n, std::vector<float>& national_amounts);
+	void estimate_directed_immigration(sys::state& state, dcon::nation_id n, ve::vectorizable_buffer<float, dcon::nation_id>& national_amounts);
 	float get_estimated_conversion(sys::state& state, dcon::pop_id n);
 
 } // namespace demographics
