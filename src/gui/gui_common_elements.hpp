@@ -74,43 +74,43 @@ namespace ui {
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			switch(Sort) {
-				case country_list_sort::boss:
+			case country_list_sort::boss:
 				text::add_line(state, contents, "sort_by_spherelord");
 				break;
-				case country_list_sort::country:
+			case country_list_sort::country:
 				text::add_line(state, contents, "sort_by_country");
 				break;
-				case country_list_sort::economic_rank:
+			case country_list_sort::economic_rank:
 				text::add_line(state, contents, "sort_by_economic_rank");
 				break;
-				case country_list_sort::factories:
+			case country_list_sort::factories:
 				text::add_line(state, contents, "sort_by_factories");
 				break;
-				case country_list_sort::military_rank:
+			case country_list_sort::military_rank:
 				text::add_line(state, contents, "sort_by_military_rank");
 				break;
-				case country_list_sort::prestige_rank:
+			case country_list_sort::prestige_rank:
 				text::add_line(state, contents, "sort_by_prestige_rank");
 				break;
-				case country_list_sort::total_rank:
+			case country_list_sort::total_rank:
 				text::add_line(state, contents, "sort_by_rank");
 				break;
-				case country_list_sort::opinion:
+			case country_list_sort::opinion:
 				text::add_line(state, contents, "sort_by_opinion");
 				break;
-				case country_list_sort::player_influence:
+			case country_list_sort::player_influence:
 				text::add_line(state, contents, "sort_by_our_influence");
 				break;
-				case country_list_sort::player_investment:
+			case country_list_sort::player_investment:
 				text::add_line(state, contents, "sort_by_our_investment");
 				break;
-				case country_list_sort::priority:
+			case country_list_sort::priority:
 				text::add_line(state, contents, "sort_by_priority");
 				break;
-				case country_list_sort::relation:
+			case country_list_sort::relation:
 				text::add_line(state, contents, "sort_by_relation");
 				break;
-				default:
+			default:
 				break;
 			}
 		}

@@ -191,7 +191,7 @@ namespace ui {
 	};
 
 	class vertical_progress_bar : public progress_bar {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			std::swap(base_data.size.x, base_data.size.y);
 			base_data.position.x -= base_data.size.x;
