@@ -216,9 +216,15 @@ namespace ui {
 		}
 	};
 
-	template<bool PosAtPort>
+	enum class unit_counter_position_type : uint8_t {
+		land,
+		land_move,
+		port,
+	};
+
+	template<unit_counter_position_type A>
 	class unit_counter_window : public window_element_base {
-		public:
+	public:
 		bool visible = true;
 		bool populated = false;
 		dcon::province_id prov;
@@ -257,7 +263,7 @@ namespace ui {
 		}
 
 		void on_update(sys::state& state) noexcept override {
-			if constexpr(PosAtPort) {
+			if constexpr(A == unit_counter_position_type::port) { //port
 				army = dcon::army_id{};
 				navy = dcon::navy_id{};
 				for(auto al : state.world.province_get_navy_location_as_location(prov)) {
@@ -267,10 +273,13 @@ namespace ui {
 							break;
 					}
 				}
-			} else {
+			} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
 				army = dcon::army_id{};
 				for(auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport() && al.get_army()) {
+					if(!al.get_army().get_navy_from_army_transport()
+					&& al.get_army()
+					&& al.get_army().get_path().size() > 0
+					&& !al.get_army().get_army_battle_participation()) {
 						army = al.get_army();
 						if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
 							break;
@@ -279,7 +288,31 @@ namespace ui {
 				navy = dcon::navy_id{};
 				if(prov.index() >= state.province_definitions.first_sea_province.index()) {
 					for(auto al : state.world.province_get_navy_location_as_location(prov)) {
-						if(al.get_navy()) {
+						if(al.get_navy()
+						&& al.get_navy().get_path().size() > 0
+						&& !al.get_navy().get_navy_battle_participation()) {
+							navy = al.get_navy();
+							if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
+								break;
+						}
+					}
+				}
+			} else { //units
+				army = dcon::army_id{};
+				for(auto al : state.world.province_get_army_location_as_location(prov)) {
+					if(!al.get_army().get_navy_from_army_transport()
+					&& al.get_army()
+					&& al.get_army().get_path().size() == 0) {
+						army = al.get_army();
+						if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
+							break;
+					}
+				}
+				navy = dcon::navy_id{};
+				if(prov.index() >= state.province_definitions.first_sea_province.index()) {
+					for(auto al : state.world.province_get_navy_location_as_location(prov)) {
+						if(al.get_navy()
+						&& al.get_navy().get_path().size() == 0) {
 							navy = al.get_navy();
 							if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
 								break;
@@ -293,11 +326,22 @@ namespace ui {
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(populated) {
 				glm::vec2 map_pos;
-				if constexpr(PosAtPort) {
+				if constexpr(A == unit_counter_position_type::port) {
 					glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 					glm::vec2 v = map::get_port_location(state, prov) / map_size;
 					v.y -= 2.5f / float(state.map_state.map_data.size_y);
 					map_pos = glm::vec2(v.x, 1.f - v.y);
+				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
+					auto path = state.world.army_get_path(army);
+					if(path.size() > 0) {
+						auto dp = state.world.province_get_mid_point(path[path.size() - 1]);
+						auto mid_point = state.world.province_get_mid_point(prov);
+						mid_point += glm::vec2(2.f, 2.f) * glm::atan(dp.x - mid_point.x, dp.y - mid_point.y);
+						map_pos = state.map_state.normalize_map_coord(mid_point);
+					} else {
+						visible = false;
+						return;
+					}
 				} else {
 					auto mid_point = state.world.province_get_mid_point(prov);
 					map_pos = state.map_state.normalize_map_coord(mid_point);
@@ -348,8 +392,8 @@ namespace ui {
 
 		mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 			if(visible && populated)
-			return window_element_base::impl_probe_mouse(state, x, y, type);
-		return mouse_probe{ nullptr, ui::xy_pair{} };
+				return window_element_base::impl_probe_mouse(state, x, y, type);
+			return mouse_probe{ nullptr, ui::xy_pair{} };
 		}
 	};
 
