@@ -60,9 +60,9 @@ namespace ai {
 			}
 
 			auto ll = state.world.nation_get_last_war_loss(n);
-			float safety_factor = 1.2f;
+			float safety_factor = 1.25f;
 			if(ll && state.current_date < ll + 365 * 4) {
-				safety_factor = 1.8f;
+				safety_factor = 1.5f;
 			}
 			auto in_sphere_of = state.world.nation_get_in_sphere_of(n);
 
@@ -75,8 +75,9 @@ namespace ai {
 			}
 
 			float self_str = float(state.world.nation_get_military_score(n));
-			for(auto subj : n.get_overlord_as_ruler())
-			self_str += 0.75f * float(subj.get_subject().get_military_score());
+			for(auto subj : n.get_overlord_as_ruler()) {
+				self_str += 0.75f * float(subj.get_subject().get_military_score());
+			}
 			float defensive_str = estimate_defensive_strength(state, n);
 
 			bool threatened = defensive_str < safety_factor * greatest_neighbor;
@@ -398,8 +399,9 @@ namespace ai {
 			std::vector<potential_techs> potential;
 
 			for(auto tid : state.world.in_technology) {
-				if(state.world.nation_get_active_technologies(n, tid))
-				continue; // Already researched
+				if(state.world.nation_get_active_technologies(n, tid)) {
+					continue; // Already researched
+				}
 
 				if(state.current_date.to_ymd(state.start_date).year >= state.world.technology_get_year(tid)) {
 					// Find previous technology before this one
@@ -578,16 +580,34 @@ namespace ai {
 		}
 	}
 
+	/* Tests if a nation is a potential candidate to go to war with, taking into account if it is in a sphere
+		@param n Nation (spherelord)
+		@param t Target to test for
+		@return If the target is viable to go to war with */
+	bool can_war_with_target_in_sphere(sys::state& state, dcon::nation_id n, dcon::nation_id t) {
+		if((state.world.nation_get_infamy(n) + state.defines.removefromsphere_infamy_cost) >= state.defines.badboy_limit) {
+			return false; //do not go over infamy limit
+		}
+		if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n); rel) {
+			return state.world.nation_get_in_sphere_of(t) == n
+				&& state.defines.removefromsphere_influence_cost <= state.world.gp_relationship_get_influence(rel)
+				&& military::can_use_cb_against(state, n, t);
+		}
+		return false;
+	}
+
 	void perform_influence_actions(sys::state& state) {
 		for(auto gprl : state.world.in_gp_relationship) {
 			if(gprl.get_great_power().get_is_player_controlled()) {
 				// nothing -- player GP
 			} else {
-				if((gprl.get_status() & nations::influence::is_banned) != 0)
-				continue; // can't do anything with a banned nation
+				if((gprl.get_status() & nations::influence::is_banned) != 0) {
+					continue; // can't do anything with a banned nation
+				}
 
-				if(military::are_at_war(state, gprl.get_great_power(), gprl.get_influence_target()))
-				continue; // can't do anything while at war
+				if(military::are_at_war(state, gprl.get_great_power(), gprl.get_influence_target())) {
+					continue; // can't do anything while at war
+				}
 
 				auto current_sphere = gprl.get_influence_target().get_in_sphere_of();
 				auto clevel = (nations::influence::level_mask & gprl.get_status());
@@ -597,31 +617,31 @@ namespace ai {
 					for(auto other_gprl : gprl.get_influence_target().get_gp_relationship_as_influence_target()) {
 						if(current_sphere
 						&& other_gprl.get_great_power() != gprl.get_great_power()
-						&& other_gprl.get_influence() >= state.defines.removefromsphere_influence_cost * 0.75f
+						&& other_gprl.get_influence() >= state.defines.decreaseopinion_influence_cost * 0.75f
 						&& command::can_decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power())) {
 							command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power());
 						}
 					}
 					continue; // already in sphere
 				}
-				if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
+				//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
+				if(military::can_use_cb_against(state, gprl.get_great_power(), gprl.get_influence_target())
+				&& state.defines.removefromsphere_influence_cost <= gprl.get_influence()
+				&& current_sphere
+				&& current_sphere == gprl.get_great_power()
+				&& clevel == nations::influence::level_friendly
+				&& (state.world.nation_get_infamy(gprl.get_great_power()) + state.defines.removefromsphere_infamy_cost) < state.defines.badboy_limit) {
+					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
+					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
+				} else if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
 					assert(command::can_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target()));
 					command::execute_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target());
-				} else if(state.defines.removefromsphere_influence_cost <= gprl.get_influence() && current_sphere /* && current_sphere != gprl.get_great_power()*/ && clevel == nations::influence::level_friendly) { // condition taken care of by check above
+				} else if(state.defines.removefromsphere_influence_cost <= gprl.get_influence() && current_sphere && current_sphere != gprl.get_great_power() && clevel == nations::influence::level_friendly) { // condition taken care of by check above
 					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
 					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
 				} else if(state.defines.addtosphere_influence_cost <= gprl.get_influence() && !current_sphere && clevel == nations::influence::level_friendly) {
 					assert(command::can_add_to_sphere(state, gprl.get_great_power(), gprl.get_influence_target()));
 					command::execute_add_to_sphere(state, gprl.get_great_power(), gprl.get_influence_target());
-					//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
-				} else if(military::can_use_cb_against(state, gprl.get_great_power(), gprl.get_influence_target())
-				&& state.defines.removefromsphere_influence_cost <= gprl.get_influence()
-				&& current_sphere
-				&& clevel == nations::influence::level_friendly
-				&& (state.world.nation_get_infamy(gprl.get_great_power()) + state.defines.removefromsphere_infamy_cost) < state.defines.badboy_limit
-				) {
-					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
-					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
 				}
 			}
 		}
@@ -631,25 +651,26 @@ namespace ai {
 		for(auto f : state.world.in_national_focus) {
 			if(f.get_promotion_amount() > 0) {
 				if(f.get_promotion_type() == state.culture_definitions.clergy)
-				state.national_definitions.clergy_focus = f;
+					state.national_definitions.clergy_focus = f;
 				if(f.get_promotion_type() == state.culture_definitions.soldiers)
-				state.national_definitions.soldier_focus = f;
+					state.national_definitions.soldier_focus = f;
 				if(f.get_promotion_type() == state.culture_definitions.aristocrat)
-				state.national_definitions.aristocrat_focus = f;
+					state.national_definitions.aristocrat_focus = f;
 				if(f.get_promotion_type() == state.culture_definitions.capitalists)
-				state.national_definitions.capitalist_focus = f;
+					state.national_definitions.capitalist_focus = f;
 				if(f.get_promotion_type() == state.culture_definitions.primary_factory_worker)
-				state.national_definitions.primary_factory_worker_focus = f;
+					state.national_definitions.primary_factory_worker_focus = f;
 				if(f.get_promotion_type() == state.culture_definitions.secondary_factory_worker)
-				state.national_definitions.secondary_factory_worker_focus = f;
+					state.national_definitions.secondary_factory_worker_focus = f;
 			}
 		}
 	}
 
 	void update_focuses(sys::state& state) {
 		for(auto si : state.world.in_state_instance) {
-			if(!si.get_nation_from_state_ownership().get_is_player_controlled())
-			si.set_owner_focus(dcon::national_focus_id{});
+			if(!si.get_nation_from_state_ownership().get_is_player_controlled()) {
+				si.set_owner_focus(dcon::national_focus_id{});
+			}
 		}
 
 		for(auto n : state.world.in_nation) {
@@ -3084,44 +3105,57 @@ namespace ai {
 		return true;
 	}
 
+	/*	Tests if a nation (via game rules) can go to war with another given nation (this is not criteria for selecting the
+		best nation to go war with for the AI, it's only a basic game rule check)
+		@param n Nation that wants to go to war
+		@param real_target The real target of the declaration (i.e the overlord)
+		@param other The "involved" target of the declaration (i.e a puppet), can be empty */
+	bool can_go_war_with(sys::state& state, dcon::nation_id n, dcon::nation_id real_target, dcon::nation_id other) {
+		if(real_target == n || other == n)
+			return false;
+		if(state.world.nation_get_owned_province_count(real_target) == 0
+		|| state.world.nation_get_owned_province_count(other) == 0)
+			return false;
+		if(state.world.nation_get_in_sphere_of(real_target) == n
+		|| state.world.nation_get_in_sphere_of(other) == n)
+			return false;
+		if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
+			return false;
+		if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
+			return false;
+		if(!military::can_use_cb_against(state, n, other))
+			return false;
+		return true;
+	}
+
 	void make_war_decs(sys::state& state) {
 		auto targets = ve::vectorizable_buffer<dcon::nation_id, dcon::nation_id>(state.world.nation_size());
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
-		dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
+			dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
 			if(state.world.nation_get_owned_province_count(n) == 0)
-			return;
+				return;
 			if(state.world.nation_get_is_at_war(n))
-			return;
+				return;
 			if(state.world.nation_get_is_player_controlled(n))
-			return;
+				return;
 			if(state.world.nation_get_military_score(n) == 0)
-			return;
+				return;
 			if(auto ol = state.world.nation_get_overlord_as_subject(n); state.world.overlord_get_ruler(ol))
-			return;
+				return;
 			auto base_strength = estimate_strength(state, n);
 			float best_difference = 2.0f;
 			//Great powers should look for non-neighbor nations to use their existing wargoals on; helpful for forcing unification/repay debts wars to happen
 			if(nations::is_great_power(state, n)) {
 				for(auto target : state.world.in_nation) {
 					auto real_target = target.get_overlord_as_subject().get_ruler() ? target.get_overlord_as_subject().get_ruler() : target;
-					if(target == n || real_target == n)
-					continue;
-					if(state.world.nation_get_owned_province_count(real_target) == 0)
-					continue;
-					if(nations::are_allied(state, n, real_target))
-					continue;
-					if(target.get_in_sphere_of() == n)
-					continue;
-					if(military::has_truce_with(state, n, real_target))
-					continue;
-					if(!military::can_use_cb_against(state, n, target))
-					continue;
+					if(!ai::can_go_war_with(state, n, real_target, target))
+						continue;
 					//If it neighbors one of our spheres and we can pathfind to each other's capitals, we don't need naval supremacy to reach this nation
 					//Generally here to help Prussia realize it doesn't need a navy to attack Denmark
 					for(auto adj : state.world.nation_get_nation_adjacency(target)) {
 						auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
 						auto neighbor = other;
-						if(neighbor.get_in_sphere_of() == n){
+						if(neighbor.get_in_sphere_of() == n) {
 							auto path = province::make_safe_land_path(state, state.world.nation_get_capital(n), state.world.nation_get_capital(neighbor), n);
 							if(path.empty()) {
 								continue;
@@ -3134,8 +3168,8 @@ namespace ai {
 							}
 						}
 					}
-					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target) && !naval_supremacy(state, n, target))
-					continue;
+					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target) && !ai::naval_supremacy(state, n, target))
+						continue;
 					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
@@ -3146,20 +3180,10 @@ namespace ai {
 			for(auto adj : state.world.nation_get_nation_adjacency(n)) {
 				auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
 				auto real_target = other.get_overlord_as_subject().get_ruler() ? other.get_overlord_as_subject().get_ruler() : other;
-				if(real_target == n)
-				continue;
-				if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
-				continue;
-				if(real_target.get_in_sphere_of() == n)
-				continue;
-				if(state.world.nation_get_in_sphere_of(other) == n)
-				continue;
-				if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
-				continue;
-				if(!military::can_use_cb_against(state, n, other))
-				continue;
-				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !naval_supremacy(state, n, other))
-				continue;
+				if(!ai::can_go_war_with(state, n, real_target, other))
+					continue;
+				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+					continue;
 				auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 				if(str_difference > best_difference) {
 					best_difference = str_difference;
@@ -3171,26 +3195,14 @@ namespace ai {
 				for(uint32_t j = 0; j < 6; ++j) {
 					auto rvalue = rng::get_random(state, uint32_t((n.index() << 3) + j));
 					auto reduced_value = rng::reduce(uint32_t(rvalue), state.world.nation_size());
-				dcon::nation_id other{ dcon::nation_id::value_base_t(reduced_value) };
+					dcon::nation_id other{ dcon::nation_id::value_base_t(reduced_value) };
 					auto real_target = fatten(state.world, other).get_overlord_as_subject().get_ruler() ? fatten(state.world, other).get_overlord_as_subject().get_ruler() : fatten(state.world, other);
-					if(other == n || real_target == n)
-					continue;
-					if(state.world.nation_get_owned_province_count(other) == 0 || state.world.nation_get_owned_province_count(real_target) == 0)
-					continue;
+					if(!ai::can_go_war_with(state, n, real_target, other))
+						continue;
 					if(state.world.nation_get_central_ports(other) == 0 || state.world.nation_get_central_ports(real_target) == 0)
-					continue;
-					if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
-					continue;
-					if(real_target.get_in_sphere_of() == n)
-					continue;
-					if(state.world.nation_get_in_sphere_of(other) == n)
-					continue;
-					if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
-					continue;
-					if(!military::can_use_cb_against(state, n, other))
-					continue;
-					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !naval_supremacy(state, n, other))
-					continue;
+						continue;
+					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+						continue;
 					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
@@ -3232,8 +3244,9 @@ namespace ai {
 				int32_t possible_sum = 0;
 				for(auto po : n.get_province_ownership_as_nation()) {
 					possible_sum += military::mobilized_regiments_possible_from_province(state, po.get_province());
-					if(possible_sum > 0)
-					break;
+					if(possible_sum > 0) {
+						break;
+					}
 				}
 				if(possible_sum == 0) {
 					will_mob = false;
@@ -3250,10 +3263,10 @@ namespace ai {
 
 	void update_budget(sys::state& state) {
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
-		dcon::nation_id nid{ dcon::nation_id::value_base_t(i) };
+			dcon::nation_id nid{ dcon::nation_id::value_base_t(i) };
 			auto n = fatten(state.world, nid);
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
-			return;
+				return;
 
 			float base_income = economy_estimations::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
 
@@ -3479,8 +3492,9 @@ namespace ai {
 		static std::vector<dcon::ship_id> to_delete;
 		to_delete.clear();
 		for(auto n : state.world.in_nation) {
-			if(n.get_is_player_controlled())
-			continue;
+			if(n.get_is_player_controlled()) {
+				continue;
+			}
 			if(n.get_is_at_war() == false && nations::is_landlocked(state, n)) {
 				for(auto v : n.get_navy_control()) {
 					if(!v.get_navy().get_battle_from_navy_battle_participation()) {
@@ -3494,9 +3508,10 @@ namespace ai {
 				dcon::unit_type_id best_light;
 				dcon::unit_type_id best_big;
 				for(uint32_t i = 2; i < state.military_definitions.unit_base_definitions.size(); ++i) {
-				dcon::unit_type_id j{ dcon::unit_type_id::value_base_t(i) };
-					if(!n.get_active_unit(j) && !state.military_definitions.unit_base_definitions[j].active)
-					continue;
+					dcon::unit_type_id j{ dcon::unit_type_id::value_base_t(i) };
+					if(!n.get_active_unit(j) && !state.military_definitions.unit_base_definitions[j].active) {
+						continue;
+					}
 					if(state.military_definitions.unit_base_definitions[j].type == military::unit_type::transport) {
 						if(!best_transport || state.military_definitions.unit_base_definitions[best_transport].defence_or_hull < state.military_definitions.unit_base_definitions[j].defence_or_hull) {
 							best_transport = j;
@@ -3520,14 +3535,17 @@ namespace ai {
 							auto type = shp.get_ship().get_type();
 
 							if(state.military_definitions.unit_base_definitions[type].type == military::unit_type::transport && !transporting) {
-								if(best_transport && type != best_transport)
-								to_delete.push_back(shp.get_ship().id);
+								if(best_transport && type != best_transport) {
+									to_delete.push_back(shp.get_ship().id);
+								}
 							} else if(state.military_definitions.unit_base_definitions[type].type == military::unit_type::light_ship) {
-								if(best_light && type != best_light)
-								to_delete.push_back(shp.get_ship().id);
+								if(best_light && type != best_light) {
+									to_delete.push_back(shp.get_ship().id);
+								}
 							} else if(state.military_definitions.unit_base_definitions[type].type == military::unit_type::big_ship) {
-								if(best_big && type != best_big)
-								to_delete.push_back(shp.get_ship().id);
+								if(best_big && type != best_big) {
+									to_delete.push_back(shp.get_ship().id);
+								}
 							}
 						}
 					}
@@ -3713,23 +3731,11 @@ namespace ai {
 
 	}
 
-
 	bool navy_needs_repair(sys::state& state, dcon::navy_id n) {
-		/*
-		auto in_nation = fatten(state.world, state.world.navy_get_controller_from_navy_control(n));
-		auto base_spending_level = in_nation.get_effective_naval_spending();
-		float oversize_amount =
-		in_nation.get_naval_supply_points() > 0
-		? std::min(float(in_nation.get_used_naval_supply_points()) / float(in_nation.get_naval_supply_points()), 1.75f)
-		: 1.75f;
-		float over_size_penalty = oversize_amount > 1.0f ? 2.0f - oversize_amount : 1.0f;
-		auto spending_level = base_spending_level * over_size_penalty;
-		auto max_org = 0.25f + 0.75f * spending_level;
-		*/
-
 		for(auto shp : state.world.navy_get_navy_membership(n)) {
-			if(shp.get_ship().get_strength() < 0.5f)
-			return true;
+			if(shp.get_ship().get_strength() < 0.5f) {
+				return true;
+			}
 			//if(shp.get_ship().get_org() < 0.75f * max_org)
 			//	return true;
 		}
@@ -3740,8 +3746,9 @@ namespace ai {
 		for(auto par : state.world.nation_get_war_participant(n)) {
 			for(auto other : par.get_war().get_war_participant()) {
 				if(other.get_is_attacker() != par.get_is_attacker()) {
-					if(other.get_nation().get_used_naval_supply_points() > state.world.nation_get_used_naval_supply_points(n))
-					return false;
+					if(other.get_nation().get_used_naval_supply_points() > state.world.nation_get_used_naval_supply_points(n)) {
+						return false;
+					}
 				}
 			}
 		}
@@ -3792,8 +3799,9 @@ namespace ai {
 			}
 		}
 
-		if(result == start)
-		return true;
+		if(result == start) {
+			return true;
+		}
 
 		if(result) {
 			auto existing_path = state.world.navy_get_path(for_navy);
@@ -3819,7 +3827,6 @@ namespace ai {
 	void unload_units_from_transport(sys::state& state, dcon::navy_id n) {
 		auto transported_armies = state.world.navy_get_army_transport(n);
 		auto location = state.world.navy_get_location_from_navy_location(n);
-
 
 		for(auto ar : transported_armies) {
 			auto path = province::make_land_path(state, location, ar.get_army().get_ai_province(), ar.get_army().get_controller_from_army_control(), ar.get_army());
@@ -3882,110 +3889,112 @@ namespace ai {
 
 	void pickup_idle_ships(sys::state& state) {
 		for(auto n : state.world.in_navy) {
-			if(n.get_battle_from_navy_battle_participation())
-			continue;
-			if(n.get_arrival_time())
-			continue;
+			if(n.get_battle_from_navy_battle_participation()) {
+				continue;
+			}
+			if(n.get_arrival_time()) {
+				continue;
+			}
 
 			auto owner = n.get_controller_from_navy_control();
 
-			if(!owner || owner.get_is_player_controlled() || owner.get_owned_province_count() == 0)
-			continue;
+			if(!owner || owner.get_is_player_controlled() || owner.get_owned_province_count() == 0) {
+				continue;
+			}
 
 			auto home_port = state.world.nation_get_ai_home_port(owner);
-			if(!home_port)
-			continue;
+			if(!home_port) {
+				continue;
+			}
 
 			auto location = state.world.navy_get_location_from_navy_location(n);
 			auto activity = fleet_activity(state.world.navy_get_ai_activity(n));
 
 			switch(activity) {
-				case fleet_activity::unspecified:
+			case fleet_activity::unspecified:
 				if(location == home_port) {
 					if(!merge_fleet(state, n, location, owner))
-					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
-				} else if(!home_port) {
-
+						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
 				} else {
 					// move to home port to merge
 					send_fleet_home(state, n, fleet_activity::merging);
 				}
 				break;
-				case fleet_activity::boarding:
-				{
-					bool all_loaded = true;
-					for(auto ar : state.world.nation_get_army_control(owner)) {
-						if(ar.get_army().get_ai_activity() == uint8_t(army_activity::transport_guard) || ar.get_army().get_ai_activity() == uint8_t(army_activity::transport_attack)) {
-							if(ar.get_army().get_navy_from_army_transport() != n)
+			case fleet_activity::boarding:
+			{
+				bool all_loaded = true;
+				for(auto ar : state.world.nation_get_army_control(owner)) {
+					if(ar.get_army().get_ai_activity() == uint8_t(army_activity::transport_guard) || ar.get_army().get_ai_activity() == uint8_t(army_activity::transport_attack)) {
+						if(ar.get_army().get_navy_from_army_transport() != n)
 							all_loaded = false;
-						}
 					}
+				}
 
-					if(all_loaded) {
-						auto transporting_range = n.get_army_transport();
-						if(transporting_range.begin() == transporting_range.end()) { // failed to pick up troops
+				if(all_loaded) {
+					auto transporting_range = n.get_army_transport();
+					if(transporting_range.begin() == transporting_range.end()) { // failed to pick up troops
+						send_fleet_home(state, n);
+					} else {
+						auto transported_dest = (*(transporting_range.begin())).get_army().get_ai_province();
+
+						// move to closest port or closest off_shore
+						if(transported_dest.get_is_coast()) {
+							auto target_prov = transported_dest.id;
+							if(!province::has_naval_access_to_province(state, owner, target_prov)) {
+								target_prov = state.world.province_get_port_to(target_prov);
+							}
+							auto naval_path = province::make_naval_path(state, location, target_prov);
+
+							auto existing_path = n.get_path();
+							auto new_size = uint32_t(naval_path.size());
+							existing_path.resize(new_size);
+
+							for(uint32_t k = 0; k < new_size; ++k) {
+								existing_path[k] = naval_path[k];
+							}
+							if(new_size > 0) {
+								n.set_arrival_time(military::arrival_time_to(state, n, naval_path.back()));
+								n.set_ai_activity(uint8_t(fleet_activity::transporting));
+							} else {
+								n.set_arrival_time(sys::date{});
+								send_fleet_home(state, n);
+							}
+
+						} else if(auto path = province::make_path_to_nearest_coast(state, owner, transported_dest); path.empty()) {
 							send_fleet_home(state, n);
 						} else {
-							auto transported_dest = (*(transporting_range.begin())).get_army().get_ai_province();
+							auto target_prov = path.front();
+							if(!province::has_naval_access_to_province(state, owner, target_prov)) {
+								target_prov = state.world.province_get_port_to(target_prov);
+							}
+							auto naval_path = province::make_naval_path(state, location, target_prov);
 
-							// move to closest port or closest off_shore
-							if(transported_dest.get_is_coast()) {
-								auto target_prov = transported_dest.id;
-								if(!province::has_naval_access_to_province(state, owner, target_prov)) {
-									target_prov = state.world.province_get_port_to(target_prov);
-								}
-								auto naval_path = province::make_naval_path(state, location, target_prov);
+							auto existing_path = n.get_path();
+							auto new_size = uint32_t(naval_path.size());
+							existing_path.resize(new_size);
 
-								auto existing_path = n.get_path();
-								auto new_size = uint32_t(naval_path.size());
-								existing_path.resize(new_size);
-
-								for(uint32_t k = 0; k < new_size; ++k) {
-									existing_path[k] = naval_path[k];
-								}
-								if(new_size > 0) {
-									n.set_arrival_time(military::arrival_time_to(state, n, naval_path.back()));
-									n.set_ai_activity(uint8_t(fleet_activity::transporting));
-								} else {
-								n.set_arrival_time(sys::date{});
-									send_fleet_home(state, n);
-								}
-
-							} else if(auto path = province::make_path_to_nearest_coast(state, owner, transported_dest); path.empty()) {
-								send_fleet_home(state, n);
+							for(uint32_t k = 0; k < new_size; ++k) {
+								existing_path[k] = naval_path[k];
+							}
+							if(new_size > 0) {
+								n.set_arrival_time(military::arrival_time_to(state, n, naval_path.back()));
+								n.set_ai_activity(uint8_t(fleet_activity::transporting));
 							} else {
-								auto target_prov = path.front();
-								if(!province::has_naval_access_to_province(state, owner, target_prov)) {
-									target_prov = state.world.province_get_port_to(target_prov);
-								}
-								auto naval_path = province::make_naval_path(state, location, target_prov);
-
-								auto existing_path = n.get_path();
-								auto new_size = uint32_t(naval_path.size());
-								existing_path.resize(new_size);
-
-								for(uint32_t k = 0; k < new_size; ++k) {
-									existing_path[k] = naval_path[k];
-								}
-								if(new_size > 0) {
-									n.set_arrival_time(military::arrival_time_to(state, n, naval_path.back()));
-									n.set_ai_activity(uint8_t(fleet_activity::transporting));
-								} else {
 								n.set_arrival_time(sys::date{});
-									send_fleet_home(state, n);
-								}
+								send_fleet_home(state, n);
 							}
 						}
 					}
 				}
-				break;
-				case fleet_activity::transporting:
+			}
+			break;
+			case fleet_activity::transporting:
 				unload_units_from_transport(state, n);
 				break;
-				case fleet_activity::failed_transport:
+			case fleet_activity::failed_transport:
 				if(location == home_port) {
 					if(!merge_fleet(state, n, location, owner))
-					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
+						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
 				} else if(home_port) {
 					auto existing_path = state.world.navy_get_path(n);
 					auto path = province::make_naval_path(state, location, home_port);
@@ -4001,15 +4010,15 @@ namespace ai {
 					}
 				}
 				break;
-				case fleet_activity::returning_to_base:
+			case fleet_activity::returning_to_base:
 				if(location == home_port) {
 					if(!merge_fleet(state, n, location, owner))
-					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
+						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
 				} else {
 					send_fleet_home(state, n);
 				}
 				break;
-				case fleet_activity::attacking:
+			case fleet_activity::attacking:
 				if(state.world.nation_get_is_at_war(owner) == false) {
 					send_fleet_home(state, n);
 				} else if(navy_needs_repair(state, n)) {
@@ -4022,15 +4031,16 @@ namespace ai {
 					}
 				}
 				break;
-				case fleet_activity::merging:
+			case fleet_activity::merging:
 				if(location == home_port) {
-					if(!merge_fleet(state, n, location, owner))
-					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
+					if(!merge_fleet(state, n, location, owner)) {
+						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::idle));
+					}
 				} else {
 					send_fleet_home(state, n);
 				}
 				break;
-				case fleet_activity::idle:
+			case fleet_activity::idle:
 				if(location != home_port) {
 					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::unspecified));
 				} else if(owner.get_is_at_war()) {
@@ -4057,28 +4067,27 @@ namespace ai {
 					}
 				}
 				break;
-				case fleet_activity::unloading:
-				{
-					bool failed_transport = true;
+			case fleet_activity::unloading:
+			{
+				bool failed_transport = true;
 
-					auto transporting = state.world.navy_get_army_transport(n);
-					for(auto ar : transporting) {
-						if(ar.get_army().get_path().size() != 0) {
-							failed_transport = false;
-						}
-					}
-
-					if(transporting.begin() == transporting.end()) {
-						// all unloaded -> set to unspecified to send home later in this routine
-						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::unspecified));
-					} else if(failed_transport) {
-						// an army is stuck on the boats
-						state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::failed_transport));
-					} else {
-						// do nothing, still unloading
+				auto transporting = state.world.navy_get_army_transport(n);
+				for(auto ar : transporting) {
+					if(ar.get_army().get_path().size() != 0) {
+						failed_transport = false;
 					}
 				}
-				break;
+				if(transporting.begin() == transporting.end()) {
+					// all unloaded -> set to unspecified to send home later in this routine
+					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::unspecified));
+				} else if(failed_transport) {
+					// an army is stuck on the boats
+					state.world.navy_set_ai_activity(n, uint8_t(fleet_activity::failed_transport));
+				} else {
+					// do nothing, still unloading
+				}
+			}
+			break;
 			}
 		}
 	}
@@ -4105,7 +4114,6 @@ namespace ai {
 		provinces.reserve(state.world.province_size());
 
 		auto cap = state.world.nation_get_capital(n);
-
 		for(auto c : state.world.nation_get_province_control(n)) {
 			province_class cls = c.get_province().get_is_coast() ? province_class::coast : province_class::interior;
 			if(c.get_province() == cap)
@@ -4132,9 +4140,8 @@ namespace ai {
 						cls = province_class::low_priority_border;
 					}
 				} else {
-					/* We will target POTENTIAL enemies of the nation;
-						we could also check if the CB can be used on us, but
-						that is expensive, so instead we use available_cbs! */
+					/*	We will target POTENTIAL enemies of the nation; we could also check if
+						the CB can be used on us, but that is expensive, so instead we use available_cbs! */
 					bool is_threat = false;
 					if(n_controller) {
 						is_threat |= n_controller.get_ai_rival() == n;
@@ -4145,12 +4152,14 @@ namespace ai {
 							is_threat |= state.world.nation_get_ai_rival(n) == ovr.id;
 							//
 							is_threat |= ovr.get_constructing_cb_target() == n;
-							for(auto cb : ovr.get_available_cbs())
+							for(auto cb : ovr.get_available_cbs()) {
 								is_threat |= cb.target == n;
+							}
 						} else {
 							is_threat |= n_controller.get_constructing_cb_target() == n;
-							for(auto cb : n_controller.get_available_cbs())
+							for(auto cb : n_controller.get_available_cbs()) {
 								is_threat |= cb.target == n;
+							}
 						}
 					}
 					if(is_threat) {
@@ -4164,22 +4173,13 @@ namespace ai {
 					}
 				}
 				if(cls == province_class::hostile_border) {
-					auto dkey = demographics::to_key(state, state.culture_definitions.soldiers);
-					if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment * 5.f
-					|| other.get_is_coast()) {
+					// go for mobilization centers
+					if(other.get_state_membership().get_capital() == other) {
 						cls = province_class::high_priority_hostile_border;
-					} else if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment) {
-						cls = province_class::medium_priority_hostile_border;
 					}
-					if((c.get_province().get_siege_progress() > 0.f && n_controller == n)
-					|| n_controller != n) {
-						if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment * 5.f
-						|| other.get_is_coast()) {
-							cls = province_class::high_priority_hostile_border;
-						} else if(other.get_demographics(dkey) >= state.defines.pop_min_size_for_regiment) {
-							cls = province_class::medium_priority_hostile_border;
-						}
-					}
+					//else if(other.get_building_level(economy::province_building_type::naval_base) > 0) {
+					//	cls = province_class::medium_priority_hostile_border;
+					//}
 				}
 			}
 			provinces.push_back(classified_province{ c.get_province().id, cls });
@@ -4236,18 +4236,6 @@ namespace ai {
 							if(military::relative_attrition_amount(state, guards_list[k], p) >= 2.f)
 								continue; //too heavy
 
-							/*
-							// this wont work because a unit could end up in, for example, a subject's region at the end of a war
-							// this region could be landlocked, resulting in this thinking that the unit can only be stationed in that
-							// same region, even though it could walk out to another region
-
-							auto g_region = state.world.province_get_connected_region_id(guard_loc);
-							assert(g_region > 0);
-
-							if(p_region != g_region && !(state.world.army_get_black_flag(guards_list[k]))  && (!p_region_is_coastal || !state.province_definitions.connected_region_is_coastal[g_region - 1]))
-							continue;
-							*/
-
 							if(auto d = province::sorting_distance(state, guard_loc, p); !nearest || d < nearest_distance) {
 								nearest_index = k;
 								nearest_distance = d;
@@ -4279,12 +4267,12 @@ namespace ai {
 			auto members = v.get_navy().get_navy_membership();
 
 			auto tsize = int32_t(members.end() - members.begin());
-			if(tsize <= n_size || tsize <= 1)
-			continue;
+			if(tsize <= n_size || tsize <= 1) {
+				continue;
+			}
 
 			n_size = tsize;
-		transport_fleet = dcon::navy_id{};
-
+			transport_fleet = dcon::navy_id{};
 			fleet_activity activity = fleet_activity(v.get_navy().get_ai_activity());
 			if(activity == fleet_activity::attacking || activity == fleet_activity::idle || activity == fleet_activity::returning_to_base) {
 				auto in_transport = v.get_navy().get_army_transport();
@@ -4293,7 +4281,6 @@ namespace ai {
 				}
 			}
 		}
-
 		return transport_fleet;
 	}
 
@@ -4310,7 +4297,6 @@ namespace ai {
 			&& !ar.get_arrival_time()
 			&& !ar.get_battle_from_army_battle_participation()
 			&& !ar.get_navy_from_army_transport()) {
-
 				auto path = ar.get_black_flag() ? province::make_unowned_land_path(state, ar.get_location_from_army_location(), ar.get_ai_province()) : province::make_land_path(state, ar.get_location_from_army_location(), ar.get_ai_province(), ar.get_controller_from_army_control(), ar);
 				if(path.size() > 0) {
 					auto existing_path = ar.get_path();
@@ -4350,7 +4336,7 @@ namespace ai {
 						require_transport.pop_back();
 					}
 				}
-			state.world.army_set_ai_province(require_transport[i], dcon::province_id{}); // stop rechecking unit
+				state.world.army_set_ai_province(require_transport[i], dcon::province_id{}); // stop rechecking unit
 				continue;
 			}
 
@@ -4506,6 +4492,25 @@ namespace ai {
 		return state.world.regiment_get_org(sample_reg) > 0.7f * max_org;
 	}
 
+	float average_army_strength(sys::state& state, dcon::army_id a) {
+		float total = 0.f;
+		float value = 0.f;
+		for(auto const am : state.world.army_get_army_membership(a)) {
+			value += am.get_regiment().get_strength();
+			total += 1.f;
+		}
+		return total > 0.f ? value / total : 0.f;
+	}
+	float average_army_org(sys::state& state, dcon::army_id a) {
+		float total = 0.f;
+		float value = 0.f;
+		for(auto const am : state.world.army_get_army_membership(a)) {
+			value += am.get_regiment().get_org();
+			total += 1.f;
+		}
+		return total > 0.f ? value / total : 0.f;
+	}
+
 	void gather_to_battle(sys::state& state, dcon::nation_id n, dcon::province_id p) {
 		for(auto ar : state.world.nation_get_army_control(n)) {
 			army_activity activity = army_activity(ar.get_army().get_ai_activity());
@@ -4515,21 +4520,21 @@ namespace ai {
 			|| ar.get_army().get_arrival_time()
 			|| (activity != army_activity::on_guard && activity != army_activity::attacking && activity != army_activity::attack_gathered && activity != army_activity::attack_transport)
 			|| !army_ready_for_battle(state, n, ar.get_army())) {
-
 				continue;
 			}
 
 			auto location = ar.get_army().get_location_from_army_location();
-			if(location == p)
-			continue;
+			if(location == p) {
+				continue;
+			}
 
 			auto sdist = province::sorting_distance(state, location, p);
-			if(sdist > state.defines.alice_ai_gather_radius)
-			continue;
+			if(sdist > state.defines.alice_ai_gather_radius) {
+				continue;
+			}
 
 			auto jpath = province::make_land_path(state, location, p, n, ar.get_army());
 			if(!jpath.empty()) {
-
 				auto existing_path = ar.get_army().get_path();
 				auto new_size = uint32_t(jpath.size());
 				existing_path.resize(new_size * 2);
@@ -4547,7 +4552,6 @@ namespace ai {
 				ar.get_army().set_arrival_time(military::arrival_time_to(state, ar.get_army(), jpath.back()));
 				ar.get_army().set_dig_in(0);
 			}
-
 		}
 	}
 
@@ -4555,21 +4559,21 @@ namespace ai {
 		auto const& ut = state.military_definitions.unit_base_definitions[utid];
 		auto const& uts = state.world.nation_get_unit_stats(n, utid);
 		switch(state.military_definitions.unit_base_definitions[utid].type) {
-			case military::unit_type::cavalry:
-			case military::unit_type::infantry:
-			{
-				float atk = (uts.attack_or_gun_power + 1.f) / uts.discipline_or_evasion;
-				float def = (uts.attack_or_gun_power + 1.f) / uts.discipline_or_evasion;
-				return std::max(atk * def, 1.f);
-			}
-			case military::unit_type::support:
-			case military::unit_type::special:
-			{
-				float atk = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support / uts.discipline_or_evasion;
-				float def = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support / uts.discipline_or_evasion;
-				return std::max(atk * def, 1.f);
-			}
-			default:
+		case military::unit_type::cavalry:
+		case military::unit_type::infantry:
+		{
+			float atk = (uts.attack_or_gun_power + 1.f) / uts.discipline_or_evasion;
+			float def = (uts.attack_or_gun_power + 1.f) / uts.discipline_or_evasion;
+			return std::max(atk * def, 1.f);
+		}
+		case military::unit_type::support:
+		case military::unit_type::special:
+		{
+			float atk = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support / uts.discipline_or_evasion;
+			float def = (uts.attack_or_gun_power * 0.1f + 1.0f) * uts.support / uts.discipline_or_evasion;
+			return std::max(atk * def, 1.f);
+		}
+		default:
 			break;
 		}
 		return 0.f;
@@ -4589,8 +4593,6 @@ namespace ai {
 
 	float estimate_balanced_composition_factor(sys::state& state, dcon::army_id a) {
 		auto regs = state.world.army_get_army_membership(a);
-		if(regs.begin() == regs.end())
-		return 0.0f;
 		// account composition
 		// Ideal composition: 4/1/4 (1 cavalry for each 4 infantry and 1 infantry for each arty)
 		float total_str = 0.f;
@@ -4601,49 +4603,50 @@ namespace ai {
 			float str = reg.get_regiment().get_strength() * reg.get_regiment().get_org();
 			if(auto utid = reg.get_regiment().get_type(); utid) {
 				switch(state.military_definitions.unit_base_definitions[utid].type) {
-					case military::unit_type::infantry:
+				case military::unit_type::infantry:
 					str_inf += str;
 					break;
-					case military::unit_type::cavalry:
+				case military::unit_type::cavalry:
 					str_cav += str;
 					break;
-					case military::unit_type::support:
-					case military::unit_type::special:
+				case military::unit_type::support:
+				case military::unit_type::special:
 					str_art += str;
 					break;
-					default:
+				default:
 					break;
 				}
 			}
 			total_str += str;
 		}
-		if(total_str == 0.f)
-		return 0.f;
-		// provide continous function for each military unit composition
-		// such that 4x times the infantry (we min with arty for equality reasons) and 1/4th of cavalry
-		float min_cav = std::min(str_cav, str_inf * (1.f / 4.f)); // more cavalry isn't bad (if the rest of the composition is 4x/y/4x), just don't underestimate it!
-		float scale = 1.f - math::sin(std::abs(std::min(str_art / total_str, str_inf / total_str) - (4.f * min_cav / total_str)));
-		return total_str * scale;
+		if(total_str == 0.f) {
+			return 0.f;
+		}
+		if((str_cav + str_inf) == str_art) {
+			return 1.f;
+		}
+		return (str_cav + str_inf) > 0.f ? std::max(str_art / (str_cav + str_inf), 0.01f) : 0.01f;
 	}
 
 	float estimate_army_defensive_strength(sys::state& state, dcon::army_id a) {
 		float scale = state.world.army_get_controller_from_army_control(a) ? 1.f : 0.5f;
 		// account general
 		auto n = state.world.army_get_controller_from_army_control(a);
-		if(!n)
-		n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+		if(!n) {
+			n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+		}
 		if(auto gen = state.world.army_get_general_from_army_leadership(a); gen) {
 			auto back = state.world.leader_get_background(gen);
 			auto pers = state.world.leader_get_personality(gen);
 			float morale = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::org_regain)
-			+ state.world.leader_trait_get_morale(back)
-			+ state.world.leader_trait_get_morale(pers) + 1.0f;
+				+ state.world.leader_trait_get_morale(back)
+				+ state.world.leader_trait_get_morale(pers) + 1.0f;
 			float org = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_organisation)
-			+ state.world.leader_trait_get_organisation(back)
-			+ state.world.leader_trait_get_organisation(pers) + 1.0f;
+				+ state.world.leader_trait_get_organisation(back)
+				+ state.world.leader_trait_get_organisation(pers) + 1.0f;
 			float def = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_defense_modifier)
-			+ state.world.leader_trait_get_defense(back)
-			+ state.world.leader_trait_get_defense(pers) + 1.0f;
+				+ state.world.leader_trait_get_defense(back)
+				+ state.world.leader_trait_get_defense(pers) + 1.0f;
 			scale += def * morale * org;
 		}
 		// terrain defensive bonus
@@ -4661,20 +4664,21 @@ namespace ai {
 		float scale = state.world.army_get_controller_from_army_control(a) ? 1.f : 0.5f;
 		// account general
 		auto n = state.world.army_get_controller_from_army_control(a);
-		if(!n)
-		n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+		if(!n) {
+			n = state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+		}
 		if(auto gen = state.world.army_get_general_from_army_leadership(a); gen) {
 			auto back = state.world.leader_get_background(gen);
 			auto pers = state.world.leader_get_personality(gen);
 			float morale = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::org_regain)
-			+ state.world.leader_trait_get_morale(back)
-			+ state.world.leader_trait_get_morale(pers) + 1.0f;
+				+ state.world.leader_trait_get_morale(back)
+				+ state.world.leader_trait_get_morale(pers) + 1.0f;
 			float org = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_organisation)
-			+ state.world.leader_trait_get_organisation(back)
-			+ state.world.leader_trait_get_organisation(pers) + 1.0f;
+				+ state.world.leader_trait_get_organisation(back)
+				+ state.world.leader_trait_get_organisation(pers) + 1.0f;
 			float atk = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attack_modifier)
-			+ state.world.leader_trait_get_attack(back)
-			+ state.world.leader_trait_get_attack(pers) + 1.0f;
+				+ state.world.leader_trait_get_attack(back)
+				+ state.world.leader_trait_get_attack(pers) + 1.0f;
 			scale += atk * morale * org;
 		}
 		// composition bonus
@@ -4728,19 +4732,18 @@ namespace ai {
 			|| ar.get_army().get_arrival_time()
 			|| activity != army_activity::on_guard
 			|| !army_ready_for_battle(state, n, ar.get_army())) {
-
 				continue;
 			}
 
 			++ready_count;
 			auto loc = ar.get_army().get_location_from_army_location().id;
-		if(std::find_if(ready_armies.begin(), ready_armies.end(), [loc](a_str const& v) { return loc == v.p; }) == ready_armies.end()) {
-			ready_armies.push_back(a_str{ loc, 0.0f });
+			if(std::find_if(ready_armies.begin(), ready_armies.end(), [loc](a_str const& v) { return loc == v.p; }) == ready_armies.end()) {
+				ready_armies.push_back(a_str{ loc, 0.0f });
 			}
 		}
 
 		if(ready_armies.empty())
-		return; // nothing to attack with
+			return; // nothing to attack with
 
 		struct army_target {
 			float minimal_distance;
@@ -4752,11 +4755,9 @@ namespace ai {
 		std::vector<army_target> potential_targets;
 		potential_targets.reserve(state.world.province_size());
 		for(auto o : state.world.nation_get_province_ownership(n)) {
-			if(!o.get_province().get_nation_from_province_control()
-			|| military::rebel_army_in_province(state, o.get_province())
-			) {
+			if(!o.get_province().get_nation_from_province_control() || military::rebel_army_in_province(state, o.get_province())) {
 				potential_targets.push_back(
-			army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
+					army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
 				);
 			}
 		}
@@ -4776,13 +4777,13 @@ namespace ai {
 		for(auto w : at_war_with) {
 			for(auto o : state.world.nation_get_province_control(w)) {
 				potential_targets.push_back(
-			army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
+					army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
 				);
 			}
 			for(auto o : state.world.nation_get_province_ownership(w)) {
 				if(!o.get_province().get_nation_from_province_control()) {
 					potential_targets.push_back(
-				army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
+						army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
 					);
 				}
 			}
@@ -4791,11 +4792,9 @@ namespace ai {
 		for(const auto ovr : state.world.nation_get_overlord_as_ruler(n)) {
 			auto w = ovr.get_subject();
 			for(auto o : state.world.nation_get_province_ownership(w)) {
-				if(!o.get_province().get_nation_from_province_control()
-				|| military::rebel_army_in_province(state, o.get_province())
-				) {
+				if(!o.get_province().get_nation_from_province_control() || military::rebel_army_in_province(state, o.get_province())) {
 					potential_targets.push_back(
-				army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
+						army_target{ province::sorting_distance(state, o.get_province(), ready_armies[0].p), o.get_province().id, 0.0f }
 					);
 				}
 			}
@@ -4822,10 +4821,13 @@ namespace ai {
 		auto const psize = potential_targets.size();
 
 		for(uint32_t i = 0; i < psize && max_attacks_to_make > 0; ++i) {
-			if(!potential_targets[i].location)
-			continue; // target has been removed as too close by some earlier iteration
-			if(potential_targets[i].strength_estimate == 0.0f)
-			potential_targets[i].strength_estimate = estimate_enemy_defensive_force(state, potential_targets[i].location, n) + 0.00001f;
+			if(!potential_targets[i].location) {
+				continue; // target has been removed as too close by some earlier iteration
+			}
+			if(potential_targets[i].strength_estimate == 0.0f) {
+				potential_targets[i].strength_estimate = estimate_enemy_defensive_force(state, potential_targets[i].location, n);
+				potential_targets[i].strength_estimate = std::max(0.001f, potential_targets[i].strength_estimate);
+			}
 
 			auto target_attack_force = potential_targets[i].strength_estimate;
 			pdqsort(ready_armies.begin(), ready_armies.end(), [&](a_str const& a, a_str const& b) {
@@ -4849,13 +4851,11 @@ namespace ai {
 						|| ar.get_army().get_arrival_time()
 						|| army_activity(ar.get_army().get_ai_activity()) != army_activity::on_guard
 						|| !army_ready_for_battle(state, n, ar.get_army())) {
-
 							continue;
 						}
-
 						ready_armies[k].str += estimate_army_offensive_strength(state, ar.get_army());
 					}
-					ready_armies[k].str += 0.00001f;
+					ready_armies[k].str = std::max(0.001f, ready_armies[k].str);
 				}
 				a_force_str += ready_armies[k].str;
 			}
@@ -4867,27 +4867,30 @@ namespace ai {
 			// find central province
 			dcon::province_id central_province;
 
-		glm::vec3 accumulated{ 0.0f, 0.0f, 0.0f };
+			glm::vec3 accumulated{ 0.0f, 0.0f, 0.0f };
 			float minimal_distance = 2.0f;
 
 			for(int32_t m = int32_t(ready_armies.size()); m-- > k + 1; ) {
 				accumulated += state.world.province_get_mid_point_b(ready_armies[m].p);
 			}
 			auto magnitude = math::sqrt((accumulated.x * accumulated.x + accumulated.y * accumulated.y) + accumulated.z * accumulated.z);
-			if(magnitude > 0.00001f)
-			accumulated /= magnitude;
+			if(magnitude > 0.001f) {
+				accumulated /= magnitude;
+			}
 
 			province::for_each_land_province(state, [&](dcon::province_id p) {
-				if(!province::has_safe_access_to_province(state, n, p))
-				return;
+				if(!province::has_safe_access_to_province(state, n, p)) {
+					return;
+				}
 				auto pmid = state.world.province_get_mid_point_b(p);
 				if(auto dist = -((accumulated.x * pmid.x + accumulated.y * pmid.y) + accumulated.z * pmid.z); dist < minimal_distance) {
 					minimal_distance = dist;
 					central_province = p;
 				}
 			});
-			if(!central_province)
-			continue;
+			if(!central_province) {
+				continue;
+			}
 
 			// issue safe-move gather command
 			for(int32_t m = int32_t(ready_armies.size()); m-- > k + 1; ) {
@@ -4900,7 +4903,6 @@ namespace ai {
 					|| ar.get_army().get_arrival_time()
 					|| army_activity(ar.get_army().get_ai_activity()) != army_activity::on_guard
 					|| !army_ready_for_battle(state, n, ar.get_army())) {
-
 						continue;
 					}
 
@@ -4930,16 +4932,61 @@ namespace ai {
 			// remove subsequent targets that are too close
 			if(is_at_war) {
 				for(uint32_t j = i + 1; j < psize; ++j) {
-					if(province::sorting_distance(state, potential_targets[j].location, potential_targets[i].location) < state.defines.alice_ai_attack_target_radius)
-				potential_targets[j].location = dcon::province_id{};
+					if(province::sorting_distance(state, potential_targets[j].location, potential_targets[i].location) < state.defines.alice_ai_attack_target_radius) {
+						potential_targets[j].location = dcon::province_id{};
+					}
+				}
+			}
+		}
+	}
+
+	void perform_cycling(sys::state& state) {
+		//code in charge of cycling armies
+		for(auto lb : state.world.in_land_battle) {
+			if(!military::can_retreat_from_battle(state, lb))
+				continue; //can't cycle yet
+			for(auto ar : state.world.land_battle_get_army_battle_participation(lb)) {
+				auto n = ar.get_army().get_controller_from_army_control();
+				if(ar.get_battle() && ar.get_army() && (!n || !n.get_is_player_controlled())) {
+					auto al = ar.get_battle().get_attacking_general();
+					auto dl = ar.get_battle().get_defending_general();
+					auto w = ar.get_battle().get_war_from_land_battle_in_war();
+					auto role = military::get_role(state, w, n);
+					if(role == military::war_role::none) {
+						//handling rebels
+					} else {
+						auto avg_str = average_army_strength(state, ar.get_army());
+						auto avg_org = average_army_org(state, ar.get_army());
+						if(avg_str < 0.3f || avg_org < 0.3f) {
+							dcon::province_id best_prov;
+							auto const p = ar.get_battle().get_location_from_land_battle_location();
+							for(auto const adj : p.get_province_adjacency()) {
+								auto const o = adj.get_connected_provinces(p == adj.get_connected_provinces(0) ? 1 : 0);
+								if(province::has_access_to_province(state, n, o)) {
+									if(!best_prov) {
+										best_prov = o;
+									}
+									if(n == o.get_nation_from_province_control()
+									|| military::are_allied_in_war(state, n, o.get_nation_from_province_control())) {
+										best_prov = o;
+									}
+								}
+							}
+							if(best_prov
+							&& command::can_move_army(state, n, ar.get_army(), best_prov).size() > 0) {
+								command::move_army(state, n, ar.get_army(), best_prov, true);
+							}
+						}
+					}
 				}
 			}
 		}
 	}
 
 	void make_attacks(sys::state& state) {
+		perform_cycling(state);
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
-		dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
+			dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
 			if(state.world.nation_is_valid(n)) {
 				assign_targets(state, n);
 			}
@@ -4948,7 +4995,7 @@ namespace ai {
 
 	void make_defense(sys::state& state) {
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
-		dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
+			dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
 			if(state.world.nation_is_valid(n)) {
 				distribute_guards(state, n);
 			}
