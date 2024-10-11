@@ -164,8 +164,15 @@ namespace ui {
 		}
 	};
 
+	enum class unit_counter_position_type : uint8_t {
+		land,
+		land_move,
+		port,
+	};
+
+	template<unit_counter_position_type A>
 	class unit_counter_bg : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto prov = retrieve<dcon::province_id>(state, parent);
 			auto n = retrieve<dcon::navy_id>(state, parent);
@@ -178,14 +185,24 @@ namespace ui {
 			state.selected_navies.clear();
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
-					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
-					state.select(al.get_navy());
+					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
+						state.select(al.get_navy());
+					}
 				}
 			}
 			if(state.selected_navies.empty() && bool(retrieve<dcon::army_id>(state, parent))) {
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport() && al.get_army().get_controller_from_army_control() == state.local_player_nation)
-					state.select(al.get_army());
+					if(!al.get_army().get_navy_from_army_transport()
+					&& al.get_army().get_controller_from_army_control() == state.local_player_nation) {
+						if constexpr(A == unit_counter_position_type::land_move) {
+							if(al.get_army().get_path().size() > 0
+							&& !al.get_army().get_battle_from_army_battle_participation()) {
+								state.select(al.get_army());
+							}
+						} else {
+							state.select(al.get_army());
+						}
+					}
 				}
 			}
 		}
@@ -216,12 +233,6 @@ namespace ui {
 		}
 	};
 
-	enum class unit_counter_position_type : uint8_t {
-		land,
-		land_move,
-		port,
-	};
-
 	template<unit_counter_position_type A>
 	class unit_counter_window : public window_element_base {
 	public:
@@ -233,7 +244,7 @@ namespace ui {
 
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "unit_panel_bg") {
-				return make_element_by_type<unit_counter_bg>(state, id);
+				return make_element_by_type<unit_counter_bg<A>>(state, id);
 			} else if(name == "unit_panel_color") {
 				return make_element_by_type<unit_counter_color_bg>(state, id);
 			} else if(name == "unit_strength") {
@@ -335,9 +346,11 @@ namespace ui {
 					auto path = state.world.army_get_path(army);
 					if(path.size() > 0) {
 						auto dp = state.world.province_get_mid_point(path[path.size() - 1]);
-						auto mid_point = state.world.province_get_mid_point(prov);
-						mid_point += glm::vec2(2.f, 2.f) * glm::atan(dp.x - mid_point.x, dp.y - mid_point.y);
-						map_pos = state.map_state.normalize_map_coord(mid_point);
+						auto mp = state.world.province_get_mid_point(prov);
+						auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
+						mp.x += 2.f * glm::sin(theta);
+						mp.y += 2.f * glm::cos(theta);
+						map_pos = state.map_state.normalize_map_coord(mp);
 					} else {
 						visible = false;
 						return;
