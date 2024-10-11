@@ -1842,7 +1842,7 @@ namespace economy {
 		*/
 
 		concurrency::parallel_for(uint32_t(0), state.world.commodity_size(), [&](uint32_t k) {
-		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(k) };
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(k) };
 
 			//handling gold cost separetely
 			if(state.world.commodity_get_money_rgo(cid)) {
@@ -1976,7 +1976,7 @@ namespace economy {
 				float total_cost = 0.f;
 
 				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 					total_cost += state.world.nation_get_private_construction_demand(n, c) * state.world.commodity_get_current_price(c);
 				}
 
@@ -2718,5 +2718,11 @@ namespace economy {
 			total = std::min(total, state.world.nation_get_demand_satisfaction(n, cset.commodity_type[i]));
 		}
 		return total;
+	}
+
+	float commodity_market_activity(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+		float produced = state.world.nation_get_domestic_market_pool(n, c);
+		float consumed = state.world.nation_get_real_demand(n, c) * state.world.nation_get_demand_satisfaction(n, c);
+		return produced + consumed;
 	}
 } // namespace economy

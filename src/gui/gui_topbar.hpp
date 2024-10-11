@@ -2239,56 +2239,56 @@ namespace ui {
 
 		void on_update(sys::state& state) noexcept override {
 			if(atpeacetext)
-			atpeacetext->set_visible(state, !state.world.nation_get_is_at_war(state.local_player_nation));
+				atpeacetext->set_visible(state, !state.world.nation_get_is_at_war(state.local_player_nation));
 			if(state.local_player_nation != current_nation) {
 				current_nation = state.local_player_nation;
 				Cyto::Any payload = current_nation;
 				impl_set(state, payload);
 			}
 
-			for(auto& e : export_icons)
-			e->set_visible(state, false);
-			for(auto& e : import_icons)
-			e->set_visible(state, false);
-			for(auto& e : produced_icons)
-			e->set_visible(state, false);
+			for(auto& e : export_icons) {
+				e->set_visible(state, false);
+			}
+			for(auto& e : import_icons) {
+				e->set_visible(state, false);
+			}
+			for(auto& e : produced_icons) {
+				e->set_visible(state, false);
+			}
 
 			{
 				std::map<float, int32_t> v;
-				for(dcon::commodity_id cid : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::military_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::raw_material_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::industrial_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::consumer_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::industrial_and_consumer_goods)
-					return;
-					float produced = state.world.nation_get_domestic_market_pool(state.local_player_nation, cid);
-					float consumed = state.world.nation_get_real_demand(state.local_player_nation, cid) *
-												 state.world.nation_get_demand_satisfaction(state.local_player_nation, cid);
-				v.insert({produced - consumed, cid.index()});
+				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+					float produced = state.world.nation_get_domestic_market_pool(state.local_player_nation, c);
+					float consumed = state.world.nation_get_real_demand(state.local_player_nation, c)
+						* state.world.nation_get_demand_satisfaction(state.local_player_nation, c);
+					v.insert({produced - consumed, c.index()});
 				}
 
 				uint8_t slot = 0;
 				for(auto it = std::rbegin(v); it != std::rend(v); it++) {
-					for(auto const& e : export_icons)
-					if(e->slot == slot) {
-						dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
-						e->frame = state.world.commodity_get_icon(cid);
-						e->commodity_id = cid;
-						e->amount = it->first;
-						e->set_visible(state, true);
+					for(auto const& e : export_icons) {
+						if(e->slot == slot) {
+							dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
+							e->frame = state.world.commodity_get_icon(cid);
+							e->commodity_id = cid;
+							e->amount = it->first;
+							e->set_visible(state, true);
+						}
 					}
 					++slot;
 				}
 				slot = 0;
 				for(auto it = v.begin(); it != v.end(); it++) {
-					for(auto const& e : import_icons)
-					if(e->slot == slot) {
-						dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
-						e->frame = state.world.commodity_get_icon(cid);
-						e->commodity_id = cid;
-						e->amount = it->first;
-						e->set_visible(state, true);
+					for(auto const& e : import_icons) {
+						if(e->slot == slot) {
+							dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
+							e->frame = state.world.commodity_get_icon(cid);
+							e->commodity_id = cid;
+							e->amount = it->first;
+							e->set_visible(state, true);
+						}
 					}
 					++slot;
 				}
@@ -2296,25 +2296,21 @@ namespace ui {
 
 			{
 				std::map<float, int32_t> v;
-				for(dcon::commodity_id cid : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::military_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::raw_material_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::industrial_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::consumer_goods &&
-						sys::commodity_group(state.world.commodity_get_commodity_group(cid)) != sys::commodity_group::industrial_and_consumer_goods)
-					return;
-				v.insert({state.world.nation_get_domestic_market_pool(state.local_player_nation, cid), cid.index()});
+				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+					v.insert({state.world.nation_get_domestic_market_pool(state.local_player_nation, c), c.index()});
 				}
 
 				uint8_t slot = 0;
 				for(auto it = std::rbegin(v); it != std::rend(v); it++) {
-					for(auto const& e : produced_icons)
-					if(e->slot == slot) {
-						dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
-						e->frame = state.world.commodity_get_icon(cid);
-						e->commodity_id = cid;
-						e->amount = it->first;
-						e->set_visible(state, true);
+					for(auto const& e : produced_icons) {
+						if(e->slot == slot) {
+							dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(it->second));
+							e->frame = state.world.commodity_get_icon(cid);
+							e->commodity_id = cid;
+							e->amount = it->first;
+							e->set_visible(state, true);
+						}
 					}
 					++slot;
 				}

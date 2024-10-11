@@ -26,6 +26,5 @@ namespace economy_estimations {
 	// NOTE: used to estimate how much you will pay if you were to subsidize a particular nation,
 	// *not* how much you are paying at the moment
 	float estimate_war_subsidies(sys::state& state, dcon::nation_id n);
-	
 	float estimate_daily_income(sys::state& state, dcon::nation_id n);
 }
