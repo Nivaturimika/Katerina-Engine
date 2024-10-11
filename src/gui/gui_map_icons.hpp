@@ -279,7 +279,7 @@ namespace ui {
 					if(!al.get_army().get_navy_from_army_transport()
 					&& al.get_army()
 					&& al.get_army().get_path().size() > 0
-					&& !al.get_army().get_army_battle_participation()) {
+					&& !al.get_army().get_battle_from_army_battle_participation()) {
 						army = al.get_army();
 						if(al.get_army().get_controller_from_army_control() == state.local_player_nation)
 							break;
@@ -290,7 +290,7 @@ namespace ui {
 					for(auto al : state.world.province_get_navy_location_as_location(prov)) {
 						if(al.get_navy()
 						&& al.get_navy().get_path().size() > 0
-						&& !al.get_navy().get_navy_battle_participation()) {
+						&& !al.get_navy().get_battle_from_navy_battle_participation()) {
 							navy = al.get_navy();
 							if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
 								break;
