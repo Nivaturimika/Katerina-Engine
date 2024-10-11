@@ -154,7 +154,7 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			auto c = retrieve<dcon::commodity_id>(state, parent);
-			auto v = int64_t(state.world.commodity_get_total_real_demand(c));
+			auto v = int64_t(state.world.commodity_get_total_consumption(c));
 			set_text(state, text::prettify(v));
 		}
 	};
@@ -162,7 +162,7 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			auto c = retrieve<dcon::commodity_id>(state, parent);
-			auto v = int64_t(state.world.commodity_get_total_real_demand(c) * state.world.commodity_get_current_price(c));
+			auto v = int64_t(state.world.commodity_get_total_consumption(c) * state.world.commodity_get_current_price(c));
 			set_text(state, text::prettify(v));
 		}
 	};
@@ -207,8 +207,8 @@ namespace ui {
 				break;
 			case trade_sort::price:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = state.world.commodity_get_total_real_demand(a) * state.world.commodity_get_current_price(a);
-					auto bv = state.world.commodity_get_total_real_demand(b) * state.world.commodity_get_current_price(b);
+					auto av = state.world.commodity_get_total_consumption(a) * state.world.commodity_get_current_price(a);
+					auto bv = state.world.commodity_get_total_consumption(b) * state.world.commodity_get_current_price(b);
 					if(av != bv)
 						return av > bv;
 					return a.index() < b.index();
@@ -216,8 +216,8 @@ namespace ui {
 				break;
 			case trade_sort::demand_satisfaction:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = state.world.commodity_get_total_real_demand(a);
-					auto bv = state.world.commodity_get_total_real_demand(b);
+					auto av = state.world.commodity_get_total_consumption(a);
+					auto bv = state.world.commodity_get_total_consumption(b);
 					if(av != bv)
 						return av > bv;
 					return a.index() < b.index();
