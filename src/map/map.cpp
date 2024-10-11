@@ -1282,11 +1282,8 @@ namespace map {
 			if(shaders[uint8_t(map_view_mode)][shader_map_standing_object] && zoom > map::zoom_very_close && state.user_settings.render_models) {
 				constexpr float dist_step = 1.77777f;
 				// Render standing objects
-
 				load_shader(shader_map_standing_object);
-
 				std::vector<model_render_command> list;
-
 				// Province flags
 				province::for_each_land_province(state, [&](dcon::province_id p) {
 					if(province_on_screen[p.index()]) {
