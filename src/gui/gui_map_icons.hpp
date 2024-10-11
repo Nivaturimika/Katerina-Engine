@@ -354,7 +354,7 @@ namespace ui {
 					v.y -= 2.5f / float(state.map_state.map_data.size_y);
 					map_pos = glm::vec2(v.x, 1.f - v.y);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
-					auto path = state.world.army_get_path(army);
+					auto path = army ? state.world.army_get_path(army) : state.world.navy_get_path(navy);
 					if(path.size() > 0) {
 						auto dp = state.world.province_get_mid_point(path[path.size() - 1]);
 						auto mp = state.world.province_get_mid_point(prov);
