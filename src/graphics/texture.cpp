@@ -336,7 +336,7 @@ set to one or more of the following values.	*/
 						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							auto ptr = buffer + buffer_index + i * block_size;
-							uint32_t data = uint32_t((ptr[0] << 16) | (ptr[1] << 8) | ptr[2]);
+							uint32_t data = uint32_t((ptr[2] << 16) | (ptr[1] << 8) | ptr[0]);
 							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
 							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
 							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
@@ -351,7 +351,7 @@ set to one or more of the following values.	*/
 						dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 3]);
 						for(uint32_t i = 0; i < dds_full_size / block_size; i++) {
 							auto ptr = buffer + buffer_index + i * block_size;
-							uint32_t data = uint32_t((ptr[0] << 16) | (ptr[1] << 8) | ptr[2]);
+							uint32_t data = uint32_t((ptr[2] << 16) | (ptr[1] << 8) | ptr[0]);
 							uint32_t r = (data & header->sPixelFormat.dwRBitMask) >> rmask_zeros;
 							uint32_t g = (data & header->sPixelFormat.dwGBitMask) >> gmask_zeros;
 							uint32_t b = (data & header->sPixelFormat.dwBBitMask) >> bmask_zeros;
