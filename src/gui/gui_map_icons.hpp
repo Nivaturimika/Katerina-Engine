@@ -53,15 +53,44 @@ namespace ui {
 		}
 	};
 
+	enum class unit_counter_position_type : uint8_t {
+		land,
+		land_move,
+		port,
+	};
+
+	bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::army_id a) {
+		auto fat_id = dcon::fatten(state.world, a);
+		switch(pos) {
+		case unit_counter_position_type::port:
+		case unit_counter_position_type::land:
+			return (fat_id.get_path().size() == 0 || fat_id.get_battle_from_army_battle_participation())
+				&& !fat_id.get_navy_from_army_transport();
+		case unit_counter_position_type::land_move:
+			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_army_battle_participation());
+		}
+	}
+	bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::navy_id a) {
+		auto fat_id = dcon::fatten(state.world, a);
+		switch(pos) {
+		case unit_counter_position_type::port:
+		case unit_counter_position_type::land:
+			return fat_id.get_path().size() == 0 || fat_id.get_battle_from_navy_battle_participation();
+		case unit_counter_position_type::land_move:
+			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_navy_battle_participation());
+		}
+	}
+
+	template<unit_counter_position_type A>
 	class unit_counter_org_bar : public vertical_progress_bar {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			float total = 0.f;
 			float value = 0.f;
 			auto prov = retrieve<dcon::province_id>(state, parent);
 			if(bool(retrieve<dcon::army_id>(state, parent))) {
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport()) {
+					if(filter_unit_for_position_type(state, A, al.get_army())) {
 						for(const auto memb : al.get_army().get_army_membership()) {
 							value += memb.get_regiment().get_org();
 							total += 1.f;
@@ -71,9 +100,11 @@ namespace ui {
 			}
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
-					for(const auto memb : al.get_navy().get_navy_membership()) {
-						value += memb.get_ship().get_org();
-						total += 1.f;
+					if(filter_unit_for_position_type(state, A, al.get_navy())) {
+						for(const auto memb : al.get_navy().get_navy_membership()) {
+							value += memb.get_ship().get_org();
+							total += 1.f;
+						}
 					}
 				}
 			}
@@ -85,11 +116,12 @@ namespace ui {
 		public:
 		mouse_probe impl_probe_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 			if(type == mouse_probe_type::tooltip)
-			return flag_button2::impl_probe_mouse(state, x, y, type);
-		return mouse_probe{ nullptr, ui::xy_pair{} };
+				return flag_button2::impl_probe_mouse(state, x, y, type);
+			return mouse_probe{ nullptr, ui::xy_pair{} };
 		}
 	};
 
+	template<unit_counter_position_type A>
 	class unit_counter_strength : public simple_text_element_base {
 		void on_update(sys::state& state) noexcept override {
 			auto prov = retrieve<dcon::province_id>(state, parent);
@@ -97,7 +129,7 @@ namespace ui {
 			bool has_navy = bool(retrieve<dcon::navy_id>(state, parent));
 			if(!has_navy) {
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport()) {
+					if(filter_unit_for_position_type(state, A, al.get_army())) {
 						for(const auto memb : al.get_army().get_army_membership()) {
 							value += memb.get_regiment().get_strength() * 3.f;
 						}
@@ -105,8 +137,10 @@ namespace ui {
 				}
 			} else {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
-					for(const auto memb : al.get_navy().get_navy_membership()) {
-						value += memb.get_ship().get_strength();
+					if(filter_unit_for_position_type(state, A, al.get_navy())) {
+						for(const auto memb : al.get_navy().get_navy_membership()) {
+							value += memb.get_ship().get_strength();
+						}
 					}
 				}
 			}
@@ -116,7 +150,7 @@ namespace ui {
 
 	class unit_counter_attrition : public image_element_base {
 		bool visible = false;
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			visible = false;
 			auto n = retrieve<dcon::navy_id>(state, parent);
@@ -130,44 +164,40 @@ namespace ui {
 		}
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(visible)
-			image_element_base::impl_render(state, x, y);
+				image_element_base::impl_render(state, x, y);
 		}
 	};
 
 	class unit_counter_color_bg : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto prov = retrieve<dcon::province_id>(state, parent);
 			frame = 0;
 			auto n = retrieve<dcon::navy_id>(state, parent);
 			if(n) {
 				if(state.world.navy_get_controller_from_navy_control(n) != state.local_player_nation) {
-					frame = 2;
+					frame = 2; //gray
 					if(military::are_at_war(state, state.world.navy_get_controller_from_navy_control(n), state.local_player_nation)) {
-						frame = 1;
+						frame = 1; //red
 					} else if(military::are_allied_in_war(state, state.world.navy_get_controller_from_navy_control(n), state.local_player_nation)) {
-						frame = 3;
+						frame = 0; //green
 					}
 				}
 				return;
 			}
 			auto a = retrieve<dcon::army_id>(state, parent);
 			if(state.world.army_get_controller_from_army_control(a) != state.local_player_nation) {
-				frame = 2;
+				frame = 2; //gray
 				if(military::are_at_war(state, state.world.army_get_controller_from_army_control(a), state.local_player_nation)
 				|| state.world.army_get_controller_from_army_rebel_control(a)) {
-					frame = 1;
+					frame = 1; //red
 				} else if(military::are_allied_in_war(state, state.world.army_get_controller_from_army_control(a), state.local_player_nation)) {
-					frame = 3;
+					frame = 0; //green
+				} else if(state.world.army_get_is_retreating(a) || state.world.army_get_black_flag(a)) {
+					frame = 2; //gray
 				}
 			}
 		}
-	};
-
-	enum class unit_counter_position_type : uint8_t {
-		land,
-		land_move,
-		port,
 	};
 
 	template<unit_counter_position_type A>
@@ -186,15 +216,8 @@ namespace ui {
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
 					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
-						if constexpr(A == unit_counter_position_type::land_move) {
-							if(al.get_navy().get_path().size() > 0
-							&& !al.get_navy().get_battle_from_navy_battle_participation()) {
-								state.select(al.get_navy());
-							}
-						} else {
-							if(al.get_navy().get_path().size() == 0) {
-								state.select(al.get_navy());
-							}
+						if(filter_unit_for_position_type(state, A, al.get_navy())) {
+							state.select(al.get_navy());
 						}
 					}
 				}
@@ -203,15 +226,8 @@ namespace ui {
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
 					if(!al.get_army().get_navy_from_army_transport()
 					&& al.get_army().get_controller_from_army_control() == state.local_player_nation) {
-						if constexpr(A == unit_counter_position_type::land_move) {
-							if(al.get_army().get_path().size() > 0
-							&& !al.get_army().get_battle_from_army_battle_participation()) {
-								state.select(al.get_army());
-							}
-						} else {
-							if(al.get_army().get_path().size() == 0) {
-								state.select(al.get_army());
-							}
+						if(filter_unit_for_position_type(state, A, al.get_army())) {
+							state.select(al.get_army());
 						}
 					}
 				}
@@ -223,15 +239,21 @@ namespace ui {
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				state.selected_armies.clear();
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
-					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation)
-					state.select(al.get_navy());
+					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
+						if(filter_unit_for_position_type(state, A, al.get_navy())) {
+							state.select(al.get_navy());
+						}
+					}
 				}
 			}
 			if(bool(retrieve<dcon::army_id>(state, parent))) {
 				state.selected_navies.clear();
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport() && al.get_army().get_controller_from_army_control() == state.local_player_nation)
-					state.select(al.get_army());
+					if(al.get_army().get_controller_from_army_control() == state.local_player_nation) {
+						if(filter_unit_for_position_type(state, A, al.get_army())) {
+							state.select(al.get_army());
+						}
+					}
 				}
 			}
 		}
@@ -259,9 +281,9 @@ namespace ui {
 			} else if(name == "unit_panel_color") {
 				return make_element_by_type<unit_counter_color_bg>(state, id);
 			} else if(name == "unit_strength") {
-				return make_element_by_type<unit_counter_strength>(state, id);
+				return make_element_by_type<unit_counter_strength<A>>(state, id);
 			} else if(name == "unit_panel_org_bar") {
-				return make_element_by_type<unit_counter_org_bar>(state, id);
+				return make_element_by_type<unit_counter_org_bar<A>>(state, id);
 			} else if(name == "unit_panel_country_flag") {
 				auto ptr = make_element_by_type<unit_counter_flag>(state, id);
 				ptr->base_data.position.y -= 1; //nudge
