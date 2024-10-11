@@ -1383,24 +1383,24 @@ namespace command {
 		can be a secondary target for this action. Your current opinion must be less than friendly
 		*/
 		if(!state.world.nation_get_is_great_power(source) || state.world.nation_get_is_great_power(influence_target))
-		return false;
+			return false;
 
 		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, source);
 		if(!rel)
-		return false;
+			return false;
 
 		if(state.world.gp_relationship_get_influence(rel) < state.defines.increaseopinion_influence_cost)
-		return false;
+			return false;
 
 		if((state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) != 0)
-		return false;
+			return false;
 
 		if(military::are_at_war(state, source, influence_target))
-		return false;
+			return false;
 
 		auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 		if(clevel == nations::influence::level_friendly || clevel == nations::influence::level_in_sphere)
-		return false;
+			return false;
 
 		return true;
 	}
@@ -1445,35 +1445,33 @@ namespace command {
 		*/
 		if(!state.world.nation_get_is_great_power(source) || !state.world.nation_get_is_great_power(affected_gp) ||
 			state.world.nation_get_is_great_power(influence_target))
-		return false;
+			return false;
 
 		if(source == affected_gp)
-		return false;
+			return false;
 
 		if(state.world.nation_get_in_sphere_of(influence_target) == affected_gp)
-		return false;
+			return false;
 
 		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, source);
 		if(!rel)
-		return false;
+			return false;
 
 		if(state.world.gp_relationship_get_influence(rel) < state.defines.decreaseopinion_influence_cost)
-		return false;
+			return false;
 
 		if((state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) != 0)
-		return false;
+			return false;
 
 		if(military::are_at_war(state, source, influence_target))
-		return false;
+			return false;
 
 		auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 		if(clevel == nations::influence::level_hostile)
-		return false;
+			return false;
 
-		if((nations::influence::level_mask &
-		state.world.gp_relationship_get_status(state.world.get_gp_relationship_by_gp_influence_pair(influence_target,
-			affected_gp))) == nations::influence::level_hostile)
-		return false;
+		if((nations::influence::level_mask & state.world.gp_relationship_get_status(state.world.get_gp_relationship_by_gp_influence_pair(influence_target, affected_gp))) == nations::influence::level_hostile)
+			return false;
 
 		return nations::influence::is_influence_level_greater_or_equal(clevel,
 			nations::influence::get_level(state, affected_gp, influence_target));
@@ -1580,29 +1578,28 @@ namespace command {
 		can be a secondary target for this action. To preform this action you must have an opinion level of friendly with the nation
 		you are removing from a sphere.
 		*/
-		if(!state.world.nation_get_is_great_power(source) || !state.world.nation_get_is_great_power(affected_gp) ||
-			state.world.nation_get_is_great_power(influence_target))
-		return false;
+		if(!state.world.nation_get_is_great_power(source) || !state.world.nation_get_is_great_power(affected_gp) || state.world.nation_get_is_great_power(influence_target))
+			return false;
 
 		if(state.world.nation_get_in_sphere_of(influence_target) != affected_gp)
-		return false;
+			return false;
 
 		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, source);
 		if(!rel)
-		return false;
+			return false;
 
 		if(source != affected_gp && state.world.gp_relationship_get_influence(rel) < state.defines.removefromsphere_influence_cost)
-		return false;
+			return false;
 
 		if((state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) != 0)
-		return false;
+			return false;
 
 		if(military::are_at_war(state, source, influence_target))
-		return false;
+			return false;
 
 		auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 		if(clevel != nations::influence::level_friendly && clevel != nations::influence::level_in_sphere)
-		return false;
+			return false;
 
 		return true;
 	}
