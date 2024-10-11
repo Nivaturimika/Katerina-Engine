@@ -223,29 +223,28 @@ namespace ui {
 	};
 
 	class topbar_nation_population_text : public multiline_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto total_pop = state.world.nation_get_demographics(n, demographics::total);
 
 			auto pop_amount = state.player_data_cache.population_record[state.ui_date.value % 32];
 			auto pop_change = state.ui_date.value <= 32
-			? (state.ui_date.value <= 2 ? 0.0f : pop_amount - state.player_data_cache.population_record[2])
-			: (pop_amount - state.player_data_cache.population_record[(state.ui_date.value - 30) % 32]);
+				? (state.ui_date.value <= 2 ? 0.0f : pop_amount - state.player_data_cache.population_record[2])
+				: (pop_amount - state.player_data_cache.population_record[(state.ui_date.value - 30) % 32]);
 
-			text::text_color color = pop_change < 0 ?  text::text_color::red : text::text_color::green;
+			text::text_color color = pop_change < 0 ? text::text_color::red : text::text_color::green;
 			if(pop_change == 0)
-			color = text::text_color::white;
+				color = text::text_color::white;
 
-			auto layout = text::create_endless_layout(state, internal_layout,
-		text::layout_parameters{0, 0, int16_t(base_data.size.x), int16_t(base_data.size.y), base_data.data.text.font_handle, 0, text::alignment::left, text::text_color::black, false});
+			auto layout = text::create_endless_layout(state, internal_layout, text::layout_parameters{ 0, 0, int16_t(base_data.size.x), int16_t(base_data.size.y), base_data.data.text.font_handle, 0, text::alignment::left, text::text_color::black, false });
 			auto box = text::open_layout_box(layout, 0);
 			text::add_to_layout_box(state, layout, box, text::prettify(int32_t(total_pop)), text::text_color::yellow);
 			text::add_to_layout_box(state, layout, box, std::string(" ("));
 			if(pop_change > 0) {
 				text::add_to_layout_box(state, layout, box, std::string("+"), text::text_color::green);
 			}
-		text::add_to_layout_box(state, layout, box, text::pretty_integer{int64_t(pop_change)}, color);
+			text::add_to_layout_box(state, layout, box, text::pretty_integer{ int64_t(pop_change) }, color);
 			text::add_to_layout_box(state, layout, box, std::string(")"));
 			text::close_layout_box(layout, box);
 		}
@@ -256,10 +255,10 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto pop_amount = state.player_data_cache.population_record[state.ui_date.value % 32];
 			auto pop_change = state.ui_date.value <= 30 ? 0.0f : (pop_amount - state.player_data_cache.population_record[(state.ui_date.value - 30) % 32]);
-		text::add_line(state, contents, "pop_growth_topbar_3", text::variable_type::curr, text::pretty_integer{ int64_t(state.world.nation_get_demographics(n, demographics::total)) });
-		text::add_line(state, contents, "pop_growth_topbar_2", text::variable_type::x, text::pretty_integer{ int64_t(pop_change) });
-		text::add_line(state, contents, "pop_growth_topbar", text::variable_type::x, text::pretty_integer{ int64_t(nations::get_monthly_pop_increase_of_nation(state, n)) });
-		text::add_line(state, contents, "pop_growth_topbar_4", text::variable_type::val, text::pretty_integer{ int64_t(state.world.nation_get_demographics(n, demographics::total) * 4.f) });
+			text::add_line(state, contents, "pop_growth_topbar_3", text::variable_type::curr, text::pretty_integer{ int64_t(state.world.nation_get_demographics(n, demographics::total)) });
+			text::add_line(state, contents, "pop_growth_topbar_2", text::variable_type::x, text::pretty_integer{ int64_t(pop_change) });
+			text::add_line(state, contents, "pop_growth_topbar", text::variable_type::x, text::pretty_integer{ int64_t(nations::get_monthly_pop_increase_of_nation(state, n)) });
+			text::add_line(state, contents, "pop_growth_topbar_4", text::variable_type::val, text::pretty_integer{ int64_t(state.world.nation_get_demographics(n, demographics::total) * 4.f) });
 			text::add_line_break_to_layout(state, contents);
 			active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::pop_growth, true);
 		}
@@ -486,16 +485,15 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto box = text::open_layout_box(contents, 0);
 			text::substitution_map sub1;
-			float relevant_pop = state.world.nation_get_demographics(n, demographics::to_key(state, state.world.nation_get_primary_culture(n)));
+			float relevant_pop = 0.f;
 			for(auto ac : state.world.in_culture) {
 				if(nations::nation_accepts_culture(state, n, ac)) {
 					relevant_pop += state.world.nation_get_demographics(n, demographics::to_key(state, ac));
 				}
 			}
-		text::add_to_substitution_map(sub1, text::variable_type::num, text::pretty_integer{(int64_t)relevant_pop});
-			auto f_points = relevant_pop / state.defines.national_focus_divider; // NOTE: Occasionally inaccurate by a few 0.01, this
-																																				// doesnt really matter so im leaving it -breizh
-		text::add_to_substitution_map(sub1, text::variable_type::focus, text::fp_two_places{ f_points });
+			text::add_to_substitution_map(sub1, text::variable_type::num, text::pretty_integer{ (int64_t)relevant_pop });
+			auto f_points = relevant_pop / state.defines.national_focus_divider;
+			text::add_to_substitution_map(sub1, text::variable_type::focus, text::fp_two_places{ f_points });
 			text::localised_format_box(state, contents, box, std::string_view("tb_nationalfocus_culture"), sub1);
 			text::add_line_break_to_layout_box(state, contents, box);
 			text::substitution_map sub2;
@@ -513,7 +511,7 @@ namespace ui {
 				});
 			} else {
 				text::add_divider_to_layout_box(state, contents, box);
-			text::localised_format_box(state, contents, box, std::string_view("tb_nationalfocus_none"), text::substitution_map{});
+				text::localised_format_box(state, contents, box, std::string_view("tb_nationalfocus_none"), text::substitution_map{});
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::max_national_focus, false);
