@@ -75,10 +75,12 @@ namespace ui {
 		switch(pos) {
 		case unit_counter_position_type::port:
 		case unit_counter_position_type::land:
+		default:
 			return fat_id.get_path().size() == 0 || fat_id.get_battle_from_navy_battle_participation();
 		case unit_counter_position_type::land_move:
 			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_navy_battle_participation());
 		}
+		return true;
 	}
 
 	template<unit_counter_position_type A>
