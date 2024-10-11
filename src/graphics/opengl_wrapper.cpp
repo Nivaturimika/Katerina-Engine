@@ -453,10 +453,12 @@ namespace ogl {
 
 		reports::write_debug("Deinitializing MSAA\n");
 		state.open_gl.msaa_enabled = false;
+		if(state.open_gl.msaa_shader_program)
+			glDeleteProgram(state.open_gl.msaa_shader_program);
 		if(state.open_gl.msaa_texture)
 			glDeleteTextures(1, &state.open_gl.msaa_texture);
 		if(state.open_gl.msaa_interbuffer)
-			glDeleteFramebuffers(1, &state.open_gl.msaa_framebuffer);
+			glDeleteFramebuffers(1, &state.open_gl.msaa_interbuffer);
 		if(state.open_gl.msaa_rbo)
 			glDeleteRenderbuffers(1, &state.open_gl.msaa_rbo);
 		if(state.open_gl.msaa_texcolorbuffer)
@@ -467,8 +469,6 @@ namespace ogl {
 			glDeleteBuffers(1, &state.open_gl.msaa_vbo);
 		if(state.open_gl.msaa_vao)
 			glDeleteVertexArrays(1, &state.open_gl.msaa_vao);
-		if(state.open_gl.msaa_shader_program)
-			glDeleteProgram(state.open_gl.msaa_shader_program);
 		glDisable(GL_MULTISAMPLE);
 	}
 
