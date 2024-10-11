@@ -3261,9 +3261,9 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_social_reform(EFFECT_DISPLAY_PARAMS) {
-			{
-				auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
-
+			auto n = trigger::to_nation(primary_slot);
+			auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
+			if(ws.user_settings.spoilers || ws.world.nation_get_issues(n, opt.get_parent_issue()) != opt) {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::issue, opt.get_parent_issue().get_name());
@@ -3274,9 +3274,37 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_political_reform(EFFECT_DISPLAY_PARAMS) {
-			{
-				auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
-
+			auto n = trigger::to_nation(primary_slot);
+			auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
+			if(ws.user_settings.spoilers || ws.world.nation_get_issues(n, opt.get_parent_issue()) != opt) {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::issue, opt.get_parent_issue().get_name());
+				text::add_to_substitution_map(m, text::variable_type::text, opt.get_name());
+				text::localised_format_box(ws, layout, box, "issue_change", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_social_reform_province(EFFECT_DISPLAY_PARAMS) {
+			auto p = trigger::to_prov(primary_slot);
+			auto n = ws.world.province_get_nation_from_province_ownership(p);
+			auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
+			if(ws.user_settings.spoilers || ws.world.nation_get_issues(n, opt.get_parent_issue()) != opt) {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::issue, opt.get_parent_issue().get_name());
+				text::add_to_substitution_map(m, text::variable_type::text, opt.get_name());
+				text::localised_format_box(ws, layout, box, "issue_change", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_political_reform_province(EFFECT_DISPLAY_PARAMS) {
+			auto p = trigger::to_prov(primary_slot);
+			auto n = ws.world.province_get_nation_from_province_ownership(p);
+			auto opt = fatten(ws.world, trigger::payload(tval[1]).opt_id);
+			if(ws.user_settings.spoilers || ws.world.nation_get_issues(n, opt.get_parent_issue()) != opt) {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::issue, opt.get_parent_issue().get_name());
@@ -3289,19 +3317,18 @@ namespace ui {
 		uint32_t ef_add_tax_relative_income(EFFECT_DISPLAY_PARAMS) {
 			auto amount = trigger::read_float_from_payload(tval + 1);
 			if(primary_slot != -1) {
-				auto income = ws.world.nation_get_total_poor_income(trigger::to_nation(primary_slot)) +
-				ws.world.nation_get_total_middle_income(trigger::to_nation(primary_slot)) +
-				ws.world.nation_get_total_rich_income(trigger::to_nation(primary_slot));
+				auto income = ws.world.nation_get_total_poor_income(trigger::to_nation(primary_slot))
+					+ ws.world.nation_get_total_middle_income(trigger::to_nation(primary_slot))
+					+ ws.world.nation_get_total_rich_income(trigger::to_nation(primary_slot));
 				auto combined_amount = income * amount;
-
 				auto box = text::open_layout_box(layout, indentation);
-			display_value(text::fp_currency{ combined_amount }, true, ws, layout, box);
+				display_value(text::fp_currency{ combined_amount }, true, ws, layout, box);
 				text::substitution_map m;
 				text::localised_format_box(ws, layout, box, "add_to_treasury", m);
 				text::close_layout_box(layout, box);
 			} else {
 				auto box = text::open_layout_box(layout, indentation);
-			display_value(text::fp_percentage{ amount }, true, ws, layout, box);
+				display_value(text::fp_percentage{ amount }, true, ws, layout, box);
 				text::substitution_map m;
 				text::localised_format_box(ws, layout, box, "add_relative_income", m);
 				text::close_layout_box(layout, box);
@@ -7093,8 +7120,8 @@ namespace ui {
 			ef_remove_core_from_nation, //constexpr inline uint16_t remove_core_nation_from_nation = 0x0180;
 			ef_remove_core_reb, //constexpr inline uint16_t remove_core_nation_reb = 0x0181;
 			ef_set_country_flag, //constexpr inline uint16_t set_country_flag_pop = 0x0182;
-			ef_social_reform, //constexpr inline uint16_t social_reform_province = 0x0183;
-			ef_political_reform, //constexpr inline uint16_t political_reform_province = 0x0184;
+			ef_social_reform_province, //constexpr inline uint16_t social_reform_province = 0x0183;
+			ef_political_reform_province, //constexpr inline uint16_t political_reform_province = 0x0184;
 			ef_flashpoint_tension, //constexpr inline uint16_t flashpoint_tension_province = 0x0185;
 			ef_release_vassal, //constexpr inline uint16_t release_vassal_province = 0x0186;
 			ef_release_vassal_this_nation, //constexpr inline uint16_t release_vassal_province_this_nation = 0x0187;
