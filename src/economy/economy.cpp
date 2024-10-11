@@ -1000,26 +1000,29 @@ namespace economy {
 				}
 			}
 		}
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto kf = state.world.commodity_get_key_factory(cid);
-			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
-				for(const auto t : state.world.in_pop_type) {
-					auto strata = state.world.pop_type_get_strata(t);
-					float base_life = state.world.pop_type_get_life_needs(t, cid);
-					float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
-					float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
-					float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
-
-					/* Invention factor doesn't factor for life needs */
-					float demand_life = base_life * pop_size * ln_mul[strata];
-					float demand_everyday = base_everyday * pop_size * invention_factor * en_mul[strata];
-					float demand_luxury = base_luxury * pop_size * invention_factor * lx_mul[strata];
-					if (demand_life > 0.0f || demand_everyday > 0.0f || demand_luxury > 0.0f)
-						state.world.nation_get_real_demand(n, cid) = std::clamp(state.world.nation_get_real_demand(n, cid), 0.0f , state.world.commodity_get_last_total_production(cid) );
-				}
-			}
-		}
+		//until better solution is found
+		// 
+		//for(uint32_t i = 1; i < total_commodities; ++i) {
+		//	dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+		//	auto kf = state.world.commodity_get_key_factory(cid);
+		//	if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
+		//		auto is_pop_need = false;
+		//		for(const auto t : state.world.in_pop_type) {
+		//			auto strata = state.world.pop_type_get_strata(t);
+		//			float base_life = state.world.pop_type_get_life_needs(t, cid);
+		//			float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
+		//			float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
+		//			float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
+		//
+		//			/* Invention factor doesn't factor for life needs */
+		//			float demand_life = base_life * pop_size * ln_mul[strata];
+		//			float demand_everyday = base_everyday * pop_size * invention_factor * en_mul[strata];
+		//			float demand_luxury = base_luxury * pop_size * invention_factor * lx_mul[strata];
+		//			if (demand_life > 0.0f || demand_everyday > 0.0f || demand_luxury > 0.0f)
+		//				state.world.nation_get_real_demand(n, cid) = std::clamp(state.world.nation_get_real_demand(n, cid), 0.0f , state.world.commodity_get_last_total_production(cid) );
+		//		}
+		//	}
+		//}
 		
 	}
 
