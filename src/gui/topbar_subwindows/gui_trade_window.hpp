@@ -134,9 +134,9 @@ namespace ui {
 
 	template<trade_sort Sort, trade_sort_assoc Assoc>
 	class trade_sort_button : public button_element_base {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, trade_sort_data{ Sort, Assoc });
+			send(state, parent, trade_sort_data{ Sort, Assoc });
 		}
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::tooltip;
@@ -150,15 +150,31 @@ namespace ui {
 		}
 	};
 
+	class trade_market_activity_value : public simple_text_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto c = retrieve<dcon::commodity_id>(state, parent);
+			auto v = int64_t(state.world.commodity_get_total_real_demand(c));
+			set_text(state, text::prettify(v));
+		}
+	};
+	class trade_market_activity_price : public simple_text_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto c = retrieve<dcon::commodity_id>(state, parent);
+			auto v = state.world.commodity_get_total_real_demand(c) * state.world.commodity_get_current_price(c);
+			set_text(state, text::format_money(v));
+		}
+	};
 	class trade_market_activity_entry : public listbox_row_element_base<dcon::commodity_id> {
 		public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "goods_type") {
 				return make_element_by_type<commodity_image>(state, id);
 			} else if(name == "cost") {
-				return make_element_by_type<commodity_price_text>(state, id);
+				return make_element_by_type<trade_market_activity_price>(state, id);
 			} else if(name == "activity") {
-				return make_element_by_type<commodity_player_availability_text>(state, id);
+				return make_element_by_type<trade_market_activity_value>(state, id);
 			} else {
 				return nullptr;
 			}
