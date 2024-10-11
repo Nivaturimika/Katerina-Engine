@@ -59,7 +59,7 @@ namespace ui {
 		port,
 	};
 
-	bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::army_id a) {
+	inline bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::army_id a) {
 		auto fat_id = dcon::fatten(state.world, a);
 		switch(pos) {
 		case unit_counter_position_type::port:
@@ -69,13 +69,13 @@ namespace ui {
 		case unit_counter_position_type::land_move:
 			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_army_battle_participation());
 		}
+		return true;
 	}
-	bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::navy_id a) {
+	inline bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::navy_id a) {
 		auto fat_id = dcon::fatten(state.world, a);
 		switch(pos) {
 		case unit_counter_position_type::port:
 		case unit_counter_position_type::land:
-		default:
 			return fat_id.get_path().size() == 0 || fat_id.get_battle_from_navy_battle_participation();
 		case unit_counter_position_type::land_move:
 			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_navy_battle_participation());
