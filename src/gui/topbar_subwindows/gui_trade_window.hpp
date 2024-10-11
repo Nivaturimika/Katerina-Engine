@@ -162,8 +162,8 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			auto c = retrieve<dcon::commodity_id>(state, parent);
-			auto v = state.world.commodity_get_total_real_demand(c) * state.world.commodity_get_current_price(c);
-			set_text(state, text::format_money(v));
+			auto v = int64_t(state.world.commodity_get_total_real_demand(c) * state.world.commodity_get_current_price(c));
+			set_text(state, text::prettify(v));
 		}
 	};
 	class trade_market_activity_entry : public listbox_row_element_base<dcon::commodity_id> {
@@ -181,12 +181,11 @@ namespace ui {
 		}
 	};
 	class trade_market_activity_listbox : public listbox_element_base<trade_market_activity_entry, dcon::commodity_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "market_activity_entry";
 		}
-
-		public:
+	public:
 		trade_sort sort = trade_sort::commodity;
 		bool sort_ascend = false;
 		void on_create(sys::state& state) noexcept override {
@@ -201,32 +200,30 @@ namespace ui {
 				}
 			});
 			switch(sort) {
-				case trade_sort::commodity:
+			case trade_sort::commodity:
 				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::price:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = state.world.commodity_get_current_price(a);
-					auto bv = state.world.commodity_get_current_price(b);
+			case trade_sort::price:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+					auto av = state.world.commodity_get_total_real_demand(a) * state.world.commodity_get_current_price(a);
+					auto bv = state.world.commodity_get_total_real_demand(b) * state.world.commodity_get_current_price(b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::demand_satisfaction:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = state.world.nation_get_demand_satisfaction(state.local_player_nation, a);
-					auto bv = state.world.nation_get_demand_satisfaction(state.local_player_nation, b);
+			case trade_sort::demand_satisfaction:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+					auto av = state.world.commodity_get_total_real_demand(a);
+					auto bv = state.world.commodity_get_total_real_demand(b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				default:
+			default:
 				break;
 			}
 			if(!sort_ascend) {
