@@ -30,7 +30,7 @@ namespace economy_estimations {
 	
 				auto kf = state.world.commodity_get_key_factory(cid);
 				if(state.world.commodity_get_overseas_penalty(cid) && (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf)))) {
-					total += overseas_factor * state.world.commodity_get_current_price(cid) * state.world.nation_get_demand_satisfaction(n, cid);
+					total += overseas_factor * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 				}
 			}
 		}
@@ -187,7 +187,7 @@ namespace economy_estimations {
 		float total = 0.0f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_army_demand(n, cid) * economy::commodity_effective_price(state, n, cid) * state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_army_demand(n, cid) * economy::commodity_effective_price(state, n, cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
 		return total;
 	}
@@ -196,7 +196,7 @@ namespace economy_estimations {
 		float total = 0.0f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_navy_demand(n, cid) * economy::commodity_effective_price(state, n, cid) * state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_navy_demand(n, cid) * economy::commodity_effective_price(state, n, cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
 		return total;
 	}
@@ -215,7 +215,9 @@ namespace economy_estimations {
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
+							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i])
+							* state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i])
+							* base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
 					} else {
 						break;
 					}
