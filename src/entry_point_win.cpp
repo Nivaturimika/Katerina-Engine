@@ -119,6 +119,68 @@ void EnableCrashingOnCrashes() {
 	SetUserObjectInformationA(GetCurrentProcess(), UOI_TIMERPROC_EXCEPTION_SUPPRESSION, &insanity, sizeof(insanity));
 }
 
+native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_handler& err, native_string_view path) {
+	simple_fs::restore_state(fs_root, path);
+	//
+	auto root = simple_fs::get_root(fs_root);
+	auto common = simple_fs::open_directory(root, NATIVE("common"));
+	parsers::bookmark_context bookmark_context;
+	if(auto f = simple_fs::open_file(common, NATIVE("bookmarks.txt")); f) {
+		auto bookmark_content = simple_fs::view_contents(*f);
+		err.file_name = "bookmarks.txt";
+		parsers::token_generator gen(bookmark_content.data, bookmark_content.data + bookmark_content.file_size);
+		parsers::parse_bookmark_file(gen, err, bookmark_context);
+		assert(!bookmark_context.bookmark_dates.empty());
+	} else {
+		err.accumulated_errors += "File common/bookmarks.txt could not be opened\n";
+	}
+	native_string selected_scenario_file;
+	sys::checksum_key scenario_key;
+	for(uint32_t date_index = 0; date_index < uint32_t(bookmark_context.bookmark_dates.size()); date_index++) {
+		err.accumulated_errors.clear();
+		err.accumulated_warnings.clear();
+		//
+		auto book_game_state = std::make_unique<sys::state>();
+		simple_fs::restore_state(book_game_state->common_fs, path);
+		book_game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
+		if(err.fatal)
+			break;
+		if(date_index == 0) {
+			auto sdir = simple_fs::get_or_create_scenario_directory();
+			int32_t append = 0;
+			auto time_stamp = uint64_t(std::time(0));
+			auto base_name = to_hex(time_stamp);
+			while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
+				++append;
+			}
+			selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
+			sys::write_scenario_file(*book_game_state, selected_scenario_file, 1);
+			scenario_key = book_game_state->scenario_checksum;
+		} else {
+			//sys::write_scenario_file(*book_game_state, std::to_wstring(date_index) + NATIVE(".bin"), 0);
+			book_game_state->scenario_checksum = scenario_key;
+			sys::write_save_file(*book_game_state, sys::save_type::bookmark, bookmark_context.bookmark_dates[date_index].name_);
+		}
+	}
+	return selected_scenario_file;
+}
+
+native_string find_matching_scenario(native_string_view path) {
+	native_string selected_scenario_file;
+	uint32_t max_scenario_count = 0;
+	auto sdir = simple_fs::get_or_create_scenario_directory();
+	for(auto& f : simple_fs::list_files(sdir, NATIVE(".bin"))) {
+		if(auto of = simple_fs::open_file(f); of) {
+			auto content = view_contents(*of);
+			auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
+			if(desc.mod_path == path && desc.count > max_scenario_count) {
+				selected_scenario_file = simple_fs::get_file_name(f);
+			}
+		}
+	}
+	return selected_scenario_file;
+}
+
 int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR /*commandline*/, int /*nCmdShow*/
 ) {
 
@@ -240,10 +302,13 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		} else {
 			bool loaded_scenario = false;
 			bool validate_only = false;
+			bool scenario_autofind = false;
 
 			std::vector<parsers::mod_file> mod_list;
 			simple_fs::file_system fs_root;
 			simple_fs::add_root(fs_root, NATIVE("."));
+
+			native_string opt_fs_path;
 			for(int i = 1; i < num_params; ++i) {
 				if(native_string(parsed_cmd[i]) == NATIVE("-host")) {
 					forwarding_apparatus.start_forwarding();
@@ -276,12 +341,6 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					headless = true;
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
 					headless_repeat = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
-					if(i + 1 < num_params) {
-						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						headless_speed = std::atoi(str.c_str());
-						i++;
-					}
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
 					if(i + 1 < num_params) {
 						auto root = get_root(fs_root);
@@ -306,74 +365,55 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 							window::emit_error_message(msg, true);
 						}
 					}
+				} else if(native_string(parsed_cmd[i]) == NATIVE("-autofind")) {
+					scenario_autofind = true;
+				} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
+					if(i + 1 < num_params) {
+						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+						headless_speed = std::atoi(str.c_str());
+						i++;
+					}
+				} else if(native_string(parsed_cmd[i]) == NATIVE("-path")) {
+					if(i + 1 < num_params) {
+						opt_fs_path = native_string(parsed_cmd[i + 1]);
+						i++;
+					}
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-validate")) {
 					validate_only = true;
 				}
 			}
 			if(!loaded_scenario) {
-				auto path = produce_mod_path(mod_list);
-				simple_fs::restore_state(fs_root, path);
-				parsers::error_handler err("");
-				auto root = get_root(fs_root);
-				auto common = open_directory(root, NATIVE("common"));
-				parsers::bookmark_context bookmark_context;
-				if(auto f = open_file(common, NATIVE("bookmarks.txt")); f) {
-					auto bookmark_content = simple_fs::view_contents(*f);
-					err.file_name = "bookmarks.txt";
-					parsers::token_generator gen(bookmark_content.data, bookmark_content.data + bookmark_content.file_size);
-					parsers::parse_bookmark_file(gen, err, bookmark_context);
-					assert(!bookmark_context.bookmark_dates.empty());
-				} else {
-					err.accumulated_errors += "File common/bookmarks.txt could not be opened\n";
+				// if the optional fs path is defined use that one, otherwise infer from mod list
+				auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
+				if(scenario_autofind) { //find scenario
+					native_string selected_scenario_file = find_matching_scenario(path);
+					if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+						game_state.fill_unsaved_data();
+						loaded_scenario = true;
+					}
 				}
-
-				native_string selected_scenario_file;
-				sys::checksum_key scenario_key;
-				for(uint32_t date_index = 0; date_index < uint32_t(bookmark_context.bookmark_dates.size()); date_index++) {
-					err.accumulated_errors.clear();
-					err.accumulated_warnings.clear();
-					//
-					auto book_game_state = std::make_unique<sys::state>();
-					simple_fs::restore_state(book_game_state->common_fs, path);
-					book_game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
-					if(err.fatal)
-						break;
-					if(date_index == 0) {
-						auto sdir = simple_fs::get_or_create_scenario_directory();
-						int32_t append = 0;
-						auto time_stamp = uint64_t(std::time(0));
-						auto base_name = to_hex(time_stamp);
-						while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
-							++append;
+				if(!loaded_scenario) { //create scenario if we couldn't find it
+					parsers::error_handler err("");
+					native_string selected_scenario_file = make_scenario(fs_root, err, path);
+					if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
+						auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
+						auto pdir = simple_fs::get_or_create_settings_directory();
+						simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
+						std::printf("%s", assembled_file.c_str());
+						if(validate_only) {
+							if(!err.accumulated_errors.empty()) {
+								return EXIT_FAILURE;
+							}
+							return EXIT_SUCCESS;
 						}
-						selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
-						sys::write_scenario_file(*book_game_state, selected_scenario_file, 1);
-						scenario_key = book_game_state->scenario_checksum;
+					}
+					if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+						game_state.fill_unsaved_data();
+						loaded_scenario = true;
 					} else {
-						//sys::write_scenario_file(*book_game_state, std::to_wstring(date_index) + NATIVE(".bin"), 0);
-						book_game_state->scenario_checksum = scenario_key;
-						sys::write_save_file(*book_game_state, sys::save_type::bookmark, bookmark_context.bookmark_dates[date_index].name_);
+						auto msg = std::string("Scenario file ") + text::native_to_utf8(selected_scenario_file) + " could not be read";
+						window::emit_error_message(msg, true);
 					}
-				}
-				if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
-					auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
-					auto pdir = simple_fs::get_or_create_settings_directory();
-					simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
-					std::printf("%s", assembled_file.c_str());
-					if(validate_only) {
-						if(!err.accumulated_errors.empty()) {
-							return EXIT_FAILURE;
-						}
-						return EXIT_SUCCESS;
-					}
-				}
-
-				if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
-					game_state.fill_unsaved_data();
-					loaded_scenario = true;
-				} else {
-					auto msg = std::string("Scenario file ") + text::native_to_utf8(selected_scenario_file) + " could not be read";
-					window::emit_error_message(msg, true);
 				}
 			}
 			network::init(game_state);

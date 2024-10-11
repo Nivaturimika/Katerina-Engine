@@ -104,6 +104,9 @@ namespace launcher {
 	static std::string password = "";
 	static std::string player_name = "AnonAnon";
 
+	static uint32_t bookmark_dates_total = 0;
+	static uint32_t bookmark_dates_done = 0;
+
 	enum class string_index : uint8_t {
 		create_scenario,
 		recreate_scenario,
@@ -127,7 +130,7 @@ namespace launcher {
 	static std::string_view en_localised_strings[uint8_t(string_index::count)] = {
 		"Create scenario",
 		"Recreate scenario",
-		"Working...",
+		"Working",
 		"Create a new scenario",
 		"for the selected mods",
 		"No scenario found",
@@ -145,7 +148,7 @@ namespace launcher {
 	static std::string_view tr_localised_strings[uint8_t(string_index::count)] = {
 		"Senaryo oluştur",
 		"Senaryoyu yeniden oluştur",
-		"Çalışma...",
+		"Çalışma",
 		"Seçilen modlar için yeni",
 		"bir senaryo oluşturun",
 		"Senaryo bulunamadı",
@@ -163,7 +166,7 @@ namespace launcher {
 	static std::string_view sq_localised_strings[uint8_t(string_index::count)] = {
 		"Krijo skenar",
 		"Rikrijo skenar",
-		"Punon...",
+		"Punon",
 		"Krijo një skenar të ri",
 		"për modalitetet e zgjedhura",
 		"Nuk u gjet asnjë skenar",
@@ -181,7 +184,7 @@ namespace launcher {
 	static std::string_view es_localised_strings[uint8_t(string_index::count)] = {
 		"Crear escenario",
 		"Recrear escenario",
-		"Trabajando...",
+		"Trabajando",
 		"Crea un nuevo escenario",
 		"para los mods seleccionados",
 		"No se encontro el escenario",
@@ -199,7 +202,7 @@ namespace launcher {
 	static std::string_view it_localised_strings[uint8_t(string_index::count)] = {
 		"Crea scenario",
 		"Ricreare scenario",
-		"Lavorando...",
+		"Lavorando",
 		"Crea un nuovo scenario",
 		"per i mod selezionati",
 		"Scenario non trovato",
@@ -217,7 +220,7 @@ namespace launcher {
 	static std::string_view fr_localised_strings[uint8_t(string_index::count)] = {
 		"Creer un scènario",
 		"Recrèer le scènario",
-		"Fonctionnement...",
+		"Fonctionnement",
 		"Creer un nouveau scènario",
 		"pour les mods sèlectionnès",
 		"Scènario introuvable",
@@ -235,7 +238,7 @@ namespace launcher {
 	static std::string_view po_localised_strings[uint8_t(string_index::count)] = {
 		"Criar cenário",
 		"Recriar cenário",
-		"Trabalhando...",
+		"Trabalhando",
 		"Crie un novo cenário para",
 		"os mods selecionados",
 		"Cenário não encontrado",
@@ -253,7 +256,7 @@ namespace launcher {
 	static std::string_view de_localised_strings[uint8_t(string_index::count)] = {
 		"Szenario erstellen",
 		"Szenario neu erstellen",
-		"Arbeitet...",
+		"Arbeitet",
 		"Neues Szenario für die",
 		"ausgewählten mods erstellen",
 		"Szenario nicht gefunden",
@@ -271,7 +274,7 @@ namespace launcher {
 	static std::string_view sv_localised_strings[uint8_t(string_index::count)] = {
 		"Skapa scenario",
 		"Återskapa scenario",
-		"Arbetssått...",
+		"Arbetssått",
 		"Skepa ett nytt scenario",
 		"för de valda mods",
 		"Scenario hittades inte",
@@ -307,7 +310,7 @@ namespace launcher {
 	static std::string_view ar_localised_strings[uint8_t(string_index::count)] = {
 		"إنشاء السيناريو",
 		"إعادة إنشاء السيناريو",
-		"عمل...",
+		"عمل",
 		"إنشاء سيناريو جديد",
 		"للوضع المحدد",
 		"لم يتم العثور على المشهد",
@@ -325,7 +328,7 @@ namespace launcher {
 	static std::string_view no_localised_strings[uint8_t(string_index::count)] = {
 		"Lag scenario",
 		"Gjenskape scenario",
-		"Arbeider...",
+		"Arbeider",
 		"Lag et nytt scenario",
 		"for de valgte modsene",
 		"Ingen scenarioer funnet",
@@ -343,7 +346,7 @@ namespace launcher {
 	static std::string_view ro_localised_strings[uint8_t(string_index::count)] = {
 		"Creați script",
 		"Scenariu de recenzie",
-		"Lucru...",
+		"Lucru",
 		"Creați un nou script",
 		"pentru moduri selectate",
 		"Nu a fost găsit niciun script",
@@ -361,7 +364,7 @@ namespace launcher {
 	static std::string_view ru_localised_strings[uint8_t(string_index::count)] = {
 		"Создать сценарий",
 		"Воссоздать сценарий",
-		"Работающий...",
+		"Работающий",
 		"Создать новый сценарий",
 		"Для выбранного мода",
 		"Сцена не найдена",
@@ -379,7 +382,7 @@ namespace launcher {
 	static std::string_view pl_localised_strings[uint8_t(string_index::count)] = {
 		"Stwórz scenariusz",
 		"Odtwórz scenariusz",
-		"Pracujący...",
+		"Pracujący",
 		"Utwórz nowy scenariusz",
 		"dla wybranych modów",
 		"Nie znaleziono scenariusza",
@@ -397,7 +400,7 @@ namespace launcher {
 	static std::string_view bg_localised_strings[uint8_t(string_index::count)] = {
 		"Създайте сценарий",
 		"Пресъздайте сценарий",
-		"Работи...",
+		"Работи",
 		"Създайте нов сценарий",
 		"за избраните модове",
 		"Няма намерен сценарий",
@@ -415,7 +418,7 @@ namespace launcher {
 	static std::string_view ca_localised_strings[uint8_t(string_index::count)] = {
 		"Crea un escenari",
 		"Recrea l'escenari",
-		"Treballant...",
+		"Treballant",
 		"Creeu un nou escenari",
 		"per als mods seleccionats",
 		"No s'ha trobat cap escenari",
@@ -433,7 +436,7 @@ namespace launcher {
 	static std::string_view cs_localised_strings[uint8_t(string_index::count)] = {
 		"Vytvořte scénář",
 		"Znovu vytvořit scénář",
-		"Pracovní...",
+		"Pracovní",
 		"Vytvořte nový scénář",
 		"pro vybrané mody",
 		"Nebyl nalezen žádný scénář",
@@ -451,7 +454,7 @@ namespace launcher {
 	static std::string_view da_localised_strings[uint8_t(string_index::count)] = {
 		"Opret scenarie",
 		"Genskab scenariet",
-		"Arbejder...",
+		"Arbejder",
 		"Opret et nyt scenarie",
 		"for de valgte mods",
 		"Intet scenarie fundet",
@@ -469,7 +472,7 @@ namespace launcher {
 	static std::string_view el_localised_strings[uint8_t(string_index::count)] = {
 		"Δημιουργία σεναρίου",
 		"Αναδημιουργήστε το σενάριο",
-		"Εργαζόμενος...",
+		"Εργαζόμενος",
 		"Δημιουργήστε ένα νέο σενάριο",
 		"για τα επιλεγμένα mods",
 		"Δεν βρέθηκε κανένα σενάριο",
@@ -487,7 +490,7 @@ namespace launcher {
 	static std::string_view fi_localised_strings[uint8_t(string_index::count)] = {
 		"Luo skenaario",
 		"Luo skenaario uudelleen",
-		"Työskentelee...",
+		"Työskentelee",
 		"Luo uusi skenaario",
 		"valituille modeille",
 		"Skenaariota ei löytynyt",
@@ -505,7 +508,7 @@ namespace launcher {
 	static std::string_view he_localised_strings[uint8_t(string_index::count)] = {
 		"צור תרחיש",
 		"ליצור מחדש תרחיש",
-		"עובד...",
+		"עובד",
 		"צור תרחיש חדש עבור",
 		"המצבים שנבחרו",
 		"לא נמצא תרחיש",
@@ -523,7 +526,7 @@ namespace launcher {
 	static std::string_view hu_localised_strings[uint8_t(string_index::count)] = {
 		"Forgatókönyv létrehozása",
 		"Forgatókönyv újbóli létrehozása",
-		"Töltődik...",
+		"Töltődik",
 		"Hozzon létre egy új forgatókönyvet",
 		"a kiválasztott modokhoz",
 		"Nem található forgatókönyv",
@@ -541,7 +544,7 @@ namespace launcher {
 	static std::string_view nl_localised_strings[uint8_t(string_index::count)] = {
 		"Scenario maken",
 		"Scenario opnieuw maken",
-		"Werken...",
+		"Werken",
 		"Maak een nieuw scenario",
 		"voor de geselecteerde mods",
 		"Geen scenario gevonden",
@@ -559,7 +562,7 @@ namespace launcher {
 	static std::string_view lt_localised_strings[uint8_t(string_index::count)] = {
 		"Sukurti scenarijų",
 		"Atkurti scenarijų",
-		"Dirba...",
+		"Dirba",
 		"Sukurkite naują pasirinktų",
 		"modifikacijų scenarijų",
 		"Scenarijus nerastas",
@@ -577,7 +580,7 @@ namespace launcher {
 	static std::string_view lv_localised_strings[uint8_t(string_index::count)] = {
 		"Izveidojiet scenāriju",
 		"Atkārtoti izveidojiet scenāriju",
-		"Strādā...",
+		"Strādā",
 		"Izveidojiet jaunu scenāriju",
 		"atlasītajiem modiem",
 		"Nav atrasts neviens scenārijs",
@@ -595,7 +598,7 @@ namespace launcher {
 	static std::string_view et_localised_strings[uint8_t(string_index::count)] = {
 		"Loo stsenaarium",
 		"Loo stsenaarium uuesti",
-		"Töötab...",
+		"Töötab",
 		"Looge valitud modifikatsioonide",
 		"jaoks uus stsenaarium",
 		"Stsenaariumi ei leitud",
@@ -613,7 +616,7 @@ namespace launcher {
 	static std::string_view hi_localised_strings[uint8_t(string_index::count)] = {
 		"परिदृश्य बनाएँ",
 		"परिदृश्य फिर से बनाएँ",
-		"कार्य कर रहा है...",
+		"कार्य कर रहा है",
 		"चयनित मॉड के लिए",
 		"एक नया परिदृश्य बनाएँ",
 		"कोई परिदृश्य नहीं मिला",
@@ -631,7 +634,7 @@ namespace launcher {
 	static std::string_view vi_localised_strings[uint8_t(string_index::count)] = {
 		"Tạo kịch bản",
 		"Kịch bản tái tạo",
-		"Đang làm việc...",
+		"Đang làm việc",
 		"Tạo một kịch bản mới cho",
 		"các mod đã chọn",
 		"Không tìm thấy kịch bản",
@@ -649,7 +652,7 @@ namespace launcher {
 	static std::string_view hy_localised_strings[uint8_t(string_index::count)] = {
 		"Ստեղծեք սցենար",
 		"Վերստեղծեք սցենարը",
-		"Աշխատանքային ...",
+		"Աշխատանքային",
 		"Ստեղծեք նոր սցենար",
 		"ընտրված ռեժիմների համար",
 		"Ոչ մի սցենար չի գտնվել",
@@ -667,7 +670,7 @@ namespace launcher {
 	static std::string_view uk_localised_strings[uint8_t(string_index::count)] = {
 		"Створити сценарій",
 		"Сценарій огляду",
-		"Працює ...",
+		"Працює",
 		"Створіть новий сценарій",
 		"для вибраних мод",
 		"Не знайдено сценарію",
@@ -695,17 +698,15 @@ namespace launcher {
 	constexpr inline int32_t ui_obj_close = 0;
 	constexpr inline int32_t ui_obj_list_left = 1;
 	constexpr inline int32_t ui_obj_list_right = 2;
-	constexpr inline int32_t ui_obj_create_scenario = 3;
-	constexpr inline int32_t ui_obj_play_game = 4;
-	constexpr inline int32_t ui_obj_host_game = 5;
-	constexpr inline int32_t ui_obj_join_game = 6;
-	constexpr inline int32_t ui_obj_ip_addr = 7;
-	constexpr inline int32_t ui_obj_password = 8;
-	constexpr inline int32_t ui_obj_player_name = 9;
+	constexpr inline int32_t ui_obj_play_game = 3;
+	constexpr inline int32_t ui_obj_host_game = 4;
+	constexpr inline int32_t ui_obj_join_game = 5;
+	constexpr inline int32_t ui_obj_ip_addr = 6;
+	constexpr inline int32_t ui_obj_password = 7;
+	constexpr inline int32_t ui_obj_player_name = 8;
 
+	constexpr inline int32_t ui_list_first = 9;
 	constexpr inline int32_t ui_list_count = 14;
-
-	constexpr inline int32_t ui_list_first = 10;
 	constexpr inline int32_t ui_list_checkbox = 0;
 	constexpr inline int32_t ui_list_move_up = 1;
 	constexpr inline int32_t ui_list_move_down = 2;
@@ -720,73 +721,60 @@ namespace launcher {
 	static bool game_dir_not_found = false;
 
 	constexpr inline ui_active_rect ui_rects[] = {
-	ui_active_rect{ 880 - 31,  0 , 31, 31}, // close
-	ui_active_rect{ 30, 208, 21, 93}, // left
-	ui_active_rect{ 515, 208, 21, 93}, // right
-	ui_active_rect{ 555, 48, 286, 33 }, // create scenario
-	ui_active_rect{ 555, 48 + 156 * 1, 286, 33 }, // play game
-	ui_active_rect{ 555, 48 + 156 * 2 + 36 * 0, 138, 33 }, // host game
-	ui_active_rect{ 703, 48 + 156 * 2 + 36 * 0, 138, 33 }, // join game
-	ui_active_rect{ 555, 54 + 156 * 2 + 36 * 2, 200, 23 }, // ip address textbox
-	ui_active_rect{ 555, 54 + 156 * 2 + 36 * 3 + 12, 200, 23 }, // password textbox
-	ui_active_rect{ 765, 54 + 156 * 2 + 36 * 2, 76, 23 }, // player name textbox
-
-	ui_active_rect{ 60 + 6, 75 + 32 * 0 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 0 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 0 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 1 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 1 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 1 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 2 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 2 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 2 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 3 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 3 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 3 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 4 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 4 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 4 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 5 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 5 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 5 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 6 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 6 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 6 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 7 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 7 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 7 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 8 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 8 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 8 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 9 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 9 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 9 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 10 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 10 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 10 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 11 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 11 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 11 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 12 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 12 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 12 + 4, 24, 24 },
-	ui_active_rect{ 60 + 6, 75 + 32 * 13 + 4, 24, 24 },
-	ui_active_rect{ 60 + 383, 75 + 32 * 13 + 4, 24, 24 },
-	ui_active_rect{ 60 + 412, 75 + 32 * 13 + 4, 24, 24 },
+		ui_active_rect{ 880 - 31,  0 , 31, 31}, // close
+		ui_active_rect{ 30, 208, 21, 93}, // left
+		ui_active_rect{ 515, 208, 21, 93}, // right
+		ui_active_rect{ 555, 48 + 156 * 0 + 36 * 0, 286, 33 }, // play game
+		ui_active_rect{ 555, 48 + 156 * 1 + 36 * 0, 138, 33 }, // host game
+		ui_active_rect{ 703, 48 + 156 * 1 + 36 * 0, 138, 33 }, // join game
+		ui_active_rect{ 555, 54 + 156 * 1 + 36 * 2, 200, 23 }, // ip address textbox
+		ui_active_rect{ 555, 54 + 156 * 1 + 36 * 3 + 12, 200, 23 }, // password textbox
+		ui_active_rect{ 765, 54 + 156 * 1 + 36 * 2, 76, 23 }, // player name textbox
+		ui_active_rect{ 60 + 6, 75 + 32 * 0 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 0 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 0 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 1 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 1 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 1 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 2 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 2 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 2 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 3 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 3 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 3 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 4 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 4 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 4 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 5 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 5 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 5 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 6 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 6 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 6 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 7 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 7 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 7 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 8 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 8 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 8 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 9 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 9 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 9 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 10 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 10 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 10 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 11 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 11 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 11 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 12 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 12 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 12 + 4, 24, 24 },
+		ui_active_rect{ 60 + 6, 75 + 32 * 13 + 4, 24, 24 },
+		ui_active_rect{ 60 + 383, 75 + 32 * 13 + 4, 24, 24 },
+		ui_active_rect{ 60 + 412, 75 + 32 * 13 + 4, 24, 24 },
 	};
 
 	static std::vector<parsers::mod_file> mod_list;
-
-	struct scenario_file {
-		native_string file_name;
-		sys::mod_identifier ident;
-	};
-
-	static std::vector<scenario_file> scenario_files;
-	static native_string selected_scenario_file;
-	static uint32_t max_scenario_count = 0;
-	static std::atomic<bool> file_is_ready = true;
-
 	static int32_t frame_in_list = 0;
 
 	static HDC opengl_window_dc = nullptr;
@@ -898,14 +886,16 @@ namespace launcher {
 
 	bool transitively_depends_on_internal(parsers::mod_file const& moda, parsers::mod_file const& modb, std::vector<bool>& seen_indices) {
 		for(auto& dep : moda.dependent_mods) {
-			if(dep == modb.name_)
-			return true;
+			if(dep == modb.name_) {
+				return true;
+			}
 
 			for(int32_t i = 0; i < int32_t(mod_list.size()); ++i) {
 				if(seen_indices[i] == false && mod_list[i].name_ == dep) {
 					seen_indices[i] = true;
-					if(transitively_depends_on_internal(mod_list[i], modb, seen_indices))
-					return true;
+					if(transitively_depends_on_internal(mod_list[i], modb, seen_indices)) {
+						return true;
+					}
 				}
 			}
 		}
@@ -934,21 +924,24 @@ namespace launcher {
 	}
 
 	bool nth_item_can_move_up(int32_t n) {
-		if(n == 0)
-		return false;
-		if(transitively_depends_on(mod_list[n], mod_list[n - 1]))
-		return false;
-
+		if(n == 0) {
+			return false;
+		}
+		if(transitively_depends_on(mod_list[n], mod_list[n - 1])) {
+			return false;
+		}
 		return true;
 	}
 	bool nth_item_can_move_down(int32_t n) {
-		if(n >= int32_t(mod_list.size()) - 1)
-		return false;
-		if(mod_list[n + 1].mod_selected == false)
-		return false;
-		if(transitively_depends_on(mod_list[n + 1], mod_list[n]))
-		return false;
-
+		if(n >= int32_t(mod_list.size()) - 1) {
+			return false;
+		}
+		if(mod_list[n + 1].mod_selected == false) {
+			return false;
+		}
+		if(transitively_depends_on(mod_list[n + 1], mod_list[n])) {
+			return false;
+		}
 		return true;
 	}
 
@@ -956,8 +949,9 @@ namespace launcher {
 		simple_fs::file_system dummy;
 		simple_fs::add_root(dummy, NATIVE("."));
 		for(int32_t i = 0; i < int32_t(mod_list.size()); ++i) {
-			if(mod_list[i].mod_selected == false)
-			break;
+			if(mod_list[i].mod_selected == false) {
+				break;
+			}
 			mod_list[i].add_to_file_system(dummy);
 		}
 		return simple_fs::extract_state(dummy);
@@ -979,198 +973,69 @@ namespace launcher {
 			ret += digits[v & 0x0F];
 			v = v >> 4;
 		} while(v != 0);
-
 		return ret;
-	}
-
-	void make_mod_file() {
-		file_is_ready.store(false, std::memory_order::memory_order_seq_cst);
-		auto path = produce_mod_path();
-		std::thread file_maker([path]() {
-			simple_fs::file_system fs_root;
-			simple_fs::restore_state(fs_root, path);
-			parsers::error_handler err("");
-			auto root = get_root(fs_root);
-			auto common = open_directory(root, NATIVE("common"));
-			parsers::bookmark_context bookmark_context;
-			if(auto f = open_file(common, NATIVE("bookmarks.txt")); f) {
-				auto bookmark_content = simple_fs::view_contents(*f);
-				err.file_name = "bookmarks.txt";
-				parsers::token_generator gen(bookmark_content.data, bookmark_content.data + bookmark_content.file_size);
-				parsers::parse_bookmark_file(gen, err, bookmark_context);
-				assert(!bookmark_context.bookmark_dates.empty());
-			} else {
-				err.accumulated_errors += "File common/bookmarks.txt could not be opened\n";
-			}
-
-			sys::checksum_key scenario_key;
-
-			for(uint32_t date_index = 0; date_index < uint32_t(bookmark_context.bookmark_dates.size()); date_index++) {
-				err.accumulated_errors.clear();
-				err.accumulated_warnings.clear();
-				//
-				auto game_state = std::make_unique<sys::state>();
-				simple_fs::restore_state(game_state->common_fs, path);
-				game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
-				if(err.fatal)
-				break;
-				if(date_index == 0) {
-					auto sdir = simple_fs::get_or_create_scenario_directory();
-					int32_t append = 0;
-					auto time_stamp = uint64_t(std::time(0));
-					auto base_name = to_hex(time_stamp);
-					while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
-						++append;
-					}
-					++max_scenario_count;
-					selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
-					sys::write_scenario_file(*game_state, selected_scenario_file, max_scenario_count);
-					if(auto of = simple_fs::open_file(sdir, selected_scenario_file); of) {
-						auto content = view_contents(*of);
-						auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-						if(desc.count != 0) {
-						scenario_files.push_back(scenario_file{ selected_scenario_file , desc });
-						}
-					}
-					std::sort(scenario_files.begin(), scenario_files.end(), [](scenario_file const& a, scenario_file const& b) {
-						return a.ident.count > b.ident.count;
-					});
-					scenario_key = game_state->scenario_checksum;
-				} else {
-					#ifndef NDEBUG
-					sys::write_scenario_file(*game_state, std::to_wstring(date_index) + NATIVE(".bin"), 0);
-					#endif
-					game_state->scenario_checksum = scenario_key;
-					sys::write_save_file(*game_state, sys::save_type::bookmark, bookmark_context.bookmark_dates[date_index].name_);
-				}
-			}
-
-			if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
-				auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
-				auto pdir = simple_fs::get_or_create_settings_directory();
-				simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
-
-				if(!err.accumulated_errors.empty() && err.fatal) {
-					auto fname = simple_fs::get_full_name(pdir) + NATIVE("\\scenario_errors.txt");
-					ShellExecuteW(
-					nullptr,
-					L"open",
-					fname.c_str(),
-					nullptr,
-					nullptr,
-					SW_NORMAL
-					);
-				}
-			}
-			file_is_ready.store(true, std::memory_order::memory_order_release);
-			InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
-		});
-
-		file_maker.detach();
-	}
-
-	void find_scenario_file() {
-		if(!file_is_ready.load(std::memory_order::memory_order_acquire))
-		return;
-
-		file_is_ready.store(false, std::memory_order::memory_order_seq_cst);
-		selected_scenario_file = NATIVE("");
-		auto mod_path = produce_mod_path();
-
-		for(auto& f : scenario_files) {
-			if(f.ident.mod_path == mod_path) {
-				selected_scenario_file = f.file_name;
-				break;
-			}
-		}
-		file_is_ready.store(true, std::memory_order::memory_order_release);
 	}
 
 	void mouse_click() {
 		if(obj_under_mouse == -1)
-		return;
+			return;
 
 		switch(obj_under_mouse) {
-			case ui_obj_close:
+		case ui_obj_close:
 			PostMessageW(m_hwnd, WM_CLOSE, 0, 0);
 			return;
-			case ui_obj_list_left:
+		case ui_obj_list_left:
 			if(frame_in_list > 0) {
 				--frame_in_list;
-				InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 			}
 			return;
-			case ui_obj_list_right:
+		case ui_obj_list_right:
 			if((frame_in_list + 1) * ui_list_count < int32_t(mod_list.size())) {
 				++frame_in_list;
-				InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 			}
 			return;
-			case ui_obj_create_scenario:
-			if(file_is_ready.load(std::memory_order::memory_order_acquire)) {
-				make_mod_file();
-				InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
-			}
-			return;
-			case ui_obj_play_game:
-			if(file_is_ready.load(std::memory_order::memory_order_acquire) && !selected_scenario_file.empty()) {
-				native_string temp_command_line = native_string(NATIVE("KatEngine.exe -scenario ")) + selected_scenario_file;
-				STARTUPINFO si;
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				PROCESS_INFORMATION pi;
-				ZeroMemory(&pi, sizeof(pi));
-				// Start the child process.
-				if(CreateProcessW(
-				nullptr,   // Module name
-				const_cast<wchar_t*>(temp_command_line.c_str()), // Command line
-				nullptr, // Process handle not inheritable
-				nullptr, // Thread handle not inheritable
-				FALSE, // Set handle inheritance to FALSE
-				0, // No creation flags
-				nullptr, // Use parent's environment block
-				nullptr, // Use parent's starting directory
-				&si, // Pointer to STARTUPINFO structure
-				&pi) != 0) {
-
-					CloseHandle(pi.hProcess);
-					CloseHandle(pi.hThread);
-				}
-				return;
-			}
-			case ui_obj_host_game:
-			case ui_obj_join_game:
-			if(file_is_ready.load(std::memory_order::memory_order_acquire) && !selected_scenario_file.empty()) {
-				native_string temp_command_line = native_string(NATIVE("KatEngine.exe -scenario ")) + selected_scenario_file;
-				if(obj_under_mouse == ui_obj_host_game) {
-					temp_command_line += NATIVE(" -host");
-					temp_command_line += NATIVE(" -name ");
-					temp_command_line += text::utf8_to_native(player_name);
-				} else if(obj_under_mouse == ui_obj_join_game) {
-					temp_command_line += NATIVE(" -join");
-					temp_command_line += NATIVE(" ");
-					temp_command_line += text::utf8_to_native(ip_addr);
-					temp_command_line += NATIVE(" -name ");
-					temp_command_line += text::utf8_to_native(player_name);
-
-					// IPv6 address
-					if(!ip_addr.empty() && ::strchr(ip_addr.c_str(), ':') != nullptr) {
-						temp_command_line += NATIVE(" -v6");
-					}
-				}
-
+		case ui_obj_play_game:
+		case ui_obj_host_game:
+		case ui_obj_join_game:
+		{
+			native_string mod_path = produce_mod_path();
+			native_string temp_command_line = native_string(NATIVE("KatEngine.exe -autofind -path "));
+			temp_command_line += NATIVE("'") + mod_path + NATIVE("'");
+			if(obj_under_mouse == ui_obj_host_game) {
+				temp_command_line += NATIVE(" -host");
+				temp_command_line += NATIVE(" -name '");
+				temp_command_line += text::utf8_to_native(player_name);
+				temp_command_line += NATIVE("'");
 				if(!password.empty()) {
 					temp_command_line += NATIVE(" -password ");
 					temp_command_line += text::utf8_to_native(password);
 				}
-
-				STARTUPINFO si;
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				PROCESS_INFORMATION pi;
-				ZeroMemory(&pi, sizeof(pi));
-				// Start the child process.
-				if(CreateProcessW(
+			} else if(obj_under_mouse == ui_obj_join_game) {
+				temp_command_line += NATIVE(" -join");
+				temp_command_line += NATIVE(" ");
+				temp_command_line += text::utf8_to_native(ip_addr);
+				temp_command_line += NATIVE(" -name '");
+				temp_command_line += text::utf8_to_native(player_name);
+				temp_command_line += NATIVE("'");
+				// IPv6 address
+				if(!ip_addr.empty() && ::strchr(ip_addr.c_str(), ':') != nullptr) {
+					temp_command_line += NATIVE(" -v6");
+				}
+				if(!password.empty()) {
+					temp_command_line += NATIVE(" -password ");
+					temp_command_line += text::utf8_to_native(password);
+				}
+			}
+			reports::write_debug(text::native_to_utf8(temp_command_line).c_str());
+			STARTUPINFO si;
+			ZeroMemory(&si, sizeof(si));
+			si.cb = sizeof(si);
+			PROCESS_INFORMATION pi;
+			ZeroMemory(&pi, sizeof(pi));
+			// Start the child process.
+			if(CreateProcessW(
 				nullptr,   // Module name
 				const_cast<wchar_t*>(temp_command_line.c_str()), // Command line
 				nullptr, // Process handle not inheritable
@@ -1181,69 +1046,57 @@ namespace launcher {
 				nullptr, // Use parent's starting directory
 				&si, // Pointer to STARTUPINFO structure
 				&pi) != 0) {
-
-					CloseHandle(pi.hProcess);
-					CloseHandle(pi.hThread);
-				}
-
-
-				// ready to launch
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
 			}
 			return;
-			case ui_obj_ip_addr:
+		}
+		case ui_obj_ip_addr:
+		case ui_obj_password:
+		case ui_obj_player_name:
 			return;
-			case ui_obj_password:
-			return;
-			case ui_obj_player_name:
-			return;
-			default:
+		default:
 			break;
 		}
-
-		if(!file_is_ready.load(std::memory_order::memory_order_acquire))
-		return;
 
 		int32_t list_position = (obj_under_mouse - ui_list_first) / 3;
 		int32_t sub_obj = (obj_under_mouse - ui_list_first) - list_position * 3;
 
 		switch(sub_obj) {
-			case ui_list_checkbox:
-			{
-				int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
-				if(list_offset < int32_t(launcher::mod_list.size())) {
-					launcher::mod_list[list_offset].mod_selected = !launcher::mod_list[list_offset].mod_selected;
-					if(!launcher::mod_list[list_offset].mod_selected) {
-						recursively_remove_from_list(launcher::mod_list[list_offset]);
-					} else {
-						recursively_add_to_list(launcher::mod_list[list_offset]);
-					}
-					enforce_list_order();
-					find_scenario_file();
-					InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+		case ui_list_checkbox:
+		{
+			int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
+			if(list_offset < int32_t(launcher::mod_list.size())) {
+				launcher::mod_list[list_offset].mod_selected = !launcher::mod_list[list_offset].mod_selected;
+				if(!launcher::mod_list[list_offset].mod_selected) {
+					recursively_remove_from_list(launcher::mod_list[list_offset]);
+				} else {
+					recursively_add_to_list(launcher::mod_list[list_offset]);
 				}
-				return;
+				enforce_list_order();
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 			}
-			case ui_list_move_up:
-			{
-				int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
-				if(launcher::mod_list[list_offset].mod_selected && nth_item_can_move_up(list_offset)) {
-					std::swap(launcher::mod_list[list_offset], launcher::mod_list[list_offset - 1]);
-					find_scenario_file();
-					InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
-				}
-				return;
+			return;
+		}
+		case ui_list_move_up:
+		{
+			int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
+			if(launcher::mod_list[list_offset].mod_selected && nth_item_can_move_up(list_offset)) {
+				std::swap(launcher::mod_list[list_offset], launcher::mod_list[list_offset - 1]);
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 			}
-			case ui_list_move_down:
-			{
-				int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
-				if(launcher::mod_list[list_offset].mod_selected && nth_item_can_move_down(list_offset)) {
-					std::swap(launcher::mod_list[list_offset], launcher::mod_list[list_offset + 1]);
-					find_scenario_file();
-					InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
-				}
-				return;
+			return;
+		}
+		case ui_list_move_down:
+		{
+			int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count + list_position;
+			if(launcher::mod_list[list_offset].mod_selected && nth_item_can_move_down(list_offset)) {
+				std::swap(launcher::mod_list[list_offset], launcher::mod_list[list_offset + 1]);
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 			}
-			default:
+			return;
+		}
+		default:
 			break;
 		}
 	}
@@ -1668,110 +1521,37 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 			}
 		}
 
-		if(file_is_ready.load(std::memory_order::memory_order_acquire)) {
-			launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_create_scenario ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
-			ui_rects[ui_obj_create_scenario].x,
-			ui_rects[ui_obj_create_scenario].y,
-			ui_rects[ui_obj_create_scenario].width,
-			ui_rects[ui_obj_create_scenario].height,
-			big_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			if(game_dir_not_found) {
-				launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_create_scenario ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
-				ui_rects[ui_obj_create_scenario].x,
-				ui_rects[ui_obj_create_scenario].y,
-				44,
-				33,
-				warning_tex.get_texture_handle(), ui::rotation::upright, false);
-			}
-
-			if(selected_scenario_file.empty()) {
-				auto sv = launcher::localised_strings[uint8_t(launcher::string_index::create_scenario)];
-				float x_pos = ui_rects[ui_obj_create_scenario].x + ui_rects[ui_obj_create_scenario].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-			launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, x_pos, ui_rects[ui_obj_create_scenario].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
-			} else {
-				auto sv = launcher::localised_strings[uint8_t(launcher::string_index::recreate_scenario)];
-				float x_pos = ui_rects[ui_obj_create_scenario].x + ui_rects[ui_obj_create_scenario].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-			launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, x_pos, ui_rects[ui_obj_create_scenario].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
-			}
-		} else {
-			launcher::ogl::render_textured_rect(launcher::ogl::color_modification::disabled,
-			ui_rects[ui_obj_create_scenario].x,
-			ui_rects[ui_obj_create_scenario].y,
-			ui_rects[ui_obj_create_scenario].width,
-			ui_rects[ui_obj_create_scenario].height,
-			big_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			if(game_dir_not_found) {
-				launcher::ogl::render_textured_rect(launcher::ogl::color_modification::disabled,
-				ui_rects[ui_obj_create_scenario].x,
-				ui_rects[ui_obj_create_scenario].y,
-				44,
-				33,
-				warning_tex.get_texture_handle(), ui::rotation::upright, false);
-			}
-			auto sv = launcher::localised_strings[uint8_t(launcher::string_index::working)];
-			float x_pos = ui_rects[ui_obj_create_scenario].x + ui_rects[ui_obj_create_scenario].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, x_pos, 50.0f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
-		}
-
 		{
 			// Create a new scenario file for the selected mods
 			auto sv = launcher::localised_strings[uint8_t(launcher::string_index::create_a_new_scenario)];
 			auto xoffset = 830.0f - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]);
-		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, xoffset, 94.0f + 0 * 18.0f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+			launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, xoffset, 94.0f + 0 * 18.0f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 			sv = launcher::localised_strings[uint8_t(launcher::string_index::for_the_selected_mods)];
 			xoffset = 830.0f - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]);
-		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, xoffset, 94.0f + 1 * 18.0f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+			launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, xoffset, 94.0f + 1 * 18.0f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 		}
 
-		if(file_is_ready.load(std::memory_order::memory_order_acquire) && !selected_scenario_file.empty()) {
-			launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_play_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
+		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_play_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 			ui_rects[ui_obj_play_game].x,
 			ui_rects[ui_obj_play_game].y,
 			ui_rects[ui_obj_play_game].width,
 			ui_rects[ui_obj_play_game].height,
 			big_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_host_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
+		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_host_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 			ui_rects[ui_obj_host_game].x,
 			ui_rects[ui_obj_host_game].y,
 			ui_rects[ui_obj_host_game].width,
 			ui_rects[ui_obj_host_game].height,
 			big_l_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_join_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
+		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_join_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 			ui_rects[ui_obj_join_game].x,
 			ui_rects[ui_obj_join_game].y,
 			ui_rects[ui_obj_join_game].width,
 			ui_rects[ui_obj_join_game].height,
 			big_r_button_tex.get_texture_handle(), ui::rotation::upright, false);
-		} else {
-			launcher::ogl::render_textured_rect(launcher::ogl::color_modification::disabled,
-			ui_rects[ui_obj_play_game].x,
-			ui_rects[ui_obj_play_game].y,
-			ui_rects[ui_obj_play_game].width,
-			ui_rects[ui_obj_play_game].height,
-			big_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			launcher::ogl::render_textured_rect(launcher::ogl::color_modification::disabled,
-			ui_rects[ui_obj_host_game].x,
-			ui_rects[ui_obj_host_game].y,
-			ui_rects[ui_obj_host_game].width,
-			ui_rects[ui_obj_host_game].height,
-			big_l_button_tex.get_texture_handle(), ui::rotation::upright, false);
-			launcher::ogl::render_textured_rect(launcher::ogl::color_modification::disabled,
-			ui_rects[ui_obj_join_game].x,
-			ui_rects[ui_obj_join_game].y,
-			ui_rects[ui_obj_join_game].width,
-			ui_rects[ui_obj_join_game].height,
-			big_r_button_tex.get_texture_handle(), ui::rotation::upright, false);
-
-			/*830, 250*/
-			// No scenario file found
-
-			auto sv = launcher::localised_strings[uint8_t(launcher::string_index::no_scenario_found)];
-			auto xoffset = 830.0f - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]);
-		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, xoffset, ui_rects[ui_obj_play_game].y + 48.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
-		}
 
 		auto sv = launcher::localised_strings[uint8_t(launcher::string_index::ip_address)];
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_ip_addr].x + ui_rects[ui_obj_ip_addr].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_ip_addr].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_ip_addr].x + ui_rects[ui_obj_ip_addr].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_ip_addr].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_ip_addr ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 		ui_rects[ui_obj_ip_addr].x,
 		ui_rects[ui_obj_ip_addr].y,
@@ -1780,7 +1560,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 		line_bg_tex.get_texture_handle(), ui::rotation::upright, false);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::password)];
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_password].x + ui_rects[ui_obj_password].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_password].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_password].x + ui_rects[ui_obj_password].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_password].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_password ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 		ui_rects[ui_obj_password].x,
 		ui_rects[ui_obj_password].y,
@@ -1789,7 +1569,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 		line_bg_tex.get_texture_handle(), ui::rotation::upright, false);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::nickname)];
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_player_name].x + ui_rects[ui_obj_player_name].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_player_name].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_player_name].x + ui_rects[ui_obj_player_name].width - base_text_extent(sv.data(), uint32_t(sv.size()), 14, fonts[0]), ui_rects[ui_obj_player_name].y - 21.f, 14.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[0]);
 		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_player_name ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 		ui_rects[ui_obj_player_name].x,
 		ui_rects[ui_obj_player_name].y,
@@ -1798,34 +1578,34 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 		line_bg_tex.get_texture_handle(), ui::rotation::upright, false);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::singleplayer)];
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_play_game].x + ui_rects[ui_obj_play_game].width - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]), ui_rects[ui_obj_play_game].y - 32.f, 22.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_play_game].x + ui_rects[ui_obj_play_game].width - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]), ui_rects[ui_obj_play_game].y - 32.f, 22.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::start_game)];
 		float sg_x_pos = ui_rects[ui_obj_play_game].x + ui_rects[ui_obj_play_game].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, sg_x_pos, ui_rects[ui_obj_play_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, sg_x_pos, ui_rects[ui_obj_play_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::multiplayer)];
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_join_game].x + ui_rects[ui_obj_join_game].width - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]), ui_rects[ui_obj_host_game].y - 32.f, 22.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ui_rects[ui_obj_join_game].x + ui_rects[ui_obj_join_game].width - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]), ui_rects[ui_obj_host_game].y - 32.f, 22.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
 
 		// Join and host game buttons
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::host)];
 		float hg_x_pos = ui_rects[ui_obj_host_game].x + ui_rects[ui_obj_host_game].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, hg_x_pos, ui_rects[ui_obj_host_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, hg_x_pos, ui_rects[ui_obj_host_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::join)];
 		float jg_x_pos = ui_rects[ui_obj_join_game].x + ui_rects[ui_obj_join_game].width / 2 - base_text_extent(sv.data(), uint32_t(sv.size()), 22, fonts[1]) / 2.0f;
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, jg_x_pos, ui_rects[ui_obj_join_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, jg_x_pos, ui_rects[ui_obj_join_game].y + 2.f, 22.0f, launcher::ogl::color3f{ 50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f }, fonts[1]);
 
 		// Text fields
 		float ia_x_pos = ui_rects[ui_obj_ip_addr].x + 6.f;// ui_rects[ui_obj_ip_addr].width - base_text_extent(ip_addr.c_str(), uint32_t(ip_addr.length()), 14, fonts[0]) - 4.f;
-	launcher::ogl::render_new_text(ip_addr.c_str(), launcher::ogl::color_modification::none, ia_x_pos, ui_rects[ui_obj_ip_addr].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(ip_addr.c_str(), launcher::ogl::color_modification::none, ia_x_pos, ui_rects[ui_obj_ip_addr].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
 		float ps_x_pos = ui_rects[ui_obj_password].x + 6.f;
-	launcher::ogl::render_new_text(password.c_str(), launcher::ogl::color_modification::none, ia_x_pos, ui_rects[ui_obj_password].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(password.c_str(), launcher::ogl::color_modification::none, ia_x_pos, ui_rects[ui_obj_password].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
 		float pn_x_pos = ui_rects[ui_obj_player_name].x + 6.f;// ui_rects[ui_obj_player_name].width - base_text_extent(player_name.c_str(), uint32_t(player_name.length()), 14, fonts[0]) - 4.f;
-	launcher::ogl::render_new_text(player_name.c_str(), launcher::ogl::color_modification::none, pn_x_pos, ui_rects[ui_obj_player_name].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
+		launcher::ogl::render_new_text(player_name.c_str(), launcher::ogl::color_modification::none, pn_x_pos, ui_rects[ui_obj_player_name].y + 3.f, 14.0f, launcher::ogl::color3f{ 255.0f, 255.0f, 255.0f }, fonts[0]);
 
 		sv = launcher::localised_strings[uint8_t(launcher::string_index::mod_list)];
 		auto ml_xoffset = list_text_right_align - base_text_extent(sv.data(), uint32_t(sv.size()), 24, fonts[1]);
-	launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ml_xoffset, 45.0f, 24.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(sv.data(), launcher::ogl::color_modification::none, ml_xoffset, 45.0f, 24.0f, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
 
 		int32_t list_offset = launcher::frame_in_list * launcher::ui_list_count;
 
@@ -2105,7 +1885,6 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 			::ogl::load_file_and_return_handle(NATIVE("assets/launcher_down.png"), fs, down_tex, false);
 			::ogl::load_file_and_return_handle(NATIVE("assets/launcher_line_bg.png"), fs, line_bg_tex, false);
 			::ogl::load_file_and_return_handle(NATIVE("assets/launcher_warning.png"), fs, warning_tex, false);
-
 			game_dir_not_found = false;
 			{
 				auto f = simple_fs::peek_file(root, NATIVE("v2game.exe"));
@@ -2117,10 +1896,8 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					}
 				}
 			}
-
 			auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
 			auto mod_files = simple_fs::list_files(mod_dir, NATIVE(".mod"));
-
 			parsers::error_handler err("");
 			for(auto& f : mod_files) {
 				auto of = simple_fs::open_file(f);
@@ -2130,26 +1907,6 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
 				}
 			}
-
-			auto sdir = simple_fs::get_or_create_scenario_directory();
-			auto s_files = simple_fs::list_files(sdir, NATIVE(".bin"));
-			for(auto& f : s_files) {
-				auto of = simple_fs::open_file(f);
-				if(of) {
-					auto content = view_contents(*of);
-					auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-					if(desc.count != 0) {
-						max_scenario_count = std::max(desc.count, max_scenario_count);
-						scenario_files.push_back(scenario_file{ simple_fs::get_file_name(f) , desc });
-					}
-				}
-			}
-
-			std::sort(scenario_files.begin(), scenario_files.end(), [](scenario_file const& a, scenario_file const& b) {
-				return a.ident.count > b.ident.count;
-			});
-			find_scenario_file();
-
 			reports::write_debug("Finished launcher setup\n");
 			return 1;
 		} else {
@@ -2166,7 +1923,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					lprcNewScale->right - lprcNewScale->left, lprcNewScale->bottom - lprcNewScale->top,
 					SWP_NOZORDER | SWP_NOACTIVATE);
 
-					InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 
 					break;
 				}
@@ -2183,7 +1940,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
 					mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
 					if(update_under_mouse()) {
-						InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+						InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 					}
 					return 0;
 				}
@@ -2192,7 +1949,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
 					mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
 					if(update_under_mouse()) {
-						InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+						InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 					}
 					return 0;
 				}
@@ -2304,7 +2061,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 							}
 						}
 					}
-					InvalidateRect((HWND)(m_hwnd), nullptr, FALSE);
+					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 					return 0;
 				}
 				default:
