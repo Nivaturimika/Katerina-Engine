@@ -508,11 +508,12 @@ namespace ui {
 		}
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-			state.world.for_each_commodity([&](dcon::commodity_id id) {
-				if(id != economy::money && economy::nation_pop_consumption(state, state.local_player_nation, id) > 0.f) {
-					row_contents.push_back(id);
+			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+				if(economy::nation_pop_consumption(state, state.local_player_nation, c) > 0.0f) {
+					row_contents.push_back(c);
 				}
-			});
+			}
 			switch(sort) {
 			case trade_sort::commodity:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
