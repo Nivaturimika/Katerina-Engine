@@ -274,32 +274,30 @@ namespace ui {
 				}
 			}
 			switch(sort) {
-				case trade_sort::commodity:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::commodity:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::stockpile:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::stockpile:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = state.world.nation_get_stockpiles(state.local_player_nation, a);
 					auto bv = state.world.nation_get_stockpiles(state.local_player_nation, b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::stockpile_change:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::stockpile_change:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = economy::stockpile_commodity_daily_increase(state, a, state.local_player_nation);
 					auto bv = economy::stockpile_commodity_daily_increase(state, b, state.local_player_nation);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				default:
+			default:
 				break;
 			}
 			if(!sort_ascend) {
@@ -344,42 +342,39 @@ namespace ui {
 				row_contents.push_back(c);
 			}
 			switch(sort) {
-				case trade_sort::commodity:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::commodity:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::global_market_pool:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::global_market_pool:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = state.world.commodity_get_global_market_pool(a);
 					auto bv = state.world.commodity_get_global_market_pool(b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::real_demand:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::real_demand:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = state.world.nation_get_real_demand(state.local_player_nation, a);
 					auto bv = state.world.nation_get_real_demand(state.local_player_nation, b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::domestic_market:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::domestic_market:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = state.world.nation_get_domestic_market_pool(state.local_player_nation, a);
 					auto bv = state.world.nation_get_domestic_market_pool(state.local_player_nation, b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				default:
+			default:
 				break;
 			}
 			if(!sort_ascend) {
@@ -424,22 +419,21 @@ namespace ui {
 				}
 			}
 			switch(sort) {
-				case trade_sort::commodity:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::commodity:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					return a.index() < b.index();
 				});
 				break;
-				case trade_sort::needs:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
+			case trade_sort::needs:
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
 					auto av = economy::government_consumption(state, state.local_player_nation, a);
 					auto bv = economy::government_consumption(state, state.local_player_nation, b);
 					if(av != bv)
-					return av > bv;
-					else
+						return av > bv;
 					return a.index() < b.index();
 				});
 				break;
-				default:
+			default:
 				break;
 			}
 			if(!sort_ascend) {
@@ -619,7 +613,9 @@ namespace ui {
 				}
 			}
 			if(producers.size() > 0) {
-				std::sort(producers.begin(), producers.end(), [](auto const& a, auto const& b) { return a.v > b.v; });
+				pdqsort(producers.begin(), producers.end(), [](auto const& a, auto const& b) {
+					return a.v > b.v;
+				});
 				{
 					auto box = text::open_layout_box(contents, 0);
 					text::substitution_map sub{};
