@@ -186,7 +186,16 @@ namespace ui {
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
 					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
-						state.select(al.get_navy());
+						if constexpr(A == unit_counter_position_type::land_move) {
+							if(al.get_navy().get_path().size() > 0
+							&& !al.get_navy().get_battle_from_navy_battle_participation()) {
+								state.select(al.get_navy());
+							}
+						} else {
+							if(al.get_navy().get_path().size() == 0) {
+								state.select(al.get_navy());
+							}
+						}
 					}
 				}
 			}
@@ -200,7 +209,9 @@ namespace ui {
 								state.select(al.get_army());
 							}
 						} else {
-							state.select(al.get_army());
+							if(al.get_army().get_path().size() == 0) {
+								state.select(al.get_army());
+							}
 						}
 					}
 				}
