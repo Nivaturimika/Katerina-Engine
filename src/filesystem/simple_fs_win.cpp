@@ -19,15 +19,19 @@
 namespace simple_fs {
 	static native_string steam_path;
 
-	native_string get_steam_path() {
+	void set_steam_path(native_string path) {
+		steam_path = path;
+	}
+
+	native_string query_steam_path() {
 		WCHAR szBuffer[4096]; // excessive but just in case someone has their game directory NESTED
 		HKEY hKey;
 		LSTATUS res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Paradox Interactive\\Victoria 2", 0, KEY_READ, &hKey); // open key if key exists
 		if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
 			DWORD lnBuffer = 4096;
-			res = RegQueryValueEx(hKey, L"path", NULL, NULL, reinterpret_cast<LPBYTE>(szBuffer), &lnBuffer);
+			res = RegQueryValueEx(hKey, L"path", NULL, NULL, LPBYTE(szBuffer), &lnBuffer);
 			if(res == ERROR_SUCCESS) { // victoria 2 could not be located, see the "Interested in Contributing?" page on the github.
-				szBuffer[lnBuffer] = 0;
+				szBuffer[lnBuffer - 1] = 0;
 				RegCloseKey(hKey);
 				return native_string(szBuffer);
 			}
@@ -36,7 +40,9 @@ namespace simple_fs {
 	}
 
 	void identify_global_system_properties() {
-		steam_path = get_steam_path();
+		if(steam_path.empty()) {
+			steam_path = query_steam_path();
+		}
 	}
 
 	file::~file() {

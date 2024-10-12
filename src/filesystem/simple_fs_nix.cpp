@@ -12,6 +12,14 @@
 #include "pdqsort.h"
 
 namespace simple_fs {
+	native_string steam_path;
+	void set_steam_path(native_string path) {
+		steam_path = path;
+	}
+
+	native_string query_steam_path() {
+		return native_string();
+	}
 
 	void identify_global_system_properties() {
 		//no globals have to be set

@@ -344,6 +344,11 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					headless = true;
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
 					headless_repeat = true;
+				} else if(native_string(parsed_cmd[i]) == NATIVE("-gamedir")) {
+					if(i + 1 < num_params) {
+						auto path = native_string(parsed_cmd[i + 1]);
+						simple_fs::set_steam_path(path);
+					}
 				} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
 					if(i + 1 < num_params) {
 						auto root = get_root(fs_root);

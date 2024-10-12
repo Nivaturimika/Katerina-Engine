@@ -15,6 +15,8 @@
 #include <map>
 
 namespace simple_fs {
+	void set_steam_path(native_string path);
+	native_string query_steam_path();
 	void identify_global_system_properties(); // -- needed for startup
 
 	class file;

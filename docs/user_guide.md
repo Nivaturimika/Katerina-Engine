@@ -79,6 +79,25 @@ Please refer to this before opening a tech support ticket.
 
 Other controls are described directly on the tooltip (for example, right clicking to add a technology to the queue).
 
+## Command line arguments
+
+* `-host`: Starts KE in host mode.
+* `-join <ip address>`: Join an ongoing game at a given IP address.
+* `-name <name>`: Name yourself in multiplayer.
+* `-password <pass>`: Password to use when connecting to a game.
+* `-v6`: Force IPv6.
+* `-v4`: Force IPv4.
+* `-headless`: Force headless mode (no GUI, no window)
+* `-repeat`: Force repeat on headless mode (when it reaches end date, it will loop back to the start from a fresh save).
+* `-gamedir <dir>`: Specify the game directory (assumed it's an Steam install).
+* `-mod <mod file>`: Specify a mod, for example: `-mod IGOR.mod`.
+* `-scenario <file>`: Specify a scenario, should just be the filename, for example: `0AAB0.bin`.
+* `-autofind`: Autofind an scenario to play with before trying to create it.
+* `-speed <n>`: Set initial game speed to `n` (from 0 to 5).
+* `-path <path>`: Set the raw mod path to `path` (separated by `?` and `;`, the former denotes a `replace_path`, the latter denotes a root).
+* `-validate`: Sets validate mode, exits upon scenario creation.
+* `-port <port>`: Use a given port to host, the default is `1984`.
+
 ## Multiplayer Instructions
 
 ### Joining a game
