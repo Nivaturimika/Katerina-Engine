@@ -992,30 +992,19 @@ namespace economy {
 		uint32_t total_commodities = state.world.commodity_size();
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto is_pop_need = false;
-			auto kf = state.world.commodity_get_key_factory(cid);
-			if(state.world.commodity_get_is_available_from_start(cid)) { //|| (kf && state.world.nation_get_active_building(n, kf))) {
-				for(const auto t : state.world.in_pop_type) {
-					auto strata = state.world.pop_type_get_strata(t);
-					float base_life = state.world.pop_type_get_life_needs(t, cid);
-					float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
-					float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
-					if(base_life > 0.0f || base_everyday > 0.0f || base_luxury > 0.0f) {
-						is_pop_need = true;
-						break;
-					}
-					/* Invention factor doesn't factor for life needs */
-				}
-				if(is_pop_need) {
-					float total_r_demand = 0.0f;
-					state.world.for_each_nation([&](dcon::nation_id n) {
-						total_r_demand += state.world.nation_get_real_demand(n, cid);
-					});
-					float limitation = std::min(std::max(state.world.commodity_get_last_total_production(cid),1.0f)/std::max(total_r_demand, 1.0f), 1.0f);
-					state.world.for_each_nation([&](dcon::nation_id n) {
-						state.world.nation_get_real_demand(n, cid) *= limitation;
-					});
-				}
+			auto is_pop_need = state.world.commodity_get_is_life_need(cid) ||
+				state.world.commodity_get_is_everyday_need(cid) ||
+				state.world.commodity_get_is_luxury_need(cid);
+			if(is_pop_need) {
+				float total_r_demand = 0.0f;
+				state.world.for_each_nation([&](dcon::nation_id n) {
+					total_r_demand += state.world.nation_get_real_demand(n, cid);
+				});
+				float limitation = std::min(std::max(state.world.commodity_get_last_total_production(cid), 1.0f) /
+					std::max(total_r_demand, 1.0f), 1.0f);
+				state.world.for_each_nation([&](dcon::nation_id n) {
+					state.world.nation_get_real_demand(n, cid) *= limitation;
+				});
 			}
 		}
 		
