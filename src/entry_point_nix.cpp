@@ -8,12 +8,7 @@ int main(int argc, char **argv) {
 	add_root(game_state.common_fs, NATIVE(".")); // will add the working directory as first root -- for the moment this lets us find the shader files
 
 	if(argc >= 2) {
-		#ifndef NDEBUG
-		{
-			auto msg = std::string("Loading scenario  ") + text::native_to_utf8(argv[1]);
-			window::emit_error_message(msg, false);
-		}
-		#endif
+		reports::write_debug(("Loading scenario: " + text::native_to_utf8(argv[1])).c_str());
 		for(int i = 1; i < argc; ++i) {
 			if(native_string(argv[i]) == NATIVE("-host")) {
 				game_state.network_mode = sys::network_mode_type::host;

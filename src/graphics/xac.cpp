@@ -606,10 +606,6 @@ namespace emfx {
 		} else {
 			sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&ptr, end, err);
 		}
-#ifdef XAC_DEBUG
-		reports::write_debug(("Skin chunk for Id#" + std::to_string(sh.node_id) + ": " + context.nodes[sh.node_id].name + "\n").c_str());
-		reports::write_debug(("skinningInfluences=" + std::to_string(sh.num_influences) + "\n").c_str());
-#endif
 		std::vector<xac_skinning_v3_influence_entry> influence_data;
 		for(uint32_t i = 0; i < sh.num_influences; i++) {
 			auto influence = parse_xac_any_binary<xac_skinning_v3_influence_entry>(&ptr, end, err);
@@ -636,7 +632,9 @@ namespace emfx {
 				obj.influences.push_back(bone_influence);
 			}
 #ifdef XAC_DEBUG
-			reports::write_debug(("skinInfluenceStarts=" + std::to_string(obj.influence_starts.size()) + "\n").c_str());
+			reports::write_debug(("Skin chunk for Id#" + std::to_string(sh.node_id) + "[" + context.nodes[sh.node_id].name + "]"
+				+ ",skinningInfluences=" + std::to_string(sh.num_influences)
+				+ ",skinInfluenceStarts=" + std::to_string(obj.influence_starts.size()) + "\n").c_str());
 #endif
 			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
 				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);

@@ -751,17 +751,11 @@ namespace network {
 						}
 						break;
 					}
-					#ifndef NDEBUG
-					auto msg = ("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer_header.type)));
-					reports::write_debug(msg.c_str());
-					#endif
+					reports::write_debug(("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer_header.type))).c_str());
 				});
 			}
 			if(r != 0) { // error
-				#if !defined(NDEBUG) && defined(_WIN32)
-				auto msg = ("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-				reports::write_debug(msg.c_str());
-				#endif
+				reports::write_debug(("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
 				network::disconnect_client(state, client, false);
 			}
 		}
@@ -801,10 +795,7 @@ namespace network {
 				/* And then the bulk payload! */
 				client.save_stream_offset = client.total_sent_bytes + client.send_buffer.size();
 				socket_add_to_send_queue(client.send_buffer, buffer, size_t(length));
-				#ifndef NDEBUG
-				auto msg = ("host:send:save: " + std::to_string(uint32_t(length)));
-				reports::write_debug(msg.c_str());
-				#endif
+				reports::write_debug(("host:send:save: " + std::to_string(uint32_t(length))).c_str());
 			}
 		}
 	}
@@ -858,10 +849,7 @@ namespace network {
 				hshake.save_checksum = state.get_save_checksum();
 				socket_add_to_send_queue(client.early_send_buffer, &hshake, sizeof(hshake));
 			}
-			#ifndef NDEBUG
-			auto msg = ("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index()));
-			reports::write_debug(msg.c_str());
-			#endif
+			reports::write_debug(("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index())).c_str());
 			return;
 		}
 	}
@@ -888,10 +876,7 @@ namespace network {
 					broadcast_to_clients(state, *c);
 					command::execute_command(state, *c);
 					command_executed = true;
-					#ifndef NDEBUG
-					auto msg = ("host:receive:cmd: " + std::to_string(uint32_t(c->type)));
-					reports::write_debug(msg.c_str());
-					#endif
+					reports::write_debug(("host:receive:cmd: " + std::to_string(uint32_t(c->type))).c_str());
 				}
 				state.network_state.outgoing_commands.pop();
 				c = state.network_state.outgoing_commands.front();
@@ -908,40 +893,28 @@ namespace network {
 						size_t old_size = client.early_send_buffer.size();
 						int r = socket_send(client.socket_fd, client.early_send_buffer);
 						if(r != 0) { // error
-							#if !defined(NDEBUG) && defined(_WIN32)
-							auto msg = ("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-							reports::write_debug(msg.c_str());
-							#endif
+							reports::write_debug(("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
 							disconnect_client(state, client, false);
 							continue;
 						}
 						client.total_sent_bytes += old_size - client.early_send_buffer.size();
-						#ifndef NDEBUG
 						if(old_size != client.early_send_buffer.size()) {
-							auto msg = ("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
-							reports::write_debug(msg.c_str());
+							reports::write_debug(("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes").c_str());
 						}
-						#endif
 					}
 				} else {
 					if(client.send_buffer.size() > 0) {
 						size_t old_size = client.send_buffer.size();
 						int r = socket_send(client.socket_fd, client.send_buffer);
 						if(r != 0) { // error
-							#if !defined(NDEBUG) && defined(_WIN32)
-							auto msg = ("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg());
-							reports::write_debug(msg.c_str());
-							#endif
+							reports::write_debug(("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
 							disconnect_client(state, client, false);
 							continue;
 						}
 						client.total_sent_bytes += old_size - client.send_buffer.size();
-						#ifndef NDEBUG
 						if(old_size != client.send_buffer.size()) {
-							auto msg = ("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes");
-							reports::write_debug(msg.c_str());
+							reports::write_debug(("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes").c_str());
 						}
-						#endif
 					}
 				}
 			}
@@ -949,9 +922,7 @@ namespace network {
 			if(state.network_state.handshake) {
 				/* Send our client's handshake */
 				int r = socket_recv(state.network_state.socket_fd, &state.network_state.s_hshake, sizeof(state.network_state.s_hshake), &state.network_state.recv_count, [&]() {
-					#ifndef NDEBUG
 					reports::write_debug("client:recv:handshake: OK");
-					#endif
 					if(!state.scenario_checksum.is_equal(state.network_state.s_hshake.scenario_checksum)) {
 						bool found_match = false;
 						// Find a scenario with a matching checksum
@@ -1011,14 +982,13 @@ namespace network {
 				}
 			} else if(state.network_state.save_stream) {
 				int r = socket_recv(state.network_state.socket_fd, state.network_state.save_data.data(), state.network_state.save_data.size(), &state.network_state.recv_count, [&]() {
-					#ifndef NDEBUG
-					auto msg = ("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size())));
-					reports::write_debug(msg.c_str());
-					#endif
+					reports::write_debug(("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size()))).c_str());
 					std::vector<dcon::nation_id> players;
-					for(const auto n : state.world.in_nation)
-					if(state.world.nation_get_is_player_controlled(n))
-						players.push_back(n);
+					for(const auto n : state.world.in_nation) {
+						if(state.world.nation_get_is_player_controlled(n)) {
+							players.push_back(n);
+						}
+					}
 					dcon::nation_id old_local_player_nation = state.local_player_nation;
 					//
 					state.network_state.save_slock.store(true, std::memory_order::release);
@@ -1086,10 +1056,7 @@ namespace network {
 						}
 						state.network_state.save_data.resize(static_cast<size_t>(save_size));
 					}
-					#ifndef NDEBUG
-					auto msg = ("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer_header.type)));
-					reports::write_debug(msg.c_str());
-					#endif
+					reports::write_debug(("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer_header.type))).c_str());
 				});
 				if(r != 0) { // error
 					ui::popup_error_window(state, "Network Error", "Network client command receive error: " + get_last_error_msg());
@@ -1102,10 +1069,7 @@ namespace network {
 				// send the outgoing commands to the server and flush the entire queue
 				auto* c = state.network_state.outgoing_commands.front();
 				while(c) {
-					#ifndef NDEBUG
-					auto msg = ("client:send:cmd: " + std::to_string(uint32_t(c->type)));
-					reports::write_debug(msg.c_str());
-					#endif
+					reports::write_debug(("client:send:cmd: " + std::to_string(uint32_t(c->type))).c_str());
 					if(c->type == command::command_type::save_game) {
 						command::execute_command(state, *c);
 						command_executed = true;

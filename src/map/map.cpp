@@ -2635,8 +2635,7 @@ namespace map {
 				level = std::clamp<uint32_t>(level, 0, 6);
 				state.map_state.map_data.model_fort[level] = edef;
 			} else {
-				culture::graphical_culture_type t = culture::graphical_culture_type::generic;
-
+				auto t = culture::graphical_culture_type::generic;
 				size_t type_pos = std::string::npos;
 				if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "africangc")) {
 					t = culture::graphical_culture_type::african;
@@ -2781,7 +2780,7 @@ namespace map {
 								if(!is_collision) {
 									for(const auto& smv : triangle_vertices) {
 										static_mesh_vertex tmp = smv;
-										//tmp.position_ *= emfx_obj.scale;
+										tmp.position_ *= emfx_obj.scale;
 										static_mesh_vertices.push_back(tmp);
 									}
 								}
