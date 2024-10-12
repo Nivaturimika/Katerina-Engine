@@ -1903,90 +1903,86 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 			return 1;
 		} else {
 			switch(message) {
-				case WM_DPICHANGED:
-				{
-					dpi = float(HIWORD(wParam));
-					auto lprcNewScale = reinterpret_cast<RECT*>(lParam);
+			case WM_DPICHANGED:
+			{
+				dpi = float(HIWORD(wParam));
+				auto lprcNewScale = reinterpret_cast<RECT*>(lParam);
 
+				scaling_factor = float(lprcNewScale->right - lprcNewScale->left) / base_width;
 
-					scaling_factor = float(lprcNewScale->right - lprcNewScale->left) / base_width;
+				SetWindowPos(hwnd, nullptr, lprcNewScale->left, lprcNewScale->top,
+				lprcNewScale->right - lprcNewScale->left, lprcNewScale->bottom - lprcNewScale->top,
+				SWP_NOZORDER | SWP_NOACTIVATE);
 
-					SetWindowPos(hwnd, nullptr, lprcNewScale->left, lprcNewScale->top,
-					lprcNewScale->right - lprcNewScale->left, lprcNewScale->bottom - lprcNewScale->top,
-					SWP_NOZORDER | SWP_NOACTIVATE);
-
-					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
-
-					break;
-				}
-				case WM_NCMOUSEMOVE:
-				{
-					RECT rcWindow;
-					GetWindowRect(hwnd, &rcWindow);
-					auto x = GET_X_LPARAM(lParam);
-					auto y = GET_Y_LPARAM(lParam);
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
+				break;
+			}
+			case WM_NCMOUSEMOVE:
+			{
+				RECT rcWindow;
+				GetWindowRect(hwnd, &rcWindow);
+				auto x = GET_X_LPARAM(lParam);
+				auto y = GET_Y_LPARAM(lParam);
 
 				POINTS adj{ SHORT(x - rcWindow.left), SHORT(y - rcWindow.top) };
-					memcpy(&lParam, &adj, sizeof(LPARAM));
+				memcpy(&lParam, &adj, sizeof(LPARAM));
 
-					mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
-					mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
-					if(update_under_mouse()) {
-						InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
-					}
-					return 0;
+				mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
+				mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
+				if(update_under_mouse()) {
+					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 				}
-				case WM_MOUSEMOVE:
-				{
-					mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
-					mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
-					if(update_under_mouse()) {
-						InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
-					}
-					return 0;
+				return 0;
+			}
+			case WM_MOUSEMOVE:
+			{
+				mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
+				mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);
+				if(update_under_mouse()) {
+					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
 				}
-				case WM_LBUTTONDOWN:
-				{
-					mouse_click();
+				return 0;
+			}
+			case WM_LBUTTONDOWN:
+			{
+				mouse_click();
+				return 0;
+			}
+			case WM_NCCALCSIZE:
+				if(wParam == TRUE)
 					return 0;
-				}
-				case WM_NCCALCSIZE:
-					if(wParam == TRUE)
-						return 0;
-					break;
-				case WM_NCHITTEST:
-				{
-					POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-					RECT rcWindow;
-					GetWindowRect(hwnd, &rcWindow);
+				break;
+			case WM_NCHITTEST:
+			{
+				POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				RECT rcWindow;
+				GetWindowRect(hwnd, &rcWindow);
 
-					if(ptMouse.x <= int32_t(rcWindow.left + caption_width * scaling_factor)
-					&& ptMouse.y <= int32_t(rcWindow.top + caption_height * scaling_factor)) {
-						return HTCAPTION;
-					}
-					return HTCLIENT;
+				if(ptMouse.x <= int32_t(rcWindow.left + caption_width * scaling_factor)
+				&& ptMouse.y <= int32_t(rcWindow.top + caption_height * scaling_factor)) {
+					return HTCAPTION;
 				}
-				case WM_PAINT:
-				case WM_DISPLAYCHANGE:
-				{
-					reports::write_debug("Start redraw\n");
-					PAINTSTRUCT ps;
-					BeginPaint(hwnd, &ps);
-					render();
-					EndPaint(hwnd, &ps);
-					reports::write_debug("Finished redraw\n");
-					return 0;
-				}
-				case WM_DESTROY:
-					PostQuitMessage(0);
-					return 1;
-				case WM_KEYDOWN:
+				return HTCLIENT;
+			}
+			case WM_PAINT:
+			case WM_DISPLAYCHANGE:
+			{
+				PAINTSTRUCT ps;
+				BeginPaint(hwnd, &ps);
+				render();
+				EndPaint(hwnd, &ps);
+				return 0;
+			}
+			case WM_DESTROY:
+				PostQuitMessage(0);
+				return 1;
+			case WM_KEYDOWN:
 				if(GetKeyState(VK_CONTROL) & 0x8000) {
 					if(wParam == L'v' || wParam == L'V') {
 						if(!IsClipboardFormatAvailable(CF_TEXT))
-						return 0;
+							return 0;
 						if(!OpenClipboard(m_hwnd))
-						return 0;
+							return 0;
 
 						auto hglb = GetClipboardData(CF_TEXT);
 						if(hglb != nullptr) {
@@ -2004,145 +2000,68 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 					}
 				}
 				return 0;
-				case WM_NCCREATE:
-				{
-					if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
-						auto pSetProcessDpiAwarenessContext = (decltype(&SetProcessDpiAwarenessContext))GetProcAddress(hUser32dll, "SetProcessDpiAwarenessContext");
-						if(pSetProcessDpiAwarenessContext == NULL) {
-							// not present, so have to call this
-							auto pEnableNonClientDpiScaling = (decltype(&EnableNonClientDpiScaling))GetProcAddress(hUser32dll, "EnableNonClientDpiScaling");
-							if(pEnableNonClientDpiScaling != NULL) {
-								pEnableNonClientDpiScaling(hwnd); //windows 10
-							}
+			case WM_NCCREATE:
+			{
+				if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
+					auto pSetProcessDpiAwarenessContext = (decltype(&SetProcessDpiAwarenessContext))GetProcAddress(hUser32dll, "SetProcessDpiAwarenessContext");
+					if(pSetProcessDpiAwarenessContext == NULL) {
+						// not present, so have to call this
+						auto pEnableNonClientDpiScaling = (decltype(&EnableNonClientDpiScaling))GetProcAddress(hUser32dll, "EnableNonClientDpiScaling");
+						if(pEnableNonClientDpiScaling != NULL) {
+							pEnableNonClientDpiScaling(hwnd); //windows 10
 						}
-						FreeLibrary(hUser32dll);
 					}
-					break;
+					FreeLibrary(hUser32dll);
 				}
-				case WM_CHAR:
-				{
-					if(GetKeyState(VK_CONTROL) & 0x8000) {
+				break;
+			}
+			case WM_CHAR:
+			{
+				if(GetKeyState(VK_CONTROL) & 0x8000) {
 
-					} else {
-						char turned_into = process_utf16_to_win1250(wchar_t(wParam));
-						if(turned_into) {
-							if(obj_under_mouse == ui_obj_ip_addr) {
-								if(turned_into == '\b') {
-									if(!ip_addr.empty())
+				} else {
+					char turned_into = process_utf16_to_win1250(wchar_t(wParam));
+					if(turned_into) {
+						if(obj_under_mouse == ui_obj_ip_addr) {
+							if(turned_into == '\b') {
+								if(!ip_addr.empty()) {
 									ip_addr.pop_back();
-								} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && ip_addr.size() < 46) {
-									ip_addr.push_back(turned_into);
 								}
-							} else if(obj_under_mouse == ui_obj_player_name) {
-								if(turned_into == '\b') {
-									if(!player_name.empty()) {
-										player_name.pop_back();
-										save_playername();
-									}
-								} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && player_name.size() < 24) {
-									player_name.push_back(turned_into);
+							} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && ip_addr.size() < 46) {
+								ip_addr.push_back(turned_into);
+							}
+						} else if(obj_under_mouse == ui_obj_player_name) {
+							if(turned_into == '\b') {
+								if(!player_name.empty()) {
+									player_name.pop_back();
 									save_playername();
 								}
-							} else if(obj_under_mouse == ui_obj_password) {
-								if(turned_into == '\b') {
-									if(!password.empty())
+							} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && player_name.size() < 24) {
+								player_name.push_back(turned_into);
+								save_playername();
+							}
+						} else if(obj_under_mouse == ui_obj_password) {
+							if(turned_into == '\b') {
+								if(!password.empty()) {
 									password.pop_back();
-								} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && password.size() < 16) {
-									password.push_back(turned_into);
 								}
+							} else if(turned_into >= 32 && turned_into != '\t' && turned_into != ' ' && password.size() < 16) {
+								password.push_back(turned_into);
 							}
 						}
 					}
-					InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
-					return 0;
 				}
-				default:
+				InvalidateRect(HWND(m_hwnd), nullptr, FALSE);
+				return 0;
+			}
+			default:
 				break;
 
 			}
 			return DefWindowProc(hwnd, message, wParam, lParam);
 		}
 	}
-
 } // end launcher namespace
-
-static CRITICAL_SECTION guard_abort_handler;
-
-void signal_abort_handler(int) {
-	static bool run_once = false;
-
-	EnterCriticalSection(&guard_abort_handler);
-	if(run_once == false) {
-		run_once = true;
-
-		STARTUPINFO si;
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		PROCESS_INFORMATION pi;
-		ZeroMemory(&pi, sizeof(pi));
-		// Start the child process.
-		if(CreateProcessW(
-			L"dbg_alice.exe",   // Module name
-			NULL, // Command line
-			NULL, // Process handle not inheritable
-			NULL, // Thread handle not inheritable
-			FALSE, // Set handle inheritance to FALSE
-			0, // No creation flags
-			NULL, // Use parent's environment block
-			NULL, // Use parent's starting directory
-			&si, // Pointer to STARTUPINFO structure
-			&pi) == 0) {
-
-			// create process failed
-			LeaveCriticalSection(&guard_abort_handler);
-			return;
-
-		}
-		// Wait until child process exits.
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		// Close process and thread handles.
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-	}
-	LeaveCriticalSection(&guard_abort_handler);
-}
-
-LONG WINAPI uef_wrapper(struct _EXCEPTION_POINTERS* lpTopLevelExceptionFilter) {
-	signal_abort_handler(0);
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-
-void generic_wrapper() {
-	signal_abort_handler(0);
-}
-void invalid_parameter_wrapper(
-   const wchar_t* expression,
-   const wchar_t* function,
-   const wchar_t* file,
-   unsigned int line,
-   uintptr_t pReserved
-) {
-	signal_abort_handler(0);
-}
-
-void EnableCrashingOnCrashes() {
-	typedef BOOL(WINAPI* tGetPolicy)(LPDWORD lpFlags);
-	typedef BOOL(WINAPI* tSetPolicy)(DWORD dwFlags);
-	const DWORD EXCEPTION_SWALLOWING = 0x1;
-
-	HMODULE kernel32 = LoadLibraryA("kernel32.dll");
-	tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress(kernel32, "GetProcessUserModeExceptionPolicy");
-	tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress(kernel32, "SetProcessUserModeExceptionPolicy");
-	if(pGetPolicy && pSetPolicy) {
-		DWORD dwFlags;
-		if(pGetPolicy(&dwFlags)) {
-			// Turn off the filter
-			pSetPolicy(dwFlags & ~EXCEPTION_SWALLOWING);
-		}
-	}
-	BOOL insanity = FALSE;
-	SetUserObjectInformationA(GetCurrentProcess(), UOI_TIMERPROC_EXCEPTION_SUPPRESSION, &insanity, sizeof(insanity));
-}
 
 int WINAPI wWinMain(
 	HINSTANCE /*hInstance*/,
@@ -2150,20 +2069,9 @@ int WINAPI wWinMain(
 	LPWSTR /*lpCmdLine*/,
 	int /*nCmdShow*/
 ) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
-	#endif
-
-	InitializeCriticalSection(&guard_abort_handler);
-
-	if(!IsDebuggerPresent()) {
-		EnableCrashingOnCrashes();
-		_set_purecall_handler(generic_wrapper);
-		_set_invalid_parameter_handler(invalid_parameter_wrapper);
-		_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-		SetUnhandledExceptionFilter(uef_wrapper);
-		signal(SIGABRT, signal_abort_handler);
-	}
+#endif
 
 	// Workaround for old machines
 	if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
@@ -2222,22 +2130,22 @@ int WINAPI wWinMain(
 		}
 	} else {
 		srand(time(NULL));
-		launcher::player_name = std::to_string(int32_t(rand()));
+		launcher::player_name = "Player" + std::to_string(int32_t(rand() & 0xff));
 	}
 
 	launcher::m_hwnd = CreateWindowEx(
 		0,
 		L"alice_launcher_class",
 		L"Launch Katerina Engine",
-		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_BORDER,
+		WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		0,
 		0,
 		NULL,
 		NULL,
-		GetModuleHandle(nullptr),
-		nullptr
+		GetModuleHandle(NULL),
+		NULL
 	);
 
 	if(launcher::m_hwnd) {
@@ -2273,7 +2181,6 @@ int WINAPI wWinMain(
 			int(launcher::scaling_factor * launcher::base_height),
 			SWP_NOMOVE | SWP_FRAMECHANGED);
 
-
 		ShowWindow((HWND)(launcher::m_hwnd), SW_SHOWNORMAL);
 		UpdateWindow((HWND)(launcher::m_hwnd));
 	}
@@ -2285,6 +2192,5 @@ int WINAPI wWinMain(
 	}
 
 	CoUninitialize();
-
 	return 0;
 }
