@@ -997,10 +997,10 @@ namespace economy {
 				state.world.commodity_get_is_luxury_need(cid);
 			auto lower_bound = 0.25f;
 			if(state.world.commodity_get_is_luxury_need(cid)) {
-				lower_bound *= 1.60f;
+				lower_bound *= 1.3f;
 			}
 			if(state.world.commodity_get_is_everyday_need(cid)) {
-				lower_bound *= 1.3f;
+				lower_bound *= 1.1f;
 			}
 			if(is_pop_need) {
 				float total_r_demand = 0.0f;
