@@ -68,10 +68,18 @@ namespace simple_fs {
 		return std::string();
 	}
 
+	/*	Whetever the Victoria 2 game install could be located or not (by probing v2game.exe's existence) */
+	bool can_locate_game_install() {
+		simple_fs::file_system fs;
+		simple_fs::add_root(fs, NATIVE("."));
+		auto root = simple_fs::get_root(fs);
+		return simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value();
+	}
+
 	void identify_global_system_properties() {
 		auto root = directory(nullptr, NATIVE("."));
 		// victoria 2 not found in current directory - try fallback to steam path
-		if(!simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
+		if(!can_locate_game_install()) {
 			// game_dir.txt will override anything that was queried, if it's present
 			if(auto game_dir_file = simple_fs::open_file(root, NATIVE("game_dir.txt")); game_dir_file) {
 				auto contents = simple_fs::view_contents(*game_dir_file);
@@ -79,17 +87,15 @@ namespace simple_fs {
 				simple_fs::set_steam_path(text::utf8_to_native(str));
 			}
 			// Try querying from registry
-			if(steam_path.empty() && !simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
+			if(steam_path.empty() && !can_locate_game_install()) {
 				steam_path = query_steam_path();
 			}
-			// No registry -> fallback to asking the user
-			if(steam_path.empty() && !simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
-				if(!simple_fs::peek_file(root, NATIVE("game_dir.txt")).has_value()) {
-					auto str = user_browse_for_steam_path();
-					if(str.size() > 0) {
-						simple_fs::write_file(root, NATIVE("game_dir.txt"), str.c_str(), uint32_t(str.size()));
-						simple_fs::set_steam_path(text::utf8_to_native(str));
-					}
+			// No registry -> fallback to asking the user and create a new game_dir.txt
+			if(steam_path.empty() && !can_locate_game_install() && !simple_fs::peek_file(root, NATIVE("game_dir.txt"))) {
+				auto str = user_browse_for_steam_path();
+				if(str.size() > 0) {
+					simple_fs::write_file(root, NATIVE("game_dir.txt"), str.c_str(), uint32_t(str.size()));
+					simple_fs::set_steam_path(text::utf8_to_native(str));
 				}
 			}
 		}
@@ -260,23 +266,41 @@ namespace simple_fs {
 
 	std::vector<unopened_file> list_files(directory const& dir, native_char const* extension) {
 		std::vector<unopened_file> accumulated_results;
+		auto r_steam_path = steam_path + NATIVE("\\");
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 				auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
 				auto const appended_path = dir_path + NATIVE("\\*") + extension;
-				if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
-				continue;
+				if(simple_fs::is_ignored_path(*dir.parent_system, appended_path)) {
+					continue;
+				}
 				WIN32_FIND_DATAW find_result;
 				auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
 					do {
 						if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-						if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(), [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; }); search_result == accumulated_results.end()) {
-								accumulated_results.emplace_back(dir_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
+							if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(), [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; }); search_result == accumulated_results.end()) {
+								auto const rel_path = dir_path + NATIVE("\\");
+								accumulated_results.emplace_back(rel_path + find_result.cFileName, find_result.cFileName);
 							}
 						}
 					} while(FindNextFileW(find_handle, &find_result) != 0);
 					FindClose(find_handle);
+				}
+				if(steam_path.size() > 0) {
+					auto const r_appended_path = r_steam_path + dir_path + NATIVE("\\*") + extension;
+					find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
+					if(find_handle != INVALID_HANDLE_VALUE) {
+						do {
+							if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
+								if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(), [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; }); search_result == accumulated_results.end()) {
+									auto const rel_path = r_steam_path + dir_path + NATIVE("\\");
+									accumulated_results.emplace_back(rel_path + find_result.cFileName, find_result.cFileName);
+								}
+							}
+						} while(FindNextFileW(find_handle, &find_result) != 0);
+						FindClose(find_handle);
+					}
 				}
 			}
 		} else {
@@ -286,43 +310,20 @@ namespace simple_fs {
 			if(find_handle != INVALID_HANDLE_VALUE) {
 				do {
 					if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-						accumulated_results.emplace_back(dir.relative_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
+						auto const rel_path = dir.relative_path + NATIVE("\\");
+						accumulated_results.emplace_back(rel_path + find_result.cFileName, find_result.cFileName);
 					}
 				} while(FindNextFileW(find_handle, &find_result) != 0);
 				FindClose(find_handle);
 			}
-		}
-
-		// if has steam install
-		if(!steam_path.empty()) {
-			auto r_steam_path = steam_path + NATIVE("\\");
-			if(dir.parent_system) {
-				for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-					auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-					auto const appended_path = r_steam_path + dir_path + NATIVE("\\*") + extension;
-					if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
-					continue;
-					WIN32_FIND_DATAW find_result;
-					auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
-					if(find_handle != INVALID_HANDLE_VALUE) {
-						do {
-							if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-							if(auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(), [n = find_result.cFileName](auto const& f) { return f.file_name.compare(n) == 0; }); search_result == accumulated_results.end()) {
-									accumulated_results.emplace_back(dir_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
-								}
-							}
-						} while(FindNextFileW(find_handle, &find_result) != 0);
-						FindClose(find_handle);
-					}
-				}
-			} else {
-				auto const appended_path = r_steam_path + dir.relative_path + NATIVE("\\*") + extension;
-				WIN32_FIND_DATAW find_result;
-				auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
+			if(steam_path.size() > 0) {
+				auto const r_appended_path = r_steam_path + dir.relative_path + NATIVE("\\*") + extension;
+				find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
 					do {
 						if(!(find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-							accumulated_results.emplace_back(r_steam_path + dir.relative_path + NATIVE("\\") + find_result.cFileName, find_result.cFileName);
+							auto const rel_path = r_steam_path + dir.relative_path + NATIVE("\\");
+							accumulated_results.emplace_back(rel_path + find_result.cFileName, find_result.cFileName);
 						}
 					} while(FindNextFileW(find_handle, &find_result) != 0);
 					FindClose(find_handle);
@@ -337,24 +338,41 @@ namespace simple_fs {
 	}
 	std::vector<directory> list_subdirectories(directory const& dir) {
 		std::vector<directory> accumulated_results;
+		auto r_steam_path = steam_path + NATIVE("\\");
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 				auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
 				auto const appended_path = dir_path + NATIVE("\\*");
-				if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
-				continue;
+				if(simple_fs::is_ignored_path(*dir.parent_system, appended_path)) {
+					continue;
+				}
 				WIN32_FIND_DATAW find_result;
 				auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
 					do {
 						if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-							native_string const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
-						if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
+							auto const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
+							if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
 								accumulated_results.emplace_back(dir.parent_system, rel_name);
 							}
 						}
 					} while(FindNextFileW(find_handle, &find_result) != 0);
 					FindClose(find_handle);
+				}
+				if(steam_path.size() > 0) {
+					auto const r_appended_path = r_steam_path + dir_path + NATIVE("\\*");
+					find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
+					if(find_handle != INVALID_HANDLE_VALUE) {
+						do {
+							if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
+								auto const rel_name = r_steam_path + dir.relative_path + NATIVE("\\") + find_result.cFileName;
+								if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
+									accumulated_results.emplace_back(dir.parent_system, rel_name);
+								}
+							}
+						} while(FindNextFileW(find_handle, &find_result) != 0);
+						FindClose(find_handle);
+					}
 				}
 			}
 		} else {
@@ -364,7 +382,7 @@ namespace simple_fs {
 			if(find_handle != INVALID_HANDLE_VALUE) {
 				do {
 					if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-						native_string const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
+						auto const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
 						if(find_result.cFileName[0] != NATIVE('.')) {
 							accumulated_results.emplace_back(nullptr, rel_name);
 						}
@@ -372,39 +390,12 @@ namespace simple_fs {
 				} while(FindNextFileW(find_handle, &find_result) != 0);
 				FindClose(find_handle);
 			}
-		}
-
-		// if has steam install
-		if(!steam_path.empty()) {
-			auto r_steam_path = steam_path + NATIVE("\\");
-			if(dir.parent_system) {
-				for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-					auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-					auto const appended_path = r_steam_path + dir_path + NATIVE("\\*");
-					if(simple_fs::is_ignored_path(*dir.parent_system, appended_path))
-					continue;
-					WIN32_FIND_DATAW find_result;
-					auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
-					if(find_handle != INVALID_HANDLE_VALUE) {
-						do {
-							if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-								native_string const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
-							if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
-									accumulated_results.emplace_back(dir.parent_system, rel_name);
-								}
-							}
-						} while(FindNextFileW(find_handle, &find_result) != 0);
-						FindClose(find_handle);
-					}
-				}
-			} else {
-				auto const appended_path = r_steam_path + dir.relative_path + NATIVE("\\*");
-				WIN32_FIND_DATAW find_result;
-				auto find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
+			if(steam_path.size() > 0) {
+				find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
 					do {
 						if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-							native_string const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
+							auto const rel_name = r_steam_path + dir.relative_path + NATIVE("\\") + find_result.cFileName;
 							if(find_result.cFileName[0] != NATIVE('.')) {
 								accumulated_results.emplace_back(nullptr, rel_name);
 							}
@@ -414,7 +405,6 @@ namespace simple_fs {
 				}
 			}
 		}
-
 		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](directory const& a, directory const& b) {
 			return std::lexicographical_compare(std::begin(a.relative_path), std::end(a.relative_path), std::begin(b.relative_path), std::end(b.relative_path), [](native_char const& char1, native_char const& char2) { return tolower(char1) < tolower(char2); });
 		});
@@ -440,14 +430,15 @@ namespace simple_fs {
 			native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
 			return full_path;
 		}
-	return std::optional<native_string>{};
+		return std::optional<native_string>{};
 	}
 
 	std::optional<file> open_file(directory const& dir, native_string_view file_name) {
+		auto r_steam_path = steam_path + NATIVE("\\");
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-				native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-				native_string full_path = dir_path + NATIVE('\\') + native_string(file_name);
+				auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
+				auto const full_path = dir_path + NATIVE('\\') + native_string(file_name);
 				if(simple_fs::is_ignored_path(*dir.parent_system, full_path)) {
 					continue;
 				}
@@ -455,46 +446,37 @@ namespace simple_fs {
 				if(file_handle != INVALID_HANDLE_VALUE) {
 					return std::optional<file>(file(file_handle, full_path));
 				}
+				if(steam_path.size() > 0) {
+					auto const r_full_path = dir_path + NATIVE('\\') + native_string(file_name);
+					file_handle = CreateFileW(r_full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+					if(file_handle != INVALID_HANDLE_VALUE) {
+						return std::optional<file>(file(file_handle, r_full_path));
+					}
+				}
 			}
 		} else {
-			native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
+			auto const full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
 			HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 			if(file_handle != INVALID_HANDLE_VALUE) {
 				return std::optional<file>(file(file_handle, full_path));
 			}
-		}
-
-		if(!steam_path.empty()) {
-			auto r_steam_path = steam_path + NATIVE("\\");
-			if(dir.parent_system) {
-				for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-					native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-					native_string full_path = r_steam_path + dir_path + NATIVE('\\') + native_string(file_name);
-					if(simple_fs::is_ignored_path(*dir.parent_system, full_path)) {
-						continue;
-					}
-					HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-					if(file_handle != INVALID_HANDLE_VALUE) {
-						return std::optional<file>(file(file_handle, full_path));
-					}
-				}
-			} else {
-				native_string full_path = r_steam_path + dir.relative_path + NATIVE('\\') + native_string(file_name);
-				HANDLE file_handle = CreateFileW(full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
+			if(steam_path.size() > 0) {
+				auto const r_full_path = r_steam_path + dir.relative_path + NATIVE('\\') + native_string(file_name);
+				file_handle = CreateFileW(r_full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 				if(file_handle != INVALID_HANDLE_VALUE) {
-					return std::optional<file>(file(file_handle, full_path));
+					return std::optional<file>(file(file_handle, r_full_path));
 				}
 			}
 		}
-
-	return std::optional<file>{};
+		return std::optional<file>{};
 	}
 
 	std::optional<unopened_file> peek_file(directory const& dir, native_string_view file_name) {
+		auto r_steam_path = steam_path + NATIVE("\\");
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-				native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-				native_string full_path = dir_path + NATIVE('\\') + native_string(file_name);
+				auto const dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
+				auto const full_path = dir_path + NATIVE('\\') + native_string(file_name);
 				if(simple_fs::is_ignored_path(*dir.parent_system, full_path)) {
 					continue;
 				}
@@ -502,38 +484,29 @@ namespace simple_fs {
 				if(dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
 					return std::optional<unopened_file>(unopened_file(full_path, file_name));
 				}
+				if(steam_path.size() > 0) {
+					auto const r_full_path = r_steam_path + dir_path + NATIVE('\\') + native_string(file_name);
+					dwAttrib = GetFileAttributesW(r_full_path.c_str());
+					if(dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
+						return std::optional<unopened_file>(unopened_file(r_full_path, file_name));
+					}
+				}
 			}
 		} else {
-			native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
+			auto const full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
 			DWORD dwAttrib = GetFileAttributesW(full_path.c_str());
 			if(dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
 				return std::optional<unopened_file>(unopened_file(full_path, file_name));
 			}
-		}
-
-		if(!steam_path.empty()) {
-			auto r_steam_path = steam_path + NATIVE("\\");
-			if(dir.parent_system) {
-				for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
-					native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-					native_string full_path = r_steam_path + dir_path + NATIVE('\\') + native_string(file_name);
-					if(simple_fs::is_ignored_path(*dir.parent_system, full_path)) {
-						continue;
-					}
-					DWORD dwAttrib = GetFileAttributesW(full_path.c_str());
-					if(dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
-						return std::optional<unopened_file>(unopened_file(full_path, file_name));
-					}
-				}
-			} else {
-				native_string full_path = r_steam_path + dir.relative_path + NATIVE('\\') + native_string(file_name);
-				DWORD dwAttrib = GetFileAttributesW(full_path.c_str());
+			if(steam_path.size() > 0) {
+				auto const r_full_path = r_steam_path + dir.relative_path + NATIVE('\\') + native_string(file_name);
+				dwAttrib = GetFileAttributesW(r_full_path.c_str());
 				if(dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
-					return std::optional<unopened_file>(unopened_file(full_path, file_name));
+					return std::optional<unopened_file>(unopened_file(r_full_path, file_name));
 				}
 			}
 		}
-	return std::optional<unopened_file>{};
+		return std::optional<unopened_file>{};
 	}
 
 	void add_ignore_path(file_system& fs, native_string_view replaced_path) {

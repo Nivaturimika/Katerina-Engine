@@ -1889,11 +1889,9 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 				}
 			}
 			auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
-			auto mod_files = simple_fs::list_files(mod_dir, NATIVE(".mod"));
 			parsers::error_handler err("");
-			for(auto& f : mod_files) {
-				auto of = simple_fs::open_file(f);
-				if(of) {
+			for(auto& f : simple_fs::list_files(mod_dir, NATIVE(".mod"))) {
+				if(auto of = simple_fs::open_file(f); of) {
 					auto content = view_contents(*of);
 					parsers::token_generator gen(content.data, content.data + content.file_size);
 					mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
