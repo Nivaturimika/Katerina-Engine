@@ -69,27 +69,25 @@ namespace simple_fs {
 	}
 
 	void identify_global_system_properties() {
-		simple_fs::file_system dummy_fs;
-		simple_fs::add_root(dummy_fs, NATIVE("."));
-		auto root_dir = simple_fs::get_root(dummy_fs);
+		auto root = directory(nullptr, NATIVE("."));
 		// victoria 2 not found in current directory - try fallback to steam path
-		if(!simple_fs::peek_file(root_dir, NATIVE("v2game.exe")).has_value()) {
+		if(!simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
 			// game_dir.txt will override anything that was queried, if it's present
-			if(auto game_dir_file = simple_fs::open_file(root_dir, NATIVE("game_dir.txt")); game_dir_file) {
+			if(auto game_dir_file = simple_fs::open_file(root, NATIVE("game_dir.txt")); game_dir_file) {
 				auto contents = simple_fs::view_contents(*game_dir_file);
 				std::string str(contents.data, contents.data + contents.file_size);
 				simple_fs::set_steam_path(text::utf8_to_native(str));
 			}
 			// Try querying from registry
-			if(steam_path.empty() && !simple_fs::peek_file(root_dir, NATIVE("v2game.exe")).has_value()) {
+			if(steam_path.empty() && !simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
 				steam_path = query_steam_path();
 			}
 			// No registry -> fallback to asking the user
-			if(steam_path.empty() && !simple_fs::peek_file(root_dir, NATIVE("v2game.exe")).has_value()) {
-				if(!simple_fs::peek_file(root_dir, NATIVE("game_dir.txt")).has_value()) {
+			if(steam_path.empty() && !simple_fs::peek_file(root, NATIVE("v2game.exe")).has_value()) {
+				if(!simple_fs::peek_file(root, NATIVE("game_dir.txt")).has_value()) {
 					auto str = user_browse_for_steam_path();
 					if(str.size() > 0) {
-						simple_fs::write_file(root_dir, NATIVE("game_dir.txt"), str.c_str(), uint32_t(str.size()));
+						simple_fs::write_file(root, NATIVE("game_dir.txt"), str.c_str(), uint32_t(str.size()));
 						simple_fs::set_steam_path(text::utf8_to_native(str));
 					}
 				}
