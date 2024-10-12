@@ -124,6 +124,7 @@ namespace network {
 		SysFreeString(local_host);
 		SysFreeString(desc);
 		internal_wait.unlock();
+		return mapped_ports_with_upnp;
 	}
 
 	bool port_forwarder::is_external_ip(std::string str) {

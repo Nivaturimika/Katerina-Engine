@@ -894,20 +894,24 @@ namespace emfx {
 	}
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
-		auto& keys = position_keys;
-		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_position, 0.f } : keys.back();
+		auto const& keys = position_keys;
+		assert(!keys.empty());
+		return i < keys.size() ? keys[i] : keys.back();
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
-		auto& keys = rotation_keys;
-		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_rotation, 0.f } : keys.back();
+		auto const& keys = rotation_keys;
+		assert(!keys.empty());
+		return i < keys.size() ? keys[i] : keys.back();
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
-		auto& keys = scale_keys;
-		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector3f>{ pose_scale, 0.f } : keys.back();
+		auto const& keys = scale_keys;
+		assert(!keys.empty());
+		return i < keys.size() ? keys[i] : keys.back();
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
-		auto& keys = scale_rotation_keys;
-		return i < keys.size() ? keys[i] : keys.empty() ? xsm_animation_key<xac_vector4f>{ pose_scale_rotation, 0.f } : keys.back();
+		auto const& keys = scale_rotation_keys;
+		assert(!keys.empty());
+		return i < keys.size() ? keys[i] : keys.back();
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
