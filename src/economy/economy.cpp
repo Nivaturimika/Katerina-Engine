@@ -995,6 +995,13 @@ namespace economy {
 			auto is_pop_need = state.world.commodity_get_is_life_need(cid) ||
 				state.world.commodity_get_is_everyday_need(cid) ||
 				state.world.commodity_get_is_luxury_need(cid);
+			auto lower_bound = 0.25f;
+			if(state.world.commodity_get_is_luxury_need(cid)) {
+				lower_bound *= 1.60f;
+			}
+			if(state.world.commodity_get_is_everyday_need(cid)) {
+				lower_bound *= 1.3f;
+			}
 			if(is_pop_need) {
 				float total_r_demand = 0.0f;
 				state.world.for_each_nation([&](dcon::nation_id n) {
@@ -1002,6 +1009,7 @@ namespace economy {
 				});
 				float limitation = std::min(std::max(state.world.commodity_get_last_total_production(cid), 1.0f) /
 					std::max(total_r_demand, 1.0f), 1.0f);
+				limitation = std::max(limitation, lower_bound);
 				state.world.for_each_nation([&](dcon::nation_id n) {
 					state.world.nation_get_real_demand(n, cid) *= limitation;
 				});
