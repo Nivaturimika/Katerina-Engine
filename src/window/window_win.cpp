@@ -360,7 +360,7 @@ namespace window {
 			(WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
 			: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(nullptr), &game_state);
+		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(NULL), &game_state);
 		if(!game_state.win_ptr->hwnd)
 			return;
 

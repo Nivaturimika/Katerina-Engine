@@ -96,15 +96,16 @@ namespace network {
 				((sockaddr_in6*)(&ext_ip))->sin6_port = default_server_port;
 				((sockaddr_in6*)(&ext_ip))->sin6_family = AF_INET6;
 			}
-			auto flow = pcp_new_flow(pcp_obj, (sockaddr*)&source_ip, nullptr, (sockaddr*)&ext_ip, IPPROTO_TCP, 3600, nullptr);
+			auto flow = pcp_new_flow(pcp_obj, (sockaddr*)&source_ip, NULL, (sockaddr*)&ext_ip, IPPROTO_TCP, 3600, NULL);
 			if(flow) {
 				pcp_wait(flow, 10000, 0);
 			}
+			pcp_close_flow(flow);
 		}
 		// wait for destructor
 		internal_wait.lock();
 		if(pcp_obj) {
-			pcp_terminate(pcp_obj, 0);
+			pcp_terminate(pcp_obj, 1);
 		}
 		//cleanup forwarding
 		if(port_mappings) {
@@ -141,95 +142,90 @@ namespace network {
 	}
 
 	void port_forwarder::start_forwarding() {
-		#ifdef _WIN64
+#ifdef _WIN64
 		if(started)
 			return;
 
 		internal_wait.lock();
 		started = true;
-		do_forwarding = std::thread{ [&]() {
+		do_forwarding = std::thread([&]() {
 			//setup forwarding
 			if(!SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED)))
 				return;
-		
+
 			std::vector<local_addresses> found_locals;
 			// try to figure out what the computer's local address is
-			{
-				IP_ADAPTER_ADDRESSES* adapter_addresses(NULL);
-				IP_ADAPTER_ADDRESSES* adapter(NULL);
-
-				// Start with a 16 KB buffer and resize if needed -
-				// multiple attempts in case interfaces change while
-				// we are in the middle of querying them.
-				DWORD adapter_addresses_buffer_size = 16 * 1024;
-				for(int attempts = 0; attempts != 3; ++attempts) {
-					adapter_addresses = (IP_ADAPTER_ADDRESSES*)malloc(adapter_addresses_buffer_size);
-					assert(adapter_addresses);
-
-					DWORD error = GetAdaptersAddresses(
-						AF_UNSPEC,
-						GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_FRIENDLY_NAME,
-						NULL,
-						adapter_addresses,
-						&adapter_addresses_buffer_size);
-
-					if(ERROR_SUCCESS == error) {
-						// We're done here, people!
-						break;
-					} else if(ERROR_BUFFER_OVERFLOW == error) {
-						// Try again with the new size
-						free(adapter_addresses);
-						adapter_addresses = NULL;
-						continue;
-					} else {
-						// Unexpected error code - log and throw
-						free(adapter_addresses);
-						adapter_addresses = NULL;
-						// @todo
-					}
+			IP_ADAPTER_ADDRESSES* adapter_addresses = NULL;
+			IP_ADAPTER_ADDRESSES* adapter = NULL;
+			// Start with a 16 KB buffer and resize if needed -
+			// multiple attempts in case interfaces change while
+			// we are in the middle of querying them.
+			DWORD adapter_addresses_buffer_size = 16 * 1024;
+			for(uint32_t attempts = 0; attempts != 3; ++attempts) {
+				adapter_addresses = (IP_ADAPTER_ADDRESSES*)malloc(adapter_addresses_buffer_size);
+				assert(adapter_addresses);
+				DWORD error = GetAdaptersAddresses(
+					AF_UNSPEC,
+					GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_FRIENDLY_NAME,
+					NULL,
+					adapter_addresses,
+					&adapter_addresses_buffer_size);
+				if(ERROR_SUCCESS == error) {
+					// We're done here, people!
+					break;
+				} else if(ERROR_BUFFER_OVERFLOW == error) {
+					// Try again with the new size
+					free(adapter_addresses);
+					adapter_addresses = NULL;
+					continue;
+				} else {
+					// Unexpected error code - log and throw
+					free(adapter_addresses);
+					adapter_addresses = NULL;
+					// @todo
 				}
-
-				// Iterate through all of the adapters
-				for(adapter = adapter_addresses; NULL != adapter; adapter = adapter->Next) {
-					// Skip loopback adapters
-					if(IF_TYPE_SOFTWARE_LOOPBACK == adapter->IfType) {
-						continue;
-					}
-
-					// Parse all IPv4 and IPv6 addresses
-					for(IP_ADAPTER_UNICAST_ADDRESS* address = adapter->FirstUnicastAddress; address != NULL; address = address->Next) {
-						auto family = address->Address.lpSockaddr->sa_family;
-						if(address->DadState != NldsPreferred && address->DadState != IpDadStatePreferred)
-							continue;
-
-						if(AF_INET == family) {
-							// IPv4
-							SOCKADDR_IN* ipv4 = reinterpret_cast<SOCKADDR_IN*>(address->Address.lpSockaddr);
-							char str_buffer[INET_ADDRSTRLEN] = { 0 };
-							inet_ntop(AF_INET, &(ipv4->sin_addr), str_buffer, INET_ADDRSTRLEN);
-							std::string ip_str(str_buffer);
-							found_locals.push_back(local_addresses{ ip_str,  false });
-						} else if(AF_INET6 == family) {
-							// IPv6
-							SOCKADDR_IN6* ipv6 = reinterpret_cast<SOCKADDR_IN6*>(address->Address.lpSockaddr);
-							char str_buffer[INET6_ADDRSTRLEN] = { 0 };
-							inet_ntop(AF_INET6, &(ipv6->sin6_addr), str_buffer, INET6_ADDRSTRLEN);
-							std::string ip_str(str_buffer);
-							// Detect and skip non-external addresses
-							if(is_external_ip(ip_str)) {
-								found_locals.push_back(local_addresses{ ip_str, true });
-							}
-						} else {
-							// Skip all other types of addresses
-							continue;
-						}
-					}
-				}
-
-				// Cleanup
-				free(adapter_addresses);
-				adapter_addresses = NULL;
 			}
+
+			// Iterate through all of the adapters
+			for(adapter = adapter_addresses; NULL != adapter; adapter = adapter->Next) {
+				// Skip loopback adapters
+				if(adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
+					continue;
+				}
+
+				// Parse all IPv4 and IPv6 addresses
+				for(IP_ADAPTER_UNICAST_ADDRESS* address = adapter->FirstUnicastAddress; address != NULL; address = address->Next) {
+					auto family = address->Address.lpSockaddr->sa_family;
+					if(address->DadState != NldsPreferred && address->DadState != IpDadStatePreferred)
+						continue;
+
+					if(AF_INET == family) {
+						// IPv4
+						SOCKADDR_IN* ipv4 = reinterpret_cast<SOCKADDR_IN*>(address->Address.lpSockaddr);
+						char str_buffer[INET_ADDRSTRLEN] = { 0 };
+						inet_ntop(AF_INET, &(ipv4->sin_addr), str_buffer, INET_ADDRSTRLEN);
+						std::string ip_str(str_buffer);
+						reports::write_debug(("Local IPv4 address: " + ip_str + "\n").c_str());
+						found_locals.push_back(local_addresses{ ip_str,  false });
+					} else if(AF_INET6 == family) {
+						// IPv6
+						SOCKADDR_IN6* ipv6 = reinterpret_cast<SOCKADDR_IN6*>(address->Address.lpSockaddr);
+						char str_buffer[INET6_ADDRSTRLEN] = { 0 };
+						inet_ntop(AF_INET6, &(ipv6->sin6_addr), str_buffer, INET6_ADDRSTRLEN);
+						std::string ip_str(str_buffer);
+						// Detect and skip non-external addresses
+						if(is_external_ip(ip_str)) {
+							reports::write_debug(("Local IPv6 address: " + ip_str + "\n").c_str());
+							found_locals.push_back(local_addresses{ ip_str, true });
+						}
+					} else {
+						// Skip all other types of addresses
+					}
+				}
+			}
+			// Cleanup
+			free(adapter_addresses);
+			adapter_addresses = NULL;
 
 			// try to add port mapping
 			bool mapped_ports_with_upnp = false;
@@ -237,9 +233,9 @@ namespace network {
 				mapped_ports_with_upnp = forward_with_pcp(found_locals[0].ipv6, found_locals[0].address);
 			}
 			CoUninitialize();
-		} };
-		#else
-		#endif
+		});
+#else
+#endif
 	}
 
 	port_forwarder::~port_forwarder() {
