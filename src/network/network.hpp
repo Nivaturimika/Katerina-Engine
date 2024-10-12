@@ -131,11 +131,13 @@ namespace network {
 	void broadcast_to_clients(sys::state& state, command::payload& c);
 
 	class port_forwarder {
-		private:
+	private:
 		std::mutex internal_wait;
 		std::thread do_forwarding;
 		bool started = false;
-		public:
+		bool forward_with_pcp(bool fl_ipv6, std::string fl_address);
+		bool is_external_ip(std::string str);
+	public:
 		port_forwarder();
 		void start_forwarding();
 		~port_forwarder();
