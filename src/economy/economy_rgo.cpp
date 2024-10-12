@@ -95,12 +95,16 @@ namespace economy_rgo {
 				float new_employment = std::min(current_workforce * (1.f - speed) + max_employment * speed, total_workforce);
 				//
 				total_workforce -= new_employment;
+				total_workforce = std::max(total_workforce, 0.0f);
 				new_employment = std::clamp(new_employment, 0.f, max_employment);
 				total_employed += new_employment;
 				state.world.province_set_rgo_employment_per_good(p, c, new_employment);
+				if(total_workforce == 0.0f) {
+					break;
+				}
 			}
 			assert(total_employed <= total_population + 1.f);
-	
+			
 			float employment_ratio = 0.f;
 			if(max_employment_total > 1.f) {
 				employment_ratio = total_employed / (max_employment_total + 1.f);
@@ -110,7 +114,7 @@ namespace economy_rgo {
 			state.world.province_set_rgo_employment(p, employment_ratio);
 	
 			auto slave_fraction = 1.0f;
-			auto free_fraction = total_employed / max_employment_total;
+			auto free_fraction = (labor_pool-total_workforce) / labor_pool;
 	
 			assert(slave_fraction >= 0.f && slave_fraction <= 1.f);
 			assert(free_fraction >= 0.f && free_fraction <= 1.f);
