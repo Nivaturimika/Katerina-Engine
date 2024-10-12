@@ -114,7 +114,7 @@ namespace economy_rgo {
 			state.world.province_set_rgo_employment(p, employment_ratio);
 	
 			auto slave_fraction = 1.0f;
-			auto free_fraction = (labor_pool-total_workforce) / labor_pool;
+			auto free_fraction = labor_pool > 0.f ? ((labor_pool - total_workforce) / labor_pool) : 0.f;
 	
 			assert(slave_fraction >= 0.f && slave_fraction <= 1.f);
 			assert(free_fraction >= 0.f && free_fraction <= 1.f);
