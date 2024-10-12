@@ -89,7 +89,7 @@ namespace simple_fs {
 				if(!simple_fs::peek_file(root_dir, NATIVE("game_dir.txt")).has_value()) {
 					auto str = user_browse_for_steam_path();
 					if(str.size() > 0) {
-						simple_fs::write_file(root_dir, NATIVE("game_dir.txt"), str.c_str(), str.size());
+						simple_fs::write_file(root_dir, NATIVE("game_dir.txt"), str.c_str(), uint32_t(str.size()));
 						simple_fs::set_steam_path(text::utf8_to_native(str));
 					}
 				}
