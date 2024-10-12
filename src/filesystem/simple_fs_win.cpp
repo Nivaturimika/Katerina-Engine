@@ -447,7 +447,7 @@ namespace simple_fs {
 					return std::optional<file>(file(file_handle, full_path));
 				}
 				if(steam_path.size() > 0) {
-					auto const r_full_path = dir_path + NATIVE('\\') + native_string(file_name);
+					auto const r_full_path = r_steam_path + dir_path + NATIVE('\\') + native_string(file_name);
 					file_handle = CreateFileW(r_full_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 					if(file_handle != INVALID_HANDLE_VALUE) {
 						return std::optional<file>(file(file_handle, r_full_path));
