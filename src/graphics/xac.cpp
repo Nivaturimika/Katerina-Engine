@@ -7,7 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#define XAC_DEBUG 1
+//#define XAC_DEBUG 1
 
 /*
 ==========================================================================================================
@@ -384,27 +384,47 @@ namespace emfx {
 			auto const mh = parse_xac_any_binary<xac_node_hierachy_v1_node_header>(&ptr, end, err);
 			std::string name = "";
 			ptr = parse_xac_cstring_nodiscard(name, ptr, end, err);
-			#ifdef XAC_DEBUG
+#ifdef XAC_DEBUG
 			std::printf(">(Id=%u),Name=%s,IIBC=%x,Imp=%f,ParentId=%i,NumChild=%u,Unk=%x,%x\n", i, name.c_str(), mh.include_in_bounds_calc, mh.importance_factor, mh.parent_id, mh.num_children, mh.unknown[0], mh.unknown[1]);
-			#endif
+#endif
 			xac_pp_actor_node node;
 			node.name = name;
 			node.position = mh.position;
-			//node.position.x = -node.position.x; //OpenGL fixup
+			node.position.x = -node.position.x; //emfx fixup
 			node.rotation = mh.rotation;
+			node.rotation.y = -node.rotation.y; //emfx fixup
+			node.rotation.z = -node.rotation.z; //emfx fixup
 			node.scale_rotation = mh.scale_rotation;
+			node.scale_rotation.y = -node.scale_rotation.y; //emfx fixup
+			node.scale_rotation.z = -node.scale_rotation.z; //emfx fixup
 			node.scale = mh.scale;
 			node.transform = mh.transform;
 			node.parent_id = mh.parent_id;
 			if(mh.parent_id == -1) {
-				context.root_nodes.push_back(node);
+				if(context.num_root_nodes > context.root_nodes.size()) {
+					std::swap(node.collision_mesh, context.root_nodes[context.num_root_nodes].collision_mesh);
+					std::swap(node.visual_mesh, context.root_nodes[context.num_root_nodes].visual_mesh);
+					std::swap(node.meshes, context.root_nodes[context.num_root_nodes].meshes);
+					context.root_nodes[context.num_root_nodes] = node;
+				} else {
+					context.root_nodes.push_back(node);
+				}
+				context.num_root_nodes++;
 			} else {
 				if(size_t(mh.parent_id) >= context.nodes.size()) {
 					err.accumulated_errors += "Specified actor node " + node.name + " before parent " + err.file_name + "\n";
 					return ptr;
 				}
 			}
-			context.nodes.push_back(node);
+			if(context.num_nodes > context.nodes.size()) {
+				std::swap(node.collision_mesh, context.nodes[context.num_nodes].collision_mesh);
+				std::swap(node.visual_mesh, context.nodes[context.num_nodes].visual_mesh);
+				std::swap(node.meshes, context.nodes[context.num_nodes].meshes);
+				context.nodes[context.num_nodes] = node;
+			} else {
+				context.nodes.push_back(node);
+			}
+			context.num_nodes++;
 		}
 		return ptr;
 	}
@@ -413,8 +433,8 @@ namespace emfx {
 		const char* ptr = start;
 		auto const cd = parse_xac_any_binary<xac_mesh_v1_chunk_header>(&ptr, end, err);
 		if(cd.node_id >= int32_t(context.nodes.size())) {
-			err.accumulated_errors += "Object references OOB node (" + err.file_name + ")\n";
-			return ptr;
+			context.nodes.resize(uint32_t(cd.node_id + 1));
+			err.accumulated_warnings += "Object references OOB node " + std::to_string(cd.node_id) + " (" + err.file_name + ")\n";
 		}
 #ifdef XAC_DEBUG
 		std::printf("N-AttribLayers=%u\n", cd.num_attribute_layers);
@@ -426,6 +446,26 @@ namespace emfx {
 		obj.influence_counts.resize(size_t(cd.num_influence_ranges), 0);
 		for(uint32_t i = 0; i < cd.num_attribute_layers; ++i) {
 			auto const vbh = parse_xac_any_binary<xac_vertex_block_v1_header>(&ptr, end, err);
+			/*
+			switch(xac_vertex_block_v1_type(vbh.ident)) {
+			case xac_vertex_block_v1_type::normal:
+				obj.normals.clear();
+				break;
+			case xac_vertex_block_v1_type::vertex:
+				obj.vertices.clear();
+				break;
+			case xac_vertex_block_v1_type::texcoord:
+				break;
+			case xac_vertex_block_v1_type::tangent:
+				obj.tangents.clear();
+				break;
+			case xac_vertex_block_v1_type::influence_indices:
+				obj.influence_indices.clear();
+				break;
+			default:
+				break;
+			}
+			*/
 #ifdef XAC_DEBUG
 			std::printf("T=%u,AttribSize=%u,NumVertices=%u,IsKeep=%u,IsScale=%u\n", vbh.ident, vbh.size, cd.num_vertices, vbh.keep_original, vbh.is_scale_factor);
 #endif
@@ -437,7 +477,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto normal = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						//normal.x = -normal.x;
+						normal.x = -normal.x;
 						obj.normals.push_back(normal);
 					}
 					break;
@@ -447,7 +487,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto vertex = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						//vertex.x = -vertex.x;
+						vertex.x = -vertex.x;
 						obj.vertices.push_back(vertex);
 					}
 					break;
@@ -460,13 +500,14 @@ namespace emfx {
 						obj.texcoords.push_back(texcoord);
 					}
 					break;
-				case xac_vertex_block_v1_type::weight:
+				case xac_vertex_block_v1_type::tangent:
 					if(vbh.size != sizeof(xac_vector4f)) {
 						err.accumulated_errors += "Attribute size doesn't match! [weight] (" + err.file_name + ")\n";
 						ptr += vbh.size;
 					} else {
-						auto const weight = parse_xac_any_binary<xac_vector4f>(&ptr, end, err);
-						obj.weights.push_back(weight);
+						auto weight = parse_xac_any_binary<xac_vector4f>(&ptr, end, err);
+						weight.x = -weight.x;
+						obj.tangents.push_back(weight);
 					}
 					break;
 				case xac_vertex_block_v1_type::influence_indices:
@@ -520,14 +561,14 @@ namespace emfx {
 		}
 		auto& node = context.nodes[cd.node_id];
 		if(cd.is_collision_mesh) {
-			if(node.collision_mesh >= 0)
+			if(node.collision_mesh != -1) {
 				err.accumulated_errors += "More than 1 collision object (" + err.file_name + ")\n";
-			//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
+			}
 			node.collision_mesh = int32_t(node.meshes.size());
 		} else {
-			if(node.visual_mesh >= 0)
+			if(node.visual_mesh != -1) {
 				err.accumulated_errors += "More than 1 visual object (" + err.file_name + ")\n";
-			//assert(node.meshes.size() < std::numeric_limits<int32_t>::max());
+			}
 			node.visual_mesh = int32_t(node.meshes.size());
 		}
 		//
@@ -538,7 +579,7 @@ namespace emfx {
 		return ptr;
 	}
 
-	const char* parse_xac_skinning_v3(xac_context& context, const char* start, const char* end, parsers::error_handler& err) {
+	const char* parse_xac_skinning_v3_or_v2(xac_context& context, const char* start, const char* end, parsers::error_handler& err, bool v2) {
 		/*
 		Influence indices indexes into the (influence starts and counts) arrays, as in:
 		start = influence_start[influence_indice[vertex_id]]
@@ -552,7 +593,19 @@ namespace emfx {
 		visible, polygonal node (that has visible polygonal meshes).
 		*/
 		const char* ptr = start;
-		auto const sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&ptr, end, err);
+		xac_skinning_v3_chunk_header sh;
+		if(v2) {
+			auto const tsh = parse_xac_any_binary<xac_skinning_v2_chunk_header>(&ptr, end, err);
+			sh.is_for_collision_mesh = tsh.is_for_collision_mesh;
+			sh.node_id = tsh.node_id;
+			sh.num_influences = tsh.num_influences;
+			sh.num_local_bones = 0;
+			sh.unused[0] = tsh.unused[0];
+			sh.unused[1] = tsh.unused[1];
+			sh.unused[2] = tsh.unused[2];
+		} else {
+			sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&ptr, end, err);
+		}
 #ifdef XAC_DEBUG
 		std::printf("NInfluences=%u\n", sh.num_influences);
 #endif
@@ -564,54 +617,32 @@ namespace emfx {
 			influence_data.push_back(influence);
 		}
 		if(sh.node_id >= int32_t(context.nodes.size())) {
-			err.accumulated_errors += "Referencing a node in bone data which is OOB (" + err.file_name + ")\n";
-			return ptr;
+			context.nodes.resize(uint32_t(sh.node_id + 1));
+			err.accumulated_warnings += "Referencing a node in bone data which is OOB (" + err.file_name + ")\n";
 		} else if(sh.node_id < 0) {
 			err.accumulated_errors += "Bone with no associated node (" + err.file_name + ")\n";
 			return ptr;
 		}
 		//
 		auto& node = context.nodes[sh.node_id];
-		if(sh.is_for_collision_mesh) {
-			if(node.collision_mesh >= 0) {
-				auto& obj = node.meshes[node.collision_mesh];
-				for(const auto& influence : influence_data) {
+		if((sh.is_for_collision_mesh && node.collision_mesh >= 0)
+		|| (!sh.is_for_collision_mesh && node.visual_mesh >= 0)) {
+			auto& obj = node.meshes[sh.is_for_collision_mesh ? node.collision_mesh : node.visual_mesh];
+			for(const auto& influence : influence_data) {
 				xac_pp_bone_influence bone_influence{};
-					bone_influence.weight = influence.weight;
-					bone_influence.bone_id = influence.bone_id;
-					obj.influences.push_back(bone_influence);
-				}
-				for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
-					auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);
-					obj.influence_starts[i] = range.first_influence_index;
-					obj.influence_counts[i] = range.num_influences;
-					assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
+				bone_influence.weight = influence.weight;
+				bone_influence.bone_id = influence.bone_id;
+				obj.influences.push_back(bone_influence);
+			}
+			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
+				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);
+				obj.influence_starts[i] = range.first_influence_index;
+				obj.influence_counts[i] = range.num_influences;
+				assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
 					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
-				}
-			} else {
-				err.accumulated_errors += "Collision mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
-				return ptr;
 			}
 		} else {
-			if(node.visual_mesh >= 0) {
-				auto& obj = node.meshes[node.visual_mesh];
-				for(const auto& influence : influence_data) {
-				xac_pp_bone_influence bone_influence{};
-					bone_influence.weight = influence.weight;
-					bone_influence.bone_id = influence.bone_id;
-					obj.influences.push_back(bone_influence);
-				}
-				for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
-					auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);
-					obj.influence_starts[i] = range.first_influence_index;
-					obj.influence_counts[i] = range.num_influences;
-					assert(obj.influence_starts[i] <= uint32_t(obj.influences.size())
-					&& obj.influence_starts[i] + obj.influence_counts[i] <= uint32_t(obj.influences.size()));
-				}
-			} else {
-				err.accumulated_errors += "Visual mesh not defined for \"" + node.name + "\" (" + err.file_name + ")\n";
-				return ptr;
-			}
+			err.accumulated_errors += "Mesh not defined for skinning \"" + node.name + "\" (" + err.file_name + ")\n";
 		}
 		return ptr;
 	}
@@ -663,7 +694,6 @@ namespace emfx {
 				}
 				break;
 			case xac_chunk_type::node_hierachy:
-			{
 				if(ch.version == 1) {
 					ptr = parse_xac_node_hierachy_v1(context, ptr, end, err);
 				} else {
@@ -672,12 +702,13 @@ namespace emfx {
 				break;
 			case xac_chunk_type::skinning:
 				if(ch.version == 3) {
-					ptr = parse_xac_skinning_v3(context, ptr, end, err);
+					ptr = parse_xac_skinning_v3_or_v2(context, ptr, end, err, false);
+				} else if(ch.version == 2) {
+					ptr = parse_xac_skinning_v3_or_v2(context, ptr, end, err, true);
 				} else {
 					err.accumulated_errors += "Unsupported version (" + err.file_name + ")\n";
 				}
 				break;
-			}
 			default:
 #ifdef XAC_DEBUG
 				std::printf("CT,Unknown-(%i)\n", int16_t(ch.ident));
@@ -702,9 +733,15 @@ namespace emfx {
 				std::printf("\t* texcoords: %zu\n", o.texcoords.size());
 			}
 		}
-		std::printf("Errors:\n%s\n", err.accumulated_errors.c_str());
-		std::printf("Warns:\n%s\n", err.accumulated_warnings.c_str());
 #endif
+		if(err.accumulated_errors.size() > 0) {
+			reports::write_debug("XAC Errors:\n");
+			reports::write_debug(err.accumulated_errors.c_str());
+		}
+		if(err.accumulated_warnings.size() > 0) {
+			reports::write_debug("XAC Warns:\n");
+			reports::write_debug(err.accumulated_warnings.c_str());
+		}
 	}
 
 	emfx::xac_pp_actor_node* get_parent_node(xac_context& context, uint32_t node_index) {
@@ -789,10 +826,10 @@ namespace emfx {
 			anim.bind_pose_scale_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 			//
 			anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			//anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
+			anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
 			anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
 			anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			//anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
+			anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
 			anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
 			//
 			uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&ptr, end, err);
@@ -803,7 +840,7 @@ namespace emfx {
 			ptr = parse_xac_cstring_nodiscard(anim.node, ptr, end, err);
 			for(uint32_t j = 0; j < num_pos_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
-				//kf.value.x = -kf.value.x;
+				kf.value.x = -kf.value.x;
 				anim.position_keys.push_back(kf);
 			}
 			for(uint32_t j = 0; j < num_rot_keys; j++) {
@@ -846,7 +883,7 @@ namespace emfx {
 			case xsm_chunk_type::bone_animation:
 				context.use_quat_16 = (ch.version == 2); //v1 is 32-bits, v2 is 16-bits
 				ptr = parse_xsm_bone_animation_v2(context, ptr, end, err);
-				context.ignore_length = true; //yeah fuck it no length fuck it
+				//context.ignore_length = true; //yeah fuck it no length fuck it
 				break;
 			case xsm_chunk_type::metadata:
 			{
@@ -881,7 +918,6 @@ namespace emfx {
 			}
 		}
 	fail_exit:
-#ifdef XAC_DEBUG
 		if(err.accumulated_errors.size() > 0) {
 			reports::write_debug("XSM Errors:\n");
 			reports::write_debug(err.accumulated_errors.c_str());
@@ -890,7 +926,6 @@ namespace emfx {
 			reports::write_debug("XSM Warns:\n");
 			reports::write_debug(err.accumulated_warnings.c_str());
 		}
-#endif
 	}
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {

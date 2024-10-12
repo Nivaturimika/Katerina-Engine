@@ -535,7 +535,7 @@ namespace map {
 		is mod'ed into the local animation time
 		@return The local animation matrix */
 	glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
-		float anim_time = std::fmod(time_counter, an.total_anim_time);
+		float anim_time = an.total_anim_time > 0.f ? std::fmod(time_counter, an.total_anim_time) : 0.f;
 		auto pos_index = an.get_position_key_index(anim_time);
 		auto pos1 = an.get_position_key(pos_index);
 		auto pos2 = an.get_position_key(pos_index + 1);
@@ -580,13 +580,13 @@ namespace map {
 	}
 
 	glm::mat4x4 get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, int32_t current, float time_counter) {
-		auto const node_m = glm::inverse(list[current].bone_matrix) * get_animation_bone_matrix(list[current], time_counter);
+		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
 		if(list[current].parent_id != -1) {
 			for(uint32_t i = start; i < start + count; i++) {
 				assert(list[i].bone_id < map::display_data::max_bone_matrices && list[i].bone_id != -1);
 				if(list[i].bone_id == list[current].parent_id) {
 					auto const parent_m = get_hierachical_animation_bone(list, start, count, i, time_counter);
-					return node_m * parent_m;
+					return parent_m * node_m;
 				}
 			}
 		}
@@ -621,7 +621,7 @@ namespace map {
 				auto count = static_mesh_idle_animation_count[index];
 				for(uint32_t k = start; k < start + count; k++) {
 					auto m = get_hierachical_animation_bone(animations, start, count, k, time_counter);
-					//m = animations[k].bone_matrix * m;
+					m = animations[k].bone_matrix * m;
 					ar_matrices[animations[k].bone_id] = m;
 				}
 			} else if(obj.anim == emfx::animation_type::move) {
@@ -629,7 +629,7 @@ namespace map {
 				auto count = static_mesh_move_animation_count[index];
 				for(uint32_t k = start; k < start + count; k++) {
 					auto m = get_hierachical_animation_bone(animations, start, count, k, time_counter);
-					//m = m * animations[k].bone_matrix;
+					m = m * animations[k].bone_matrix;
 					ar_matrices[animations[k].bone_id] = m;
 				}
 			} else if(obj.anim == emfx::animation_type::attack) {
@@ -637,7 +637,7 @@ namespace map {
 				auto count = static_mesh_attack_animation_count[index];
 				for(uint32_t k = start; k < start + count; k++) {
 					auto m = get_hierachical_animation_bone(animations, start, count, k, time_counter);
-					//m = m * animations[k].bone_matrix;
+					m = m * animations[k].bone_matrix;
 					ar_matrices[animations[k].bone_id] = m;
 				}
 			}
@@ -2470,11 +2470,11 @@ namespace map {
 						auto const vp = glm::vec3(model_context.nodes[i].position.x, model_context.nodes[i].position.y, model_context.nodes[i].position.z);
 						auto const vs = glm::vec3(model_context.nodes[i].scale.x, model_context.nodes[i].scale.y, model_context.nodes[i].scale.z);
 						auto const vq = glm::quat(model_context.nodes[i].rotation.x, model_context.nodes[i].rotation.y, model_context.nodes[i].rotation.z, model_context.nodes[i].rotation.w);
-
+#if 0
 						reports::write_debug(("animation for node " + model_context.nodes[i].name + "\n").c_str());
 						reports::write_debug(("bone-id=" + std::to_string(i) + ",parent=" + std::to_string(t_anim.parent_id) + "\n").c_str());
 						reports::write_debug(("pos: x=" + std::to_string(vp.x) + " ,y=" + std::to_string(vp.y) + ",z=" + std::to_string(vp.z) + "\n").c_str());
-
+#endif
 						t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
 						state.map_state.map_data.animations.push_back(t_anim);
 						break;
@@ -2743,17 +2743,19 @@ namespace map {
 								auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
 								assert(submesh_index < state.map_state.map_data.max_static_submeshes);
 								// This is how most models fallback to find their textures...
-								auto const& mat = context.materials[sub.material_id];
-								auto const& layer = get_diffuse_layer(mat);
-								if(!layer.texture.empty()) {
-									native_string fname = text::win1250_to_native(layer.texture) + NATIVE(".dds");
-									GLuint texid = load_dds_texture(gfx_anims, fname, 0);
-									if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
-										state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
-									} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
-										state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+								if(context.materials.size() > 0) {
+									auto const& mat = context.materials[sub.material_id];
+									auto const& layer = get_diffuse_layer(mat);
+									if(!layer.texture.empty()) {
+										native_string fname = text::win1250_to_native(layer.texture) + NATIVE(".dds");
+										GLuint texid = load_dds_texture(gfx_anims, fname, 0);
+										if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
+											state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+										} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
+											state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+										}
+										state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 									}
-									state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 								}
 								state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
 								state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
@@ -2767,27 +2769,31 @@ namespace map {
 			}
 		}
 
+#if 0
 		//fill missing models with any
 		for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
 			for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
 				if(!state.map_state.map_data.model_gc_unit[i][j]) {
 					for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
 						state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][j];
-						if(state.map_state.map_data.model_gc_unit[i][j])
-						break;
+						if(state.map_state.map_data.model_gc_unit[i][j]) {
+							break;
+						}
 					}
 					if(!state.map_state.map_data.model_gc_unit[i][j]) {
 						for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
 							for(uint32_t l = 0; l < uint32_t(state.military_definitions.unit_base_definitions.size()); l++) {
 								state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][l];
-								if(state.map_state.map_data.model_gc_unit[i][j])
-								break;
+								if(state.map_state.map_data.model_gc_unit[i][j]) {
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+#endif
 
 		if(!static_mesh_vertices.empty()) {
 			glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);

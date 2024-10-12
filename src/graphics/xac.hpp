@@ -197,7 +197,7 @@ namespace emfx {
 		int32_t bone_id = -1;
 	};
 	struct xac_pp_actor_mesh {
-		std::vector<xac_vector4f> weights;
+		std::vector<xac_vector4f> tangents;
 		std::vector<xac_vector3f> vertices;
 		std::vector<xac_vector3f> normals;
 		std::vector<xac_vector2f> texcoords;
@@ -253,6 +253,8 @@ namespace emfx {
 		std::vector<xac_pp_actor_node> root_nodes;
 		std::vector<xac_pp_actor_node> nodes;
 		std::vector<xac_pp_actor_material> materials;
+		uint32_t num_root_nodes = 0; //kept track of separatedly
+		uint32_t num_nodes = 0;
 		uint32_t max_standard_materials = 0; // Normal standard materials (diffuse, ambient, normal, etc)
 		uint32_t max_fx_materials = 0; // Especial effect materials (smoke, fire, glow, etc)
 		bool ignore_length = false; // Length of chunks sometimes doesn't align with their true size
@@ -353,7 +355,7 @@ namespace emfx {
 	enum class xac_vertex_block_v1_type : uint32_t {
 		vertex = 0,
 		normal = 1,
-		weight = 2,
+		tangent = 2,
 		texcoord = 3,
 		color32 = 4,
 		influence_indices = 5,
@@ -375,6 +377,14 @@ namespace emfx {
 		uint8_t unused[3] = { 0, 0, 0 };
 		// vertex blocks[vertex_block_count]
 	};
+	struct xac_skinning_v2_chunk_header {
+		int32_t node_id = -1;
+		uint32_t num_influences = 0;
+		uint8_t is_for_collision_mesh = 0;
+		uint8_t unused[3] = { 0, 0, 0 };
+		// vertex blocks[vertex_block_count]
+	};
+
 	struct xac_skinning_v3_influence_entry {
 		float weight = 0.f;
 		int16_t bone_id = -1;
