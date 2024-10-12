@@ -98,6 +98,15 @@ Other controls are described directly on the tooltip (for example, right clickin
 * `-validate`: Sets validate mode, exits upon scenario creation.
 * `-port <port>`: Use a given port to host, the default is `1984`.
 
+## Game directory
+
+KE will try to locate a copy of Victoria 2 within the system using various strategies, in the following order:
+- Read a file in the current directory called `game_dir.txt` with the assumption it has the full path to the game directory in it's contents.
+- Reading the registry key `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Paradox Interactive\Victoria 2`, and querying the `path` property off it.
+- Asking the user directly for a path to the game.
+
+Failing to do that the program will simply abort.
+
 ## Multiplayer Instructions
 
 ### Joining a game

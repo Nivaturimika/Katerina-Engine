@@ -2115,11 +2115,6 @@ int WINAPI wWinMain(
 		window::emit_error_message("Unable to register window class", true);
 	}
 
-	// Use by default the name of the computer
-	char username[256 + 1];
-	DWORD username_len = 256 + 1;
-	GetComputerNameA(username, &username_len);
-
 	// Load from user settings
 	auto settings_location = simple_fs::get_or_create_settings_directory();
 	if(auto player_name_file = simple_fs::open_file(settings_location, NATIVE("player_name.dat")); player_name_file) {
