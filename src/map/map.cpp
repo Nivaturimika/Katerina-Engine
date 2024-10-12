@@ -2433,65 +2433,55 @@ namespace map {
 		return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
 	}
 
-	void load_animation(sys::state& state, std::string_view filename, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
+	void load_animation(sys::state& state, emfx::xsm_context const& anim_context, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
 		auto root = simple_fs::get_root(state.common_fs);
-		emfx::xsm_context anim_context{};
-		if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
-			reports::write_debug(("Loading XSM animation: " + std::string(filename) + "\n").c_str());
-			//
-			parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
-			auto contents = simple_fs::view_contents(*cf);
-			emfx::parse_xsm(anim_context, contents.data, contents.data + contents.file_size, err);
-			emfx::finish(anim_context);
-			//
-			auto old_size = state.map_state.map_data.animations.size();
-			switch(at) {
-			case emfx::animation_type::idle:
-				state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
-				break;
-			case emfx::animation_type::move:
-				state.map_state.map_data.static_mesh_move_animation_start[index] = uint32_t(old_size);
-				break;
-			case emfx::animation_type::attack:
-				state.map_state.map_data.static_mesh_attack_animation_start[index] = uint32_t(old_size);
-				break;
+		auto old_size = state.map_state.map_data.animations.size();
+		switch(at) {
+		case emfx::animation_type::idle:
+			state.map_state.map_data.static_mesh_idle_animation_start[index] = uint32_t(old_size);
+			break;
+		case emfx::animation_type::move:
+			state.map_state.map_data.static_mesh_move_animation_start[index] = uint32_t(old_size);
+			break;
+		case emfx::animation_type::attack:
+			state.map_state.map_data.static_mesh_attack_animation_start[index] = uint32_t(old_size);
+			break;
+		}
+		for(const auto& anim : anim_context.animations) {
+			if(anim.position_keys.empty() && anim.rotation_keys.empty()
+			&& anim.scale_keys.empty() && anim.scale_rotation_keys.empty()) {
+				continue;
 			}
-			for(const auto& anim : anim_context.animations) {
-				if(anim.position_keys.empty() && anim.rotation_keys.empty()
-				&& anim.scale_keys.empty() && anim.scale_rotation_keys.empty()) {
-					continue;
-				}
-				auto t_anim = anim;
-				t_anim.bone_id = -1;
-				for(uint32_t i = 0; i < uint32_t(model_context.nodes.size()); i++) {
-					if(t_anim.node == model_context.nodes[i].name) {
-						t_anim.parent_id = model_context.nodes[i].parent_id;
-						t_anim.bone_id = int32_t(i);
-						auto const vp = glm::vec3(model_context.nodes[i].position.x, model_context.nodes[i].position.y, model_context.nodes[i].position.z);
-						auto const vs = glm::vec3(model_context.nodes[i].scale.x, model_context.nodes[i].scale.y, model_context.nodes[i].scale.z);
-						auto const vq = glm::quat(model_context.nodes[i].rotation.x, model_context.nodes[i].rotation.y, model_context.nodes[i].rotation.z, model_context.nodes[i].rotation.w);
+			auto t_anim = anim;
+			t_anim.bone_id = -1;
+			for(uint32_t i = 0; i < uint32_t(model_context.nodes.size()); i++) {
+				if(t_anim.node == model_context.nodes[i].name) {
+					t_anim.parent_id = model_context.nodes[i].parent_id;
+					t_anim.bone_id = int32_t(i);
+					auto const vp = glm::vec3(model_context.nodes[i].position.x, model_context.nodes[i].position.y, model_context.nodes[i].position.z);
+					auto const vs = glm::vec3(model_context.nodes[i].scale.x, model_context.nodes[i].scale.y, model_context.nodes[i].scale.z);
+					auto const vq = glm::quat(model_context.nodes[i].rotation.x, model_context.nodes[i].rotation.y, model_context.nodes[i].rotation.z, model_context.nodes[i].rotation.w);
 #if 0
-						reports::write_debug(("animation for node " + model_context.nodes[i].name + "\n").c_str());
-						reports::write_debug(("bone-id=" + std::to_string(i) + ",parent=" + std::to_string(t_anim.parent_id) + "\n").c_str());
-						reports::write_debug(("pos: x=" + std::to_string(vp.x) + " ,y=" + std::to_string(vp.y) + ",z=" + std::to_string(vp.z) + "\n").c_str());
+					reports::write_debug(("animation for node " + model_context.nodes[i].name + "\n").c_str());
+					reports::write_debug(("bone-id=" + std::to_string(i) + ",parent=" + std::to_string(t_anim.parent_id) + "\n").c_str());
+					reports::write_debug(("pos: x=" + std::to_string(vp.x) + " ,y=" + std::to_string(vp.y) + ",z=" + std::to_string(vp.z) + "\n").c_str());
 #endif
-						t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
-						state.map_state.map_data.animations.push_back(t_anim);
-						break;
-					}
+					t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
+					state.map_state.map_data.animations.push_back(t_anim);
+					break;
 				}
 			}
-			switch(at) {
-			case emfx::animation_type::idle:
-				state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
-				break;
-			case emfx::animation_type::move:
-				state.map_state.map_data.static_mesh_move_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
-				break;
-			case emfx::animation_type::attack:
-				state.map_state.map_data.static_mesh_attack_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
-				break;
-			}
+		}
+		switch(at) {
+		case emfx::animation_type::idle:
+			state.map_state.map_data.static_mesh_idle_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
+		case emfx::animation_type::move:
+			state.map_state.map_data.static_mesh_move_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
+		case emfx::animation_type::attack:
+			state.map_state.map_data.static_mesh_attack_animation_count[index] = uint32_t(state.map_state.map_data.animations.size() - old_size);
+			break;
 		}
 	}
 
@@ -2519,6 +2509,70 @@ namespace map {
 		for(uint32_t i = 0; i < uint32_t(display_data::max_static_meshes); i++) { //reset for reloading
 			state.map_state.map_data.static_mesh_counts[i].clear();
 			state.map_state.map_data.static_mesh_starts[i].clear();
+		}
+
+		//preload all models and all animations
+		ankerl::unordered_dense::map<std::string, emfx::xac_context> map_of_models;
+		ankerl::unordered_dense::map<std::string, emfx::xsm_context> map_of_animations;
+		for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
+			auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
+			ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
+			{ //models
+				auto filename = std::string(state.to_string_view(emfx_obj.actorfile));
+				if(map_of_models.find(filename) == map_of_models.end()) {
+					if(auto f = simple_fs::open_file(root, text::win1250_to_native(filename)); f) {
+						reports::write_debug(("Loading XAC: " + filename + "\n").c_str());
+						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*f)));
+						auto contents = simple_fs::view_contents(*f);
+						emfx::xac_context context{};
+						emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
+						emfx::finish(context);
+						map_of_models.insert_or_assign(filename, context);
+					}
+				}
+			}
+			{ //idle set
+				auto filename = std::string(state.to_string_view(emfx_obj.idle));
+				if(map_of_animations.find(filename) == map_of_animations.end()) {
+					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
+						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
+						auto contents = simple_fs::view_contents(*cf);
+						emfx::xsm_context context{};
+						emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+						emfx::finish(context);
+						map_of_animations.insert_or_assign(filename, context);
+					}
+				}
+			}
+			{ //moving set
+				auto filename = std::string(state.to_string_view(emfx_obj.move));
+				if(map_of_animations.find(filename) == map_of_animations.end()) {
+					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
+						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
+						auto contents = simple_fs::view_contents(*cf);
+						emfx::xsm_context context{};
+						emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+						emfx::finish(context);
+						map_of_animations.insert_or_assign(filename, context);
+					}
+				}
+			}
+			{ //attacking set
+				auto filename = std::string(state.to_string_view(emfx_obj.attack));
+				if(map_of_animations.find(filename) == map_of_animations.end()) {
+					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
+						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
+						auto contents = simple_fs::view_contents(*cf);
+						emfx::xsm_context context{};
+						emfx::parse_xsm(context, contents.data, contents.data + contents.file_size, err);
+						emfx::finish(context);
+						map_of_animations.insert_or_assign(filename, context);
+					}
+				}
+			}
 		}
 
 		state.map_state.map_data.model_province_flag.resize(size_t(state.province_definitions.num_allocated_provincial_flags));
@@ -2667,25 +2721,24 @@ namespace map {
 				}
 			}
 
-			auto actorfile = state.to_string_view(emfx_obj.actorfile);
-			if(auto f = simple_fs::open_file(root, text::win1250_to_native(actorfile)); f) {
-				parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*f)));
-				auto contents = simple_fs::view_contents(*f);
-				emfx::xac_context context{};
-				emfx::parse_xac(context, contents.data, contents.data + contents.file_size, err);
-				emfx::finish(context);
-
-				load_animation(state, state.to_string_view(emfx_obj.idle), k, context, emfx::animation_type::idle);
-				load_animation(state, state.to_string_view(emfx_obj.move), k, context, emfx::animation_type::move);
-				load_animation(state, state.to_string_view(emfx_obj.attack), k, context, emfx::animation_type::attack);
-			
+			auto actorfile = std::string(state.to_string_view(emfx_obj.actorfile));
+			if(auto it1 = map_of_models.find(actorfile); it1 != map_of_models.end()) {
+				auto const& context = it1->second;
+				if(auto it = map_of_animations.find(std::string(state.to_string_view(emfx_obj.idle))); it != map_of_animations.end()) {
+					load_animation(state, it->second, k, context, emfx::animation_type::idle);
+				}
+				if(auto it = map_of_animations.find(std::string(state.to_string_view(emfx_obj.move))); it != map_of_animations.end()) {
+					load_animation(state, it->second, k, context, emfx::animation_type::move);
+				}
+				if(auto it = map_of_animations.find(std::string(state.to_string_view(emfx_obj.attack))); it != map_of_animations.end()) {
+					load_animation(state, it->second, k, context, emfx::animation_type::attack);
+				}
 				uint32_t node_index = 0;
 				for(auto const& node : context.nodes) {
 					//if(node.name == "polySurface95" || node.name == "polySurface97") {
 					//	node_index++;
 					//	continue;
 					//}
-
 					int32_t mesh_index = 0;
 					for(auto const& mesh : node.meshes) {
 						bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
@@ -2700,12 +2753,12 @@ namespace map {
 									static_mesh_vertex& smv = triangle_vertices[j];
 									auto index = sub.indices[i + j] + vertex_offset;
 									auto vv = mesh.vertices[index % mesh.vertices.size()];
-									auto vn = mesh.normals.empty()
+									auto vn = mesh.normals.empty() || index >= mesh.normals.size()
 										? emfx::xac_vector3f{ vv.x, vv.y, vv.z }
-										: mesh.normals[index % mesh.normals.size()];
-									auto vt = mesh.texcoords.empty()
+										: mesh.normals[index];
+									auto vt = mesh.texcoords.empty() || index >= mesh.texcoords.size()
 										? emfx::xac_vector2f{ vv.x, vv.y }
-										: mesh.texcoords[index % mesh.texcoords.size()];
+										: mesh.texcoords[index];
 									smv.position_ = glm::vec3(vv.x, vv.y, vv.z);
 									smv.normal_ = glm::u8vec3(vn.x * 255.f, vn.y * 255.f, vn.z * 255.f);
 									smv.texture_coord_ = glm::u16vec2(vt.x * 65535.f / 4.f, vt.y * 65535.f / 4.f);
@@ -2716,7 +2769,8 @@ namespace map {
 									uint32_t i_count = mesh.influence_counts[mesh.influence_indices[index]];
 									assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
 									for(uint32_t l = 0; l < i_count; l++) {
-										if(mesh.influences[l + i_start].bone_id >= state.map_state.map_data.max_bone_matrices) {
+										if(mesh.influences[l + i_start].bone_id == -1
+										|| mesh.influences[l + i_start].bone_id >= state.map_state.map_data.max_bone_matrices) {
 											has_invalid_bone_ids = true;
 											continue;
 										}
@@ -2724,21 +2778,18 @@ namespace map {
 										smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 									}
 								}
-								//if(!is_collision) {
+								if(!is_collision) {
 									for(const auto& smv : triangle_vertices) {
 										static_mesh_vertex tmp = smv;
 										//tmp.position_ *= emfx_obj.scale;
 										static_mesh_vertices.push_back(tmp);
 									}
-								//}
+								}
 							}
 							if(has_invalid_bone_ids) {
-#ifdef WIN32
 								reports::write_debug("Invalid bone ID");
-#endif
 							}
 							vertex_offset += sub.num_vertices;
-
 							if(!is_collision) {
 								auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
 								assert(submesh_index < state.map_state.map_data.max_static_submeshes);

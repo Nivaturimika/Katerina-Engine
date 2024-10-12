@@ -7,7 +7,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-//#define XAC_DEBUG 1
+#define XAC_DEBUG 1
 
 /*
 ==========================================================================================================
@@ -607,7 +607,8 @@ namespace emfx {
 			sh = parse_xac_any_binary<xac_skinning_v3_chunk_header>(&ptr, end, err);
 		}
 #ifdef XAC_DEBUG
-		std::printf("NInfluences=%u\n", sh.num_influences);
+		reports::write_debug(("Skin chunk for Id#" + std::to_string(sh.node_id) + ": " + context.nodes[sh.node_id].name + "\n").c_str());
+		reports::write_debug(("skinningInfluences=" + std::to_string(sh.num_influences) + "\n").c_str());
 #endif
 		std::vector<xac_skinning_v3_influence_entry> influence_data;
 		for(uint32_t i = 0; i < sh.num_influences; i++) {
@@ -634,6 +635,9 @@ namespace emfx {
 				bone_influence.bone_id = influence.bone_id;
 				obj.influences.push_back(bone_influence);
 			}
+#ifdef XAC_DEBUG
+			reports::write_debug(("skinInfluenceStarts=" + std::to_string(obj.influence_starts.size()) + "\n").c_str());
+#endif
 			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
 				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);
 				obj.influence_starts[i] = range.first_influence_index;
@@ -815,6 +819,10 @@ namespace emfx {
 	}
 
 	const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
+		if(context.use_quat_16) {
+			reports::write_debug("xsm using 16b quaternion\n");
+		}
+
 		const char* ptr = start;
 		uint32_t num_sub_motions = parse_xac_any_binary<uint32_t>(&ptr, end, err);
 		for(uint32_t i = 0; i < num_sub_motions; i++) {
@@ -838,6 +846,14 @@ namespace emfx {
 			uint32_t num_scale_rot_keys = parse_xac_any_binary<uint32_t>(&ptr, end, err);
 			anim.max_error = parse_xac_any_binary<float>(&ptr, end, err);
 			ptr = parse_xac_cstring_nodiscard(anim.node, ptr, end, err);
+			//
+			reports::write_debug(("xsm.BoneId#" + std::to_string(anim.bone_id) + "[" + anim.node + "] "
+				+ "nPos=" + std::to_string(num_pos_keys)
+				+ ",nRot=" + std::to_string(num_rot_keys)
+				+ ",nScale=" + std::to_string(num_scale_keys)
+				+ ",nScaleRot=" + std::to_string(num_scale_rot_keys)
+				+ ",maxErr=" + std::to_string(anim.max_error) + "\n").c_str());
+			//
 			for(uint32_t j = 0; j < num_pos_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
 				kf.value.x = -kf.value.x;
@@ -906,10 +922,6 @@ namespace emfx {
 #endif
 				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(ptr - start)) + ") on " + err.file_name + "\n";
 				ptr += ch.len;
-				if(ch.ident == 0) {
-					ptr = end; //eof?
-					context.ignore_length = true;
-				}
 				break;
 			}
 			if(!context.ignore_length && ptr != expected) {
