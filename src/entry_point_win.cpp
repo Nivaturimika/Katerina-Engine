@@ -33,8 +33,9 @@ native_string to_hex(uint64_t v) {
 native_string produce_mod_path(std::vector<parsers::mod_file>& mod_list) {
 	simple_fs::file_system dummy;
 	simple_fs::add_root(dummy, NATIVE("."));
-	for(int32_t i = 0; i < int32_t(mod_list.size()); ++i)
+	for(int32_t i = 0; i < int32_t(mod_list.size()); ++i) {
 		mod_list[i].add_to_file_system(dummy);
+	}
 	return simple_fs::extract_state(dummy);
 }
 
@@ -173,8 +174,10 @@ native_string find_matching_scenario(native_string_view path) {
 		if(auto of = simple_fs::open_file(f); of) {
 			auto content = view_contents(*of);
 			auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-			if(desc.mod_path == path && desc.count > max_scenario_count) {
+			reports::write_debug(("Scenario: '" + text::native_to_utf8(desc.mod_path) + "',count=" + std::to_string(desc.count)).c_str());
+			if(desc.mod_path == path && desc.count >= max_scenario_count) {
 				selected_scenario_file = simple_fs::get_file_name(f);
+				max_scenario_count = desc.count;
 			}
 		}
 	}
@@ -385,8 +388,11 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			if(!loaded_scenario) {
 				// if the optional fs path is defined use that one, otherwise infer from mod list
 				auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
+				reports::write_debug(("Produced scenario path: " + text::native_to_utf8(path) + "\n").c_str());
+				reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
 				if(scenario_autofind) { //find scenario
 					native_string selected_scenario_file = find_matching_scenario(path);
+					reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
 					if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
 						game_state.fill_unsaved_data();
 						loaded_scenario = true;

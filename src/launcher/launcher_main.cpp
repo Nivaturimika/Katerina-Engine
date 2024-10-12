@@ -1002,48 +1002,40 @@ namespace launcher {
 		{
 			native_string mod_path = produce_mod_path();
 			native_string temp_command_line = native_string(NATIVE("KatEngine.exe -autofind -path "));
-			temp_command_line += NATIVE("'") + mod_path + NATIVE("'");
+			temp_command_line += NATIVE("\"") + mod_path + NATIVE("\"");
 			if(obj_under_mouse == ui_obj_host_game) {
 				temp_command_line += NATIVE(" -host");
-				temp_command_line += NATIVE(" -name '");
-				temp_command_line += text::utf8_to_native(player_name);
-				temp_command_line += NATIVE("'");
-				if(!password.empty()) {
-					temp_command_line += NATIVE(" -password ");
-					temp_command_line += text::utf8_to_native(password);
-				}
 			} else if(obj_under_mouse == ui_obj_join_game) {
-				temp_command_line += NATIVE(" -join");
-				temp_command_line += NATIVE(" ");
-				temp_command_line += text::utf8_to_native(ip_addr);
-				temp_command_line += NATIVE(" -name '");
-				temp_command_line += text::utf8_to_native(player_name);
-				temp_command_line += NATIVE("'");
+				temp_command_line += NATIVE(" -join \"") + text::utf8_to_native(ip_addr) + NATIVE("\"");
 				// IPv6 address
 				if(!ip_addr.empty() && ::strchr(ip_addr.c_str(), ':') != nullptr) {
 					temp_command_line += NATIVE(" -v6");
 				}
-				if(!password.empty()) {
-					temp_command_line += NATIVE(" -password ");
-					temp_command_line += text::utf8_to_native(password);
-				}
 			}
+			temp_command_line += NATIVE(" -name \"") + text::utf8_to_native(player_name) + NATIVE("\"");
+			if(!password.empty()) {
+				temp_command_line += NATIVE(" -password \"") + text::utf8_to_native(password) + NATIVE("\"");
+			}
+
 			reports::write_debug(text::native_to_utf8(temp_command_line).c_str());
+
 			STARTUPINFO si;
 			ZeroMemory(&si, sizeof(si));
 			si.cb = sizeof(si);
+
 			PROCESS_INFORMATION pi;
 			ZeroMemory(&pi, sizeof(pi));
+
 			// Start the child process.
 			if(CreateProcessW(
-				nullptr,   // Module name
-				const_cast<wchar_t*>(temp_command_line.c_str()), // Command line
-				nullptr, // Process handle not inheritable
-				nullptr, // Thread handle not inheritable
+				NULL,   // Module name
+				temp_command_line.data(), // Command line
+				NULL, // Process handle not inheritable
+				NULL, // Thread handle not inheritable
 				FALSE, // Set handle inheritance to FALSE
 				0, // No creation flags
-				nullptr, // Use parent's environment block
-				nullptr, // Use parent's starting directory
+				NULL, // Use parent's environment block
+				NULL, // Use parent's starting directory
 				&si, // Pointer to STARTUPINFO structure
 				&pi) != 0) {
 				CloseHandle(pi.hProcess);
