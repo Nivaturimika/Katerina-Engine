@@ -288,6 +288,7 @@ namespace simple_fs {
 					FindClose(find_handle);
 				}
 				if(steam_path.size() > 0) {
+					std::memset(&find_result, 0, sizeof(WIN32_FIND_DATAW));
 					auto const r_appended_path = r_steam_path + dir_path + NATIVE("\\*") + extension;
 					find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 					if(find_handle != INVALID_HANDLE_VALUE) {
@@ -317,6 +318,7 @@ namespace simple_fs {
 				FindClose(find_handle);
 			}
 			if(steam_path.size() > 0) {
+				std::memset(&find_result, 0, sizeof(WIN32_FIND_DATAW));
 				auto const r_appended_path = r_steam_path + dir.relative_path + NATIVE("\\*") + extension;
 				find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
@@ -330,7 +332,6 @@ namespace simple_fs {
 				}
 			}
 		}
-
 		pdqsort(accumulated_results.begin(), accumulated_results.end(), [](unopened_file const& a, unopened_file const& b) {
 			return std::lexicographical_compare(std::begin(a.file_name), std::end(a.file_name), std::begin(b.file_name), std::end(b.file_name), list_files_compare_func);
 		});
@@ -360,12 +361,13 @@ namespace simple_fs {
 					FindClose(find_handle);
 				}
 				if(steam_path.size() > 0) {
+					std::memset(&find_result, 0, sizeof(WIN32_FIND_DATAW));
 					auto const r_appended_path = r_steam_path + dir_path + NATIVE("\\*");
 					find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 					if(find_handle != INVALID_HANDLE_VALUE) {
 						do {
 							if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-								auto const rel_name = r_steam_path + dir.relative_path + NATIVE("\\") + find_result.cFileName;
+								auto const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
 								if(find_result.cFileName[0] != NATIVE('.') && std::find_if(accumulated_results.begin(), accumulated_results.end(), [&rel_name](auto const& s) { return s.relative_path.compare(rel_name) == 0; }) == accumulated_results.end()) {
 									accumulated_results.emplace_back(dir.parent_system, rel_name);
 								}
@@ -391,11 +393,13 @@ namespace simple_fs {
 				FindClose(find_handle);
 			}
 			if(steam_path.size() > 0) {
-				find_handle = FindFirstFileExW(appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
+				std::memset(&find_result, 0, sizeof(WIN32_FIND_DATAW));
+				auto const r_appended_path = r_steam_path + dir.relative_path + NATIVE("\\*");
+				find_handle = FindFirstFileExW(r_appended_path.c_str(), FindExInfoBasic, &find_result, FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH);
 				if(find_handle != INVALID_HANDLE_VALUE) {
 					do {
 						if((find_result.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && !impl::contains_non_ascii(find_result.cFileName)) {
-							auto const rel_name = r_steam_path + dir.relative_path + NATIVE("\\") + find_result.cFileName;
+							auto const rel_name = dir.relative_path + NATIVE("\\") + find_result.cFileName;
 							if(find_result.cFileName[0] != NATIVE('.')) {
 								accumulated_results.emplace_back(nullptr, rel_name);
 							}
@@ -423,12 +427,10 @@ namespace simple_fs {
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 				native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
-				native_string full_path = dir_path + NATIVE('\\') + native_string(file_name);
-				return full_path;
+				return dir_path + NATIVE('\\') + native_string(file_name);
 			}
 		} else {
-			native_string full_path = dir.relative_path + NATIVE('\\') + native_string(file_name);
-			return full_path;
+			return dir.relative_path + NATIVE('\\') + native_string(file_name);
 		}
 		return std::optional<native_string>{};
 	}
