@@ -153,7 +153,7 @@ namespace economy_rgo {
 		if(!std::isfinite(tp) || std::isnan(tp)) {
 			tp = 0.0f;
 		}
-		return vl * tp * base * ef;
+		return vl * tp * base * ef * 1.2f;
 	}
 
 	economy::rgo_workers_breakdown rgo_relevant_population(sys::state& state, dcon::province_id p, dcon::nation_id n) {

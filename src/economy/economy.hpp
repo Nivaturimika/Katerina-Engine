@@ -188,6 +188,7 @@ namespace economy {
 
 	void daily_update(sys::state& state, bool initiate_building);
 	void resolve_constructions(sys::state& state);
+	void limit_pop_demand_to_production(sys::state& state);
 
 	float base_artisan_profit(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	float artisan_scale_limit(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
