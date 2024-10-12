@@ -328,10 +328,25 @@ namespace ui {
 
 	void event_image::on_update(sys::state& state) noexcept {
 		event_data_wrapper content = retrieve<event_data_wrapper>(state, parent);
-		if(std::holds_alternative<event::pending_human_n_event>(content))
-		base_data.data.image.gfx_object = state.world.national_event_get_image(std::get<event::pending_human_n_event>(content).e);
-		else if(std::holds_alternative<event::pending_human_f_n_event>(content))
-		base_data.data.image.gfx_object = state.world.free_national_event_get_image(std::get<event::pending_human_f_n_event>(content).e);
+		if(std::holds_alternative<event::pending_human_n_event>(content)) {
+			base_data.data.image.gfx_object = state.world.national_event_get_image(std::get<event::pending_human_n_event>(content).e);
+		} else if(std::holds_alternative<event::pending_human_f_n_event>(content)) {
+			base_data.data.image.gfx_object = state.world.free_national_event_get_image(std::get<event::pending_human_f_n_event>(content).e);
+		}
+	}
+
+	void event_image::render(sys::state& state, int32_t x, int32_t y) noexcept {
+		if(auto gid = base_data.data.image.gfx_object; gid) {
+			auto& gfx_def = state.ui_defs.gfx[gid];
+			auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
+			if(!tid) {
+				tid = ogl::get_texture_handle(state, ui::definitions::no_event_image, gfx_def.is_partially_transparent());
+			}
+			ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+				float(x), float(y), float(base_data.size.x), float(base_data.size.y),
+				tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+				get_horizontal_flip(state));
+		}
 	}
 
 	void event_desc_text::on_create(sys::state& state) noexcept {

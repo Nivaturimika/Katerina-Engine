@@ -51,6 +51,7 @@ namespace ui {
 			return false; //never flip
 		}
 		void on_update(sys::state& state) noexcept override;
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override;
 	};
 	class event_desc_text : public scrollable_text {
 		public:

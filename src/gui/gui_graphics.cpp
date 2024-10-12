@@ -22,11 +22,25 @@ namespace ui {
 			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
 			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::transparency);
 		}
+		{
+			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\pictures\\decisions\\noimage.dds"));
+			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
+			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_decision_image);
+		}
+		{
+			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\pictures\\decisions\\GFX_event_no_image.tga"));
+			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
+			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_event_image);
+		}
+		{
+			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\pictures\\tech\\noimage.tga"));
+			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
+			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_tech_image);
+		}
 
 		auto rt = get_root(state.common_fs);
 		auto interfc = open_directory(rt, NATIVE("interface"));
 		auto assets = open_directory(rt, NATIVE("assets"));
-
 		{
 			// first, load in special mod gfx
 			// TODO put this in a better location
@@ -77,19 +91,14 @@ namespace ui {
 
 			// load normal .gui files
 			auto all_gui_files = list_files(interfc, NATIVE(".gui"));
-
 			for(auto& file : all_gui_files) {
 				auto file_name = get_full_name(file);
-				if(!parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("confirmbuild.gui"))
-				&& !parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("convoys.gui"))
-				&& !parsers::native_has_fixed_suffix_ci(file_name.data(), file_name.data() + file_name.length(), NATIVE("brigadeview.gui"))) {
-					if(auto ofile = open_file(file); ofile) {
-						auto content = view_contents(*ofile);
-						err.file_name = text::native_to_utf8(get_full_name(*ofile));
-						parsers::token_generator gen(content.data, content.data + content.file_size);
-						parsers::parse_gui_files(gen, err, context);
-						context.gui_files.emplace_back(std::move(*ofile));
-					}
+				if(auto ofile = open_file(file); ofile) {
+					auto content = view_contents(*ofile);
+					err.file_name = text::native_to_utf8(get_full_name(*ofile));
+					parsers::token_generator gen(content.data, content.data + content.file_size);
+					parsers::parse_gui_files(gen, err, context);
+					context.gui_files.emplace_back(std::move(*ofile));
 				}
 			}
 		}
@@ -98,21 +107,21 @@ namespace ui {
 	int16_t child_relative_location_y_component(element_base const& parent, element_base const& child) {
 		auto orientation = child.base_data.get_orientation();
 		switch(orientation) {
-			case orientation::upper_left:
+		case orientation::upper_left:
 			return int16_t(child.base_data.position.y);
-			case orientation::upper_right:
+		case orientation::upper_right:
 			return int16_t(child.base_data.position.y);
-			case orientation::lower_left:
+		case orientation::lower_left:
 			return int16_t(parent.base_data.size.y + child.base_data.position.y);
-			case orientation::lower_right:
+		case orientation::lower_right:
 			return int16_t(parent.base_data.size.y + child.base_data.position.y);
-			case orientation::upper_center:
+		case orientation::upper_center:
 			return int16_t(child.base_data.position.y);
-			case orientation::lower_center:
+		case orientation::lower_center:
 			return int16_t(parent.base_data.size.y + child.base_data.position.y);
-			case orientation::center:
+		case orientation::center:
 			return int16_t(parent.base_data.size.y / 2 + child.base_data.position.y);
-			default:
+		default:
 			return int16_t(child.base_data.position.y);
 		}
 	}

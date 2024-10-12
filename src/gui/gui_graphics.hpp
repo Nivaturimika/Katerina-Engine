@@ -344,6 +344,9 @@ struct position_data { };
 		static constexpr dcon::texture_id small_tiles_dialog = dcon::texture_id(0);
 		static constexpr dcon::texture_id tiles_dialog = dcon::texture_id(1);
 		static constexpr dcon::texture_id transparency = dcon::texture_id(2);
+		static constexpr dcon::texture_id no_decision_image = dcon::texture_id(3);
+		static constexpr dcon::texture_id no_event_image = dcon::texture_id(4);
+		static constexpr dcon::texture_id no_tech_image = dcon::texture_id(5);
 
 		tagged_vector<gfx_object, dcon::gfx_object_id> gfx;
 		tagged_vector<dcon::text_key, dcon::texture_id> textures;

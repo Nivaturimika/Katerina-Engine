@@ -230,14 +230,26 @@ namespace ui {
 	// --------------
 
 	class decision_image : public image_element_base {
-		public:
+	public:
 		bool get_horizontal_flip(sys::state& state) noexcept override {
 			return false; //never flip
 		}
 		void on_update(sys::state& state) noexcept override {
 			auto id = retrieve<dcon::decision_id>(state, parent);
-			auto fat_id = dcon::fatten(state.world, id);
-			base_data.data.image.gfx_object = fat_id.get_image();
+			base_data.data.image.gfx_object = state.world.decision_get_image(id);
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(auto gid = base_data.data.image.gfx_object; gid) {
+				auto& gfx_def = state.ui_defs.gfx[gid];
+				auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
+				if(!tid) {
+					tid = ogl::get_texture_handle(state, ui::definitions::no_decision_image, gfx_def.is_partially_transparent());
+				}
+				ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+					float(x), float(y), float(base_data.size.x), float(base_data.size.y),
+					tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+					get_horizontal_flip(state));
+			}
 		}
 	};
 
@@ -290,7 +302,7 @@ namespace ui {
 		public:
 		void button_action(sys::state& state) noexcept override {
 			auto id = retrieve<dcon::decision_id>(state, parent);
-			if(bool(id)) {
+			if(id) {
 				state.world.decision_set_hide_notification(id, !state.world.decision_get_hide_notification(id));
 				state.game_state_updated.store(true, std::memory_order_release);
 			}

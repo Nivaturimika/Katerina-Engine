@@ -334,24 +334,14 @@ namespace parsers {
 		context.state.world.technology_set_name(new_id, name_id);
 		context.state.world.technology_set_desc(new_id, text::find_or_add_key(context.state, std::string(name) + "_desc", false));
 
-	context.map_of_technologies.insert_or_assign(std::string(name), pending_tech_content{gen, new_id});
+		context.map_of_technologies.insert_or_assign(std::string(name), pending_tech_content{gen, new_id});
 
 		auto root = get_root(context.state.common_fs);
 		auto gfx = open_directory(root, NATIVE("gfx"));
 		auto pictures = open_directory(gfx, NATIVE("pictures"));
 		auto tech = open_directory(pictures, NATIVE("tech"));
 
-		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\tech\\") + [&]() {
-			if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".tga"))) {
-				return std::string(name) + ".tga";
-			} else if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".dds"))) {
-				return std::string(name) + ".tga";
-			} else if(peek_file(tech, text::utf8_to_native(name) + NATIVE(".png"))) {
-				return std::string(name) + ".png";
-			} else {
-				return std::string("noimage.tga");
-			}
-		}());
+		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\tech\\") + std::string(name) + ".png");
 
 		if(auto it = context.gfx_context.map_of_names.find(file_name); it != context.gfx_context.map_of_names.end()) {
 			context.state.world.technology_set_image(new_id, it->second);

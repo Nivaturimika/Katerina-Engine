@@ -519,14 +519,22 @@ namespace ui {
 	};
 
 	class technology_image : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
-			if(parent) {
-			Cyto::Any payload = dcon::technology_id{};
-				parent->impl_get(state, payload);
-				auto content = any_cast<dcon::technology_id>(payload);
-
-				base_data.data.image.gfx_object = state.world.technology_get_image(content);
+			auto content = retrieve<dcon::technology_id>(state, parent);
+			base_data.data.image.gfx_object = state.world.technology_get_image(content);
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(auto gid = base_data.data.image.gfx_object; gid) {
+				auto& gfx_def = state.ui_defs.gfx[gid];
+				auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
+				if(!tid) {
+					tid = ogl::get_texture_handle(state, ui::definitions::no_tech_image, gfx_def.is_partially_transparent());
+				}
+				ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+					float(x), float(y), float(base_data.size.x), float(base_data.size.y),
+					tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+					get_horizontal_flip(state));
 			}
 		}
 	};

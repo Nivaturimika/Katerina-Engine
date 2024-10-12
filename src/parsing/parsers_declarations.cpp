@@ -2311,11 +2311,11 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto gfx = open_directory(root, NATIVE("gfx"));
 		auto pictures = open_directory(gfx, NATIVE("pictures"));
 		auto decisions = open_directory(pictures, NATIVE("decisions"));
+
 		if(!peek_file(decisions, text::utf8_to_native(value) + NATIVE(".dds")).has_value()
 		&& !peek_file(decisions, text::utf8_to_native(value) + NATIVE(".tga")).has_value()
 		&& !peek_file(decisions, text::utf8_to_native(value) + NATIVE(".png")).has_value()) {
-			err.accumulated_warnings += "Picture " + std::string(value) + " does not exist " + " (" + err.file_name + ")\n";
-			return; // Picture not found
+			err.accumulated_warnings += "Decision picture " + std::string(value) + " does not exist " + " (" + err.file_name + ")\n";
 		}
 
 		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\decisions\\") + std::string(value) + ".tga");
@@ -3138,24 +3138,18 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 	}
 
 	void generic_event::picture(association_type, std::string_view name, error_handler& err, int32_t line, event_building_context& context) {
-
 		auto root = get_root(context.outer_context.state.common_fs);
 		auto gfx = open_directory(root, NATIVE("gfx"));
 		auto pictures = open_directory(gfx, NATIVE("pictures"));
 		auto events = open_directory(pictures, NATIVE("events"));
 
-		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\events\\") + [&]() {
-			if(peek_file(events, text::utf8_to_native(name) + NATIVE(".tga"))) {
-				return std::string(name) + ".tga";
-			} else if(peek_file(events, text::utf8_to_native(name) + NATIVE(".dds"))) {
-				return std::string(name) + ".tga";
-			} else if(peek_file(events, text::utf8_to_native(name) + NATIVE(".png"))) {
-				return std::string(name) + ".tga";
-			} else {
-				return std::string("GFX_event_no_image.tga");
-			}
-		}());
+		if(!peek_file(events, text::utf8_to_native(name) + NATIVE(".dds")).has_value()
+		&& !peek_file(events, text::utf8_to_native(name) + NATIVE(".tga")).has_value()
+		&& !peek_file(events, text::utf8_to_native(name) + NATIVE(".png")).has_value()) {
+			err.accumulated_warnings += "Event picture " + std::string(name) + " does not exist " + " (" + err.file_name + ")\n";
+		}
 
+		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\events\\") + std::string(name) + ".tga");
 		if(auto it = context.outer_context.gfx_context.map_of_names.find(file_name);
 			it != context.outer_context.gfx_context.map_of_names.end()) {
 			picture_ = it->second;
