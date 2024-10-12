@@ -3778,6 +3778,7 @@ object {
 	property{
 		name{ is_player_controlled }
 		type{ bitfield }
+		tag{ unsaved }
 	}
 	property{
 		name{ is_debt_spending }

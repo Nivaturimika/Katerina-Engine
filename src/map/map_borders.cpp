@@ -119,7 +119,6 @@ namespace map {
 		border_vertices.clear();
 
 		glm::vec2 map_size(size_x, size_y);
-
 		diagonal_borders = std::vector<uint8_t>(size_x * size_y, 0);
 
 		// The borders of the current row and last row
@@ -145,13 +144,10 @@ namespace map {
 				if(prov_id_ul == prov_id_dr && prov_id_ur == prov_id_dl && prov_id_ul != prov_id_ur) {
 					if((prov_id_ul >= province::to_map_id(context.state.province_definitions.first_sea_province) || prov_id_ul == 0)
 					&& (prov_id_ur < province::to_map_id(context.state.province_definitions.first_sea_province) && prov_id_ur != 0)) {
-
 						diagonal_borders[x + (y + 1) * uint32_t(map_size.x)] |= uint8_t(diagonal_border::UP_RIGHT);
 						diagonal_borders[(x + 1) + y * uint32_t(map_size.x)] |= uint8_t(diagonal_border::DOWN_LEFT);
-
 					} else if((prov_id_ur >= province::to_map_id(context.state.province_definitions.first_sea_province) || prov_id_ur == 0)
 					&& (prov_id_ul < province::to_map_id(context.state.province_definitions.first_sea_province) && prov_id_ul != 0)) {
-
 						diagonal_borders[(x + 1) + (y + 1) * uint32_t(map_size.x)] |= uint8_t(diagonal_border::UP_LEFT);
 						diagonal_borders[x + y * uint32_t(map_size.x)] |= uint8_t(diagonal_border::DOWN_RIGHT);
 					}
@@ -160,27 +156,24 @@ namespace map {
 				if(prov_id_ul != prov_id_ur || prov_id_ul != prov_id_dl || prov_id_ul != prov_id_dr) {
 					if(prov_id_ul != prov_id_ur && prov_id_ur != 0 && prov_id_ul != 0) {
 						context.state.world.try_create_province_adjacency(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_ur));
-
 						auto aval = context.state.world.get_province_adjacency_by_province_pair(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_ur));
-						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0)
-						context.state.world.province_adjacency_get_type(aval) &= ~(province::border::non_adjacent_bit | province::border::impassible_bit);
-					
+						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0) {
+							context.state.world.province_adjacency_get_type(aval) &= ~(province::border::non_adjacent_bit | province::border::impassible_bit);
+						}
 					}
 					if(prov_id_ul != prov_id_dl && prov_id_dl != 0 && prov_id_ul != 0) {
 						context.state.world.try_create_province_adjacency(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_dl));
-
 						auto aval = context.state.world.get_province_adjacency_by_province_pair(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_dl));
-						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0)
+						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0) {
 							context.state.world.province_adjacency_get_type(aval) &= ~(province::border::non_adjacent_bit | province::border::impassible_bit);
-					
+						}
 					}
 					if(prov_id_ul != prov_id_dr && prov_id_dr != 0 && prov_id_ul != 0) {
 						context.state.world.try_create_province_adjacency(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_dr));
-
 						auto aval = context.state.world.get_province_adjacency_by_province_pair(province::from_map_id(prov_id_ul), province::from_map_id(prov_id_dr));
-						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0)
-						context.state.world.province_adjacency_get_type(aval) &= ~(province::border::non_adjacent_bit | province::border::impassible_bit);
-					
+						if((context.state.world.province_adjacency_get_type(aval) & province::border::non_adjacent_bit) != 0) {
+							context.state.world.province_adjacency_get_type(aval) &= ~(province::border::non_adjacent_bit | province::border::impassible_bit);
+						}
 					}
 				}
 			}

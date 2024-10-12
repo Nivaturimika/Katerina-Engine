@@ -240,17 +240,15 @@ namespace map {
 			terrain_id_map.resize(size_x * size_y, uint8_t(255));
 
 			ogl::image terrain_data;
-			if(terrain_file)
-			terrain_data = ogl::load_stb_image(*terrain_file);
-
+			if(terrain_file) {
+				terrain_data = ogl::load_stb_image(*terrain_file);
+			}
 			auto terrain_resolution = internal_make_index_map();
 
 			if(terrain_data.size_x == int32_t(size_x) && terrain_data.size_y == int32_t(size_y)) {
 				for(uint32_t ty = 0; ty < size_y; ++ty) {
 					uint32_t y = size_y - ty - 1;
 					for(uint32_t x = 0; x < size_x; ++x) {
-
-
 						uint8_t* ptr = terrain_data.data + (x + size_x * y) * 4;
 						auto color = sys::pack_color(ptr[0], ptr[1], ptr[2]);
 
@@ -258,11 +256,9 @@ namespace map {
 							terrain_id_map[ty * size_x + x] = it->second;
 						} else {
 							bool found_neightbor = false;
-
 							if(x > 0) {
 								uint8_t* ptrb = terrain_data.data + (x - 1 + size_x * y) * 4;
 								auto colorb = sys::pack_color(ptrb[0], ptrb[1], ptrb[2]);
-
 								if(auto itb = terrain_resolution.find(colorb); itb != terrain_resolution.end()) {
 									terrain_id_map[ty * size_x + x] = itb->second;
 									found_neightbor = true;
@@ -271,7 +267,6 @@ namespace map {
 							if(!found_neightbor && y > 0) {
 								uint8_t* ptrb = terrain_data.data + (x  + size_x * (y-1)) * 4;
 								auto colorb = sys::pack_color(ptrb[0], ptrb[1], ptrb[2]);
-
 								if(auto itb = terrain_resolution.find(colorb); itb != terrain_resolution.end()) {
 									terrain_id_map[ty * size_x + x] = itb->second;
 									found_neightbor = true;
@@ -280,7 +275,6 @@ namespace map {
 							if(!found_neightbor && x < size_x - 1) {
 								uint8_t* ptrb = terrain_data.data + (x + 1 + size_x * y) * 4;
 								auto colorb = sys::pack_color(ptrb[0], ptrb[1], ptrb[2]);
-
 								if(auto itb = terrain_resolution.find(colorb); itb != terrain_resolution.end()) {
 									terrain_id_map[ty * size_x + x] = itb->second;
 									found_neightbor = true;
@@ -289,7 +283,6 @@ namespace map {
 							if(!found_neightbor && y < size_y - 1) {
 								uint8_t* ptrb = terrain_data.data + (x + size_x * (y + 1)) * 4;
 								auto colorb = sys::pack_color(ptrb[0], ptrb[1], ptrb[2]);
-
 								if(auto itb = terrain_resolution.find(colorb); itb != terrain_resolution.end()) {
 									terrain_id_map[ty * size_x + x] = itb->second;
 									found_neightbor = true;
@@ -300,16 +293,16 @@ namespace map {
 								uint8_t resolved_index = 255;
 								int32_t min_distance = std::numeric_limits<int32_t>::max();
 								for(auto& p : terrain_resolution) {
-									if(p.second == 255)
-									continue;
-									auto c = p.first;
-									auto r = sys::int_red_from_int(c);
-									auto g = sys::int_green_from_int(c);
-									auto b = sys::int_blue_from_int(c);
-									auto dist = (r - ptr[0]) * (r - ptr[0]) + (b - ptr[1]) * (b - ptr[1]) + (g - ptr[2]) * (g - ptr[2]);
-									if(dist < min_distance) {
-										min_distance = dist;
-										resolved_index = p.second;
+									if(p.second != 255) {
+										auto c = p.first;
+										auto r = sys::int_red_from_int(c);
+										auto g = sys::int_green_from_int(c);
+										auto b = sys::int_blue_from_int(c);
+										auto dist = (r - ptr[0]) * (r - ptr[0]) + (b - ptr[1]) * (b - ptr[1]) + (g - ptr[2]) * (g - ptr[2]);
+										if(dist < min_distance) {
+											min_distance = dist;
+											resolved_index = p.second;
+										}
 									}
 								}
 								terrain_id_map[ty * size_x + x] = resolved_index;
@@ -344,23 +337,24 @@ namespace map {
 	void display_data::load_median_terrain_type(parsers::scenario_building_context& context) {
 		median_terrain_type.resize(context.state.world.province_size() + 1);
 		province_area.resize(context.state.world.province_size() + 1);
-	std::vector<std::array<int, 64>> terrain_histogram(context.state.world.province_size() + 1, std::array<int, 64>{});
+		std::vector<std::array<int32_t, 64>> terrain_histogram(context.state.world.province_size() + 1, std::array<int, 64>{});
 		for(int i = size_x * size_y - 1; i-- > 0;) {
 			auto prov_id = province_id_map[i];
 			auto terrain_id = terrain_id_map[i];
-			if(terrain_id < 64)
-			terrain_histogram[prov_id][terrain_id] += 1;
+			if(terrain_id < 64) {
+				terrain_histogram[prov_id][terrain_id] += 1;
+			}
 		}
-
-		for(int i = context.state.world.province_size(); i-- > 1;) { // map-id province 0 == the invalid province; we don't need to collect data for it
-			int max_index = 64;
-			int max = 0;
+		for(int32_t i = context.state.world.province_size(); i-- > 1;) { // map-id province 0 == the invalid province; we don't need to collect data for it
+			int32_t max_index = 64;
+			int32_t max = 0;
 			province_area[i] = 0;
-			for(int j = max_index; j-- > 0;) {
-				province_area[i] += terrain_histogram[i][j];
-				if(terrain_histogram[i][j] > max) {
+			for(int32_t j = max_index; j-- > 0;) {
+				auto const v = terrain_histogram[i][j];
+				province_area[i] += v;
+				if(v > max) {
 					max_index = j;
-					max = terrain_histogram[i][j];
+					max = v;
 				}
 			}
 			median_terrain_type[i] = uint8_t(max_index);
@@ -373,19 +367,16 @@ namespace map {
 		std::vector<int> tiles_number(context.state.world.province_size() + 1, 0);
 		for(int i = size_x * size_y - 1; i-- > 0;) {
 			auto prov_id = province_id_map[i];
-			int x = i % size_x;
-			int y = i / size_x;
+			int32_t x = i % size_x;
+			int32_t y = i / size_x;
 			accumulated_tile_positions[prov_id] += glm::vec2(x, y);
 			tiles_number[prov_id]++;
 		}
 		// schombert: needs to start from +1 here or you don't catch the last province
-		for(int i = context.state.world.province_size() + 1; i-- > 1;) { // map-id province 0 == the invalid province; we don't need to collect data for it
-
+		for(int32_t i = context.state.world.province_size() + 1; i-- > 1;) { // map-id province 0 == the invalid province; we don't need to collect data for it
 			glm::vec2 tile_pos;
-
 			// OK, so some mods do in fact define provinces that aren't on the map.
 			//assert(tiles_number[i] > 0); // yeah but a province without tiles is no bueno
-
 			if(tiles_number[i] == 0) {
 				tile_pos = glm::vec2(0, 0);
 			} else {
@@ -400,7 +391,6 @@ namespace map {
 		if(!context.new_maps) {
 			auto free_space = std::max(uint32_t(0), size_y - image.size_y); // schombert: find out how much water we need to add
 			auto top_free_space = (free_space * 3) / 5;
-
 			province_id_map.resize(imsz);
 			uint32_t i = 0;
 			for(; i < top_free_space * size_x; ++i) { // schombert: fill with nothing until the start of the real data
@@ -435,7 +425,6 @@ namespace map {
 				}
 			}
 		}
-
 		load_provinces_mid_point(context);
 	}
 

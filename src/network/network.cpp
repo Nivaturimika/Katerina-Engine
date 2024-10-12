@@ -928,34 +928,28 @@ namespace network {
 						// Find a scenario with a matching checksum
 						auto dir = simple_fs::get_or_create_scenario_directory();
 						for(const auto& uf : simple_fs::list_files(dir, NATIVE(".bin"))) {
-							auto f = simple_fs::open_file(uf);
-							if(f) {
+							if(auto f = simple_fs::open_file(uf); f) {
 								auto contents = simple_fs::view_contents(*f);
 								sys::scenario_header scen_header;
 								if(contents.file_size > sizeof(sys::scenario_header)) {
 									sys::read_scenario_header(reinterpret_cast<const uint8_t*>(contents.data), scen_header);
-									if(!scen_header.checksum.is_equal(state.network_state.s_hshake.scenario_checksum))
-									continue; // Same checksum
-									if(scen_header.version != sys::scenario_file_version)
-									continue; // Same version of scenario
-									if(sys::try_read_scenario_and_save_file(state, simple_fs::get_file_name(uf))) {
-										state.fill_unsaved_data();
-										found_match = true;
-										break;
+									if(scen_header.version == sys::scenario_file_version
+									&& scen_header.checksum.is_equal(state.network_state.s_hshake.scenario_checksum)) {
+										if(sys::try_read_scenario_and_save_file(state, simple_fs::get_file_name(uf))) {
+											state.fill_unsaved_data();
+											found_match = true;
+											break;
+										}
 									}
 								}
 							}
 						}
 						if(!found_match) {
-							std::string msg = "Could not find a scenario with a matching checksum!"
-							"This is most likely a false positive, so just ask the host for their"
-							"scenario file and it should work. Or you haven't clicked on 'Make scenario'!";
-							msg += "\n";
-							msg += "Host should give you the scenario from:\n"
-							"'My Documents\\Katerina Engine\\scenarios\\<Most recent scenario>'";
-							msg += "And you place it on:\n"
-							"'My Documents\\Katerina Engine\\scenarios\\'\n";
-
+							std::string msg = "Could not find a scenario with a matching checksum!\n"
+								"Just ask the host for their scenario file and it should work.\n"
+								"Host should give you the scenario from:\n"
+								"'My Documents\\Katerina Engine\\scenarios\\<Most recent scenario>'"
+								"And you place it on that same directory as well.\n";
 							window::emit_error_message(msg.c_str(), true);
 						}
 					}
@@ -970,9 +964,8 @@ namespace network {
 					socket_add_to_send_queue(state.network_state.send_buffer, &hshake, sizeof(hshake));
 					state.network_state.handshake = false;
 					state.network_state.wait_for_header = true;
-
 					//update map
-				state.map_state.set_selected_province(dcon::province_id{});
+					state.map_state.set_selected_province(dcon::province_id{});
 					state.map_state.unhandled_province_selection = true;
 				});
 				if(r != 0) { // error
