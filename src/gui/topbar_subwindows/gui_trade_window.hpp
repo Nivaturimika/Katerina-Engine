@@ -157,7 +157,7 @@ namespace ui {
 			auto c = retrieve<dcon::commodity_id>(state, parent);
 			float produced = state.world.nation_get_domestic_market_pool(n, c);
 			float consumed = state.world.nation_get_real_demand(n, c) * state.world.nation_get_demand_satisfaction(n, c);
-			auto v = int64_t(produced + consumed);
+			auto v = int64_t(produced - consumed);
 			set_text(state, text::prettify(v));
 		}
 	};
@@ -204,6 +204,7 @@ namespace ui {
 				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 				row_contents.push_back(c);
 			}
+			auto n = state.local_player_nation;
 			switch(sort) {
 			case trade_sort::commodity:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
@@ -212,8 +213,8 @@ namespace ui {
 				break;
 			case trade_sort::price:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = state.world.commodity_get_total_consumption(a) * state.world.commodity_get_current_price(a);
-					auto bv = state.world.commodity_get_total_consumption(b) * state.world.commodity_get_current_price(b);
+					auto av = economy::commodity_market_activity(state, n, a) * economy::commodity_effective_price(state, n, a);
+					auto bv = economy::commodity_market_activity(state, n, a) * economy::commodity_effective_price(state, n, b);
 					if(av != bv)
 						return av > bv;
 					return a.index() < b.index();
@@ -221,8 +222,8 @@ namespace ui {
 				break;
 			case trade_sort::demand_satisfaction:
 				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::commodity_id a, dcon::commodity_id b) {
-					auto av = economy::commodity_market_activity(state, state.local_player_nation, a);
-					auto bv = economy::commodity_market_activity(state, state.local_player_nation, b);
+					auto av = economy::commodity_market_activity(state, n, a);
+					auto bv = economy::commodity_market_activity(state, n, b);
 					if(av != bv)
 						return av > bv;
 					return a.index() < b.index();
