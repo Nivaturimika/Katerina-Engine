@@ -3167,7 +3167,7 @@ namespace nations {
 	void cleanup_dead_gps(sys::state& state) {
 		// delete gp rels of non-gps
 		for(auto n : state.world.in_nation) {
-			if(n.get_owned_province_count() == 0) {
+			if(!n.get_is_great_power()) {
 				auto rels = n.get_gp_relationship_as_great_power();
 				while(rels.begin() != rels.end()) {
 					auto rel = *(rels.begin());
@@ -3176,12 +3176,15 @@ namespace nations {
 					}
 					state.world.delete_gp_relationship(rel);
 				}
-			} else {
-				for(const auto rel : n.get_gp_relationship_as_great_power()) {
-					if((rel.get_status() & influence::level_mask) == influence::level_in_sphere) {
-						rel.get_influence_target().set_in_sphere_of(rel.get_great_power());
-					}
-				}
+			}
+		}
+	}
+
+	/*	The `in_sphre_of` property is unsaved, so we restore it by querying the appropriate gp relationship object */
+	void restore_sphere_values(sys::state& state) {
+		for(const auto rel : state.world.in_gp_relationship) {
+			if((rel.get_status() & influence::level_mask) == influence::level_in_sphere) {
+				rel.get_influence_target().set_in_sphere_of(rel.get_great_power());
 			}
 		}
 	}

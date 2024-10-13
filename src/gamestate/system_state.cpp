@@ -3216,15 +3216,6 @@ namespace sys {
 			}
 		}
 
-		/* run pending triggers and effects */
-		for(auto pending_decision : pending_decisions) {
-			dcon::nation_id n = pending_decision.first;
-			dcon::decision_id d = pending_decision.second;
-			if(auto e = world.decision_get_effect(d); e) {
-				effect::execute(*this, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(current_date.value), uint32_t(n.index() << 4 ^ d.index()));
-			}
-		}
-
 		demographics::regenerate_from_pop_data_full(*this);
 		economy::initialize(*this);
 
@@ -3250,7 +3241,6 @@ namespace sys {
 				world.nation_set_is_great_power(nations_by_rank[i], true);
 			}
 		}
-		nations::cleanup_dead_gps(*this);
 
 		// fix slaves in non-slave owning nations
 		for(auto p : world.in_province) {
@@ -3264,6 +3254,15 @@ namespace sys {
 				world.province_set_rgo(p, economy::money);
 			}
 		});
+
+		/* run pending triggers and effects */
+		for(auto pending_decision : pending_decisions) {
+			dcon::nation_id n = pending_decision.first;
+			dcon::decision_id d = pending_decision.second;
+			if(auto e = world.decision_get_effect(d); e) {
+				effect::execute(*this, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(current_date.value), uint32_t(n.index() << 4 ^ d.index()));
+			}
+		}
 
 		economy::presimulate(*this);
 
@@ -3361,7 +3360,7 @@ namespace sys {
 
 		province::restore_distances(*this);
 
-	world.for_each_nation([&](dcon::nation_id id) { politics::update_displayed_identity(*this, id); });
+		world.for_each_nation([&](dcon::nation_id id) { politics::update_displayed_identity(*this, id); });
 
 		nations_by_rank.resize(2000); // TODO: take this value directly from the data container: max number of nations
 		nations_by_industrial_score.resize(2000);
@@ -3416,6 +3415,8 @@ namespace sys {
 		sys::repopulate_modifier_effects(*this);
 		military::restore_unsaved_values(*this);
 		nations::restore_unsaved_values(*this);
+		nations::cleanup_dead_gps(*this);
+		nations::restore_sphere_values(*this);
 
 		pop_demographics::regenerate_is_primary_or_accepted(*this);
 		nations::update_administrative_efficiency(*this);

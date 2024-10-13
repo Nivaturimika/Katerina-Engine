@@ -19,8 +19,7 @@ std::vector<uint32_t> get_global_sphere_color(sys::state& state) {
 			if(nations::is_great_power(state, owner.id)) {
 				color = owner.get_color();
 			} else {
-				auto master = owner.get_in_sphere_of();
-				if(bool(master)) {
+				if(auto master = owner.get_in_sphere_of(); master) {
 					color = master.get_color();
 				}
 			}

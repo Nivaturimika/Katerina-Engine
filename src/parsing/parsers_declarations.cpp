@@ -2490,19 +2490,19 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		auto rel = context.outer_context.state.world.get_gp_relationship_by_gp_influence_pair(context.nation_with, context.nation_for);
 		auto status_level = [&]() {
 			switch(v) {
-				case 0:
+			case 0:
 				return nations::influence::level_hostile;
-				case 1:
+			case 1:
 				return nations::influence::level_opposed;
-				case 2:
+			case 2:
 				return nations::influence::level_neutral;
-				case 3:
+			case 3:
 				return nations::influence::level_cordial;
-				case 4:
+			case 4:
 				return nations::influence::level_friendly;
-				case 5:
+			case 5:
 				return nations::influence::level_in_sphere;
-				default:
+			default:
 				return nations::influence::level_neutral;
 			}
 		}();
