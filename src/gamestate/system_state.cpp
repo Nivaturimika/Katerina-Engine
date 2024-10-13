@@ -2444,8 +2444,9 @@ namespace sys {
 			auto ymd = current_date.to_ymd(start_date);
 			auto start_dir_name = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
 			date_directories.emplace_back(start_dir_name);
-			//
-			date_directories.emplace_back(NATIVE("1836.1.1"));
+			if(ymd.year != 1836 && ymd.month != 1 && ymd.day != 1) {
+				date_directories.emplace_back(NATIVE("1836.1.1"));
+			}
 			//
 			for(const auto& dir_name : date_directories) {
 				auto date_directory = open_directory(pop_history, dir_name);
