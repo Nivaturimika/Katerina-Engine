@@ -380,21 +380,21 @@ namespace launcher {
 	};
 	//polish
 	static std::string_view pl_localised_strings[uint8_t(string_index::count)] = {
-		"Stwórz scenariusz",
-		"Odtwórz scenariusz",
-		"Pracujący",
-		"Utwórz nowy scenariusz",
-		"dla wybranych modów",
-		"Nie znaleziono scenariusza",
-		"Adres IP",
-		"Hasło",
-		"Przezwisko",
-		"Jeden gracz",
-		"Tryb wieloosobowy",
-		"Rozpocząć grę",
-		"Gospodarz",
-		"Dołączyć",
-		"Lista modów"
+        "Stwórz Scenariusz",
+        "Odtwórz scenariusz",
+        "Czekaj",
+        "Utwórz nowy scenariusz",
+        "dla wybranych modów",
+        "Nie znaleziono scenariusza",
+        "Adres IP",
+        "Hasło",
+        "Nazwa",
+        "Tryb Jednoosobowy",
+        "Tryb Wieloosobowy",
+        "Rozpocznij Grę",
+        "Hostuj",
+        "Dołącz",
+        "Lista Modów"
 	};
 	//bulgarian
 	static std::string_view bg_localised_strings[uint8_t(string_index::count)] = {
