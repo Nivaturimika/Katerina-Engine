@@ -194,7 +194,7 @@ namespace nations {
 		}
 		// delete gp rels of non-gps
 		for(auto n : state.world.in_nation) {
-			if(n.get_is_great_power()) {
+			if(!n.get_is_great_power()) {
 				auto rels = n.get_gp_relationship_as_great_power();
 				while(rels.begin() != rels.end()) {
 					auto rel = *(rels.begin());
