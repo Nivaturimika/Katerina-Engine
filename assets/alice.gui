@@ -2549,7 +2549,7 @@ guiTypes = {
 		}
 		instantTextBoxType = {
 			name = "console_list"
-			font = "Arial16"
+			font = "FPS_Font"
 			maxsize = { 500 565 }
 			format = left
 		}
