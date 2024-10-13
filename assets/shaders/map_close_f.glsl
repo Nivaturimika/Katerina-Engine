@@ -44,8 +44,7 @@ vec2 get_rounded_tex_coords(vec2 tex_coords) {
 }
 
 // The water effect
-vec4 get_water_terrain()
-{
+vec4 get_water_terrain() {
 	// Water effect taken from Vic2 fx/water/PixelShader_HoiWater_2_0
 	const float WRAP = 0.8f;
 	const float WaveModOne = 3.f;
@@ -109,17 +108,19 @@ vec4 get_water_terrain()
 
 // The terrain color from the current texture coordinate offset with one pixel in the "corner" direction
 vec4 get_terrain(vec2 corner, vec2 offset) {
-	float index = texture(terrain_texture_sampler, floor(tex_coord * map_size + vec2(0.5, 0.5)) / map_size + 0.5 * pix * corner).r;
-	index = floor(index * 256);
-	float is_water = step(64, index);
+	float index = texture(terrain_texture_sampler, floor(tex_coord * map_size + vec2(0.5f)) / map_size + 0.5f * pix * corner).r;
+	index = floor(index * 256.f);
+	float is_water = step(64.f, index);
 	vec4 colour = texture(terrainsheet_texture_sampler, vec3(offset, index));
+	colour.a = 1.f;
 	return mix(colour, vec4(0.f), is_water);
 }
 
 vec4 get_terrain_mix() {
 	// Pixel size on map texture
-	vec2 scaling = fract(tex_coord * map_size + vec2(0.5, 0.5));
+	vec2 scaling = fract(tex_coord * map_size + vec2(0.5f));
 	vec2 offset = tex_coord / (16.f * pix);
+	//vec2 offset = tex_coord / (4.f * pix);
 
 	vec4 colourlu = get_terrain(vec2(-1.f, -1.f), offset);
 	vec4 colourld = get_terrain(vec2(-1.f, +1.f), offset);
@@ -133,7 +134,7 @@ vec4 get_terrain_mix() {
 
 	// Mixes the terrains from "texturesheet.tga" with the "colormap.dds" background color.
 	vec4 terrain_background = texture(colormap_terrain, get_corrected_coords(tex_coord));
-	terrain.rgb = (terrain.rgb * 2. + terrain_background.rgb) / 3.;
+	terrain.rgb = (terrain.rgb * 2.f + terrain_background.rgb) / 3.f;
 	return terrain;
 }
 
@@ -146,8 +147,8 @@ vec4 get_land_political_close() {
 	float is_land = terrain.a;
 
 	// Make the terrain a gray scale color
-	const vec3 GREYIFY = vec3( 0.212671, 0.715160, 0.072169 );
-	float grey = dot( terrain.rgb, GREYIFY );
+	const vec3 GREYIFY = vec3(0.212671f, 0.715160f, 0.072169f);
+	float grey = dot(terrain.rgb, GREYIFY);
 	terrain.rgb = vec3(grey);
 
 	vec2 tex_coords = tex_coord;
@@ -155,8 +156,8 @@ vec4 get_land_political_close() {
 	vec2 prov_id = texture(provinces_texture_sampler, rounded_tex_coords).xy;
 
 	// The primary and secondary map mode province colors
-	vec4 prov_color = texture(province_color, vec3(prov_id, 0.));
-	vec4 stripe_color = texture(province_color, vec3(prov_id, 1.));
+	vec4 prov_color = texture(province_color, vec3(prov_id, 0.f));
+	vec4 stripe_color = texture(province_color, vec3(prov_id, 1.f));
 
 	vec2 stripe_coord = tex_coord * vec2(512., 512. * map_size.y / map_size.x);
 
