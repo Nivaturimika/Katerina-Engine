@@ -725,19 +725,19 @@ namespace network {
 					//next command is a header!
 					client.wait_for_header = true;
 					switch(client.recv_buffer_header.type) {
-						case command::command_type::invalid:
-						case command::command_type::notify_player_ban:
-						case command::command_type::notify_player_kick:
-						case command::command_type::notify_save_loaded:
-						case command::command_type::notify_reload:
-						case command::command_type::advance_tick:
-						case command::command_type::notify_start_game:
-						case command::command_type::notify_stop_game:
-						case command::command_type::notify_pause_game:
-						case command::command_type::notify_player_joins:
-						case command::command_type::save_game:
+					case command::command_type::invalid:
+					case command::command_type::notify_player_ban:
+					case command::command_type::notify_player_kick:
+					case command::command_type::notify_save_loaded:
+					case command::command_type::notify_reload:
+					case command::command_type::advance_tick:
+					case command::command_type::notify_start_game:
+					case command::command_type::notify_stop_game:
+					case command::command_type::notify_pause_game:
+					case command::command_type::notify_player_joins:
+					case command::command_type::save_game:
 						break; // has to be valid/sendable by client
-						default:
+					default:
 						/* Has to be from the nation of the client proper - and early
 						discard invalid commands */
 						if(client.recv_buffer_header.source == client.playing_as) {

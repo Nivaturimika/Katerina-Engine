@@ -625,18 +625,19 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 		text::font_manager font_collection;
 
 		// synchronization data (between main update logic and ui thread)
-		std::atomic<bool> game_state_updated = false;                    // game state -> ui signal
-		std::atomic<bool> province_ownership_changed = true;                    // game state -> ui signal
-		std::atomic<bool> province_name_changed = true;					// game state -> ui signal
-		std::atomic<bool> save_list_updated = false;                     // game state -> ui signal
-		std::atomic<bool> quit_signaled = false;                         // ui -> game state signal
-		std::atomic<int32_t> actual_game_speed = 0;                      // ui -> game state message
-		rigtorp::SPSCQueue<command::payload> incoming_commands;          // ui or network -> local gamestate
-		std::atomic<bool> ui_pause = false;                              // force pause by an important message being open
-		std::atomic<bool> railroad_built = true; // game state -> map
-		#ifndef NDEBUG
+		std::atomic<bool> game_state_updated = false;			// game state -> ui signal
+		std::atomic<bool> province_ownership_changed = true;	// game state -> ui signal
+		std::atomic<bool> province_name_changed = true;			// game state -> ui signal
+		std::atomic<bool> save_list_updated = false;			// game state -> ui signal
+		std::atomic<bool> quit_signaled = false;				// ui -> game state signal
+		std::atomic<int32_t> actual_game_speed = 0;				// ui -> game state message
+		rigtorp::SPSCQueue<command::payload> incoming_commands;	// ui or network -> local gamestate
+		std::atomic<bool> ui_pause = false;						// force pause by an important message being open
+		std::atomic<bool> railroad_built = true;				// game state -> map
+		dcon::nation_id last_nation_that_paused;				// network -> ui
+#ifndef NDEBUG
 		bool trigger_eval_is_ub = false; // -- triggers not ready
-		#endif
+#endif
 
 		// synchronization: notifications from the gamestate to ui
 		rigtorp::SPSCQueue<event::pending_human_n_event> new_n_event;

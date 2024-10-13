@@ -161,24 +161,24 @@ namespace command {
 		//assert(command::can_perform_command(state, p));
 
 		switch(p.type) {
-			case command_type::notify_player_joins:
-			case command_type::notify_player_leaves:
-			case command_type::notify_player_picks_nation:
-			case command_type::notify_player_ban:
-			case command_type::notify_player_kick:
-			case command_type::notify_save_loaded:
-			case command_type::notify_reload:
-			case command_type::notify_start_game:
-			case command_type::notify_stop_game:
-			case command_type::notify_player_oos:
-			case command_type::notify_pause_game:
-			case command_type::chat_message:
+		case command_type::notify_player_joins:
+		case command_type::notify_player_leaves:
+		case command_type::notify_player_picks_nation:
+		case command_type::notify_player_ban:
+		case command_type::notify_player_kick:
+		case command_type::notify_save_loaded:
+		case command_type::notify_reload:
+		case command_type::notify_start_game:
+		case command_type::notify_stop_game:
+		case command_type::notify_player_oos:
+		case command_type::notify_pause_game:
+		case command_type::chat_message:
 			// Notifications can be sent because it's an-always do thing
 			break;
-			default:
+		default:
 			// Normal commands are discarded iff we are not in the game
 			if(!state.current_scene.game_in_progress)
-			return;
+				return;
 			state.network_state.is_new_game = false;
 			break;
 		}
@@ -4782,6 +4782,7 @@ namespace command {
 
 	void execute_notify_pause_game(sys::state& state, dcon::nation_id source) {
 		state.actual_game_speed = 0;
+		state.last_nation_that_paused = source;
 	}
 
 	void notify_pause_game(sys::state& state, dcon::nation_id source) {

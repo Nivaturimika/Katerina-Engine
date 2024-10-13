@@ -998,19 +998,15 @@ namespace ui {
 			} else {
 				state.ui_state.held_game_speed = state.actual_game_speed.load();
 				state.actual_game_speed = 0;
-				if(state.network_mode == sys::network_mode_type::host) {
+				if(state.network_mode != sys::network_mode_type::single_player) {
 					command::notify_pause_game(state, state.local_player_nation);
 				}
 			}
 		}
 
 		void on_update(sys::state& state) noexcept override {
-			if(state.network_mode == sys::network_mode_type::client) {
-				disabled = true;
-			} else {
-				disabled = state.internally_paused || state.ui_pause.load(std::memory_order::acquire);
-				disabled = disabled || ui::events_pause_test(state);
-			}
+			disabled = state.internally_paused || state.ui_pause.load(std::memory_order::acquire);
+			disabled = disabled || ui::events_pause_test(state);
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -1018,6 +1014,11 @@ namespace ui {
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			text::add_line(state, contents, "topbar_pause_speed");
+			if(state.last_nation_that_paused) {
+				text::add_line(state, contents, "last_player_that_paused", text::variable_type::x, state.last_nation_that_paused);
+			}
+
 			if(state.network_mode == sys::network_mode_type::host) {
 				auto box = text::open_layout_box(contents);
 				for(auto& client : state.network_state.clients) {
@@ -1033,19 +1034,13 @@ namespace ui {
 				text::close_layout_box(contents, box);
 			}
 
-			if(state.network_mode == sys::network_mode_type::client) {
-				text::add_line(state, contents, "alice_only_host_speed");
-			} else {
-				text::add_line(state, contents, "topbar_pause_speed");
-			}
-
+			/*
 			auto ymd = state.current_date.to_ymd(state.start_date);
 			if(sys::is_leap_year(ymd.year)) {
 				text::add_line(state, contents, "date_is_leap");
 			} else {
 				text::add_line(state, contents, "date_is_not_leap");
 			}
-
 			float nh_temp = 15.f;
 			std::string nh_season;
 			if(ymd.month == 12 || ymd.month <= 2) {
@@ -1058,7 +1053,6 @@ namespace ui {
 				nh_season = text::produce_simple_string(state, "autumn");
 			}
 			text::add_line(state, contents, "topbar_date_season_nh", text::variable_type::x, std::string_view(nh_season));
-
 			std::string sh_season;
 			if(ymd.month >= 6 && ymd.month <= 8) {
 				sh_season = text::produce_simple_string(state, "winter");
@@ -1070,6 +1064,7 @@ namespace ui {
 				sh_season = text::produce_simple_string(state, "autumn");
 			}
 			text::add_line(state, contents, "topbar_date_season_sh", text::variable_type::x, std::string_view(sh_season));
+			*/
 
 			//auto r = ((float(rng::reduce(state.game_seed, 4096)) / 4096.f) * 8.f) - 4.f;
 			//float avg_temp = (nh_temp + sh_temp + r) / 2.f;
@@ -1099,11 +1094,7 @@ namespace ui {
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto box = text::open_layout_box(contents, 0);
-			if(state.network_mode == sys::network_mode_type::client) {
-				text::localised_format_box(state, contents, box, std::string_view("alice_only_host_speed"));
-			} else {
-				text::localised_format_box(state, contents, box, std::string_view("topbar_inc_speed"));
-			}
+			text::localised_format_box(state, contents, box, std::string_view("topbar_inc_speed"));
 			text::close_layout_box(contents, box);
 		}
 	};
@@ -1129,11 +1120,7 @@ namespace ui {
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto box = text::open_layout_box(contents, 0);
-			if(state.network_mode == sys::network_mode_type::client) {
-				text::localised_format_box(state, contents, box, std::string_view("alice_only_host_speed"));
-			} else {
-				text::localised_format_box(state, contents, box, std::string_view("topbar_dec_speed"));
-			}
+			text::localised_format_box(state, contents, box, std::string_view("topbar_dec_speed"));
 			text::close_layout_box(contents, box);
 		}
 	};
