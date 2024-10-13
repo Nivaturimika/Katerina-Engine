@@ -192,13 +192,19 @@ namespace nations {
 		for(auto& gp : state.great_nations) {
 			state.world.nation_set_is_great_power(gp.nation, true);
 		}
-		state.world.for_each_gp_relationship([&](dcon::gp_relationship_id rel) {
-			if((influence::level_mask & state.world.gp_relationship_get_status(rel)) == influence::level_in_sphere) {
-				auto t = state.world.gp_relationship_get_influence_target(rel);
-				auto gp = state.world.gp_relationship_get_great_power(rel);
-				state.world.nation_set_in_sphere_of(t, gp);
+		// delete gp rels of non-gps
+		for(auto n : state.world.in_nation) {
+			if(n.get_is_great_power()) {
+				auto rels = n.get_gp_relationship_as_great_power();
+				while(rels.begin() != rels.end()) {
+					auto rel = *(rels.begin());
+					if(rel.get_influence_target().get_in_sphere_of() == n) {
+						rel.get_influence_target().set_in_sphere_of(dcon::nation_id{});
+					}
+					state.world.delete_gp_relationship(rel);
+				}
 			}
-		});
+		}
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto treasury = state.world.nation_get_stockpiles(ids, economy::money);
 			state.world.nation_set_last_treasury(ids, treasury);
