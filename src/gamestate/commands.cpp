@@ -4781,7 +4781,12 @@ namespace command {
 	}
 
 	void execute_notify_pause_game(sys::state& state, dcon::nation_id source) {
-		state.actual_game_speed = 0;
+		if(state.actual_game_speed <= 0) {
+			state.actual_game_speed = state.ui_state.held_game_speed;
+		} else {
+			state.ui_state.held_game_speed = state.actual_game_speed.load();
+			state.actual_game_speed = 0;
+		}
 		state.last_nation_that_paused = source;
 	}
 

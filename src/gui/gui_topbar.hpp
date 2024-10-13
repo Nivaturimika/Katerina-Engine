@@ -993,14 +993,15 @@ namespace ui {
 		}
 
 		void button_action(sys::state& state) noexcept override {
-			if(state.actual_game_speed <= 0) {
-				state.actual_game_speed = state.ui_state.held_game_speed;
-			} else {
-				state.ui_state.held_game_speed = state.actual_game_speed.load();
-				state.actual_game_speed = 0;
-				if(state.network_mode != sys::network_mode_type::single_player) {
-					command::notify_pause_game(state, state.local_player_nation);
+			if(state.network_mode == sys::network_mode_type::single_player) {
+				if(state.actual_game_speed <= 0) {
+					state.actual_game_speed = state.ui_state.held_game_speed;
+				} else {
+					state.ui_state.held_game_speed = state.actual_game_speed.load();
+					state.actual_game_speed = 0;
 				}
+			} else {
+				command::notify_pause_game(state, state.local_player_nation);
 			}
 		}
 
