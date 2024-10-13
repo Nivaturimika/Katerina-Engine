@@ -353,7 +353,7 @@ namespace economy {
 			fn.set_naval_spending(int8_t(100));
 			fn.set_construction_spending(int8_t(100));
 			fn.set_overseas_spending(int8_t(100));
-			state.world.nation_set_stockpiles(fn, economy::money, std::max(fn.get_non_colonial_population()/100.0f,3000.0f));
+			fn.set_stockpiles(economy::money, std::max(fn.get_non_colonial_population() / 100.f, 3000.f));
 
 			fn.set_poor_tax(int8_t(50));
 			fn.set_middle_tax(int8_t(50));
