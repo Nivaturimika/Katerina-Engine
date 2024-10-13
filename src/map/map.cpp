@@ -76,34 +76,34 @@ namespace map {
 
 	}
 
-	void add_nation_visible_provinces(sys::state& state, std::vector<dcon::province_id>& list, dcon::nation_id n) {
-		for(auto pc : state.world.nation_get_province_control_as_nation(n))
-			list.push_back(pc.get_province());
-		for(auto ac : state.world.nation_get_army_control_as_controller(n))
-			list.push_back(ac.get_army().get_location_from_army_location());
-		for(auto nc : state.world.nation_get_navy_control_as_controller(n))
-			list.push_back(nc.get_navy().get_location_from_navy_location());
+	void add_nation_visible_provinces(sys::state& state, dcon::nation_id n) {
+		for(auto pc : state.world.nation_get_province_control_as_nation(n)) {
+			auto p = pc.get_province();
+			state.map_state.visible_provinces[province::to_map_id(p)] = true;
+			for(auto c : state.world.province_get_province_adjacency(p)) {
+				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+			}
+		}
+		for(auto ac : state.world.nation_get_army_control_as_controller(n)) {
+			auto p = ac.get_army().get_location_from_army_location();
+			state.map_state.visible_provinces[province::to_map_id(p)] = true;
+			for(auto c : state.world.province_get_province_adjacency(p)) {
+				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+			}
+		}
+		for(auto nc : state.world.nation_get_navy_control_as_controller(n)) {
+			auto p = nc.get_navy().get_location_from_navy_location();
+			state.map_state.visible_provinces[province::to_map_id(p)] = true;
+			for(auto c : state.world.province_get_province_adjacency(p)) {
+				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+			}
+		}
 	}
 
 	void display_data::update_fog_of_war(sys::state& state) {
-		std::vector<dcon::province_id> direct_provinces;
-		add_nation_visible_provinces(state, direct_provinces, state.local_player_nation);
-		for(auto urel : state.world.nation_get_overlord_as_ruler(state.local_player_nation))
-			add_nation_visible_provinces(state, direct_provinces, urel.get_subject());
-		for(auto rel : state.world.nation_get_diplomatic_relation(state.local_player_nation)) {
-			if(rel.get_are_allied()) {
-				auto n = rel.get_related_nations(0) == state.local_player_nation ? rel.get_related_nations(1) : rel.get_related_nations(0);
-				add_nation_visible_provinces(state, direct_provinces, n);
-				for(auto urel : state.world.nation_get_overlord_as_ruler(n))
-					add_nation_visible_provinces(state, direct_provinces, urel.get_subject());
-			}
-		}
-		for(auto n : state.world.in_nation) {
-			if(n != state.local_player_nation && military::are_allied_in_war(state, n, state.local_player_nation)) {
-				add_nation_visible_provinces(state, direct_provinces, n);
-			}
-		}
-
 		// update fog of war too
 		std::vector<uint32_t> province_fows(state.world.province_size() + 1, 0xFFFFFFFF);
 		state.map_state.visible_provinces.clear();
@@ -111,15 +111,22 @@ namespace map {
 		&& (state.user_settings.fow_enabled || state.network_mode != sys::network_mode_type::single_player)
 		&& !state.current_scene.is_lobby) {
 			state.map_state.visible_provinces.resize(state.world.province_size() + 1, false);
-			for(auto p : direct_provinces) {
-				if(bool(p)) {
-					state.map_state.visible_provinces[province::to_map_id(p)] = true;
-					for(auto c : state.world.province_get_province_adjacency(p)) {
-						auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
-						if(bool(pc)) {
-							state.map_state.visible_provinces[province::to_map_id(pc)] = true;
-						}
+			add_nation_visible_provinces(state, state.local_player_nation);
+			for(auto urel : state.world.nation_get_overlord_as_ruler(state.local_player_nation)) {
+				add_nation_visible_provinces(state, urel.get_subject());
+			}
+			for(auto rel : state.world.nation_get_diplomatic_relation(state.local_player_nation)) {
+				if(rel.get_are_allied()) {
+					auto n = rel.get_related_nations(0) == state.local_player_nation ? rel.get_related_nations(1) : rel.get_related_nations(0);
+					add_nation_visible_provinces(state, n);
+					for(auto urel : state.world.nation_get_overlord_as_ruler(n)) {
+						add_nation_visible_provinces(state, urel.get_subject());
 					}
+				}
+			}
+			for(auto n : state.world.in_nation) {
+				if(n != state.local_player_nation && military::are_allied_in_war(state, n, state.local_player_nation)) {
+					add_nation_visible_provinces(state, n);
 				}
 			}
 			for(auto p : state.world.in_province) {

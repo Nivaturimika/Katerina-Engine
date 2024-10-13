@@ -336,7 +336,6 @@ namespace map {
 
 	void display_data::load_median_terrain_type(parsers::scenario_building_context& context) {
 		median_terrain_type.resize(context.state.world.province_size() + 1);
-		province_area.resize(context.state.world.province_size() + 1);
 		std::vector<std::array<int32_t, 64>> terrain_histogram(context.state.world.province_size() + 1, std::array<int, 64>{});
 		for(int i = size_x * size_y - 1; i-- > 0;) {
 			auto prov_id = province_id_map[i];
@@ -348,17 +347,14 @@ namespace map {
 		for(int32_t i = context.state.world.province_size(); i-- > 1;) { // map-id province 0 == the invalid province; we don't need to collect data for it
 			int32_t max_index = 64;
 			int32_t max = 0;
-			province_area[i] = 0;
 			for(int32_t j = max_index; j-- > 0;) {
 				auto const v = terrain_histogram[i][j];
-				province_area[i] += v;
 				if(v > max) {
 					max_index = j;
 					max = v;
 				}
 			}
 			median_terrain_type[i] = uint8_t(max_index);
-			province_area[i] = std::max(province_area[i], uint32_t(1));
 		}
 	}
 

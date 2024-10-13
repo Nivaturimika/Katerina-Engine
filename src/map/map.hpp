@@ -218,7 +218,6 @@ namespace map {
 		//
 		std::vector<uint8_t> terrain_id_map;
 		std::vector<uint8_t> median_terrain_type;
-		std::vector<uint32_t> province_area;
 		std::vector<uint8_t> diagonal_borders;
 
 		// map pixel -> province id
@@ -385,7 +384,7 @@ namespace map {
 		void load_terrain_data(parsers::scenario_building_context& context);
 		void load_median_terrain_type(parsers::scenario_building_context& context);
 
-		uint16_t safe_get_province(glm::ivec2 pt);
+		uint16_t safe_get_province(int32_t x, int32_t y);
 		void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 		void make_borders(sys::state& state, std::vector<bool>& visited);
 

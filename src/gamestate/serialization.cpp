@@ -149,7 +149,6 @@ namespace sys {
 			ptr_in = deserialize(ptr_in, state.map_state.map_data.borders);
 			ptr_in = deserialize(ptr_in, state.map_state.map_data.terrain_id_map);
 			ptr_in = deserialize(ptr_in, state.map_state.map_data.province_id_map);
-			ptr_in = deserialize(ptr_in, state.map_state.map_data.province_area);
 			ptr_in = deserialize(ptr_in, state.map_state.map_data.diagonal_borders);
 		}
 		{
@@ -337,7 +336,6 @@ namespace sys {
 			ptr_in = serialize(ptr_in, state.map_state.map_data.borders);
 			ptr_in = serialize(ptr_in, state.map_state.map_data.terrain_id_map);
 			ptr_in = serialize(ptr_in, state.map_state.map_data.province_id_map);
-			ptr_in = serialize(ptr_in, state.map_state.map_data.province_area);
 			ptr_in = serialize(ptr_in, state.map_state.map_data.diagonal_borders);
 		}
 		{
@@ -525,7 +523,6 @@ namespace sys {
 			sz += serialize_size(state.map_state.map_data.borders);
 			sz += serialize_size(state.map_state.map_data.terrain_id_map);
 			sz += serialize_size(state.map_state.map_data.province_id_map);
-			sz += serialize_size(state.map_state.map_data.province_area);
 			sz += serialize_size(state.map_state.map_data.diagonal_borders);
 		}
 	{ sz += sizeof(parsing::defines); }

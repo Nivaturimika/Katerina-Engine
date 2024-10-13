@@ -705,7 +705,6 @@ namespace map {
 					e /= ratio;
 					out_y.push_back(e.y);
 					out_x.push_back(e.x);
-					//w.push_back(10 * float(map_data.province_area[province::to_map_id(p2)]));
 					in_x.push_back(std::array<float, 4>{ l_0 * 1.f, l_1* e.x, l_1* e.x* e.x, l_3* e.x* e.x* e.x});
 					in_y.push_back(std::array<float, 4>{ l_0 * 1.f, l_1* e.y, l_1* e.y* e.y, l_3* e.y* e.y* e.y});
 				}
