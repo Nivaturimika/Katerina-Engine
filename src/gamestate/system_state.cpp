@@ -3415,8 +3415,6 @@ namespace sys {
 		sys::repopulate_modifier_effects(*this);
 		military::restore_unsaved_values(*this);
 		nations::restore_unsaved_values(*this);
-		nations::cleanup_dead_gps(*this);
-		nations::restore_sphere_values(*this);
 
 		pop_demographics::regenerate_is_primary_or_accepted(*this);
 		nations::update_administrative_efficiency(*this);

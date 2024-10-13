@@ -196,6 +196,16 @@ namespace nations {
 			auto treasury = state.world.nation_get_stockpiles(ids, economy::money);
 			state.world.nation_set_last_treasury(ids, treasury);
 		});
+
+		cleanup_dead_gps(state);
+		state.world.for_each_gp_relationship([&](dcon::gp_relationship_id rel) {
+			if((influence::level_mask & state.world.gp_relationship_get_status(rel)) == influence::level_in_sphere) {
+				auto t = state.world.gp_relationship_get_influence_target(rel);
+				auto gp = state.world.gp_relationship_get_great_power(rel);
+				state.world.nation_set_in_sphere_of(t, gp);
+			}
+		});
+
 		restore_cached_values(state);
 	}
 
@@ -3167,7 +3177,9 @@ namespace nations {
 	void cleanup_dead_gps(sys::state& state) {
 		// delete gp rels of non-gps
 		for(auto n : state.world.in_nation) {
-			if(!n.get_is_great_power()) {
+			if(n.get_owned_province_count() > 0) {
+				//existing
+			} else {
 				auto rels = n.get_gp_relationship_as_great_power();
 				while(rels.begin() != rels.end()) {
 					auto rel = *(rels.begin());
@@ -3179,14 +3191,4 @@ namespace nations {
 			}
 		}
 	}
-
-	/*	The `in_sphre_of` property is unsaved, so we restore it by querying the appropriate gp relationship object */
-	void restore_sphere_values(sys::state& state) {
-		for(const auto rel : state.world.in_gp_relationship) {
-			if((rel.get_status() & influence::level_mask) == influence::level_in_sphere) {
-				rel.get_influence_target().set_in_sphere_of(rel.get_great_power());
-			}
-		}
-	}
-
 } // namespace nations
