@@ -3176,6 +3176,14 @@ namespace nations {
 					}
 					state.world.delete_gp_relationship(rel);
 				}
+			} else {
+				auto rels = n.get_gp_relationship_as_great_power();
+				while(rels.begin() != rels.end()) {
+					auto rel = *(rels.begin());
+					if((rel.get_status() & influence::level_mask) == influence::level_in_sphere) {
+						rel.get_influence_target().set_in_sphere_of(rel.get_great_power());
+					}
+				}
 			}
 		}
 	}
