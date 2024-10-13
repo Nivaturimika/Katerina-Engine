@@ -317,9 +317,9 @@ namespace economy {
 		state.world.for_each_pop([&](dcon::pop_id p) {
 			auto fp = fatten(state.world, p);
 			fp.set_life_needs_satisfaction(1.0f);
-			fp.set_everyday_needs_satisfaction(1.0f);
-			fp.set_luxury_needs_satisfaction(1.0f);
-			fp.set_savings(fp.get_size() / 1000000.f);
+			fp.set_everyday_needs_satisfaction(0.75f);
+			fp.set_luxury_needs_satisfaction(0.25f);
+			fp.set_savings(fp.get_size() / 10000.f);
 		});
 
 		state.world.for_each_factory([&](dcon::factory_id f) {
@@ -353,6 +353,7 @@ namespace economy {
 			fn.set_naval_spending(int8_t(100));
 			fn.set_construction_spending(int8_t(100));
 			fn.set_overseas_spending(int8_t(100));
+			fn.set_stockpiles(economy::money, std::max(fn.get_non_colonial_population() / 100.f, 3000.f));
 
 			fn.set_poor_tax(int8_t(50));
 			fn.set_middle_tax(int8_t(50));
@@ -1011,16 +1012,18 @@ namespace economy {
 				});
 				float last_t_production = state.world.commodity_get_last_total_production(cid);
 				float average = 0.0f;
-				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.0f) / (base_life + base_everyday + base_luxury);
-				if(which_type < 2.0f) {
-					average = last_t_production;
-				}
-				else if(which_type >= 2.0f && which_type <= 2.5f) {
-					average = last_t_production * 0.75f;
-				}
-				else {
-					average = total_r_demand;
-				}
+				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.5f) / (base_life + base_everyday + base_luxury);
+				average = last_t_production * std::max((1.0f - (which_type < 2.0f ? which_type * 0.125f : which_type * 0.4f)), 0.0f)
+					+ total_r_demand * std::max(((5.5f-which_type)*1.5f),0.0f) * (which_type >= 2.5f ? 1.0f : 0.0f);
+				//if(which_type < 2.0f) {
+				//	average = last_t_production;
+				//}
+				//else if(which_type >= 2.0f && which_type <= 3.0f) {
+				//	average = last_t_production * 0.75f;
+				//}
+				//else {
+				//	average = total_r_demand;
+				//}
 
 				float limitation = std::min(std::max(average, 1.0f) /
 					std::max(total_r_demand, 1.0f), 1.0f);
