@@ -4087,6 +4087,7 @@ namespace effect {
 		auto l = fatten(ws.world, ws.world.create_leader());
 		l.set_since(ws.current_date);
 		l.set_is_admiral(false);
+		l.set_auto_assign(true);
 		l.set_background(trigger::payload(tval[4]).lead_id);
 		l.set_personality(trigger::payload(tval[3]).lead_id);
 		l.set_name(dcon::unit_name_id(dcon::unit_name_id::value_base_t(trigger::read_int32_t_from_payload(tval + 1))));
@@ -4097,6 +4098,7 @@ namespace effect {
 		auto l = fatten(ws.world, ws.world.create_leader());
 		l.set_since(ws.current_date);
 		l.set_is_admiral(true);
+		l.set_auto_assign(true);
 		l.set_background(trigger::payload(tval[4]).lead_id);
 		l.set_personality(trigger::payload(tval[3]).lead_id);
 		l.set_name(dcon::unit_name_id(dcon::unit_name_id::value_base_t(trigger::read_int32_t_from_payload(tval + 1))));

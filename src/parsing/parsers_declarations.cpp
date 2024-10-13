@@ -2376,6 +2376,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			l_id.set_since(value.date_);
 			l_id.set_name(value.name_);
 			l_id.set_is_admiral(false);
+			l_id.set_auto_assign(true);
 			context.outer_context.state.world.force_create_leader_loyalty(context.nation_for, l_id);
 			context.outer_context.state.world.force_create_army_leadership(context.id, l_id);
 		} else {
@@ -2405,6 +2406,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			l_id.set_since(value.date_);
 			l_id.set_name(value.name_);
 			l_id.set_is_admiral(false);
+			l_id.set_auto_assign(true);
 			context.outer_context.state.world.force_create_leader_loyalty(context.nation_for, l_id);
 			context.outer_context.state.world.force_create_navy_leadership(context.id, l_id);
 		} else {
@@ -2562,6 +2564,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			l_id.set_since(value.date_);
 			l_id.set_name(value.name_);
 			l_id.set_is_admiral(false);
+			l_id.set_auto_assign(true);
 			context.outer_context.state.world.force_create_leader_loyalty(context.nation_for, l_id);
 		} else {
 			auto l_id = fatten(context.outer_context.state.world, context.outer_context.state.world.create_leader());
@@ -2571,6 +2574,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			l_id.set_since(value.date_);
 			l_id.set_name(value.name_);
 			l_id.set_is_admiral(true);
+			l_id.set_auto_assign(true);
 			context.outer_context.state.world.force_create_leader_loyalty(context.nation_for, l_id);
 		}
 	}
