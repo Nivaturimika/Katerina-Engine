@@ -3444,17 +3444,28 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 	void mod_file::add_to_file_system(simple_fs::file_system& fs){
 		// If there isn't any path then we aren't required to do anything
 		if(path_.empty())
-		return;
+			return;
 
 		// Add root of mod_path
-		for(auto replace_path : replace_paths) {
-			native_string path_block = simple_fs::list_roots(fs)[0];
-			path_block += NATIVE_DIR_SEPARATOR;
-			path_block += simple_fs::correct_slashes(text::utf8_to_native(replace_path));
-			if(path_block.back() != NATIVE_DIR_SEPARATOR)
-			path_block += NATIVE_DIR_SEPARATOR;
-
-			simple_fs::add_ignore_path(fs, path_block);
+		for(auto const s : replace_paths) {
+			auto const replace_path = simple_fs::correct_slashes(text::utf8_to_native(s));
+			if(replace_path == NATIVE("history")) {
+				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\countries\\"));
+				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\diplomacy\\"));
+				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\provinces\\"));
+				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\units\\"));
+				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\wars\\"));
+			} else if(replace_path == NATIVE("history\\pops")) {
+				//no
+			} else {
+				auto path_block = simple_fs::list_roots(fs)[0];
+				path_block += NATIVE_DIR_SEPARATOR;
+				path_block += replace_path;
+				if(path_block.back() != NATIVE_DIR_SEPARATOR) {
+					path_block += NATIVE_DIR_SEPARATOR;
+				}
+				simple_fs::add_ignore_path(fs, path_block);
+			}
 		}
 
 		native_string mod_path = simple_fs::list_roots(fs)[0];
