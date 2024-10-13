@@ -486,12 +486,10 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			err.accumulated_warnings += "Pop with invalid size " + std::to_string(float(def.size)) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			return;
 		}
-		auto final_cul_id = def.cul_id;
 		if(!def.cul_id) {
 			err.accumulated_warnings += "Pop with no culture (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			return;
 		}
-		auto final_rel_id = def.rel_id;
 		if(!def.rel_id) {
 			err.accumulated_warnings += "Pop with no religion (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			return;
@@ -505,16 +503,17 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 
 		for(auto pops_by_location : context.outer_context.state.world.province_get_pop_location(context.id)) {
 			auto pop_id = pops_by_location.get_pop();
-			if(pop_id.get_culture() == final_cul_id && pop_id.get_poptype() == ptype && pop_id.get_religion() == final_rel_id) {
-				pop_id.get_size() = float(def.size);
-				pop_id.set_militancy(final_militancy);
+			if(pop_id.get_culture() == def.cul_id && pop_id.get_poptype() == ptype && pop_id.get_religion() == def.rel_id) {
+				float frac = pop_id.get_size() > 0.f ? (pop_id.get_size() + float(def.size)) / pop_id.get_size() : 0.f;
+				pop_id.set_size(pop_id.get_size() + float(def.size));
+				pop_id.set_militancy(final_militancy * (1.f - frac) + pop_id.get_militancy() * frac); //lerp of two values
 				return; // done with this pop
 			}
 		}
 		// no existing pop matched -- make a new pop
 		auto new_pop = fatten(context.outer_context.state.world, context.outer_context.state.world.create_pop());
-		new_pop.set_culture(final_cul_id);
-		new_pop.set_religion(final_rel_id);
+		new_pop.set_culture(def.cul_id);
+		new_pop.set_religion(def.rel_id);
 		new_pop.set_size(float(def.size));
 		new_pop.set_poptype(ptype);
 		new_pop.set_militancy(final_militancy);
