@@ -453,7 +453,7 @@ namespace window {
 		game_state.on_create();
 		change_cursor(game_state, cursor_type::normal);
 
-		PostMessage(game_state.win_ptr->hwnd, WM_SIZE, SIZE_MAXIMIZED, LPARAM(game_state.x_size) | LPARAM(game_state.y_size << 16));
+		PostMessage(game_state.win_ptr->hwnd, WM_SIZE, SIZE_MAXIMIZED, LPARAM(game_state.x_size) | (LPARAM(game_state.y_size) << 16));
 		// pump message loop
 		MSG msg;
 		while(true) {
