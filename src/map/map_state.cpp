@@ -530,7 +530,7 @@ namespace map {
 				if(state.user_settings.map_label == sys::map_label_mode::quadratic) {
 					min_amount = 3;
 				}
-				size_t num_of_clusters = std::max(min_amount, (size_t)(points.size() / 40));
+				size_t num_of_clusters = std::max(min_amount, size_t(points.size() / 40));
 				size_t neighbours_requirement = std::clamp(int(std::log(num_of_clusters + 1)), 1, 3);
 				if(points.size() < num_of_clusters) {
 					num_of_clusters = points.size();
@@ -588,7 +588,6 @@ namespace map {
 					}
 				}
 
-
 				if(good_centroids.size() <= 1) {
 					good_centroids.clear();
 					final_points.clear();
@@ -615,8 +614,10 @@ namespace map {
 
 					bool is_good = false;
 					for(size_t i = 0; i < good_centroids.size(); i++) {
-						if(closest == good_centroids[i])
+						if(closest == good_centroids[i]) {
 							is_good = true;
+							break;
+						}
 					}
 
 					if(is_good) {
@@ -627,29 +628,22 @@ namespace map {
 				points = good_points;
 
 				//initial center:
-				glm::vec2 center = sum_points / (float)(points.size());
-
+				glm::vec2 center = sum_points / float(points.size());
 				//calculate deviation
-				float total_sum = 0;
-
+				float total_sum = 0.f;
 				for(auto point : points) {
 					auto dif_v = point - center;
 					total_sum += dif_v.x * dif_v.x;
 				}
-
 				float mse = total_sum / points.size();
 				//ignore points beyond 3 std
-				float limit = mse * 3;
-
+				float limit = mse * 3.f;
 				//calculate radius
-				//reports::write_debug("\n");
-				//reports::write_debug("\n");
 				float right = 0.f;
 				float left = 0.f;
 				float top = 0.f;
 				float bottom = 0.f;
 				for(auto point : points) {
-					//reports::write_debug((std::to_string(point.x) + ", " + std::to_string(point.y) + ", \n").c_str());
 					glm::vec2 current = point - center;
 					if((current.x > right) && (current.x * current.x < limit)) {
 						right = current.x;
@@ -664,7 +658,7 @@ namespace map {
 						bottom = current.y;
 					}
 				}
-
+				points = final_points;
 				std::array<glm::vec2, 5> key_provs{
 					center, //capital
 					center + glm::vec2(left, 0.f), //min x
@@ -675,11 +669,8 @@ namespace map {
 				glm::vec2 map_size{ float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y) };
 				glm::vec2 basis{ key_provs[1].x, key_provs[2].y };
 				glm::vec2 ratio{ key_provs[3].x - key_provs[1].x, key_provs[4].y - key_provs[2].y };
-
 				if(ratio.x < 0.001f || ratio.y < 0.001f)
 					continue;
-
-				points = final_points;
 
 				//regularisation parameters
 				float lambda = 0.00001f;

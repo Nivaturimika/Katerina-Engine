@@ -3004,8 +3004,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 	}
 
 	void country_history_file::decision(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
-	auto value_key = context.outer_context.state.lookup_key(std::string{ value } + "_title");
-
+		auto value_key = context.outer_context.state.lookup_key(std::string{ value } + "_title");
 		if(!value_key) {
 			err.accumulated_errors += "no decision named " + std::string(value) + " found  (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			return;
@@ -3014,7 +3013,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		for(auto d : context.outer_context.state.world.in_decision) {
 			auto name = d.get_name();
 			if(name == value_key) {
-				context.pending_decisions.emplace_back(context.holder_id, d);
+				context.pending_history_decisions.emplace_back(context.holder_id, d);
 				return;
 			}
 		}

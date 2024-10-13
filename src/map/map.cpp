@@ -2218,13 +2218,11 @@ namespace map {
 				font_size_index = 5.f * std::round(std::min(45.f, font_size_index) / 5.f);
 			}
 			size = glm::pow(glm::golden_ratio<float>(), font_size_index / 5.f);
-
 			if(size < 15.f) {
 				continue;
 			}
 
 			auto real_text_size = size / (size_x * 2.0f);
-
 			float letter_spacing_map = std::clamp(0.5f * (curve_length / text_length - size) / 2.f, 0.f, size * 2.f);
 			if(state.world.locale_get_prevent_letterspace(state.font_collection.get_current_locale())) {
 				letter_spacing_map = 0.f;

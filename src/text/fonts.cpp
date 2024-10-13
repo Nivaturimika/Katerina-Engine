@@ -553,7 +553,6 @@ namespace text {
 			gso.texture_slot = first_free_slot;
 			GLuint texid = 0;
 			if((first_free_slot & 63) == 0) {
-				GLuint new_text = 0;
 				glGenTextures(1, &texid);
 				glBindTexture(GL_TEXTURE_2D, texid);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64 * 8, 64 * 8, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);

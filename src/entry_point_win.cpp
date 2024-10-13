@@ -237,198 +237,131 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		simple_fs::identify_global_system_properties(); // -- globals startup
 
 		network::port_forwarder forwarding_apparatus;
-		if(num_params < 2) {
-			add_root(game_state.common_fs, NATIVE(".")); // for the moment this lets us find the shader files
-			if(!sys::try_read_scenario_and_save_file(game_state, NATIVE("development_test_file.bin"))) {
-				// scenario making functions
-				parsers::error_handler err{ "" };
-				simple_fs::file_system fs_root;
-				simple_fs::add_root(fs_root, NATIVE("."));
-				auto root = get_root(fs_root);
-				auto common = open_directory(root, NATIVE("common"));
-				parsers::bookmark_context bookmark_context;
-				if(auto f = open_file(common, NATIVE("bookmarks.txt")); f) {
-					auto bookmark_content = simple_fs::view_contents(*f);
-					err.file_name = "bookmarks.txt";
-					parsers::token_generator gen(bookmark_content.data, bookmark_content.data + bookmark_content.file_size);
-					parsers::parse_bookmark_file(gen, err, bookmark_context);
-					assert(!bookmark_context.bookmark_dates.empty());
-				} else {
-					err.accumulated_errors += "File common/bookmarks.txt could not be opened\n";
-				}
-				auto to_hex = [](uint64_t v) {
-					native_string ret;
-					constexpr native_char digits[] = NATIVE("0123456789ABCDEF");
-					do {
-						ret += digits[v & 0x0F];
-						v = v >> 4;
-					} while(v != 0);
-					return ret;
-				};
-				sys::checksum_key scenario_key;
-				for(uint32_t date_index = 0; date_index < uint32_t(bookmark_context.bookmark_dates.size()); date_index++) {
-					err.accumulated_errors.clear();
-					err.accumulated_warnings.clear();
-					//
-					auto inner_game_state = std::make_unique<sys::state>();
-					simple_fs::add_root(inner_game_state->common_fs, NATIVE("."));
-					inner_game_state->load_scenario_data(err, bookmark_context.bookmark_dates[date_index].date_);
-					if(err.fatal)
-						break;
-					if(date_index == 0) {
-						auto sdir = simple_fs::get_or_create_scenario_directory();
-						int32_t append = 0;
-						auto time_stamp = uint64_t(std::time(0));
-						auto selected_scenario_file = native_string(NATIVE("development_test_file.bin"));
-						sys::write_scenario_file(*inner_game_state, selected_scenario_file, 0);
-						if(auto of = simple_fs::open_file(sdir, selected_scenario_file); of) {
-							auto content = view_contents(*of);
-							auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-						}
-						scenario_key = inner_game_state->scenario_checksum;
-					} else {
-						inner_game_state->scenario_checksum = scenario_key;
-						sys::write_save_file(*inner_game_state, sys::save_type::bookmark, bookmark_context.bookmark_dates[date_index].name_);
-					}
-				}
-				if(!err.accumulated_errors.empty()) {
-					auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
-					auto pdir = simple_fs::get_or_create_settings_directory();
-					simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
-					auto fname = simple_fs::get_full_name(pdir) + NATIVE("\\scenario_errors.txt");
-				}
-				if(!sys::try_read_scenario_and_save_file(game_state, NATIVE("development_test_file.bin"))) {
-					return 0;
-				}
-			}
-			game_state.fill_unsaved_data();
-		} else {
-			bool loaded_scenario = false;
-			bool validate_only = false;
-			bool scenario_autofind = false;
+		bool loaded_scenario = false;
+		bool validate_only = false;
+		bool scenario_autofind = true;
 
-			std::vector<parsers::mod_file> mod_list;
-			simple_fs::file_system fs_root;
-			simple_fs::add_root(fs_root, NATIVE("."));
+		std::vector<parsers::mod_file> mod_list;
+		simple_fs::file_system fs_root;
+		simple_fs::add_root(fs_root, NATIVE("."));
 
-			native_string opt_fs_path;
-			for(int i = 1; i < num_params; ++i) {
-				if(native_string(parsed_cmd[i]) == NATIVE("-host")) {
-					forwarding_apparatus.start_forwarding();
-					game_state.network_mode = sys::network_mode_type::host;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-join")) {
-					game_state.network_mode = sys::network_mode_type::client;
-					game_state.network_state.ip_address = "127.0.0.1";
-					if(i + 1 < num_params) {
-						game_state.network_state.ip_address = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-name")) {
-					if(i + 1 < num_params) {
-						std::string nickname = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-password")) {
-					if(i + 1 < num_params) {
-						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
-						std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-v6")) {
-					game_state.network_state.as_v6 = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-v4")) {
-					game_state.network_state.as_v6 = false;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-headless")) {
-					headless = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
-					headless_repeat = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-gamedir")) {
-					if(i + 1 < num_params) {
-						auto path = native_string(parsed_cmd[i + 1]);
-						simple_fs::set_steam_path(path);
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
-					if(i + 1 < num_params) {
-						auto root = get_root(fs_root);
-						auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
-						parsers::error_handler err("");
-						auto of = simple_fs::open_file(mod_dir, native_string(parsed_cmd[i + 1]));
-						if(of) {
-							auto content = view_contents(*of);
-							parsers::token_generator gen(content.data, content.data + content.file_size);
-							mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
-						}
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-scenario")) {
-					if(i + 1 < num_params) {
-						auto str = parsed_cmd[i + 1];
-						if(sys::try_read_scenario_and_save_file(game_state, parsed_cmd[i + 1])) {
-							game_state.fill_unsaved_data();
-							loaded_scenario = true;
-						} else {
-							auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
-							window::emit_error_message(msg, true);
-						}
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-autofind")) {
-					scenario_autofind = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
-					if(i + 1 < num_params) {
-						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						headless_speed = std::atoi(str.c_str());
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-path")) {
-					if(i + 1 < num_params) {
-						opt_fs_path = native_string(parsed_cmd[i + 1]);
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-validate")) {
-					validate_only = true;
+		native_string opt_fs_path;
+		for(int i = 1; i < num_params; ++i) {
+			if(native_string(parsed_cmd[i]) == NATIVE("-host")) {
+				forwarding_apparatus.start_forwarding();
+				game_state.network_mode = sys::network_mode_type::host;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-join")) {
+				game_state.network_mode = sys::network_mode_type::client;
+				game_state.network_state.ip_address = "127.0.0.1";
+				if(i + 1 < num_params) {
+					game_state.network_state.ip_address = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					i++;
 				}
-			}
-			if(!loaded_scenario) {
-				// if the optional fs path is defined use that one, otherwise infer from mod list
-				auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
-				reports::write_debug(("Produced scenario path: " + text::native_to_utf8(path) + "\n").c_str());
-				reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
-				if(scenario_autofind) { //find scenario
-					native_string selected_scenario_file = find_matching_scenario(path);
-					reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
-					if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
-						game_state.fill_unsaved_data();
-						loaded_scenario = true;
-					}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-name")) {
+				if(i + 1 < num_params) {
+					std::string nickname = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
+					i++;
 				}
-				if(!loaded_scenario) { //create scenario if we couldn't find it
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-password")) {
+				if(i + 1 < num_params) {
+					auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
+					std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-v6")) {
+				game_state.network_state.as_v6 = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-v4")) {
+				game_state.network_state.as_v6 = false;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-headless")) {
+				headless = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
+				headless_repeat = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-gamedir")) {
+				if(i + 1 < num_params) {
+					auto path = native_string(parsed_cmd[i + 1]);
+					simple_fs::set_steam_path(path);
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
+				if(i + 1 < num_params) {
+					auto root = get_root(fs_root);
+					auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
 					parsers::error_handler err("");
-					native_string selected_scenario_file = make_scenario(fs_root, err, path);
-					if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
-						auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
-						auto pdir = simple_fs::get_or_create_settings_directory();
-						simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
-						std::printf("%s", assembled_file.c_str());
-						if(validate_only) {
-							if(!err.accumulated_errors.empty()) {
-								return EXIT_FAILURE;
-							}
-							return EXIT_SUCCESS;
-						}
+					auto of = simple_fs::open_file(mod_dir, native_string(parsed_cmd[i + 1]));
+					if(of) {
+						auto content = view_contents(*of);
+						parsers::token_generator gen(content.data, content.data + content.file_size);
+						mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
 					}
-					if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-scenario")) {
+				if(i + 1 < num_params) {
+					auto str = parsed_cmd[i + 1];
+					if(sys::try_read_scenario_and_save_file(game_state, parsed_cmd[i + 1])) {
 						game_state.fill_unsaved_data();
 						loaded_scenario = true;
 					} else {
-						auto msg = std::string("Scenario file ") + text::native_to_utf8(selected_scenario_file) + " could not be read";
+						auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
 						window::emit_error_message(msg, true);
 					}
 				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-autofind")) {
+				scenario_autofind = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
+				if(i + 1 < num_params) {
+					auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					headless_speed = std::atoi(str.c_str());
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-path")) {
+				if(i + 1 < num_params) {
+					opt_fs_path = native_string(parsed_cmd[i + 1]);
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-validate")) {
+				validate_only = true;
 			}
-			network::init(game_state);
 		}
+		if(!loaded_scenario) {
+			// if the optional fs path is defined use that one, otherwise infer from mod list
+			auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
+			reports::write_debug(("Produced scenario path: " + text::native_to_utf8(path) + "\n").c_str());
+			reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
+			if(scenario_autofind) { //find scenario
+				native_string selected_scenario_file = find_matching_scenario(path);
+				reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
+				if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+					game_state.fill_unsaved_data();
+					loaded_scenario = true;
+				}
+			}
+			if(!loaded_scenario) { //create scenario if we couldn't find it
+				parsers::error_handler err("");
+				native_string selected_scenario_file = make_scenario(fs_root, err, path);
+				if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
+					auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
+					auto pdir = simple_fs::get_or_create_settings_directory();
+					simple_fs::write_file(pdir, NATIVE("scenario_errors.txt"), assembled_file.data(), uint32_t(assembled_file.length()));
+					std::printf("%s", assembled_file.c_str());
+					if(validate_only) {
+						if(!err.accumulated_errors.empty()) {
+							return EXIT_FAILURE;
+						}
+						return EXIT_SUCCESS;
+					}
+				}
+				if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+					game_state.fill_unsaved_data();
+					loaded_scenario = true;
+				} else {
+					auto msg = std::string("Scenario file ") + text::native_to_utf8(selected_scenario_file) + " could not be read";
+					window::emit_error_message(msg, true);
+				}
+			}
+		}
+		network::init(game_state);
 		LocalFree(parsed_cmd);
 
 		// scenario loading functions (would have to run these even when scenario is pre-built)

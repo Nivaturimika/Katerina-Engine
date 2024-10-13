@@ -38,17 +38,15 @@ namespace culture {
 
 	void set_default_issue_and_reform_options(sys::state& state) {
 		state.world.nation_resize_issues(state.world.issue_size());
-
 		state.world.for_each_issue([&](dcon::issue_id i) {
 			auto def_option = state.world.issue_get_options(i)[0];
-		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_issues(ids, i, def_option); });
+			state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_issues(ids, i, def_option); });
 		});
 
 		state.world.nation_resize_reforms(state.world.reform_size());
-
 		state.world.for_each_reform([&](dcon::reform_id i) {
 			auto def_option = state.world.reform_get_options(i)[0];
-		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_reforms(ids, i, def_option); });
+			state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_reforms(ids, i, def_option); });
 		});
 	}
 

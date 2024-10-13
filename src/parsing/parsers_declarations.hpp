@@ -444,6 +444,7 @@ namespace parsers {
 		std::optional<simple_fs::file> triggered_modifiers_file;
 		std::optional<simple_fs::file> rebel_types_file;
 		std::vector<simple_fs::file> tech_and_invention_files;
+		std::vector<std::pair<dcon::nation_id, dcon::decision_id>> pending_history_decisions;
 
 		std::vector<dcon::province_id> special_impassible;
 		ankerl::unordered_dense::map<int32_t, std::string> map_of_oob_files_per_nation;
@@ -2593,7 +2594,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		scenario_building_context& outer_context;
 		dcon::national_identity_id nat_ident;
 		dcon::nation_id holder_id;
-		std::vector<std::pair<dcon::nation_id, dcon::decision_id>>& pending_decisions;
+		std::vector<std::pair<dcon::nation_id, dcon::decision_id>>& pending_history_decisions;
 		bool in_dated_block = false;
 	};
 

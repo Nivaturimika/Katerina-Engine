@@ -447,8 +447,11 @@ namespace map {
 			}
 		}
 
+		reports::write_debug("Loading province data\n");
 		load_province_data(context, provinces_image);
+		reports::write_debug("Loading terrain data\n");
 		load_terrain_data(context);
+		reports::write_debug("Loading border data\n");
 		load_border_data(context);
 
 		std::vector<uint8_t> river_data;
@@ -460,11 +463,11 @@ namespace map {
 			river_data.resize(size_x * size_y, uint8_t(255));
 
 			ogl::image river_image_data;
-			if(river_file)
-			river_image_data = ogl::load_stb_image(*river_file);
+			if(river_file) {
+				river_image_data = ogl::load_stb_image(*river_file);
+			}
 
 			auto terrain_resolution = internal_make_index_map();
-
 			if(river_image_data.size_x == int32_t(size_x) && river_image_data.size_y == int32_t(size_y)) {
 				for(uint32_t ty = 0; ty < size_y; ++ty) {
 					uint32_t y = size_y - ty - 1;
@@ -483,20 +486,24 @@ namespace map {
 			}
 		}
 
-
+		reports::write_debug("Loading river crossings\n");
 		load_river_crossings(context, river_data, glm::vec2(float(size_x), float(size_y)));
 
+		reports::write_debug("Creating curved river vertices\n");
 		create_curved_river_vertices(context, river_data, terrain_id_map);
 		{
+			reports::write_debug("Making coastal borders\n");
 			std::vector<bool> borders_visited;
 			borders_visited.resize(size_x * size_y * 2, false);
 			make_coastal_borders(context.state, borders_visited);
 		}
 		{
+			reports::write_debug("Making normal borders\n");
 			std::vector<bool> borders_visited;
 			borders_visited.resize(size_x * size_y * 2, false);
 			make_borders(context.state, borders_visited);
 		}
+		reports::write_debug("Finished loading map data\n");
 	}
 
 	// Called to load the terrain and province map data
