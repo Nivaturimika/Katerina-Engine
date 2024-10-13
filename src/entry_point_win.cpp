@@ -325,6 +325,11 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			}
 		}
 
+		// if the optional fs path is defined use that one, otherwise infer from mod list
+		auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
+		window::create_window(game_state, window::creation_parameters{ 1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen });
+
+		//
 		// Validator only mode
 		if(validate_only) {
 			parsers::error_handler err("");
@@ -340,11 +345,9 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 				return EXIT_SUCCESS;
 			}
 		}
-
+		//
 		// Normal mode (default)
 		if(!loaded_scenario) {
-			// if the optional fs path is defined use that one, otherwise infer from mod list
-			auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
 			reports::write_debug(("Produced scenario path: " + text::native_to_utf8(path) + "\n").c_str());
 			reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
 			if(scenario_autofind) { //find scenario
@@ -414,7 +417,6 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		} else {
 			std::thread update_thread([&]() { game_state.game_loop(); });
 			// entire game runs during this line
-			window::create_window(game_state, window::creation_parameters{ 1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen });
 			window::initialize_window(game_state);
 			game_state.quit_signaled.store(true, std::memory_order_release);
 			update_thread.join();

@@ -119,23 +119,36 @@ namespace window {
 		if(message == WM_CREATE) {
 			CREATESTRUCTW* cptr = (CREATESTRUCTW*)lParam;
 			sys::state* create_state = (sys::state*)(cptr->lpCreateParams);
-
 			create_state->win_ptr->hwnd = hwnd;
 			create_state->win_ptr->opengl_window_dc = GetDC(hwnd);
-
-			// setup opengl here
-			ogl::initialize_opengl(*create_state);
-
 			RECT crect{};
 			GetClientRect(hwnd, &crect);
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)create_state);
-
-			reports::write_debug("Finished window creation");
+			SetWindowLongPtrW(hwnd, GWLP_USERDATA, LONG_PTR(create_state));
 			return 0;
 		}
 
 		sys::state* state = (sys::state*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
 		if(!state || !(state->win_ptr)) {
+			return DefWindowProcW(hwnd, message, wParam, lParam);
+		}
+
+		if(state->open_gl.context == NULL) {
+			if(message == WM_SIZE) {
+				window::window_state t = window::window_state::normal;
+				if(wParam == SIZE_MAXIMIZED) {
+					t = window_state::maximized;
+				} else if(wParam == SIZE_MINIMIZED) {
+					t = window_state::minimized;
+				} else if(wParam == SIZE_RESTORED) {
+					t = window_state::normal;
+				} else {
+					return DefWindowProcW(hwnd, message, wParam, lParam);
+				}
+				//state->on_resize(LOWORD(lParam), HIWORD(lParam), t);
+				state->x_size = LOWORD(lParam);
+				state->y_size = HIWORD(lParam);
+				return 0;
+			}
 			return DefWindowProcW(hwnd, message, wParam, lParam);
 		}
 
@@ -150,8 +163,9 @@ namespace window {
 			PostQuitMessage(0);
 			return 0;
 		case WM_SETFOCUS:
-			if(state->win_ptr->in_fullscreen)
+			if(state->win_ptr->in_fullscreen) {
 				SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOREDRAW | SWP_NOSIZE | SWP_NOMOVE);
+			}
 			if(state->user_settings.mute_on_focus_lost) {
 				sound::resume_all(*state);
 			}
@@ -191,8 +205,9 @@ namespace window {
 			auto y = GET_Y_LPARAM(lParam);
 			state->on_mouse_move(x, y, get_current_modifiers());
 
-			if(wParam & MK_LBUTTON)
+			if(wParam & MK_LBUTTON) {
 				state->on_mouse_drag(x, y, get_current_modifiers());
+			}
 
 			state->mouse_x_position = x;
 			state->mouse_y_position = y;
@@ -237,7 +252,6 @@ namespace window {
 		case WM_SIZE:
 		{
 			window::window_state t = window::window_state::normal;
-
 			if(wParam == SIZE_MAXIMIZED) {
 				t = window_state::maximized;
 			} else if(wParam == SIZE_MINIMIZED) {
@@ -248,13 +262,11 @@ namespace window {
 				// other
 				break;
 			}
-
 			state->on_resize(LOWORD(lParam), HIWORD(lParam), t);
 			state->x_size = LOWORD(lParam);
 			state->y_size = HIWORD(lParam);
-
 			// TODO MAP CAMERA HERE CODE HERE
-		// state->map_camera = map::flat_camera(glm::vec2{ state->x_size, state->y_size }, glm::vec2{
+			// state->map_camera = map::flat_camera(glm::vec2{ state->x_size, state->y_size }, glm::vec2{
 			// state->map_provinces_texture.size_x, state->map_provinces_texture.size_y });
 			return 0;
 		}
@@ -333,6 +345,7 @@ namespace window {
 	}
 
 	void create_window(sys::state& game_state, creation_parameters const& params) {
+		reports::write_debug("Creating window\n");
 		game_state.win_ptr = std::make_unique<window_data_impl>();
 		game_state.win_ptr->creation_x_size = params.size_x;
 		game_state.win_ptr->creation_y_size = params.size_y;
@@ -428,6 +441,11 @@ namespace window {
 	}
 
 	void initialize_window(sys::state& game_state) {
+		reports::write_debug("Initializing window\n");
+
+		// setup opengl here
+		ogl::initialize_opengl(game_state);
+
 		sound::initialize_sound_system(game_state);
 		sound::start_music(game_state, game_state.user_settings.master_volume * game_state.user_settings.music_volume);
 
@@ -435,8 +453,9 @@ namespace window {
 		game_state.on_create();
 		change_cursor(game_state, cursor_type::normal);
 
-		MSG msg;
+		PostMessage(game_state.win_ptr->hwnd, WM_SIZE, SIZE_MAXIMIZED, LPARAM(game_state.x_size) | LPARAM(game_state.y_size << 16));
 		// pump message loop
+		MSG msg;
 		while(true) {
 			if(PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
 				if(msg.message == WM_QUIT) {
