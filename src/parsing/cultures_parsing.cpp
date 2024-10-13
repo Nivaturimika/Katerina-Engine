@@ -293,6 +293,8 @@ namespace parsers {
 			cat = ::culture::tech_category::diplomacy;
 		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "flavor_tech")) {
 			cat = ::culture::tech_category::flavor;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "theory_tech")) {
+			cat = ::culture::tech_category::theory;
 		} else {
 			err.accumulated_errors += "Unknown technology category " + std::string(name) + " in file " + err.file_name + "\n";
 		}

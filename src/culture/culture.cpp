@@ -11,26 +11,28 @@ namespace culture {
 
 	std::string get_tech_category_name(tech_category t) {
 		switch(t) {
-			case culture::tech_category::army:
+		case culture::tech_category::army:
 			return "army_tech";
-			case culture::tech_category::navy:
+		case culture::tech_category::navy:
 			return "navy_tech";
-			case culture::tech_category::commerce:
+		case culture::tech_category::commerce:
 			return "commerce_tech";
-			case culture::tech_category::culture:
+		case culture::tech_category::culture:
 			return "culture_tech";
-			case culture::tech_category::industry:
+		case culture::tech_category::industry:
 			return "industry_tech";
 			//non-vanilla
-			case culture::tech_category::military_theory:
+		case culture::tech_category::military_theory:
 			return "military_theory_tech";
-			case culture::tech_category::population:
+		case culture::tech_category::population:
 			return "population_tech";
-			case culture::tech_category::diplomacy:
+		case culture::tech_category::diplomacy:
 			return "diplomacy_tech";
-			case culture::tech_category::flavor:
+		case culture::tech_category::flavor:
 			return "flavor_tech";
-			default:
+		case culture::tech_category::theory:
+			return "theory_tech";
+		default:
 			break;
 		}
 		return "none";
@@ -841,26 +843,28 @@ namespace culture {
 		auto category = state.culture_definitions.tech_folders[folder].category;
 		auto research_mod = [&]() {
 			switch(category) {
-				case tech_category::army:
+			case tech_category::army:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::army_tech_research_bonus) + 1.0f;
-				case tech_category::navy:
+			case tech_category::navy:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::navy_tech_research_bonus) + 1.0f;
-				case tech_category::commerce:
+			case tech_category::commerce:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::commerce_tech_research_bonus) + 1.0f;
-				case tech_category::culture:
+			case tech_category::culture:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::culture_tech_research_bonus) + 1.0f;
-				case tech_category::industry:
+			case tech_category::industry:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::industry_tech_research_bonus) + 1.0f;
 				//non vanilla
-				case tech_category::military_theory:
+			case tech_category::military_theory:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::military_theory_tech_research_bonus) + 1.0f;
-				case tech_category::population:
+			case tech_category::population:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::population_tech_research_bonus) + 1.0f;
-				case tech_category::diplomacy:
+			case tech_category::diplomacy:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::diplomacy_tech_research_bonus) + 1.0f;
-				case tech_category::flavor:
+			case tech_category::flavor:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::flavor_tech_research_bonus) + 1.0f;
-				default:
+			case tech_category::theory:
+				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::theory_tech_research_bonus) + 1.0f;
+			default:
 				return 1.0f;
 			}
 		}();

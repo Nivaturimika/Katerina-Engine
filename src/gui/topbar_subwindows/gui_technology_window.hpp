@@ -40,34 +40,37 @@ namespace ui {
 				text::close_layout_box(contents, box);
 			});
 			switch(category) {
-				case culture::tech_category::army:
+			case culture::tech_category::army:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::army_tech_research_bonus, true);
 				break;
-				case culture::tech_category::commerce:
+			case culture::tech_category::commerce:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::commerce_tech_research_bonus, true);
 				break;
-				case culture::tech_category::culture:
+			case culture::tech_category::culture:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::culture_tech_research_bonus, true);
 				break;
-				case culture::tech_category::industry:
+			case culture::tech_category::industry:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::industry_tech_research_bonus, true);
 				break;
-				case culture::tech_category::navy:
+			case culture::tech_category::navy:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::navy_tech_research_bonus, true);
 				break;
-				case culture::tech_category::military_theory:
+			case culture::tech_category::military_theory:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::military_theory_tech_research_bonus, true);
 				break;
-				case culture::tech_category::population:
+			case culture::tech_category::population:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::population_tech_research_bonus, true);
 				break;
-				case culture::tech_category::diplomacy:
+			case culture::tech_category::diplomacy:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::diplomacy_tech_research_bonus, true);
 				break;
-				case culture::tech_category::flavor:
+			case culture::tech_category::flavor:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::flavor_tech_research_bonus, true);
 				break;
-				case culture::tech_category::unknown:
+			case culture::tech_category::theory:
+				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
+				break;
+			case culture::tech_category::unknown:
 				break;
 			}
 		}
@@ -588,35 +591,38 @@ namespace ui {
 			}
 
 			switch(category) {
-				case culture::tech_category::army:
+			case culture::tech_category::army:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::army_tech_research_bonus, true);
 				break;
-				case culture::tech_category::navy:
+			case culture::tech_category::navy:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::navy_tech_research_bonus, true);
 				break;
-				case culture::tech_category::commerce:
+			case culture::tech_category::commerce:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::commerce_tech_research_bonus, true);
 				break;
-				case culture::tech_category::culture:
+			case culture::tech_category::culture:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::culture_tech_research_bonus, true);
 				break;
-				case culture::tech_category::industry:
+			case culture::tech_category::industry:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::industry_tech_research_bonus, true);
 				break;
 				//non vanilla
-				case culture::tech_category::military_theory:
+			case culture::tech_category::military_theory:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::military_theory_tech_research_bonus, true);
 				break;
-				case culture::tech_category::population:
+			case culture::tech_category::population:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::population_tech_research_bonus, true);
 				break;
-				case culture::tech_category::diplomacy:
+			case culture::tech_category::diplomacy:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::diplomacy_tech_research_bonus, true);
 				break;
-				case culture::tech_category::flavor:
+			case culture::tech_category::flavor:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::flavor_tech_research_bonus, true);
 				break;
-				default:
+			case culture::tech_category::theory:
+				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
+				break;
+			default:
 				break;
 			}
 

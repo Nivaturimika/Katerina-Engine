@@ -2256,11 +2256,12 @@ namespace sys {
 					cat = culture::tech_category::population;
 				} else if(simple_fs::get_file_name(invf) == NATIVE("flavor_inventions.txt")) {
 					cat = culture::tech_category::flavor;
+				} else if(simple_fs::get_file_name(invf) == NATIVE("theory_inventions.txt")) {
+					cat = culture::tech_category::theory;
 				}
 
-			parsers::tech_group_context invention_context{ context, cat };
-				auto i_file = open_file(invf);
-				if(i_file) {
+				parsers::tech_group_context invention_context{ context, cat };
+				if(auto i_file = open_file(invf); i_file) {
 					auto content = view_contents(*i_file);
 					err.file_name = text::native_to_utf8(simple_fs::get_file_name(invf));
 					parsers::token_generator gen(content.data, content.data + content.file_size);

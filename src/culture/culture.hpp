@@ -131,16 +131,14 @@ namespace culture {
 		bool available_by_default = false;
 	};
 
-enum class tech_category : uint8_t { army, navy, commerce, culture, industry, military_theory, population, diplomacy, flavor, unknown };
-
+	enum class tech_category : uint8_t { army, navy, commerce, culture, industry, military_theory, population, diplomacy, flavor, theory, unknown };
 	std::string get_tech_category_name(tech_category t);
 
 	struct folder_info {
 		dcon::text_key name;
 		tech_category category = tech_category::army;
 	};
-
-enum class pop_strata : uint8_t { poor = 0, middle = 1, rich = 2 };
+	enum class pop_strata : uint8_t { poor = 0, middle = 1, rich = 2 };
 	enum class income_type : uint8_t {
 		none = 0,
 		administration = 1,
@@ -148,7 +146,7 @@ enum class pop_strata : uint8_t { poor = 0, middle = 1, rich = 2 };
 		education = 3,
 		reforms = 4,
 	};
-enum class issue_type : uint8_t { party = 0, political = 1, social = 2, military = 3, economic = 4 };
+	enum class issue_type : uint8_t { party = 0, political = 1, social = 2, military = 3, economic = 4 };
 	struct global_cultural_state {
 		std::vector<dcon::issue_id> party_issues;
 		std::vector<dcon::issue_id> political_issues;

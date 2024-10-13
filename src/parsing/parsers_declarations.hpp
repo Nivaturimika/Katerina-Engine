@@ -885,9 +885,10 @@ namespace parsers {
 		MOD_NAT_FUNCTION(diplomacy_tech_research_bonus)
 		MOD_NAT_FUNCTION(population_tech_research_bonus)
 		MOD_NAT_FUNCTION(flavor_tech_research_bonus)
+		MOD_NAT_FUNCTION(theory_tech_research_bonus)
 
 		template<typename T>
-	void finish(T& context) { }
+		void finish(T& context) { }
 
 		sys::provincial_modifier_definition const& peek_province_mod() const {
 			return constructed_definition_p;
