@@ -81,24 +81,28 @@ namespace map {
 			auto p = pc.get_province();
 			state.map_state.visible_provinces[province::to_map_id(p)] = true;
 			for(auto c : state.world.province_get_province_adjacency(p)) {
-				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
-				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+				auto p2 = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+				state.map_state.visible_provinces[province::to_map_id(p2)] = true;
 			}
 		}
 		for(auto ac : state.world.nation_get_army_control_as_controller(n)) {
 			auto p = ac.get_army().get_location_from_army_location();
 			state.map_state.visible_provinces[province::to_map_id(p)] = true;
-			for(auto c : state.world.province_get_province_adjacency(p)) {
-				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
-				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+			if(!ac.get_army().get_is_retreating() && !ac.get_army().get_black_flag()) {
+				for(auto c : state.world.province_get_province_adjacency(p)) {
+					auto p2 = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+					state.map_state.visible_provinces[province::to_map_id(p2)] = true;
+				}
 			}
 		}
 		for(auto nc : state.world.nation_get_navy_control_as_controller(n)) {
 			auto p = nc.get_navy().get_location_from_navy_location();
 			state.map_state.visible_provinces[province::to_map_id(p)] = true;
-			for(auto c : state.world.province_get_province_adjacency(p)) {
-				auto pc = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
-				state.map_state.visible_provinces[province::to_map_id(pc)] = true;
+			if(!nc.get_navy().get_is_retreating()) {
+				for(auto c : state.world.province_get_province_adjacency(p)) {
+					auto p2 = c.get_connected_provinces(0) == p ? c.get_connected_provinces(1) : c.get_connected_provinces(0);
+					state.map_state.visible_provinces[province::to_map_id(p2)] = true;
+				}
 			}
 		}
 	}
