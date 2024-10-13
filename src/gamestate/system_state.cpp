@@ -3187,8 +3187,6 @@ namespace sys {
 		nations::update_revanchism(*this);
 		fill_unsaved_data(); // we need this to run triggers
 
-		nations::cleanup_dead_gps(*this);
-
 		for(auto n : world.in_nation) {
 			auto g = n.get_government_type();
 			auto name = nations::int_to_tag(n.get_identity_from_identity_holder().get_identifying_int());
@@ -3252,6 +3250,7 @@ namespace sys {
 				world.nation_set_is_great_power(nations_by_rank[i], true);
 			}
 		}
+		nations::cleanup_dead_gps(*this);
 
 		// fix slaves in non-slave owning nations
 		for(auto p : world.in_province) {
