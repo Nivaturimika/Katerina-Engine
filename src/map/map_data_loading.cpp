@@ -472,19 +472,16 @@ namespace map {
 			if(river_image_data.size_x == int32_t(size_x) && river_image_data.size_y == int32_t(size_y)) {
 				for(uint32_t ty = 0; ty < size_y; ++ty) {
 					uint32_t y = size_y - ty - 1;
-
 					for(uint32_t x = 0; x < size_x; ++x) {
-
 						uint8_t* ptr = river_image_data.data + (x + size_x * y) * 4;
 						if(ptr[0] + ptr[2] < 128 * 2 && ptr[1] > 128 /* && terrain_id_map[x + size_x * ty] != uint8_t(255)*/)
-						river_data[ty * size_x + x] = 0; // source
-						else if(ptr[1] + ptr[2] < 128 * 2 && ptr[0] > 128 /* && terrain_id_map[x + size_x * ty] != uint8_t(255)*/ )
-						river_data[ty * size_x + x] = 1; // merge
+							river_data[ty * size_x + x] = 0; // source
+						else if(ptr[1] + ptr[2] < 128 * 2 && ptr[0] > 128 /* && terrain_id_map[x + size_x * ty] != uint8_t(255)*/)
+							river_data[ty * size_x + x] = 1; // merge
 						else if(ptr[0] + ptr[1] + ptr[2] < 128 * 3 /*&& terrain_id_map[x + size_x * ty] != uint8_t(255)*/)
-						river_data[ty * size_x + x] = 2;
+							river_data[ty * size_x + x] = 2;
 						else
-						river_data[ty * size_x + x] = 255;
-
+							river_data[ty * size_x + x] = 255;
 					}
 				}
 			}
@@ -510,6 +507,4 @@ namespace map {
 	void map_state::load_map_data(parsers::scenario_building_context& context) {
 		map_data.load_map_data(context);
 	}
-
-
 }

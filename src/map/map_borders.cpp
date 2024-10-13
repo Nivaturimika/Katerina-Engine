@@ -238,20 +238,12 @@ namespace map {
 		return river_data == 1;
 	}
 
-	uint16_t display_data::safe_get_province(glm::ivec2 pt) {
-		while(pt.x < 0) {
-			pt.x += int32_t(size_x);
-		}
-		while(pt.x >= int32_t(size_x)) {
-			pt.x -= int32_t(size_x);
-		}
-		if(pt.y < 0) {
-			pt.y = 0;
-		}
-		if(pt.y >= int32_t(size_y)) {
-			pt.y = int32_t(size_y - 1);
-		}
-		return province_id_map[pt.x + pt.y * size_x];
+	uint16_t display_data::safe_get_province(int32_t x, int32_t y) {
+		x %= int32_t(size_x);
+		x += int32_t(size_x);
+		x %= int32_t(size_x);
+		y = std::clamp(y, 0, int32_t(size_y - 1));
+		return province_id_map[x + y * size_x];
 	}
 
 	bool coastal_point(sys::state& state, uint16_t a, uint16_t b) {
@@ -268,31 +260,32 @@ namespace map {
 		std::vector<glm::vec2> points;
 
 		auto add_next = [&](int32_t i, int32_t j, bool& next_found) {
-			if(next_found)
+			if(next_found) {
 				return glm::ivec2(0, 0);
-			if(visited[i + j * dat.size_x])
+			}
+			if(visited[i + j * dat.size_x]) {
 				return glm::ivec2(0, 0);
+			}
+			uint16_t prov_ter = dat.safe_get_province(i, j / 2);
 			if(j % 2 == 0) {
-				if(order_indifferent_compare(prov_prim, prov_sec, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i - 1, j / 2)))) {
+				uint16_t prov_qua = dat.safe_get_province(i - 1, j / 2);
+				if(order_indifferent_compare(prov_prim, prov_sec, prov_ter, prov_qua)) {
 					visited[i + j * dat.size_x] = true;
-
 					points.push_back(glm::vec2(float(i), 0.5f + float(j) / 2.0f));
 					next_found = true;
 					return glm::ivec2(i, j);
 				}
 			} else {
-				if(order_indifferent_compare(prov_prim, prov_sec, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i, j / 2 + 1)))) {
+				uint16_t prov_qua = dat.safe_get_province(i, j / 2 + 1);
+				if(order_indifferent_compare(prov_prim, prov_sec, prov_ter, prov_qua)) {
 					visited[i + j * dat.size_x] = true;
-
 					points.push_back(glm::vec2(float(i) + 0.5f, 0.5f + float(j) / 2.0f));
 					next_found = true;
 					return glm::ivec2(i, j);
 				}
 			}
-
 			return glm::ivec2(0, 0);
-			};
-
+		};
 
 		points.push_back(glm::vec2(float(start_x) + (start_y % 2 == 0 ? 0.0f : 0.5f), 0.5f + float(start_y) / 2.0f));
 		visited[start_x + start_y * dat.size_x] = true;
@@ -305,9 +298,8 @@ namespace map {
 		do {
 			progress = false;
 			glm::ivec2 temp{ 0, 0 };
-
 			if(cur_y % 2 == 0) {
-				bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
+				bool left_is_s = dat.safe_get_province(cur_x - 1, cur_y / 2) == prov_sec;
 				if(left_is_s) {
 					temp += add_next(cur_x, cur_y + 1, progress);
 					temp += add_next(cur_x, cur_y + 2, progress);
@@ -318,7 +310,7 @@ namespace map {
 					temp += add_next(cur_x, cur_y - 1, progress);
 				}
 			} else {
-				bool top_is_s = dat.safe_get_province(glm::ivec2(cur_x, cur_y / 2)) == prov_sec;
+				bool top_is_s = dat.safe_get_province(cur_x, cur_y / 2) == prov_sec;
 				if(top_is_s) {
 					temp += add_next(cur_x, cur_y + 1, progress);
 					temp += add_next(cur_x - 1, cur_y, progress);
@@ -337,14 +329,14 @@ namespace map {
 
 		//terminal point
 		if(cur_y % 2 == 0) {
-			bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
+			bool left_is_s = dat.safe_get_province(cur_x - 1, cur_y / 2) == prov_sec;
 			if(left_is_s) {
 				points.push_back(glm::vec2(float(cur_x), 1.0f + float(cur_y) / 2.0f));
 			} else {
 				points.push_back(glm::vec2(float(cur_x), 0.0f + float(cur_y) / 2.0f));
 			}
 		} else {
-			bool top_is_s = dat.safe_get_province(glm::ivec2(cur_x, cur_y / 2)) == prov_sec;
+			bool top_is_s = dat.safe_get_province(cur_x, cur_y / 2) == prov_sec;
 			if(top_is_s) {
 				points.push_back(glm::vec2(float(cur_x), 0.5f + float(cur_y) / 2.0f));
 			} else {
@@ -361,9 +353,8 @@ namespace map {
 		do {
 			progress = false;
 			glm::ivec2 temp{ 0, 0 };
-
 			if(cur_y % 2 == 0) {
-				bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
+				bool left_is_s = dat.safe_get_province(cur_x - 1, cur_y / 2) == prov_sec;
 				if(!left_is_s) {
 					temp += add_next(cur_x, cur_y + 1, progress);
 					temp += add_next(cur_x, cur_y + 2, progress);
@@ -374,7 +365,7 @@ namespace map {
 					temp += add_next(cur_x, cur_y - 1, progress);
 				}
 			} else {
-				bool top_is_s = dat.safe_get_province(glm::ivec2(cur_x, cur_y / 2)) == prov_sec;
+				bool top_is_s = dat.safe_get_province(cur_x, cur_y / 2) == prov_sec;
 				if(!top_is_s) {
 					temp += add_next(cur_x, cur_y + 1, progress);
 					temp += add_next(cur_x - 1, cur_y, progress);
@@ -393,14 +384,14 @@ namespace map {
 
 		//terminal point
 		if(cur_y % 2 == 0) {
-			bool left_is_s = dat.safe_get_province(glm::ivec2(cur_x - 1, cur_y / 2)) == prov_sec;
+			bool left_is_s = dat.safe_get_province(cur_x - 1, cur_y / 2) == prov_sec;
 			if(!left_is_s) {
 				points.push_back(glm::vec2(float(cur_x), 1.0f + float(cur_y) / 2.0f));
 			} else {
 				points.push_back(glm::vec2(float(cur_x), 0.0f + float(cur_y) / 2.0f));
 			}
 		} else {
-			bool top_is_s = dat.safe_get_province(glm::ivec2(cur_x, cur_y / 2)) == prov_sec;
+			bool top_is_s = dat.safe_get_province(cur_x, cur_y / 2) == prov_sec;
 			if(!top_is_s) {
 				points.push_back(glm::vec2(float(cur_x), 0.5f + float(cur_y) / 2.0f));
 			} else {
@@ -486,8 +477,8 @@ namespace map {
 				{
 					bool was_visited = visited[i + (j * 2) * size_x];
 
-					auto prim = province::from_map_id(safe_get_province(glm::ivec2(i, j)));
-					auto sec = province::from_map_id(safe_get_province(glm::ivec2(i - 1, j)));
+					auto prim = province::from_map_id(safe_get_province(i, j));
+					auto sec = province::from_map_id(safe_get_province(i - 1, j));
 
 					if(!was_visited && prim != sec && prim && sec) {
 						auto adj = state.world.get_province_adjacency_by_province_pair(prim, sec);
@@ -511,8 +502,8 @@ namespace map {
 				// horizontals
 				if(j < int32_t(size_y) - 1) {
 					bool was_visited = visited[i + (j * 2 + 1) * size_x];
-					auto prim = province::from_map_id(safe_get_province(glm::ivec2(i, j)));
-					auto sec = province::from_map_id(safe_get_province(glm::ivec2(i, j + 1)));
+					auto prim = province::from_map_id(safe_get_province(i, j));
+					auto sec = province::from_map_id(safe_get_province(i, j + 1));
 
 					if(!was_visited && prim != sec && prim && sec) {
 						auto adj = state.world.get_province_adjacency_by_province_pair(prim, sec);
@@ -548,7 +539,7 @@ namespace map {
 			if(visited[i + j * dat.size_x])
 				return glm::ivec2(0, 0);
 			if(j % 2 == 0) {
-				if(coastal_point(state, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i - 1, j / 2)))) {
+				if(coastal_point(state, dat.safe_get_province(i, j / 2), dat.safe_get_province(i - 1, j / 2))) {
 					visited[i + j * dat.size_x] = true;
 
 					// test for colinearity
@@ -572,7 +563,7 @@ namespace map {
 					return glm::ivec2(i, j);
 				}
 			} else {
-				if(coastal_point(state, dat.safe_get_province(glm::ivec2(i, j / 2)), dat.safe_get_province(glm::ivec2(i, j / 2 + 1)))) {
+				if(coastal_point(state, dat.safe_get_province(i, j / 2), dat.safe_get_province(i, j / 2 + 1))) {
 					visited[i + j * dat.size_x] = true;
 
 					// test for colinearity
@@ -609,7 +600,8 @@ namespace map {
 			glm::ivec2 temp{ 0, 0 };
 
 			if(start_y % 2 == 0) {
-				bool left_is_sea = dat.safe_get_province(glm::ivec2(start_x - 1, start_y / 2)) == 0 || province::from_map_id(dat.safe_get_province(glm::ivec2(start_x - 1, start_y / 2))).index() >= state.province_definitions.first_sea_province.index();
+				bool left_is_sea = dat.safe_get_province(start_x - 1, start_y / 2) == 0
+					|| province::from_map_id(dat.safe_get_province(start_x - 1, start_y / 2)).index() >= state.province_definitions.first_sea_province.index();
 				if(left_is_sea) {
 					temp += add_next(start_x, start_y + 1, progress);
 					temp += add_next(start_x, start_y + 2, progress);
@@ -620,7 +612,8 @@ namespace map {
 					temp += add_next(start_x, start_y - 1, progress);
 				}
 			} else {
-				bool top_is_sea = dat.safe_get_province(glm::ivec2(start_x, start_y / 2)) == 0 || province::from_map_id(dat.safe_get_province(glm::ivec2(start_x, start_y / 2))).index() >= state.province_definitions.first_sea_province.index();
+				bool top_is_sea = dat.safe_get_province(start_x, start_y / 2) == 0
+					|| province::from_map_id(dat.safe_get_province(start_x, start_y / 2)).index() >= state.province_definitions.first_sea_province.index();
 				if(top_is_sea) {
 					temp += add_next(start_x, start_y + 1, progress);
 					temp += add_next(start_x - 1, start_y, progress);
@@ -729,7 +722,7 @@ namespace map {
 				// left verticals
 				{
 					bool was_visited = visited[i + (j * 2) * size_x];
-					if(!was_visited && coastal_point(state, safe_get_province(glm::ivec2(i, j)), safe_get_province(glm::ivec2(i - 1, j)))) {
+					if(!was_visited && coastal_point(state, safe_get_province(i, j), safe_get_province(i - 1, j))) {
 						auto res = make_coastal_loop(*this, state, visited, i, j * 2);
 						add_coastal_loop_vertices(*this, res);
 					}
@@ -738,7 +731,7 @@ namespace map {
 				// horizontals
 				if(j < int32_t(size_y) - 1) {
 					bool was_visited = visited[i + (j * 2 + 1) * size_x];
-					if(!was_visited && coastal_point(state, safe_get_province(glm::ivec2(i, j)), safe_get_province(glm::ivec2(i, j + 1)))) {
+					if(!was_visited && coastal_point(state, safe_get_province(i, j), safe_get_province(i, j + 1))) {
 						auto res = make_coastal_loop(*this, state, visited, i, j * 2 + 1);
 						add_coastal_loop_vertices(*this, res);
 					}
