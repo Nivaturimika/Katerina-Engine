@@ -265,11 +265,14 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		game_state.win_ptr->creation_x_size = params.size_x;
 		game_state.win_ptr->creation_y_size = params.size_y;
 		game_state.win_ptr->in_fullscreen = params.borderless_fullscreen;
+	}
 
+	void initialize_window(sys::state& game_state, creation_parameters const& params) {
 		// Setup window
 		glfwSetErrorCallback(glfw_error_callback);
-		if(!glfwInit())
-		emit_error_message("Failed to init glfw\n", true);
+		if(!glfwInit()) {
+			emit_error_message("Failed to init glfw\n", true);
+		}
 
 		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -280,8 +283,9 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 
 		// Create window with graphics context
 		auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
-		if(window == NULL)
-		emit_error_message("Failed to create window\n", true);
+		if(window == NULL) {
+			emit_error_message("Failed to create window\n", true);
+		}
 		game_state.win_ptr->window = window;
 
 		glfwSetWindowUserPointer(window, &game_state);

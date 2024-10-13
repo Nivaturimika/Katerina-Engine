@@ -51,8 +51,9 @@ enum class window_state : uint8_t { normal, maximized, minimized };
 		bool borderless_fullscreen = false;
 	};
 
-	void create_window(sys::state& game_state,
-		creation_parameters const& params);		 // this function will not return until the window is closed or otherwise destroyed
+	void create_window(sys::state& game_state, creation_parameters const& params);
+	/* This function will run the main window loop and will not return until the window is closed */
+	void initialize_window(sys::state& game_state);
 	void close_window(sys::state& game_state); // close the main window
 	void set_borderless_full_screen(sys::state& game_state, bool fullscreen);
 	bool is_in_fullscreen(sys::state const& game_state);

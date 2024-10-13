@@ -356,8 +356,8 @@ namespace window {
 			window::emit_error_message("Unable to register window class", true);
 		}
 
-		DWORD win32Style = !params.borderless_fullscreen ?
-			(WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
+		DWORD win32Style = !params.borderless_fullscreen
+			? (WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
 			: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(NULL), &game_state);
@@ -375,7 +375,7 @@ namespace window {
 			int left = (mi.rcWork.right - mi.rcWork.left) / 2 - game_state.win_ptr->creation_x_size / 2;
 			int top = (mi.rcWork.bottom - mi.rcWork.top) / 2 - game_state.win_ptr->creation_y_size / 2;
 
-			RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
+			RECT rectangle = { left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size };
 			if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
 				auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
 				if(pAdjustWindowRectExForDpi != NULL) {
@@ -393,12 +393,13 @@ namespace window {
 			SetWindowPos(game_state.win_ptr->hwnd, HWND_NOTOPMOST, rectangle.left, rectangle.top, final_width, final_height, SWP_FRAMECHANGED);
 			SetWindowRgn(game_state.win_ptr->hwnd, NULL, TRUE);
 
-			if(params.initial_state == window_state::maximized)
+			if(params.initial_state == window_state::maximized) {
 				ShowWindow(game_state.win_ptr->hwnd, SW_MAXIMIZE);
-			else if(params.initial_state == window_state::minimized)
+			} else if(params.initial_state == window_state::minimized) {
 				ShowWindow(game_state.win_ptr->hwnd, SW_MINIMIZE);
-			else
+			} else {
 				ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
+			}
 		} else {
 			auto monitor_handle = MonitorFromWindow(game_state.win_ptr->hwnd, MONITOR_DEFAULTTOPRIMARY);
 			MONITORINFO mi;
@@ -423,9 +424,10 @@ namespace window {
 			SetWindowPos(game_state.win_ptr->hwnd, HWND_TOPMOST, rectangle.left, rectangle.top, win_width, win_height, SWP_FRAMECHANGED);
 			ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
 		}
-
 		UpdateWindow(game_state.win_ptr->hwnd);
+	}
 
+	void initialize_window(sys::state& game_state) {
 		sound::initialize_sound_system(game_state);
 		sound::start_music(game_state, game_state.user_settings.master_volume * game_state.user_settings.music_volume);
 

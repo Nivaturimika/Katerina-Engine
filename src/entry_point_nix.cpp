@@ -68,7 +68,8 @@ int main(int argc, char **argv) {
 
 	std::thread update_thread([&]() { game_state.game_loop(); });
 
-	window::create_window(game_state, window::creation_parameters{1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen});
+	window::create_window(game_state, window::creation_parameters{ 1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen });
+	window::initialize_window(game_state);
 
 	game_state.quit_signaled.store(true, std::memory_order_release);
 	update_thread.join();
