@@ -995,24 +995,38 @@ namespace economy {
 			auto is_pop_need = state.world.commodity_get_is_life_need(cid) ||
 				state.world.commodity_get_is_everyday_need(cid) ||
 				state.world.commodity_get_is_luxury_need(cid);
-			auto lower_bound = 0.25f;
-			if(state.world.commodity_get_is_luxury_need(cid)) {
-				lower_bound *= 1.3f;
-			}
-			if(state.world.commodity_get_is_everyday_need(cid)) {
-				lower_bound *= 1.1f;
-			}
 			if(is_pop_need) {
+				float base_life = 0.0f;
+				float base_everyday = 0.0f;
+				float base_luxury = 0.0f;
+				for(const auto t : state.world.in_pop_type) {
+					auto strata = state.world.pop_type_get_strata(t);
+					base_life += state.world.pop_type_get_life_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
+					base_everyday += state.world.pop_type_get_everyday_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
+					base_luxury += state.world.pop_type_get_luxury_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
+				}
 				float total_r_demand = 0.0f;
 				state.world.for_each_nation([&](dcon::nation_id n) {
 					total_r_demand += state.world.nation_get_real_demand(n, cid);
 				});
-				float limitation = std::min(std::max(state.world.commodity_get_last_total_production(cid), 1.0f) /
+				float last_t_production = state.world.commodity_get_last_total_production(cid);
+				float average = 0.0f;
+				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.0f) / (base_life + base_everyday + base_luxury);
+				if(which_type < 2.0f) {
+					average = last_t_production;
+				}
+				else if(which_type >= 2.0f && which_type <= 2.5f) {
+					average = last_t_production * 0.75f;
+				}
+				else {
+					average = total_r_demand;
+				}
+
+				float limitation = std::min(std::max(average, 1.0f) /
 					std::max(total_r_demand, 1.0f), 1.0f);
-				limitation = std::max(limitation, lower_bound);
 				state.world.for_each_nation([&](dcon::nation_id n) {
 					state.world.nation_get_real_demand(n, cid) *= limitation;
-				});
+				}); 
 			}
 		}
 		
