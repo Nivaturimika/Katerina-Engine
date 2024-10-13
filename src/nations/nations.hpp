@@ -400,4 +400,6 @@ enum class status : uint8_t { great_power, secondary_power, civilized, westerniz
 
 	bool has_country_modifier(sys::state& state, dcon::nation_id n, dcon::modifier_id m);
 
+	void cleanup_dead_gps(sys::state& state);
+
 } // namespace nations

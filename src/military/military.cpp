@@ -2627,13 +2627,13 @@ namespace military {
 			assert(rel);
 			state.world.gp_relationship_get_status(rel) &= ~nations::influence::level_mask;
 			state.world.gp_relationship_get_status(rel) |= nations::influence::level_hostile;
-		state.world.nation_set_in_sphere_of(member, dcon::nation_id{});
+			state.world.nation_set_in_sphere_of(member, dcon::nation_id{});
 		}
 
 		if(!nations::is_great_power(state, new_gp))
-		return;
+			return;
 		if(state.world.nation_get_owned_province_count(member) == 0)
-		return;
+			return;
 
 		auto nrel = state.world.get_gp_relationship_by_gp_influence_pair(member, new_gp);
 		if(!nrel) {

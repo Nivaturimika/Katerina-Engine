@@ -192,19 +192,6 @@ namespace nations {
 		for(auto& gp : state.great_nations) {
 			state.world.nation_set_is_great_power(gp.nation, true);
 		}
-		// delete gp rels of non-gps
-		for(auto n : state.world.in_nation) {
-			if(!n.get_is_great_power()) {
-				auto rels = n.get_gp_relationship_as_great_power();
-				while(rels.begin() != rels.end()) {
-					auto rel = *(rels.begin());
-					if(rel.get_influence_target().get_in_sphere_of() == n) {
-						rel.get_influence_target().set_in_sphere_of(dcon::nation_id{});
-					}
-					state.world.delete_gp_relationship(rel);
-				}
-			}
-		}
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto treasury = state.world.nation_get_stockpiles(ids, economy::money);
 			state.world.nation_set_last_treasury(ids, treasury);
@@ -1412,8 +1399,9 @@ namespace nations {
 			auto gp_relationships = state.world.nation_get_gp_relationship_as_great_power(n);
 			while(gp_relationships.begin() != gp_relationships.end()) {
 				auto i = (*gp_relationships.begin()).get_influence_target();
-				if(i.get_in_sphere_of() == n)
-				i.set_in_sphere_of(dcon::nation_id{});
+				if(i.get_in_sphere_of() == n) {
+					i.set_in_sphere_of(dcon::nation_id{});
+				}
 				state.world.delete_gp_relationship(*(gp_relationships.begin()));
 			}
 		}
@@ -1422,7 +1410,7 @@ namespace nations {
 			while(gp_relationships.begin() != gp_relationships.end()) {
 				state.world.delete_gp_relationship(*(gp_relationships.begin()));
 			}
-		state.world.nation_set_in_sphere_of(n, dcon::nation_id{});
+			state.world.nation_set_in_sphere_of(n, dcon::nation_id{});
 		}
 		{
 			for(auto rel : state.world.nation_get_diplomatic_relation(n)) {
@@ -2756,11 +2744,11 @@ namespace nations {
 
 	void adjust_influence_with_overflow(sys::state& state, dcon::nation_id great_power, dcon::nation_id target, float delta) {
 		if(state.world.nation_get_owned_province_count(great_power) == 0 || state.world.nation_get_owned_province_count(target) == 0)
-		return;
+			return;
 		if(great_power == target)
-		return;
+			return;
 		if(state.world.nation_get_is_great_power(target) || !state.world.nation_get_is_great_power(great_power))
-		return;
+			return;
 
 		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, great_power);
 		if(!rel) {
@@ -2788,7 +2776,7 @@ namespace nations {
 			if(state.world.nation_get_in_sphere_of(target) != great_power) {
 				inf -= state.defines.removefromsphere_influence_cost;
 				auto affected_gp = state.world.nation_get_in_sphere_of(target);
-			state.world.nation_set_in_sphere_of(target, dcon::nation_id{});
+				state.world.nation_set_in_sphere_of(target, dcon::nation_id{});
 				{
 					auto orel = state.world.get_gp_relationship_by_gp_influence_pair(target, affected_gp);
 					auto& l = state.world.gp_relationship_get_status(orel);
@@ -2821,9 +2809,9 @@ namespace nations {
 		/* TODO -
 		 * This is a temporary function (the contents of it), what it should return is yesterdays income
 		 * code below should be replaced with more appropriate when avaliable
-	 * return value is passed to text::fp_currency{}
+		 * return value is passed to text::fp_currency{}
 		 */
-		float sum = 0;
+		float sum = 0.f;
 		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor);
 		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
 		sum += economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
@@ -3172,6 +3160,24 @@ namespace nations {
 			}
 		}
 		return false;
+	}
+
+	/*	Some mods define influence values for dead nations, it is our duty to clean them after rankings have been updated.
+		This should in theory be done once on scenario creation. */
+	void cleanup_dead_gps(sys::state& state) {
+		// delete gp rels of non-gps
+		for(auto n : state.world.in_nation) {
+			if(n.get_owned_province_count() == 0) {
+				auto rels = n.get_gp_relationship_as_great_power();
+				while(rels.begin() != rels.end()) {
+					auto rel = *(rels.begin());
+					if(rel.get_influence_target().get_in_sphere_of() == n) {
+						rel.get_influence_target().set_in_sphere_of(dcon::nation_id{});
+					}
+					state.world.delete_gp_relationship(rel);
+				}
+			}
+		}
 	}
 
 } // namespace nations

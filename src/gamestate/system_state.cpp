@@ -3187,6 +3187,8 @@ namespace sys {
 		nations::update_revanchism(*this);
 		fill_unsaved_data(); // we need this to run triggers
 
+		nations::cleanup_dead_gps(*this);
+
 		for(auto n : world.in_nation) {
 			auto g = n.get_government_type();
 			auto name = nations::int_to_tag(n.get_identity_from_identity_holder().get_identifying_int());
@@ -3220,8 +3222,9 @@ namespace sys {
 		for(auto pending_decision : pending_decisions) {
 			dcon::nation_id n = pending_decision.first;
 			dcon::decision_id d = pending_decision.second;
-			if(auto e = world.decision_get_effect(d); e)
-			effect::execute(*this, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(current_date.value), uint32_t(n.index() << 4 ^ d.index()));
+			if(auto e = world.decision_get_effect(d); e) {
+				effect::execute(*this, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(current_date.value), uint32_t(n.index() << 4 ^ d.index()));
+			}
 		}
 
 		demographics::regenerate_from_pop_data_full(*this);
@@ -3245,7 +3248,7 @@ namespace sys {
 		assert(great_nations.size() == 0);
 		for(uint32_t i = 0; i < nations_by_rank.size() && i < uint32_t(defines.great_nations_count); ++i) {
 			if(nations_by_rank[i]) {
-			great_nations.push_back(great_nation{ sys::date{0}, nations_by_rank[i] });
+				great_nations.push_back(great_nation{ sys::date{0}, nations_by_rank[i] });
 				world.nation_set_is_great_power(nations_by_rank[i], true);
 			}
 		}
@@ -3303,13 +3306,13 @@ namespace sys {
 			n.set_substates_count(0);
 			n.set_administrative_efficiency(0.0f);
 			n.set_is_target_of_some_cb(false);
-		n.set_in_sphere_of(dcon::nation_id{});
+			n.set_in_sphere_of(dcon::nation_id{});
 			n.set_is_player_controlled(false);
 			n.set_is_great_power(false);
 			n.set_is_colonial_nation(false);
 			n.set_has_flash_point_state(false);
 			n.set_ai_is_threatened(false);
-		n.set_ai_home_port(dcon::province_id{});
+			n.set_ai_home_port(dcon::province_id{});
 		}
 		for(auto p : world.in_pop) {
 			p.set_political_reform_desire(0);
