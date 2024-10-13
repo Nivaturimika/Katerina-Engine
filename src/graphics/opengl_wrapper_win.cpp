@@ -12,7 +12,6 @@
 //#include "wglew.h"
 
 namespace ogl {
-
 	void create_opengl_context(sys::state& state) {
 		assert(state.win_ptr && state.win_ptr->hwnd && !state.open_gl.context);
 
@@ -51,15 +50,14 @@ namespace ogl {
 			msg += "GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
 			msg += "GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
 			reports::write_debug(msg.c_str());
-			/*
-			if(wglewIsSupported("WGL_EXT_swap_control_tear") == 1) {
-				reports::write_debug("WGL_EXT_swap_control_tear is on\n");
-				wglSwapIntervalEXT(-1);
-			} else if(wglewIsSupported("WGL_EXT_swap_control") == 1) {
+
+			// Enable vsync
+			BOOL (*_wglSwapIntervalEXT)(int) = (BOOL(*)(int))(((decltype(&wglGetProcAddress))GetProcAddress(gl_lib, "wglGetProcAddress"))("wglSwapIntervalEXT"));
+			if(_wglSwapIntervalEXT) {
 				reports::write_debug("WGL_EXT_swap_control is on\n");
-				wglSwapIntervalEXT(1);
+				_wglSwapIntervalEXT(1);
 			}
-			*/
+
 			FreeLibrary(gl_lib);
 		} else {
 			window::emit_error_message("Opengl32.dll is missing", true);
