@@ -317,9 +317,9 @@ namespace economy {
 		state.world.for_each_pop([&](dcon::pop_id p) {
 			auto fp = fatten(state.world, p);
 			fp.set_life_needs_satisfaction(1.0f);
-			fp.set_everyday_needs_satisfaction(1.0f);
-			fp.set_luxury_needs_satisfaction(1.0f);
-			fp.set_savings(fp.get_size() / 1000000.f);
+			fp.set_everyday_needs_satisfaction(0.75f);
+			fp.set_luxury_needs_satisfaction(0.25f);
+			fp.set_savings(fp.get_size() / 10000.f);
 		});
 
 		state.world.for_each_factory([&](dcon::factory_id f) {
@@ -353,6 +353,7 @@ namespace economy {
 			fn.set_naval_spending(int8_t(100));
 			fn.set_construction_spending(int8_t(100));
 			fn.set_overseas_spending(int8_t(100));
+			state.world.nation_set_stockpiles(fn, economy::money, std::max(fn.get_non_colonial_population()/100.0f,3000.0f));
 
 			fn.set_poor_tax(int8_t(50));
 			fn.set_middle_tax(int8_t(50));
