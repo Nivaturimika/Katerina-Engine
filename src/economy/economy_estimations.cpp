@@ -187,7 +187,7 @@ namespace economy_estimations {
 		float total = 0.0f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_army_demand(n, cid) * economy::commodity_effective_price(state, n, cid); //* state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_army_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
 		return total;
 	}
@@ -196,7 +196,7 @@ namespace economy_estimations {
 		float total = 0.0f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_navy_demand(n, cid) * economy::commodity_effective_price(state, n, cid); //* state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_navy_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
 		return total;
 	}

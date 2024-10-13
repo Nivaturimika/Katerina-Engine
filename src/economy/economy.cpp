@@ -792,13 +792,13 @@ namespace economy {
 		float n_spending = float(state.world.nation_get_naval_spending(n)) / 100.0f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto v = state.world.nation_get_army_demand(n, cid) * l_spending * commodity_effective_price(state, n, cid);
+			auto v = state.world.nation_get_army_demand(n, cid) * l_spending * state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
 			total += v;
 		}
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto v = state.world.nation_get_navy_demand(n, cid) * n_spending * commodity_effective_price(state, n, cid);
+			auto v = state.world.nation_get_navy_demand(n, cid) * n_spending * state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
 			total += v;
 		}
@@ -812,7 +812,7 @@ namespace economy {
 		float o_spending = float(state.world.nation_get_overseas_spending(n)) / 100.f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto v = state.world.nation_get_construction_demand(n, cid) * c_spending * commodity_effective_price(state, n, cid);
+			auto v = state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
 			total += v;
 		}
@@ -820,7 +820,7 @@ namespace economy {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto difference = state.world.nation_get_stockpile_targets(n, cid) - state.world.nation_get_stockpiles(n, cid);
 			if(difference > 0.f && state.world.nation_get_drawing_on_stockpiles(n, cid) == false) {
-				auto v = difference * commodity_effective_price(state, n, cid);
+				auto v = difference * state.world.commodity_get_current_price(cid);
 				assert(std::isfinite(v) && v >= 0.0f);
 				total += v;
 			}
@@ -832,7 +832,7 @@ namespace economy {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 				auto kf = state.world.commodity_get_key_factory(cid);
 				if(state.world.commodity_get_overseas_penalty(cid) && (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf)))) {
-					auto v = overseas_factor * commodity_effective_price(state, n, cid) * o_spending;
+					auto v = overseas_factor * state.world.commodity_get_current_price(cid) * o_spending;
 					assert(std::isfinite(v) && v >= 0.0f);
 					total += v;
 				}
@@ -847,7 +847,7 @@ namespace economy {
 		uint32_t total_commodities = state.world.commodity_size();
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_private_construction_demand(n, cid) * commodity_effective_price(state, n, cid);
+			total += state.world.nation_get_private_construction_demand(n, cid) * state.world.commodity_get_current_price(cid);
 		}
 		return total;
 	}
@@ -1064,7 +1064,7 @@ namespace economy {
 			float en_total = 0.f;
 			float lx_total = 0.f;
 			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-			dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 				auto kf = state.world.commodity_get_key_factory(c);
 				if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 					float effective_price = commodity_effective_price(state, n, c);
@@ -1098,7 +1098,7 @@ namespace economy {
 			auto d_sat = state.world.nation_get_demand_satisfaction(n, c);
 			auto& nat_demand = state.world.nation_get_construction_demand(n, c);
 			assert(d_sat >= 0.f && d_sat <= 1.f);
-			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * commodity_effective_price(state, n, c);
+			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * state.world.commodity_get_current_price(c);
 			nat_demand *= c_spending * d_sat;
 			state.world.nation_get_private_construction_demand(n, c) *= p_spending * d_sat;
 		}
@@ -1596,7 +1596,7 @@ namespace economy {
 					auto val = state.world.nation_get_navy_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					refund += val * (1.0f - sat) * spending_level * commodity_effective_price(state, n, c);
+					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
 					max_sp += val * sat;
 				}
@@ -1614,7 +1614,7 @@ namespace economy {
 					auto val = state.world.nation_get_army_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					refund += val * (1.0f - sat) * spending_level * commodity_effective_price(state, n, c);
+					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
 					max_sp += val * sat;
 				}
@@ -1632,6 +1632,7 @@ namespace economy {
 					auto val = state.world.nation_get_construction_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
+					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
 					max_sp += val * sat;
 				}
