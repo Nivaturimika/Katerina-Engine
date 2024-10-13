@@ -982,7 +982,9 @@ namespace ui {
 		public:
 		void on_create(sys::state& state) noexcept override {
 			button_element_base::on_create(state);
-			base_data.data.button.shortcut = sys::virtual_key::SPACE;
+			if(state.network_mode == sys::network_mode_type::single_player) {
+				base_data.data.button.shortcut = sys::virtual_key::SPACE;
+			}
 		}
 
 		sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
