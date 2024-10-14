@@ -343,7 +343,7 @@ namespace parsers {
 		auto pictures = open_directory(gfx, NATIVE("pictures"));
 		auto tech = open_directory(pictures, NATIVE("tech"));
 
-		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\tech\\") + std::string(name) + ".png");
+		std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\tech\\") + std::string(name) + ".tga");
 
 		if(auto it = context.gfx_context.map_of_names.find(file_name); it != context.gfx_context.map_of_names.end()) {
 			context.state.world.technology_set_image(new_id, it->second);
