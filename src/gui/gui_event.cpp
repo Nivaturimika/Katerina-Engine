@@ -340,18 +340,16 @@ namespace ui {
 			auto& gfx_def = state.ui_defs.gfx[gid];
 			auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
 			if(!tid) {
-				tid = ogl::get_texture_handle(state, ui::definitions::no_event_image, gfx_def.is_partially_transparent());
+				tid = ogl::get_texture_handle(state, ui::definitions::no_event_image, false);
 			}
 			ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
 				float(x), float(y), float(base_data.size.x), float(base_data.size.y),
-				tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
-				get_horizontal_flip(state));
+				tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(), get_horizontal_flip(state));
 		} else {
-			auto tid = ogl::get_texture_handle(state, ui::definitions::no_event_image, gfx_def.is_partially_transparent());
+			auto tid = ogl::get_texture_handle(state, ui::definitions::no_event_image, false);
 			ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
 				float(x), float(y), float(base_data.size.x), float(base_data.size.y),
-				tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
-				get_horizontal_flip(state));
+				tid, base_data.get_rotation(), false, get_horizontal_flip(state));
 		}
 	}
 
