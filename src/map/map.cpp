@@ -1159,6 +1159,7 @@ namespace map {
 
 			if(shaders[uint8_t(map_view_mode)][shader_selection] && !selection_vertices.empty() && zoom > map::zoom_very_close) { //only render if close enough
 				load_shader(shader_selection);
+				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_selection][uniform_time], 0.f);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textures[texture_selection]);
 				glBindVertexArray(vao_array[vo_selection]);
@@ -2430,16 +2431,15 @@ namespace map {
 	}
 
 	GLuint load_dds_texture(simple_fs::directory const& dir, native_string_view file_name, int soil_flags = ogl::SOIL_FLAG_TEXTURE_REPEATS) {
-		auto file = simple_fs::open_file(dir, file_name);
-		if(!bool(file)) {
-			auto full_message = std::string("Can't load DDS file ") + text::native_to_utf8(file_name) + "\n";
-			reports::write_debug(full_message.c_str());
-			return 0;
+		if(auto file = simple_fs::open_file(dir, file_name); file) {
+			auto content = simple_fs::view_contents(*file);
+			uint32_t size_x, size_y;
+			uint8_t const* data = (uint8_t const*)(content.data);
+			reports::write_debug(("Loading [map] DDS file " + text::native_to_utf8(file_name) + "\n").c_str());
+			return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
 		}
-		auto content = simple_fs::view_contents(*file);
-		uint32_t size_x, size_y;
-		uint8_t const* data = (uint8_t const*)(content.data);
-		return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
+		reports::write_debug(("Can't load [map] DDS file " + text::native_to_utf8(file_name) + "\n").c_str());
+		return 0;
 	}
 
 	void load_animation(sys::state& state, emfx::xsm_context const& anim_context, uint32_t index, emfx::xac_context const& model_context, emfx::animation_type at) {
@@ -2942,9 +2942,6 @@ namespace map {
 		textures[texture_railroad] = load_dds_texture(gfx_anims_dir, NATIVE("railroad.dds"));
 		ogl::set_gltex_parameters(textures[texture_railroad], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
-		textures[texture_selection] = load_dds_texture(test_dir, NATIVE("selection.dds"));
-		ogl::set_gltex_parameters(textures[texture_railroad], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
-
 		textures[texture_unit_arrow] = ogl::make_gl_texture(map_items_dir, NATIVE("movearrow.tga"));
 		ogl::set_gltex_parameters(textures[texture_unit_arrow], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -2966,8 +2963,10 @@ namespace map {
 		textures[texture_hover_border] = load_dds_texture(assets_dir, NATIVE("hover_border.dds"));
 		ogl::set_gltex_parameters(textures[texture_hover_border], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
 
+		textures[texture_selection] = load_dds_texture(test_dir, NATIVE("selection.dds"));
+		ogl::set_gltex_parameters(textures[texture_selection], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 		textures[texture_capital] = load_dds_texture(map_items_dir, NATIVE("building_capital.dds"));
-		ogl::set_gltex_parameters(textures[texture_capital], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+		ogl::set_gltex_parameters(textures[texture_capital], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
 		// Get the province_color handle
 		// province_color is an array of 2 textures, one for province and the other for stripes

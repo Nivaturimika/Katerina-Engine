@@ -40,7 +40,7 @@ void main() {
 		world_pos = skin_pos.xyz;
 		world_pos.z *= -1.f;
 	} else {
-		//world_pos.y *= -1.f;
+		world_pos.y *= -1.f;
 	}
 	world_pos = rotate_target(world_pos, vec3(0.f, 1.f, 0.f), target_facing - PI / 2.f);
 //

@@ -902,9 +902,9 @@ namespace map {
 
 		update_unit_arrows(state, map_data);
 
-		if(state.game_state_updated.load(std::memory_order::acquire)) {
-			update_capitals(state, map_data);
-		}
+		//if(state.game_state_updated.load(std::memory_order::acquire)) {
+		update_capitals(state, map_data);
+		//}
 
 		// Update railroads, only if railroads are being built and we have 'em enabled
 		if(state.user_settings.railroads_enabled && state.railroad_built.load(std::memory_order::acquire)) {
