@@ -1076,8 +1076,7 @@ namespace ui {
 	class budget_estimated_stockpile_spending_text : public budget_scaled_monetary_value_text {
 		public:
 		void put_values(sys::state& state, std::array<float, size_t(budget_slider_target::target_count)>& vals) noexcept override {
-			vals[uint8_t(budget_slider_target::construction_stock)] =
-				economy_estimations::estimate_construction_spending(state, state.local_player_nation);
+			vals[uint8_t(budget_slider_target::construction_stock)] = economy_estimations::estimate_construction_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::army_stock)] = economy_estimations::estimate_land_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::navy_stock)] = economy_estimations::estimate_naval_spending(state, state.local_player_nation);
 		}
@@ -1144,17 +1143,13 @@ namespace ui {
 	class budget_expenditure_projection_text : public budget_scaled_monetary_value_text {
 		public:
 		void put_values(sys::state& state, std::array<float, size_t(budget_slider_target::target_count)>& vals) noexcept override {
-			vals[uint8_t(budget_slider_target::construction_stock)] =
-				economy_estimations::estimate_construction_spending(state, state.local_player_nation);
+			vals[uint8_t(budget_slider_target::construction_stock)] = economy_estimations::estimate_construction_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::army_stock)] = economy_estimations::estimate_land_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::navy_stock)] = economy_estimations::estimate_naval_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::social)] = economy_estimations::estimate_social_spending(state, state.local_player_nation);
-			vals[uint8_t(budget_slider_target::education)] =
-				economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::education);
-			vals[uint8_t(budget_slider_target::admin)] =
-				economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::administration);
-			vals[uint8_t(budget_slider_target::military)] =
-				economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::military);
+			vals[uint8_t(budget_slider_target::education)] = economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::education);
+			vals[uint8_t(budget_slider_target::admin)] = economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::administration);
+			vals[uint8_t(budget_slider_target::military)] = economy_estimations::estimate_pop_payouts_by_income_type(state, state.local_player_nation, culture::income_type::military);
 			vals[uint8_t(budget_slider_target::domestic_investment)] = economy_estimations::estimate_domestic_investment(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::subsidies)] = economy_estimations::estimate_subsidy_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::overseas)] = economy_estimations::estimate_overseas_penalty_spending(state, state.local_player_nation);
@@ -1167,17 +1162,13 @@ namespace ui {
 		public:
 		void put_values(sys::state& state, std::array<float, size_t(budget_slider_target::target_count)>& vals) noexcept override {
 			// income
-			vals[uint8_t(budget_slider_target::poor_tax)] =
-				economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::poor);
-			vals[uint8_t(budget_slider_target::middle_tax)] =
-				economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::middle);
-			vals[uint8_t(budget_slider_target::rich_tax)] =
-				economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::rich);
+			vals[uint8_t(budget_slider_target::poor_tax)] = economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::poor);
+			vals[uint8_t(budget_slider_target::middle_tax)] = economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::middle);
+			vals[uint8_t(budget_slider_target::rich_tax)] = economy_estimations::estimate_tax_income_by_strata(state, state.local_player_nation, culture::pop_strata::rich);
 			vals[uint8_t(budget_slider_target::gold_income)] = economy_estimations::estimate_gold_income(state, state.local_player_nation);
 
 			// spend
-			vals[uint8_t(budget_slider_target::construction_stock)] =
-				-economy_estimations::estimate_construction_spending(state, state.local_player_nation);
+			vals[uint8_t(budget_slider_target::construction_stock)] = -economy_estimations::estimate_construction_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::army_stock)] = -economy_estimations::estimate_land_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::navy_stock)] = -economy_estimations::estimate_naval_spending(state, state.local_player_nation);
 			vals[uint8_t(budget_slider_target::social)] = -economy_estimations::estimate_social_spending(state, state.local_player_nation);

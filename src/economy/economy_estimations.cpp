@@ -64,7 +64,9 @@ namespace economy_estimations {
 			if(adj_pop_of_type <= 0)
 				return;
 			auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
-			if(ln_type == culture::income_type::administration || ln_type == culture::income_type::education || ln_type == culture::income_type::military) {
+			if(ln_type == culture::income_type::administration
+			|| ln_type == culture::income_type::education
+			|| ln_type == culture::income_type::military) {
 				//nothing
 			} else { // unemployment, pensions
 				total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
@@ -205,78 +207,10 @@ namespace economy_estimations {
 		float total = 0.0f;
 		float admin_eff = state.world.nation_get_administrative_efficiency(n);
 		float admin_cost_factor = 2.0f - admin_eff;
-
-		for(auto lc : state.world.nation_get_province_land_construction(n)) {
-			auto province = state.world.pop_get_province_from_pop_location(state.world.province_land_construction_get_pop(lc));
-			if(state.world.province_get_nation_from_province_control(province) == n) {
-				auto& base_cost = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_cost;
-				auto& current_purchased = state.world.province_land_construction_get_purchased_goods(lc);
-				float construction_time = float(state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(lc)].build_time);
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i])
-							* state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i])
-							* base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
-					} else {
-						break;
-					}
-				}
-			}
+		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			total += state.world.nation_get_construction_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
-		for(auto po : state.world.nation_get_province_ownership(n)) {
-			auto p = po.get_province();
-			if(state.world.province_get_nation_from_province_control(p) != n)
-				continue;
-			auto rng = state.world.province_get_province_naval_construction(p);
-			if(rng.begin() != rng.end()) {
-				auto c = *(rng.begin());
-				auto& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
-				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
-					} else {
-						break;
-					}
-				}
-			}
-		}
-		for(auto c : state.world.nation_get_province_building_construction(n)) {
-			if(n == c.get_province().get_nation_from_province_control() && !c.get_is_pop_project()) {
-				auto t = economy::province_building_type(c.get_type());
-				auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
-				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor)
-							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * admin_cost_factor / construction_time;
-					} else {
-						break;
-					}
-				}
-			}
-		}
-		for(auto c : state.world.nation_get_state_building_construction(n)) {
-			if(!c.get_is_pop_project()) {
-				auto& base_cost = c.get_type().get_construction_costs();
-				auto& current_purchased = c.get_purchased_goods();
-				float construction_time = float(c.get_type().get_construction_time());
-				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod)
-							total += economy::commodity_effective_price(state, n, base_cost.commodity_type[i]) * state.world.nation_get_demand_satisfaction(n, base_cost.commodity_type[i]) * base_cost.commodity_amounts[i] * cost_mod / construction_time;
-					} else {
-						break;
-					}
-				}
-			}
-		}
-
 		return total;
 	}
 

@@ -1091,25 +1091,29 @@ namespace economy {
 		float c_spending = state.world.nation_get_spending_level(n) * float(state.world.nation_get_construction_spending(n)) / 100.0f;
 		float p_spending = state.world.nation_get_private_investment_effective_fraction(n);
 
+		// Calculate refunds of extra goods bought (that werent needed
 		float refund_amount = 0.0f;
-
 		for(uint32_t i = 1; i < total_commodities; ++i) {
-		dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+			dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 			auto d_sat = state.world.nation_get_demand_satisfaction(n, c);
 			auto& nat_demand = state.world.nation_get_construction_demand(n, c);
 			assert(d_sat >= 0.f && d_sat <= 1.f);
-			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * state.world.commodity_get_current_price(c);
+			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * economy::commodity_effective_price(state, n, c);
 			nat_demand *= c_spending * d_sat;
 			state.world.nation_get_private_construction_demand(n, c) *= p_spending * d_sat;
 		}
-
-		// TODO: Fix refunds one day -- right now they just give infinite money :(
-		assert(refund_amount >= 0.0f);
 		state.world.nation_get_stockpiles(n, economy::money) += refund_amount;
+
+		//Replicate demand property into a temporal buffer (as to not modify the principal demand)
+		ve::vectorizable_buffer<float, dcon::commodity_id> gbuf(state.world.commodity_size());
+		ve::vectorizable_buffer<float, dcon::commodity_id> pbuf(state.world.commodity_size());
+		for(const auto c : state.world.in_commodity) {
+			gbuf.set(c, state.world.nation_get_construction_demand(n, c));
+			pbuf.set(c, state.world.nation_get_private_construction_demand(n, c));
+		}
 
 		float admin_eff = state.world.nation_get_administrative_efficiency(n);
 		float admin_cost_factor = 2.0f - admin_eff;
-
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			if(p.get_province().get_nation_from_province_control() != n)
 			continue;
@@ -1125,7 +1129,7 @@ namespace economy {
 						if(base_cost.commodity_type[i]) {
 							if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 								auto amount = base_cost.commodity_amounts[i] / construction_time;
-								auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
+								auto& source = gbuf.get(base_cost.commodity_type[i]);
 								auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 								current_purchased.commodity_amounts[i] += delta;
 								source -= delta;
@@ -1148,7 +1152,7 @@ namespace economy {
 						if(base_cost.commodity_type[i]) {
 							if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 								auto amount = base_cost.commodity_amounts[i] / construction_time;
-								auto& source = state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
+								auto& source = gbuf.get(base_cost.commodity_type[i]);
 								auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
 								current_purchased.commodity_amounts[i] += delta;
 								source -= delta;
@@ -1174,8 +1178,8 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							auto& source = c.get_is_pop_project()
-							? state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i])
-							: state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
+								? pbuf.get(base_cost.commodity_type[i])
+								: gbuf.get(base_cost.commodity_type[i]);
 							auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 							current_purchased.commodity_amounts[i] += delta;
 							source -= delta;
@@ -1196,8 +1200,8 @@ namespace economy {
 				if(base_cost.commodity_type[i]) {
 					if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
 						auto& source = c.get_is_pop_project()
-						? state.world.nation_get_private_construction_demand(n, base_cost.commodity_type[i])
-						: state.world.nation_get_construction_demand(n, base_cost.commodity_type[i]);
+							? pbuf.get(base_cost.commodity_type[i])
+							: gbuf.get(base_cost.commodity_type[i]);
 						auto delta = std::clamp(base_cost.commodity_amounts[i] * cost_mod / construction_time, 0.f, source);
 						current_purchased.commodity_amounts[i] += delta;
 						source -= delta;
