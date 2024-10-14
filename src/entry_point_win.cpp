@@ -154,7 +154,18 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 			while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
 				++append;
 			}
-			selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
+
+			selected_scenario_file.clear();
+			for(uint32_t i = 0; i < path.size(); i++) {
+				auto c = path[i];
+				if(c == NATIVE(';') || c == NATIVE('?') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\')) {
+					
+				} else {
+					selected_scenario_file.push_back(c);
+				}
+			}
+
+			//selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
 			sys::write_scenario_file(*book_game_state, selected_scenario_file, 1);
 			scenario_key = book_game_state->scenario_checksum;
 		} else {
