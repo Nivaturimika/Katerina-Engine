@@ -166,9 +166,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto c = retrieve<dcon::commodity_id>(state, parent);
-			float produced = state.world.nation_get_domestic_market_pool(n, c);
-			float consumed = state.world.nation_get_real_demand(n, c) * state.world.nation_get_demand_satisfaction(n, c);
-			auto v = int64_t((produced + consumed) * economy::commodity_effective_price(state, n, c));
+			auto v = int64_t(economy::commodity_market_activity(state, n, c) * economy::commodity_effective_price(state, n, c));
 			set_text(state, text::prettify(v));
 		}
 	};
