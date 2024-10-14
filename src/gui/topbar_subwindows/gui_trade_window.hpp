@@ -683,15 +683,30 @@ namespace ui {
 		}
 	};
 
+	class commodity_automation_indicator : public image_element_base {
+		bool visible = false;
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto com = retrieve<dcon::commodity_id>(state, parent);
+			visible = state.world.nation_get_stockpile_targets(state.local_player_nation, com) > 0;
+		}
+		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(visible) {
+				image_element_base::impl_render(state, x, y);
+			}
+		}
+	};
+
 	class commodity_stockpile_indicator : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			if(state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com)) {
-				if(state.world.nation_get_stockpiles(state.local_player_nation, com) > 0)
-				frame = 2;
-				else
-				frame = 0;
+				if(state.world.nation_get_stockpiles(state.local_player_nation, com) > 0) {
+					frame = 2;
+				} else {
+					frame = 0;
+				}
 			} else if(state.world.nation_get_stockpiles(state.local_player_nation, com)  < state.world.nation_get_stockpile_targets(state.local_player_nation, com)) {
 				frame = 1;
 			} else {
@@ -700,26 +715,16 @@ namespace ui {
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
-			auto com = retrieve<dcon::commodity_id>(state, parent);
-			if(state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com)) {
-				return tooltip_behavior::variable_tooltip;
-			} else if(state.world.nation_get_stockpiles(state.local_player_nation, com)  < state.world.nation_get_stockpile_targets(state.local_player_nation, com)) {
-				return tooltip_behavior::variable_tooltip;
-			} else {
-				return tooltip_behavior::no_tooltip;
-			}
-		
+			return tooltip_behavior::variable_tooltip;
 		}
-
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			if(state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com)) {
-				if(state.world.nation_get_stockpiles(state.local_player_nation, com) > 0)
-				text::add_line(state, contents, "trade_setting_drawing");
+				if(state.world.nation_get_stockpiles(state.local_player_nation, com) > 0) {
+					text::add_line(state, contents, "trade_setting_drawing");
+				}
 			} else if(state.world.nation_get_stockpiles(state.local_player_nation, com) < state.world.nation_get_stockpile_targets(state.local_player_nation, com)) {
 				text::add_line(state, contents, "trade_setting_filling");
-			} else {
-
 			}
 		}
 	};
@@ -782,7 +787,7 @@ namespace ui {
 			} else if(name == "selling_indicator") {
 				return make_element_by_type<commodity_stockpile_indicator>(state, id);
 			} else if(name == "automation_indicator") {
-				return make_element_by_type<invisible_element>(state, id);
+				return make_element_by_type<commodity_automation_indicator>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -1313,19 +1318,14 @@ namespace ui {
 	};
 
 	class prices_line_graph : public line_graph {
-		public:
-		prices_line_graph()
-			: line_graph(32) { }
-
+	public:
+		prices_line_graph() : line_graph(32) { }
 		void on_create(sys::state& state) noexcept override {
 			line_graph::on_create(state);
 		}
-
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-
 			assert(economy::price_history_length >= 32);
-
 			std::vector<float> datapoints(32);
 			auto newest_index = economy::most_recent_price_record_index(state);
 			for(uint32_t i = 0; i < 32; ++i) {
@@ -1333,20 +1333,14 @@ namespace ui {
 			}
 			set_data_points(state, datapoints);
 		}
-		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			auto com = retrieve<dcon::commodity_id>(state, parent);
-			line_graph::render(state, x, y);
-		}
 	};
 
 	class price_chart_high : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-		
 			auto newest_index = economy::most_recent_price_record_index(state);
 			float max_price = state.world.commodity_get_price_record(com, newest_index);
-
 			for(int32_t i = 1; i < 32; ++i) {
 				max_price = std::max(state.world.commodity_get_price_record(com, (newest_index + i + economy::price_history_length - 32) % economy::price_history_length), max_price);
 			}
@@ -1355,13 +1349,11 @@ namespace ui {
 	};
 
 	class price_chart_low : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-		
 			auto newest_index = economy::most_recent_price_record_index(state);
 			float min_price = state.world.commodity_get_price_record(com, newest_index);
-
 			for(int32_t i = 1; i < 32; ++i) {
 				min_price = std::min(state.world.commodity_get_price_record(com, (newest_index + i + economy::price_history_length - 32) % economy::price_history_length), min_price);
 			}
@@ -1370,19 +1362,10 @@ namespace ui {
 	};
 
 	class stockpile_sell_button : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-			if(state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com)) {
-				frame = 1;
-			} else {
-				frame = 0;
-			}
-		}
-
-		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			auto com = retrieve<dcon::commodity_id>(state, parent);
-			button_element_base::render(state, x, y);
+			frame = state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com) ? 1 : 0;
 		}
 
 		void button_action(sys::state& state) noexcept override {
@@ -1392,7 +1375,7 @@ namespace ui {
 	};
 
 	class stockpile_sell_label : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			set_text(state, text::produce_simple_string(state, state.world.nation_get_drawing_on_stockpiles(state.local_player_nation, com) ? "trade_use" : "trade_fill"));
@@ -1400,21 +1383,15 @@ namespace ui {
 	};
 
 	class stockpile_slider_label : public simple_text_element_base {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
+			simple_text_element_base::on_create(state);
 			set_text(state, text::produce_simple_string(state, "trade_stockpile_target"));
-		}
-		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			auto com = retrieve<dcon::commodity_id>(state, parent);
-			simple_text_element_base::render(state, x, y);
 		}
 	};
 
 	class stockpile_amount_label : public simple_text_element_base {
-		public:
-		void on_create(sys::state& state) noexcept override {
-		
-		}
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			set_text(state, text::produce_simple_string(state, "trade_stockpile_current") + text::format_float(state.world.nation_get_stockpiles(state.local_player_nation, com), 1));
@@ -1422,11 +1399,11 @@ namespace ui {
 	};
 
 	class detail_domestic_production : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			text::substitution_map m;
-		text::add_to_substitution_map(m, text::variable_type::val, text::pretty_integer{int64_t(state.world.nation_get_domestic_market_pool(state.local_player_nation, com))});
+			text::add_to_substitution_map(m, text::variable_type::val, text::pretty_integer{ int64_t(state.world.nation_get_domestic_market_pool(state.local_player_nation, com)) });
 			set_text(state, text::resolve_string_substitution(state, "produced_detail_remove", m));
 		}
 	};
@@ -1439,30 +1416,26 @@ namespace ui {
 	};
 
 	class trade_slider : public scrollbar {
-		public:
+	public:
 		void on_value_change(sys::state& state, int32_t v) noexcept final {
 			float a = float(v) - 1.0f;
-		send(state, parent, stockpile_target_change{a});
-			if(state.ui_state.drag_target != slider)
-			commit_changes(state);
+			send(state, parent, stockpile_target_change{ a });
+			if(state.ui_state.drag_target != slider) {
+				commit_changes(state);
+			}
 		}
 
 		void on_update(sys::state& state) noexcept final {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
-			if(!com)
-			return;
+			if(com) {
+				if(state.ui_state.drag_target == slider) {
 
-			if(state.ui_state.drag_target == slider) {
-			
-			} else {
-				auto value = state.world.nation_get_stockpile_targets(state.local_player_nation, com);
-				update_raw_value(state, int32_t(value + 1.f));
-			send(state, parent, stockpile_target_change{value + 1.f});
+				} else {
+					auto value = state.world.nation_get_stockpile_targets(state.local_player_nation, com);
+					update_raw_value(state, int32_t(value + 1.f));
+					send(state, parent, stockpile_target_change{ value + 1.f });
+				}
 			}
-		}
-		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			auto com = retrieve<dcon::commodity_id>(state, parent);
-			scrollbar::impl_render(state, x, y);
 		}
 		void on_drag_finish(sys::state& state) noexcept override {
 			commit_changes(state);
@@ -1475,14 +1448,13 @@ namespace ui {
 	};
 
 	class trade_slider_amount : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto com = retrieve<dcon::commodity_id>(state, parent);
 			auto val = retrieve<get_stockpile_target>(state, parent);
 			set_text(state, text::prettify(int64_t(val.value)));
 		}
 	};
-
 
 	class trade_details_window : public window_element_base {
 		simple_text_element_base* slider_value_display = nullptr;
@@ -1684,55 +1656,57 @@ namespace ui {
 			} else if(payload.holds_type<trade_sort_data>()) {
 				auto d = any_cast<trade_sort_data>(payload);
 				switch(d.assoc) {
-					case trade_sort_assoc::market_activity:
-					if(list_ma->sort == d.sort)
-					list_ma->sort_ascend = !list_ma->sort_ascend;
-					else
-					list_ma->sort_ascend = false;
+				case trade_sort_assoc::market_activity:
+					if(list_ma->sort == d.sort) {
+						list_ma->sort_ascend = !list_ma->sort_ascend;
+					} else {
+						list_ma->sort_ascend = false;
+					}
 					list_ma->sort = d.sort;
 					list_ma->impl_on_update(state);
 					break;
-					case trade_sort_assoc::stockpile:
-					if(list_sp->sort == d.sort)
-					list_sp->sort_ascend = !list_sp->sort_ascend;
-					else
-					list_sp->sort_ascend = false;
+				case trade_sort_assoc::stockpile:
+					if(list_sp->sort == d.sort) {
+						list_sp->sort_ascend = !list_sp->sort_ascend;
+					} else {
+						list_sp->sort_ascend = false;
+					}
 					list_sp->sort = d.sort;
 					list_sp->impl_on_update(state);
 					break;
-					case trade_sort_assoc::common_market:
+				case trade_sort_assoc::common_market:
 					if(list_cm->sort == d.sort)
-					list_cm->sort_ascend = !list_cm->sort_ascend;
+						list_cm->sort_ascend = !list_cm->sort_ascend;
 					else
-					list_cm->sort_ascend = false;
+						list_cm->sort_ascend = false;
 					list_cm->sort = d.sort;
 					list_cm->impl_on_update(state);
 					break;
-					case trade_sort_assoc::needs_government:
+				case trade_sort_assoc::needs_government:
 					if(list_gn->sort == d.sort)
-					list_gn->sort_ascend = !list_gn->sort_ascend;
+						list_gn->sort_ascend = !list_gn->sort_ascend;
 					else
-					list_gn->sort_ascend = false;
+						list_gn->sort_ascend = false;
 					list_gn->sort = d.sort;
 					list_gn->impl_on_update(state);
 					break;
-					case trade_sort_assoc::needs_factories:
+				case trade_sort_assoc::needs_factories:
 					if(list_fn->sort == d.sort)
-					list_fn->sort_ascend = !list_fn->sort_ascend;
+						list_fn->sort_ascend = !list_fn->sort_ascend;
 					else
-					list_fn->sort_ascend = false;
+						list_fn->sort_ascend = false;
 					list_fn->sort = d.sort;
 					list_fn->impl_on_update(state);
 					break;
-					case trade_sort_assoc::needs_pops:
+				case trade_sort_assoc::needs_pops:
 					if(list_pn->sort == d.sort)
-					list_pn->sort_ascend = !list_pn->sort_ascend;
+						list_pn->sort_ascend = !list_pn->sort_ascend;
 					else
-					list_pn->sort_ascend = false;
+						list_pn->sort_ascend = false;
 					list_pn->sort = d.sort;
 					list_pn->impl_on_update(state);
 					break;
-					default:
+				default:
 					break;
 				}
 				return message_result::consumed;
