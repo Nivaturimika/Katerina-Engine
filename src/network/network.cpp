@@ -733,7 +733,7 @@ namespace network {
 					case command::command_type::advance_tick:
 					case command::command_type::notify_start_game:
 					case command::command_type::notify_stop_game:
-					case command::command_type::notify_pause_game:
+					//case command::command_type::notify_pause_game:
 					case command::command_type::notify_player_joins:
 					case command::command_type::save_game:
 						break; // has to be valid/sendable by client
