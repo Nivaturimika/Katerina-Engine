@@ -346,8 +346,7 @@ namespace ui {
 					auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
 					mp.x += 2.f * glm::sin(theta);
 					mp.y += 2.f * glm::cos(theta);
-					auto v = state.map_state.normalize_map_coord(mp);
-					map_pos = glm::vec2(v.x, 1.f - v.y);
+					map_pos state.map_state.normalize_map_coord(mp);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
 					auto path = army ? state.world.army_get_path(army) : state.world.navy_get_path(navy);
 					if(path.size() > 0) {
