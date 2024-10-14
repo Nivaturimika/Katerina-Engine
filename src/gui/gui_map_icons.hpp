@@ -592,8 +592,10 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto lbattle = retrieve<dcon::land_battle_id>(state, parent);
+
+			float value = 0.f;
+			float opposing_value = 0.f;
 			if(lbattle) {
-				float value = 0.f;
 				auto w = state.world.land_battle_get_war_from_land_battle_in_war(lbattle);
 				auto is_attacker = state.world.land_battle_get_war_attacker_is_attacker(lbattle);
 				for(const auto a : state.world.land_battle_get_army_battle_participation(lbattle)) {
@@ -605,12 +607,14 @@ namespace ui {
 						for(const auto memb : a.get_army().get_army_membership()) {
 							value += memb.get_regiment().get_strength() * 3.f;
 						}
+					} else {
+						for(const auto memb : a.get_army().get_army_membership()) {
+							opposing_value += memb.get_regiment().get_strength() * 3.f;
+						}
 					}
 				}
-				set_text(state, text::prettify(int64_t(value)));
 			} else {
 				auto nbattle = retrieve<dcon::naval_battle_id>(state, parent);
-				float value = 0.f;
 				auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(nbattle);
 				auto is_attacker = state.world.naval_battle_get_war_attacker_is_attacker(nbattle);
 				for(const auto a : state.world.naval_battle_get_navy_battle_participation(nbattle)) {
@@ -620,8 +624,22 @@ namespace ui {
 						for(const auto memb : a.get_navy().get_navy_membership()) {
 							value += memb.get_ship().get_strength();
 						}
+					} else {
+						for(const auto memb : a.get_navy().get_navy_membership()) {
+							opposing_value += memb.get_ship().get_strength();
+						}
 					}
 				}
+			}
+			value = std::max(value, 0.001f);
+			opposing_value = std::max(opposing_value, 0.001f);
+			// 1000 / 2000 -> 1/2 -> 0.5 (x0.5 times the size)
+			// 3000 / 1000 -> 3/1 -> 3 (advantage of 3 times)
+			if(value / opposing_value > 1.25f) {
+				set_text(state, "?G" + text::prettify(int64_t(value)));
+			} else if(opposing_value / value > 1.25f) {
+				set_text(state, "?R" + text::prettify(int64_t(value)));
+			} else {
 				set_text(state, text::prettify(int64_t(value)));
 			}
 		}
