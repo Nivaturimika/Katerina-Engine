@@ -6852,11 +6852,10 @@ namespace military {
 			float over_size_penalty = oversize_amount > 1.0f ? 2.0f - oversize_amount : 1.0f;
 			auto spending_level = in_nation.get_effective_naval_spending() * over_size_penalty;
 			auto modified_regen = regen_mod * spending_level / 150.0f;
-
 			auto max_org = 0.25f + 0.75f * spending_level;
 			for(auto reg : ar.get_navy_membership()) {
 				auto c_org = reg.get_ship().get_org();
-				reg.get_ship().set_org(std::min(c_org + modified_regen, std::max(c_org, max_org)));
+				reg.get_ship().set_org(std::min(c_org + modified_regen, max_org));
 			}
 		}
 	}
