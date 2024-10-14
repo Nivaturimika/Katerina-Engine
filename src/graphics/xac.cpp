@@ -400,26 +400,10 @@ namespace emfx {
 			node.scale = mh.scale;
 			node.transform = mh.transform;
 			node.parent_id = mh.parent_id;
-			if(mh.parent_id == -1) {
-				if(context.num_root_nodes > context.root_nodes.size()) {
-					std::swap(node.collision_mesh, context.root_nodes[context.num_root_nodes].collision_mesh);
-					std::swap(node.visual_mesh, context.root_nodes[context.num_root_nodes].visual_mesh);
-					std::swap(node.meshes, context.root_nodes[context.num_root_nodes].meshes);
-					context.root_nodes[context.num_root_nodes] = node;
-				} else {
-					context.root_nodes.push_back(node);
-				}
-				context.num_root_nodes++;
-			} else {
-				if(size_t(mh.parent_id) >= context.nodes.size()) {
-					err.accumulated_errors += "Specified actor node " + node.name + " before parent " + err.file_name + "\n";
-					return ptr;
-				}
-			}
-			if(context.num_nodes > context.nodes.size()) {
-				std::swap(node.collision_mesh, context.nodes[context.num_nodes].collision_mesh);
-				std::swap(node.visual_mesh, context.nodes[context.num_nodes].visual_mesh);
-				std::swap(node.meshes, context.nodes[context.num_nodes].meshes);
+			if(context.num_nodes < context.nodes.size()) {
+				node.collision_mesh = context.nodes[context.num_nodes].collision_mesh;
+				node.visual_mesh = context.nodes[context.num_nodes].visual_mesh;
+				node.meshes = context.nodes[context.num_nodes].meshes;
 				context.nodes[context.num_nodes] = node;
 			} else {
 				context.nodes.push_back(node);
@@ -571,7 +555,6 @@ namespace emfx {
 			}
 			node.visual_mesh = int32_t(node.meshes.size());
 		}
-		//
 		if(vertex_offset != cd.num_vertices) {
 			err.accumulated_warnings += "Object total meshes doesn't add up to subojects " + std::to_string(vertex_offset) + " != " + std::to_string(cd.num_vertices) + " (" + err.file_name + ")\n";
 		}
@@ -765,10 +748,13 @@ namespace emfx {
 	}
 
 	void finish(xac_context& context) {
+		auto const new_size = std::max(context.num_nodes, uint32_t(context.nodes.size()));
+		context.nodes.resize(new_size);
+
 		// Post-proccessing step: Transform ALL vectors using the given matrices
 		// for rotation and position, and scale too!
+		/*
 		for(auto& node : context.nodes) {
-			/*
 			const emfx::xac_vector4f q = node.rotation;
 			const emfx::xac_mat4x4 qm{
 				2.f * (q.x * q.x + q.y * q.y) - 1.f, //0 * 4 + 0 = 0
@@ -798,8 +784,8 @@ namespace emfx {
 				qm.m[2][2] * node.scale.z, //2 * 4 + 2 = 10
 				node.position.z, //2 * 4 + 3 = 11
 			};
-			*/
 		}
+		*/
 	}
 
 	xac_vector4f parse_quat_16b(const char** start, const char* end, parsers::error_handler& err, bool as_16b) {
@@ -845,7 +831,7 @@ namespace emfx {
 			anim.max_error = parse_xac_any_binary<float>(&ptr, end, err);
 			ptr = parse_xac_cstring_nodiscard(anim.node, ptr, end, err);
 			//
-			reports::write_debug(("xsm.BoneId#" + std::to_string(anim.bone_id) + "[" + anim.node + "] "
+			reports::write_debug(("xsm.Bone[" + anim.node + "] "
 				+ "nPos=" + std::to_string(num_pos_keys)
 				+ ",nRot=" + std::to_string(num_rot_keys)
 				+ ",nScale=" + std::to_string(num_scale_keys)
@@ -940,23 +926,19 @@ namespace emfx {
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
 		auto const& keys = position_keys;
-		assert(!keys.empty());
-		return i < keys.size() ? keys[i] : keys.back();
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
 		auto const& keys = rotation_keys;
-		assert(!keys.empty());
-		return i < keys.size() ? keys[i] : keys.back();
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
 		auto const& keys = scale_keys;
-		assert(!keys.empty());
-		return i < keys.size() ? keys[i] : keys.back();
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
 		auto const& keys = scale_rotation_keys;
-		assert(!keys.empty());
-		return i < keys.size() ? keys[i] : keys.back();
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
@@ -996,12 +978,9 @@ namespace emfx {
 		assert(t1 <= t2);
 		if(t1 == t2)
 			return 0.f;
-		float mid_len = time - t1;
-		float frames_diff = t2 - t1;
-		float factor = mid_len / frames_diff;
-		//return factor;
-		//assert(factor >= 0.f && factor <= 1.f);
-		return factor;
+		float cur_frame = time - t1;
+		float end_frame = t2 - t1;
+		return cur_frame / end_frame;
 	}
 
 	void finish(xsm_context& context) {

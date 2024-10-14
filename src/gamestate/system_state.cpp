@@ -91,14 +91,21 @@ namespace ui {
 				state.ui_state.units_root->add_child_to_front(std::move(ptr));
 			}
 		});
-		state.world.for_each_province([&](dcon::province_id id) {
+		province::for_each_land_province(state, [&](dcon::province_id id) {
 			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::land>>(state, "unit_mapicon");
 			if(ptr.get()) {
 				static_cast<ui::unit_counter_window<unit_counter_position_type::land>*>(ptr.get())->prov = id;
 				state.ui_state.units_root->add_child_to_front(std::move(ptr));
 			}
 		});
-		state.world.for_each_province([&](dcon::province_id id) {
+		province::for_each_sea_province(state, [&](dcon::province_id id) {
+			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::land>>(state, "unit_mapicon");
+			if(ptr.get()) {
+				static_cast<ui::unit_counter_window<unit_counter_position_type::sea>*>(ptr.get())->prov = id;
+				state.ui_state.units_root->add_child_to_front(std::move(ptr));
+			}
+		});
+		province::for_each_land_province(state, [&](dcon::province_id id) {
 			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::land_move>>(state, "unit_mapicon");
 			if(ptr.get()) {
 				static_cast<ui::unit_counter_window<unit_counter_position_type::land_move>*>(ptr.get())->prov = id;
@@ -386,32 +393,32 @@ namespace sys {
 	void state::on_mouse_wheel(int32_t x, int32_t y, key_modifiers mod, float amount) { // an amount of 1.0 is one "click" of the wheel
 		//update en demand
 		ui::element_base* root_elm = current_scene.get_root(*this);
-		ui_state.scroll_target = root_elm->impl_probe_mouse(*this,
-		int32_t(mouse_x_position / user_settings.ui_scale),
-		int32_t(mouse_y_position / user_settings.ui_scale),
-		ui::mouse_probe_type::scroll).under_mouse;
+		if(root_elm) {
+			ui_state.scroll_target = root_elm->impl_probe_mouse(*this,
+			int32_t(mouse_x_position / user_settings.ui_scale),
+			int32_t(mouse_y_position / user_settings.ui_scale),
+			ui::mouse_probe_type::scroll).under_mouse;
+			auto belongs_on_map = [&](ui::element_base* b) {
+				while(b != nullptr) {
+					if(b == ui_state.units_root.get())
+						return true;
+					if(b == ui_state.colonizations_root.get())
+						return true;
+					if(b == ui_state.rgos_root.get())
+						return true;
+					b = b->parent;
+				}
+				return false;
+			};
+			if(ui_state.scroll_target != nullptr) {
+				ui_state.scroll_target->impl_on_scroll(*this, ui_state.relative_mouse_location.x, ui_state.relative_mouse_location.y, amount, mod);
+			} else if(ui_state.under_mouse == nullptr || belongs_on_map(ui_state.under_mouse)) {
+				map_state.on_mouse_wheel(x, y, x_size, y_size, mod, amount);
 
-		auto belongs_on_map = [&](ui::element_base* b) {
-			while(b != nullptr) {
-				if(b == ui_state.units_root.get())
-					return true;
-				if(b == ui_state.colonizations_root.get())
-					return true;
-				if(b == ui_state.rgos_root.get())
-					return true;
-				b = b->parent;
-			}
-			return false;
-		};
-
-		if(ui_state.scroll_target != nullptr) {
-			ui_state.scroll_target->impl_on_scroll(*this, ui_state.relative_mouse_location.x, ui_state.relative_mouse_location.y, amount, mod);
-		} else if(ui_state.under_mouse == nullptr || belongs_on_map(ui_state.under_mouse)) {
-			map_state.on_mouse_wheel(x, y, x_size, y_size, mod, amount);
-
-			if(ui_state.mouse_sensitive_target) {
-				ui_state.mouse_sensitive_target->set_visible(*this, false);
-				ui_state.mouse_sensitive_target = nullptr;
+				if(ui_state.mouse_sensitive_target) {
+					ui_state.mouse_sensitive_target->set_visible(*this, false);
+					ui_state.mouse_sensitive_target = nullptr;
+				}
 			}
 		}
 	}

@@ -28,10 +28,9 @@
 
 emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material const& mat) {
 	for(const auto& layer : mat.layers) {
-		if(layer.texture == "test256texture" || layer.texture == "unionjacksquare" || layer.texture == "nospec")
-			continue;
-		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse)
+		if(layer.map_type == emfx::xac_pp_material_map_type::diffuse) {
 			return layer;
+		}
 	}
 	return mat.layers.empty() ? emfx::xac_pp_actor_material_layer{} : mat.layers[0];
 }
@@ -1460,12 +1459,11 @@ namespace map {
 						}
 						auto lb = state.world.province_get_land_battle_location(p);
 						if(lb.begin() != lb.end()) {
-							emfx::animation_type at = emfx::animation_type::attack;
-							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, at);
-							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi, at);
+							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, emfx::animation_type::attack);
+							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi, emfx::animation_type::attack);
 						} else if(unit_unit) {
 							list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
-							list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), 0.f, emfx::animation_type::idle);
+							list.emplace_back(model_flag, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
 						}
 						if(moving_unit) {
 							auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -1473,7 +1471,7 @@ namespace map {
 								theta = -math::pi / 2.f;
 							}
 							list.emplace_back(moving_model, glm::vec2(p1.x + dist_step, p1.y + dist_step), -theta, emfx::animation_type::move);
-							list.emplace_back(model_flag_floating, glm::vec2(p1.x + dist_step, p1.y + dist_step), 0.f, emfx::animation_type::idle);
+							list.emplace_back(model_flag, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
 						}
 					}
 				});
@@ -1506,13 +1504,12 @@ namespace map {
 							theta = -math::pi / 2.f;
 						auto lb = state.world.province_get_naval_battle_location(p);
 						if(lb.begin() != lb.end()) {
-							emfx::animation_type at = emfx::animation_type::attack;
-							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, at);
-							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, at);
+							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::attack);
+							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::attack);
 						} else {
 							emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 							list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
-							list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), 0.f, emfx::animation_type::idle);
+							list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
 						}
 					}
 				});
@@ -2577,24 +2574,23 @@ namespace map {
 		}
 
 		state.map_state.map_data.model_province_flag.resize(size_t(state.province_definitions.num_allocated_provincial_flags));
+		assert(display_data::max_static_meshes >= uint32_t(state.ui_defs.emfx.size()));
 		for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
 			auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
 			ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
 
-			auto name = state.to_string_view(emfx_obj.name);
+			auto name = parsers::lowercase_str(state.to_string_view(emfx_obj.name));
 			bool is_province_flag_model = false;
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.num_allocated_provincial_flags); i++) {
 			dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
 				auto pf_name = text::produce_simple_string(state, state.province_definitions.flag_variable_names[pfid]);
-				if(parsers::lowercase_str(pf_name) == parsers::lowercase_str(name)) {
+				if(parsers::lowercase_str(pf_name) == name) {
 					state.map_state.map_data.model_province_flag[i] = edef;
 					is_province_flag_model = true;
 					break;
 				}
 			}
-			if(is_province_flag_model) {
-				//dont execute the rest
-			} else if(name == "wake") {
+			if(name == "wake") {
 				state.map_state.map_data.model_wake = edef;
 				for(uint32_t l = 0; l < display_data::max_static_submeshes; l++) {
 					state.map_state.map_data.static_mesh_scrolling_factor[k][l] = 0.5f;
@@ -2635,6 +2631,8 @@ namespace map {
 				}
 				level = std::clamp<uint32_t>(level, 0, 6);
 				state.map_state.map_data.model_fort[level] = edef;
+			} else if(is_province_flag_model) {
+				//dont execute the rest
 			} else {
 				auto t = culture::graphical_culture_type::generic;
 				size_t type_pos = std::string::npos;
@@ -2735,17 +2733,17 @@ namespace map {
 				}
 				uint32_t node_index = 0;
 				for(auto const& node : context.nodes) {
-					//if(node.name == "polySurface95" || node.name == "polySurface97") {
-					//	node_index++;
-					//	continue;
-					//}
+					if(node.name == "polySurface95" || node.name == "polySurface97") {
+						node_index++;
+						continue;
+					}
 					int32_t mesh_index = 0;
 					for(auto const& mesh : node.meshes) {
 						bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
-						//if(is_collision) {
-						//	mesh_index++;
-						//	continue;
-						//}
+						if(is_collision) {
+							mesh_index++;
+							continue;
+						}
 
 						uint32_t vertex_offset = 0;
 						for(auto const& sub : mesh.submeshes) {
@@ -2776,19 +2774,25 @@ namespace map {
 										smv.bone_ids[l] = -1;
 										smv.bone_weights[l] = 0.f;
 									}
-									for(uint32_t l = 0; l < i_count; l++) {
-										if(mesh.influences[l + i_start].bone_id == -1
-										|| mesh.influences[l + i_start].bone_id >= int32_t(context.nodes.size())
-										|| mesh.influences[l + i_start].bone_id >= state.map_state.map_data.max_bone_matrices) {
-											has_invalid_bone_ids = true;
-											continue;
+									uint32_t added_count = 0;
+									for(uint32_t l = i_start; l < i_start + i_count; l++) {
+										auto influence = mesh.influences[l];
+										//if(influence.bone_id == -1
+										//|| influence.bone_id >= int32_t(context.nodes.size())
+										//|| influence.bone_id >= state.map_state.map_data.max_bone_matrices) {
+										//	reports::write_debug(("Invalid bone Id#" + std::to_string(influence.bone_id) + "\n").c_str());
+										//	continue;
+										//}
+										//assert(influence.bone_id != -1);
+										if(influence.bone_id >= int32_t(context.nodes.size())) {
+											influence.bone_id = -1;
 										}
-										if(context.nodes[mesh.influences[l + i_start].bone_id].name == "polySurface95"
-										|| context.nodes[mesh.influences[l + i_start].bone_id].name == "polySurface97") {
-											continue;
+										assert(influence.bone_id < int32_t(state.map_state.map_data.max_bone_matrices));
+										if(influence.bone_id != -1) {
+											smv.bone_ids[added_count] = int8_t(influence.bone_id);
+											smv.bone_weights[added_count] = influence.weight;
+											++added_count;
 										}
-										smv.bone_ids[l] = int8_t(mesh.influences[l + i_start].bone_id);
-										smv.bone_weights[l] = mesh.influences[l + i_start].weight;
 									}
 								}
 								for(const auto& smv : triangle_vertices) {
@@ -2796,9 +2800,6 @@ namespace map {
 									tmp.position_ *= emfx_obj.scale;
 									static_mesh_vertices.push_back(tmp);
 								}
-							}
-							if(has_invalid_bone_ids) {
-								reports::write_debug("Invalid bone ID\n");
 							}
 							vertex_offset += sub.num_vertices;
 							auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();

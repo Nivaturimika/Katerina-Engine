@@ -1325,11 +1325,12 @@ namespace map {
 		return screen_size.x / screen_size.y;
 	}
 	float map_state::get_counter_factor(float v) const {
-		if(zoom <= map::zoom_close)
-		return 0.f;
+		if(zoom <= map::zoom_close) {
+			return 0.f;
+		}
 		float z_factor = (zoom - map::zoom_close) / (map::max_zoom - map::zoom_close);
 		z_factor *= v;
-		return std::sin(z_factor * math::pi / 2.f) * math::pi / 2.f;
+		return std::sin(z_factor * math::pi / 1.66f) * math::pi / 1.66f;
 	}
 
 	float map_state::get_zoom() const {
