@@ -138,22 +138,19 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 			break;
 		if(date_index == 0) {
 			auto sdir = simple_fs::get_or_create_scenario_directory();
+			native_string base_name;
+			for(uint32_t i = 0; i < path.size(); i++) {
+				auto c = path[i];
+				if(!(c == NATIVE(';') || c == NATIVE('?') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\'))) {
+					base_name.push_back(c);
+				}
+			}
 			int32_t append = 0;
 			auto time_stamp = uint64_t(std::time(0));
 			while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
 				++append;
 			}
-
-			selected_scenario_file.clear();
-			for(uint32_t i = 0; i < path.size(); i++) {
-				auto c = path[i];
-				if(c == NATIVE(';') || c == NATIVE('?') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\')) {
-					
-				} else {
-					selected_scenario_file.push_back(c);
-				}
-			}
-			selected_scenario_file += NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
+			selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
 			sys::write_scenario_file(*book_game_state, selected_scenario_file, 1);
 			scenario_key = book_game_state->scenario_checksum;
 		} else {
