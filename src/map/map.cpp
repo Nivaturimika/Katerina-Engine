@@ -1159,7 +1159,6 @@ namespace map {
 
 			if(shaders[uint8_t(map_view_mode)][shader_selection] && !selection_vertices.empty() && zoom > map::zoom_very_close) { //only render if close enough
 				load_shader(shader_selection);
-				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_selection][uniform_time], 0.f);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textures[texture_selection]);
 				glBindVertexArray(vao_array[vo_selection]);
@@ -1169,6 +1168,7 @@ namespace map {
 
 			if(shaders[uint8_t(map_view_mode)][shader_selection] && !capital_vertices.empty() && zoom > map::zoom_very_close) { //only render if close enough
 				load_shader(shader_selection);
+				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_selection][uniform_time], 0.f);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, textures[texture_capital]);
 				glBindVertexArray(vao_array[vo_capital]);
