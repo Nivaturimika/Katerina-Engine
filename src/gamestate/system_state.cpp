@@ -2254,18 +2254,8 @@ namespace sys {
 					cat = culture::tech_category::culture;
 				} else if(simple_fs::get_file_name(invf) == NATIVE("industry_inventions.txt")) {
 					cat = culture::tech_category::industry;
-					//non vanilla
-				} else if(simple_fs::get_file_name(invf) == NATIVE("military_theory_inventions.txt")) {
-					cat = culture::tech_category::military_theory;
-				} else if(simple_fs::get_file_name(invf) == NATIVE("diplomacy_inventions.txt")) {
-					cat = culture::tech_category::diplomacy;
-				} else if(simple_fs::get_file_name(invf) == NATIVE("population_inventions.txt")) {
-					cat = culture::tech_category::population;
-				} else if(simple_fs::get_file_name(invf) == NATIVE("flavor_inventions.txt")) {
-					cat = culture::tech_category::flavor;
-				} else if(simple_fs::get_file_name(invf) == NATIVE("theory_inventions.txt")) {
-					cat = culture::tech_category::theory;
 				}
+				//non vanilla tech categories not accounted for
 
 				parsers::tech_group_context invention_context{ context, cat };
 				if(auto i_file = open_file(invf); i_file) {

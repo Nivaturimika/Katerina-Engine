@@ -1412,20 +1412,18 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			"Only uncivilized nation reforms may have a tech cost (" + err.file_name + " line " + std::to_string(line) + ")\n";
 	}
 
-	void issue_option_body::war_exhaustion_effect(association_type, float value, error_handler& err, int32_t line,
-		individual_option_context& context) {
+	void issue_option_body::war_exhaustion_effect(association_type, float value, error_handler& err, int32_t line, individual_option_context& context) {
 		context.outer_context.state.world.issue_option_set_war_exhaustion_effect(context.id, value);
 	}
 
-	void issue_option_body::administrative_multiplier(association_type, float value, error_handler& err, int32_t line,
-		individual_option_context& context) {
+	void issue_option_body::administrative_multiplier(association_type, float value, error_handler& err, int32_t line, individual_option_context& context) {
 		context.outer_context.state.world.issue_option_set_administrative_multiplier(context.id, value);
 	}
 
-	void issue_option_body::is_jingoism(association_type, bool value, error_handler& err, int32_t line,
-		individual_option_context& context) {
-		if(value)
-		context.outer_context.state.culture_definitions.jingoism = context.id;
+	void issue_option_body::is_jingoism(association_type, bool value, error_handler& err, int32_t line, individual_option_context& context) {
+		if(value) {
+			context.outer_context.state.culture_definitions.jingoism = context.id;
+		}
 	}
 
 	void issue_option_body::technology_cost(association_type, int32_t value, error_handler& err, int32_t line,

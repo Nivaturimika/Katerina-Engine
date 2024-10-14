@@ -32,6 +32,20 @@ namespace culture {
 			return "flavor_tech";
 		case culture::tech_category::theory:
 			return "theory_tech";
+		case culture::tech_category::economic:
+			return "economic_tech";
+		case culture::tech_category::society:
+			return "society_tech";
+		case culture::tech_category::naval:
+			return "naval_tech";
+		case culture::tech_category::production:
+			return "production_tech";
+		case culture::tech_category::first_century:
+			return "first_century_tech";
+		case culture::tech_category::second_century:
+			return "second_century_tech";
+		case culture::tech_category::third_century:
+			return "third_century_tech";
 		default:
 			break;
 		}
@@ -864,6 +878,7 @@ namespace culture {
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::flavor_tech_research_bonus) + 1.0f;
 			case tech_category::theory:
 				return state.world.nation_get_modifier_values(target_nation, sys::national_mod_offsets::theory_tech_research_bonus) + 1.0f;
+			// TODO: economic, society, naval, production, first_century, second_century, third_century
 			default:
 				return 1.0f;
 			}

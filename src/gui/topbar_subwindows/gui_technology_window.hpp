@@ -70,6 +70,7 @@ namespace ui {
 			case culture::tech_category::theory:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
 				break;
+			// TODO: economic, society, naval, production, first_century, second_century, third_century
 			case culture::tech_category::unknown:
 				break;
 			}
@@ -622,6 +623,7 @@ namespace ui {
 			case culture::tech_category::theory:
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
 				break;
+			// TODO: economic, society, naval, production, first_century, second_century, third_century
 			default:
 				break;
 			}

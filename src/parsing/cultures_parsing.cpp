@@ -295,6 +295,20 @@ namespace parsers {
 			cat = ::culture::tech_category::flavor;
 		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "theory_tech")) {
 			cat = ::culture::tech_category::theory;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "economic_tech")) {
+			cat = ::culture::tech_category::economic;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "society_tech")) {
+			cat = ::culture::tech_category::society;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "naval_tech")) {
+			cat = ::culture::tech_category::naval;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "production_tech")) {
+			cat = ::culture::tech_category::production;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "first_century")) {
+			cat = ::culture::tech_category::first_century;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "second_century")) {
+			cat = ::culture::tech_category::second_century;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "third_century")) {
+			cat = ::culture::tech_category::third_century;
 		} else {
 			err.accumulated_errors += "Unknown technology category " + std::string(name) + " in file " + err.file_name + "\n";
 		}

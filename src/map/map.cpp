@@ -2636,71 +2636,36 @@ namespace map {
 			} else {
 				auto t = culture::graphical_culture_type::generic;
 				size_t type_pos = std::string::npos;
-				if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "africangc")) {
-					t = culture::graphical_culture_type::african;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "asiangc")) {
-					t = culture::graphical_culture_type::asian;
-					type_pos = 5 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "austriahungarygc")) {
+				if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "generic")) {
+					type_pos = 7;
+				} /* following tokens are dynamic */
+#define CT_STRING_ENUM(x) \
+	else if(parsers::has_fixed_prefix(name.data(), name.data() + name.length(), #x"gc")) {\
+		t = culture::graphical_culture_type::x; type_pos = 2 + std::strlen(#x); }
+				CT_STRING_ENUM(african)
+				CT_STRING_ENUM(asian)
+				CT_STRING_ENUM(british)
+				CT_STRING_ENUM(chinese)
+				CT_STRING_ENUM(confederate)
+				CT_STRING_ENUM(european)
+				CT_STRING_ENUM(french)
+				CT_STRING_ENUM(indian)
+				CT_STRING_ENUM(italian)
+				CT_STRING_ENUM(japanese)
+				CT_STRING_ENUM(middle_eastern)
+				CT_STRING_ENUM(morocco)
+				CT_STRING_ENUM(ottoman)
+				CT_STRING_ENUM(prussian)
+				CT_STRING_ENUM(russian)
+				CT_STRING_ENUM(south_american)
+				CT_STRING_ENUM(spanish)
+				CT_STRING_ENUM(swedish)
+				CT_STRING_ENUM(us)
+				CT_STRING_ENUM(zulu)
+#undef CT_STRING_ENUM
+				else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "austriahungarygc")) {
 					t = culture::graphical_culture_type::austria_hungary;
 					type_pos = 14 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "britishgc")) {
-					t = culture::graphical_culture_type::british;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "chinesegc")) {
-					t = culture::graphical_culture_type::chinese;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "confederategc")) {
-					t = culture::graphical_culture_type::confederate;
-					type_pos = 11 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "europeangc")) {
-					t = culture::graphical_culture_type::european;
-					type_pos = 8 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "frenchgc")) {
-					t = culture::graphical_culture_type::french;
-					type_pos = 6 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "indiangc")) {
-					t = culture::graphical_culture_type::indian;
-					type_pos = 6 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "italiangc")) {
-					t = culture::graphical_culture_type::italian;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "japanesegc")) {
-					t = culture::graphical_culture_type::japanese;
-					type_pos = 8 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "middleeasterngc")) {
-					t = culture::graphical_culture_type::middle_eastern;
-					type_pos = 13 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "moroccogc")) {
-					t = culture::graphical_culture_type::morocco;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "ottomangc")) {
-					t = culture::graphical_culture_type::ottoman;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "prussiangc")) {
-					t = culture::graphical_culture_type::prussian;
-					type_pos = 8 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "russiangc")) {
-					t = culture::graphical_culture_type::russian;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "southamericangc")) {
-					t = culture::graphical_culture_type::south_american;
-					type_pos = 13 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "spanishgc")) {
-					t = culture::graphical_culture_type::spanish;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "swedishgc")) {
-					t = culture::graphical_culture_type::swedish;
-					type_pos = 7 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "usgc")) {
-					t = culture::graphical_culture_type::us;
-					type_pos = 2 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "zulugc")) {
-					t = culture::graphical_culture_type::zulu;
-					type_pos = 4 + 2;
-				} else if(parsers::has_fixed_prefix_ci(name.data(), name.data() + name.length(), "generic")) {
-					type_pos = 7;
 				}
 				if(type_pos != std::string::npos) {
 					auto type_name = parsers::lowercase_str(std::string_view(name.data() + type_pos, name.data() + name.length()));
