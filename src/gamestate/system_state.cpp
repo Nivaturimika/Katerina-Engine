@@ -2102,8 +2102,8 @@ namespace sys {
 		// read *.lua, not being able to read the defines isn't fatal per se
 		{
 			// Default vanilla dates used if ones are not defined
-		start_date = sys::absolute_time_point(sys::year_month_day{ 1836, 1, 1 });
-		end_date = sys::absolute_time_point(sys::year_month_day{ 1935, 12, 31 });
+			start_date = sys::absolute_time_point(sys::year_month_day{ 1836, 1, 1 });
+			end_date = sys::absolute_time_point(sys::year_month_day{ 1935, 12, 31 });
 			for(auto defines_file : simple_fs::list_files(common, NATIVE(".lua"))) {
 				auto opened_file = open_file(defines_file);
 				if(opened_file) {
@@ -2443,10 +2443,10 @@ namespace sys {
 			std::vector<native_string> date_directories;
 			//
 			auto ymd = current_date.to_ymd(start_date);
-			auto start_dir_name = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
-			date_directories.emplace_back(start_dir_name);
-			if(ymd.year != 1836 && ymd.month != 1 && ymd.day != 1) {
-				date_directories.emplace_back(NATIVE("1836.1.1"));
+			date_directories.emplace_back(to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day));
+			if(current_date.value > 0) {
+				auto sd_ymd = sys::date(0).to_ymd(start_date);
+				date_directories.emplace_back(to_native_string(sd_ymd.year) + NATIVE(".") + to_native_string(sd_ymd.month) + NATIVE(".") + to_native_string(sd_ymd.day));
 			}
 			//
 			for(const auto& dir_name : date_directories) {
