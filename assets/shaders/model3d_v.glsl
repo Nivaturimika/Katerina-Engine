@@ -30,6 +30,7 @@ void main() {
 	vec3 world_pos = vertex_position;
 	bool have_animations = false; //have animations?
 	if(have_animations) {
+		//vec4 skin_pos = vec4(vertex_position, 1.f);
 		vec4 skin_pos = vec4(0.f);
 		for(int i = 0 ; i < 4; i++) {
 			if(bone_ids[i] == -1)
@@ -38,7 +39,8 @@ void main() {
 			skin_pos += local_pos * bone_weights[i];
 		}
 		world_pos = skin_pos.xyz;
-		world_pos.z *= -1.f;
+		//world_pos.xyz /= skin_pos.w;
+		world_pos.y *= -1.f;
 	} else {
 		world_pos.y *= -1.f;
 	}
