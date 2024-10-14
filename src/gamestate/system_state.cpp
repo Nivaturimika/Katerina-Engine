@@ -3902,6 +3902,7 @@ namespace sys {
 		case 1:
 			nations::update_monthly_points(*this);
 			economy_factory::prune_factories(*this);
+			military::reinforce_regiments(*this);
 			break;
 		case 2:
 			province::update_blockaded_cache(*this);
@@ -3912,7 +3913,6 @@ namespace sys {
 			ai::add_gw_goals(*this);
 			break;
 		case 4:
-			military::reinforce_regiments(*this);
 			break;
 		case 5:
 			rebel::update_movements(*this);
