@@ -6824,16 +6824,14 @@ namespace military {
 
 			auto leader = ar.get_general_from_army_leadership();
 			auto regen_mod = tech_nation.get_modifier_values(sys::national_mod_offsets::org_regain)
-			+ leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f
-			+ leader.get_prestige() * state.defines.leader_prestige_to_max_org_factor;
+				+ leader.get_personality().get_morale() + leader.get_background().get_morale() + 1.0f
+				+ leader.get_prestige() * state.defines.leader_prestige_to_max_org_factor;
 			auto spending_level = (in_nation ? in_nation.get_effective_land_spending() : 1.0f);
-			auto modified_regen = regen_mod * spending_level / 150.0f;
-
-			// TODO: is it max org base? 
+			auto modified_regen = regen_mod * spending_level / 150.f;
 			auto max_org = 0.25f + 0.75f * spending_level;
 			for(auto reg : ar.get_army_membership()) {
 				auto c_org = reg.get_regiment().get_org();
-				reg.get_regiment().set_org(std::min(c_org + modified_regen, std::max(c_org, max_org)));
+				reg.get_regiment().set_org(std::min(c_org + modified_regen, max_org));
 			}
 		}
 
