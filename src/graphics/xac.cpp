@@ -1001,7 +1001,7 @@ namespace emfx {
 		float factor = mid_len / frames_diff;
 		//return factor;
 		//assert(factor >= 0.f && factor <= 1.f);
-		return std::clamp(factor, 0.f, 1.f);
+		return factor;
 	}
 
 	void finish(xsm_context& context) {
