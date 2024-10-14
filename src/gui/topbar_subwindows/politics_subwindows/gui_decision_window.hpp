@@ -249,6 +249,12 @@ namespace ui {
 					float(x), float(y), float(base_data.size.x), float(base_data.size.y),
 					tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
 					get_horizontal_flip(state));
+			} else {
+				auto tid = ogl::get_texture_handle(state, ui::definitions::no_decision_image, gfx_def.is_partially_transparent());
+				ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+					float(x), float(y), float(base_data.size.x), float(base_data.size.y),
+					tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+					get_horizontal_flip(state));
 			}
 		}
 	};

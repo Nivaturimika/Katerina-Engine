@@ -520,22 +520,22 @@ set to one or more of the following values.	*/
 			}
 			f = open_file(root, png_name);
 			if(!f) {
-				auto dds_name = native_name;
+				auto tga_name = native_name;
 				if(ext_pos != native_string::npos) {
-					dds_name[ext_pos + 1] = NATIVE('d');
-					dds_name[ext_pos + 2] = NATIVE('d');
-					dds_name[ext_pos + 3] = NATIVE('s');
-					dds_name.resize(ext_pos + 4);
+					tga_name[ext_pos + 1] = NATIVE('t');
+					tga_name[ext_pos + 2] = NATIVE('g');
+					tga_name[ext_pos + 3] = NATIVE('a');
+					tga_name.resize(ext_pos + 4);
 				}
-				f = open_file(root, dds_name);
+				f = open_file(root, tga_name);
 			}
 		}
 		if(f) {
 			auto content = simple_fs::view_contents(*f);
 			reports::write_debug(("Loading texture: " + text::native_to_utf8(simple_fs::get_full_name(*f)) + "\n").c_str());
 			int32_t file_channels = 4;
-			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &(asset_texture.size_x), &(asset_texture.size_y), &file_channels, 4);
-			asset_texture.channels = 4;
+			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &asset_texture.size_x, &asset_texture.size_y, &file_channels, 4);
+			asset_texture.channels = file_channels;
 			glGenTextures(1, &asset_texture.texture_handle);
 			glBindTexture(GL_TEXTURE_2D, asset_texture.texture_handle);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, asset_texture.size_x, asset_texture.size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
