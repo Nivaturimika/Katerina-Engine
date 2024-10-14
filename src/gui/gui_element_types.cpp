@@ -1085,11 +1085,10 @@ namespace ui {
 				if(gfx_def.size.x != 0) {
 					dat.size = gfx_def.size;
 				} else {
-					auto tex_handle = gfx_def.primary_texture_handle;
-					if(tex_handle) {
-						ogl::get_texture_handle(state, tex_handle, gfx_def.is_partially_transparent());
-						dat.size.y = int16_t(state.open_gl.asset_textures[tex_handle].size_y);
-						dat.size.x = int16_t(state.open_gl.asset_textures[tex_handle].size_x / gfx_def.number_of_frames);
+					if(auto tid = gfx_def.primary_texture_handle; tid) {
+						ogl::get_texture_handle(state, tid, gfx_def.is_partially_transparent());
+						dat.size.y = int16_t(state.open_gl.asset_textures[tid].size_y);
+						dat.size.x = int16_t(state.open_gl.asset_textures[tid].size_x / gfx_def.number_of_frames);
 					}
 				}
 				if(scale != 1.0f) {

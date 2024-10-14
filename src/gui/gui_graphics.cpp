@@ -28,7 +28,7 @@ namespace ui {
 			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_decision_image);
 		}
 		{
-			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\pictures\\decisions\\GFX_event_no_image.tga"));
+			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\pictures\\events\\GFX_event_no_image.tga"));
 			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
 			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_event_image);
 		}
