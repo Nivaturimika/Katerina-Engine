@@ -171,7 +171,7 @@ namespace command {
 		case command_type::notify_start_game:
 		case command_type::notify_stop_game:
 		case command_type::notify_player_oos:
-		//case command_type::notify_pause_game:
+		case command_type::notify_pause_game:
 		case command_type::chat_message:
 			// Notifications can be sent because it's an-always do thing
 			break;
