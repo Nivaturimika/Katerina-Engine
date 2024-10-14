@@ -480,13 +480,18 @@ namespace ui {
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
 			if(state.world.province_get_siege_progress(p) > 0.f)
-			progress_bar::impl_render(state, x, y);
+				progress_bar::impl_render(state, x, y);
 		}
 		message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
-			if(state.world.province_get_siege_progress(p) > 0.f)
-			return progress_bar::test_mouse(state, x, y, type);
-			return message_result::unseen;
+			return state.world.province_get_siege_progress(p) > 0.f ? progress_bar::test_mouse(state, x, y, type) : message_result::unseen;
+		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			text::add_line(state, contents, "siege_progress", text::variable_type::x, text::fp_percentage_one_place{ state.world.province_get_siege_progress(prov) });
 		}
 	};
 	class province_siege_flag : public flag_button {
@@ -529,27 +534,23 @@ namespace ui {
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
 			if(state.world.province_get_siege_progress(p) > 0.f)
-			flag_button::impl_render(state, x, y);
+				flag_button::impl_render(state, x, y);
 		}
 		message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
-			if(state.world.province_get_siege_progress(p) > 0.f)
-			return flag_button::test_mouse(state, x, y, type);
-			return message_result::unseen;
+			return state.world.province_get_siege_progress(p) > 0.f ? flag_button::test_mouse(state, x, y, type) : message_result::unseen;
 		}
 	};
 	class province_siege_icon : public image_element_base {
-		public:
+	public:
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
 			if(state.world.province_get_siege_progress(p) > 0.f)
-			image_element_base::impl_render(state, x, y);
+				image_element_base::impl_render(state, x, y);
 		}
 		message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
-			if(state.world.province_get_siege_progress(p) > 0.f)
-			return image_element_base::test_mouse(state, x, y, type);
-			return message_result::unseen;
+			return state.world.province_get_siege_progress(p) > 0.f ? image_element_base::test_mouse(state, x, y, type) : message_result::unseen;
 		}
 	};
 

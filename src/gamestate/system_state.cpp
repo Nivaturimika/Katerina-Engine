@@ -84,6 +84,13 @@ namespace ui {
 				}
 			}
 		}
+		province::for_each_land_province(state, [&](dcon::province_id id) {
+			auto ptr = ui::make_element_by_type<ui::siege_counter_window>(state, "siege_mapicon");
+			if(ptr.get()) {
+				static_cast<ui::siege_counter_window*>(ptr.get())->prov = id;
+				state.ui_state.units_root->add_child_to_front(std::move(ptr));
+			}
+		});
 		state.world.for_each_province([&](dcon::province_id id) {
 			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::land>>(state, "unit_mapicon");
 			if(ptr.get()) {
@@ -105,13 +112,6 @@ namespace ui {
 					static_cast<ui::unit_counter_window<unit_counter_position_type::port>*>(ptr.get())->prov = id;
 					state.ui_state.units_root->add_child_to_front(std::move(ptr));
 				}
-			}
-		});
-		province::for_each_land_province(state, [&](dcon::province_id id) {
-			auto ptr = ui::make_element_by_type<ui::siege_counter_window>(state, "siege_mapicon");
-			if(ptr.get()) {
-				static_cast<ui::siege_counter_window*>(ptr.get())->prov = id;
-				state.ui_state.units_root->add_child_to_front(std::move(ptr));
 			}
 		});
 		state.world.for_each_province([&](dcon::province_id id) {

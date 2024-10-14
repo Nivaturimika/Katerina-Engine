@@ -452,6 +452,13 @@ namespace ui {
 			auto prov = retrieve<dcon::province_id>(state, parent);
 			progress = state.world.province_get_siege_progress(prov);
 		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			text::add_line(state, contents, "siege_progress", text::variable_type::x, text::fp_percentage_one_place{ state.world.province_get_siege_progress(prov) });
+		}
 	};
 
 	class siege_counter_window : public window_element_base {
