@@ -724,7 +724,7 @@ namespace ui {
 			uint32_t total_commodities = state.world.commodity_size();
 			for(uint32_t i = 1; i < total_commodities; ++i) {
 				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-				auto cost = state.world.commodity_get_current_price(n, cid);
+				auto cost = state.world.commodity_get_current_price(cid);
 				auto amount = state.world.nation_get_army_demand(n, cid);
 				if(amount > 0.f) {
 					text::substitution_map m;
@@ -757,7 +757,7 @@ namespace ui {
 			uint32_t total_commodities = state.world.commodity_size();
 			for(uint32_t i = 1; i < total_commodities; ++i) {
 				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-				auto cost = state.world.commodity_get_current_price(n, cid);
+				auto cost = state.world.commodity_get_current_price(cid);
 				auto amount = state.world.nation_get_navy_demand(n, cid);
 				if(amount > 0.f) {
 					text::substitution_map m;
