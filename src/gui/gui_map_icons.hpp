@@ -63,6 +63,7 @@ namespace ui {
 		auto fat_id = dcon::fatten(state.world, a);
 		switch(pos) {
 		case unit_counter_position_type::port:
+			return false;
 		case unit_counter_position_type::land:
 			return (fat_id.get_path().size() == 0 || fat_id.get_battle_from_army_battle_participation())
 				&& !fat_id.get_navy_from_army_transport();
@@ -76,7 +77,7 @@ namespace ui {
 		switch(pos) {
 		case unit_counter_position_type::port:
 		case unit_counter_position_type::land:
-			return fat_id.get_path().size() == 0 || fat_id.get_battle_from_navy_battle_participation();
+			return true;
 		case unit_counter_position_type::land_move:
 			return false;
 		}
@@ -310,23 +311,20 @@ namespace ui {
 
 		void on_update(sys::state& state) noexcept override {
 			army = dcon::army_id{};
-			for(auto al : state.world.province_get_army_location_as_location(prov)) {
-				if(filter_unit_for_position_type(state, A, al.get_army()) {
+			navy = dcon::navy_id{};
+			for(const auto al : state.world.province_get_army_location_as_location(prov)) {
+				if(filter_unit_for_position_type(state, A, al.get_army())) {
 					army = al.get_army();
 					if(al.get_army().get_controller_from_army_control() == state.local_player_nation) {
 						break;
 					}
 				}
 			}
-			navy = dcon::navy_id{};
-			if(prov.index() >= state.province_definitions.first_sea_province.index()
-			|| state.world.province_get_port_to(prov)) {
-				for(auto al : state.world.province_get_navy_location_as_location(prov)) {
-					if(filter_unit_for_position_type(state, A, al.get_navy()) {
-						navy = al.get_navy();
-						if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
-							break;
-						}
+			for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
+				if(filter_unit_for_position_type(state, A, al.get_navy())) {
+					navy = al.get_navy();
+					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
+						break;
 					}
 				}
 			}
@@ -341,8 +339,8 @@ namespace ui {
 					auto dp = state.world.province_get_mid_point(state.world.province_get_port_to(prov));
 					auto mp = state.world.province_get_mid_point(prov);
 					auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
-					mp.x += 2.f * glm::sin(theta);
-					mp.y += 2.f * glm::cos(theta);
+					mp.x -= 2.f * glm::sin(theta);
+					mp.y -= 2.f * glm::cos(theta);
 					auto v = state.map_state.normalize_map_coord(mp);
 					map_pos = glm::vec2(v.x, 1.f - v.y);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
