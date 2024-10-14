@@ -405,21 +405,20 @@ namespace command {
 		nations::adjust_relationship(state, source, target, state.defines.cancelwarsubsidy_relation_on_accept);
 		state.world.nation_get_diplomatic_points(source) -= state.defines.cancelwarsubsidy_diplomatic_cost;
 		auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, source);
-		if(rel)
-		state.world.unilateral_relationship_set_war_subsidies(rel, false);
-
+		if(rel) {
+			state.world.unilateral_relationship_set_war_subsidies(rel, false);
+		}
 		if(source != state.local_player_nation) {
 			notification::post(state, notification::message{
 				[source, target](sys::state& state, text::layout_base& contents) {
 					text::add_line(state, contents, "msg_wsub_end_1", text::variable_type::x, source, text::variable_type::y, target);
 				},
 				"msg_wsub_end_title",
-			source, target, dcon::nation_id{},
+				source, target, dcon::nation_id{},
 				sys::message_base_type::war_subsidies_end
 			});
 		}
 	}
-
 
 	void increase_relations(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		payload p;
@@ -1036,7 +1035,6 @@ namespace command {
 		} else if(state.local_player_nation == holder) {
 			state.local_player_nation = source;
 		}
-
 
 		for(auto p : state.world.nation_get_province_ownership(holder)) {
 			auto pid = p.get_province();
@@ -1961,15 +1959,10 @@ namespace command {
 		add_to_command_queue(state, p);
 	}
 	bool can_enact_reform(sys::state& state, dcon::nation_id source, dcon::reform_option_id r) {
-		if(source == state.local_player_nation && state.cheat_data.always_allow_reforms)
-		return true;
-
-		bool is_military = state.world.reform_get_reform_type(state.world.reform_option_get_parent_reform(r)) ==
-		uint8_t(culture::issue_category::military);
-		if(is_military)
-		return politics::can_enact_military_reform(state, source, r);
-		else
-		return politics::can_enact_economic_reform(state, source, r);
+		if(state.world.nation_get_is_player_controlled(source) && state.cheat_data.always_allow_reforms)
+			return true;
+		bool is_military = state.world.reform_get_reform_type(state.world.reform_option_get_parent_reform(r)) == uint8_t(culture::issue_category::military);
+		return is_military ? politics::can_enact_military_reform(state, source, r) : politics::can_enact_economic_reform(state, source, r);
 	}
 	void execute_enact_reform(sys::state& state, dcon::nation_id source, dcon::reform_option_id r) {
 		nations::enact_reform(state, source, r);
@@ -1985,15 +1978,15 @@ namespace command {
 		add_to_command_queue(state, p);
 	}
 	bool can_enact_issue(sys::state& state, dcon::nation_id source, dcon::issue_option_id i) {
-		if(source == state.local_player_nation && state.cheat_data.always_allow_reforms)
-		return true;
+		if(state.world.nation_get_is_player_controlled(source) && state.cheat_data.always_allow_reforms)
+			return true;
 
 		auto type = state.world.issue_get_issue_type(state.world.issue_option_get_parent_issue(i));
-		if(type == uint8_t(culture::issue_type::political))
-		return politics::can_enact_political_reform(state, source, i);
-		else if(type == uint8_t(culture::issue_type::social))
-		return politics::can_enact_social_reform(state, source, i);
-		else
+		if(type == uint8_t(culture::issue_type::political)) {
+			return politics::can_enact_political_reform(state, source, i);
+		} else if(type == uint8_t(culture::issue_type::social)) {
+			return politics::can_enact_social_reform(state, source, i);
+		}
 		return false;
 	}
 	void execute_enact_issue(sys::state& state, dcon::nation_id source, dcon::issue_option_id i) {
@@ -2633,7 +2626,7 @@ namespace command {
 					text::add_line(state, contents, "msg_access_canceled_b_1", text::variable_type::x, source, text::variable_type::y, target);
 				},
 				"msg_access_canceled_b_title",
-			source, target, dcon::nation_id{},
+				source, target, dcon::nation_id{},
 				sys::message_base_type::mil_access_end
 			});
 		}
@@ -3568,7 +3561,7 @@ namespace command {
 			reg.set_army_from_army_membership(a);
 		}
 
-		if(source == state.local_player_nation) {
+		if(source == state.local_player_nation && state.is_selected(b)) {
 			state.deselect(b);
 		}
 		military::cleanup_army(state, b);
@@ -3624,7 +3617,7 @@ namespace command {
 			arm.set_navy_from_army_transport(a);
 		}
 
-		if(source == state.local_player_nation) {
+		if(source == state.local_player_nation && state.is_selected(b)) {
 			state.deselect(b);
 		}
 		military::cleanup_navy(state, b);
@@ -3930,8 +3923,9 @@ namespace command {
 				state.world.regiment_set_army_from_army_membership(t, new_u);
 			}
 
-			if(source == state.local_player_nation && state.is_selected(a))
-			state.select(new_u);
+			if(source == state.local_player_nation && state.is_selected(a)) {
+				state.select(new_u);
+			}
 
 			auto old_regs = state.world.army_get_army_membership(a);
 			if(old_regs.begin() == old_regs.end()) {

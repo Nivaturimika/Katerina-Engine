@@ -2409,7 +2409,7 @@ namespace economy {
 							text::add_line(state, contents, "amsg_army_built");
 						},
 						"amsg_army_built",
-					c.get_nation(), dcon::nation_id{ }, dcon::nation_id{ },
+						c.get_nation(), dcon::nation_id{ }, dcon::nation_id{ },
 						sys::message_base_type::army_built
 					});
 				}
@@ -2456,7 +2456,7 @@ namespace economy {
 								text::add_line(state, contents, "amsg_navy_built");
 							},
 							"amsg_navy_built",
-						state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+							state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 							sys::message_base_type::navy_built
 						});
 					}
@@ -2499,34 +2499,34 @@ namespace economy {
 
 					if(state.world.province_building_construction_get_nation(c) == state.local_player_nation) {
 						switch(t) {
-							case province_building_type::naval_base:
+						case province_building_type::naval_base:
 							notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {
 									text::add_line(state, contents, "amsg_naval_base_complete");
 								},
 								"amsg_naval_base_complete",
-							state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+								state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 								sys::message_base_type::naval_base_complete
 							});
 							break;
-							case province_building_type::fort:
+						case province_building_type::fort:
 							notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {
 									text::add_line(state, contents, "amsg_fort_complete");
 								},
 								"amsg_fort_complete",
-							state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+								state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 								sys::message_base_type::fort_complete
 							});
 							break;
-							case province_building_type::railroad:
+						case province_building_type::railroad:
 							notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {
 									text::add_line(state, contents, "amsg_rr_complete");
 								},
 								"amsg_rr_complete",
-							state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+								state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 								sys::message_base_type::rr_complete
 							});
 							break;
-							default:
+						default:
 							break;
 						}
 					}
@@ -2557,12 +2557,12 @@ namespace economy {
 			if(all_finished) {
 				economy_factory::add_factory_level_to_state(state, state.world.state_building_construction_get_state(c), type, state.world.state_building_construction_get_is_upgrade(c));
 				if(state.world.state_building_construction_get_nation(c) == state.local_player_nation
-				&& state.world.state_building_construction_get_is_pop_project(c)) {
+				&& !state.world.state_building_construction_get_is_pop_project(c)) {
 					notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {
 							text::add_line(state, contents, "amsg_factory_complete");
 						},
 						"amsg_factory_complete",
-					state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+						state.world.state_building_construction_get_nation(c), dcon::nation_id{}, dcon::nation_id{},
 						sys::message_base_type::factory_complete
 					});
 				}

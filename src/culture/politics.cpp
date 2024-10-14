@@ -647,12 +647,12 @@ namespace politics {
 					for(auto i : state.world.in_ideology) {
 						auto frac = state.world.nation_get_upper_house(n, i);
 						if(frac > 0.f) {
-						text::add_line(state, contents, "msg_upper_house_2", text::variable_type::x, text::fp_one_place{frac}, text::variable_type::y, i.get_name());
+							text::add_line(state, contents, "msg_upper_house_2", text::variable_type::x, text::fp_one_place{ frac }, text::variable_type::y, i.get_name());
 						}
 					}
 				},
 				"msg_upper_house_title",
-			n, dcon::nation_id{}, dcon::nation_id{},
+				n, dcon::nation_id{}, dcon::nation_id{},
 				sys::message_base_type::upperhouse
 			});
 		}
@@ -713,7 +713,7 @@ namespace politics {
 						text::add_line(state, contents, "msg_election_start_1", text::variable_type::x, end_date);
 					},
 					"msg_election_start_title",
-				n, dcon::nation_id{}, dcon::nation_id{},
+					n, dcon::nation_id{}, dcon::nation_id{},
 					sys::message_base_type::electionstart
 				});
 			}
@@ -890,11 +890,11 @@ namespace politics {
 						set_ruling_party(state, n, party_votes[winner_b].par);
 
 						notification::post(state, notification::message{
-							[rp = party_votes[winner_b].par, frac = winner_amount_b / total](sys::state& state, text::layout_base& contents) {
+							[rp = party_votes[winner_b].par, frac = total > 0.f ? winner_amount_b / total : 1.f](sys::state& state, text::layout_base& contents) {
 							text::add_line(state, contents, "msg_election_end_2", text::variable_type::x, state.world.political_party_get_name(rp), text::variable_type::y, text::fp_percentage{frac});
 							},
 							"msg_election_end_title",
-						n, dcon::nation_id{}, dcon::nation_id{},
+							n, dcon::nation_id{}, dcon::nation_id{},
 							sys::message_base_type::electiondone
 						});
 					} else {
@@ -912,11 +912,11 @@ namespace politics {
 						set_ruling_party(state, n, party_votes[winner].par);
 
 						notification::post(state, notification::message{
-							[rp = party_votes[winner].par, frac = winner_amount / total](sys::state& state, text::layout_base& contents) {
+							[rp = party_votes[winner].par, frac = total > 0.f ? winner_amount / total : 1.f](sys::state& state, text::layout_base& contents) {
 							text::add_line(state, contents, "msg_election_end_1", text::variable_type::x, state.world.political_party_get_name(rp), text::variable_type::y, text::fp_percentage{frac});
 							},
 							"msg_election_end_title",
-						n, dcon::nation_id{}, dcon::nation_id{},
+							n, dcon::nation_id{}, dcon::nation_id{},
 							sys::message_base_type::electiondone
 						});
 					}

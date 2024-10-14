@@ -470,14 +470,15 @@ namespace game_scene {
 	sys::virtual_key replace_keycodes_map_movement(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
 		//Emulating autohotkey
 		if(!state.ui_state.edit_target && state.user_settings.wasd_for_map_movement) {
-			if(keycode == sys::virtual_key::W)
-			return sys::virtual_key::UP;
-			else if(keycode == sys::virtual_key::A)
-			return sys::virtual_key::LEFT;
-			else if(keycode == sys::virtual_key::S)
-			return sys::virtual_key::DOWN;
-			else if(keycode == sys::virtual_key::D)
-			return sys::virtual_key::RIGHT;
+			if(keycode == sys::virtual_key::W) {
+				return sys::virtual_key::UP;
+			} else if(keycode == sys::virtual_key::A) {
+				return sys::virtual_key::LEFT;
+			} else if(keycode == sys::virtual_key::S) {
+				return sys::virtual_key::DOWN;
+			} else if(keycode == sys::virtual_key::D) {
+				return sys::virtual_key::RIGHT;
+			}
 		}
 		return keycode;
 	}
@@ -487,10 +488,11 @@ namespace game_scene {
 	}
 
 	sys::virtual_key replace_keycodes(sys::state& state, sys::virtual_key keycode, sys::key_modifiers mod) {
-		if(keycode == sys::virtual_key::MINUS)
-		return sys::virtual_key::SUBTRACT;
-		else if(keycode == sys::virtual_key::PLUS)
-		return sys::virtual_key::ADD;
+		if(keycode == sys::virtual_key::MINUS) {
+			return sys::virtual_key::SUBTRACT;
+		} else if(keycode == sys::virtual_key::PLUS) {
+			return sys::virtual_key::ADD;
+		}
 		return state.current_scene.keycode_mapping(state, keycode, mod);
 	}
 

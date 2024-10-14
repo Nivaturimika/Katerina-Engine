@@ -439,11 +439,9 @@ namespace diplomatic_message {
 			if(i.type == type::none) {
 				std::memcpy(&i, &m, sizeof(message));
 				i.when = state.current_date;
-
 				if(i.to == state.local_player_nation) {
 					state.new_requests.push(i);
 				}
-
 				return;
 			}
 		}
