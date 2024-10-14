@@ -2399,17 +2399,17 @@ namespace sys {
 					auto name_end = name_start + file_name.length();
 					// exclude files starting with "~" for example
 					if(name_start < name_end && !isdigit(*name_start))
-					continue;
+						continue;
 
 					auto value_start = name_start;
 					for(; value_start < name_end; ++value_start) {
 						if(isdigit(*value_start))
-						break;
+							break;
 					}
 					auto value_end = value_start;
 					for(; value_end < name_end; ++value_end) {
 						if(!isdigit(*value_end))
-						break;
+							break;
 					}
 
 					err.file_name = text::native_to_utf8(get_full_name(prov_file));
@@ -2418,19 +2418,19 @@ namespace sys {
 						auto opened_file = open_file(prov_file);
 						if(opened_file) {
 							auto pid = context.original_id_to_prov_id_map[province_id];
-						  parsers::province_file_context pf_context{ context, pid };
-						  auto content = view_contents(*opened_file);
-						  parsers::token_generator gen(content.data, content.data + content.file_size);
-					  	parsers::parse_province_history_file(gen, err, pf_context);
-					  	//ordered execute -- errors streamed to dummy
-					  	std::stable_sort(pf_context.history_blocks.begin(), pf_context.history_blocks.end(), [](const auto& a, const auto& b) {
-					  		return a.first < b.first;
-					  	});
-						  for(auto& block : pf_context.history_blocks) {
-						  	parsers::province_file_context tpf_context{ context, pid };
-						  	parsers::parse_province_history_file(block.second, err, tpf_context);
-              }
-            }
+							parsers::province_file_context pf_context{ context, pid };
+							auto content = view_contents(*opened_file);
+							parsers::token_generator gen(content.data, content.data + content.file_size);
+							parsers::parse_province_history_file(gen, err, pf_context);
+							//ordered execute -- errors streamed to dummy
+							std::stable_sort(pf_context.history_blocks.begin(), pf_context.history_blocks.end(), [](const auto& a, const auto& b) {
+								return a.first < b.first;
+							});
+							for(auto& block : pf_context.history_blocks) {
+								parsers::province_file_context tpf_context{ context, pid };
+								parsers::parse_province_history_file(block.second, err, tpf_context);
+							}
+						}
 					}
 				}
 			}
@@ -2442,12 +2442,13 @@ namespace sys {
 			//
 			std::vector<native_string> date_directories;
 			//
-			auto ymd = current_date.to_ymd(start_date);
-			date_directories.emplace_back(to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day));
 			if(current_date.value > 0) {
-				auto sd_ymd = sys::date(0).to_ymd(start_date);
-				date_directories.emplace_back(to_native_string(sd_ymd.year) + NATIVE(".") + to_native_string(sd_ymd.month) + NATIVE(".") + to_native_string(sd_ymd.day));
+				auto ymd = sys::date(0).to_ymd(start_date);
+				auto sd_dir = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
+				date_directories.emplace_back(sd_dir);
 			}
+			auto bd_dir = to_native_string(bookmark_date.year) + NATIVE(".") + to_native_string(bookmark_date.month) + NATIVE(".") + to_native_string(bookmark_date.day);
+			date_directories.emplace_back(bd_dir);
 			//
 			for(const auto& dir_name : date_directories) {
 				auto date_directory = open_directory(pop_history, dir_name);

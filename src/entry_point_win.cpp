@@ -141,7 +141,9 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 			native_string base_name;
 			for(uint32_t i = 0; i < path.size(); i++) {
 				auto c = path[i];
-				if(!(c == NATIVE(';') || c == NATIVE('?') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\'))) {
+				if(c == NATIVE('?')) {
+					break;
+				} else if(!(c == NATIVE(';') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\'))) {
 					base_name.push_back(c);
 				}
 			}
