@@ -57,6 +57,7 @@ namespace ui {
 		land,
 		land_move,
 		port,
+		sea,
 	};
 
 	inline bool filter_unit_for_position_type(sys::state& state, unit_counter_position_type pos, dcon::army_id a) {
@@ -69,6 +70,8 @@ namespace ui {
 				&& !fat_id.get_navy_from_army_transport();
 		case unit_counter_position_type::land_move:
 			return (fat_id.get_path().size() > 0 && !fat_id.get_battle_from_army_battle_participation());
+		case unit_counter_position_type::sea:
+			return false;
 		}
 		return true;
 	}
@@ -76,10 +79,13 @@ namespace ui {
 		auto fat_id = dcon::fatten(state.world, a);
 		switch(pos) {
 		case unit_counter_position_type::port:
-		case unit_counter_position_type::land:
 			return true;
+		case unit_counter_position_type::land:
+			return false;
 		case unit_counter_position_type::land_move:
 			return false;
+		case unit_counter_position_type::sea:
+			return true;
 		}
 		return true;
 	}
@@ -218,8 +224,8 @@ namespace ui {
 			state.selected_navies.clear();
 			if(bool(retrieve<dcon::navy_id>(state, parent))) {
 				for(const auto al : state.world.province_get_navy_location_as_location(prov)) {
-					if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
-						if(filter_unit_for_position_type(state, A, al.get_navy())) {
+					if(filter_unit_for_position_type(state, A, al.get_navy())) {
+						if(al.get_navy().get_controller_from_navy_control() == state.local_player_nation) {
 							state.select(al.get_navy());
 						}
 					}
@@ -227,9 +233,8 @@ namespace ui {
 			}
 			if(state.selected_navies.empty() && bool(retrieve<dcon::army_id>(state, parent))) {
 				for(const auto al : state.world.province_get_army_location_as_location(prov)) {
-					if(!al.get_army().get_navy_from_army_transport()
-					&& al.get_army().get_controller_from_army_control() == state.local_player_nation) {
-						if(filter_unit_for_position_type(state, A, al.get_army())) {
+					if(filter_unit_for_position_type(state, A, al.get_army())) {
+						if(al.get_army().get_controller_from_army_control() == state.local_player_nation) {
 							state.select(al.get_army());
 						}
 					}
