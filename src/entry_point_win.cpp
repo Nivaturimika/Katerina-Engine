@@ -20,16 +20,6 @@
 #pragma comment(lib, "icuin.lib")
 #pragma comment(lib, "icuuc.lib")
 
-native_string to_hex(uint64_t v) {
-	native_string ret;
-	constexpr native_char digits[] = NATIVE("0123456789ABCDEF");
-	do {
-		ret += digits[v & 0x0F];
-		v = v >> 4;
-	} while(v != 0);
-	return ret;
-}
-
 native_string produce_mod_path(std::vector<parsers::mod_file>& mod_list) {
 	simple_fs::file_system dummy;
 	simple_fs::add_root(dummy, NATIVE("."));
@@ -150,7 +140,6 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 			auto sdir = simple_fs::get_or_create_scenario_directory();
 			int32_t append = 0;
 			auto time_stamp = uint64_t(std::time(0));
-			auto base_name = to_hex(time_stamp);
 			while(simple_fs::peek_file(sdir, base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin"))) {
 				++append;
 			}
@@ -164,8 +153,7 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 					selected_scenario_file.push_back(c);
 				}
 			}
-
-			//selected_scenario_file = base_name + NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
+			selected_scenario_file += NATIVE("-") + std::to_wstring(append) + NATIVE(".bin");
 			sys::write_scenario_file(*book_game_state, selected_scenario_file, 1);
 			scenario_key = book_game_state->scenario_checksum;
 		} else {
