@@ -698,7 +698,7 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			auto box = text::open_layout_box(contents, 0);
-		text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 			text::close_layout_box(contents, box);
 
 			active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::tax_efficiency, true);
@@ -718,20 +718,20 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			{
 				auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+				text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 				text::close_layout_box(contents, box);
 			}
 			uint32_t total_commodities = state.world.commodity_size();
 			for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-				auto cost = economy::commodity_effective_price(state, state.local_player_nation, cid);
+				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+				auto cost = state.world.commodity_get_current_price(n, cid);
 				auto amount = state.world.nation_get_army_demand(n, cid);
 				if(amount > 0.f) {
 					text::substitution_map m;
 					text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(cid));
-				text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
-				text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
-				text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
+					text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
+					text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
+					text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
 					auto box = text::open_layout_box(contents, 0);
 					text::localised_format_box(state, contents, box, "alice_spending_commodity", m);
 					text::close_layout_box(contents, box);
@@ -751,20 +751,20 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			{
 				auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+				text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 				text::close_layout_box(contents, box);
 			}
 			uint32_t total_commodities = state.world.commodity_size();
 			for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-				auto cost = economy::commodity_effective_price(state, state.local_player_nation, cid);
+				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+				auto cost = state.world.commodity_get_current_price(n, cid);
 				auto amount = state.world.nation_get_navy_demand(n, cid);
 				if(amount > 0.f) {
 					text::substitution_map m;
 					text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(cid));
-				text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
-				text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
-				text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
+					text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
+					text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
+					text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
 					auto box = text::open_layout_box(contents, 0);
 					text::localised_format_box(state, contents, box, "alice_spending_commodity", m);
 					text::close_layout_box(contents, box);
@@ -784,34 +784,23 @@ namespace ui {
 			auto n = retrieve<dcon::nation_id>(state, parent);
 			{
 				auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
+				text::localised_single_sub_box(state, contents, box, "alice_budget_setting_percent", text::variable_type::perc, text::int_percentage{ stored_value });
 				text::close_layout_box(contents, box);
 			}
-			std::vector<float> total;
-			total.resize(size_t(state.world.commodity_size()), 0.0f);
-			for(auto c : state.world.in_commodity) {
-				float amount = state.world.nation_get_construction_demand(n, c);
-				total[c.id.index()] += amount * economy::commodity_effective_price(state, n, c);
-			}
-
 			uint32_t total_commodities = state.world.commodity_size();
-			bool is_spending = !total.empty() && (*std::max_element(total.begin(), total.end())) > 0.f;
-			if(is_spending) {
-				text::add_line(state, contents, "alice_spending_total");
-				for(uint32_t i = 1; i < total_commodities; ++i) {
+			for(uint32_t i = 1; i < total_commodities; ++i) {
 				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-					auto cost = economy::commodity_effective_price(state, n, cid);
-					auto amount = total[i];
-					if(amount > 0.f) {
-						text::substitution_map m;
-						text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(cid));
+				auto cost = economy::commodity_effective_price(state, n, cid);
+				auto amount = state.world.nation_get_construction_demand(n, cid);
+				if(amount > 0.f) {
+					text::substitution_map m;
+					text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(cid));
 					text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
 					text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
 					text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
-						auto box = text::open_layout_box(contents, 0);
-						text::localised_format_box(state, contents, box, "alice_spending_commodity", m);
-						text::close_layout_box(contents, box);
-					}
+					auto box = text::open_layout_box(contents, 0);
+					text::localised_format_box(state, contents, box, "alice_spending_commodity", m);
+					text::close_layout_box(contents, box);
 				}
 			}
 		}
