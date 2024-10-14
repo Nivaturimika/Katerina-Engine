@@ -373,9 +373,13 @@ namespace ui {
 			if(populated) {
 				glm::vec2 map_pos;
 				if constexpr(A == unit_counter_position_type::port) {
-					glm::vec2 map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
-					glm::vec2 v = map::get_port_location(state, prov) / map_size;
-					v.y -= 2.5f / float(state.map_state.map_data.size_y);
+					auto map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
+					auto dp = map::get_port_location(state, prov);
+					auto mp = state.world.province_get_mid_point(prov);
+					auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
+					mp.x += 2.f * glm::sin(theta);
+					mp.y += 2.f * glm::cos(theta);
+					auto v = state.map_state.normalize_map_coord(mp);
 					map_pos = glm::vec2(v.x, 1.f - v.y);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
 					auto path = army ? state.world.army_get_path(army) : state.world.navy_get_path(navy);

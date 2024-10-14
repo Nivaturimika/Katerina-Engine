@@ -38,8 +38,7 @@ emfx::xac_pp_actor_material_layer get_diffuse_layer(emfx::xac_pp_actor_material 
 
 namespace duplicates {
 	glm::vec2 get_port_location(sys::state& state, dcon::province_id p) {
-		auto pt = state.world.province_get_port_to(p);
-		if(pt) {
+		if(auto pt = state.world.province_get_port_to(p); pt) {
 			auto adj = state.world.get_province_adjacency_by_province_pair(p, pt);
 			assert(adj);
 			auto id = adj.index();
