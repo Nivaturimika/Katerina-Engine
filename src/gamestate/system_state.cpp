@@ -279,8 +279,11 @@ namespace ui {
 		}
 		{
 			auto new_elm = make_element_by_type<news_page_window>(state, "news_window_default");
-			state.ui_state.news_page_window = new_elm.get();
-			state.ui_state.root->add_child_to_front(std::move(new_elm));
+			if(new_elm.get()) {
+				state.ui_state.news_page_window = new_elm.get();
+				new_elm->set_visible(state, false);
+				state.ui_state.root->add_child_to_front(std::move(new_elm));
+			}
 		}
 		state.ui_state.rgos_root->impl_on_update(state);
 		state.ui_state.units_root->impl_on_update(state);
