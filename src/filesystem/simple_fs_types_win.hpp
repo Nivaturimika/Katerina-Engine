@@ -96,6 +96,6 @@ namespace simple_fs {
 		friend class std::optional<file>;
 		friend file_contents view_contents(file const& f);
 		friend native_string get_full_name(file const& f);
-		friend uint32_t get_write_time(file const& f);
+		friend uint64_t get_write_time(file const& f);
 	};
 } // namespace simple_fs

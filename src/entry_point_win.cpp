@@ -182,10 +182,12 @@ native_string find_matching_scenario(native_string_view path) {
 	return selected_scenario_file;
 }
 
-bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string path, uint32_t scenario_time) {
-	simple_fs::restore_state(fs, path);
-	uint32_t max_time = 0;
-	auto root = simple_fs::get_root(fs);
+bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time) {
+	simple_fs::file_system fs_root;
+	simple_fs::add_root(fs_root, NATIVE("."));
+	simple_fs::restore_state(fs_root, path);
+	uint64_t max_time = 0;
+	auto root = simple_fs::get_root(fs_root);
 	auto scan_files = [&](auto const dir) {
 		for(const auto f : simple_fs::list_files(dir, NATIVE(".txt"))) {
 			if(auto of = simple_fs::open_file(f); of) {
@@ -194,16 +196,6 @@ bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string 
 				if(file_time > scenario_time) {
 					reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
 				}
-			}
-		}
-	};
-	auto scan_subdirss = [&](auto const dir) {
-		// history/provinces/africa/thing.txt
-		scan_files(dir); //history
-		for(const auto s2 : simple_fs::list_subdirectories(dir)) {
-			scan_files(s2); //provinces
-			for(const auto s3 : simple_fs::list_subdirectories(s2)) {
-				scan_files(s3); //africa
 			}
 		}
 	};
@@ -228,22 +220,33 @@ bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string 
 	};
 	for(const auto sc_dir : scan_dirs) {
 		auto dir = simple_fs::open_directory(root, sc_dir);
-		scan_subdirss(dir);
+		reports::write_debug(("Checksum directory: " + text::native_to_utf8(sc_dir) + "\n").c_str());
+		// history/provinces/africa/thing.txt
+		scan_files(dir); //history
+		for(const auto s2 : simple_fs::list_subdirectories(dir)) {
+			scan_files(s2); //provinces
+			for(const auto s3 : simple_fs::list_subdirectories(s2)) {
+				scan_files(s3); //africa
+			}
+		}
 	}
 	// Check also against interface
+	reports::write_debug("Checksum interface directory (*.gfx/*.gui)\n");
 	auto interface_dir = simple_fs::open_directory(root, NATIVE("interface"));
 	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gui"))) {
 		if(auto of = simple_fs::open_file(f); of) {
-			max_time = std::max(max_time, simple_fs::get_write_time(*of));
-			if(max_time > scenario_time) {
+			auto file_time = simple_fs::get_write_time(*of);
+			max_time = std::max(max_time, file_time);
+			if(file_time > scenario_time) {
 				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
 			}
 		}
 	}
 	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gfx"))) {
 		if(auto of = simple_fs::open_file(f); of) {
-			max_time = std::max(max_time, simple_fs::get_write_time(*of));
-			if(max_time > scenario_time) {
+			auto file_time = simple_fs::get_write_time(*of);
+			max_time = std::max(max_time, file_time);
+			if(file_time > scenario_time) {
 				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
 			}
 		}
@@ -419,18 +422,19 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
 			if(scenario_autofind) { //find scenario
 				native_string selected_scenario_file = find_matching_scenario(path);
-				reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
-				if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
-					game_state.fill_unsaved_data();
-					loaded_scenario = true;
-				}
 				// Automatically force creation of scenario when a file changes
 				auto s_dir = simple_fs::get_or_create_scenario_directory();
 				if(auto f = simple_fs::open_file(s_dir, selected_scenario_file); f) {
 					auto scenario_time = simple_fs::get_write_time(*f);
-					if(scenario_modify_time_is_outdated(fs_root, path, scenario_time)) {
-						reports::write_debug("Forcing re-creation of scenario\n");
+					if(scenario_modify_time_is_outdated(path, scenario_time)) {
+						reports::write_debug("Forcing re-creation of scenario due to file changes\n");
 						loaded_scenario = false;
+					} else {
+						reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
+						if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
+							game_state.fill_unsaved_data();
+							loaded_scenario = true;
+						}
 					}
 				}
 			}

@@ -674,9 +674,9 @@ namespace simple_fs {
 		return res;
 	}
 
-	uint32_t get_write_time(file const& f) {
+	uint64_t get_write_time(file const& f) {
 		FILETIME ft;
-		GetFileTime(f.file_handle, &ft, NULL, NULL);
-		return uint32_t(ft.dwLowDateTime);
+		GetFileTime(f.file_handle, NULL, NULL, &ft);
+		return uint64_t(ft.dwLowDateTime) | (uint64_t(ft.dwHighDateTime) << 32);
 	}
 } // namespace simple_fs

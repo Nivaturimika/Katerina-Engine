@@ -85,5 +85,5 @@ namespace simple_fs {
 
 	std::string remove_double_backslashes(std::string_view data_in); // unfortunately, paradox decided to escape their paths ...
 	native_string correct_slashes(native_string_view path);
-	uint32_t get_write_time(file const& f);
+	uint64_t get_write_time(file const& f);
 } // namespace simple_fs
