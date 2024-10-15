@@ -347,6 +347,7 @@ struct position_data { };
 		static constexpr dcon::texture_id no_decision_image = dcon::texture_id(3);
 		static constexpr dcon::texture_id no_event_image = dcon::texture_id(4);
 		static constexpr dcon::texture_id no_tech_image = dcon::texture_id(5);
+		static constexpr dcon::texture_id no_news_image = dcon::texture_id(6);
 
 		tagged_vector<gfx_object, dcon::gfx_object_id> gfx;
 		tagged_vector<dcon::text_key, dcon::texture_id> textures;

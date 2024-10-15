@@ -37,6 +37,11 @@ namespace ui {
 			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
 			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_tech_image);
 		}
+		{
+			auto stripped_name = simple_fs::remove_double_backslashes(std::string_view("gfx\\interface\\news\\no_pic.tga"));
+			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
+			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_news_image);
+		}
 
 		auto rt = get_root(state.common_fs);
 		auto interfc = open_directory(rt, NATIVE("interface"));
