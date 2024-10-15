@@ -232,7 +232,7 @@ struct save_country {
 	void ruling_party(association_type, int32_t v, error_handler& err, int32_t line, save_parser_context& context);
 	void research_points(association_type, float v, error_handler& err, int32_t line, save_parser_context& context);
 	void civilized(association_type, bool v, error_handler& err, int32_t line, save_parser_context& context);
-	void money(association_type, int32_t v, error_handler& err, int32_t line, save_parser_context& context);
+	void money(association_type, float v, error_handler& err, int32_t line, save_parser_context& context);
 	void nationalvalue(association_type, std::string_view v, error_handler& err, int32_t line, save_parser_context& context);
 	void variables(association_type, save_variables v, error_handler& err, int32_t line, save_parser_context& context);
 	void technology(association_type, save_technologies v, error_handler& err, int32_t line, save_parser_context& context);

@@ -511,6 +511,12 @@ namespace parsers {
 	void finish(effect_building_context&) { }
 	};
 
+	struct ef_clear_news_scopes {
+		std::string type;
+		dcon::trigger_key limit;
+		void finish(effect_building_context&) { }
+	};
+
 	struct effect_body {
 		int32_t chance = 0;
 	void finish(effect_building_context&) { }

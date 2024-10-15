@@ -434,7 +434,7 @@ void save_country::primary_culture(association_type, std::string_view v, error_h
 void save_country::religion(association_type, std::string_view v, error_handler& err, int32_t line, save_parser_context& context) {
 
 }
-void save_country::money(association_type, int32_t v, error_handler& err, int32_t line, save_parser_context& context) {
+void save_country::money(association_type, float v, error_handler& err, int32_t line, save_parser_context& context) {
 	context.state.world.nation_set_stockpiles(context.current, economy::money, v);
 }
 void save_country::last_election(association_type, sys::year_month_day ymd, error_handler& err, int32_t line, save_parser_context& context) {

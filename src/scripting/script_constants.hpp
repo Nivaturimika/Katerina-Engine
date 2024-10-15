@@ -1362,13 +1362,30 @@ namespace trigger {
 	TRIGGER_BYTECODE_ELEMENT(0x02DF, unit_has_leader, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x02E0, has_national_focus_state, 1) \
 	TRIGGER_BYTECODE_ELEMENT(0x02E1, has_national_focus_province, 1) \
-	TRIGGER_BYTECODE_ELEMENT(0x02E2, has_province_flag, 1)
+	TRIGGER_BYTECODE_ELEMENT(0x02E2, has_province_flag, 1) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E3, tags_eq, 5) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E4, strings_eq, 6) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E5, values_eq, 6) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E6, dates_eq, 6) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E7, tags_match, 8) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E8, strings_match, 8) \
+	TRIGGER_BYTECODE_ELEMENT(0x02E9, values_match, 8) \
+	TRIGGER_BYTECODE_ELEMENT(0x02EA, dates_match, 8) \
+	TRIGGER_BYTECODE_ELEMENT(0x02EB, tags_contains, 3) \
+	TRIGGER_BYTECODE_ELEMENT(0x02EC, strings_contains, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02ED, values_contains, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02EE, dates_contains, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02EF, length_greater_tags, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F0, length_greater_strings, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F1, length_greater_values, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F2, length_greater_dates, 4) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 2) \
 
 	#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	TRIGGER_BYTECODE_LIST
 	#undef TRIGGER_BYTECODE_ELEMENT
 
-	constexpr inline uint16_t first_scope_code = 0x02E3;
+	constexpr inline uint16_t first_scope_code = 0x02F4;
 
 	// technology name -- payload 1
 	// ideology name -- 4 variants payload 2
