@@ -2749,10 +2749,10 @@ namespace map {
 										//	continue;
 										//}
 										//assert(influence.bone_id != -1);
-										if(influence.bone_id >= int32_t(context.nodes.size())) {
+										if(influence.bone_id >= int32_t(context.nodes.size())
+										|| influence.bone_id < int32_t(state.map_state.map_data.max_bone_matrices)) {
 											influence.bone_id = -1;
 										}
-										assert(influence.bone_id < int32_t(state.map_state.map_data.max_bone_matrices));
 										if(influence.bone_id != -1) {
 											smv.bone_ids[added_count] = int8_t(influence.bone_id);
 											smv.bone_weights[added_count] = influence.weight;
