@@ -8,7 +8,6 @@ void news_picture_case::picture(association_type, std::string_view name, error_h
 	auto pictures = open_directory(gfx, NATIVE("pictures"));
 
 	std::string file_name = simple_fs::remove_double_backslashes(std::string("gfx\\pictures\\") + std::string(name) + ".tga");
-
 	if(auto it = context.outer_context.gfx_context.map_of_names.find(file_name);
 			it != context.outer_context.gfx_context.map_of_names.end()) {
 		picture_ = it->second;
@@ -24,7 +23,7 @@ void news_picture_case::picture(association_type, std::string_view name, error_h
 			new_obj.primary_texture_handle = itb->second;
 		} else {
 			auto index = context.outer_context.state.ui_defs.textures.size();
-			context.outer_context.state.ui_defs.textures.emplace_back(context.outer_context.state.add_to_pool(file_name));
+			context.outer_context.state.ui_defs.textures.emplace_back(context.outer_context.state.add_key_win1252(file_name));
 			new_obj.primary_texture_handle = dcon::texture_id(uint16_t(index));
 			context.outer_context.gfx_context.map_of_texture_names.insert_or_assign(file_name, dcon::texture_id(uint16_t(index)));
 		}
@@ -129,7 +128,7 @@ void news_generate_article::finish(news_context& context) {
 }
 
 void news_text_add::free_value(std::string_view value, error_handler& err, int32_t line, news_context& context) {
-	text_ = text::find_or_add_key(context.outer_context.state, value);
+	text_ = text::find_or_add_key(context.outer_context.state, value, false);
 }
 
 dcon::trigger_key make_news_trigger(token_generator& gen, error_handler& err, news_context& context) {
