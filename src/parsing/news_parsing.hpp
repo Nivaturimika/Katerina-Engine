@@ -14,22 +14,22 @@ struct news_picture_case {
 	void finish(news_context& context) { }
 };
 struct news_text_add {
-	dcon::text_key text_;
+	dcon::text_sequence_id text_;
 	void free_value(std::string_view value, error_handler& err, int32_t line, news_context& context);
 	void finish(news_context& context) { }
 };
 struct news_title_case {
 	dcon::trigger_key trigger;
-	dcon::text_key text;
-	void text_add(association_type, news_text_add value, error_handler& err, int32_t line, news_context& context) {
+	dcon::text_sequence_id text;
+	void text_add(news_text_add value, error_handler& err, int32_t line, news_context& context) {
 		text = value.text_;
 	}
 	void finish(news_context& context) { }
 };
 struct news_desc_case {
 	dcon::trigger_key trigger;
-	dcon::text_key text;
-	void text_add(association_type, news_text_add value, error_handler& err, int32_t line, news_context& context) {
+	dcon::text_sequence_id text;
+	void text_add(news_text_add value, error_handler& err, int32_t line, news_context& context) {
 		text = value.text_;
 	}
 	void finish(news_context& context) { }
@@ -38,19 +38,19 @@ struct news_generator_selector {
 	void finish(news_context& context) { }
 };
 struct news_generate_article {
-	uint8_t flags = 0;
-	int32_t last_picture_case = 0;
-	int32_t last_title_case = 0;
-	int32_t last_desc_case = 0;
 	std::array<sys::news_picture_case, sys::max_news_generator_cases> picture_cases;
 	std::array<sys::news_text_case, sys::max_news_generator_cases> title_cases;
 	std::array<sys::news_text_case, sys::max_news_generator_cases> desc_cases;
+	int32_t last_picture_case = 0;
+	int32_t last_title_case = 0;
+	int32_t last_desc_case = 0;
+	uint8_t flags = 0;
 	void type(association_type, std::string_view value, error_handler& err, int32_t line, news_context& context);
 	void size(association_type, std::string_view value, error_handler& err, int32_t line, news_context& context);
-	void picture_case(association_type, news_picture_case value, error_handler& err, int32_t line, news_context& context);
-	void title_case(association_type, news_title_case value, error_handler& err, int32_t line, news_context& context);
-	void description_case(association_type, news_desc_case value, error_handler& err, int32_t line, news_context& context);
-	void finish(news_context& context) { }
+	void picture_case(news_picture_case value, error_handler& err, int32_t line, news_context& context);
+	void title_case(news_title_case value, error_handler& err, int32_t line, news_context& context);
+	void description_case(news_desc_case value, error_handler& err, int32_t line, news_context& context);
+	void finish(news_context& context);
 };
 struct news_pattern {
 	std::string name_;
@@ -95,6 +95,7 @@ struct news_article_types {
 	int32_t ai_afraid_of = 0;
 	int32_t ai_likes_very_much = 0;
 	int32_t fake = 0;
+	int32_t invention = 0;
 	void finish(news_context& context) { }
 };
 struct news_style_article {
@@ -107,6 +108,9 @@ struct news_style {
 	void finish(news_context& context) { }
 };
 struct news_file {
+	void generate_article(news_generate_article, error_handler& err, int32_t line, news_context& context) {
+
+	}
 	void any_group(std::string_view name, news_pattern_instance, error_handler& err, int32_t line, news_context& context) {
 		if(auto it = context.map_of_news_pattern_names.find(std::string(name)); it != context.map_of_news_pattern_names.end()) {
 			//do something
@@ -116,4 +120,7 @@ struct news_file {
 	}
 	void finish(news_context& context) { }
 };
+dcon::trigger_key make_news_trigger(token_generator& gen, error_handler& err, news_context& context);
+dcon::trigger_key make_news_case_trigger(token_generator& gen, error_handler& err, news_context& context);
+
 } //parsers

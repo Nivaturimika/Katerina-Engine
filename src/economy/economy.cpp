@@ -2370,7 +2370,7 @@ namespace economy {
 
 	void resolve_constructions(sys::state& state) {
 		for(uint32_t i = state.world.province_land_construction_size(); i-- > 0;) {
-		auto c = fatten(state.world, dcon::province_land_construction_id{ dcon::province_land_construction_id::value_base_t(i) });
+			auto c = fatten(state.world, dcon::province_land_construction_id{ dcon::province_land_construction_id::value_base_t(i) });
 
 			float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_land_construction_get_nation(c));
 			float admin_cost_factor = 2.0f - admin_eff;
@@ -2467,7 +2467,7 @@ namespace economy {
 		});
 
 		for(uint32_t i = state.world.province_building_construction_size(); i-- > 0;) {
-		dcon::province_building_construction_id c{ dcon::province_building_construction_id::value_base_t(i) };
+			dcon::province_building_construction_id c{ dcon::province_building_construction_id::value_base_t(i) };
 			auto for_province = state.world.province_building_construction_get_province(c);
 
 			float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_building_construction_get_nation(c));
@@ -2529,6 +2529,19 @@ namespace economy {
 						default:
 							break;
 						}
+						news::news_scope scope;
+						scope.type = sys::news_generator_type::construction_complete;
+						//value 0,0 is province id
+						scope.values[0][1] = state.world.province_get_building_level(for_province, t);
+						scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(state.world.province_building_construction_get_nation(c));
+						scope.strings[0][0] = state.world.province_get_name(for_province);
+						auto it = state.key_to_text_sequence.find(economy::province_building_type_get_name(t));
+						if(it != state.key_to_text_sequence.end()) {
+							scope.strings[0][1] = it->second;
+							scope.strings[0][2] = it->second;
+						}
+						scope.dates[0][0] = state.current_date;
+						news::collect_news_scope(state, scope);
 					}
 				}
 				state.world.delete_province_building_construction(c);
@@ -2536,7 +2549,7 @@ namespace economy {
 		}
 
 		for(uint32_t i = state.world.state_building_construction_size(); i-- > 0;) {
-		dcon::state_building_construction_id c{ dcon::state_building_construction_id::value_base_t(i) };
+			dcon::state_building_construction_id c{ dcon::state_building_construction_id::value_base_t(i) };
 			auto n = state.world.state_building_construction_get_nation(c);
 			auto type = state.world.state_building_construction_get_type(c);
 			auto& base_cost = state.world.factory_type_get_construction_costs(type);

@@ -892,7 +892,7 @@ namespace culture {
 		for(auto n : state.world.in_nation) {
 			if(n.get_owned_province_count() != 0 && n.get_current_research()) {
 				if(n.get_active_technologies(n.get_current_research())) {
-				n.set_current_research(dcon::technology_id{});
+					n.set_current_research(dcon::technology_id{});
 				} else {
 					auto cost = effective_technology_cost(state, current_year, n, n.get_current_research());
 					if(n.get_research_points() >= cost) {
@@ -905,11 +905,19 @@ namespace culture {
 								ui::technology_description(state, contents, t);
 							},
 							"msg_tech_title",
-						n, dcon::nation_id{}, dcon::nation_id{},
+							n, dcon::nation_id{}, dcon::nation_id{},
 							sys::message_base_type::tech
 						});
 
-					n.set_current_research(dcon::technology_id{});
+						news::news_scope scope;
+						scope.type = sys::news_generator_type::research_complete;
+						scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
+						scope.strings[0][0] = state.world.technology_get_name(n.get_current_research());
+						scope.strings[0][1] = state.world.technology_get_name(n.get_current_research());
+						scope.dates[0][0] = state.current_date;
+						news::collect_news_scope(state, scope);
+
+						n.set_current_research(dcon::technology_id{});
 					}
 				}
 			}
@@ -929,13 +937,13 @@ namespace culture {
 			if(lim) {
 				ve::execute_serial_fast<dcon::nation_id>(state.world.nation_size(), [&](auto nids) {
 					auto may_discover = !state.world.nation_get_active_inventions(nids, inv)
-					&& (state.world.nation_get_owned_province_count(nids) != 0)
-					&& trigger::evaluate(state, lim, trigger::to_generic(nids), trigger::to_generic(nids), 0);
+						&& (state.world.nation_get_owned_province_count(nids) != 0)
+						&& trigger::evaluate(state, lim, trigger::to_generic(nids), trigger::to_generic(nids), 0);
 
 					if(ve::compress_mask(may_discover).v != 0) {
 						auto chances = odds
-						? trigger::evaluate_additive_modifier(state, odds, trigger::to_generic(nids), trigger::to_generic(nids), 0)
-						: 1.f;
+							? trigger::evaluate_additive_modifier(state, odds, trigger::to_generic(nids), trigger::to_generic(nids), 0)
+							: 1.f;
 						ve::apply([&](dcon::nation_id n, float chance, bool allow_discovery) {
 							if(allow_discovery) {
 								auto random = rng::get_random(state, uint32_t(inv.id.index()) << 5 ^ uint32_t(n.index()));
@@ -948,9 +956,16 @@ namespace culture {
 											ui::invention_description(state, contents, inv, 0);
 										},
 										"msg_inv_title",
-									n, dcon::nation_id{}, dcon::nation_id{},
+										n, dcon::nation_id{}, dcon::nation_id{},
 										sys::message_base_type::invention
 									});
+									news::news_scope scope;
+									scope.type = sys::news_generator_type::invention;
+									scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
+									scope.strings[0][0] = state.world.invention_get_name(inv);
+									scope.strings[0][1] = state.world.invention_get_name(inv);
+									scope.dates[0][0] = state.current_date;
+									news::collect_news_scope(state, scope);
 								}
 							}
 						}, nids, chances, may_discover);
@@ -962,8 +977,8 @@ namespace culture {
 						state.world.nation_get_active_inventions(nids, inv) || (state.world.nation_get_owned_province_count(nids) == 0);
 					if(ve::compress_mask(may_not_discover).v != 0) {
 						auto chances = odds
-						? trigger::evaluate_additive_modifier(state, odds, trigger::to_generic(nids), trigger::to_generic(nids), 0)
-						: 1.f;
+							? trigger::evaluate_additive_modifier(state, odds, trigger::to_generic(nids), trigger::to_generic(nids), 0)
+							: 1.f;
 						ve::apply([&](dcon::nation_id n, float chance, bool block_discovery) {
 							if(!block_discovery) {
 								auto random = rng::get_random(state, uint32_t(inv.id.index()) << 5 ^ uint32_t(n.index()));
@@ -976,9 +991,16 @@ namespace culture {
 											ui::invention_description(state, contents, inv, 0);
 										},
 										"msg_inv_title",
-									n, dcon::nation_id{}, dcon::nation_id{},
+										n, dcon::nation_id{}, dcon::nation_id{},
 										sys::message_base_type::invention
 									});
+									news::news_scope scope;
+									scope.type = sys::news_generator_type::invention;
+									scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
+									scope.strings[0][0] = state.world.invention_get_name(inv);
+									scope.strings[0][1] = state.world.invention_get_name(inv);
+									scope.dates[0][0] = state.current_date;
+									news::collect_news_scope(state, scope);
 								}
 							}
 						}, nids, chances, may_not_discover);

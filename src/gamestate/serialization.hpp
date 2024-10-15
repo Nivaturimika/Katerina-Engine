@@ -151,7 +151,7 @@ namespace sys {
 		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
 	}
 
-	constexpr inline uint32_t save_file_version = 65;
+	constexpr inline uint32_t save_file_version = 66;
 	constexpr inline uint32_t scenario_file_version = 131 + save_file_version;
 
 	struct scenario_header {

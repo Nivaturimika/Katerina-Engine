@@ -2239,18 +2239,18 @@ namespace military {
 		{
 			auto ol_rel = state.world.nation_get_overlord_as_subject(primary_defender);
 			if(auto ol = state.world.overlord_get_ruler(ol_rel); ol && ol == primary_attacker)
-			nations::release_vassal(state, ol_rel);
+				nations::release_vassal(state, ol_rel);
 		}
 		{
 			auto ol_rel = state.world.nation_get_overlord_as_subject(primary_attacker);
 			if(auto ol = state.world.overlord_get_ruler(ol_rel); ol && ol == primary_defender)
-			nations::release_vassal(state, ol_rel);
+				nations::release_vassal(state, ol_rel);
 		}
 
 		auto real_target = primary_defender;
 		auto target_ol_rel = state.world.nation_get_overlord_as_subject(primary_defender);
 		if(auto ol = state.world.overlord_get_ruler(target_ol_rel); ol && ol != primary_attacker)
-		real_target = ol;
+			real_target = ol;
 
 		new_war.set_primary_attacker(primary_attacker);
 		new_war.set_primary_defender(real_target);
@@ -2270,16 +2270,18 @@ namespace military {
 				primary_wargoal_secondary);
 			new_war.set_name(state.world.cb_type_get_war_name(primary_wargoal));
 		} else {
-		auto it = state.lookup_key(std::string_view{"agression_war_name"}); // misspelling is intentional; DO NOT CORRECT
+			auto it = state.lookup_key(std::string_view{ "agression_war_name" }); // misspelling is intentional; DO NOT CORRECT
 			if(it) {
 				new_war.set_name(it);
 			}
 		}
 
-		if(state.world.nation_get_is_player_controlled(primary_attacker) == false)
-		ai::add_free_ai_cbs_to_war(state, primary_attacker, new_war);
-		if(state.world.nation_get_is_player_controlled(primary_defender) == false)
-		ai::add_free_ai_cbs_to_war(state, primary_defender, new_war);
+		if(state.world.nation_get_is_player_controlled(primary_attacker) == false) {
+			ai::add_free_ai_cbs_to_war(state, primary_attacker, new_war);
+		}
+		if(state.world.nation_get_is_player_controlled(primary_defender) == false) {
+			ai::add_free_ai_cbs_to_war(state, primary_defender, new_war);
+		}
 
 		notification::post(state, notification::message{
 			[primary_attacker, primary_defender, w = new_war.id](sys::state& state, text::layout_base& contents) {
@@ -2287,10 +2289,20 @@ namespace military {
 			text::add_line(state, contents, "msg_war_1", text::variable_type::x, primary_attacker, text::variable_type::y, primary_defender, text::variable_type::val, std::string_view{resolved_war_name});
 			},
 			"msg_war_title",
-		primary_attacker, primary_defender, dcon::nation_id{},
+			primary_attacker, primary_defender, dcon::nation_id{},
 			sys::message_base_type::war
 		});
-
+		news::news_scope scope;
+		scope.type = sys::news_generator_type::war_declared;
+		scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(primary_attacker);
+		scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(primary_defender);
+		scope.tags[1][0] = primary_wargoal_tag;
+		scope.tags[1][1] = state.world.nation_get_identity_from_identity_holder(primary_wargoal_secondary);
+		scope.strings[0][0] = state.world.cb_type_get_name(primary_wargoal);
+		scope.strings[0][1] = state.world.cb_type_get_name(primary_wargoal);
+		scope.strings[0][2] = state.world.war_get_name(new_war);
+		scope.dates[0][0] = state.current_date;
+		news::collect_news_scope(state, scope);
 		return new_war;
 	}
 
@@ -3187,9 +3199,18 @@ namespace military {
 				text::add_line(state, contents, "msg_peace_offer_accepted_1", text::variable_type::x, target, text::variable_type::y, from, text::variable_type::val, std::string_view{resolved_war_name});
 				},
 				"msg_peace_offer_accepted_title",
-			target, from, dcon::nation_id{},
+				target, from, dcon::nation_id{},
 				sys::message_base_type::peace_accepted
 			});
+			news::news_scope scope;
+			scope.type = sys::news_generator_type::peace_offer_accept;
+			scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(state.world.war_get_primary_attacker(war));
+			scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(state.world.war_get_primary_defender(war));
+			scope.strings[0][0] = state.world.war_get_name(war);
+			//string_9_0 -> cb
+			scope.dates[0][0] = state.world.war_get_start_date(war);
+			scope.dates[0][1] = state.current_date;
+			news::collect_news_scope(state, scope);
 		}
 
 		bool contains_sq = false;

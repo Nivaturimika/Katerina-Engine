@@ -823,27 +823,27 @@ namespace map_mode {
 	void set_map_mode(sys::state& state, mode mode) {
 		std::vector<uint32_t> prov_color;
 		switch(mode) {
-			case map_mode::mode::migration:
-			case map_mode::mode::population:
-			case map_mode::mode::relation:
-			case map_mode::mode::revolt:
-			case map_mode::mode::supply:
-			case map_mode::mode::admin:
-			case map_mode::mode::crisis:
+		case map_mode::mode::migration:
+		case map_mode::mode::population:
+		case map_mode::mode::relation:
+		case map_mode::mode::revolt:
+		case map_mode::mode::supply:
+		case map_mode::mode::admin:
+		case map_mode::mode::crisis:
 			//New mapmodes
-			case map_mode::mode::literacy:
-			case map_mode::mode::conciousness:
-			case map_mode::mode::growth:
-			case map_mode::mode::income:
-			case map_mode::mode::employment:
-			case map_mode::mode::militancy:
-			case map_mode::mode::life_needs:
-			case map_mode::mode::everyday_needs:
-			case map_mode::mode::luxury_needs:
-			case map_mode::mode::mobilization:
-			case map_mode::mode::officers:
-			case map_mode::mode::life_rating:
-			case map_mode::mode::clerk_to_craftsmen_ratio:
+		case map_mode::mode::literacy:
+		case map_mode::mode::conciousness:
+		case map_mode::mode::growth:
+		case map_mode::mode::income:
+		case map_mode::mode::employment:
+		case map_mode::mode::militancy:
+		case map_mode::mode::life_needs:
+		case map_mode::mode::everyday_needs:
+		case map_mode::mode::luxury_needs:
+		case map_mode::mode::mobilization:
+		case map_mode::mode::officers:
+		case map_mode::mode::life_rating:
+		case map_mode::mode::clerk_to_craftsmen_ratio:
 			if(!state.ui_state.map_gradient_legend) {
 				auto legend_win = ui::make_element_by_type<ui::map_legend_gradient>(state, "alice_map_legend_gradient_window");
 				state.ui_state.map_gradient_legend = legend_win.get();
@@ -851,7 +851,7 @@ namespace map_mode {
 			}
 			state.ui_state.map_gradient_legend->set_visible(state, true);
 			break;
-			default:
+		default:
 			if(state.ui_state.map_gradient_legend)
 				state.ui_state.map_gradient_legend->set_visible(state, false);
 			break;

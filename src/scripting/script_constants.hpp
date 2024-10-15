@@ -1379,7 +1379,7 @@ namespace trigger {
 	TRIGGER_BYTECODE_ELEMENT(0x02F0, length_greater_strings, 4) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F1, length_greater_values, 4) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F2, length_greater_dates, 4) \
-	TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 2) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 1) \
 
 	#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	TRIGGER_BYTECODE_LIST

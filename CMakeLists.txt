@@ -77,6 +77,7 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"src/text/fonts.cpp"
 	"src/text/text.cpp"
 	"src/zstd/zstd.cpp"
+	"src/news/news.cpp"
 	"src/network/pcp.cpp"
 	"src/gamestate/game_scene.cpp"
  
@@ -224,6 +225,7 @@ target_include_directories(KatEngineCommon INTERFACE
 	${PROJECT_SOURCE_DIR}/src/military
 	${PROJECT_SOURCE_DIR}/src/scripting
 	${PROJECT_SOURCE_DIR}/src/zstd
+	${PROJECT_SOURCE_DIR}/src/news
 	"ankerl")
 
 target_link_libraries(KatEngine PRIVATE KatEngineCommon)

@@ -1250,7 +1250,8 @@ namespace parsers {
 
 	void trigger_body::news_printing_count(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
 		context.compiled_trigger.push_back(uint16_t(trigger::news_printing_count | association_to_bool_code(a)));
-		context.add_int32_t_to_payload(value);
+		//TODO warn when value >= 16-bits
+		context.compiled_trigger.push_back(uint16_t(value));
 	}
 
 } // namespace parsers

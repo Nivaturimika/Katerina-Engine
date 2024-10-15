@@ -886,6 +886,15 @@ namespace province {
 		}
 
 		if(state_is_new && old_owner) {
+			news::news_scope scope;
+			scope.type = sys::news_generator_type::province_change_owner;
+			scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(old_owner);
+			scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(new_owner);
+			scope.strings[0][0] = state.world.province_get_name(id);
+			scope.strings[0][1] = state.world.modifier_get_name(state.world.province_get_continent(id));
+			scope.strings[1][0] = state.world.state_definition_get_name(state.world.state_instance_get_definition(new_si));
+			scope.dates[0][0] = state.current_date;
+			news::collect_news_scope(state, scope);
 			/* spawn event */
 			event::fire_fixed_event(state, state.national_definitions.on_state_conquest, trigger::to_generic(new_si), event::slot_type::state, new_owner, -1, event::slot_type::none);
 		}

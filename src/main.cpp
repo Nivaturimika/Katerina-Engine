@@ -55,6 +55,7 @@
 #include "prng.cpp"
 #include "blake2.cpp"
 #include "zstd.cpp"
+#include "news.cpp"
 #include "pcp.cpp"
 #endif
 #include "gui_element_types.cpp"

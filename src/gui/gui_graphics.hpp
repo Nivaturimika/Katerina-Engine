@@ -499,6 +499,7 @@ enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tool
 		element_base* request_topbar_listbox = nullptr;
 		element_base* build_province_unit_window = nullptr;
 		element_base* national_focus_overwrite_window = nullptr;
+		element_base* news_page_window = nullptr;
 
 		element_base* army_reorg_window = nullptr;
 		element_base* navy_reorg_window = nullptr;
