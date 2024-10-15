@@ -14,7 +14,7 @@ void collect_news_scope(sys::state& state, news_scope& scope) {
 	}
 }
 
-dcon::text_sequence_id generator_get_title(sys::state& state, dcon::news_article_generator_id gen, dcon::nation_id n) {
+dcon::text_key generator_get_title(sys::state& state, dcon::news_article_generator_id gen, dcon::nation_id n) {
 	auto const& list = state.world.news_article_generator_get_title_case(gen);
 	for(uint32_t i = 0; i < sys::max_news_generator_cases; i++) {
 		if(!list[i].text)
@@ -26,7 +26,7 @@ dcon::text_sequence_id generator_get_title(sys::state& state, dcon::news_article
 	}
 	return list[0].text;
 }
-dcon::text_sequence_id generator_get_desc(sys::state& state, dcon::news_article_generator_id gen, dcon::nation_id n) {
+dcon::text_key generator_get_desc(sys::state& state, dcon::news_article_generator_id gen, dcon::nation_id n) {
 	auto const& list = state.world.news_article_generator_get_desc_case(gen);
 	for(uint32_t i = 0; i < sys::max_news_generator_cases; i++) {
 		if(!list[i].text)

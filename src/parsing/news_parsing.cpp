@@ -129,7 +129,7 @@ void news_generate_article::finish(news_context& context) {
 }
 
 void news_text_add::free_value(std::string_view value, error_handler& err, int32_t line, news_context& context) {
-	text_ = text::find_or_add_key(context.outer_context.state, value, false);
+	text_ = text::find_or_add_key(context.outer_context.state, value);
 }
 
 dcon::trigger_key make_news_trigger(token_generator& gen, error_handler& err, news_context& context) {

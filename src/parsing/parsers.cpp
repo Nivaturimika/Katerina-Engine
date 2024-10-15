@@ -403,4 +403,5 @@ namespace parsers {
 #include "trigger_parsing.cpp"
 #include "effect_parsing.cpp"
 #include "save_parsing.cpp"
+#include "news_parsing.cpp"
 #include "parsers_declarations.cpp"
