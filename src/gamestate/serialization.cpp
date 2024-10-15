@@ -209,9 +209,6 @@ namespace sys {
 			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.infantry);
 			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.artillery);
 		}
-		{ // news definitions
-			ptr_in = memcpy_deserialize(ptr_in, state.news_definitions);
-		}
 		{ // national definitions
 			ptr_in = deserialize(ptr_in, state.national_definitions.flag_variable_names);
 			ptr_in = deserialize(ptr_in, state.national_definitions.global_flag_variable_names);
@@ -399,9 +396,6 @@ namespace sys {
 			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.infantry);
 			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.artillery);
 		}
-		{ // news definitions
-			ptr_in = memcpy_serialize(ptr_in, state.news_definitions);
-		}
 		{ // national definitions
 			ptr_in = serialize(ptr_in, state.national_definitions.flag_variable_names);
 			ptr_in = serialize(ptr_in, state.national_definitions.global_flag_variable_names);
@@ -583,9 +577,6 @@ namespace sys {
 			sz += sizeof(state.military_definitions.infantry);
 			sz += sizeof(state.military_definitions.artillery);
 		}
-		{ // news definitions
-			sz += sizeof(state.news_definitions);
-		}
 		{ // national definitions
 			sz += serialize_size(state.national_definitions.flag_variable_names);
 			sz += serialize_size(state.national_definitions.global_flag_variable_names);
@@ -728,6 +719,9 @@ namespace sys {
 		ptr_in = deserialize(ptr_in, state.future_n_event);
 		ptr_in = deserialize(ptr_in, state.future_p_event);
 
+		{ // news definitions
+			ptr_in = memcpy_deserialize(ptr_in, state.news_definitions);
+		}
 		{ // national definitions
 			ptr_in = deserialize(ptr_in, state.national_definitions.global_flag_variables);
 		}
@@ -775,7 +769,9 @@ namespace sys {
 		ptr_in = memcpy_serialize(ptr_in, state.player_data_cache);
 		ptr_in = serialize(ptr_in, state.future_n_event);
 		ptr_in = serialize(ptr_in, state.future_p_event);
-
+		{ // news definitions
+			ptr_in = memcpy_serialize(ptr_in, state.news_definitions);
+		}
 		{ // national definitions
 			ptr_in = serialize(ptr_in, state.national_definitions.global_flag_variables);
 		}
@@ -823,7 +819,9 @@ namespace sys {
 		sz += sizeof(state.player_data_cache);
 		sz += serialize_size(state.future_n_event);
 		sz += serialize_size(state.future_p_event);
-
+		{ // news definitions
+			sz += sizeof(state.news_definitions);
+		}
 		{ // national definitions
 			sz += serialize_size(state.national_definitions.global_flag_variables);
 		}
