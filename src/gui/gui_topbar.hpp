@@ -2026,6 +2026,9 @@ namespace ui {
 	class news_article_picture : public image_element_base {
 		dcon::gfx_object_id no_news_image;
 	public:
+		bool get_horizontal_flip(sys::state& state) noexcept override {
+			return false; //never flip
+		}
 		void on_create(sys::state& state) noexcept override {
 			image_element_base::on_create(state);
 			no_news_image = base_data.data.image.gfx_object;
@@ -2041,6 +2044,20 @@ namespace ui {
 			if(!base_data.data.image.gfx_object) {
 				base_data.data.image.gfx_object = no_news_image;
 			}
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept {
+			auto gid = base_data.data.image.gfx_object;
+			if(!gid) {
+				gid = no_news_image;
+				if(!gid) {
+					return;
+				}
+			}
+			auto& gfx_def = state.ui_defs.gfx[gid];
+			auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
+			ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+				float(x), float(y), float(base_data.size.x), float(base_data.size.y),
+				tid, base_data.get_rotation(), gfx_def.is_vertically_flipped(), get_horizontal_flip(state));
 		}
 	};
 	template<uint8_t size, uint8_t index>
@@ -2187,7 +2204,7 @@ namespace ui {
 	class news_open_label : public simple_text_element_base {
 	public:
 		void on_update(sys::state& state) noexcept override {
-			set_text(state, "!");
+			set_text(state, "X");
 		}
 	};
 	class news_icon_window : public window_element_base {
