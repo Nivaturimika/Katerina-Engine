@@ -14,13 +14,13 @@ struct news_picture_case {
 	void finish(news_context& context) { }
 };
 struct news_text_add {
-	dcon::text_sequence_id text_;
+	dcon::text_key text_;
 	void free_value(std::string_view value, error_handler& err, int32_t line, news_context& context);
 	void finish(news_context& context) { }
 };
 struct news_title_case {
 	dcon::trigger_key trigger;
-	dcon::text_sequence_id text;
+	dcon::text_key text;
 	void text_add(news_text_add value, error_handler& err, int32_t line, news_context& context) {
 		text = value.text_;
 	}
@@ -28,7 +28,7 @@ struct news_title_case {
 };
 struct news_desc_case {
 	dcon::trigger_key trigger;
-	dcon::text_sequence_id text;
+	dcon::text_key text;
 	void text_add(news_text_add value, error_handler& err, int32_t line, news_context& context) {
 		text = value.text_;
 	}
