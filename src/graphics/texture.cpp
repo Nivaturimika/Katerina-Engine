@@ -408,16 +408,16 @@ set to one or more of the following values.	*/
 				}
 				}
 				glTexImage2D(GL_TEXTURE_2D, 0, s3tc_format, width, height, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get());
-				buffer_index += (dds_main_size / block_size) * (keep_rgba ? 4 : 3);
+				uint32_t dest_buffer_index = (dds_main_size / block_size) * (keep_rgba ? 4 : 3);
 				/*	upload the mipmaps, if we have them	*/
 				for(uint32_t i = 1; i <= mipmaps; ++i) {
 					uint32_t w = std::max<uint32_t>(width >> i, 1);
 					uint32_t h = std::max<uint32_t>(height >> i, 1);
 					/*	upload this mipmap	*/
 					uint32_t mip_size = w * h * (keep_rgba ? 4 : 3);
-					glTexImage2D(GL_TEXTURE_2D, i, s3tc_format, w, h, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get() + buffer_index);
+					glTexImage2D(GL_TEXTURE_2D, i, s3tc_format, w, h, 0, s3tc_format_layout, s3tc_type, dds_dest_data.get() + dest_buffer_index);
 					/*	and move to the next mipmap	*/
-					buffer_index += mip_size;
+					dest_buffer_index += mip_size;
 				}
 			} else {
 				glCompressedTexImage2D(GL_TEXTURE_2D, 0, s3tc_format, width, height, 0, dds_main_size, buffer + buffer_index);
