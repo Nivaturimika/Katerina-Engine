@@ -99,7 +99,7 @@ namespace ui {
 			}
 		});
 		province::for_each_sea_province(state, [&](dcon::province_id id) {
-			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::land>>(state, "unit_mapicon");
+			auto ptr = ui::make_element_by_type<ui::unit_counter_window<unit_counter_position_type::sea>>(state, "unit_mapicon");
 			if(ptr.get()) {
 				static_cast<ui::unit_counter_window<unit_counter_position_type::sea>*>(ptr.get())->prov = id;
 				state.ui_state.units_root->add_child_to_front(std::move(ptr));
