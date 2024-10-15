@@ -407,7 +407,7 @@ void save_country::civilized(association_type, bool v, error_handler& err, int32
 	context.state.world.nation_set_is_civilized(context.current, v);
 }
 void save_country::ruling_party(association_type, int32_t v, error_handler& err, int32_t line, save_parser_context& context) {
-	auto id = dcon::political_party_id(dcon::political_party_id::value_base_t(i));
+	auto id = dcon::political_party_id(dcon::political_party_id::value_base_t(v));
 	context.state.world.nation_set_ruling_party(context.current, id);
 }
 void save_country::nationalvalue(association_type, std::string_view v, error_handler& err, int32_t line, save_parser_context& context) {
@@ -467,7 +467,7 @@ void save_country::any_group(std::string_view name, save_relations v, error_hand
 			return;
 		}
 	}
-	err.accumulated_errors += "invalid tag " + std::string(tag) + " encountered  (" + err.file_name + " line " + std::to_string(line) + ")\n";
+	err.accumulated_errors += "invalid tag " + std::string(name) + " encountered  (" + err.file_name + " line " + std::to_string(line) + ")\n";
 }
 
 void save_file::date(association_type, sys::year_month_day ymd, error_handler& err, int32_t line, save_parser_context& context) {
