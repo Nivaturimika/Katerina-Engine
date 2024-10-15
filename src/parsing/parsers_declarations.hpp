@@ -2949,9 +2949,12 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 #include "trigger_parsing.hpp"
 #include "effect_parsing.hpp"
 #include "cultures_parsing.hpp"
+#include "save_parsing.hpp"
+
 #include "parser_defs_generated.hpp"
 #include "tutorial_parser_defs_generated.hpp"
 #include "news_parser_defs_generated.hpp"
 #include "gui_parser_defs_generated.hpp"
 #include "trigger_parser_defs_generated.hpp"
 #include "effect_parser_defs_generated.hpp"
+#include "save_parser_defs_generated.hpp"

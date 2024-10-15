@@ -402,4 +402,5 @@ namespace parsers {
 #include "provinces_parsing.cpp"
 #include "trigger_parsing.cpp"
 #include "effect_parsing.cpp"
+#include "save_parsing.cpp"
 #include "parsers_declarations.cpp"
