@@ -807,7 +807,7 @@ namespace culture {
 				});
 				if(total != 0) {
 					float adjustment_factor = 1.0f / total;
-					state.world.for_each_ideology([&state, pid, adjustment_factor](dcon::ideology_id iid) {
+					state.world.for_each_ideology([&state, &buf, pid, adjustment_factor](dcon::ideology_id iid) {
 						auto normalized_amount = buf.get(iid) * adjustment_factor;
 						state.world.pop_set_demographics(pid, pop_demographics::to_key(state, iid), normalized_amount);
 					});
@@ -833,7 +833,7 @@ namespace culture {
 				});
 				if(total != 0) {
 					float adjustment_factor = 1.0f / total;
-					state.world.for_each_issue_option([&state, pid, adjustment_factor](dcon::issue_option_id iid) {
+					state.world.for_each_issue_option([&state, &buf, pid, adjustment_factor](dcon::issue_option_id iid) {
 						auto normalized_amount = buf.get(iid) * adjustment_factor;
 						state.world.pop_set_demographics(pid, pop_demographics::to_key(state, iid), normalized_amount);
 					});

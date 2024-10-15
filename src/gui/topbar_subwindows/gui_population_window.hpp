@@ -8,6 +8,7 @@
 #include "triggers.hpp"
 #include "gui_province_window.hpp"
 #include "prng.hpp"
+#include "pdqsort.h"
 
 namespace ui {
 

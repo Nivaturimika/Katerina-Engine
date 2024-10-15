@@ -187,11 +187,12 @@ bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string 
 	uint32_t max_time = 0;
 	auto root = simple_fs::get_root(fs);
 	auto scan_files = [&](auto const dir) {
-		for(const auto f : simple_fs::list_files(dir)) {
+		for(const auto f : simple_fs::list_files(dir, NATIVE(".txt"))) {
 			if(auto of = simple_fs::open_file(f); of) {
-				max_time = std::max(max_time, simple_fs::get_write_time(*of));
-				if(max_time > scenario_time) {
-					reports::write_debug(("File changed " + std::to_string(max_time) + "\n").c_str());
+				auto file_time = simple_fs::get_write_time(*of);
+				max_time = std::max(max_time, file_time);
+				if(file_time > scenario_time) {
+					reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
 				}
 			}
 		}
@@ -214,7 +215,6 @@ bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string 
 		NATIVE("events"),
 		//NATIVE("gfx"), -- graphics
 		NATIVE("history"),
-		NATIVE("interface"),
 		NATIVE("inventions"),
 		//NATIVE("launcher"), -- not relevant to the game
 		//NATIVE("localisation"), -- loaded in-game (not on scenario creation)
@@ -229,6 +229,24 @@ bool scenario_modify_time_is_outdated(simple_fs::file_system& fs, native_string 
 	for(const auto sc_dir : scan_dirs) {
 		auto dir = simple_fs::open_directory(root, sc_dir);
 		scan_subdirss(dir);
+	}
+	// Check also against interface
+	auto interface_dir = simple_fs::open_directory(root, NATIVE("interface"));
+	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gui"))) {
+		if(auto of = simple_fs::open_file(f); of) {
+			max_time = std::max(max_time, simple_fs::get_write_time(*of));
+			if(max_time > scenario_time) {
+				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
+			}
+		}
+	}
+	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gfx"))) {
+		if(auto of = simple_fs::open_file(f); of) {
+			max_time = std::max(max_time, simple_fs::get_write_time(*of));
+			if(max_time > scenario_time) {
+				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
+			}
+		}
 	}
 	return max_time > scenario_time;
 }
