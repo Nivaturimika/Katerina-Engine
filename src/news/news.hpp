@@ -9,10 +9,10 @@ struct state;
 namespace news {
 
 struct news_scope {
-	dcon::text_sequence_id strings[4][4]; //4*4*4
+	dcon::text_key strings[4][4]; //4*4*4
 	int32_t values[4][4]; //4*4*4
-	dcon::text_sequence_id title; //4
-	dcon::text_sequence_id desc; //4
+	dcon::text_key title; //4
+	dcon::text_key desc; //4
 	sys::date dates[4][4]; //4*4*2
 	dcon::national_identity_id tags[4][4]; //4*4*2
 	dcon::gfx_object_id picture; //2
