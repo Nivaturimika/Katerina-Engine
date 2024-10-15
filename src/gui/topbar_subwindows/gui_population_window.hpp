@@ -2555,15 +2555,19 @@ namespace ui {
 					} else if(a_mov != b_mov) {
 						return a_mov ? (b_mov ? a_mov.id.index() > b_mov.id.index() : true) : false;
 					}
-					return a_fat_id.id.index() < b_fat_id.id.index()
+					return a_fat_id.id.index() < b_fat_id.id.index();
 				};
 				break;
 			case pop_list_sort::change:
 				fn = [&](dcon::pop_id a, dcon::pop_id b) {
 					auto a_fat_id = dcon::fatten(state.world, a);
 					auto b_fat_id = dcon::fatten(state.world, b);
-					return demographics::get_monthly_pop_increase(state, a_fat_id.id);
-					demographics::get_monthly_pop_increase(state, b_fat_id.id);
+					auto av = demographics::get_monthly_pop_increase(state, a_fat_id.id);
+					auto bv = demographics::get_monthly_pop_increase(state, b_fat_id.id);
+					if(av != bv) {
+						return av < bv;
+					}
+					return a_fat_id.id.index() < b_fat_id.id.index();
 				};
 				break;
 			}

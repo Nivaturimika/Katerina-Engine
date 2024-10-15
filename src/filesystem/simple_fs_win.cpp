@@ -655,8 +655,9 @@ namespace simple_fs {
 		for(uint32_t i = 0; i < data_in.size(); ++i) {
 			if(data_in[i] == '\\') {
 				res += '\\';
-				if(i + 1 < data_in.size() && data_in[i + 1] == '\\')
-				++i;
+				if(i + 1 < data_in.size() && data_in[i + 1] == '\\') {
+					++i;
+				}
 			} else {
 				res += data_in[i];
 			}
@@ -671,5 +672,11 @@ namespace simple_fs {
 			res += path[i] == '/' ? '\\' : path[i];
 		}
 		return res;
+	}
+
+	uint32_t get_write_time(file const& f) {
+		FILETIME ft;
+		GetFileTime(f.file_handle, &ft, NULL, NULL);
+		return uint32_t(ft.dwLowDateTime);
 	}
 } // namespace simple_fs

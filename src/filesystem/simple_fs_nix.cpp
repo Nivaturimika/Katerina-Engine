@@ -560,4 +560,9 @@ namespace simple_fs {
 		return res;
 	}
 
+	uint32_t get_write_time(file const& f) {
+		struct stat st;
+		fstat(f.file_descriptor, &st);
+		return uint32_t(st.m_time);
+	}
 } // namespace simple_fs
