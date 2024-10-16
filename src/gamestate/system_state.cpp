@@ -3278,7 +3278,7 @@ namespace sys {
 			}
 		}
 
-		economy::presimulate(*this
+		economy::presimulate(*this);
 
 		ai::identify_focuses(*this);
 		// ai::update_ai_research(*this);
