@@ -893,15 +893,18 @@ namespace game_scene {
 			}
 		}
 		state.map_state.map_data.update_borders(state);
+		state.map_state.map_data.update_models(state);
 	}
 
 	void update_add_units_game_scene(sys::state& state) {
 		update_unit_selection_ui(state);
 		state.map_state.map_data.update_borders(state);
+		state.map_state.map_data.update_models(state);
 	}
 
 	void generic_map_scene_update(sys::state& state) {
 		state.map_state.map_data.update_borders(state);
+		state.map_state.map_data.update_models(state);
 	}
 
 	void open_chat_during_game(sys::state& state) {

@@ -153,6 +153,7 @@ namespace map {
 		void clear_opengl_objects();
 
 		void render(sys::state& state, glm::vec2 screen_size, glm::vec2 offset, float zoom, sys::projection_mode map_view_mode, map_mode::mode active_map_mode, glm::mat3 globe_rotation, float time_counter);
+		void update_models(sys::state& state);
 		void update_borders(sys::state& state);
 		void update_fog_of_war(sys::state& state);
 		void set_selected_province(sys::state& state, dcon::province_id province_id);
@@ -162,6 +163,7 @@ namespace map {
 		void set_text_lines(sys::state& state, std::vector<text_line_generator_data> const& data);
 		void set_province_text_lines(sys::state& state, std::vector<text_line_generator_data> const& data);
 
+		std::vector<model_render_command> model_render_list;
 		std::vector<border> borders;
 		std::vector<textured_line_vertex_b> border_vertices;
 		std::vector<textured_line_vertex> river_vertices;
@@ -219,7 +221,6 @@ namespace map {
 		std::vector<uint8_t> terrain_id_map;
 		std::vector<uint8_t> median_terrain_type;
 		std::vector<uint8_t> diagonal_borders;
-
 		// map pixel -> province id
 		std::vector<uint16_t> province_id_map;
 		std::vector<uint16_t> map_indices;
