@@ -591,7 +591,7 @@ namespace map {
 	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, int32_t current, float time_counter, glm::mat4x4 parent_m) {
 		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
 		auto const global_m = parent_m * node_m;
-		matrices[list[current].bone_id] = glm::mat4x4(1.f);//global_m * list[current].bone_pose_matrix * glm::inverse(list[current].bone_bind_pose_matrix);
+		matrices[list[current].bone_id] = list[current].bone_pose_matrix * glm::inverse(list[current].bone_bind_pose_matrix);
 		for(uint32_t i = start; i < start + count; i++) {
 			if(list[i].bone_id == list[current].parent_id) {
 				get_hierachical_animation_bone(list, matrices, start, count, i, time_counter, global_m);
