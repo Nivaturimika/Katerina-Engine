@@ -10,30 +10,30 @@ namespace ui {
 	class diplomatic_message_topbar_button : public button_element_base {
 		std::string_view get_type_key(diplomatic_message::type_t type) {
 			switch(type) {
-				case diplomatic_message::type_t::none:
+			case diplomatic_message::type_t::none:
 				return "???";
-				case diplomatic_message::type_t::access_request:
+			case diplomatic_message::type_t::access_request:
 				return "askmilitaryaccess_di";
-				case diplomatic_message::type_t::alliance_request:
+			case diplomatic_message::type_t::alliance_request:
 				return "alliance_di";
-				case diplomatic_message::type_t::call_ally_request:
+			case diplomatic_message::type_t::call_ally_request:
 				return "callally_di";
-				case diplomatic_message::type_t::be_crisis_primary_defender:
+			case diplomatic_message::type_t::be_crisis_primary_defender:
 				return "back_crisis_di";
-				case diplomatic_message::type_t::be_crisis_primary_attacker:
+			case diplomatic_message::type_t::be_crisis_primary_attacker:
 				return "back_crisis_di";
-				case diplomatic_message::type_t::peace_offer:
+			case diplomatic_message::type_t::peace_offer:
 				return "peace_di";
-				case diplomatic_message::type_t::take_crisis_side_offer:
+			case diplomatic_message::type_t::take_crisis_side_offer:
 				return "back_crisis_di";
-				case diplomatic_message::type_t::crisis_peace_offer:
+			case diplomatic_message::type_t::crisis_peace_offer:
 				return "crisis_offer_di";
-				case diplomatic_message::type_t::state_transfer:
+			case diplomatic_message::type_t::state_transfer:
 				return "state_transfer_di";
 			}
 			return "???";
 		}
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto const m = retrieve<diplomatic_message::message>(state, parent);
 			/*
@@ -45,51 +45,48 @@ namespace ui {
 			invitecrisis = 5,
 			*/
 			switch(m.type) {
-				case diplomatic_message::type_t::none:
-				case diplomatic_message::type_t::state_transfer:
+			case diplomatic_message::type_t::none:
+			case diplomatic_message::type_t::state_transfer:
 				frame = 0;
 				break;
-				case diplomatic_message::type_t::access_request:
+			case diplomatic_message::type_t::access_request:
 				frame = 1;
 				break;
-				case diplomatic_message::type_t::alliance_request:
+			case diplomatic_message::type_t::alliance_request:
 				frame = 2;
 				break;
-				case diplomatic_message::type_t::call_ally_request:
+			case diplomatic_message::type_t::call_ally_request:
 				frame = 3;
 				break;
-				case diplomatic_message::type_t::take_crisis_side_offer:
-				case diplomatic_message::type_t::peace_offer:
-				case diplomatic_message::type_t::crisis_peace_offer:
+			case diplomatic_message::type_t::take_crisis_side_offer:
+			case diplomatic_message::type_t::peace_offer:
+			case diplomatic_message::type_t::crisis_peace_offer:
 				frame = 4;
 				break;
-				case diplomatic_message::type_t::be_crisis_primary_defender:
-				case diplomatic_message::type_t::be_crisis_primary_attacker:
+			case diplomatic_message::type_t::be_crisis_primary_defender:
+			case diplomatic_message::type_t::be_crisis_primary_attacker:
 				frame = 5;
 				break;
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto m = retrieve<diplomatic_message::message>(state, parent);
 			auto box = text::open_layout_box(contents);
 			auto tstr = text::produce_simple_string(state, get_type_key(m.type));
-		text::substitution_map sub{};
+			text::substitution_map sub{};
 			text::add_to_substitution_map(sub, text::variable_type::nation, m.from);
 			text::add_to_substitution_map(sub, text::variable_type::date, m.when + diplomatic_message::expiration_in_days);
 			text::add_to_substitution_map(sub, text::variable_type::type, std::string_view(tstr.c_str()));
 			text::localised_format_box(state, contents, box, std::string_view("diploicon_tip"), sub);
 			text::close_layout_box(contents, box);
 		}
-
 		void button_action(sys::state& state) noexcept override;
 	};
 	class diplomatic_message_topbar_flag_button : public flag_button {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override;
 	};
 	class diplomatic_message_topbar_entry_window : public listbox_row_element_base<diplomatic_message::message> {
@@ -124,7 +121,7 @@ namespace ui {
 		std::string_view get_row_element_name() override {
 			return "alice_diplomessageicon_entry_window";
 		}
-		public:
+	public:
 		std::vector< diplomatic_message::message> messages;
 		void on_update(sys::state& state) noexcept override {
 			auto it = std::remove_if(messages.begin(), messages.end(), [&](auto& m) {
@@ -132,7 +129,6 @@ namespace ui {
 				|| !diplomatic_message::can_accept(state, m);
 			});
 			messages.erase(it, messages.end());
-
 			row_contents.clear();
 			for(auto m : messages) {
 				row_contents.push_back(m);
@@ -151,7 +147,7 @@ namespace ui {
 		state.ui_state.root->move_child_to_front(dpw);
 		//Remove from listbox
 		auto dmtl = static_cast<diplomatic_message_topbar_listbox*>(state.ui_state.request_topbar_listbox);
-	auto it = std::remove_if(dmtl->messages.begin(), dmtl->messages.end(), [&](auto& e) { return e.from == m.from && e.to == m.to && e.type == m.type && e.when == m.when; });
+		auto it = std::remove_if(dmtl->messages.begin(), dmtl->messages.end(), [&](auto& e) { return e.from == m.from && e.to == m.to && e.type == m.type && e.when == m.when; });
 		auto r = std::distance(it, dmtl->messages.end());
 		dmtl->messages.erase(it, dmtl->messages.end());
 		dmtl->impl_on_update(state);

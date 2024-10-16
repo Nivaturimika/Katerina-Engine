@@ -2377,19 +2377,19 @@ namespace ui {
 				return make_element_by_type<invisible_element>(state, id);
 			} else if(name.substr(0, 13) == "topbar_import") {
 				auto ptr = make_element_by_type<topbar_commodity_xport_icon>(state, id);
-			std::string var = std::string{name.substr(13)};
+				std::string var = std::string{name.substr(13)};
 				var.empty() ? ptr->slot = uint8_t(0) : ptr->slot = uint8_t(std::stoi(var));
 				import_icons.push_back(ptr.get());
 				return ptr;
 			} else if(name.substr(0, 13) == "topbar_export") {
 				auto ptr = make_element_by_type<topbar_commodity_xport_icon>(state, id);
-			std::string var = std::string{name.substr(13)};
+				std::string var = std::string{name.substr(13)};
 				var.empty() ? ptr->slot = uint8_t(0) : ptr->slot = uint8_t(std::stoi(var));
 				export_icons.push_back(ptr.get());
 				return ptr;
 			} else if(name.substr(0, 15) == "topbar_produced") {
 				auto ptr = make_element_by_type<topbar_commodity_xport_icon>(state, id);
-			std::string var = std::string{name.substr(15)};
+				std::string var = std::string{name.substr(15)};
 				var.empty() ? ptr->slot = uint8_t(0) : ptr->slot = uint8_t(std::stoi(var));
 				produced_icons.push_back(ptr.get());
 				return ptr;
