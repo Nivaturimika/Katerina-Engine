@@ -172,8 +172,10 @@ namespace parsers {
 	void make_oob_army_helper(token_generator& gen, error_handler& err, C& context) {
 		auto id = context.outer_context.state.world.create_army();
 		context.outer_context.state.world.force_create_army_control(id, context.nation_for);
-	oob_file_army_context new_context{context.outer_context, id, context.nation_for};
+		oob_file_army_context new_context{context.outer_context, id, context.nation_for};
 		parse_oob_army(gen, err, new_context);
+
+		//if(context.outer_context.national_defintiions.)
 
 		// and check they have correct unit types
 		auto p = context.outer_context.state.world.army_get_location_from_army_location(id);
@@ -189,7 +191,7 @@ namespace parsers {
 	void make_oob_navy_helper(token_generator& gen, error_handler& err, C& context) {
 		auto id = context.outer_context.state.world.create_navy();
 		context.outer_context.state.world.force_create_navy_control(id, context.nation_for);
-	oob_file_navy_context new_context{context.outer_context, id, context.nation_for};
+		oob_file_navy_context new_context{context.outer_context, id, context.nation_for};
 		parse_oob_navy(gen, err, new_context);
 
 		// and check they have correct unit types

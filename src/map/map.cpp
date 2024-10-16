@@ -618,11 +618,9 @@ namespace map {
 			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_attack_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
 			std::vector<uint8_t> model_needs_matrix(emfx_size);
 			for(auto const& obj : list) {
-				if(obj.anim != emfx::animation_type::none) {
-					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::idle) ? 0x80 : 0x00;
-					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::move) ? 0x40 : 0x00;
-					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::attack) ? 0x20 : 0x00;
-				}
+				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::idle) ? 0x80 : 0x00;
+				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::move) ? 0x40 : 0x00;
+				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::attack) ? 0x20 : 0x00;
 			}
 			for(uint32_t i = 0; i < emfx_size; i++) {
 				if((model_needs_matrix[i] & 0x80) != 0) {
@@ -647,17 +645,15 @@ namespace map {
 			}
 			for(const auto& obj : list) {
 				auto index = obj.emfx.index();
-				if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
-					if(obj.anim == emfx::animation_type::idle) {
-						auto const& final_matrix = final_idle_matrices[index];
-						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
-					} else if(obj.anim == emfx::animation_type::move) {
-						auto const& final_matrix = final_move_matrices[index];
-						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
-					} else if(obj.anim == emfx::animation_type::attack) {
-						auto const& final_matrix = final_attack_matrices[index];
-						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
-					}
+				if(obj.anim == emfx::animation_type::idle) {
+					auto const& final_matrix = final_idle_matrices[index];
+					glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+				} else if(obj.anim == emfx::animation_type::move) {
+					auto const& final_matrix = final_move_matrices[index];
+					glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+				} else if(obj.anim == emfx::animation_type::attack) {
+					auto const& final_matrix = final_attack_matrices[index];
+					glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
 				}
 				glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
@@ -2494,7 +2490,7 @@ namespace map {
 					reports::write_debug(("bone-id=" + std::to_string(i) + ",parent=" + std::to_string(t_anim.parent_id) + "\n").c_str());
 					reports::write_debug(("pos: x=" + std::to_string(vp.x) + " ,y=" + std::to_string(vp.y) + ",z=" + std::to_string(vp.z) + "\n").c_str());
 #endif
-					t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(glm::normalize(vq)) * glm::scale(vs);
+					t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
 					state.map_state.map_data.animations.push_back(t_anim);
 					break;
 				}
@@ -2793,13 +2789,12 @@ namespace map {
 										//}
 										//assert(influence.bone_id != -1);
 										if(influence.bone_id >= int32_t(context.nodes.size())
-										|| influence.bone_id < int32_t(state.map_state.map_data.max_bone_matrices)) {
+										|| influence.bone_id >= int32_t(state.map_state.map_data.max_bone_matrices)) {
 											influence.bone_id = -1;
 										}
 										if(influence.bone_id != -1) {
 											smv.bone_ids[added_count] = int8_t(influence.bone_id);
 											smv.bone_weights[added_count] = influence.weight;
-											++added_count;
 										}
 									}
 								}
