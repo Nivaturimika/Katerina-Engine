@@ -690,6 +690,7 @@ namespace map {
 
 	void display_data::update_models(sys::state& state) {
 		constexpr float dist_step = 1.77777f;
+		model_render_list.clear();
 		// Province flags
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.num_allocated_provincial_flags); i++) {
@@ -820,21 +821,27 @@ namespace map {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
 					}
 					auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
-					for(const auto sm : unit.get_army().get_army_membership()) {
-						auto utid = sm.get_regiment().get_type();
-						if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
-							if(!unit_model && path.size() == 0) {
+					if(!unit_model && path.size() == 0) {
+						for(const auto sm : unit.get_army().get_army_membership()) {
+							auto utid = sm.get_regiment().get_type();
+							if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
 								unit_type = utid;
 								unit_model = model;
+								break;
 							}
-							if(!moving_model && path.size() > 0) {
+						}
+					} else if(!moving_model && path.size() > 0) {
+						for(const auto sm : unit.get_army().get_army_membership()) {
+							auto utid = sm.get_regiment().get_type();
+							if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
 								moving_type = utid;
 								moving_model = model;
+								break;
 							}
 						}
-						if(unit_model && moving_model) {
-							break;
-						}
+					}
+					if(unit_model && moving_model) {
+						break;
 					}
 				}
 				auto lb = state.world.province_get_land_battle_location(p);
