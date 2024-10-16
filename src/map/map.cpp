@@ -596,7 +596,7 @@ namespace map {
 				get_hierachical_animation_bone(list, matrices, start, count, i, time_counter, global_m);
 			}
 		}
-		matrices[list[current].bone_id] = global_m * glm::inverse(list[current].bone_bind_pose_matrix);
+		matrices[list[current].bone_id] = list[current].bone_pose_matrix * glm::inverse(list[current].bone_bind_pose_matrix);
 	}
 
 	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {

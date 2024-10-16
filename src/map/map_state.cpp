@@ -97,8 +97,11 @@ namespace map {
 
 		map_data.selection_vertices.clear();
 		for(auto selected_army : state.selected_armies) {
-			map::make_selection_quad(state, map_data.selection_vertices, state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army)));
+			auto const p = state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army));
 			if(auto ps = state.world.army_get_path(selected_army); ps.size() > 0) {
+				constexpr float dist_step = 1.77777f;
+				map::make_selection_quad(state, map_data.selection_vertices, p + glm::vec2(dist_step, dist_step));
+
 				auto dest_controller = state.world.province_get_nation_from_province_control(ps[0]);
 				if(state.world.army_get_black_flag(selected_army) || state.world.army_get_is_retreating(selected_army)) {
 					auto old_size = map_data.retreat_unit_arrow_vertices.size();
@@ -128,6 +131,8 @@ namespace map {
 					map::make_army_path(state, map_data.unit_arrow_vertices, selected_army, float(map_data.size_x), float(map_data.size_y));
 					map_data.unit_arrow_counts.push_back(GLsizei(map_data.unit_arrow_vertices.size() - old_size));
 				}
+			} else {
+				map::make_selection_quad(state, map_data.selection_vertices, p);
 			}
 		}
 		for(auto selected_navy : state.selected_navies) {
