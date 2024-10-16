@@ -1418,31 +1418,28 @@ namespace map {
 						auto p2 = p1;
 						dcon::emfx_object_id unit_model;
 						dcon::unit_type_id unit_type;
-						dcon::army_id unit_unit;
-
 						dcon::emfx_object_id moving_model;
 						dcon::unit_type_id moving_type;
-						dcon::army_id moving_unit;
 						for(const auto unit : units) {
 							auto path = unit.get_army().get_path();
 							if(path.size() > 0) {
 								p2 = state.world.province_get_mid_point(path[path.size() - 1]);
-								moving_unit = unit.get_army();
 							}
 							auto gc = unit.get_army().get_controller_from_army_control().get_identity_from_identity_holder().get_graphical_culture();
 							for(const auto sm : unit.get_army().get_army_membership()) {
 								auto utid = sm.get_regiment().get_type();
 								if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
-									if(path.size() == 0 && utid.index() >= unit_type.index()) {
+									if(!unit_type && path.size() == 0) {
 										unit_type = utid;
 										unit_model = model;
-										unit_unit = unit.get_army();
 									}
-									if(path.size() > 0 && utid.index() >= moving_type.index()) {
+									if(!moving_type && path.size() > 0) {
 										moving_type = utid;
 										moving_model = model;
-										moving_unit = unit.get_army();
 									}
+								}
+								if(unit_model && moving_model) {
+									break;
 								}
 							}
 						}
@@ -1450,11 +1447,11 @@ namespace map {
 						if(lb.begin() != lb.end()) {
 							list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), 0.f, emfx::animation_type::attack);
 							list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi, emfx::animation_type::attack);
-						} else if(unit_unit) {
+						} else if(unit_model) {
 							list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
 							list.emplace_back(model_flag, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle);
 						}
-						if(moving_unit) {
+						if(moving_model) {
 							auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 							if(p1 == p2) {
 								theta = -math::pi / 2.f;
@@ -1481,11 +1478,15 @@ namespace map {
 							auto gc = unit.get_navy().get_controller_from_navy_control().get_identity_from_identity_holder().get_graphical_culture();
 							for(const auto sm : unit.get_navy().get_navy_membership()) {
 								auto utid = sm.get_ship().get_type();
-								auto candidate_model = model_gc_unit[uint8_t(gc)][utid.index()];
-								if(candidate_model && utid.index() < unit_type.index()) {
+								auto model = model_gc_unit[0][utid.index()];
+								if(!model && utid.index() < unit_type.index()) {
 									unit_type = utid;
-									unit_model = candidate_model;
+									unit_model = model;
+									break;
 								}
+							}
+							if(unit_model) {
+								break;
 							}
 						}
 						auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -2567,11 +2568,11 @@ namespace map {
 		for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
 			auto edef = dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(k));
 			ui::emfx_object const& emfx_obj = state.ui_defs.emfx[edef];
-
+			//
 			auto name = parsers::lowercase_str(state.to_string_view(emfx_obj.name));
 			bool is_province_flag_model = false;
 			for(uint32_t i = 0; i < uint32_t(state.province_definitions.num_allocated_provincial_flags); i++) {
-			dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
+				dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
 				auto pf_name = text::produce_simple_string(state, state.province_definitions.flag_variable_names[pfid]);
 				if(parsers::lowercase_str(pf_name) == name) {
 					state.map_state.map_data.model_province_flag[i] = edef;
@@ -2607,7 +2608,7 @@ namespace map {
 				if(name.size() > 19) {
 					level = name.data()[19] - '0';
 				}
-				level = std::clamp<uint32_t>(level, 0, 6);
+				level = std::clamp<uint32_t>(level, 0, 7);
 				if(name.ends_with("_ships")) {
 					state.map_state.map_data.model_naval_base_ships[level] = edef;
 				} else {
@@ -2618,7 +2619,7 @@ namespace map {
 				if(name.size() > 13) {
 					level = name.data()[13] - '0';
 				}
-				level = std::clamp<uint32_t>(level, 0, 6);
+				level = std::clamp<uint32_t>(level, 0, 7);
 				state.map_state.map_data.model_fort[level] = edef;
 			} else if(is_province_flag_model) {
 				//dont execute the rest
@@ -2662,29 +2663,25 @@ namespace map {
 					if(std::isdigit(type_name[type_name.length() - 1])) {
 						continue;//type_name.pop_back();
 					}
-					if(t == culture::graphical_culture_type::generic) {
-						for(uint32_t j = 0; j < uint32_t(culture::graphical_culture_type::count); j++) {
-							for(uint32_t i = 0; i < uint32_t(state.military_definitions.unit_base_definitions.size()); i++) {
-								auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(i));
-								auto const& udef = state.military_definitions.unit_base_definitions[utid];
-								if(!state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()]
-								&& udef.type == military::unit_type::cavalry) {
-									reports::write_debug(("Applying GC unit " + type_name + "(" + name + ")\n").c_str());
-									state.map_state.map_data.model_gc_unit[j][utid.index()] = edef;
-								}
+					for(uint32_t i = 0; i < uint32_t(state.military_definitions.unit_base_definitions.size()); i++) {
+						auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(i));
+						auto const& udef = state.military_definitions.unit_base_definitions[utid];
+						auto sprite = parsers::lowercase_str(state.to_string_view(udef.sprite_type));
+						if((sprite == "cavalry" && type_name == "mount")
+						|| (udef.type == military::unit_type::cavalry)) {
+							if(!state.map_state.map_data.model_gc_unit[0][utid.index()]) {
+								state.map_state.map_data.model_gc_unit[0][utid.index()] = edef;
 							}
-						}
-					} else {
-						for(uint32_t i = 0; i < uint32_t(state.military_definitions.unit_base_definitions.size()); i++) {
-							auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(i));
-							auto const& udef = state.military_definitions.unit_base_definitions[utid];
-							auto sprite = parsers::lowercase_str(state.to_string_view(udef.sprite_type));
-							if(!state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()]
-							&& type_name == sprite) {
-								reports::write_debug(("Applying GC unit " + type_name + "(" + name + ")\n").c_str());
+						} else if(type_name == sprite) {
+							if(!state.map_state.map_data.model_gc_unit[0][utid.index()] || t == culture::graphical_culture_type::generic) {
+								state.map_state.map_data.model_gc_unit[0][utid.index()] = edef;
+								reports::write_debug(("Applying GC#<generic> unit -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n").c_str());
+							}
+							if(!state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()]) {
 								state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()] = edef;
-								break;
+								reports::write_debug(("Applying GC#" + std::to_string(uint32_t(t)) + " -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n").c_str());
 							}
+							break;
 						}
 					}
 				}
@@ -2715,7 +2712,6 @@ namespace map {
 							mesh_index++;
 							continue;
 						}
-
 						uint32_t vertex_offset = 0;
 						for(auto const& sub : mesh.submeshes) {
 							auto old_size = static_mesh_vertices.size();
@@ -2808,31 +2804,19 @@ namespace map {
 			}
 		}
 
-//#if 0
-		//fill missing models with any
-		for(uint32_t i = 0; i < uint32_t(culture::graphical_culture_type::count); i++) {
-			for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
+		// Fill missing models with generic (slot 0)
+		for(uint32_t j = 0; j < uint32_t(state.military_definitions.unit_base_definitions.size()); j++) {
+			for(uint32_t i = 1; i < uint32_t(culture::graphical_culture_type::count); i++) {
 				if(!state.map_state.map_data.model_gc_unit[i][j]) {
-					for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
-						state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][j];
-						if(state.map_state.map_data.model_gc_unit[i][j]) {
-							break;
-						}
-					}
-					if(!state.map_state.map_data.model_gc_unit[i][j]) {
-						for(uint32_t k = 0; k < uint32_t(culture::graphical_culture_type::count); k++) {
-							for(uint32_t l = 0; l < uint32_t(state.military_definitions.unit_base_definitions.size()); l++) {
-								state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[k][l];
-								if(state.map_state.map_data.model_gc_unit[i][j]) {
-									break;
-								}
-							}
-						}
-					}
+					state.map_state.map_data.model_gc_unit[i][j] = state.map_state.map_data.model_gc_unit[0][j];
 				}
 			}
+			if(!state.map_state.map_data.model_gc_unit[0][j]) {
+				auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(j));
+				auto const& udef = state.military_definitions.unit_base_definitions[utid];
+				reports::write_debug(("Unit model missing for: " + std::to_string(j) + "#" + std::string(state.to_string_view(udef.name)) + "\n").c_str());
+			}
 		}
-//#endif
 
 		if(!static_mesh_vertices.empty()) {
 			glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);
