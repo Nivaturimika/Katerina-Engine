@@ -1479,7 +1479,7 @@ namespace map {
 							for(const auto sm : unit.get_navy().get_navy_membership()) {
 								auto utid = sm.get_ship().get_type();
 								auto model = model_gc_unit[0][utid.index()];
-								if(!model && utid.index() < unit_type.index()) {
+								if(!model) {
 									unit_type = utid;
 									unit_model = model;
 									break;
