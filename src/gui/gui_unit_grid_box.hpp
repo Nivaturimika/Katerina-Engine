@@ -124,7 +124,7 @@ namespace ui {
 			return 5;
 		} else if(state.world.army_get_arrival_time(a)) {
 			return 7;
-		} else if(military::will_recieve_attrition(state, a)) {
+		} else if(military::attrition_amount(state, a) > 0.f) {
 			return 3;
 		} else if(is_understr()) {
 			return 4;
@@ -148,7 +148,7 @@ namespace ui {
 			return 2;
 		} else if(state.world.navy_get_battle_from_navy_battle_participation(a)) {
 			return 6;
-		} else if(military::will_recieve_attrition(state, a)) {
+		} else if(military::attrition_amount(state, a) > 0.f) {
 			return 3;
 		} else if(trange.begin() != trange.end()) {
 			return 5;

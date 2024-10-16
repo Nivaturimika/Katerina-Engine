@@ -445,7 +445,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 		bool visible = false;
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<T>(state, parent);
-			visible = military::will_recieve_attrition(state, content);
+			visible = military::attrition_amount(state, content) > 0.f;
 		}
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(visible)
@@ -459,10 +459,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<T>(state, parent);
 			auto amount = military::attrition_amount(state, content);
-			if(amount > 0)
-			set_text(state, text::format_percentage(amount, 1));
-			else
-			set_text(state, "");
+			set_text(state, amount > 0 ? text::format_percentage(amount, 1) : std::string(""));
 		}
 	};
 
@@ -1712,10 +1709,10 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto foru = retrieve<unit_var>(state, parent);
 			if(std::holds_alternative<dcon::army_id>(foru)) {
 				auto a = std::get<dcon::army_id>(foru);
-				visible = military::will_recieve_attrition(state, a);
+				visible = military::attrition_amount(state, a) > 0.f;
 			} else if(std::holds_alternative<dcon::navy_id>(foru)) {
 				auto a = std::get<dcon::navy_id>(foru);
-				visible = military::will_recieve_attrition(state, a);
+				visible = military::attrition_amount(state, a) > 0.f;
 			} else {
 				visible = false;
 			}
