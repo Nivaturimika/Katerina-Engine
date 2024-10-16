@@ -823,11 +823,11 @@ namespace map {
 					for(const auto sm : unit.get_army().get_army_membership()) {
 						auto utid = sm.get_regiment().get_type();
 						if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
-							if(!unit_type && path.size() == 0) {
+							if(!unit_model && path.size() == 0) {
 								unit_type = utid;
 								unit_model = model;
 							}
-							if(!moving_type && path.size() > 0) {
+							if(!moving_model && path.size() > 0) {
 								moving_type = utid;
 								moving_model = model;
 							}
