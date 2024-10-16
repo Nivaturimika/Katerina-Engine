@@ -648,7 +648,6 @@ namespace map {
 			for(const auto& obj : list) {
 				auto index = obj.emfx.index();
 				if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
-					std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
 					if(obj.anim == emfx::animation_type::idle) {
 						auto const& final_matrix = final_idle_matrices[index];
 						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
@@ -671,16 +670,15 @@ namespace map {
 			}
 		} else {
 			//default matrix -- overriden if zoomed in enough
-			static const std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
-			glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
+			static const std::array<glm::mat4x4, max_bone_matrices> ident_matrix{ glm::mat4x4(1.f) };
+			glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ident_matrix.size()), GL_FALSE, (const GLfloat*)ident_matrix.data());
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], 0.f); //not fix rotations
+			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter); //dont need to animate scrolling textures
 			for(const auto& obj : list) {
 				auto index = obj.emfx.index();
 				glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
-				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
-				//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
 				for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
 					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
-					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
 					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 				}
 			}
@@ -926,6 +924,9 @@ namespace map {
 			glBindFramebuffer(GL_FRAMEBUFFER, state.open_gl.msaa_framebuffer);
 			glClearColor(0.f, 0.f, 0.f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		} else {
+			glClearColor(0.f, 0.f, 0.f, 1.f);
+			glClear(GL_COLOR_BUFFER_BIT);
 		}
 
 		if(state.ui_state.bg_gfx_id) {
