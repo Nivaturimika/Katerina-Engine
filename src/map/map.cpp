@@ -588,15 +588,15 @@ namespace map {
 		return mt * mr * ms;
 	}
 
-	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, int32_t current, float time_counter, glm::mat4x4 parent_m) {
+	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, uint32_t current, float time_counter, glm::mat4x4 parent_m) {
 		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
 		auto const global_m = parent_m * node_m;
-		matrices[list[current].bone_id] = list[current].bone_pose_matrix * glm::inverse(list[current].bone_bind_pose_matrix);
 		for(uint32_t i = start; i < start + count; i++) {
-			if(list[i].bone_id == list[current].parent_id) {
+			if(i != current && list[current].parent_id == list[i].bone_id) {
 				get_hierachical_animation_bone(list, matrices, start, count, i, time_counter, global_m);
 			}
 		}
+		matrices[list[current].bone_id] = global_m * glm::inverse(list[current].bone_bind_pose_matrix);
 	}
 
 	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
@@ -940,7 +940,7 @@ namespace map {
 			if(gfx_def.primary_texture_handle) {
 				auto texid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
 				if(texid) {
-					glBindVertexArray(state.open_gl.global_square_vao[0]);
+					glBindVertexArray(state.open_gl.global_square_vao);
 					glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
 					glUniform4f(state.open_gl.ui_shader_d_rect_uniform, 0.f, 0.f, float(state.x_size), float(state.y_size));
 					glBindTexture(GL_TEXTURE_2D, texid);
