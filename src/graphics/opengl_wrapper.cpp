@@ -552,21 +552,16 @@ namespace ogl {
 			0, 65535, 0, 65535,
 			65535, 65535, 65535, 65535,
 			65535, 0, 65535, 0,
-			//global_square_right_data
-			0, 0, 0, 65535,
-			0, 65535, 65535, 65535,
-			65535, 65535, 65535, 0,
-			65535, 0, 0, 0,
 			//global_square_left_data
 			0, 0, 65535, 0,
 			0, 65535, 0, 0,
 			65535, 65535, 0, 65535,
 			65535, 0, 65535, 65535,
-			//global_square_flipped_data
+			//global_square_right_data
 			0, 0, 0, 65535,
-			0, 65535, 0, 0,
+			0, 65535, 65535, 65535,
 			65535, 65535, 65535, 0,
-			65535, 0, 65535, 65535,
+			65535, 0, 0, 0,
 			//global_square_right_flipped_data
 			0, 0, 0, 0,
 			0, 65535, 65535, 0,
@@ -577,26 +572,26 @@ namespace ogl {
 			0, 65535, 0, 65535,
 			65535, 65535, 0, 0,
 			65535, 0, 65535, 0,
+			//global_square_flipped_data
+			0, 0, 0, 65535,
+			0, 65535, 0, 0,
+			65535, 65535, 65535, 0,
+			65535, 0, 65535, 65535,
 			//global_rtl_square_data
 			0, 0, 65535, 0,
 			0, 65535, 65535, 65535,
 			65535, 65535, 0, 65535,
 			65535, 0, 0, 0,
-			//global_rtl_square_right_data
-			0, 65535, 65535, 0,
-			0, 0, 0, 0,
-			65535, 0, 0, 65535,
-			65535, 65535, 65535, 65535,
 			//global_rtl_square_left_data
 			0, 0, 0, 0,
 			0, 65535, 65535, 0,
 			65535, 65535, 65535, 65535,
 			65535, 0, 0, 65535,
-			//global_rtl_square_flipped_data
-			0, 0, 65535, 65535,
+			//global_rtl_square_right_data
 			0, 65535, 65535, 0,
-			65535, 65535, 0, 0,
+			0, 0, 0, 0,
 			65535, 0, 0, 65535,
+			65535, 65535, 65535, 65535,
 			//global_rtl_square_right_flipped_data
 			0, 0, 65535, 0,
 			0, 65535, 0, 0,
@@ -606,13 +601,23 @@ namespace ogl {
 			0, 0, 0, 65535,
 			0, 65535, 65535, 65535,
 			65535, 65535, 65535, 0,
-			65535, 0, 0, 0
+			65535, 0, 0, 0,
+			//global_rtl_square_flipped_data
+			0, 0, 65535, 65535,
+			0, 65535, 65535, 0,
+			65535, 65535, 0, 0,
+			65535, 0, 0, 65535,
 		};
 
 		glGenVertexArrays(1, &state.open_gl.global_square_vao);
-		// Populate the position buffer
 		glGenBuffers(1, &state.open_gl.global_square_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, state.open_gl.global_square_buffer);
+		glBindVertexArray(state.open_gl.global_square_vao);
+		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, 0); // position
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, (const void*)(sizeof(GLushort) * 2)); // texture coordinates
+		glEnableVertexAttribArray(0); // position
+		glEnableVertexAttribArray(1); // texture coordinates
+
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16 * (12 + 64), NULL, GL_STATIC_DRAW); //64 sub squares, 12 squares
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLushort) * 16 * 12, global_square_data);
 		for(uint32_t i = 0; i < 64; ++i) {
@@ -626,11 +631,6 @@ namespace ogl {
 			};
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLushort) * 16 * (12 + i), sizeof(GLushort) * 16, global_sub_square_data);
 		}
-		glBindVertexArray(state.open_gl.global_square_vao);
-		glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, 0); // position
-		glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLushort) * 4, (const void*)(sizeof(GLushort) * 2)); // texture coordinates
-		glEnableVertexAttribArray(0); // position
-		glEnableVertexAttribArray(1); // texture coordinates
 	}
 
 	inline auto map_color_modification_to_index(color_modification e) {
