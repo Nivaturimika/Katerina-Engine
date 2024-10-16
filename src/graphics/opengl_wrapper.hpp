@@ -110,23 +110,8 @@ enum class color_modification { none, disabled, interactable, interactable_disab
 		GLuint ui_shader_screen_height_uniform = 0;
 		GLuint ui_shader_gamma_uniform = 0;
 
-		GLuint global_square_vao[64 + 12] = {0};
-
+		GLuint global_square_vao = 0;
 		GLuint global_square_buffer = 0;
-		GLuint global_square_right_buffer = 0;
-		GLuint global_square_left_buffer = 0;
-		GLuint global_square_flipped_buffer = 0;
-		GLuint global_square_right_flipped_buffer = 0;
-		GLuint global_square_left_flipped_buffer = 0;
-
-		GLuint global_rtl_square_buffer = 0;
-		GLuint global_rtl_square_right_buffer = 0;
-		GLuint global_rtl_square_left_buffer = 0;
-		GLuint global_rtl_square_flipped_buffer = 0;
-		GLuint global_rtl_square_right_flipped_buffer = 0;
-		GLuint global_rtl_square_left_flipped_buffer = 0;
-
-		GLuint sub_square_buffers[64] = {0};
 
 		GLuint money_icon_tex = 0;
 		GLuint cross_icon_tex = 0;
