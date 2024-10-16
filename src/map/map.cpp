@@ -638,6 +638,8 @@ namespace map {
 					for(uint32_t k = start; k < start + count; k++) {
 						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
 					}
+				} else if(obj.anim == emfx::animation_type::none) {
+					//for buildings and such
 				}
 				glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 			}
@@ -661,7 +663,7 @@ namespace map {
 				dcon::provincial_flag_id pfid{ dcon::provincial_flag_id::value_base_t(i) };
 				if(state.world.province_get_flag_variables(p, pfid)) {
 					auto center = state.world.province_get_mid_point(p);
-					model_render_list.emplace_back(model_province_flag[i], center, 0.f, emfx::animation_type::idle);
+					model_render_list.emplace_back(model_province_flag[i], center, 0.f, emfx::animation_type::none);
 				}
 			}
 		});
@@ -672,7 +674,7 @@ namespace map {
 				auto center = state.world.province_get_mid_point(p);
 				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index() + level;
 				auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-				model_render_list.emplace_back(model_train_station, center, theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_train_station, center, theta, emfx::animation_type::none);
 			}
 		});
 		// Naval bases
@@ -683,9 +685,9 @@ namespace map {
 			auto p2 = state.world.province_get_mid_point(p);
 			auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
 			if(units.begin() != units.end()) { //full
-				model_render_list.emplace_back(model_naval_base_ships[level], p1, theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_naval_base_ships[level], p1, theta, emfx::animation_type::none);
 			} else { //empty
-				model_render_list.emplace_back(model_naval_base[level], p1, theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_naval_base[level], p1, theta, emfx::animation_type::none);
 			}
 		});
 		// Fort
@@ -696,7 +698,7 @@ namespace map {
 				auto pos = center + glm::vec2(dist_step, -dist_step); //bottom left (from center)
 				auto seed_r = p.index() - state.world.province_get_nation_from_province_ownership(p).index() + level;
 				auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-				model_render_list.emplace_back(model_fort[level], pos, theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_fort[level], pos, theta, emfx::animation_type::none);
 			}
 		});
 		// Factory
@@ -709,7 +711,7 @@ namespace map {
 				auto pos = center + glm::vec2(-dist_step, -dist_step); //bottom right (from center)
 				auto seed_r = p.index() + state.world.province_get_nation_from_province_ownership(p).index();
 				auto theta = glm::atan(float(rng::get_random(state, seed_r, seed_r ^ level) % 360) / 180.f - 1.f);
-				model_render_list.emplace_back(model_factory, pos, theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_factory, pos, theta, emfx::animation_type::none);
 			}
 		});
 		// Construction
@@ -759,14 +761,14 @@ namespace map {
 				auto p1 = duplicates::get_navy_location(state, p);
 				auto p2 = state.world.province_get_mid_point(p);
 				auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
-				model_render_list.emplace_back(model_blockaded, p1, -theta, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_blockaded, p1, -theta, emfx::animation_type::none);
 			}
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
-				model_render_list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle);
+				model_render_list.emplace_back(model_siege, center, 0.f, emfx::animation_type::none);
 			}
 		});
 		// Render armies
@@ -1497,7 +1499,7 @@ namespace map {
 				}
 			}
 
-			if(shaders[uint8_t(map_view_mode)][shader_map_standing_object] && zoom > map::zoom_very_close && state.user_settings.render_models) {
+			if(shaders[uint8_t(map_view_mode)][shader_map_standing_object] && zoom > map::zoom_close && state.user_settings.render_models) {
 				if(model_render_list.size() > 0) {
 					// Render standing objects
 					load_shader(shader_map_standing_object);

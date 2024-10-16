@@ -477,7 +477,8 @@ namespace emfx {
 		idle = 0,
 		move = 1,
 		attack = 2,
-		count
+		count,
+		none
 	};
 
 }
