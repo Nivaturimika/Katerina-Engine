@@ -600,7 +600,7 @@ namespace map {
 		}
 	}
 
-	void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
+	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 		glEnable(GL_DEPTH_TEST);
@@ -611,45 +611,78 @@ namespace map {
 		glActiveTexture(GL_TEXTURE0);
 		//
 		constexpr float animation_zoom_threshold = map::zoom_very_close + 2.f;
-		{ //default matrix -- overriden if zoomed in enough
+		if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
+			auto const emfx_size = std::min(map::display_data::max_static_meshes, uint32_t(state.ui_defs.emfx.size()));
+			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_idle_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
+			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_move_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
+			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_attack_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
+			std::vector<uint8_t> model_needs_matrix(emfx_size);
+			for(auto const& obj : list) {
+				if(obj.anim != emfx::animation_type::none) {
+					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::idle) ? 0x80 : 0x00;
+					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::move) ? 0x40 : 0x00;
+					model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::attack) ? 0x20 : 0x00;
+				}
+			}
+			for(uint32_t i = 0; i < emfx_size; i++) {
+				if((model_needs_matrix[i] & 0x80) != 0) {
+					auto start = static_mesh_idle_animation_start[i];
+					auto count = static_mesh_idle_animation_count[i];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, final_idle_matrices[i], start, count, k, time_counter, glm::mat4x4(1.f));
+					}
+				} else if((model_needs_matrix[i] & 0x40) != 0) {
+					auto start = static_mesh_move_animation_start[i];
+					auto count = static_mesh_move_animation_count[i];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, final_move_matrices[i], start, count, k, time_counter, glm::mat4x4(1.f));
+					}
+				} else if((model_needs_matrix[i] & 0x20) != 0) {
+					auto start = static_mesh_attack_animation_start[i];
+					auto count = static_mesh_attack_animation_count[i];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, final_attack_matrices[i], start, count, k, time_counter, glm::mat4x4(1.f));
+					}
+				}
+			}
+			for(const auto& obj : list) {
+				auto index = obj.emfx.index();
+				if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
+					std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
+					if(obj.anim == emfx::animation_type::idle) {
+						auto const& final_matrix = final_idle_matrices[index];
+						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+					} else if(obj.anim == emfx::animation_type::move) {
+						auto const& final_matrix = final_move_matrices[index];
+						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+					} else if(obj.anim == emfx::animation_type::attack) {
+						auto const& final_matrix = final_attack_matrices[index];
+						glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+					}
+				}
+				glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
+				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
+				//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
+				for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
+					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
+					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
+					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
+				}
+			}
+		} else {
+			//default matrix -- overriden if zoomed in enough
 			static const std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
 			glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
-		}
-		//
-		for(const auto& obj : list) {
-			auto index = obj.emfx.index();
-			if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
-				std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
-				if(obj.anim == emfx::animation_type::idle) {
-					auto start = static_mesh_idle_animation_start[index];
-					auto count = static_mesh_idle_animation_count[index];
-					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
-					}
-				} else if(obj.anim == emfx::animation_type::move) {
-					auto start = static_mesh_move_animation_start[index];
-					auto count = static_mesh_move_animation_count[index];
-					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
-					}
-				} else if(obj.anim == emfx::animation_type::attack) {
-					auto start = static_mesh_attack_animation_start[index];
-					auto count = static_mesh_attack_animation_count[index];
-					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
-					}
-				} else if(obj.anim == emfx::animation_type::none) {
-					//for buildings and such
+			for(const auto& obj : list) {
+				auto index = obj.emfx.index();
+				glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
+				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
+				//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
+				for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
+					glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
+					glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
+					glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 				}
-				glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
-			}
-			glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
-			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
-			//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
-			for(uint32_t i = 0; i < static_mesh_starts[index].size(); i++) {
-				glBindTexture(GL_TEXTURE_2D, static_mesh_textures[index][i]);
-				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_time], time_counter * static_mesh_scrolling_factor[index][i]);
-				glDrawArrays(GL_TRIANGLES, static_mesh_starts[index][i], static_mesh_counts[index][i]);
 			}
 		}
 		glDisable(GL_DEPTH_TEST);
@@ -1503,7 +1536,7 @@ namespace map {
 				if(model_render_list.size() > 0) {
 					// Render standing objects
 					load_shader(shader_map_standing_object);
-					render_models(model_render_list, time_counter, map_view_mode, zoom);
+					render_models(state, model_render_list, time_counter, map_view_mode, zoom);
 				}
 			}
 		}

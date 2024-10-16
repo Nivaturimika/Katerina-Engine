@@ -389,7 +389,7 @@ namespace map {
 		void make_coastal_borders(sys::state& state, std::vector<bool>& visited);
 		void make_borders(sys::state& state, std::vector<bool>& visited);
 
-		void render_models(std::vector<model_render_command>& info, float time_counter, sys::projection_mode map_view_mode, float zoom);
+		void render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom);
 		void load_shaders(simple_fs::directory& root);
 		void create_meshes();
 		void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);
