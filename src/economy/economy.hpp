@@ -186,7 +186,7 @@ namespace economy {
 		float total = 0.f;
 	};
 
-	void daily_update(sys::state& state, bool initiate_building);
+	void daily_update(sys::state& state);
 	void resolve_constructions(sys::state& state);
 	void limit_pop_demand_to_production(sys::state& state);
 

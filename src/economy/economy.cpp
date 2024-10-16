@@ -302,18 +302,6 @@ namespace economy {
 			}
 		});
 
-		auto savings_buffer = state.world.pop_type_make_vectorizable_float_buffer();
-		state.world.for_each_pop_type([&](dcon::pop_type_id t) {
-			auto ft = fatten(state.world, t);
-			state.world.for_each_commodity([&](dcon::commodity_id c) {
-				savings_buffer.get(t) += state.world.commodity_get_is_available_from_start(c)
-				? state.world.commodity_get_cost(c) * ft.get_life_needs(c) + 0.5f * state.world.commodity_get_cost(c) * ft.get_everyday_needs(c)
-				: 0.0f;
-			});
-			auto strata = (ft.get_strata() * 2) + 1;
-			savings_buffer.get(t) *= strata;
-		});
-
 		state.world.for_each_pop([&](dcon::pop_id p) {
 			auto fp = fatten(state.world, p);
 			fp.set_life_needs_satisfaction(1.0f);
@@ -1243,7 +1231,7 @@ namespace economy {
 		return std::max(0.001f, eff_p); //sanity
 	}
 
-	void daily_update(sys::state& state, bool initiate_buildings) {
+	void daily_update(sys::state& state) {
 		/* initialization parallel block */
 		concurrency::parallel_for(0, 10, [&](int32_t index) {
 			switch(index) {
@@ -1542,20 +1530,20 @@ namespace economy {
 
 		/* add up production, collect taxes and tariffs, other updates purely internal to each nation */
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
-		auto n = dcon::nation_id{ dcon::nation_id::value_base_t(i) };
+			auto n = dcon::nation_id{ dcon::nation_id::value_base_t(i) };
 			if(state.world.nation_get_owned_province_count(n) == 0)
 				return;
 
 			/* prepare needs satisfaction caps */
-			ve::vectorizable_buffer<float, dcon::pop_type_id> ln_max = state.world.pop_type_make_vectorizable_float_buffer();
-			ve::vectorizable_buffer<float, dcon::pop_type_id> en_max = state.world.pop_type_make_vectorizable_float_buffer();
-			ve::vectorizable_buffer<float, dcon::pop_type_id> lx_max = state.world.pop_type_make_vectorizable_float_buffer();
+			auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
+			auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
+			auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
 			state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
 				float ln_total = 0.0f;
 				float en_total = 0.0f;
 				float lx_total = 0.0f;
 				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 					auto kf = state.world.commodity_get_key_factory(c);
 					if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 						auto sat = state.world.nation_get_demand_satisfaction(n, c);
@@ -1573,15 +1561,15 @@ namespace economy {
 						lx_max.get(pt) += lx_val * sat;
 					}
 				}
-				if(ln_total > 0)
+				if(ln_total > 0.f)
 					ln_max.get(pt) /= ln_total;
 				else
 					ln_max.get(pt) = 1.f;
-				if(en_total > 0)
+				if(en_total > 0.f)
 					en_max.get(pt) /= en_total;
 				else
 					en_max.get(pt) = 1.f;
-				if(lx_total > 0)
+				if(lx_total > 0.f)
 					lx_max.get(pt) /= lx_total;
 				else
 					lx_max.get(pt) = 1.f;
@@ -1694,21 +1682,12 @@ namespace economy {
 			update_national_artisan_production(state, n);
 
 			for(auto p : state.world.nation_get_province_ownership(n)) {
-				/*
-				perform production
-				*/
-
+				// perform production
 				for(auto f : state.world.province_get_factory_location(p.get_province())) {
-					// factory
 					economy_factory::update_single_factory_production(state, f.get_factory(), n, factory_min_wage);
 				}
-
-				// artisan
-				//update_province_artisan_production(state, p.get_province(), n);
-
 				// rgo
 				economy_rgo::update_province_rgo_production(state, p.get_province(), n);
-
 				/* adjust pop satisfaction based on consumption */
 				for(auto pl : p.get_province().get_pop_location()) {
 					auto t = pl.get_pop().get_poptype();
@@ -1856,11 +1835,7 @@ namespace economy {
 				assert(std::isfinite(t_total));
 				state.world.nation_get_stockpiles(n, economy::money) += t_total;
 			}
-
-			/* advance construction */
 			advance_construction(state, n);
-
-			// shift needs weights
 			adjust_artisan_balance(state, n);
 		});
 
@@ -1993,126 +1968,124 @@ namespace economy {
 		// make constructions:
 		resolve_constructions(state);
 
-		if(initiate_buildings) {
+		// make new investments
+		for(auto n : state.world.in_nation) {
+			auto nation_rules = n.get_combined_issue_rules();
 
-			// make new investments
-			for(auto n : state.world.in_nation) {
-				auto nation_rules = n.get_combined_issue_rules();
+			// check if current projects are already too expensive for capitalists to manage
+			float total_cost = 0.f;
 
-				// check if current projects are already too expensive for capitalists to manage
-				float total_cost = 0.f;
+			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
+				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
+				total_cost += state.world.nation_get_private_construction_demand(n, c) * state.world.commodity_get_current_price(c);
+			}
 
-				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
-					total_cost += state.world.nation_get_private_construction_demand(n, c) * state.world.commodity_get_current_price(c);
+			float total_cost_added = 0.f;
+
+			if(n.get_private_investment() > total_cost
+			&& n.get_is_civilized()
+			&& (nation_rules & (issue_rule::pop_build_factory | issue_rule::pop_expand_factory)) != 0) {
+
+				static std::vector<dcon::state_instance_id> states_in_order;
+				states_in_order.clear();
+				for(auto si : n.get_state_ownership()) {
+					if(si.get_state().get_capital().get_is_colonial() == false) {
+						states_in_order.push_back(si.get_state().id);
+					}
+				}
+				pdqsort(states_in_order.begin(), states_in_order.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+					auto a_pop = state.world.state_instance_get_demographics(a, demographics::total);
+					auto b_pop = state.world.state_instance_get_demographics(b, demographics::total);
+					if(a_pop != b_pop)
+						return a_pop > b_pop;
+					return a.index() < b.index(); // force total ordering
+				});
+
+				static std::vector<dcon::factory_type_id> desired_types;
+				desired_types.clear();
+				if(!states_in_order.empty() && (nation_rules & issue_rule::pop_build_factory) != 0) {
+					ai::get_desired_factory_types(state, n, desired_types);
 				}
 
-				float total_cost_added = 0.f;
+				//upgrade all good targets!!!
+				//upgrading only one per run is too slow and leads to massive unemployment!!!
 
-				if(n.get_private_investment() > total_cost
-				&& n.get_is_civilized()
-				&& (nation_rules & (issue_rule::pop_build_factory | issue_rule::pop_expand_factory)) != 0) {
+				for(auto s : states_in_order) {
+					auto pw_num = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
+					auto pw_employed = state.world.state_instance_get_demographics(s, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
 
-					static std::vector<dcon::state_instance_id> states_in_order;
-					states_in_order.clear();
-					for(auto si : n.get_state_ownership()) {
-						if(si.get_state().get_capital().get_is_colonial() == false) {
-							states_in_order.push_back(si.get_state().id);
-						}
-					}
-					pdqsort(states_in_order.begin(), states_in_order.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-						auto a_pop = state.world.state_instance_get_demographics(a, demographics::total);
-						auto b_pop = state.world.state_instance_get_demographics(b, demographics::total);
-						if(a_pop != b_pop)
-							return a_pop > b_pop;
-						return a.index() < b.index(); // force total ordering
-					});
-
-					static std::vector<dcon::factory_type_id> desired_types;
-					desired_types.clear();
-					if(!states_in_order.empty() && (nation_rules & issue_rule::pop_build_factory) != 0) {
-						ai::get_desired_factory_types(state, n, desired_types);
-					}
-
-					//upgrade all good targets!!!
-					//upgrading only one per run is too slow and leads to massive unemployment!!!
-
-					for(auto s : states_in_order) {
-						auto pw_num = state.world.state_instance_get_demographics(s, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
-						auto pw_employed = state.world.state_instance_get_demographics(s, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
-
-						if(pw_employed >= pw_num && pw_num > 0.0f)
+					if(pw_employed >= pw_num && pw_num > 0.0f)
 						continue; // no spare workers
 
-						int32_t num_factories = 0;
-						float profit = 0.0f;
-						dcon::factory_id selected_factory;
-						// is there an upgrade target ?
-						auto d = state.world.state_instance_get_definition(s);
-						for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
-							if(p.get_province().get_nation_from_province_ownership() == n) {
-								auto fl_range = p.get_province().get_factory_location();
-								num_factories += int32_t(fl_range.end() - fl_range.begin());
-								for(auto f : fl_range) {
-									if((nation_rules & issue_rule::pop_expand_factory) != 0
-									&& f.get_factory().get_production_scale() >= 0.9985f
-									&& f.get_factory().get_primary_employment() >= 0.9985f
-									&& f.get_factory().get_level() < uint8_t(255)) {
-										auto type = f.get_factory().get_building_type();
-										auto ug_in_progress = false;
-										for(auto c : state.world.state_instance_get_state_building_construction(s)) {
-											if(c.get_type() == type) {
-												ug_in_progress = true;
-												break;
-											}
+					int32_t num_factories = 0;
+					float profit = 0.0f;
+					dcon::factory_id selected_factory;
+					// is there an upgrade target ?
+					auto d = state.world.state_instance_get_definition(s);
+					for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
+						if(p.get_province().get_nation_from_province_ownership() == n) {
+							auto fl_range = p.get_province().get_factory_location();
+							num_factories += int32_t(fl_range.end() - fl_range.begin());
+							for(auto f : fl_range) {
+								if((nation_rules & issue_rule::pop_expand_factory) != 0
+								&& f.get_factory().get_production_scale() >= 0.9985f
+								&& f.get_factory().get_primary_employment() >= 0.9985f
+								&& f.get_factory().get_level() < uint8_t(255)) {
+									auto type = f.get_factory().get_building_type();
+									auto ug_in_progress = false;
+									for(auto c : state.world.state_instance_get_state_building_construction(s)) {
+										if(c.get_type() == type) {
+											ug_in_progress = true;
+											break;
 										}
+									}
 
-										if(ug_in_progress) {
-											continue;
-										}
+									if(ug_in_progress) {
+										continue;
+									}
 
-										if(auto new_p = f.get_factory().get_full_profit() / f.get_factory().get_level(); new_p > profit) {
-											profit = new_p;
-											selected_factory = f.get_factory();
-										}
+									if(auto new_p = f.get_factory().get_full_profit() / f.get_factory().get_level(); new_p > profit) {
+										profit = new_p;
+										selected_factory = f.get_factory();
 									}
 								}
 							}
 						}
-						if(selected_factory && profit > 1.f) {
-							auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
-							new_up.set_is_pop_project(true);
-							new_up.set_is_upgrade(true);
-							new_up.set_type(state.world.factory_get_building_type(selected_factory));
-						}
+					}
+					if(selected_factory && profit > 1.f) {
+						auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
+						new_up.set_is_pop_project(true);
+						new_up.set_is_upgrade(true);
+						new_up.set_type(state.world.factory_get_building_type(selected_factory));
+					}
 
-						//try to invest into something new...
-						//bool found_investment = false;
-						auto existing_constructions = state.world.state_instance_get_state_building_construction(s);
-						if(existing_constructions.begin() != existing_constructions.end())
+					//try to invest into something new...
+					//bool found_investment = false;
+					auto existing_constructions = state.world.state_instance_get_state_building_construction(s);
+					if(existing_constructions.begin() != existing_constructions.end())
 						continue; // already building
 
-						if(n.get_private_investment() * 0.01f < total_cost + total_cost_added)
+					if(n.get_private_investment() * 0.01f < total_cost + total_cost_added)
 						continue;
 
-						if(num_factories < int32_t(state.defines.factories_per_state) && (nation_rules & issue_rule::pop_build_factory) != 0) {
-							// randomly try a valid (check coastal, unlocked, non existing) factory
-							if(economy_factory::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
+					if(num_factories < int32_t(state.defines.factories_per_state) && (nation_rules & issue_rule::pop_build_factory) != 0) {
+						// randomly try a valid (check coastal, unlocked, non existing) factory
+						if(economy_factory::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
 							continue;
-							if(!desired_types.empty()) {
-								std::vector<dcon::factory_type_id> valid_desired_types;
-								for(const auto ft : desired_types) {
-									if(state.world.factory_type_get_is_coastal(ft) && !province::state_is_coastal(state, s))
+						if(!desired_types.empty()) {
+							std::vector<dcon::factory_type_id> valid_desired_types;
+							for(const auto ft : desired_types) {
+								if(state.world.factory_type_get_is_coastal(ft) && !province::state_is_coastal(state, s))
 									continue;
-									bool already_in_progress = [&]() {
-										for(auto p : state.world.state_instance_get_state_building_construction(s)) {
-											if(p.get_type() == ft)
+								bool already_in_progress = [&]() {
+									for(auto p : state.world.state_instance_get_state_building_construction(s)) {
+										if(p.get_type() == ft)
 											return true;
-										}
-										return false;
+									}
+									return false;
 									}();
 									if(already_in_progress)
-									continue;
+										continue;
 									bool present_in_location = false;
 									province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
 										for(auto fac : state.world.province_get_factory_location(p)) {
@@ -2124,76 +2097,75 @@ namespace economy {
 										}
 									});
 									if(present_in_location)
-									continue;
+										continue;
 									valid_desired_types.push_back(ft);
-								}
-
-								pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
-									auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s);
-									auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s);
-									if(a_bonus != b_bonus)
-										return a_bonus > b_bonus;
-									return a.index() < b.index(); // force total ordering
-								});
-
-								if(!valid_desired_types.empty()) {
-									auto selected = valid_desired_types[0];
-									auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
-									new_up.set_is_pop_project(true);
-									new_up.set_is_upgrade(false);
-									new_up.set_type(selected);
-									auto costs = new_up.get_type().get_construction_costs();
-									for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-										if(costs.commodity_type[i]) {
-											total_cost_added += commodity_effective_price(state, n, costs.commodity_type[i]) * costs.commodity_amounts[i];
-										} else {
-											break;
-										}
-									}
-									//found_investment = true;
-								}
 							}
-						}
-					}
 
-					if((nation_rules & issue_rule::pop_build_factory) != 0) {
-						static std::vector<std::pair<dcon::province_id, int32_t>> provinces_in_order;
-						provinces_in_order.clear();
-						for(auto si : n.get_state_ownership()) {
-							if(si.get_state().get_capital().get_is_colonial() == false) {
-								auto s = si.get_state().id;
-								auto d = state.world.state_instance_get_definition(s);
-								int32_t num_factories = 0;
-								for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
-									if(province::generic_can_build_railroads(state, p.get_province(), n) && p.get_province().get_nation_from_province_ownership() == n) {
-										for(auto f : p.get_province().get_factory_location())
-										num_factories += int32_t(f.get_factory().get_level());
-										provinces_in_order.emplace_back(p.get_province().id, num_factories);
+							pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
+								auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s);
+								auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s);
+								if(a_bonus != b_bonus)
+									return a_bonus > b_bonus;
+								return a.index() < b.index(); // force total ordering
+							});
+
+							if(!valid_desired_types.empty()) {
+								auto selected = valid_desired_types[0];
+								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
+								new_up.set_is_pop_project(true);
+								new_up.set_is_upgrade(false);
+								new_up.set_type(selected);
+								auto costs = new_up.get_type().get_construction_costs();
+								for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+									if(costs.commodity_type[i]) {
+										total_cost_added += commodity_effective_price(state, n, costs.commodity_type[i]) * costs.commodity_amounts[i];
+									} else {
+										break;
 									}
 								}
-								// The state's number of factories is intentionally given to all the provinces within the state so the
-								// railroads aren't just built on a single province within a state
-								for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
-									if(province::generic_can_build_railroads(state, p.get_province(), n) && p.get_province().get_nation_from_province_ownership() == n)
-									provinces_in_order.emplace_back(p.get_province().id, num_factories);
-								}
+								//found_investment = true;
 							}
-						}
-						if(!provinces_in_order.empty()) {
-							std::pair<dcon::province_id, int32_t> best_p = provinces_in_order[0];
-							for(auto e : provinces_in_order)
-							if(e.second > best_p.second)
-								best_p = e;
-
-							auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_p.first, n));
-							new_rr.set_is_pop_project(true);
-							new_rr.set_type(uint8_t(province_building_type::railroad));
-							//found_investment = true;
 						}
 					}
 				}
-				n.set_private_investment(0.0f);
+
+				if((nation_rules & issue_rule::pop_build_factory) != 0) {
+					static std::vector<std::pair<dcon::province_id, int32_t>> provinces_in_order;
+					provinces_in_order.clear();
+					for(auto si : n.get_state_ownership()) {
+						if(si.get_state().get_capital().get_is_colonial() == false) {
+							auto s = si.get_state().id;
+							auto d = state.world.state_instance_get_definition(s);
+							int32_t num_factories = 0;
+							for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
+								if(province::generic_can_build_railroads(state, p.get_province(), n) && p.get_province().get_nation_from_province_ownership() == n) {
+									for(auto f : p.get_province().get_factory_location())
+										num_factories += int32_t(f.get_factory().get_level());
+									provinces_in_order.emplace_back(p.get_province().id, num_factories);
+								}
+							}
+							// The state's number of factories is intentionally given to all the provinces within the state so the
+							// railroads aren't just built on a single province within a state
+							for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
+								if(province::generic_can_build_railroads(state, p.get_province(), n) && p.get_province().get_nation_from_province_ownership() == n)
+									provinces_in_order.emplace_back(p.get_province().id, num_factories);
+							}
+						}
+					}
+					if(!provinces_in_order.empty()) {
+						std::pair<dcon::province_id, int32_t> best_p = provinces_in_order[0];
+						for(auto e : provinces_in_order)
+							if(e.second > best_p.second)
+								best_p = e;
+
+						auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_p.first, n));
+						new_rr.set_is_pop_project(true);
+						new_rr.set_type(uint8_t(province_building_type::railroad));
+						//found_investment = true;
+					}
+				}
 			}
+			n.set_private_investment(0.0f);
 		}
 	}
 

@@ -3278,27 +3278,35 @@ namespace sys {
 			}
 		}
 
-		economy::presimulate(*this);
+		economy::presimulate(*this
 
 		ai::identify_focuses(*this);
 		// ai::update_ai_research(*this);
 		ai::update_influence_priorities(*this);
 		ai::update_focuses(*this);
 
+		economy::initialize(*this);
 		military::recover_org(*this);
 		military::set_initial_leaders(*this);
-
 		military::run_gc(*this);
-
 		for(auto r : world.in_army) {
 			auto nation = world.army_control_get_controller(r.get_army_control());
-			if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
+			//armies defined as "rebels" will be assigned to the nearest rebellion
+			if(nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
+				world.delete_army_control(r.get_army_control());
+				dcon::rebel_faction_id rf;
+				auto owner = r.get_location_from_army_location().get_nation_from_province_ownership();
+				auto lrw = owner.get_rebellion_within();
+				if(lrw.begin() != lrw.end()) {
+					world.force_create_army_rebel_control(r, (*lrw.begin()).get_rebels());
+				}
+			} else if(world.nation_get_owned_province_count(nation) == 0) {
 				military::cleanup_army(*this,r);
 			}
 		}
 		for(auto r : world.in_navy) {
 			auto nation = world.navy_control_get_controller(r.get_navy_control());
-			if(world.nation_get_owned_province_count(nation) == 0 && nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {			
+			if(world.nation_get_owned_province_count(nation) == 0) {			
 				military::cleanup_navy(*this, r);
 			}
 		}
@@ -3308,7 +3316,7 @@ namespace sys {
 		adjacency_data_out_of_date = true;
 		for(auto si : world.in_state_instance) {
 			si.set_naval_base_is_taken(false);
-		si.set_capital(dcon::province_id{});
+			si.set_capital(dcon::province_id{});
 		}
 		for(auto n : world.in_nation) {
 			n.set_combined_issue_rules(0);
@@ -3874,7 +3882,7 @@ namespace sys {
 			}
 		});
 
-		economy::daily_update(*this, true);
+		economy::daily_update(*this);
 
 		military::recover_org(*this);
 		military::update_siege_progress(*this);

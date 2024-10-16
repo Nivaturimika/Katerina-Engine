@@ -4734,11 +4734,16 @@ namespace command {
 		assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 		state.selected_armies.clear();
 		state.selected_navies.clear();
-		for(auto& v : state.ctrl_armies) v.clear();
-		for(auto& v : state.ctrl_navies) v.clear();
+		for(auto& v : state.ctrl_armies) {
+			v.clear();
+		}
+		for(auto& v : state.ctrl_navies) {
+			v.clear();
+		}
 		/* And clear the save stuff */
 		state.network_state.current_save_buffer.reset();
 		state.network_state.current_save_length = 0;
+
 		/* Clear AI data */
 		for(const auto n : state.world.in_nation) {
 			if(state.world.nation_get_is_player_controlled(n)) {
@@ -4746,6 +4751,7 @@ namespace command {
 			}
 		}
 		ai::take_ai_decisions(state);
+		economy::daily_update(state);
 
 		game_scene::switch_scene(state, game_scene::scene_id::in_game_basic);
 		state.map_state.set_selected_province(dcon::province_id{});
