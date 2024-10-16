@@ -392,11 +392,11 @@ namespace emfx {
 			node.position = mh.position;
 			//node.position.x = -node.position.x; //emfx fixup
 			node.rotation = mh.rotation;
-			node.rotation.y = -node.rotation.y; //emfx fixup
-			node.rotation.z = -node.rotation.z; //emfx fixup
+			//node.rotation.y = -node.rotation.y; //emfx fixup
+			//node.rotation.z = -node.rotation.z; //emfx fixup
 			node.scale_rotation = mh.scale_rotation;
-			node.scale_rotation.y = -node.scale_rotation.y; //emfx fixup
-			node.scale_rotation.z = -node.scale_rotation.z; //emfx fixup
+			//node.scale_rotation.y = -node.scale_rotation.y; //emfx fixup
+			//node.scale_rotation.z = -node.scale_rotation.z; //emfx fixup
 			node.scale = mh.scale;
 			node.transform = mh.transform;
 			node.parent_id = mh.parent_id;
@@ -797,8 +797,8 @@ namespace emfx {
 		} else {
 			nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 		}
-		nkf.y = -nkf.y; //emfx fixup
-		nkf.z = -nkf.z; //emfx fixup
+		//nkf.y = -nkf.y; //emfx fixup
+		//nkf.z = -nkf.z; //emfx fixup
 		return nkf;
 	}
 
