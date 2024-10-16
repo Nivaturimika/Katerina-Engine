@@ -4094,14 +4094,13 @@ namespace ai {
 
 	enum class province_class : uint8_t {
 		interior = 0,
-		coast = 1,
-		low_priority_border = 2,
-		border = 3,
-		threat_border = 4,
-		hostile_border = 5,
-		medium_priority_hostile_border = 6,
-		high_priority_hostile_border = 7,
-		count = 8
+		low_priority_border = 1,
+		border = 2,
+		threat_border = 3,
+		hostile_border = 4,
+		medium_priority_hostile_border = 5,
+		high_priority_hostile_border = 6,
+		count = 7
 	};
 
 	struct classified_province {
@@ -4115,10 +4114,7 @@ namespace ai {
 
 		auto cap = state.world.nation_get_capital(n);
 		for(auto c : state.world.nation_get_province_control(n)) {
-			province_class cls = c.get_province().get_is_coast() ? province_class::coast : province_class::interior;
-			if(c.get_province() == cap)
-				cls = province_class::border;
-
+			province_class cls = province_class::interior;
 			for(auto padj : c.get_province().get_province_adjacency()) {
 				auto other = padj.get_connected_provinces(0) == c.get_province() ? padj.get_connected_provinces(1) : padj.get_connected_provinces(0);
 				auto n_controller = other.get_nation_from_province_control();
@@ -4177,9 +4173,6 @@ namespace ai {
 					if(other.get_state_membership().get_capital() == other) {
 						cls = province_class::high_priority_hostile_border;
 					}
-					//else if(other.get_building_level(economy::province_building_type::naval_base) > 0) {
-					//	cls = province_class::medium_priority_hostile_border;
-					//}
 				}
 			}
 			provinces.push_back(classified_province{ c.get_province().id, cls });
@@ -4211,7 +4204,6 @@ namespace ai {
 
 		for(uint8_t stage = uint8_t(province_class::count); stage-- > 0 && !guards_list.empty(); ) {
 			uint32_t start_of_stage = end_of_stage;
-
 			for(; end_of_stage < provinces.size(); ++end_of_stage) {
 				if(uint8_t(provinces[end_of_stage].c) != stage)
 					break;
@@ -4227,15 +4219,12 @@ namespace ai {
 					assert(p_region > 0);
 					bool p_region_is_coastal = state.province_definitions.connected_region_is_coastal[p_region - 1];
 
-					if(10.0f * (1 + full_loops_through) <= military::peacetime_attrition_limit(state, n, p)) {
+					if(10.f * (1 + full_loops_through) <= military::local_army_weight(state, p)) {
 						uint32_t nearest_index = 0;
 						dcon::army_id nearest;
 						float nearest_distance = 1.0f;
 						for(uint32_t k = uint32_t(guards_list.size()); k-- > 0;) {
 							auto guard_loc = state.world.army_get_location_from_army_location(guards_list[k]);
-							if(military::relative_attrition_amount(state, guards_list[k], p) >= 2.f)
-								continue; //too heavy
-
 							if(auto d = province::sorting_distance(state, guard_loc, p); !nearest || d < nearest_distance) {
 								nearest_index = k;
 								nearest_distance = d;

@@ -459,7 +459,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<T>(state, parent);
 			auto amount = military::attrition_amount(state, content);
-			set_text(state, amount > 0 ? text::format_percentage(amount, 1) : std::string(""));
+			set_text(state, amount > 0.f ? "?R" + text::format_percentage(amount * 0.01f, 1) : std::string(""));
 		}
 	};
 
@@ -1699,7 +1699,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				auto a = std::get<dcon::navy_id>(foru);
 				value = military::attrition_amount(state, a);
 			}
-			set_text(state, (value > 0.f ? "?R" : "") + text::format_percentage(value));
+			set_text(state, (value > 0.f ? "?R" : "") + text::format_percentage(value * 0.01f));
 		}
 	};
 

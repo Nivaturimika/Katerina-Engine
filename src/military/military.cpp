@@ -4937,7 +4937,7 @@ namespace military {
 	}
 
 	float local_army_weight(sys::state& state, dcon::province_id prov) {
-		float total_army_weight = 0;
+		float total_army_weight = 0.f;
 		for(auto ar : state.world.province_get_army_location(prov)) {
 			if(ar.get_army().get_black_flag() == false
 			&& ar.get_army().get_is_retreating() == false
@@ -4965,8 +4965,8 @@ namespace military {
 		float greatest_hostile_fort = greatest_adjacent_hostile_fort_level(state, nation_as, prov);
 		float attrition_value =
 			std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
-			+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.0f
-			+ (!province::any_adjacent_is_friendly(state, nation_as, prov) ? 5.f : 0.f);
+			+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.f
+			+ (!province::any_adjacent_is_friendly(state, nation_as, prov) ? 3.f : 0.f);
 		return attrition_value;
 	}
 	/*	Returns the attrition amount of a province relative to the army, for example, to evaluate if an
@@ -4992,18 +4992,7 @@ namespace military {
 	void apply_attrition(sys::state& state) {
 		concurrency::parallel_for(0, state.province_definitions.first_sea_province.index(), [&](int32_t i) {
 			dcon::province_id prov{dcon::province_id::value_base_t(i)};
-			float total_army_weight = 0;
-			for(auto ar : state.world.province_get_army_location(prov)) {
-				if(ar.get_army().get_black_flag() == false
-				&& ar.get_army().get_is_retreating() == false
-				&& !bool(ar.get_army().get_navy_from_army_transport())
-				&& !bool(ar.get_army().get_battle_from_army_battle_participation())) {
-					for(auto rg : ar.get_army().get_army_membership()) {
-						total_army_weight += 3.0f * rg.get_regiment().get_strength();
-					}
-				}
-			}
-
+			float total_army_weight = military::local_army_weight(state, prov);
 			/*
 			First we calculate (total-strength + leader-attrition-trait) x (attrition-modifier-from-technology + 1) -
 			effective-province-supply-limit (rounded down to the nearest integer) + province-attrition-modifier +
@@ -5026,7 +5015,7 @@ namespace military {
 					float attrition_value =
 						std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
 						+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.0f
-						+ (!province::any_adjacent_is_friendly(state, army_controller, prov) ? 5.f : 0.f);
+						+ (!province::any_adjacent_is_friendly(state, army_controller, prov) ? 3.f : 0.f);
 					for(auto rg : ar.get_army().get_army_membership()) {
 						rg.get_regiment().get_pending_damage() += attrition_value * 0.01f;
 						rg.get_regiment().get_strength() -= attrition_value * 0.01f;

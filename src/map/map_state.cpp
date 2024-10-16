@@ -96,6 +96,7 @@ namespace map {
 		map_data.other_objective_unit_arrow_starts.clear();
 
 		map_data.selection_vertices.clear();
+
 		for(auto selected_army : state.selected_armies) {
 			auto const p = state.world.province_get_mid_point(state.world.army_get_location_from_army_location(selected_army));
 			if(auto ps = state.world.army_get_path(selected_army); ps.size() > 0) {
