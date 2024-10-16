@@ -440,7 +440,9 @@ namespace emfx {
 		int32_t bone_id = -1; //assigned by processer
 		int32_t parent_id = -1;
 
-		glm::mat4x4 bone_matrix = glm::mat4x4(1.f);
+		glm::mat4x4 bone_node_matrix = glm::mat4x4(1.f);
+		glm::mat4x4 bone_pose_matrix = glm::mat4x4(1.f);
+		glm::mat4x4 bone_bind_pose_matrix = glm::mat4x4(1.f);
 		glm::mat4x4 parent_matrix = glm::mat4x4(1.f);
 
 		float total_anim_time = 0.f;

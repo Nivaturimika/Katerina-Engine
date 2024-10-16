@@ -390,7 +390,7 @@ namespace emfx {
 			xac_pp_actor_node node;
 			node.name = name;
 			node.position = mh.position;
-			node.position.x = -node.position.x; //emfx fixup
+			//node.position.x = -node.position.x; //emfx fixup
 			node.rotation = mh.rotation;
 			node.rotation.y = -node.rotation.y; //emfx fixup
 			node.rotation.z = -node.rotation.z; //emfx fixup
@@ -461,7 +461,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto normal = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						normal.x = -normal.x;
+						//normal.x = -normal.x; //emfx fixup
 						obj.normals.push_back(normal);
 					}
 					break;
@@ -471,7 +471,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto vertex = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						vertex.x = -vertex.x;
+						//vertex.x = -vertex.x; //emfx fixup
 						obj.vertices.push_back(vertex);
 					}
 					break;
@@ -490,7 +490,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto weight = parse_xac_any_binary<xac_vector4f>(&ptr, end, err);
-						weight.x = -weight.x;
+						//weight.x = -weight.x; //emfx fixup
 						obj.tangents.push_back(weight);
 					}
 					break;
@@ -797,8 +797,8 @@ namespace emfx {
 		} else {
 			nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 		}
-		nkf.y = -nkf.y;
-		nkf.z = -nkf.z;
+		nkf.y = -nkf.y; //emfx fixup
+		nkf.z = -nkf.z; //emfx fixup
 		return nkf;
 	}
 
@@ -818,10 +818,10 @@ namespace emfx {
 			anim.bind_pose_scale_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 			//
 			anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			anim.pose_position.x = -anim.pose_position.x; // OpenGL fixup
+			//anim.pose_position.x = -anim.pose_position.x; //emfx fixup
 			anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
 			anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			anim.bind_pose_position.x = -anim.bind_pose_position.x; // OpenGL fixup
+			//anim.bind_pose_position.x = -anim.bind_pose_position.x; //emfx fixup
 			anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
 			//
 			uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&ptr, end, err);
@@ -840,7 +840,7 @@ namespace emfx {
 			//
 			for(uint32_t j = 0; j < num_pos_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
-				kf.value.x = -kf.value.x;
+				//kf.value.x = -kf.value.x; //emfx fixup
 				anim.position_keys.push_back(kf);
 			}
 			for(uint32_t j = 0; j < num_rot_keys; j++) {

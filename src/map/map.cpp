@@ -591,10 +591,9 @@ namespace map {
 	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, int32_t current, float time_counter, glm::mat4x4 parent_m) {
 		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
 		auto const global_m = parent_m * node_m;
-		matrices[list[current].bone_id] = global_m * list[current].bone_matrix;
+		matrices[list[current].bone_id] = glm::mat4x4(1.f);//global_m * list[current].bone_pose_matrix * glm::inverse(list[current].bone_bind_pose_matrix);
 		for(uint32_t i = start; i < start + count; i++) {
-			assert(list[i].bone_id < map::display_data::max_bone_matrices && list[i].bone_id != -1);
-			if(list[i].parent_id == list[current].bone_id) {
+			if(list[i].bone_id == list[current].parent_id) {
 				get_hierachical_animation_bone(list, matrices, start, count, i, time_counter, global_m);
 			}
 		}
@@ -654,6 +653,9 @@ namespace map {
 				} else if(obj.anim == emfx::animation_type::attack) {
 					auto const& final_matrix = final_attack_matrices[index];
 					glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(final_matrix.size()), GL_FALSE, (const GLfloat*)final_matrix.data());
+				} else {
+					static const std::array<glm::mat4x4, max_bone_matrices> ident_matrix{ glm::mat4x4(1.f) };
+					glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ident_matrix.size()), GL_FALSE, (const GLfloat*)ident_matrix.data());
 				}
 				glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
 				glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
@@ -2485,12 +2487,18 @@ namespace map {
 					auto const vp = glm::vec3(node.position.x, node.position.y, node.position.z);
 					auto const vs = glm::vec3(node.scale.x, node.scale.y, node.scale.z);
 					auto const vq = glm::quat(node.rotation.x, node.rotation.y, node.rotation.z, node.rotation.w);
-#if 0
-					reports::write_debug(("animation for node " + node.name + "\n").c_str());
-					reports::write_debug(("bone-id=" + std::to_string(i) + ",parent=" + std::to_string(t_anim.parent_id) + "\n").c_str());
-					reports::write_debug(("pos: x=" + std::to_string(vp.x) + " ,y=" + std::to_string(vp.y) + ",z=" + std::to_string(vp.z) + "\n").c_str());
-#endif
-					t_anim.bone_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
+					t_anim.bone_node_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
+
+					auto const pp = glm::vec3(t_anim.pose_position.x, t_anim.pose_position.y, t_anim.pose_position.z);
+					auto const ps = glm::vec3(t_anim.pose_scale.x, t_anim.pose_scale.y, t_anim.pose_scale.z);
+					auto const pq = glm::quat(t_anim.pose_rotation.x, t_anim.pose_rotation.y, t_anim.pose_rotation.z, t_anim.pose_rotation.w);
+					t_anim.bone_pose_matrix = glm::translate(pp) * glm::toMat4(pq) * glm::scale(ps);
+
+					auto const ip = glm::vec3(t_anim.bind_pose_position.x, t_anim.bind_pose_position.y, t_anim.bind_pose_position.z);
+					auto const is = glm::vec3(t_anim.bind_pose_scale.x, t_anim.bind_pose_scale.y, t_anim.bind_pose_scale.z);
+					auto const iq = glm::quat(t_anim.bind_pose_rotation.x, t_anim.bind_pose_rotation.y, t_anim.bind_pose_rotation.z, t_anim.bind_pose_rotation.w);
+					t_anim.bone_bind_pose_matrix = glm::translate(ip) * glm::toMat4(iq) * glm::scale(is);
+
 					state.map_state.map_data.animations.push_back(t_anim);
 					break;
 				}
@@ -2795,6 +2803,7 @@ namespace map {
 										if(influence.bone_id != -1) {
 											smv.bone_ids[added_count] = int8_t(influence.bone_id);
 											smv.bone_weights[added_count] = influence.weight;
+											++added_count;
 										}
 									}
 								}
