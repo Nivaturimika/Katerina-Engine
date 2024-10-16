@@ -1478,8 +1478,7 @@ namespace map {
 							auto gc = unit.get_navy().get_controller_from_navy_control().get_identity_from_identity_holder().get_graphical_culture();
 							for(const auto sm : unit.get_navy().get_navy_membership()) {
 								auto utid = sm.get_ship().get_type();
-								auto model = model_gc_unit[0][utid.index()];
-								if(!model) {
+								if(auto model = model_gc_unit[0][utid.index()]; model) {
 									unit_type = utid;
 									unit_model = model;
 									break;
@@ -2764,7 +2763,7 @@ namespace map {
 								}
 								for(const auto& smv : triangle_vertices) {
 									static_mesh_vertex tmp = smv;
-									tmp.position_ *= emfx_obj.scale > 0.f ? emfx_obj.scale : 1.f;
+									tmp.position_ *= (emfx_obj.scale > 0.f ? emfx_obj.scale : 1.f) * 0.85f; //nudge for good scales
 									static_mesh_vertices.push_back(tmp);
 								}
 							}
