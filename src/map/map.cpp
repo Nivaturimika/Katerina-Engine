@@ -600,7 +600,7 @@ namespace map {
 		}
 	}
 
-	void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode) {
+	void display_data::render_models(std::vector<model_render_command>& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
 		glEnable(GL_DEPTH_TEST);
@@ -609,29 +609,38 @@ namespace map {
 		glDepthFunc(GL_LESS);
 		//glCullFace(GL_FRONT);
 		glActiveTexture(GL_TEXTURE0);
+		//
+		constexpr float animation_zoom_threshold = map::zoom_very_close + 2.f;
+		{ //default matrix -- overriden if zoomed in enough
+			static const std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
+			glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
+		}
+		//
 		for(const auto& obj : list) {
 			auto index = obj.emfx.index();
-			std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
-			if(obj.anim == emfx::animation_type::idle) {
-				auto start = static_mesh_idle_animation_start[index];
-				auto count = static_mesh_idle_animation_count[index];
-				for(uint32_t k = start; k < start + count; k++) {
-					get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+			if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
+				std::array<glm::mat4x4, max_bone_matrices> ar_matrices{ glm::mat4x4(1.f) };
+				if(obj.anim == emfx::animation_type::idle) {
+					auto start = static_mesh_idle_animation_start[index];
+					auto count = static_mesh_idle_animation_count[index];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+					}
+				} else if(obj.anim == emfx::animation_type::move) {
+					auto start = static_mesh_move_animation_start[index];
+					auto count = static_mesh_move_animation_count[index];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+					}
+				} else if(obj.anim == emfx::animation_type::attack) {
+					auto start = static_mesh_attack_animation_start[index];
+					auto count = static_mesh_attack_animation_count[index];
+					for(uint32_t k = start; k < start + count; k++) {
+						get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+					}
 				}
-			} else if(obj.anim == emfx::animation_type::move) {
-				auto start = static_mesh_move_animation_start[index];
-				auto count = static_mesh_move_animation_count[index];
-				for(uint32_t k = start; k < start + count; k++) {
-					get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
-				}
-			} else if(obj.anim == emfx::animation_type::attack) {
-				auto start = static_mesh_attack_animation_start[index];
-				auto count = static_mesh_attack_animation_count[index];
-				for(uint32_t k = start; k < start + count; k++) {
-					get_hierachical_animation_bone(animations, ar_matrices, start, count, k, time_counter, glm::mat4x4(1.f));
-				}
+				glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 			}
-			glUniformMatrix4fv(bone_matrices_uniform_array[uint8_t(map_view_mode)], GLsizei(ar_matrices.size()), GL_FALSE, (const GLfloat*)ar_matrices.data());
 			glUniform2f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_model_offset], obj.pos.x, obj.pos.y);
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_facing], obj.facing);
 			//REMOVE -- glUniform1f(shader_uniforms[uint8_t(map_view_mode)][shader_map_standing_object][uniform_target_topview_fixup], obj.topview_fixup);
@@ -755,7 +764,7 @@ namespace map {
 		});
 		// Siege
 		province::for_each_land_province(state, [&](dcon::province_id p) {
-			if(military::province_is_under_siege(state, p)) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
 				model_render_list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle);
 			}
@@ -763,7 +772,7 @@ namespace map {
 		// Render armies
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_army_location_as_location(p);
-			if(units.begin() != units.end()) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
@@ -814,7 +823,7 @@ namespace map {
 		// Render navies
 		province::for_each_sea_province(state, [&](dcon::province_id p) {
 			auto units = state.world.province_get_navy_location_as_location(p);
-			if(units.begin() != units.end()) {
+			if(state.map_state.visible_provinces[province::to_map_id(p)] && units.begin() != units.end()) {
 				auto p1 = state.world.province_get_mid_point(p);
 				auto p2 = p1;
 				dcon::emfx_object_id unit_model;
@@ -1492,7 +1501,7 @@ namespace map {
 				if(model_render_list.size() > 0) {
 					// Render standing objects
 					load_shader(shader_map_standing_object);
-					render_models(model_render_list, time_counter, map_view_mode);
+					render_models(model_render_list, time_counter, map_view_mode, zoom);
 				}
 			}
 		}
