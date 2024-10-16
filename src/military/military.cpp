@@ -5195,10 +5195,10 @@ namespace military {
 		auto to_delete = ve::vectorizable_buffer<uint8_t, dcon::land_battle_id>(isize);
 
 		concurrency::parallel_for(0, int32_t(isize), [&](int32_t index) {
-		dcon::land_battle_id b{dcon::land_battle_id::value_base_t(index)};
+			dcon::land_battle_id b{ dcon::land_battle_id::value_base_t(index) };
 
 			if(!state.world.land_battle_is_valid(b))
-			return;
+				return;
 
 			// fill to combat width
 			auto combat_width = state.world.land_battle_get_combat_width(b);
@@ -5255,9 +5255,9 @@ namespace military {
 			attacker_bg = bool(attacker_bg) ? attacker_bg : state.military_definitions.no_background;
 
 			auto attack_bonus =
-			int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
+				int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
 			auto attacker_org_bonus =
-			1.0f + state.world.leader_trait_get_organisation(attacker_per) + state.world.leader_trait_get_organisation(attacker_bg);
+				1.0f + state.world.leader_trait_get_organisation(attacker_per) + state.world.leader_trait_get_organisation(attacker_bg);
 
 			auto defender_per = state.world.leader_get_personality(state.world.land_battle_get_general_from_defending_general(b));
 			auto defender_bg = state.world.leader_get_background(state.world.land_battle_get_general_from_defending_general(b));
@@ -5265,12 +5265,12 @@ namespace military {
 			defender_bg = bool(defender_bg) ? defender_bg : state.military_definitions.no_background;
 
 			auto defence_bonus =
-			int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
+				int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
 			auto defender_org_bonus =
-			1.0f + state.world.leader_trait_get_organisation(defender_per) + state.world.leader_trait_get_organisation(defender_bg);
+				1.0f + state.world.leader_trait_get_organisation(defender_per) + state.world.leader_trait_get_organisation(defender_bg);
 
-			auto attacker_mod = combat_modifier_table[std::clamp(attacker_dice + attack_bonus + crossing_adjustment +  int32_t(attacker_gas ? state.defines.gas_attack_modifier : 0.0f) + 3, 0, 18)];
-			auto defender_mod = combat_modifier_table[std::clamp(defender_dice + defence_bonus + dig_in_value +  int32_t(defender_gas ? state.defines.gas_attack_modifier : 0.0f) + int32_t(terrain_bonus) + 3, 0, 18)];
+			auto attacker_mod = combat_modifier_table[std::clamp(attacker_dice + attack_bonus + crossing_adjustment + int32_t(attacker_gas ? state.defines.gas_attack_modifier : 0.0f) + 3, 0, 18)];
+			auto defender_mod = combat_modifier_table[std::clamp(defender_dice + defence_bonus + dig_in_value + int32_t(defender_gas ? state.defines.gas_attack_modifier : 0.0f) + int32_t(terrain_bonus) + 3, 0, 18)];
 
 			float defender_fort = 1.0f;
 			auto local_control = state.world.province_get_nation_from_province_control(location);
@@ -5342,18 +5342,18 @@ namespace military {
 					auto& org = state.world.regiment_get_org(def_front[i]);
 					org = std::max(0.0f, org - org_damage);
 					switch(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(def_front[i])].type) {
-						case unit_type::infantry:
+					case unit_type::infantry:
 						state.world.land_battle_get_defender_infantry_lost(b) += str_damage;
 						break;
-						case unit_type::cavalry:
+					case unit_type::cavalry:
 						state.world.land_battle_get_defender_cav_lost(b) += str_damage;
 						break;
-						case unit_type::support:
+					case unit_type::support:
 						// fallthrough
-						case unit_type::special:
+					case unit_type::special:
 						state.world.land_battle_get_defender_support_lost(b) += str_damage;
 						break;
-						default:
+					default:
 						break;
 					}
 				}
@@ -5368,13 +5368,13 @@ namespace military {
 					auto& att_stats = state.world.nation_get_unit_stats(tech_att_nation, state.world.regiment_get_type(att_front[i]));
 
 					auto str_damage = str_dam_mul
-					* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
-					* def_stats.support * defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
-					* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
+						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+						* def_stats.support * defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
+						* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
 					auto org_damage = str_dam_mul
-					* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
-					* def_stats.support * defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
-					* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
+						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+						* def_stats.support * defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
+						* (state.world.regiment_get_experience(att_front[i]) * 0.1f + 1.f);
 
 					// gain experience
 					auto leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
@@ -5389,18 +5389,18 @@ namespace military {
 					auto& org = state.world.regiment_get_org(att_front[i]);
 					org = std::max(0.0f, org - org_damage);
 					switch(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(att_front[i])].type) {
-						case unit_type::infantry:
+					case unit_type::infantry:
 						state.world.land_battle_get_attacker_infantry_lost(b) += str_damage;
 						break;
-						case unit_type::cavalry:
+					case unit_type::cavalry:
 						state.world.land_battle_get_attacker_cav_lost(b) += str_damage;
 						break;
-						case unit_type::support:
+					case unit_type::support:
 						// fallthrough
-						case unit_type::special:
+					case unit_type::special:
 						state.world.land_battle_get_attacker_support_lost(b) += str_damage;
 						break;
-						default:
+					default:
 						break;
 					}
 				}
@@ -5428,13 +5428,13 @@ namespace military {
 						auto& def_stats = state.world.nation_get_unit_stats(tech_def_nation, state.world.regiment_get_type(att_front_target));
 
 						auto str_damage = str_dam_mul
-						* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
-						(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
-						* (state.world.regiment_get_experience(att_front_target) * 0.1f + 1.f);
+							* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
+							(defender_fort * (state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::military_tactics)))
+							* (state.world.regiment_get_experience(att_front_target) * 0.1f + 1.f);
 						auto org_damage = str_dam_mul
-						* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
-						(defender_fort * def_stats.discipline_or_evasion * defender_org_bonus * (1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
-						* (state.world.regiment_get_experience(att_front_target) * 0.1f + 1.f);
+							* (att_stats.attack_or_gun_power * 0.1f + 1.0f) * attacker_mod /
+							(defender_fort * def_stats.discipline_or_evasion * defender_org_bonus * (1.0f + state.world.nation_get_modifier_values(tech_def_nation, sys::national_mod_offsets::land_organisation)))
+							* (state.world.regiment_get_experience(att_front_target) * 0.1f + 1.f);
 
 						// gain experience
 						auto leader_exp_mod = 1.f + attacker_per.get_experience() + attacker_bg.get_experience();
@@ -5449,18 +5449,18 @@ namespace military {
 						auto& org = state.world.regiment_get_org(att_front_target);
 						org = std::max(0.0f, org - org_damage);
 						switch(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(att_front_target)].type) {
-							case unit_type::infantry:
+						case unit_type::infantry:
 							state.world.land_battle_get_defender_infantry_lost(b) += str_damage;
 							break;
-							case unit_type::cavalry:
+						case unit_type::cavalry:
 							state.world.land_battle_get_defender_cav_lost(b) += str_damage;
 							break;
-							case unit_type::support:
+						case unit_type::support:
 							// fallthrough
-							case unit_type::special:
+						case unit_type::special:
 							state.world.land_battle_get_defender_support_lost(b) += str_damage;
 							break;
-							default:
+						default:
 							break;
 						}
 					}
@@ -5490,13 +5490,13 @@ namespace military {
 						auto& att_stats = state.world.nation_get_unit_stats(tech_att_nation, state.world.regiment_get_type(def_front_target));
 
 						auto str_damage = str_dam_mul
-						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
-						* defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
-						* (state.world.regiment_get_experience(def_front_target) * 0.1f + 1.f);
+							* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+							* defender_mod / ((state.defines.base_military_tactics + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::military_tactics)))
+							* (state.world.regiment_get_experience(def_front_target) * 0.1f + 1.f);
 						auto org_damage = str_dam_mul
-						* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
-						* defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
-						* (state.world.regiment_get_experience(def_front_target) * 0.1f + 1.f);
+							* (def_stats.attack_or_gun_power * 0.1f + 1.0f)
+							* defender_mod / (attacker_org_bonus * def_stats.discipline_or_evasion * (1.0f + state.world.nation_get_modifier_values(tech_att_nation, sys::national_mod_offsets::land_organisation)))
+							* (state.world.regiment_get_experience(def_front_target) * 0.1f + 1.f);
 
 						// gain experience
 						auto leader_exp_mod = 1.f + defender_per.get_experience() + defender_per.get_experience();
@@ -5511,18 +5511,18 @@ namespace military {
 						auto& org = state.world.regiment_get_org(def_front_target);
 						org = std::max(0.0f, org - org_damage);
 						switch(state.military_definitions.unit_base_definitions[state.world.regiment_get_type(def_front_target)].type) {
-							case unit_type::infantry:
+						case unit_type::infantry:
 							state.world.land_battle_get_attacker_infantry_lost(b) += str_damage;
 							break;
-							case unit_type::cavalry:
+						case unit_type::cavalry:
 							state.world.land_battle_get_attacker_cav_lost(b) += str_damage;
 							break;
-							case unit_type::support:
+						case unit_type::support:
 							// fallthrough
-							case unit_type::special:
+						case unit_type::special:
 							state.world.land_battle_get_attacker_support_lost(b) += str_damage;
 							break;
-							default:
+						default:
 							break;
 						}
 					}
@@ -5538,30 +5538,30 @@ namespace military {
 			for(int32_t i = 0; i < combat_width; ++i) {
 				if(def_back[i]) {
 					if(state.world.regiment_get_strength(def_back[i]) <= 0.0f) {
-					def_back[i] = dcon::regiment_id{};
+						def_back[i] = dcon::regiment_id{};
 					} else if(state.world.regiment_get_org(def_back[i]) < 0.1f) {
-					def_back[i] = dcon::regiment_id{};
+						def_back[i] = dcon::regiment_id{};
 					}
 				}
 				if(def_front[i]) {
 					if(state.world.regiment_get_strength(def_front[i]) <= 0.0f) {
-					def_front[i] = dcon::regiment_id{};
+						def_front[i] = dcon::regiment_id{};
 					} else if(state.world.regiment_get_org(def_front[i]) < 0.1f) {
-					def_front[i] = dcon::regiment_id{};
+						def_front[i] = dcon::regiment_id{};
 					}
 				}
 				if(att_back[i]) {
 					if(state.world.regiment_get_strength(att_back[i]) <= 0.0f) {
-					att_back[i] = dcon::regiment_id{};
+						att_back[i] = dcon::regiment_id{};
 					} else if(state.world.regiment_get_org(att_back[i]) < 0.1f) {
-					att_back[i] = dcon::regiment_id{};
+						att_back[i] = dcon::regiment_id{};
 					}
 				}
 				if(att_front[i]) {
 					if(state.world.regiment_get_strength(att_front[i]) <= 0.0f) {
-					att_front[i] = dcon::regiment_id{};
+						att_front[i] = dcon::regiment_id{};
 					} else if(state.world.regiment_get_org(att_front[i]) < 0.1f) {
-					att_front[i] = dcon::regiment_id{};
+						att_front[i] = dcon::regiment_id{};
 					}
 				}
 			}
@@ -5574,15 +5574,15 @@ namespace military {
 				}
 				int32_t high = low + 2;
 				while(high < 30 && !a[high])
-				high += 2;
+					high += 2;
 
 				while(high < 30) {
 					a[low] = a[high];
-				a[high] = dcon::regiment_id{};
+					a[high] = dcon::regiment_id{};
 
 					high += 2;
 					while(high < 30 && !a[high])
-					high += 2;
+						high += 2;
 
 					low += 2;
 				}
@@ -5593,19 +5593,19 @@ namespace military {
 				}
 				high = low + 2;
 				while(high < 30 && !a[high])
-				high += 2;
+					high += 2;
 
 				while(high < 30) {
 					a[low] = a[high];
-				a[high] = dcon::regiment_id{};
+					a[high] = dcon::regiment_id{};
 
 					high += 2;
 					while(high < 30 && !a[high])
-					high += 2;
+						high += 2;
 
 					low += 2;
 				}
-			};
+				};
 
 			compact(att_back);
 			compact(att_front);
@@ -5715,7 +5715,7 @@ namespace military {
 		});
 
 		for(auto i = isize; i-- > 0;) {
-		dcon::land_battle_id b{dcon::land_battle_id::value_base_t(i) };
+			dcon::land_battle_id b{dcon::land_battle_id::value_base_t(i) };
 			if(state.world.land_battle_is_valid(b) && to_delete.get(b) != 0) {
 				end_battle(state, b, to_delete.get(b) == uint8_t(1) ? battle_result::attacker_won : battle_result::defender_won);
 			}
@@ -5727,10 +5727,10 @@ namespace military {
 		auto to_delete = ve::vectorizable_buffer<uint8_t, dcon::naval_battle_id>(isize);
 
 		concurrency::parallel_for(0, int32_t(isize), [&](int32_t index) {
-		dcon::naval_battle_id b{dcon::naval_battle_id::value_base_t(index)};
+			dcon::naval_battle_id b{ dcon::naval_battle_id::value_base_t(index) };
 
 			if(!state.world.naval_battle_is_valid(b))
-			return;
+				return;
 
 			int32_t attacker_ships = 0;
 			int32_t defender_ships = 0;
@@ -5739,16 +5739,16 @@ namespace military {
 
 			for(uint32_t j = slots.size(); j-- > 0;) {
 				switch(slots[j].flags & ship_in_battle::mode_mask) {
-					case ship_in_battle::mode_seeking:
-					case ship_in_battle::mode_approaching:
-					case ship_in_battle::mode_retreating:
-					case ship_in_battle::mode_engaged:
+				case ship_in_battle::mode_seeking:
+				case ship_in_battle::mode_approaching:
+				case ship_in_battle::mode_retreating:
+				case ship_in_battle::mode_engaged:
 					if((slots[j].flags & ship_in_battle::is_attacking) != 0)
-					++attacker_ships;
+						++attacker_ships;
 					else
-					++defender_ships;
+						++defender_ships;
 					break;
-					default:
+				default:
 					break;
 				}
 			}
@@ -5783,9 +5783,9 @@ namespace military {
 			defender_bg = bool(defender_bg) ? defender_bg : state.military_definitions.no_background;
 
 			auto defence_bonus =
-			int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
+				int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
 			auto defender_org_bonus =
-			1.0f + state.world.leader_trait_get_organisation(defender_per) + state.world.leader_trait_get_organisation(defender_bg);
+				1.0f + state.world.leader_trait_get_organisation(defender_per) + state.world.leader_trait_get_organisation(defender_bg);
 
 			auto attacker_mod = combat_modifier_table[std::clamp(attacker_dice + attack_bonus + 3, 0, 18)];
 			auto defender_mod = combat_modifier_table[std::clamp(defender_dice + defence_bonus + 3, 0, 18)];
@@ -5800,136 +5800,140 @@ namespace military {
 				auto& ship_stats = state.world.nation_get_unit_stats(ship_owner, ship_type);
 
 				switch(slots[j].flags & ship_in_battle::mode_mask) {
-					case ship_in_battle::mode_approaching: {
-						auto target_mode = slots[slots[j].target_slot].flags & ship_in_battle::mode_mask;
-						if(target_mode == ship_in_battle::mode_retreated || target_mode == ship_in_battle::mode_sunk) {
-							slots[j].flags &= ~ship_in_battle::mode_mask;
-							slots[j].flags |= ship_in_battle::mode_seeking;
-							break;
-						}
-
-						/*
-						An approaching ship:
-						Has its distance reduced by (random-value-in-range-\[0.0 - 0.5) + 0.5) x max-speed x
-						define:NAVAL_COMBAT_SPEED_TO_DISTANCE_FACTOR * 1000 to a minimum of 0. Switches to engaged when its distance + the
-						target's distance is less than its fire range
-						*/
-
-						float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_speed_to_distance_factor *
-											(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
-						auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
-						int32_t adjust = std::clamp(int32_t(std::ceil(speed)), 0, old_distance);
-						slots[j].flags &= ~ship_in_battle::distance_mask;
-						slots[j].flags |= ship_in_battle::distance_mask & (old_distance - adjust);
-
-						if(old_distance == adjust ||
-						(old_distance - adjust) + (slots[slots[j].target_slot].flags & ship_in_battle::distance_mask) <
-								int32_t(1000.0f * ship_stats.reconnaissance_or_fire_range)) {
-
-							slots[j].flags &= ~ship_in_battle::mode_mask;
-							slots[j].flags |= ship_in_battle::mode_engaged;
-						}
-
+				case ship_in_battle::mode_approaching:
+				{
+					auto target_mode = slots[slots[j].target_slot].flags & ship_in_battle::mode_mask;
+					if(target_mode == ship_in_battle::mode_retreated || target_mode == ship_in_battle::mode_sunk) {
+						slots[j].flags &= ~ship_in_battle::mode_mask;
+						slots[j].flags |= ship_in_battle::mode_seeking;
 						break;
 					}
-					case ship_in_battle::mode_engaged: {
-						auto target_mode = slots[slots[j].target_slot].flags & ship_in_battle::mode_mask;
-						if(target_mode == ship_in_battle::mode_retreated || target_mode == ship_in_battle::mode_sunk) {
-							slots[j].flags &= ~ship_in_battle::mode_mask;
-							slots[j].flags |= ship_in_battle::mode_seeking;
-							break;
-						}
-						bool target_is_big = (slots[slots[j].target_slot].flags & ship_in_battle::type_mask) == ship_in_battle::type_big;
-						bool is_attacker = (slots[j].flags & ship_in_battle::is_attacking) != 0;
-						auto tship = slots[slots[j].target_slot].ship;
-						assert(tship);
 
-						auto ship_target_owner =
+					/*
+					An approaching ship:
+					Has its distance reduced by (random-value-in-range-\[0.0 - 0.5) + 0.5) x max-speed x
+					define:NAVAL_COMBAT_SPEED_TO_DISTANCE_FACTOR * 1000 to a minimum of 0. Switches to engaged when its distance + the
+					target's distance is less than its fire range
+					*/
+
+					float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_speed_to_distance_factor *
+						(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
+					auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
+					int32_t adjust = std::clamp(int32_t(std::ceil(speed)), 0, old_distance);
+					slots[j].flags &= ~ship_in_battle::distance_mask;
+					slots[j].flags |= ship_in_battle::distance_mask & (old_distance - adjust);
+
+					if(old_distance == adjust ||
+					(old_distance - adjust) + (slots[slots[j].target_slot].flags & ship_in_battle::distance_mask) <
+							int32_t(1000.0f * ship_stats.reconnaissance_or_fire_range)) {
+
+						slots[j].flags &= ~ship_in_battle::mode_mask;
+						slots[j].flags |= ship_in_battle::mode_engaged;
+					}
+
+					break;
+				}
+				case ship_in_battle::mode_engaged:
+				{
+					auto target_mode = slots[slots[j].target_slot].flags & ship_in_battle::mode_mask;
+					if(target_mode == ship_in_battle::mode_retreated || target_mode == ship_in_battle::mode_sunk) {
+						slots[j].flags &= ~ship_in_battle::mode_mask;
+						slots[j].flags |= ship_in_battle::mode_seeking;
+						break;
+					}
+					bool target_is_big = (slots[slots[j].target_slot].flags & ship_in_battle::type_mask) == ship_in_battle::type_big;
+					bool is_attacker = (slots[j].flags & ship_in_battle::is_attacking) != 0;
+					auto tship = slots[slots[j].target_slot].ship;
+					assert(tship);
+
+					auto ship_target_owner =
 						state.world.navy_get_controller_from_navy_control(state.world.ship_get_navy_from_navy_membership(tship));
-						auto ttype = state.world.ship_get_type(tship);
-						assert(ttype);
-						auto& ship_target_stats = state.world.nation_get_unit_stats(ship_target_owner, ttype);
+					auto ttype = state.world.ship_get_type(tship);
+					assert(ttype);
+					auto& ship_target_stats = state.world.nation_get_unit_stats(ship_target_owner, ttype);
 
-						/*
-						Torpedo attack: is treated as 0 except against big ships
-						- Damage to organization is (gun-power + torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x target-strength x
-						define:NAVAL_COMBAT_DAMAGE_ORG_MULT / (target-max-hull x target-experience x 0.1 + 1)
-						- Damage to strength is (gun-power +
-						torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x attacker-strength x define:NAVAL_COMBAT_DAMAGE_STR_MULT x
-						define:NAVAL_COMBAT_DAMAGE_MULT_NO_ORG (if target has no org) / (target-max-hull x target-experience x 0.1 + 1)
-						*/
+					/*
+					Torpedo attack: is treated as 0 except against big ships
+					- Damage to organization is (gun-power + torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x target-strength x
+					define:NAVAL_COMBAT_DAMAGE_ORG_MULT / (target-max-hull x target-experience x 0.1 + 1)
+					- Damage to strength is (gun-power +
+					torpedo-attack) x Modifier-Table\[modifiers + 2\] (see above) x attacker-strength x define:NAVAL_COMBAT_DAMAGE_STR_MULT x
+					define:NAVAL_COMBAT_DAMAGE_MULT_NO_ORG (if target has no org) / (target-max-hull x target-experience x 0.1 + 1)
+					*/
 
-						float exp = state.world.ship_get_experience(tship);
-						float str_damage_org_mult = state.defines.naval_combat_damage_str_mult * (state.world.ship_get_org(slots[j].ship) == 0.f ? state.defines.naval_combat_damage_mult_no_org : 0.f);
-						float org_damage = state.world.ship_get_strength(slots[j].ship)
+					float exp = state.world.ship_get_experience(tship);
+					float str_damage_org_mult = state.defines.naval_combat_damage_str_mult * (state.world.ship_get_org(slots[j].ship) == 0.f ? state.defines.naval_combat_damage_mult_no_org : 0.f);
+					float org_damage = state.world.ship_get_strength(slots[j].ship)
 						* (ship_stats.attack_or_gun_power + (target_is_big ? ship_stats.siege_or_torpedo_attack : 0.0f)) *
 						(is_attacker ? attacker_mod : defender_mod) * state.defines.naval_combat_damage_org_mult /
 						((ship_target_stats.defence_or_hull * exp * 0.1f + 1.0f) * (is_attacker ? defender_org_bonus : attacker_org_bonus)
 						* (1.0f + state.world.nation_get_modifier_values(ship_target_owner, sys::national_mod_offsets::naval_organisation)));
-						float str_damage = state.world.ship_get_strength(slots[j].ship)
+					float str_damage = state.world.ship_get_strength(slots[j].ship)
 						* (ship_stats.attack_or_gun_power + (target_is_big ? ship_stats.siege_or_torpedo_attack : 0.0f)) *
 						(is_attacker ? attacker_mod : defender_mod) * str_damage_org_mult /
 						(ship_target_stats.defence_or_hull * exp * 0.1f + 1.0f);
 
-						auto& torg = state.world.ship_get_org(tship);
-						torg = std::max(0.0f, torg - org_damage);
-						auto& tstr = state.world.ship_get_strength(tship);
-						tstr = std::max(0.0f, tstr - str_damage);
+					auto& torg = state.world.ship_get_org(tship);
+					torg = std::max(0.0f, torg - org_damage);
+					auto& tstr = state.world.ship_get_strength(tship);
+					tstr = std::max(0.0f, tstr - str_damage);
 
-						auto atk_leader_exp_mod = 1 + attacker_per.get_experience() + attacker_bg.get_experience();
-						auto def_leader_exp_mod = 1 + defender_per.get_experience() + defender_per.get_experience();
-						auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
-						adjust_experience_gain(state, slots[j].ship, str_damage * leader_exp_mod);
-						break;
-					}
-					case ship_in_battle::mode_retreating: {
-						/*
-						A retreating ship will increase its distance by define:NAVAL_COMBAT_RETREAT_SPEED_MOD x
-						define:NAVAL_COMBAT_SPEED_TO_DISTANCE_FACTOR x (random value in the range \[0.0 - 0.5) + 0.5) x ship-max-speed.
-						*/
+					auto atk_leader_exp_mod = 1 + attacker_per.get_experience() + attacker_bg.get_experience();
+					auto def_leader_exp_mod = 1 + defender_per.get_experience() + defender_per.get_experience();
+					auto leader_exp_mod = (is_attacker ? atk_leader_exp_mod : def_leader_exp_mod);
+					adjust_experience_gain(state, slots[j].ship, str_damage * leader_exp_mod);
+					break;
+				}
+				case ship_in_battle::mode_retreating:
+				{
+					/*
+					A retreating ship will increase its distance by define:NAVAL_COMBAT_RETREAT_SPEED_MOD x
+					define:NAVAL_COMBAT_SPEED_TO_DISTANCE_FACTOR x (random value in the range \[0.0 - 0.5) + 0.5) x ship-max-speed.
+					*/
 
-						float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_retreat_speed_mod *
-											state.defines.naval_combat_speed_to_distance_factor *
-											(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
+					float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_retreat_speed_mod *
+						state.defines.naval_combat_speed_to_distance_factor *
+						(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
 
-						auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
-						int32_t new_distance = std::min(int32_t(std::ceil(speed)) + old_distance, 1000);
-						slots[j].flags &= ~ship_in_battle::distance_mask;
-						slots[j].flags |= ship_in_battle::distance_mask & (new_distance);
+					auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
+					int32_t new_distance = std::min(int32_t(std::ceil(speed)) + old_distance, 1000);
+					slots[j].flags &= ~ship_in_battle::distance_mask;
+					slots[j].flags |= ship_in_battle::distance_mask & (new_distance);
 
-						break;
-					}
-					case ship_in_battle::mode_seeking: {
-						/*
-						When a target is selected, distance is increased by random-value-in-range-\[0.0, 1.0) x (1.0 -
-						combat-duration^define:NAVAL_COMBAT_SHIFT_BACK_DURATION_SCALE) / NAVAL_COMBAT_SHIFT_BACK_DURATION_SCALE) x
-						NAVAL_COMBAT_SHIFT_BACK_ON_NEXT_TARGET to a maximum of 1000, and the ship switches to approaching.
-						*/
+					break;
+				}
+				case ship_in_battle::mode_seeking:
+				{
+					/*
+					When a target is selected, distance is increased by random-value-in-range-\[0.0, 1.0) x (1.0 -
+					combat-duration^define:NAVAL_COMBAT_SHIFT_BACK_DURATION_SCALE) / NAVAL_COMBAT_SHIFT_BACK_DURATION_SCALE) x
+					NAVAL_COMBAT_SHIFT_BACK_ON_NEXT_TARGET to a maximum of 1000, and the ship switches to approaching.
+					*/
 
-						if((slots[j].flags & ship_in_battle::is_attacking) != 0) {
-							auto pick = rng::get_random(state, uint32_t(slots[j].ship.value)) % defender_ships;
+					if((slots[j].flags & ship_in_battle::is_attacking) != 0) {
+						auto pick = rng::get_random(state, uint32_t(slots[j].ship.value)) % defender_ships;
 
-							[&]() {
-								for(uint32_t k = slots.size(); k-- > 0;) {
-									switch(slots[k].flags & ship_in_battle::mode_mask) {
+						[&]() {
+							for(uint32_t k = slots.size(); k-- > 0;) {
+								switch(slots[k].flags & ship_in_battle::mode_mask) {
 
-										case ship_in_battle::mode_seeking:
-										case ship_in_battle::mode_approaching:
-										case ship_in_battle::mode_retreating:
-										case ship_in_battle::mode_engaged:
-										if((slots[k].flags & ship_in_battle::is_attacking) == 0) {
-											if(pick == 0) {
-												slots[j].target_slot = uint16_t(k);
-												return;
-											} else {
-												--pick;
-											}
+								case ship_in_battle::mode_seeking:
+								case ship_in_battle::mode_approaching:
+								case ship_in_battle::mode_retreating:
+								case ship_in_battle::mode_engaged:
+									if((slots[k].flags & ship_in_battle::is_attacking) == 0) {
+										if(pick == 0) {
+											slots[j].target_slot = uint16_t(k);
+											return;
+										} else {
+											--pick;
 										}
-										break;
-										default:
-										break;
 									}
+									break;
+								default:
+									break;
 								}
+							}
 							}();
 
 							auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
@@ -5939,30 +5943,30 @@ namespace military {
 							slots[j].flags |= ship_in_battle::mode_approaching;
 							slots[j].flags &= ~ship_in_battle::distance_mask;
 							slots[j].flags |= ship_in_battle::distance_mask & new_distance;
-						} else {
-							auto pick = rng::get_random(state, uint32_t(slots[j].ship.value)) % attacker_ships;
+					} else {
+						auto pick = rng::get_random(state, uint32_t(slots[j].ship.value)) % attacker_ships;
 
-							[&]() {
-								for(uint32_t k = slots.size(); k-- > 0;) {
-									switch(slots[k].flags & ship_in_battle::mode_mask) {
+						[&]() {
+							for(uint32_t k = slots.size(); k-- > 0;) {
+								switch(slots[k].flags & ship_in_battle::mode_mask) {
 
-										case ship_in_battle::mode_seeking:
-										case ship_in_battle::mode_approaching:
-										case ship_in_battle::mode_retreating:
-										case ship_in_battle::mode_engaged:
-										if((slots[k].flags & ship_in_battle::is_attacking) != 0) {
-											if(pick == 0) {
-												slots[j].target_slot = uint16_t(k);
-												return;
-											} else {
-												--pick;
-											}
+								case ship_in_battle::mode_seeking:
+								case ship_in_battle::mode_approaching:
+								case ship_in_battle::mode_retreating:
+								case ship_in_battle::mode_engaged:
+									if((slots[k].flags & ship_in_battle::is_attacking) != 0) {
+										if(pick == 0) {
+											slots[j].target_slot = uint16_t(k);
+											return;
+										} else {
+											--pick;
 										}
-										break;
-										default:
-										break;
 									}
+									break;
+								default:
+									break;
 								}
+							}
 							}();
 
 							auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
@@ -5972,11 +5976,11 @@ namespace military {
 							slots[j].flags |= ship_in_battle::mode_approaching;
 							slots[j].flags &= ~ship_in_battle::distance_mask;
 							slots[j].flags |= ship_in_battle::distance_mask & new_distance;
-						}
-
-						break;
 					}
-					default:
+
+					break;
+				}
+				default:
 					break;
 				}
 			}
@@ -5987,9 +5991,9 @@ namespace military {
 				auto type = state.world.ship_get_type(slots[j].ship);
 
 				switch(slots[j].flags & ship_in_battle::mode_mask) {
-					case ship_in_battle::mode_seeking:
-					case ship_in_battle::mode_approaching:
-					case ship_in_battle::mode_engaged:
+				case ship_in_battle::mode_seeking:
+				case ship_in_battle::mode_approaching:
+				case ship_in_battle::mode_engaged:
 					if(state.world.ship_get_strength(slots[j].ship) <= 0) {
 						if((slots[j].flags & ship_in_battle::is_attacking) != 0) {
 							if((slots[j].flags & ship_in_battle::type_mask) == ship_in_battle::type_big) {
@@ -6021,7 +6025,7 @@ namespace military {
 						slots[j].flags |= ship_in_battle::mode_retreating;
 					}
 					break;
-					case ship_in_battle::mode_retreating:
+				case ship_in_battle::mode_retreating:
 					if(state.world.ship_get_strength(slots[j].ship) <= 0) {
 						if((slots[j].flags & ship_in_battle::is_attacking) != 0) {
 							if((slots[j].flags & ship_in_battle::type_mask) == ship_in_battle::type_big) {
@@ -6049,21 +6053,21 @@ namespace military {
 						slots[j].flags |= ship_in_battle::mode_retreated;
 					}
 					break;
-					default:
+				default:
 					break;
 				}
 			}
 		});
 
 		for(auto i = isize; i-- > 0;) {
-		dcon::naval_battle_id b{ dcon::naval_battle_id::value_base_t(i) };
+			dcon::naval_battle_id b{ dcon::naval_battle_id::value_base_t(i) };
 			if(state.world.naval_battle_is_valid(b) && to_delete.get(b) != 0) {
 				end_battle(state, b, to_delete.get(b) == uint8_t(1) ? battle_result::attacker_won : battle_result::defender_won);
 			}
 		}
 
 		for(uint32_t i = state.world.ship_size(); i-- > 0;) {
-		dcon::ship_id s{dcon::ship_id::value_base_t(i)};
+			dcon::ship_id s{dcon::ship_id::value_base_t(i)};
 			if(state.world.ship_is_valid(s)) {
 				if(state.world.ship_get_strength(s) <= 0.0f) {
 					state.world.delete_ship(s);
