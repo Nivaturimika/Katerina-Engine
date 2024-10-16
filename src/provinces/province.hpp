@@ -111,6 +111,7 @@ namespace province {
 	bool has_naval_access_to_province(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov);
 	// determines whether a land unit is allowed to move to / be in a province that isn't an active enemy
 	bool has_safe_access_to_province(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov);
+	bool any_adjacent_is_friendly(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov);
 
 	//
 	// when pathfinding, check that the destination province is valid on its own (i.e. accessible for normal, or embark-able for sea)

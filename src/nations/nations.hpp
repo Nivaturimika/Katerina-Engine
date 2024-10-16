@@ -70,6 +70,51 @@ namespace nations {
 		massive_promotion_focus
 	};
 
+	enum class static_modifier : uint8_t {
+		very_easy_player,
+		easy_player,
+		hard_player,
+		very_hard_player,
+		very_easy_ai,
+		easy_ai,
+		hard_ai,
+		very_hard_ai,
+		// provincial
+		overseas,
+		coastal,
+		non_coastal,
+		coastal_sea,
+		sea_zone,
+		land_province,
+		blockaded,
+		no_adjacent_controlled,
+		core,
+		has_siege,
+		occupied,
+		nationalism,
+		infrastructure,
+		// national
+		base_values,
+		war,
+		peace,
+		disarming,
+		war_exhaustion,
+		badboy,
+		debt_default_to,
+		bad_debter,
+		great_power,
+		second_power,
+		civ_nation,
+		unciv_nation,
+		average_literacy,
+		plurality,
+		generalised_debt_default,
+		total_occupation,
+		total_blockaded,
+		in_bankrupcy,
+		count
+	};
+
 	struct global_national_state {
 		std::vector<triggered_modifier> triggered_modifiers;
 		std::vector<dcon::bitfield_type> global_flag_variables;
@@ -81,49 +126,7 @@ namespace nations {
 
 		dcon::national_identity_id rebel_id;
 
-		dcon::modifier_id very_easy_player;
-		dcon::modifier_id easy_player;
-		dcon::modifier_id hard_player;
-		dcon::modifier_id very_hard_player;
-		dcon::modifier_id very_easy_ai;
-		dcon::modifier_id easy_ai;
-		dcon::modifier_id hard_ai;
-		dcon::modifier_id very_hard_ai;
-
-		// provincial
-		dcon::modifier_id overseas;
-		dcon::modifier_id coastal;
-		dcon::modifier_id non_coastal;
-		dcon::modifier_id coastal_sea;
-		dcon::modifier_id sea_zone;
-		dcon::modifier_id land_province;
-		dcon::modifier_id blockaded;
-		dcon::modifier_id no_adjacent_controlled;
-		dcon::modifier_id core;
-		dcon::modifier_id has_siege;
-		dcon::modifier_id occupied;
-		dcon::modifier_id nationalism;
-		dcon::modifier_id infrastructure;
-
-		// national
-		dcon::modifier_id base_values;
-		dcon::modifier_id war;
-		dcon::modifier_id peace;
-		dcon::modifier_id disarming;
-		dcon::modifier_id war_exhaustion;
-		dcon::modifier_id badboy;
-		dcon::modifier_id debt_default_to;
-		dcon::modifier_id bad_debter;
-		dcon::modifier_id great_power;
-		dcon::modifier_id second_power;
-		dcon::modifier_id civ_nation;
-		dcon::modifier_id unciv_nation;
-		dcon::modifier_id average_literacy;
-		dcon::modifier_id plurality;
-		dcon::modifier_id generalised_debt_default;
-		dcon::modifier_id total_occupation;
-		dcon::modifier_id total_blockaded;
-		dcon::modifier_id in_bankrupcy;
+		dcon::modifier_id static_modifiers[uint8_t(static_modifier::count)];
 
 		int32_t num_allocated_national_variables = 0;
 		int32_t num_allocated_national_flags = 0;

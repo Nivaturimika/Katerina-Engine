@@ -152,8 +152,8 @@ namespace ui {
 	template<typename T>
 	void acting_modifiers_description_province(sys::state& state, text::layout_base& layout, dcon::province_id p, int32_t identation,
 		bool& header, T nmid) {
-		if(state.national_definitions.land_province)
-		active_single_modifier_description(state, layout, state.national_definitions.land_province, identation, header, nmid);
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)])
+		active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)], identation, header, nmid);
 		for(auto mpr : state.world.province_get_current_modifiers(p))
 		active_single_modifier_description(state, layout, mpr.mod_id, identation, header, nmid);
 		if(auto m = state.world.province_get_terrain(p); m)
@@ -172,36 +172,36 @@ namespace ui {
 					header, nmid, state.world.province_get_building_level(p, t));
 			}
 		}
-		if(state.national_definitions.infrastructure) {
-			active_single_modifier_description(state, layout, state.national_definitions.infrastructure, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)], identation, header, nmid,
 				state.world.province_get_building_level(p, economy::province_building_type::railroad) * state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure);
 		}
-		if(state.national_definitions.nationalism) {
-			active_single_modifier_description(state, layout, state.national_definitions.nationalism, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)], identation, header, nmid,
 				(state.world.province_get_is_owner_core(p) ? 1.f : 0.f) * state.world.province_get_nationalism(p));
 		}
-		if(state.national_definitions.non_coastal) {
-			active_single_modifier_description(state, layout, state.national_definitions.non_coastal, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::non_coastal)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::non_coastal)], identation, header, nmid,
 				!state.world.province_get_is_coast(p) ? 1.f : 0.f);
 		}
-		if(state.national_definitions.coastal) {
-			active_single_modifier_description(state, layout, state.national_definitions.coastal, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal)], identation, header, nmid,
 				state.world.province_get_is_coast(p) ? 1.f : 0.f);
 		}
-		if(state.national_definitions.overseas) {
-			active_single_modifier_description(state, layout, state.national_definitions.overseas, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::overseas)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::overseas)], identation, header, nmid,
 				province::is_overseas(state, p) ? 1.f : 0.f);
 		}
-		if(state.national_definitions.core) {
-			active_single_modifier_description(state, layout, state.national_definitions.core, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::core)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::core)], identation, header, nmid,
 				state.world.province_get_is_owner_core(p) ? 1.f : 0.f);
 		}
-		if(state.national_definitions.has_siege) {
-			active_single_modifier_description(state, layout, state.national_definitions.has_siege, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::has_siege)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::has_siege)], identation, header, nmid,
 				military::province_is_under_siege(state, p) ? 1.f : 0.f);
 		}
-		if(state.national_definitions.blockaded) {
-			active_single_modifier_description(state, layout, state.national_definitions.blockaded, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::blockaded)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::blockaded)], identation, header, nmid,
 				military::province_is_blockaded(state, p) ? 1.f : 0.f);
 		}
 	}
@@ -249,37 +249,37 @@ namespace ui {
 
 		auto in_wars = state.world.nation_get_war_participant(n);
 		if(in_wars.begin() != in_wars.end()) {
-			if(state.national_definitions.war)
-			active_single_modifier_description(state, layout, state.national_definitions.war, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)], identation, header, nmid);
 		} else {
-			if(state.national_definitions.peace)
-			active_single_modifier_description(state, layout, state.national_definitions.peace, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)], identation, header, nmid);
 		}
 
-		if(state.national_definitions.badboy) {
-			active_single_modifier_description(state, layout, state.national_definitions.badboy, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)], identation, header, nmid,
 				state.world.nation_get_infamy(n));
 		}
-		if(state.national_definitions.plurality) {
-			active_single_modifier_description(state, layout, state.national_definitions.plurality, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)], identation, header, nmid,
 				state.world.nation_get_plurality(n));
 		}
-		if(state.national_definitions.war_exhaustion) {
-			active_single_modifier_description(state, layout, state.national_definitions.war_exhaustion, identation, header, nmid,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)], identation, header, nmid,
 				state.world.nation_get_war_exhaustion(n));
 		}
-		if(state.national_definitions.average_literacy) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)]) {
 			auto total = state.world.nation_get_demographics(n, demographics::total);
-			active_single_modifier_description(state, layout, state.national_definitions.average_literacy, identation, header, nmid,
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)], identation, header, nmid,
 				total > 0 ? state.world.nation_get_demographics(n, demographics::literacy) / total : 0.0f);
 		}
-		if(state.national_definitions.total_blockaded) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)]) {
 			auto bc = ve::to_float(state.world.nation_get_central_blockaded(n));
 			auto c = ve::to_float(state.world.nation_get_central_ports(n));
-			active_single_modifier_description(state, layout, state.national_definitions.total_blockaded, identation, header, nmid,
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)], identation, header, nmid,
 				c > 0.0f ? bc / c : 0.0f);
 		}
-		if(state.national_definitions.total_occupation) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
 			auto nid = fatten(state.world, n);
 			auto cap_continent = nid.get_capital().get_continent();
 			float total = 0.0f;
@@ -292,31 +292,31 @@ namespace ui {
 					}
 				}
 			}
-			active_single_modifier_description(state, layout, state.national_definitions.total_occupation, identation, header, nmid,
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)], identation, header, nmid,
 				total > 0.0f ? occupied / total : 0.0f);
 		}
 
 		if(state.world.nation_get_is_civilized(n) == false) {
-			if(state.national_definitions.unciv_nation)
-			active_single_modifier_description(state, layout, state.national_definitions.unciv_nation, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)], identation, header, nmid);
 		} else if(nations::is_great_power(state, n)) {
-			if(state.national_definitions.great_power)
-			active_single_modifier_description(state, layout, state.national_definitions.great_power, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)], identation, header, nmid);
 		} else if(state.world.nation_get_rank(n) <= uint16_t(state.defines.colonial_rank)) {
-			if(state.national_definitions.second_power)
-			active_single_modifier_description(state, layout, state.national_definitions.second_power, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)], identation, header, nmid);
 		} else {
-			if(state.national_definitions.civ_nation)
-			active_single_modifier_description(state, layout, state.national_definitions.civ_nation, identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)])
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)], identation, header, nmid);
 		}
 
-		if(state.national_definitions.disarming) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]) {
 			if(bool(state.world.nation_get_disarmed_until(n)) && state.world.nation_get_disarmed_until(n) > state.current_date)
-			active_single_modifier_description(state, layout, state.national_definitions.disarming, identation, header, nmid);
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)], identation, header, nmid);
 		}
-		if(state.national_definitions.in_bankrupcy) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]) {
 			if(bool(state.world.nation_get_is_bankrupt(n)))
-			active_single_modifier_description(state, layout, state.national_definitions.in_bankrupcy, identation, header, nmid);
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)], identation, header, nmid);
 		}
 		// TODO: debt
 

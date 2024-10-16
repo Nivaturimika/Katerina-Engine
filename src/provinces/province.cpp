@@ -1626,28 +1626,40 @@ namespace province {
 		auto controller = state.world.province_get_nation_from_province_control(prov);
 
 		if(!controller)
-		return !bool(state.world.province_get_rebel_faction_from_province_rebel_control(prov));
+			return !bool(state.world.province_get_rebel_faction_from_province_rebel_control(prov));
 
 		if(!nation_as) // rebels go everywhere
-		return true;
+			return true;
 
 		if(controller == nation_as)
-		return true;
+			return true;
 
 		if(state.world.nation_get_in_sphere_of(controller) == nation_as)
-		return true;
+			return true;
 
 		auto coverl = state.world.nation_get_overlord_as_subject(controller);
 		if(state.world.overlord_get_ruler(coverl) == nation_as)
-		return true;
+			return true;
 
 		auto url = state.world.get_unilateral_relationship_by_unilateral_pair(controller, nation_as);
 		if(state.world.unilateral_relationship_get_military_access(url))
-		return true;
+			return true;
 
 		if(military::are_allied_in_war(state, nation_as, controller))
-		return true;
+			return true;
 
+		return false;
+	}
+
+	bool any_adjacent_is_friendly(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov) {
+		for(auto adj : state.world.province_get_province_adjacency(prov)) {
+			if((adj.get_type() & (province::border::impassible_bit | province::border::coastal_bit)) == 0) {
+				auto other = adj.get_connected_provinces(0) != prov ? adj.get_connected_provinces(0) : adj.get_connected_provinces(1);
+				if(has_safe_access_to_province(state, nation_as, other)) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 

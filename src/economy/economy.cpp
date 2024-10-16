@@ -2701,8 +2701,8 @@ namespace economy {
 			}
 		}
 
-		sys::add_modifier_to_nation(state, n, state.national_definitions.in_bankrupcy, state.current_date + int32_t(state.defines.bankrupcy_duration * 365));
-		sys::add_modifier_to_nation(state, n, state.national_definitions.bad_debter, state.current_date + int32_t(state.defines.bankruptcy_external_loan_years * 365));
+		sys::add_modifier_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)], state.current_date + int32_t(state.defines.bankrupcy_duration * 365));
+		sys::add_modifier_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::bad_debter)], state.current_date + int32_t(state.defines.bankruptcy_external_loan_years * 365));
 
 		debt = 0.0f;
 		state.world.nation_set_is_debt_spending(n, false);

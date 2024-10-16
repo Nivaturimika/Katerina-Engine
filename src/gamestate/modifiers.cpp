@@ -262,12 +262,14 @@ namespace sys {
 		});
 
 		for(auto n : state.world.in_nation) {
-			if(auto ts = n.get_tech_school(); ts)
-			apply_modifier_values_to_nation(state, n, ts);
+			if(auto ts = n.get_tech_school(); ts) {
+				apply_modifier_values_to_nation(state, n, ts);
+			}
 		}
 		for(auto n : state.world.in_nation) {
-			if(auto nv = n.get_national_value(); nv)
-			apply_modifier_values_to_nation(state, n, nv);
+			if(auto nv = n.get_national_value(); nv) {
+				apply_modifier_values_to_nation(state, n, nv);
+			}
 		}
 		for(auto n : state.world.in_nation) {
 			for(auto mpr : state.world.nation_get_current_modifiers(n)) {
@@ -309,41 +311,43 @@ namespace sys {
 		for(auto n : state.world.in_nation) {
 			auto in_wars = n.get_war_participant();
 			if(in_wars.begin() != in_wars.end()) {
-				if(state.national_definitions.war)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.war);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]);
+				}
 			} else {
-				if(state.national_definitions.peace)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.peace);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]);
+				}
 			}
 		}
 
-		if(state.national_definitions.badboy) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.badboy,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)],
 				[&](auto ids) { return state.world.nation_get_infamy(ids); });
 		}
-		if(state.national_definitions.plurality) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.plurality,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)],
 				[&](auto ids) { return state.world.nation_get_plurality(ids); });
 		}
-		if(state.national_definitions.war_exhaustion) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.war_exhaustion,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)],
 				[&](auto ids) { return state.world.nation_get_war_exhaustion(ids); });
 		}
-		if(state.national_definitions.average_literacy) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.average_literacy, [&](auto ids) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)], [&](auto ids) {
 				auto total = state.world.nation_get_demographics(ids, demographics::total);
 				return ve::select(total > 0, state.world.nation_get_demographics(ids, demographics::literacy) / total, 0.0f);
 			});
 		}
-		if(state.national_definitions.total_blockaded) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.total_blockaded, [&](auto ids) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)], [&](auto ids) {
 				auto bc = ve::to_float(state.world.nation_get_central_blockaded(ids));
 				auto c = ve::to_float(state.world.nation_get_central_ports(ids));
 				return ve::select(c > 0.0f, bc / c, 0.0f);
 			});
 		}
-		if(state.national_definitions.total_occupation) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.total_occupation, [&](auto ids) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
+			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)], [&](auto ids) {
 				return ve::apply(
 					[&](dcon::nation_id nid) {
 						auto n = fatten(state.world, nid);
@@ -358,38 +362,39 @@ namespace sys {
 								}
 							}
 						}
-						if(total > 0.0f)
-							return 100.0f * occupied / total;
-						else
-							return 0.0f;
+						return total > 0.f ? 100.0f * occupied / total : 0.f;
 					},
 					ids);
 			});
 		}
 		for(auto n : state.world.in_nation) {
 			if(n.get_is_civilized() == false) {
-				if(state.national_definitions.unciv_nation)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.unciv_nation);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)]);
+				}
 			} else if(nations::is_great_power(state, n)) {
-				if(state.national_definitions.great_power)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.great_power);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)]);
+				}
 			} else if(n.get_rank() <= uint16_t(state.defines.colonial_rank)) {
-				if(state.national_definitions.second_power)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.second_power);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)]);
+				}
 			} else {
-				if(state.national_definitions.civ_nation)
-				apply_modifier_values_to_nation(state, n, state.national_definitions.civ_nation);
-			}
-		}
-		if(state.national_definitions.disarming) {
-			for(auto n : state.world.in_nation) {
-				if(bool(n.get_disarmed_until()) && n.get_disarmed_until() > state.current_date) {
-					apply_modifier_values_to_nation(state, n, state.national_definitions.disarming);
+				if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]);
 				}
 			}
 		}
-		if(state.national_definitions.in_bankrupcy) {
-			bulk_apply_masked_modifier_to_nations(state, state.national_definitions.in_bankrupcy,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]) {
+			for(auto n : state.world.in_nation) {
+				if(bool(n.get_disarmed_until()) && n.get_disarmed_until() > state.current_date) {
+					apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]);
+				}
+			}
+		}
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]) {
+			bulk_apply_masked_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)],
 				[&](auto ids) { return state.world.nation_get_is_bankrupt(ids); });
 		}
 		// TODO: debt
@@ -408,9 +413,9 @@ namespace sys {
 							return;
 						} else {
 							for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
-								if(!(nat_values.offsets[i]))
-								break; // no more modifier values attached
-
+								if(!(nat_values.offsets[i])) {
+									break; // no more modifier values attached
+								}
 								auto fixed_offset = nat_values.offsets[i];
 								auto modifier_amount = nat_values.values[i];
 								auto old_mod_value = state.world.nation_get_modifier_values(nids, fixed_offset);
@@ -473,35 +478,35 @@ namespace sys {
 
 		auto in_wars = state.world.nation_get_war_participant(n);
 		if(in_wars.begin() != in_wars.end()) {
-			if(state.national_definitions.war)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.war);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]);
 		} else {
-			if(state.national_definitions.peace)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.peace);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]);
 		}
 
-		if(state.national_definitions.badboy) {
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.badboy, state.world.nation_get_infamy(n));
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)], state.world.nation_get_infamy(n));
 		}
-		if(state.national_definitions.plurality) {
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.plurality, state.world.nation_get_plurality(n));
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)]) {
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)], state.world.nation_get_plurality(n));
 		}
-		if(state.national_definitions.war_exhaustion) {
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.war_exhaustion,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)]) {
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)],
 				state.world.nation_get_war_exhaustion(n));
 		}
-		if(state.national_definitions.average_literacy) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)]) {
 			auto total = state.world.nation_get_demographics(n, demographics::total);
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.average_literacy,
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)],
 				total > 0 ? state.world.nation_get_demographics(n, demographics::literacy) / total : 0.0f);
 		}
-		if(state.national_definitions.total_blockaded) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)]) {
 			auto bc = ve::to_float(state.world.nation_get_central_blockaded(n));
 			auto c = ve::to_float(state.world.nation_get_central_ports(n));
 
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.total_blockaded, c > 0.0f ? bc / c : 0.0f);
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)], c > 0.0f ? bc / c : 0.0f);
 		}
-		if(state.national_definitions.total_occupation) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
 			auto nid = fatten(state.world, n);
 			auto cap_continent = nid.get_capital().get_continent();
 			float total = 0.0f;
@@ -515,32 +520,32 @@ namespace sys {
 				}
 			}
 
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.total_occupation,
+			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)],
 				total > 0.0f ? occupied / total : 0.0f);
 		}
 
 		if(state.world.nation_get_is_civilized(n) == false) {
-			if(state.national_definitions.unciv_nation)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.unciv_nation);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)]);
 		} else if(nations::is_great_power(state, n)) {
-			if(state.national_definitions.great_power)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.great_power);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)]);
 		} else if(state.world.nation_get_rank(n) <= uint16_t(state.defines.colonial_rank)) {
-			if(state.national_definitions.second_power)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.second_power);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)]);
 		} else {
-			if(state.national_definitions.civ_nation)
-			apply_modifier_values_to_nation(state, n, state.national_definitions.civ_nation);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)])
+			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]);
 		}
 
-		if(state.national_definitions.disarming) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]) {
 			if(bool(state.world.nation_get_disarmed_until(n)) && state.world.nation_get_disarmed_until(n) > state.current_date) {
-				apply_modifier_values_to_nation(state, n, state.national_definitions.disarming);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]);
 			}
 		}
-		if(state.national_definitions.in_bankrupcy) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]) {
 			if(bool(state.world.nation_get_is_bankrupt(n))) {
-				apply_modifier_values_to_nation(state, n, state.national_definitions.in_bankrupcy);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]);
 			}
 		}
 		// TODO: debt
@@ -577,8 +582,8 @@ namespace sys {
 				[&](auto ids) { state.world.province_set_modifier_values(ids, mid, ve::fp_vector{}); });
 		});
 
-		if(state.national_definitions.land_province)
-		bulk_apply_modifier_to_provinces(state, state.national_definitions.land_province);
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)])
+		bulk_apply_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)]);
 
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			for(auto mpr : state.world.province_get_current_modifiers(p)) {
@@ -604,8 +609,9 @@ namespace sys {
 		});
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(auto c = state.world.province_get_crime(p); c) {
-				if(auto m = state.culture_definitions.crimes[c].modifier; m)
-				apply_modifier_values_to_province(state, p, m);
+				if(auto m = state.culture_definitions.crimes[c].modifier; m) {
+					apply_modifier_values_to_province(state, p, m);
+				}
 			}
 		});
 
@@ -615,39 +621,39 @@ namespace sys {
 					[&](auto ids) { return ve::to_float(state.world.province_get_building_level(ids, t)); });
 			}
 		}
-		if(state.national_definitions.infrastructure) {
-			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.infrastructure, [&](auto ids) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)]) {
+			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)], [&](auto ids) {
 				return ve::to_float(state.world.province_get_building_level(ids, economy::province_building_type::railroad)) *
 						 state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure;
 			});
 		}
-		if(state.national_definitions.nationalism) {
-			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.nationalism, [&](auto ids) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)]) {
+			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)], [&](auto ids) {
 				return ve::select(state.world.province_get_is_owner_core(ids), 0.0f, state.world.province_get_nationalism(ids));
 			});
 		}
-		if(state.national_definitions.non_coastal) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.non_coastal,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::non_coastal)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::non_coastal)],
 				[&](auto ids) { return !state.world.province_get_is_coast(ids); });
 		}
-		if(state.national_definitions.coastal) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.coastal,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal)],
 				[&](auto ids) { return state.world.province_get_is_coast(ids); });
 		}
-		if(state.national_definitions.overseas) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.overseas,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::overseas)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::overseas)],
 				[&](auto ids) { return province::is_overseas(state, ids); });
 		}
-		if(state.national_definitions.core) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.core,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::core)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::core)],
 				[&](auto ids) { return state.world.province_get_is_owner_core(ids); });
 		}
-		if(state.national_definitions.has_siege) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.has_siege,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::has_siege)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::has_siege)],
 				[&](auto ids) { return military::province_is_under_siege(state, ids); });
 		}
-		if(state.national_definitions.blockaded) {
-			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.blockaded,
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::blockaded)]) {
+			bulk_apply_masked_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::blockaded)],
 				[&](auto ids) { return military::province_is_blockaded(state, ids); });
 		}
 	}

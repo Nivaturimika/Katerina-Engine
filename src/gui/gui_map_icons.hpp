@@ -163,11 +163,11 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			visible = false;
 			auto n = retrieve<dcon::navy_id>(state, parent);
-			if(n && military::will_recieve_attrition(state, n)) {
+			if(n && military::attrition_amount(state, n) > 0.f) {
 				visible = true;
 			}
 			auto a = retrieve<dcon::army_id>(state, parent);
-			if(a && military::will_recieve_attrition(state, a)) {
+			if(a && military::attrition_amount(state, a) > 0.f) {
 				visible = true;
 			}
 		}

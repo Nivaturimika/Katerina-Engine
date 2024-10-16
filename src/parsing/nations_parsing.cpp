@@ -109,7 +109,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("very_easy_player"), new_modifier);
-		context.state.national_definitions.very_easy_player = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_easy_player)] = new_modifier;
 	}
 
 	void m_easy_player(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -124,7 +124,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("easy_player"), new_modifier);
-		context.state.national_definitions.easy_player = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::easy_player)] = new_modifier;
 	}
 
 	void m_hard_player(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -139,7 +139,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("hard_player"), new_modifier);
-		context.state.national_definitions.hard_player = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::hard_player)] = new_modifier;
 	}
 
 	void m_very_hard_player(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -154,7 +154,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("very_hard_player"), new_modifier);
-		context.state.national_definitions.very_hard_player = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_hard_player)] = new_modifier;
 	}
 
 	void m_very_easy_ai(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -169,7 +169,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("very_easy_ai"), new_modifier);
-		context.state.national_definitions.very_easy_ai = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_easy_ai)] = new_modifier;
 	}
 
 	void m_easy_ai(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -184,7 +184,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("easy_ai"), new_modifier);
-		context.state.national_definitions.easy_ai = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::easy_ai)] = new_modifier;
 	}
 
 	void m_hard_ai(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -199,7 +199,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("hard_ai"), new_modifier);
-		context.state.national_definitions.hard_ai = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::hard_ai)] = new_modifier;
 	}
 
 	void m_very_hard_ai(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -214,7 +214,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("very_hard_ai"), new_modifier);
-		context.state.national_definitions.very_hard_ai = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_hard_ai)] = new_modifier;
 	}
 
 	void m_overseas(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -230,7 +230,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("overseas"), new_modifier);
-		context.state.national_definitions.overseas = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::overseas)] = new_modifier;
 	}
 
 	void m_coastal(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -246,7 +246,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("coastal"), new_modifier);
-		context.state.national_definitions.coastal = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal)] = new_modifier;
 	}
 
 	void m_non_coastal(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -262,7 +262,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("non_coastal"), new_modifier);
-		context.state.national_definitions.non_coastal = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::non_coastal)] = new_modifier;
 	}
 
 	void m_coastal_sea(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -278,7 +278,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("coastal_sea"), new_modifier);
-		context.state.national_definitions.coastal_sea = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::coastal_sea)] = new_modifier;
 	}
 
 	void m_sea_zone(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -294,7 +294,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("sea_zone"), new_modifier);
-		context.state.national_definitions.sea_zone = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::sea_zone)] = new_modifier;
 	}
 
 	void m_land_province(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -310,7 +310,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("land_province"), new_modifier);
-		context.state.national_definitions.land_province = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)] = new_modifier;
 	}
 
 	void m_blockaded(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -326,7 +326,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("blockaded"), new_modifier);
-		context.state.national_definitions.blockaded = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::blockaded)] = new_modifier;
 	}
 
 	void m_no_adjacent_controlled(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -342,7 +342,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("no_adjacent_controlled"), new_modifier);
-		context.state.national_definitions.no_adjacent_controlled = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::no_adjacent_controlled)] = new_modifier;
 	}
 
 	void m_core(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -358,7 +358,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("core"), new_modifier);
-		context.state.national_definitions.core = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::core)] = new_modifier;
 	}
 
 	void m_has_siege(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -374,7 +374,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("has_siege"), new_modifier);
-		context.state.national_definitions.has_siege = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::has_siege)] = new_modifier;
 	}
 
 	void m_occupied(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -390,7 +390,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("occupied"), new_modifier);
-		context.state.national_definitions.occupied = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::occupied)] = new_modifier;
 	}
 
 	void m_nationalism(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -406,7 +406,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("nationalism"), new_modifier);
-		context.state.national_definitions.nationalism = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)] = new_modifier;
 	}
 
 	void m_infrastructure(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -422,7 +422,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("infrastructure"), new_modifier);
-		context.state.national_definitions.infrastructure = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)] = new_modifier;
 	}
 
 	void m_base_values(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -437,7 +437,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("base_values"), new_modifier);
-		context.state.national_definitions.base_values = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::base_values)] = new_modifier;
 	}
 
 	void m_war(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -452,7 +452,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("war"), new_modifier);
-		context.state.national_definitions.war = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)] = new_modifier;
 	}
 
 	void m_peace(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -467,7 +467,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("peace"), new_modifier);
-		context.state.national_definitions.peace = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)] = new_modifier;
 	}
 
 	void m_disarming(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -482,7 +482,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("disarming"), new_modifier);
-		context.state.national_definitions.disarming = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)] = new_modifier;
 	}
 
 	void m_war_exhaustion(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -497,7 +497,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("war_exhaustion"), new_modifier);
-		context.state.national_definitions.war_exhaustion = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war_exhaustion)] = new_modifier;
 	}
 
 	void m_badboy(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -512,7 +512,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("badboy"), new_modifier);
-		context.state.national_definitions.badboy = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)] = new_modifier;
 	}
 
 	void m_debt_default_to(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -527,7 +527,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("debt_default_to"), new_modifier);
-		context.state.national_definitions.debt_default_to = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::debt_default_to)] = new_modifier;
 	}
 
 	void m_bad_debter(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -542,7 +542,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("bad_debter"), new_modifier);
-		context.state.national_definitions.bad_debter = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::bad_debter)] = new_modifier;
 	}
 
 	void m_great_power(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -557,7 +557,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("great_power"), new_modifier);
-		context.state.national_definitions.great_power = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)] = new_modifier;
 	}
 
 	void m_second_power(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -572,7 +572,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("second_power"), new_modifier);
-		context.state.national_definitions.second_power = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)] = new_modifier;
 	}
 
 	void m_civ_nation(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -587,7 +587,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("civ_nation"), new_modifier);
-		context.state.national_definitions.civ_nation = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)] = new_modifier;
 	}
 
 	void m_unciv_nation(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -602,7 +602,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("unciv_nation"), new_modifier);
-		context.state.national_definitions.unciv_nation = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)] = new_modifier;
 	}
 
 	void m_average_literacy(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -617,7 +617,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("average_literacy"), new_modifier);
-		context.state.national_definitions.average_literacy = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::average_literacy)] = new_modifier;
 	}
 
 	void m_plurality(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -632,7 +632,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("plurality"), new_modifier);
-		context.state.national_definitions.plurality = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::plurality)] = new_modifier;
 	}
 
 	void m_generalised_debt_default(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -647,7 +647,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("generalised_debt_default"), new_modifier);
-		context.state.national_definitions.generalised_debt_default = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::generalised_debt_default)] = new_modifier;
 	}
 
 	void m_total_occupation(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -662,7 +662,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("total_occupation"), new_modifier);
-		context.state.national_definitions.total_occupation = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)] = new_modifier;
 	}
 
 	void m_total_blockaded(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -677,7 +677,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("total_blockaded"), new_modifier);
-		context.state.national_definitions.total_blockaded = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)] = new_modifier;
 	}
 
 	void m_in_bankrupcy(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -692,7 +692,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.force_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string("in_bankrupcy"), new_modifier);
-		context.state.national_definitions.in_bankrupcy = new_modifier;
+		context.state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)] = new_modifier;
 	}
 
 	void make_event_modifier(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {
