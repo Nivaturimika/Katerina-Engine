@@ -455,7 +455,7 @@ namespace ui {
 			auto is_asc = retrieve<bool>(state, parent);
 			switch(s) {
 			case picker_sort::name:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = text::get_name_as_string(state, fatten(state.world, a));
 					auto bv = text::get_name_as_string(state, fatten(state.world, b));
 					if(av != bv)
@@ -464,7 +464,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::mil_rank:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_military_rank(a);
 					auto bv = state.world.nation_get_military_rank(b);
 					if(av != bv)
@@ -473,7 +473,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::indust_rank:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_industrial_rank(a);
 					auto bv = state.world.nation_get_industrial_rank(b);
 					if(av != bv)
@@ -482,7 +482,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::p_rank:
-				std::sort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_prestige_rank(a);
 					auto bv = state.world.nation_get_prestige_rank(b);
 					if(av != bv)
