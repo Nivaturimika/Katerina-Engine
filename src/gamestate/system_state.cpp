@@ -2452,41 +2452,43 @@ namespace sys {
 			auto pop_history = open_directory(history, NATIVE("pops"));
 			//
 			std::vector<native_string> date_directories;
-			//
-			auto ymd = sys::date(0).to_ymd(start_date);
-			if(ymd.year != bookmark_date.year && ymd.month != bookmark_date.month && ymd.day != bookmark_date.day) {
-				auto sd_dir = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
-				date_directories.emplace_back(sd_dir);
-			}
-			auto bd_dir = to_native_string(bookmark_date.year) + NATIVE(".") + to_native_string(bookmark_date.month) + NATIVE(".") + to_native_string(bookmark_date.day);
-			date_directories.emplace_back(bd_dir);
-			//
-			for(const auto& dir_name : date_directories) {
-				auto date_directory = open_directory(pop_history, dir_name);
-				// NICK: 
-				// Attempts to look through the start date as defined by the mod.
-				// If it does not find any pop files there, it defaults to looking through 1836.1.1
-				// This is to deal with mods that have their start date defined as something else
-				// But have pop history within 1836.1.1 (converters).
-				for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
-					auto opened_file = open_file(pop_file);
-					if(opened_file) {
-						err.file_name = text::native_to_utf8(get_full_name(*opened_file));
-						auto content = view_contents(*opened_file);
-						parsers::token_generator gen(content.data, content.data + content.file_size);
-						parsers::parse_pop_history_file(gen, err, context);
-					}
+			native_string closest_bd_dir;
+			for(const auto closest_dir : simple_fs::list_subdirectories(pop_history)) {
+				auto fname = simple_fs::get_full_name(closest_dir);
+				// TODO: very naive way to obtain the directory... smh
+				if(fname[fname.size() - 1] == NATIVE('\\')
+				|| fname[fname.size() - 1] == NATIVE('/')) {
+					fname.pop_back();
 				}
-				// Modding extension:
-				// Support loading pops from a CSV file, this to condense them better and allow
-				// for them to load faster and better ordered, editable with a spreadsheet program
-				for(auto pop_file : list_files(date_directory, NATIVE(".csv"))) {
-					auto opened_file = open_file(pop_file);
-					if(opened_file) {
-						err.file_name = text::native_to_utf8(get_full_name(*opened_file));
-						auto content = view_contents(*opened_file);
-						parsers::parse_csv_pop_history_file(*this, content.data, content.data + content.file_size, err, context);
-					}
+				if(auto pos = fname.find_last_of(NATIVE("/\\")); pos != std::string::npos) {
+					fname = fname.substr(pos + 1);
+				}
+				// End of naive thing
+				auto ymd = parsers::parse_date(text::native_to_utf8(fname), 0, err);
+				if(ymd.year <= bookmark_date.year && ymd.month <= bookmark_date.month && ymd.day <= bookmark_date.day) {
+					closest_bd_dir = fname;
+				}
+			}
+			//
+			auto date_directory = open_directory(pop_history, closest_bd_dir);
+			for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
+				auto opened_file = open_file(pop_file);
+				if(opened_file) {
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
+					auto content = view_contents(*opened_file);
+					parsers::token_generator gen(content.data, content.data + content.file_size);
+					parsers::parse_pop_history_file(gen, err, context);
+				}
+			}
+			// Modding extension:
+			// Support loading pops from a CSV file, this to condense them better and allow
+			// for them to load faster and better ordered, editable with a spreadsheet program
+			for(auto pop_file : list_files(date_directory, NATIVE(".csv"))) {
+				auto opened_file = open_file(pop_file);
+				if(opened_file) {
+					err.file_name = text::native_to_utf8(get_full_name(*opened_file));
+					auto content = view_contents(*opened_file);
+					parsers::parse_csv_pop_history_file(*this, content.data, content.data + content.file_size, err, context);
 				}
 			}
 		}
