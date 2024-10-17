@@ -3294,7 +3294,7 @@ namespace sys {
 		for(auto r : world.in_army) {
 			auto nation = world.army_control_get_controller(r.get_army_control());
 			//armies defined as "rebels" will be assigned to the nearest rebellion
-			if(nation != world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
+			if(nation == world.national_identity_get_nation_from_identity_holder(national_definitions.rebel_id)) {
 				world.delete_army_control(r.get_army_control());
 				dcon::rebel_faction_id rf;
 				auto owner = r.get_location_from_army_location().get_nation_from_province_ownership();
