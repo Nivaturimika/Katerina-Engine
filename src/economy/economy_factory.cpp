@@ -116,18 +116,16 @@ namespace economy_factory {
 		return throughput_multiplier * output_multiplier * max_production_scale;
 	}
 
-
+	/* - Then, for input/output/throughput we sum up national and provincial modifiers to general factory
+		input/output/throughput are added, plus technology modifiers to its specific output commodity, add
+		one to the sum, and then multiply the input/output/throughput modifier from the workforce by it. */
 	float factory_input_multiplier(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id sid) {
 		float total_workers = factory_max_employment(state, f);
 		float small_size_effect = 1.f;
-		float small_bound = 5.f * state.defines.alice_factory_per_level_employment;
-		if(total_workers < small_bound) {
-			small_size_effect = 0.5f + total_workers / small_bound * 0.5f;
-		}
 		float total_state_pop = std::max(0.001f, state.world.state_instance_get_demographics(sid, demographics::total));
 		float capitalists = state.world.state_instance_get_demographics(sid, demographics::to_key(state, state.culture_definitions.capitalists));
 		float owner_fraction = total_state_pop > 0.f ? std::min(0.05f, capitalists / total_state_pop) : 0.0f;
-		return small_size_effect * std::max(0.1f, (state.defines.alice_inputs_base_factor
+		return std::max(0.1f, (1.f
 			+ state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_factory_input)
 			+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_input)
 			+ owner_fraction * -2.5f));
@@ -485,7 +483,7 @@ namespace economy_factory {
 				return a.index() < b.index();
 			});
 
-			float employment_shift_speed = 0.09f;
+			float employment_shift_speed = 0.05f;
 
 			float primary_pool_copy = primary_pool;
 			float secondary_pool_copy = secondary_pool;

@@ -310,9 +310,13 @@ namespace economy {
 			fp.set_savings(fp.get_size() / 10000.f);
 		});
 
+		/* - Newly built factories (upgrading from 0) seem to have some special employment logic to get them up
+			to 1000. ... Look I can only figure out so many details. */
 		state.world.for_each_factory([&](dcon::factory_id f) {
 			auto ff = fatten(state.world, f);
-			ff.set_production_scale(1.0f);
+			ff.set_production_scale(1.f);
+			ff.set_primary_employment(1.f);
+			ff.set_secondary_employment(1.f);
 		});
 
 		province::for_each_land_province(state, [&](dcon::province_id p) {
