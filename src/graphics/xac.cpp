@@ -797,8 +797,8 @@ namespace emfx {
 		} else {
 			nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 		}
-		//nkf.y = -nkf.y; //emfx fixup
-		//nkf.z = -nkf.z; //emfx fixup
+		nkf.y = -nkf.y; //emfx fixup
+		nkf.z = -nkf.z; //emfx fixup
 		return nkf;
 	}
 
