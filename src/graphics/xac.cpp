@@ -271,17 +271,17 @@ chunk CA: bone animation (v2)
 namespace emfx {
 	inline xac_vector3f vec3_to_glsl(xac_vector3f q) {
 		return xac_vector3f{
-			-q.x,
+			q.x,
 			q.y,
 			q.z
 		};
 	}
 	inline xac_vector4f vec4_to_glsl(xac_vector4f q) {
 		return xac_vector4f{
-			q.w,
-			q.z,
+			q.x,
 			q.y,
-			q.x
+			q.z,
+			q.w
 		};
 	}
 
@@ -937,19 +937,19 @@ namespace emfx {
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
 		auto const& keys = position_keys;
-		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
 		auto const& keys = rotation_keys;
-		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
 		auto const& keys = scale_keys;
-		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
 		auto const& keys = scale_rotation_keys;
-		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
+		return i < keys.size() ? keys[i] : keys[0];
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
