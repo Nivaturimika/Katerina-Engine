@@ -610,7 +610,7 @@ namespace map {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glClearDepth(1.f);
 		glDepthFunc(GL_LESS);
-		//glCullFace(GL_FRONT);
+		glCullFace(GL_FRONT);
 		glActiveTexture(GL_TEXTURE0);
 		//
 		constexpr float animation_zoom_threshold = map::zoom_very_close + 2.f;
