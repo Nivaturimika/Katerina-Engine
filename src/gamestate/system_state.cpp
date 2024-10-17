@@ -2453,8 +2453,8 @@ namespace sys {
 			//
 			std::vector<native_string> date_directories;
 			//
-			if(current_date.value > 0) {
-				auto ymd = sys::date(0).to_ymd(start_date);
+			auto ymd = sys::date(0).to_ymd(start_date);
+			if(ymd.year != bookmark_date.year && ymd.month != bookmark_date.month && ymd.day != bookmark_date.day) {
 				auto sd_dir = to_native_string(ymd.year) + NATIVE(".") + to_native_string(ymd.month) + NATIVE(".") + to_native_string(ymd.day);
 				date_directories.emplace_back(sd_dir);
 			}
