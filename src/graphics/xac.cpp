@@ -269,6 +269,22 @@ chunk CA: bone animation (v2)
 */
 
 namespace emfx {
+	inline xac_vector3f vec3_to_glsl(xac_vector3f q) {
+		return xac_vector3f{
+			-q.x,
+			q.y,
+			q.z
+		};
+	}
+	inline xac_vector4f vec4_to_glsl(xac_vector4f q) {
+		return xac_vector4f{
+			q.w,
+			q.z,
+			q.y,
+			q.x
+		};
+	}
+
 	const char* parse_xac_cstring(const char* start, const char* end, parsers::error_handler& err) {
 		const char* ptr = start;
 		auto const len = parse_xac_any_binary<uint32_t>(&ptr, end, err);
@@ -389,14 +405,9 @@ namespace emfx {
 #endif
 			xac_pp_actor_node node;
 			node.name = name;
-			node.position = mh.position;
-			//node.position.x = -node.position.x; //emfx fixup
-			node.rotation = mh.rotation;
-			//node.rotation.y = -node.rotation.y; //emfx fixup
-			//node.rotation.z = -node.rotation.z; //emfx fixup
-			node.scale_rotation = mh.scale_rotation;
-			//node.scale_rotation.y = -node.scale_rotation.y; //emfx fixup
-			//node.scale_rotation.z = -node.scale_rotation.z; //emfx fixup
+			node.position = vec3_to_glsl(mh.position);
+			node.rotation = vec4_to_glsl(mh.rotation);
+			node.scale_rotation = vec4_to_glsl(mh.scale_rotation);
 			node.scale = mh.scale;
 			node.transform = mh.transform;
 			node.parent_id = mh.parent_id;
@@ -461,7 +472,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto normal = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						//normal.x = -normal.x; //emfx fixup
+						normal = vec3_to_glsl(normal);
 						obj.normals.push_back(normal);
 					}
 					break;
@@ -471,7 +482,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto vertex = parse_xac_any_binary<xac_vector3f>(&ptr, end, err);
-						//vertex.x = -vertex.x; //emfx fixup
+						vertex = vec3_to_glsl(vertex);
 						obj.vertices.push_back(vertex);
 					}
 					break;
@@ -490,7 +501,7 @@ namespace emfx {
 						ptr += vbh.size;
 					} else {
 						auto weight = parse_xac_any_binary<xac_vector4f>(&ptr, end, err);
-						//weight.x = -weight.x; //emfx fixup
+						//weight = vec3_to_glsl(weight);
 						obj.tangents.push_back(weight);
 					}
 					break;
@@ -797,9 +808,7 @@ namespace emfx {
 		} else {
 			nkf = parse_xac_any_binary<xac_vector4f>(start, end, err);
 		}
-		nkf.y = -nkf.y; //emfx fixup
-		nkf.z = -nkf.z; //emfx fixup
-		return nkf;
+		return vec4_to_glsl(nkf);
 	}
 
 	const char* parse_xsm_bone_animation_v2(xsm_context& context, const char* start, const char* end, parsers::error_handler& err) {
@@ -812,17 +821,19 @@ namespace emfx {
 		for(uint32_t i = 0; i < num_sub_motions; i++) {
 			context.animations.push_back(xsm_animation{});
 			xsm_animation& anim = context.animations.back();
+			// rotation and scale rotation quaternions
 			anim.pose_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 			anim.bind_pose_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 			anim.pose_scale_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 			anim.bind_pose_scale_rotation = parse_quat_16b(&ptr, end, err, context.use_quat_16);
-			//
+			// positions and scales
 			anim.pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			//anim.pose_position.x = -anim.pose_position.x; //emfx fixup
 			anim.pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
 			anim.bind_pose_position = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
-			//anim.bind_pose_position.x = -anim.bind_pose_position.x; //emfx fixup
 			anim.bind_pose_scale = parse_xac_any_binary<emfx::xac_vector3f>(&ptr, end, err);
+			// fixups for glsl
+			anim.pose_position = vec3_to_glsl(anim.pose_position); //emfx fixup
+			anim.bind_pose_position = vec3_to_glsl(anim.bind_pose_position); //emfx fixup
 			//
 			uint32_t num_pos_keys = parse_xac_any_binary<uint32_t>(&ptr, end, err);
 			uint32_t num_rot_keys = parse_xac_any_binary<uint32_t>(&ptr, end, err);
@@ -840,7 +851,7 @@ namespace emfx {
 			//
 			for(uint32_t j = 0; j < num_pos_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
-				//kf.value.x = -kf.value.x; //emfx fixup
+				kf.value = vec3_to_glsl(kf.value); //emfx fixup
 				anim.position_keys.push_back(kf);
 			}
 			for(uint32_t j = 0; j < num_rot_keys; j++) {
@@ -926,19 +937,19 @@ namespace emfx {
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
 		auto const& keys = position_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
 		auto const& keys = rotation_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
 		auto const& keys = scale_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
 		auto const& keys = scale_rotation_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return i < keys.size() ? keys[i] : keys[keys.size() - 1];
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
@@ -985,33 +996,46 @@ namespace emfx {
 
 	void finish(xsm_context& context) {
 		for(auto& anim : context.animations) {
-			for(auto& s : anim.position_keys) {
+			for(auto const& s : anim.position_keys) {
 				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 				anim.total_position_anim_time = std::max(anim.total_position_anim_time, s.time);
 			}
-			if(anim.position_keys.empty()) {
-				anim.position_keys.emplace_back(anim.pose_position, 0.f);
-			}
-			//
-			for(auto& s : anim.rotation_keys) {
+			for(auto const& s : anim.rotation_keys) {
 				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
 				anim.total_rotation_anim_time = std::max(anim.total_rotation_anim_time, s.time);
+			}
+			for(auto const& s : anim.scale_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
+			}
+			for(auto const& s : anim.scale_rotation_keys) {
+				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
+				anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
+			}
+			// Normalise time
+			if(anim.total_anim_time > 0.f) {
+				for(auto& s : anim.position_keys) {
+					s.time /= anim.total_anim_time;
+				}
+				for(auto& s : anim.rotation_keys) {
+					s.time /= anim.total_anim_time;
+				}
+				for(auto& s : anim.scale_keys) {
+					s.time /= anim.total_anim_time;
+				}
+				for(auto& s : anim.scale_rotation_keys) {
+					s.time /= anim.total_anim_time;
+				}
+			}
+			//
+			if(anim.position_keys.empty()) {
+				anim.position_keys.emplace_back(anim.pose_position, 0.f);
 			}
 			if(anim.rotation_keys.empty()) {
 				anim.rotation_keys.emplace_back(anim.pose_rotation, 0.f);
 			}
-			//
-			for(auto& s : anim.scale_keys) {
-				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-				anim.total_scale_anim_time = std::max(anim.total_scale_anim_time, s.time);
-			}
 			if(anim.scale_keys.empty()) {
 				anim.scale_keys.emplace_back(anim.pose_scale, 0.f);
-			}
-			//
-			for(auto& s : anim.scale_rotation_keys) {
-				anim.total_anim_time = std::max(anim.total_anim_time, s.time);
-				anim.total_scale_rotation_anim_time = std::max(anim.total_scale_rotation_anim_time, s.time);
 			}
 			if(anim.scale_rotation_keys.empty()) {
 				anim.scale_rotation_keys.emplace_back(anim.pose_scale_rotation, 0.f);

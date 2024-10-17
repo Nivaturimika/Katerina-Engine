@@ -544,7 +544,8 @@ namespace map {
 		is mod'ed into the local animation time
 		@return The local animation matrix */
 	glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
-		float anim_time = an.total_anim_time > 0.f ? std::fmod(time_counter, an.total_anim_time) : 0.f;
+		auto anim_time = std::fmod(time_counter * (1.f / an.total_anim_time), 1.f);
+		//auto anim_time = an.total_position_anim_time > 0.f ? std::fmod(time_counter, an.total_position_anim_time) : 0.f;
 		auto pos_index = an.get_position_key_index(anim_time);
 		auto pos1 = an.get_position_key(pos_index);
 		auto pos2 = an.get_position_key(pos_index + 1);
@@ -555,6 +556,7 @@ namespace map {
 				an.get_player_scale_factor(pos1.time, pos2.time, anim_time)
 			)
 		);
+		//anim_time = an.total_scale_anim_time > 0.f ? std::fmod(time_counter, an.total_scale_anim_time) : 0.f;
 		auto sca_index = an.get_scale_key_index(anim_time);
 		auto sca1 = an.get_scale_key(sca_index);
 		auto sca2 = an.get_scale_key(sca_index + 1);
@@ -565,6 +567,7 @@ namespace map {
 				an.get_player_scale_factor(sca1.time, sca2.time, anim_time)
 			)
 		);
+		//anim_time = an.total_rotation_anim_time > 0.f ? std::fmod(time_counter, an.total_rotation_anim_time) : 0.f;
 		auto rot_index = an.get_rotation_key_index(anim_time);
 		auto rot1 = an.get_rotation_key(rot_index);
 		auto rot2 = an.get_rotation_key(rot_index + 1);
@@ -575,6 +578,7 @@ namespace map {
 				an.get_player_scale_factor(rot1.time, rot2.time, anim_time)
 			)
 		));
+		//anim_time = an.total_scale_rotation_anim_time > 0.f ? std::fmod(time_counter, an.total_scale_rotation_anim_time) : 0.f;
 		auto rsc_index = an.get_scale_rotation_key_index(anim_time);
 		auto rsc1 = an.get_scale_rotation_key(rsc_index);
 		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1);
@@ -585,21 +589,18 @@ namespace map {
 				an.get_player_scale_factor(rsc1.time, rsc2.time, anim_time)
 			)
 		));
-		//return mr;
 		return mt * mr * ms;
-		//return mt * mr * ms;
 	}
 
 	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, uint32_t current, float time_counter, glm::mat4x4 parent_m) {
 		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
-		//auto const node_m = matrices[list[current].bone_id]; //glm::rotate(glm::radians(45.f), glm::vec3(0.f, 1.f, 0.f));
 		auto const global_m = parent_m * node_m;
 		for(uint32_t i = start; i < start + count; i++) { //recurse thru all of our children
 			if(i != current && list[current].bone_id == list[i].parent_id) {
 				get_hierachical_animation_bone(list, matrices, start, count, i, time_counter, global_m);
 			}
 		}
-		matrices[list[current].bone_id] = global_m * glm::inverse(list[current].bone_bind_pose_matrix);
+		matrices[list[current].bone_id] = global_m;
 	}
 
 	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
@@ -609,7 +610,7 @@ namespace map {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glClearDepth(1.f);
 		glDepthFunc(GL_LESS);
-		glCullFace(GL_FRONT);
+		//glCullFace(GL_FRONT);
 		glActiveTexture(GL_TEXTURE0);
 		//
 		constexpr float animation_zoom_threshold = map::zoom_very_close + 2.f;
@@ -628,25 +629,37 @@ namespace map {
 				if((model_needs_matrix[i] & 0x80) != 0) {
 					auto start = static_mesh_idle_animation_start[i];
 					auto count = static_mesh_idle_animation_count[i];
+					auto& matrices = final_idle_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
 						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, final_idle_matrices[i], start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+					}
+					for(uint32_t k = start; k < start + count; k++) {
+						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
 					}
 				}
 				if((model_needs_matrix[i] & 0x40) != 0) {
 					auto start = static_mesh_move_animation_start[i];
 					auto count = static_mesh_move_animation_count[i];
+					auto& matrices = final_move_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
 						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, final_move_matrices[i], start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+					}
+					for(uint32_t k = start; k < start + count; k++) {
+						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
 					}
 				}
 				if((model_needs_matrix[i] & 0x20) != 0) {
 					auto start = static_mesh_attack_animation_start[i];
 					auto count = static_mesh_attack_animation_count[i];
+					auto& matrices = final_attack_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
 						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, final_attack_matrices[i], start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+					}
+					for(uint32_t k = start; k < start + count; k++) {
+						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
 					}
 				}
 			}
@@ -898,8 +911,8 @@ namespace map {
 					theta = -math::pi / 2.f;
 				auto lb = state.world.province_get_naval_battle_location(p);
 				if(lb.begin() != lb.end()) {
-					model_render_list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::attack);
-					model_render_list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::attack);
+					model_render_list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::idle);
+					model_render_list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::idle);
 				} else {
 					emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
 					model_render_list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at);
