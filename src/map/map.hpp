@@ -138,6 +138,7 @@ namespace map {
 		glm::vec2 pos = glm::vec2(0.f, 0.f);
 		float facing = 0.f;
 		emfx::animation_type anim;
+		GLuint flag_texid;
 	};
 
 	class display_data {
