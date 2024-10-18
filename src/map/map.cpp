@@ -2906,7 +2906,7 @@ namespace map {
 		glBindBuffer(GL_ARRAY_BUFFER, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh]);
 		//glBindVertexBuffer(0, state.map_state.map_data.vbo_array[state.map_state.map_data.vo_static_mesh], 0, sizeof(static_mesh_vertex)); // Bind the VBO to 0 of the VAO
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, position_)); // Set up vertex attribute format for the position
-		glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
+		glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, normal_)); // Set up vertex attribute format for the normal direction
 		glVertexAttribPointer(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, texture_coord_)); // Set up vertex attribute format for the texture coordinates
 		glVertexAttribIPointer(3, 4, GL_BYTE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, bone_ids));
 		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(static_mesh_vertex), (const void*)offsetof(static_mesh_vertex, bone_weights));

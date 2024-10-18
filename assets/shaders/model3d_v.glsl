@@ -1,11 +1,13 @@
 // Goes from 0 to 1
 layout (location = 0) in vec3 vertex_position;
-layout (location = 1) in vec2 normal_direction;
+layout (location = 1) in vec3 normal_direction;
 layout (location = 2) in vec2 texture_coord;
 layout (location = 3) in ivec4 bone_ids;
 layout (location = 4) in vec4 bone_weights;
 
 out vec2 tex_coord;
+out vec3 normal;
+out vec3 light_dir;
 
 uniform vec2 offset;
 uniform float zoom;
@@ -29,11 +31,15 @@ vec3 rotate_target(vec3 v, vec3 k, float s) {
 void main() {
 	vec3 world_pos = vertex_position;
 	vec4 skin_pos = vec4(0.f);
+	vec4 skin_norm = vec4(0.f);
 	for(int i = 0 ; i < 4; i++) {
 		if(bone_ids[i] == -1)
 			break;
-		vec4 local_pos = vec4(vertex_position, 1.f) * bones_matrices[bone_ids[i]];
+		vec4 local_pos = bones_matrices[bone_ids[i]] * vec4(vertex_position, 1.f);
+		//vec4 local_pos = bones_matrices[bone_ids[i]] * vec4(vertex_position, 1.f);
 		skin_pos += local_pos * bone_weights[i];
+		vec4 local_norm = bones_matrices[bone_ids[i]] * vec4(normal_direction, 1.f);
+		skin_norm += local_norm * bone_weights[i];
 	}
 	world_pos = skin_pos.xyz;
 	world_pos.y *= -1.f;
@@ -44,6 +50,8 @@ void main() {
 	world_pos += vec3(model_offset.x / map_size.x, 0.f, model_offset.y / map_size.y);
 	vec4 t = calc_gl_position(world_pos);
 	gl_Position = t;
-
+//
 	tex_coord = texture_coord * 4.f;
+	normal = normalize(skin_norm.xyz);
+	light_dir = -normalize(vec3(0.5f, 1.f, 1.f));
 }
