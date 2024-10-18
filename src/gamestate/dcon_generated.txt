@@ -1712,7 +1712,7 @@ object {
 object {
 	name{ ship }
 	storage_type{ erasable }
-	size{ 16000 }
+	size{ 32000 }
 	tag{ save }
 	tag{ unsaved }
 
