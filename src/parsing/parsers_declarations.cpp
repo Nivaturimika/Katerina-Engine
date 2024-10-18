@@ -3544,9 +3544,9 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\units\\"));
 				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\wars\\"));
 			} else if(replace_path == NATIVE("map")
-				|| replace_path == NATIVE("map\\terrain")) {
+				|| replace_path.starts_with(NATIVE("map\\"))) {
 				//no
-			} else if(replace_path.starts_with(NATIVE("history\\pops")) {
+			} else if(replace_path.starts_with(NATIVE("history\\pops"))) {
 				//no
 			} else {
 				auto path_block = simple_fs::list_roots(fs)[0];
