@@ -617,86 +617,79 @@ namespace text {
 	std::string produce_simple_string(sys::state const& state, dcon::text_key id) {
 		std::string result;
 
-		if(!id)
-		return result;
-
-		std::string_view sv;
-		if(auto it = state.locale_key_to_text_sequence.find(id); it != state.locale_key_to_text_sequence.end()) {
-			sv = state.locale_string_view(it->second);
-		} else {
-			sv = state.to_string_view(id);
-		}
-
-		char const* section_start = sv.data();
-		for(char const* pos = sv.data(); pos < sv.data() + sv.length();) {
-			bool colour_esc = false;
-			if(pos + 1 < sv.data() + sv.length() && uint8_t(*pos) == 0xC2 && uint8_t(*(pos + 1)) == 0xA7) {
-				if(section_start < pos)
-				result += std::string_view(section_start, pos - section_start);
-
-				pos += 2;
-				section_start = pos;
-				if(pos < sv.data() + sv.length()) {
-					pos += 1;
-					section_start = pos;
-				}
-			} else if(pos + 2 < sv.data() + sv.length() && uint8_t(*pos) == 0xEF && uint8_t(*(pos + 1)) == 0xBF && uint8_t(*(pos + 2)) == 0xBD && is_qmark_color(*(pos + 3))) {
-				if(section_start < pos)
-				result += std::string_view(section_start, pos - section_start);
-
-				section_start = pos += 3;
-
-				if(pos < sv.data() + sv.length()) {
-					pos += 1;
-					section_start = pos;
-				}
-			} else if(pos + 1 < sv.data() + sv.length() && *pos == '?' && is_qmark_color(*(pos + 1))) {
-				if(section_start < pos)
-				result += std::string_view(section_start, pos - section_start);
-
-				pos += 1;
-				section_start = pos;
-
-				if(pos < sv.data() + sv.length()) {
-					pos += 1;
-					section_start = pos;
-				}
-			} else if(*pos == '$') {
-				if(section_start < pos)
-				result += std::string_view(section_start, pos - section_start);
-
-				const char* vend = pos + 1;
-				for(; vend != sv.data() + sv.length() && *vend != '$'; ++vend)
-				;
-
-				pos = vend + 1;
-				section_start = pos;
-			} else if(pos + 1 < sv.data() + sv.length() && *pos == '\\' && *(pos + 1) == 'n') {
-				result += std::string_view(section_start, pos - section_start);
-				section_start = pos += 2;
+		if(id) {
+			std::string_view sv;
+			if(auto it = state.locale_key_to_text_sequence.find(id); it != state.locale_key_to_text_sequence.end()) {
+				sv = state.locale_string_view(it->second);
 			} else {
-				++pos;
+				sv = state.to_string_view(id);
+			}
+
+			char const* section_start = sv.data();
+			for(char const* pos = sv.data(); pos < sv.data() + sv.length();) {
+				bool colour_esc = false;
+				if(pos + 1 < sv.data() + sv.length() && uint8_t(*pos) == 0xC2 && uint8_t(*(pos + 1)) == 0xA7) {
+					if(section_start < pos)
+						result += std::string_view(section_start, pos - section_start);
+
+					pos += 2;
+					section_start = pos;
+					if(pos < sv.data() + sv.length()) {
+						pos += 1;
+						section_start = pos;
+					}
+				} else if(pos + 2 < sv.data() + sv.length() && uint8_t(*pos) == 0xEF && uint8_t(*(pos + 1)) == 0xBF && uint8_t(*(pos + 2)) == 0xBD && is_qmark_color(*(pos + 3))) {
+					if(section_start < pos)
+						result += std::string_view(section_start, pos - section_start);
+
+					section_start = pos += 3;
+
+					if(pos < sv.data() + sv.length()) {
+						pos += 1;
+						section_start = pos;
+					}
+				} else if(pos + 1 < sv.data() + sv.length() && *pos == '?' && is_qmark_color(*(pos + 1))) {
+					if(section_start < pos)
+						result += std::string_view(section_start, pos - section_start);
+
+					pos += 1;
+					section_start = pos;
+
+					if(pos < sv.data() + sv.length()) {
+						pos += 1;
+						section_start = pos;
+					}
+				} else if(*pos == '$') {
+					if(section_start < pos)
+						result += std::string_view(section_start, pos - section_start);
+
+					const char* vend = pos + 1;
+					for(; vend != sv.data() + sv.length() && *vend != '$'; ++vend)
+						;
+
+					pos = vend + 1;
+					section_start = pos;
+				} else if(pos + 1 < sv.data() + sv.length() && *pos == '\\' && *(pos + 1) == 'n') {
+					result += std::string_view(section_start, pos - section_start);
+					section_start = pos += 2;
+				} else {
+					++pos;
+				}
+			}
+
+			if(section_start < sv.data() + sv.length()) {
+				result += std::string_view(section_start, (sv.data() + sv.length()) - section_start);
 			}
 		}
-
-		if(section_start < sv.data() + sv.length())
-		result += std::string_view(section_start, (sv.data() + sv.length()) - section_start);
-
 		return result;
 	}
 	std::string produce_simple_string(sys::state const& state, std::string_view txt) {
 		auto v = state.lookup_key(txt);
-		if(v)
-		return produce_simple_string(state, v);
-		else
-		return std::string(txt);
+		return v ? produce_simple_string(state, v) : std::string(txt);
 	}
 
 	dcon::text_key find_or_add_key(sys::state& state, std::string_view key, bool as_unicode) {
-		if(as_unicode)
-		return state.add_key_utf8(key);
-		else
-		return state.add_key_win1252(key);
+		return as_unicode ? state.add_key_utf8(key) : state.add_key_win1252(key);
 	}
 
 	std::string prettify_currency(float num) {
@@ -1751,16 +1744,15 @@ namespace text {
 	}
 
 	void add_to_layout_box(sys::state& state, layout_base& dest, layout_box& box, dcon::text_key source_text, substitution_map const& mp) {
-		if(!source_text)
-		return;
-
-		std::string_view sv;
-		if(auto it = state.locale_key_to_text_sequence.find(source_text); it != state.locale_key_to_text_sequence.end()) {
-			sv = state.locale_string_view(it->second);
-		} else {
-			sv = state.to_string_view(source_text);
+		if(source_text) {
+			std::string_view sv;
+			if(auto it = state.locale_key_to_text_sequence.find(source_text); it != state.locale_key_to_text_sequence.end()) {
+				sv = state.locale_string_view(it->second);
+			} else {
+				sv = state.to_string_view(source_text);
+			}
+			add_unparsed_text_to_layout_box(state, dest, box, sv, mp);
 		}
-		add_unparsed_text_to_layout_box(state, dest, box, sv, mp);
 	}
 
 	void add_to_layout_box(sys::state& state, layout_base& dest, layout_box& box, substitution val, text_color color) {

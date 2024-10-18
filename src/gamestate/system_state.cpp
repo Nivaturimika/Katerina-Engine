@@ -1184,7 +1184,10 @@ namespace sys {
 
 	std::string_view state::to_string_view(dcon::text_key tag) const {
 		if(tag) {
-			assert(size_t(tag.index()) < key_data.size());
+			if(size_t(tag.index()) >= key_data.size()) {
+				// TODO: this is because UI code can reference OOB data due to data races
+				return std::string_view();
+			}
 			auto start_position = key_data.data() + tag.index();
 			auto data_size = key_data.size();
 			auto end_position = start_position;
@@ -1198,13 +1201,17 @@ namespace sys {
 	}
 
 	std::string_view state::locale_string_view(uint32_t tag) const {
-		assert(size_t(tag) < locale_text_data.size());
+		if(size_t(tag) >= locale_text_data.size()) {
+			// TODO: this is because UI code can reference OOB data due to data races
+			return std::string_view();
+		}
 		auto start_position = locale_text_data.data() + tag;
 		auto data_size = locale_text_data.size();
 		auto end_position = start_position;
 		for(; end_position < locale_text_data.data() + data_size; ++end_position) {
-			if(*end_position == 0)
+			if(*end_position == 0) {
 				break;
+			}
 		}
 		return std::string_view(locale_text_data.data() + tag, size_t(end_position - start_position));
 	}
@@ -1275,7 +1282,10 @@ namespace sys {
 
 	bool state::key_is_localized(dcon::text_key tag) const {
 		if(tag) {
-			assert(size_t(tag.index()) < key_data.size());
+			if(size_t(tag.index()) >= key_data.size()) {
+				// TODO: this is because UI code can reference OOB data due to data races
+				return false;
+			}
 			return locale_key_to_text_sequence.find(tag) != locale_key_to_text_sequence.end();
 		}
 		return false;
@@ -1357,7 +1367,10 @@ namespace sys {
 	}
 	std::string_view state::to_string_view(dcon::unit_name_id tag) const {
 		if(tag) {
-			assert(size_t(tag.index()) < unit_names_indices.size());
+			if(size_t(tag.index()) >= unit_names_indices.size()) {
+				// TODO: this is because UI code can reference OOB data due to data races
+				return std::string_view();
+			}
 			auto start_position = unit_names.data() + unit_names_indices[tag.index()];
 			auto data_size = unit_names.size();
 			auto end_position = start_position;
