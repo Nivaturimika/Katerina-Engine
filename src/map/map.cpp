@@ -603,6 +603,28 @@ namespace map {
 		matrices[list[current].bone_id] = global_m;
 	}
 
+	/*	Finds a given root node, or most importantly, the end of a chain on a given bone hierachy,
+		for example the torso, if the arm is given! */
+	uint32_t get_root_node(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, uint32_t current) {
+		for(uint32_t i = start; i < start + count; i++) {
+			if(i != current && list[current].parent_id == list[i].bone_id) {
+				return get_root_node(list, start, count, i); //our parent
+			}
+		}
+		return current; //ourselves
+	}
+
+	float sum_of_bone_chain_length(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, uint32_t current, float sum) {
+		for(uint32_t i = start; i < start + count; i++) {
+			if(i != current && list[current].parent_id == list[i].bone_id) {
+				auto const a = glm::vec3(list[current].bone_pose_matrix[3]);
+				auto const b = glm::vec3(list[i].bone_pose_matrix[3]);
+				return glm::distance(a, b) + sum_of_bone_chain_length(list, start, count, i, sum);
+			}
+		}
+		return sum;
+	}
+
 	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);
@@ -631,8 +653,7 @@ namespace map {
 					auto count = static_mesh_idle_animation_count[i];
 					auto& matrices = final_idle_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -643,8 +664,7 @@ namespace map {
 					auto count = static_mesh_move_animation_count[i];
 					auto& matrices = final_move_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -655,8 +675,7 @@ namespace map {
 					auto count = static_mesh_attack_animation_count[i];
 					auto& matrices = final_attack_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						auto m = glm::mat4x4(1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, m);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -921,8 +940,7 @@ namespace map {
 					model_render_list.emplace_back(unit_model, glm::vec2(p1.x - dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::idle, 0);
 					model_render_list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi / 2.f, emfx::animation_type::idle, 0);
 				} else {
-					emfx::animation_type at = is_move ? emfx::animation_type::move : emfx::animation_type::idle;
-					model_render_list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, at, 0);
+					model_render_list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), -theta, emfx::animation_type::idle, 0);
 					n = n ? n : state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
 					auto flag_tex_id = ogl::get_flag_handle(state, state.world.nation_get_identity_from_identity_holder(n), culture::flag_type(state.world.government_type_get_flag(state.world.nation_get_government_type(n))));
 					model_render_list.emplace_back(model_flag_floating, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle, flag_tex_id);
