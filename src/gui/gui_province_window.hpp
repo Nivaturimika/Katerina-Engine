@@ -59,49 +59,15 @@ namespace ui {
 	};
 
 	class province_liferating : public progress_bar {
-		public:
-
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto prov_id = retrieve<dcon::province_id>(state, parent);
 			progress = state.world.province_get_life_rating(prov_id) / 100.f;
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			dcon::province_id prov_id = retrieve<dcon::province_id>(state, parent);
-
-			text::add_line(state, contents, "provinceview_liferating", text::variable_type::value, int64_t(state.world.province_get_life_rating(prov_id)));
-			text::add_line_break_to_layout(state, contents);
-			text::add_line(state, contents, "col_liferate_techs");
-			for(auto i : state.world.in_invention) {
-				auto mod = i.get_modifier();
-				for(uint32_t j = 0; j < sys::national_modifier_definition::modifier_definition_size; j++) {
-					if(mod.get_national_values().offsets[j] == sys::national_mod_offsets::colonial_life_rating) {
-						auto box = text::open_layout_box(contents);
-						text::add_to_layout_box(state, contents, box, i.get_name(), state.world.nation_get_active_inventions(state.local_player_nation, i) ? text::text_color::green : text::text_color::red);
-
-						dcon::technology_id containing_tech;
-						auto lim_trigger_k = i.get_limit();
-						trigger::recurse_over_triggers(state.trigger_data.data() + state.trigger_data_indices[lim_trigger_k.index() + 1],
-						[&](uint16_t* tval) {
-							if((tval[0] & trigger::code_mask) == trigger::technology)
-								containing_tech = trigger::payload(tval[1]).tech_id;
-						});
-
-						if(containing_tech) {
-						text::add_to_layout_box(state, contents, box, std::string_view{ " (" });
-							text::add_to_layout_box(state, contents, box, state.world.technology_get_name(containing_tech), state.world.nation_get_active_technologies(state.local_player_nation, containing_tech) ? text::text_color::green : text::text_color::red);
-						text::add_to_layout_box(state, contents, box, std::string_view{ ")" });
-						}
-						text::close_layout_box(contents, box);
-						break;
-					}
-				}
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class province_population : public province_population_text {
@@ -144,30 +110,16 @@ namespace ui {
 	};
 
 	class province_pop_button : public button_element_base {
-		public:
-		void button_action(sys::state& state) noexcept override {
-			dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
-			state.open_population();
-			if(state.ui_state.population_subwindow) {
-				Cyto::Any fl_payload = pop_list_filter(province_id);
-				state.ui_state.population_subwindow->impl_set(state, fl_payload);
-			}
-		}
+	public:
+		void button_action(sys::state& state) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
-			text::substitution_map sub_map;
-			text::add_to_substitution_map(sub_map, text::variable_type::loc, state.world.province_get_name(province_id));
-			auto box = text::open_layout_box(contents, 0);
-			text::localised_format_box(state, contents, box, std::string_view("pw_open_popscreen"), sub_map);
-			text::close_layout_box(contents, box);
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class province_terrain_image : public opaque_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
 			auto fat_id = dcon::fatten(state.world, province_id);
@@ -177,42 +129,10 @@ namespace ui {
 				base_data.data.image.gfx_object = terrain_image;
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t t, text::columnar_layout& contents) noexcept override {
-			dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
-			auto fat_id = dcon::fatten(state.world, province_id);
-			//terrain
-			if(auto name = fat_id.get_terrain().get_name(); name) {
-				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, name), text::text_color::yellow);
-				text::close_layout_box(contents, box);
-			}
-			if(auto mod_id = fat_id.get_terrain().id; mod_id) {
-				modifier_description(state, contents, mod_id);
-			}
-			//climate
-			if(auto name = fat_id.get_climate().get_name(); name) {
-				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, name), text::text_color::yellow);
-				text::close_layout_box(contents, box);
-			}
-			if(auto mod_id = fat_id.get_climate().id; mod_id) {
-				modifier_description(state, contents, mod_id);
-			}
-			//continent
-			if(auto name = fat_id.get_continent().get_name(); name) {
-				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, name), text::text_color::yellow);
-				text::close_layout_box(contents, box);
-			}
-			if(auto mod_id = fat_id.get_continent().id; mod_id) {
-				modifier_description(state, contents, mod_id);
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t t, text::columnar_layout& contents) noexcept override;
 	};
 
 	class province_flashpoint_indicator : public image_element_base {
@@ -232,11 +152,12 @@ namespace ui {
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t t, text::columnar_layout& contents) noexcept override {
 			dcon::province_id prov = retrieve<dcon::province_id>(state, parent);
-			if(!state.world.state_instance_get_flashpoint_tag(state.world.province_get_state_membership(prov)))
-			return;
+			if(!state.world.state_instance_get_flashpoint_tag(state.world.province_get_state_membership(prov))) {
+				return;
+			}
 
-		text::substitution_map sub_map{};
-		text::add_to_substitution_map(sub_map, text::variable_type::value, text::fp_two_places{ state.world.state_instance_get_flashpoint_tension(state.world.province_get_state_membership(prov)) });
+			text::substitution_map sub_map{};
+			text::add_to_substitution_map(sub_map, text::variable_type::value, text::fp_two_places{ state.world.state_instance_get_flashpoint_tension(state.world.province_get_state_membership(prov)) });
 			auto box = text::open_layout_box(contents, 0);
 			text::localised_format_box(state, contents, box, std::string_view("flashpoint_tension"), sub_map);
 			text::close_layout_box(contents, box);
@@ -251,7 +172,7 @@ namespace ui {
 				auto fat_id = dcon::fatten(state.world, province_id);
 				return state.world.nation_get_identity_from_identity_holder(fat_id.get_province_control_as_province().get_nation().id);
 			}
-		return dcon::national_identity_id{};
+			return dcon::national_identity_id{};
 		}
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
@@ -259,8 +180,9 @@ namespace ui {
 			auto prov_fat = dcon::fatten(state.world, province_id);
 			auto controller = prov_fat.get_province_control_as_province().get_nation();
 			auto rebel_faction = prov_fat.get_province_rebel_control_as_province().get_rebel_faction();
-			if(!controller && !rebel_faction)
-			return;
+			if(!controller && !rebel_faction) {
+				return;
+			}
 			flag_button::render(state, x, y);
 		}
 
@@ -273,8 +195,9 @@ namespace ui {
 			auto prov_fat = dcon::fatten(state.world, province_id);
 			auto controller = prov_fat.get_province_control_as_province().get_nation();
 			auto rebel_faction = prov_fat.get_province_rebel_control_as_province().get_rebel_faction();
-			if(!controller && !rebel_faction)
+			if(!controller && !rebel_faction) {
 				return;
+			}
 			auto box = text::open_layout_box(contents, 0);
 			text::localised_format_box(state, contents, box, std::string_view("pv_controller"));
 			text::add_space_to_layout_box(state, contents, box);
@@ -291,8 +214,9 @@ namespace ui {
 	public:
 		int32_t get_icon_frame(sys::state& state) noexcept {
 			auto content = retrieve<dcon::state_instance_id>(state, parent);
-			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation)
+			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation) {
 				return state.world.national_focus_get_icon(state.national_definitions.flashpoint_focus) - 1;
+			}
 			return bool(state.world.state_instance_get_owner_focus(content).id)
 				? state.world.state_instance_get_owner_focus(content).get_icon() - 1
 				: 0;
@@ -304,8 +228,9 @@ namespace ui {
 			for(auto nfid : state.world.in_national_focus) {
 				disabled = nations::can_overwrite_national_focus(state, state.local_player_nation, content, nfid) ? false : disabled;
 			}
-			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation)
+			if(state.world.state_instance_get_nation_from_flashpoint_focus(content) == state.local_player_nation) {
 				disabled = false;
+			}
 			frame = get_icon_frame(state);
 		}
 
@@ -317,87 +242,27 @@ namespace ui {
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto box = text::open_layout_box(contents, 0);
-
-			auto sid = retrieve<dcon::state_instance_id>(state, parent);
-			auto fat_si = dcon::fatten(state.world, sid);
-			text::add_to_layout_box(state, contents, box, sid);
-			text::add_line_break_to_layout_box(state, contents, box);
-			auto content = state.world.state_instance_get_owner_focus(sid);
-			if(bool(content)) {
-				auto fat_nf = dcon::fatten(state.world, content);
-				text::add_to_layout_box(state, contents, box, state.world.national_focus_get_name(content), text::substitution_map{});
-				text::add_line_break_to_layout_box(state, contents, box);
-				auto color = text::text_color::white;
-				if(fat_nf.get_promotion_type()) {
-					//Is the NF not optimal? Recolor it
-					if(fat_nf.get_promotion_type() == state.culture_definitions.clergy) {
-						if((fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total)) > state.defines.max_clergy_for_literacy) {
-							color = text::text_color::red;
-						}
-					} else if(fat_nf.get_promotion_type() == state.culture_definitions.bureaucrat) {
-						if(province::state_admin_efficiency(state, fat_si.id) > state.defines.max_bureaucracy_percentage) {
-							color = text::text_color::red;
-						}
-					}
-					auto full_str = text::format_percentage(fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total));
-					text::add_to_layout_box(state, contents, box, std::string_view(full_str), color);
-				}
-			}
-			text::close_layout_box(contents, box);
-			if(auto mid = state.world.national_focus_get_modifier(content);  mid) {
-				modifier_description(state, contents, mid, 15);
-			}
-			text::add_line(state, contents, "alice_nf_controls");
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept;
 	};
 
 
 	class province_modifier_icon : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			sys::dated_modifier mod = retrieve< sys::dated_modifier>(state, parent);
 			if(mod.mod_id) {
 				frame = state.world.modifier_get_icon(mod.mod_id) - 1;
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			sys::dated_modifier mod = retrieve< sys::dated_modifier>(state, parent);
-			if(mod.mod_id) {
-				auto p = retrieve<dcon::province_id>(state, parent);
-				auto n = state.world.province_get_nation_from_province_ownership(p);
-				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, state.world.modifier_get_name(mod.mod_id), text::text_color::yellow);
-				text::add_line_break_to_layout_box(state, contents, box);
-				if(auto desc = state.world.modifier_get_desc(mod.mod_id); state.key_is_localized(desc)) {
-				text::substitution_map sub{};
-					text::add_to_substitution_map(sub, text::variable_type::country, n);
-					text::add_to_substitution_map(sub, text::variable_type::country_adj, text::get_adjective(state, n));
-					text::add_to_substitution_map(sub, text::variable_type::capital, state.world.nation_get_capital(n));
-					text::add_to_substitution_map(sub, text::variable_type::continentname, state.world.modifier_get_name(state.world.province_get_continent(state.world.nation_get_capital(n))));
-					text::add_to_substitution_map(sub, text::variable_type::provincename, p);
-					text::add_to_layout_box(state, contents, box, desc, sub);
-				}
-				text::close_layout_box(contents, box);
-				modifier_description(state, contents, mod.mod_id, 15);
-			}
-			if(mod.expiration) {
-				text::add_line(state, contents, "expires_on", text::variable_type::date, mod.expiration);
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class province_modifier_win : public window_element_base {
-		public:
+	public:
 		sys::dated_modifier mod;
-
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "modifier") {
 				return make_element_by_type<province_modifier_icon>(state, id);
@@ -405,7 +270,6 @@ namespace ui {
 				return nullptr;
 			}
 		}
-
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 			if(payload.holds_type<sys::dated_modifier>()) {
 				payload.emplace<sys::dated_modifier>(mod);
@@ -413,11 +277,10 @@ namespace ui {
 			}
 			return message_result::unseen;
 		}
-
 	};
 
 	class province_modifiers : public overlapping_listbox_element_base<province_modifier_win, sys::dated_modifier> {
-		public:
+	public:
 		std::string_view get_row_element_name() override {
 			return "prov_state_modifier";
 		}
@@ -426,7 +289,6 @@ namespace ui {
 		}
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-
 			auto prov = retrieve<dcon::province_id>(state, parent);
 			if(prov) {
 				for(auto mods : state.world.province_get_current_modifiers(prov)) {
@@ -438,7 +300,7 @@ namespace ui {
 	};
 
 	class province_move_capital_button : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
 			disabled = !command::can_move_capital(state, state.local_player_nation, p);

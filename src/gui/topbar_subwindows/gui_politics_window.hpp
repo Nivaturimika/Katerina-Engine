@@ -72,7 +72,7 @@ enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_su
 			text::add_line_break_to_layout_box(state, contents, box);
 			text::localised_format_box(state, contents, box, "plurality_change");
 			text::add_space_to_layout_box(state, contents, box);
-		text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
+			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
 			text::add_to_layout_box(state, contents, box,
 				text::fp_two_places{state.world.nation_get_demographics(state.local_player_nation, demographics::consciousness) * 0.0222f / std::max(state.world.nation_get_demographics(state.local_player_nation, demographics::total), 1.0f)},
 				text::text_color::green);

@@ -6,8 +6,6 @@
 #include "gui_element_types.hpp"
 
 namespace ui {
-
-
 	class commodity_price_text : public simple_text_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
@@ -323,11 +321,11 @@ namespace ui {
 		}
 	};
 	class trade_common_market_listbox : public listbox_element_base<trade_common_market_entry, dcon::commodity_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "common_market_entry";
 		}
-		public:
+	public:
 		trade_sort sort = trade_sort::commodity;
 		bool sort_ascend = false;
 		void on_create(sys::state& state) noexcept override {
@@ -398,11 +396,11 @@ namespace ui {
 	};
 
 	class trade_government_needs_listbox : public listbox_element_base<trade_goods_needs_entry<commodity_player_government_needs_text>, dcon::commodity_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "goods_needs_entry";
 		}
-		public:
+	public:
 		trade_sort sort = trade_sort::commodity;
 		bool sort_ascend = false;
 		void on_create(sys::state& state) noexcept override {
@@ -443,11 +441,11 @@ namespace ui {
 	};
 
 	class trade_factory_needs_listbox : public listbox_element_base<trade_goods_needs_entry<commodity_player_factory_needs_text>, dcon::commodity_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "goods_needs_entry";
 		}
-		public:
+	public:
 		trade_sort sort = trade_sort::commodity;
 		bool sort_ascend = false;
 		void on_create(sys::state& state) noexcept override {
@@ -533,10 +531,10 @@ namespace ui {
 	};
 
 	struct trade_details_select_commodity {
-	dcon::commodity_id commodity_id{};
+		dcon::commodity_id commodity_id{};
 	};
 	struct trade_details_open_window {
-	dcon::commodity_id commodity_id{};
+		dcon::commodity_id commodity_id{};
 	};
 
 	class trade_commodity_entry_button : public tinted_button_element_base {
