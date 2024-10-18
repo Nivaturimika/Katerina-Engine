@@ -1,6 +1,7 @@
 #include "simple_fs.hpp"
 #include "simple_fs_types_win.hpp"
 #include "text.hpp"
+#include "reports.hpp"
 
 #ifndef UNICODE
 #define UNICODE
@@ -541,7 +542,7 @@ namespace simple_fs {
 
 	void write_file(directory const& dir, native_string_view file_name, char const* file_data, uint32_t file_size) {
 		if(dir.parent_system) {
-			reports::write_debug("Undefined parent system");
+			reports::write_debug("Undefined parent system\n");
 			std::abort();
 		}
 

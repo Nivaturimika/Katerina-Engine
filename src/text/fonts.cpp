@@ -8,6 +8,7 @@
 #include "parsers.hpp"
 #include "simple_fs.hpp"
 #include "system_state.hpp"
+#include "reports.hpp"
 #include "unicode/ubrk.h"
 #include "unicode/utypes.h"
 #include "unicode/ubidi.h"
@@ -325,9 +326,7 @@ namespace text {
 					font_array.back().file_name = fname;
 					resolved = &(font_array.back());
 				} else {
-					#ifdef _WIN64
-					reports::write_debug("locale body font not found");
-					#endif
+					reports::write_debug("locale body font not found\n");
 				}
 			}
 
@@ -360,9 +359,7 @@ namespace text {
 					font_array.back().file_name = fname;
 					resolved = &(font_array.back());
 				} else {
-					#ifdef _WIN64
-					reports::write_debug("locale header font not found");
-					#endif
+					reports::write_debug("locale header font not found\n");
 				}
 			}
 
@@ -395,9 +392,7 @@ namespace text {
 					font_array.back().file_name = fname;
 					resolved = &(font_array.back());
 				} else {
-					#ifdef _WIN64
-					reports::write_debug("locale map font not found");
-					#endif
+					reports::write_debug("locale map font not found\n");
 				}
 			}
 
@@ -415,16 +410,12 @@ namespace text {
 		UErrorCode errorCode = U_ZERO_ERROR;
 		UBreakIterator* lb_it = ubrk_open(UBreakIteratorType::UBRK_LINE, lang_str.c_str(), nullptr, 0, &errorCode);
 		if(!lb_it || !U_SUCCESS(errorCode)) {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "cant create ubrk iterator", MB_OK);
-			#endif
+			reports::write_debug("Can't create ubrk iterator\n");
 			std::abort(); // couldn't create iterator
 		}
 		auto rule_size = ubrk_getBinaryRules(lb_it, nullptr, 0, &errorCode);
 		if(rule_size == 0 || !U_SUCCESS(errorCode)) {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "cant create ubrk get_rules", MB_OK);
-			#endif
+			reports::write_debug("Can't create ubrk get_rules\n");
 			std::abort(); // couldn't get_rules
 		}
 	
@@ -628,9 +619,7 @@ namespace text {
 
 		para = ubidi_open();
 		if(!para) {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "no ubidi parameter", MB_OK);
-			#endif
+			reports::write_debug("Can't get ubidi parameter\n");
 			std::abort();
 		}
 
@@ -676,15 +665,11 @@ namespace text {
 					}
 				}
 			} else {
-				#ifdef _WIN64
-				MessageBoxA(NULL, "Fatal assert", "failure to get number of runs", MB_OK);
-				#endif
+				reports::write_debug("Can't get number of ubidi rows\n");
 				std::abort();
 			}
 		} else {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "failure to add text", MB_OK);
-			#endif
+			reports::write_debug("Can't add ubidi text\n");
 			std::abort();
 		}
 
@@ -859,9 +844,7 @@ namespace text {
 			UBiDi* para = ubidi_open();
 			//para = ubidi_openSized(int32_t(temp_text.size()), 64, pErrorCode);
 			if(!para) {
-				#ifdef _WIN64
-				reports::write_debug("failure to get para");
-				#endif
+				reports::write_debug("Failure to get parameter\n");
 				std::abort();
 			}
 
@@ -908,15 +891,11 @@ namespace text {
 						}
 					}
 				} else {
-					#ifdef _WIN64
-					MessageBoxA(NULL, "Fatal assert", "failure to get number of runs", MB_OK);
-					#endif
+					reports::write_debug("Can't get number of ubidi rows\n");
 					std::abort();
 				}
 			} else {
-				#ifdef _WIN64
-				MessageBoxA(NULL, "Fatal assert", "failure to add text", MB_OK);
-				#endif
+				reports::write_debug("Can't add ubidi text\n");
 				std::abort();
 			}
 

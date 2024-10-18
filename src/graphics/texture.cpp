@@ -2,6 +2,7 @@
 #include "system_state.hpp"
 #include "simple_fs.hpp"
 #include "glad.h"
+#include "reports.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION 1
 #define STBI_NO_STDIO 1
@@ -137,7 +138,7 @@ set to one or more of the following values.	*/
 		bool is_alpha = (header->sPixelFormat.dwFlags & (DDPF_ALPHAPIXELS)) != 0;
 		bool uncompressed = (header->sPixelFormat.dwFlags & DDPF_FOURCC) == 0;
 		if((header->sPixelFormat.dwFlags & (DDPF_FOURCC | DDPF_RGB | DDPF_PALETTEINDEXED8)) == 0) {
-			reports::write_debug(("Invalid DDS pixel format flags" + std::to_string(header->sPixelFormat.dwFlags) + "\n").c_str());
+			reports::write_debug("Invalid DDS pixel format flags" + std::to_string(header->sPixelFormat.dwFlags) + "\n");
 			return 0;
 		}
 		/*	make sure it is a type we can upload	*/
@@ -402,7 +403,7 @@ set to one or more of the following values.	*/
 				}
 				default:
 				{
-					reports::write_debug(("Experimental " + std::to_string(block_size) + " DDS block size used\n").c_str());
+					reports::write_debug("Experimental " + std::to_string(block_size) + " DDS block size used\n");
 					dds_dest_data = std::unique_ptr<uint8_t[]>(new uint8_t[(dds_full_size / block_size) * 4]);
 					break;
 				}
@@ -485,7 +486,7 @@ set to one or more of the following values.	*/
 			}
 			if(auto f = open_file(root, dds_name); f) {
 				auto content = simple_fs::view_contents(*f);
-				reports::write_debug(("Loading DDS texture: " + text::native_to_utf8(dds_name) + "\n").c_str());
+				reports::write_debug("Loading DDS texture: " + text::native_to_utf8(dds_name) + "\n");
 				uint32_t w = 0;
 				uint32_t h = 0;
 				asset_texture.texture_handle = SOIL_direct_load_DDS_from_memory(reinterpret_cast<uint8_t const*>(content.data), content.file_size, w, h, 0);
@@ -532,7 +533,7 @@ set to one or more of the following values.	*/
 		}
 		if(f) {
 			auto content = simple_fs::view_contents(*f);
-			reports::write_debug(("Loading texture: " + text::native_to_utf8(simple_fs::get_full_name(*f)) + "\n").c_str());
+			reports::write_debug("Loading texture: " + text::native_to_utf8(simple_fs::get_full_name(*f)) + "\n");
 			int32_t file_channels = 4;
 			asset_texture.data = stbi_load_from_memory(reinterpret_cast<uint8_t const*>(content.data), int32_t(content.file_size), &asset_texture.size_x, &asset_texture.size_y, &file_channels, 4);
 			asset_texture.channels = file_channels;

@@ -1,5 +1,6 @@
 #include "xac.hpp"
 #include "parsers.hpp"
+#include "reports.hpp"
 #include <cassert>
 
 #include <glm/common.hpp>
@@ -626,9 +627,9 @@ namespace emfx {
 				obj.influences.push_back(bone_influence);
 			}
 #ifdef XAC_DEBUG
-			reports::write_debug(("Skin chunk for Id#" + std::to_string(sh.node_id) + "[" + context.nodes[sh.node_id].name + "]"
+			reports::write_debug("Skin chunk for Id#" + std::to_string(sh.node_id) + "[" + context.nodes[sh.node_id].name + "]"
 				+ ",skinningInfluences=" + std::to_string(sh.num_influences)
-				+ ",skinInfluenceStarts=" + std::to_string(obj.influence_starts.size()) + "\n").c_str());
+				+ ",skinInfluenceStarts=" + std::to_string(obj.influence_starts.size()) + "\n");
 #endif
 			for(uint32_t i = 0; i < uint32_t(obj.influence_starts.size()); i++) {
 				auto const range = parse_xac_any_binary<xac_skinning_v3_influence_range>(&ptr, end, err);
@@ -731,12 +732,10 @@ namespace emfx {
 		}
 #endif
 		if(err.accumulated_errors.size() > 0) {
-			reports::write_debug("XAC Errors:\n");
-			reports::write_debug(err.accumulated_errors.c_str());
+			reports::write_debug("XAC Errors:\n" + err.accumulated_errors);
 		}
 		if(err.accumulated_warnings.size() > 0) {
-			reports::write_debug("XAC Warns:\n");
-			reports::write_debug(err.accumulated_warnings.c_str());
+			reports::write_debug("XAC Warns:\n" + err.accumulated_warnings);
 		}
 	}
 
@@ -842,12 +841,12 @@ namespace emfx {
 			anim.max_error = parse_xac_any_binary<float>(&ptr, end, err);
 			ptr = parse_xac_cstring_nodiscard(anim.node, ptr, end, err);
 			//
-			reports::write_debug(("xsm.Bone[" + anim.node + "] "
+			reports::write_debug("xsm.Bone[" + anim.node + "] "
 				+ "nPos=" + std::to_string(num_pos_keys)
 				+ ",nRot=" + std::to_string(num_rot_keys)
 				+ ",nScale=" + std::to_string(num_scale_keys)
 				+ ",nScaleRot=" + std::to_string(num_scale_rot_keys)
-				+ ",maxErr=" + std::to_string(anim.max_error) + "\n").c_str());
+				+ ",maxErr=" + std::to_string(anim.max_error) + "\n");
 			//
 			for(uint32_t j = 0; j < num_pos_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
@@ -881,12 +880,12 @@ namespace emfx {
 			goto fail_exit;
 		}
 #ifdef XAC_DEBUG
-		reports::write_debug(("XsmFile-> version " + std::to_string(h.major_version) + "." + std::to_string(h.minor_version) + " totalSize=" + std::to_string(uint32_t(end - start)) + "\n").c_str());
+		reports::write_debug("XsmFile-> version " + std::to_string(h.major_version) + "." + std::to_string(h.minor_version) + " totalSize=" + std::to_string(uint32_t(end - start)) + "\n");
 #endif
 		while(ptr < end) {
 			auto const ch = parse_xac_any_binary<xsm_chunk_header>(&ptr, end, err);
 #ifdef XAC_DEBUG
-			reports::write_debug(("chunk >>> id=" + std::to_string(ch.ident) + ",version=" + std::to_string(ch.version) + ",len=" + std::to_string(ch.len) + "\n").c_str());
+			reports::write_debug("chunk >>> id=" + std::to_string(ch.ident) + ",version=" + std::to_string(ch.version) + ",len=" + std::to_string(ch.len) + "\n");
 #endif
 			context.ignore_length = false; // Reset
 			const char* expected = ptr + ch.len;
@@ -913,7 +912,7 @@ namespace emfx {
 			}
 			default:
 #ifdef XAC_DEBUG
-				reports::write_debug(("CT,Unknown-(" + std::to_string(int16_t(ch.ident)) + "\n").c_str());
+				reports::write_debug("CT,Unknown-(" + std::to_string(int16_t(ch.ident)) + "\n");
 #endif
 				err.accumulated_warnings += "Unknown chunk block type " + std::to_string(int32_t(ch.ident)) + " (size " + std::to_string(ch.len) + " @ offset " + std::to_string(uint32_t(ptr - start)) + ") on " + err.file_name + "\n";
 				ptr += ch.len;
@@ -926,12 +925,10 @@ namespace emfx {
 		}
 	fail_exit:
 		if(err.accumulated_errors.size() > 0) {
-			reports::write_debug("XSM Errors:\n");
-			reports::write_debug(err.accumulated_errors.c_str());
+			reports::write_debug("XSM Errors:\n" + err.accumulated_errors);
 		}
 		if(err.accumulated_warnings.size() > 0) {
-			reports::write_debug("XSM Warns:\n");
-			reports::write_debug(err.accumulated_warnings.c_str());
+			reports::write_debug("XSM Warns:\n" + err.accumulated_warnings);
 		}
 	}
 

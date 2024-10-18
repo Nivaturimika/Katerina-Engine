@@ -395,31 +395,30 @@ namespace diplomatic_message {
 
 	bool ai_will_accept(sys::state& state, message const& m) {
 		if(state.world.nation_get_is_player_controlled(m.from) && state.cheat_data.always_accept_deals)
-		return true;
+			return true;
 
 		switch(m.type) {
-			case type::none:
-			std::abort();
-			break;
-			case type::access_request:
+		case type::none: //none
+			return false;
+		case type::access_request:
 			return ai::ai_will_grant_access(state, m.to, m.from);
-			case type::alliance_request:
+		case type::alliance_request:
 			return ai::ai_will_accept_alliance(state, m.to, m.from);
-			case type::call_ally_request:
+		case type::call_ally_request:
 			if(!command::can_call_to_arms(state, m.from, m.to, m.data.war, true))
 				return false;
 			return ai::will_join_war(state, m.to, m.data.war, military::get_role(state, m.data.war, m.from) == military::war_role::attacker);
-			case type::be_crisis_primary_defender:
+		case type::be_crisis_primary_defender:
 			return ai::will_be_crisis_primary_defender(state, m.to);
-			case type::be_crisis_primary_attacker:
+		case type::be_crisis_primary_attacker:
 			return ai::will_be_crisis_primary_attacker(state, m.to);
-			case type::peace_offer:
+		case type::peace_offer:
 			return ai::will_accept_peace_offer(state, m.to, m.from, m.data.peace);
-			case type::take_crisis_side_offer:
+		case type::take_crisis_side_offer:
 			return ai::will_join_crisis_with_offer(state, m.to, m.data.crisis_offer);
-			case type::crisis_peace_offer:
+		case type::crisis_peace_offer:
 			return ai::will_accept_crisis_peace_offer(state, m.to, m.data.peace);
-			case type::state_transfer:
+		case type::state_transfer:
 			return false;
 		}
 		return false;

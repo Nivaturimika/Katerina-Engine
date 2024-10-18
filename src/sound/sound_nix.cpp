@@ -1,5 +1,6 @@
 #include "sound.hpp"
 #include "system_state.hpp"
+#include "reports.hpp"
 
 #define MINIAUDIO_IMPLEMENTATION 1
 #define MA_NO_FLAC 1
@@ -82,7 +83,7 @@ namespace sound {
 	}
 
 	void initialize_sound_system(sys::state& state) {
-		reports::write_debug("Initializing sound system");
+		reports::write_debug("Initializing sound system\n");
 
 		state.sound_ptr = std::make_unique<sound_impl>();
 

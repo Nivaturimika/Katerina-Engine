@@ -1269,10 +1269,8 @@ namespace text {
 		UBreakIterator* lb_it = ubrk_openBinaryRules(state.font_collection.compiled_ubrk_rules.data(), int32_t(state.font_collection.compiled_ubrk_rules.size()), (UChar const*)temp_text.data(), int32_t(temp_text.size()), &errorCode);
 
 		if(!lb_it || !U_SUCCESS(errorCode)) {
-			#ifdef _WIN64
-			MessageBoxA(NULL, "Fatal assert", "ubidi iterator cant be made", MB_OK);
-			#endif
-			std::abort(); // couldn't create iterator
+			reports::write_debug("Can't create ubidi iterator\n");
+			std::abort();
 		}
 
 		ubrk_first(lb_it);

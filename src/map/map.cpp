@@ -23,6 +23,7 @@
 #include "province_templates.hpp"
 #include "gui_element_types.hpp"
 #include "pdqsort.h"
+#include "reports.hpp"
 
 #include "xac.hpp"
 
@@ -2498,10 +2499,10 @@ namespace map {
 			auto content = simple_fs::view_contents(*file);
 			uint32_t size_x, size_y;
 			uint8_t const* data = (uint8_t const*)(content.data);
-			reports::write_debug(("Loading [map] DDS file " + text::native_to_utf8(file_name) + "\n").c_str());
+			reports::write_debug("Loading [map] DDS file " + text::native_to_utf8(file_name) + "\n");
 			return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
 		}
-		reports::write_debug(("Can't load [map] DDS file " + text::native_to_utf8(file_name) + "\n").c_str());
+		reports::write_debug("Can't load [map] DDS file " + text::native_to_utf8(file_name) + "\n");
 		return 0;
 	}
 
@@ -2592,7 +2593,7 @@ namespace map {
 				auto filename = std::string(state.to_string_view(emfx_obj.actorfile));
 				if(map_of_models.find(filename) == map_of_models.end()) {
 					if(auto f = simple_fs::open_file(root, text::win1250_to_native(filename)); f) {
-						reports::write_debug(("Loading XAC: " + filename + "\n").c_str());
+						reports::write_debug("Loading XAC: " + filename + "\n");
 						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*f)));
 						auto contents = simple_fs::view_contents(*f);
 						emfx::xac_context context{};
@@ -2606,7 +2607,7 @@ namespace map {
 				auto filename = std::string(state.to_string_view(emfx_obj.idle));
 				if(map_of_animations.find(filename) == map_of_animations.end()) {
 					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
-						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						reports::write_debug("Loading XSM: " + filename + "\n");
 						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
 						auto contents = simple_fs::view_contents(*cf);
 						emfx::xsm_context context{};
@@ -2620,7 +2621,7 @@ namespace map {
 				auto filename = std::string(state.to_string_view(emfx_obj.move));
 				if(map_of_animations.find(filename) == map_of_animations.end()) {
 					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
-						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						reports::write_debug("Loading XSM: " + filename + "\n");
 						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
 						auto contents = simple_fs::view_contents(*cf);
 						emfx::xsm_context context{};
@@ -2634,7 +2635,7 @@ namespace map {
 				auto filename = std::string(state.to_string_view(emfx_obj.attack));
 				if(map_of_animations.find(filename) == map_of_animations.end()) {
 					if(auto cf = simple_fs::open_file(root, text::win1250_to_native(filename)); cf) {
-						reports::write_debug(("Loading XSM: " + filename + "\n").c_str());
+						reports::write_debug("Loading XSM: " + filename + "\n");
 						parsers::error_handler err(text::native_to_utf8(simple_fs::get_full_name(*cf)));
 						auto contents = simple_fs::view_contents(*cf);
 						emfx::xsm_context context{};
@@ -2740,7 +2741,7 @@ namespace map {
 					t = culture::graphical_culture_type::austria_hungary;
 					type_pos = 14 + 2;
 				}
-				reports::write_debug(("Loading [" + name + "] as GC model\n").c_str());
+				reports::write_debug("Loading [" + name + "] as GC model\n");
 				if(type_pos != std::string::npos) {
 					auto type_name = parsers::lowercase_str(std::string_view(name.data() + type_pos, name.data() + name.length()));
 					if(std::isdigit(type_name[type_name.length() - 1])) {
@@ -2758,11 +2759,11 @@ namespace map {
 						} else if(type_name == sprite) {
 							if(!state.map_state.map_data.model_gc_unit[0][utid.index()] || t == culture::graphical_culture_type::generic) {
 								state.map_state.map_data.model_gc_unit[0][utid.index()] = edef;
-								reports::write_debug(("Applying GC#<generic> unit -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n").c_str());
+								reports::write_debug("Applying GC#<generic> unit -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n");
 							}
 							if(!state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()]) {
 								state.map_state.map_data.model_gc_unit[uint8_t(t)][utid.index()] = edef;
-								reports::write_debug(("Applying GC#" + std::to_string(uint32_t(t)) + " -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n").c_str());
+								reports::write_debug("Applying GC#" + std::to_string(uint32_t(t)) + " -> " + std::string(state.to_string_view(udef.name)) + "::" + type_name + "(" + name + ")\n");
 							}
 							break;
 						}
@@ -2890,7 +2891,7 @@ namespace map {
 			if(!state.map_state.map_data.model_gc_unit[0][j]) {
 				auto utid = dcon::unit_type_id(dcon::unit_type_id::value_base_t(j));
 				auto const& udef = state.military_definitions.unit_base_definitions[utid];
-				reports::write_debug(("Unit model missing for: " + std::to_string(j) + "#" + std::string(state.to_string_view(udef.name)) + "\n").c_str());
+				reports::write_debug("Unit model missing for: " + std::to_string(j) + "#" + std::string(state.to_string_view(udef.name)) + "\n");
 			}
 		}
 

@@ -5198,7 +5198,7 @@ namespace command {
 			return;
 		switch(c.type) {
 		case command_type::invalid:
-			std::abort(); // invalid command
+			// invalid command
 			break;
 		case command_type::change_nat_focus:
 			execute_set_national_focus(state, c.source, c.data.nat_focus.target_state, c.data.nat_focus.focus);

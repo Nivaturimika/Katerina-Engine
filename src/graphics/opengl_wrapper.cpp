@@ -4,6 +4,7 @@
 #include "fonts.hpp"
 #include "bmfont.hpp"
 #include "pdqsort.h"
+#include "reports.hpp"
 
 namespace ogl {
 	void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, GLchar const* message, void const*) {
@@ -86,7 +87,7 @@ namespace ogl {
 		full_message += "; ";
 		full_message += message;
 		full_message += "\n";
-		reports::write_debug(full_message.c_str());
+		reports::write_debug(full_message);
 #endif
 	}
 

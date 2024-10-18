@@ -1,9 +1,9 @@
 #include "sound.hpp"
 #include "system_state.hpp"
+#include "reports.hpp"
+
 #include "Dshow.h"
-
 #define WM_GRAPHNOTIFY (WM_APP + 1)
-
 #pragma comment(lib, "Strmiids.lib")
 
 namespace sound {
@@ -291,7 +291,7 @@ namespace sound {
 
 	// called on startup and shutdown -- initialize should also load the list of available music files and load sound effects
 	void initialize_sound_system(sys::state& state) {
-		reports::write_debug("Initializing sound system");
+		reports::write_debug("Initializing sound system\n");
 
 		state.sound_ptr = std::make_unique<sound_impl>();
 		state.sound_ptr->window_handle = state.win_ptr->hwnd;

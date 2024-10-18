@@ -10,6 +10,7 @@
 
 #include "Windows.h"
 //#include "wglew.h"
+#include "reports.hpp"
 
 namespace ogl {
 	void create_opengl_context(sys::state& state) {
@@ -22,7 +23,7 @@ namespace ogl {
 		for(uint32_t i = 0; i < uint32_t(pfd_count); i++) {
 			PIXELFORMATDESCRIPTOR pfd;
 			if(!DescribePixelFormat(window_dc, i + 1, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
-				reports::write_debug(("Unable to describe PixelFormat " + std::to_string(i) + "\n").c_str());
+				reports::write_debug("Unable to describe PixelFormat " + std::to_string(i) + "\n");
 				continue;
 			}
 			if((pfd.dwFlags & PFD_DRAW_TO_WINDOW) != 0
@@ -32,8 +33,8 @@ namespace ogl {
 			&& pfd.cDepthBits >= 8
 			&& pfd.cStencilBits >= 8
 			&& pfd.cColorBits >= 24) {
-				reports::write_debug(("Found usable pixel format #" + std::to_string(i) + "\n").c_str());
-				reports::write_debug(("Stencil=" + std::to_string(pfd.cStencilBits) + ",ColorDepth=" + std::to_string(pfd.cColorBits) + ",AccumBits=" + std::to_string(pfd.cAccumBits) + "\n").c_str());
+				reports::write_debug("Found usable pixel format #" + std::to_string(i) + "\n");
+				reports::write_debug("Stencil=" + std::to_string(pfd.cStencilBits) + ",ColorDepth=" + std::to_string(pfd.cColorBits) + ",AccumBits=" + std::to_string(pfd.cAccumBits) + "\n");
 				auto pixel_format = ChoosePixelFormat(window_dc, &pfd);
 				if(SetPixelFormat(window_dc, pixel_format, &pfd)) {
 					has_pfd_set = true;
@@ -71,11 +72,8 @@ namespace ogl {
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 			glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
 #endif
-			//
-			std::string msg;
-			msg += "GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n";
-			msg += "GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n";
-			reports::write_debug(msg.c_str());
+			reports::write_debug("GL Version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_VERSION))) + "\n");
+			reports::write_debug("GL Shading version: " + std::string(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION))) + "\n");
 
 			// Enable vsync
 			BOOL (*_wglSwapIntervalEXT)(int) = (BOOL(*)(int))(((decltype(&wglGetProcAddress))GetProcAddress(gl_lib, "wglGetProcAddress"))("wglSwapIntervalEXT"));

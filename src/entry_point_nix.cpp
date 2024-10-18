@@ -1,5 +1,6 @@
 #include "serialization.hpp"
 #include "system_state.hpp"
+#include "reports.hpp"
 
 static sys::state game_state; // too big for the stack
 
@@ -8,7 +9,7 @@ int main(int argc, char **argv) {
 	add_root(game_state.common_fs, NATIVE(".")); // will add the working directory as first root -- for the moment this lets us find the shader files
 
 	if(argc >= 2) {
-		reports::write_debug(("Loading scenario: " + text::native_to_utf8(argv[1])).c_str());
+		reports::write_debug("Loading scenario: " + text::native_to_utf8(argv[1]));
 		for(int i = 1; i < argc; ++i) {
 			if(native_string(argv[i]) == NATIVE("-host")) {
 				game_state.network_mode = sys::network_mode_type::host;

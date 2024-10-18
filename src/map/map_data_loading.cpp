@@ -6,16 +6,14 @@
 #include "opengl_wrapper.hpp"
 
 #ifdef _WIN64
-
 #ifndef UNICODE
 #define UNICODE
 #endif
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
-
 #include "Windows.h"
-
 #endif
+#include "reports.hpp"
 
 namespace map {
 	// Used to load the terrain.bmp and the rivers.bmp

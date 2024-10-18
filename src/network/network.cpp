@@ -29,6 +29,7 @@
 #include "network.hpp"
 #include "serialization.hpp"
 #include "gui_error_window.hpp"
+#include "reports.hpp"
 
 #define ZSTD_STATIC_LINKING_ONLY
 #define XXH_NAMESPACE ZSTD_
@@ -206,7 +207,7 @@ namespace network {
 						char str_buffer[INET_ADDRSTRLEN] = { 0 };
 						inet_ntop(AF_INET, &(ipv4->sin_addr), str_buffer, INET_ADDRSTRLEN);
 						std::string ip_str(str_buffer);
-						reports::write_debug(("Local IPv4 address: " + ip_str + "\n").c_str());
+						reports::write_debug("Local IPv4 address: " + ip_str + "\n");
 						found_locals.push_back(local_addresses{ ip_str,  false });
 					} else if(AF_INET6 == family) {
 						// IPv6
@@ -216,7 +217,7 @@ namespace network {
 						std::string ip_str(str_buffer);
 						// Detect and skip non-external addresses
 						if(is_external_ip(ip_str)) {
-							reports::write_debug(("Local IPv6 address: " + ip_str + "\n").c_str());
+							reports::write_debug("Local IPv6 address: " + ip_str + "\n");
 							found_locals.push_back(local_addresses{ ip_str, true });
 						}
 					} else {
@@ -751,11 +752,11 @@ namespace network {
 						}
 						break;
 					}
-					reports::write_debug(("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer_header.type))).c_str());
+					reports::write_debug("host:recv:client_cmd: " + std::to_string(uint32_t(client.recv_buffer_header.type)) + "\n");
 				});
 			}
 			if(r != 0) { // error
-				reports::write_debug(("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
+				reports::write_debug("host:disconnect: in-receive err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
 				network::disconnect_client(state, client, false);
 			}
 		}
@@ -795,7 +796,7 @@ namespace network {
 				/* And then the bulk payload! */
 				client.save_stream_offset = client.total_sent_bytes + client.send_buffer.size();
 				socket_add_to_send_queue(client.send_buffer, buffer, size_t(length));
-				reports::write_debug(("host:send:save: " + std::to_string(uint32_t(length))).c_str());
+				reports::write_debug("host:send:save: " + std::to_string(uint32_t(length)) + "\n");
 			}
 		}
 	}
@@ -849,7 +850,7 @@ namespace network {
 				hshake.save_checksum = state.get_save_checksum();
 				socket_add_to_send_queue(client.early_send_buffer, &hshake, sizeof(hshake));
 			}
-			reports::write_debug(("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index())).c_str());
+			reports::write_debug("host:send:cmd: handshake -> " + std::to_string(client.playing_as.index()) + "\n");
 			return;
 		}
 	}
@@ -876,7 +877,7 @@ namespace network {
 					broadcast_to_clients(state, *c);
 					command::execute_command(state, *c);
 					command_executed = true;
-					reports::write_debug(("host:receive:cmd: " + std::to_string(uint32_t(c->type))).c_str());
+					reports::write_debug("host:receive:cmd: " + std::to_string(uint32_t(c->type)) + "\n");
 				}
 				state.network_state.outgoing_commands.pop();
 				c = state.network_state.outgoing_commands.front();
@@ -893,13 +894,13 @@ namespace network {
 						size_t old_size = client.early_send_buffer.size();
 						int r = socket_send(client.socket_fd, client.early_send_buffer);
 						if(r != 0) { // error
-							reports::write_debug(("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
+							reports::write_debug("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
 							disconnect_client(state, client, false);
 							continue;
 						}
 						client.total_sent_bytes += old_size - client.early_send_buffer.size();
 						if(old_size != client.early_send_buffer.size()) {
-							reports::write_debug(("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes").c_str());
+							reports::write_debug("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
 						}
 					}
 				} else {
@@ -907,13 +908,13 @@ namespace network {
 						size_t old_size = client.send_buffer.size();
 						int r = socket_send(client.socket_fd, client.send_buffer);
 						if(r != 0) { // error
-							reports::write_debug(("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg()).c_str());
+							reports::write_debug("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
 							disconnect_client(state, client, false);
 							continue;
 						}
 						client.total_sent_bytes += old_size - client.send_buffer.size();
 						if(old_size != client.send_buffer.size()) {
-							reports::write_debug(("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes").c_str());
+							reports::write_debug("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
 						}
 					}
 				}
@@ -922,7 +923,7 @@ namespace network {
 			if(state.network_state.handshake) {
 				/* Send our client's handshake */
 				int r = socket_recv(state.network_state.socket_fd, &state.network_state.s_hshake, sizeof(state.network_state.s_hshake), &state.network_state.recv_count, [&]() {
-					reports::write_debug("client:recv:handshake: OK");
+					reports::write_debug("client:recv:handshake: OK\n");
 					if(!state.scenario_checksum.is_equal(state.network_state.s_hshake.scenario_checksum)) {
 						bool found_match = false;
 						// Find a scenario with a matching checksum
@@ -975,7 +976,7 @@ namespace network {
 				}
 			} else if(state.network_state.save_stream) {
 				int r = socket_recv(state.network_state.socket_fd, state.network_state.save_data.data(), state.network_state.save_data.size(), &state.network_state.recv_count, [&]() {
-					reports::write_debug(("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size()))).c_str());
+					reports::write_debug("client:recv:save: len=" + std::to_string(uint32_t(state.network_state.save_data.size())) + "\n");
 					std::vector<dcon::nation_id> players;
 					for(const auto n : state.world.in_nation) {
 						if(state.world.nation_get_is_player_controlled(n)) {
@@ -1049,7 +1050,7 @@ namespace network {
 						}
 						state.network_state.save_data.resize(static_cast<size_t>(save_size));
 					}
-					reports::write_debug(("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer_header.type))).c_str());
+					reports::write_debug("client:recv:cmd: " + std::to_string(uint32_t(state.network_state.recv_buffer_header.type)) + "\n");
 				});
 				if(r != 0) { // error
 					ui::popup_error_window(state, "Network Error", "Network client command receive error: " + get_last_error_msg());
@@ -1062,7 +1063,7 @@ namespace network {
 				// send the outgoing commands to the server and flush the entire queue
 				auto* c = state.network_state.outgoing_commands.front();
 				while(c) {
-					reports::write_debug(("client:send:cmd: " + std::to_string(uint32_t(c->type))).c_str());
+					reports::write_debug("client:send:cmd: " + std::to_string(uint32_t(c->type)) + "\n");
 					if(c->type == command::command_type::save_game) {
 						command::execute_command(state, *c);
 						command_executed = true;

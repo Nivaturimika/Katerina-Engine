@@ -3,6 +3,7 @@
 #include "system_state.hpp"
 #include "gui_graphics.hpp"
 #include "text.hpp"
+#include "reports.hpp"
 
 namespace sys {
 	struct state;
@@ -33,8 +34,7 @@ enum class mouse_probe_type { click, tooltip, scroll };
 				on_hide(state);
 			}
 		}
-
-	element_base() { }
+		element_base() { }
 
 		// impl members: to be overridden only for the very basic container / not a container distinction
 		//       - are responsible for propagating messages and responses
@@ -54,15 +54,14 @@ enum class mouse_probe_type { click, tooltip, scroll };
 		virtual void impl_on_drag_finish(sys::state& state) noexcept {
 			on_drag_finish(state);
 		}
-
 		virtual tooltip_behavior has_tooltip(sys::state& state) noexcept { // used to test whether a tooltip is possible
 			return tooltip_behavior::no_tooltip;
 		}
-	virtual void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept { }
+		virtual void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept { }
 
 		// these message handlers can be overridden by basically anyone
 		//        - generally *should not* be called directly
-		protected:
+	protected:
 		virtual message_result test_mouse(sys::state& state, int32_t x, int32_t y, mouse_probe_type type) noexcept; // asks whether the mouse would be intercepted here, but without taking an action
 		virtual message_result on_lbutton_down(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept;
 		virtual message_result on_lbutton_up(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods, bool under_mouse) noexcept;
@@ -72,37 +71,36 @@ enum class mouse_probe_type { click, tooltip, scroll };
 		virtual message_result on_mouse_move(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept;
 		virtual message_result get(sys::state& state, Cyto::Any& payload) noexcept;
 		virtual message_result set(sys::state& state, Cyto::Any& payload) noexcept;
-	virtual void render(sys::state& state, int32_t x, int32_t y) noexcept { }
+		virtual void render(sys::state& state, int32_t x, int32_t y) noexcept { }
 		virtual void on_update(sys::state& state) noexcept;
-	virtual void on_create(sys::state& state) noexcept { } // called automatically after the element has been created by the system
-		virtual void on_drag(sys::state& state, int32_t oldx, int32_t oldy, int32_t x, int32_t y,
-			sys::key_modifiers mods) noexcept; // as drag events are generated
-	virtual void on_text(sys::state& state, char32_t ch) noexcept { }
-	virtual void on_visible(sys::state& state) noexcept { }
-	virtual void on_hide(sys::state& state) noexcept { }
-	virtual void on_reset_text(sys::state& state) noexcept { }
+		virtual void on_create(sys::state& state) noexcept { } // called automatically after the element has been created by the system
+		virtual void on_drag(sys::state& state, int32_t oldx, int32_t oldy, int32_t x, int32_t y, sys::key_modifiers mods) noexcept; // as drag events are generated
+		virtual void on_text(sys::state& state, char32_t ch) noexcept { }
+		virtual void on_visible(sys::state& state) noexcept { }
+		virtual void on_hide(sys::state& state) noexcept { }
+		virtual void on_reset_text(sys::state& state) noexcept { }
 
 		virtual focus_result on_get_focus(sys::state& state) noexcept { // used to both react to getting the focus and to accept or reject it
 			return focus_result::ignored;
 		}
-	virtual void on_lose_focus(sys::state& state) noexcept { }	// called when the focus is taken away
-	virtual void on_drag_finish(sys::state& state) noexcept { } // when the mouse is released, and drag ends
+		virtual void on_lose_focus(sys::state& state) noexcept { }	// called when the focus is taken away
+		virtual void on_drag_finish(sys::state& state) noexcept { } // when the mouse is released, and drag ends
 		private:
 		uint8_t get_pixel_opacity(sys::state& state, int32_t x, int32_t y, dcon::texture_id tid);
 
-		public:
+	public:
 		// these commands are meaningful only if the element has children
 		virtual std::unique_ptr<element_base> remove_child(element_base* child) noexcept {
-		return std::unique_ptr<element_base>{};
+			return std::unique_ptr<element_base>{};
 		}
-	virtual void move_child_to_front(element_base* child) noexcept { }
-	virtual void move_child_to_back(element_base* child) noexcept { }
+		virtual void move_child_to_front(element_base* child) noexcept { }
+		virtual void move_child_to_back(element_base* child) noexcept { }
 		virtual void add_child_to_front(std::unique_ptr<element_base> child) noexcept {
-			reports::write_debug("Virtual add_child_to_front called");
+			reports::write_debug("Virtual add_child_to_front called\n");
 			std::abort();
 		}
 		virtual void add_child_to_back(std::unique_ptr<element_base> child) noexcept {
-			reports::write_debug("Virtual add_child_to_back called");
+			reports::write_debug("Virtual add_child_to_back called\n");
 			std::abort();
 		}
 		virtual element_base* get_child_by_name(sys::state const& state, std::string_view name) noexcept {

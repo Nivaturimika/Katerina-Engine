@@ -1,5 +1,6 @@
 #include "system_state.hpp"
 #include "serialization.hpp"
+#include "reports.hpp"
 
 #ifndef UNICODE
 #define UNICODE
@@ -172,7 +173,7 @@ native_string find_matching_scenario(native_string_view path) {
 		if(auto of = simple_fs::open_file(f); of) {
 			auto content = view_contents(*of);
 			auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-			reports::write_debug(("Scenario: '" + text::native_to_utf8(desc.mod_path) + "',count=" + std::to_string(desc.count)).c_str());
+			reports::write_debug("Scenario: '" + text::native_to_utf8(desc.mod_path) + "',count=" + std::to_string(desc.count));
 			if(desc.mod_path == path && desc.count >= max_scenario_count) {
 				selected_scenario_file = simple_fs::get_file_name(f);
 				max_scenario_count = desc.count;
@@ -194,7 +195,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 				auto file_time = simple_fs::get_write_time(*of);
 				max_time = std::max(max_time, file_time);
 				if(file_time > scenario_time) {
-					reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
+					reports::write_debug("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n");
 				}
 			}
 		}
@@ -220,7 +221,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 	};
 	for(const auto sc_dir : scan_dirs) {
 		auto dir = simple_fs::open_directory(root, sc_dir);
-		reports::write_debug(("Checksum directory: " + text::native_to_utf8(sc_dir) + "\n").c_str());
+		reports::write_debug("Checksum directory: " + text::native_to_utf8(sc_dir) + "\n");
 		// history/provinces/africa/thing.txt
 		scan_files(dir); //history
 		for(const auto s2 : simple_fs::list_subdirectories(dir)) {
@@ -238,7 +239,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 			auto file_time = simple_fs::get_write_time(*of);
 			max_time = std::max(max_time, file_time);
 			if(file_time > scenario_time) {
-				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
+				reports::write_debug("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n");
 			}
 		}
 	}
@@ -247,7 +248,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 			auto file_time = simple_fs::get_write_time(*of);
 			max_time = std::max(max_time, file_time);
 			if(file_time > scenario_time) {
-				reports::write_debug(("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n").c_str());
+				reports::write_debug("File " + text::native_to_utf8(simple_fs::get_full_name(f)) + " changed " + std::to_string(max_time) + "\n");
 			}
 		}
 	}
@@ -418,8 +419,8 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		//
 		// Normal mode (default)
 		if(!loaded_scenario) {
-			reports::write_debug(("Produced scenario path: " + text::native_to_utf8(path) + "\n").c_str());
-			reports::write_debug(("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n").c_str());
+			reports::write_debug("Produced scenario path: " + text::native_to_utf8(path) + "\n");
+			reports::write_debug("Optional scenario path: " + text::native_to_utf8(opt_fs_path) + "\n");
 			if(scenario_autofind) { //find scenario
 				native_string selected_scenario_file = find_matching_scenario(path);
 				// Automatically force creation of scenario when a file changes
@@ -430,7 +431,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 						reports::write_debug("Forcing re-creation of scenario due to file changes\n");
 						loaded_scenario = false;
 					} else {
-						reports::write_debug(("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n").c_str());
+						reports::write_debug("Using scenario " + text::native_to_utf8(selected_scenario_file) + "\n");
 						if(sys::try_read_scenario_and_save_file(game_state, selected_scenario_file)) {
 							game_state.fill_unsaved_data();
 							loaded_scenario = true;

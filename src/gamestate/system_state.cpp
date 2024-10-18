@@ -36,6 +36,7 @@
 #include "gui_end_window.hpp"
 #include "gui_map_legend.hpp"
 #include "blake2.h"
+#include "reports.hpp"
 
 #include "gui_production_window.hpp"
 #include "gui_diplomacy_window.hpp"
@@ -320,7 +321,7 @@ namespace sys {
 				} else {
 					state.selected_states.erase(std::remove(state.selected_states.begin(), state.selected_states.end(), sdef), state.selected_states.end());
 				}*/
-				reports::write_debug("Invalid state selector state");
+				reports::write_debug("Invalid state selector state\n");
 				std::abort();
 			}
 		}
