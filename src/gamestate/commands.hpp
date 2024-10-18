@@ -100,7 +100,6 @@ namespace command {
 		state_transfer = 91,
 		release_subject = 92,
 		enable_debt = 93,
-		move_capital = 94,
 		toggle_unit_ai_control = 95,
 		toggle_mobilized_is_ai_controlled = 96,
 		pbutton_script = 97,
@@ -847,9 +846,6 @@ bool can_start_land_unit_construction(sys::state& state, dcon::nation_id source,
 	void toggle_auto_assign_single_leader(sys::state& state, dcon::nation_id source, dcon::leader_id l);
 
 	void enable_debt(sys::state& state, dcon::nation_id source);
-
-	void move_capital(sys::state& state, dcon::nation_id source, dcon::province_id p);
-	bool can_move_capital(sys::state& state, dcon::nation_id source, dcon::province_id p);
 
 	void use_province_button(sys::state& state, dcon::nation_id source, dcon::gui_def_id d, dcon::province_id p);
 	bool can_use_province_button(sys::state& state, dcon::nation_id source, dcon::gui_def_id d, dcon::province_id p);

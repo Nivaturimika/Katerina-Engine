@@ -113,7 +113,6 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(invite_to_crisis, crisis_invitation) \
 	GS_COMMAND_LIST_ENTRY(toggle_mobilization, no_data) \
 	GS_COMMAND_LIST_ENTRY(enable_debt, no_data) \
-	GS_COMMAND_LIST_ENTRY(move_capital, generic_location) \
 	GS_COMMAND_LIST_ENTRY(pbutton_script, pbutton) \
 	GS_COMMAND_LIST_ENTRY(nbutton_script, nbutton) \
 	GS_COMMAND_LIST_ENTRY(chat_message, chat_message) \
@@ -4314,45 +4313,6 @@ namespace command {
 		state.world.nation_set_is_debt_spending(source, !state.world.nation_get_is_debt_spending(source));
 	}
 
-	void move_capital(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
-		p.type = command_type::move_capital;
-		p.source = source;
-		p.data.generic_location.prov = prov;
-		add_to_command_queue(state, p);
-	}
-
-	bool can_move_capital(sys::state& state, dcon::nation_id source, dcon::province_id p) {
-		if(state.current_crisis != sys::crisis_type::none)
-		return false;
-		if(state.world.nation_get_is_at_war(source))
-		return false;
-		if(state.world.nation_get_capital(source) == p)
-		return false;
-		if(state.world.province_get_is_colonial(p))
-		return false;
-		if(state.world.province_get_continent(state.world.nation_get_capital(source)) != state.world.province_get_continent(p))
-		return false;
-		if(nations::nation_accepts_culture(state, source, state.world.province_get_dominant_culture(p)) == false)
-		return false;
-		if(state.world.province_get_siege_progress(p) > 0.f)
-		return false;
-		if(state.world.province_get_siege_progress(state.world.nation_get_capital(source)) > 0.f)
-		return false;
-		if(state.world.province_get_nation_from_province_ownership(p) != source)
-		return false;
-		if(state.world.province_get_nation_from_province_control(p) != source)
-		return false;
-		if(state.world.province_get_is_owner_core(p) == false)
-		return false;
-		return true;
-	}
-
-	void execute_move_capital(sys::state& state, dcon::nation_id source, dcon::province_id p) {
-		state.world.nation_set_capital(source, p);
-	}
-
 	void use_province_button(sys::state& state, dcon::nation_id source, dcon::gui_def_id d, dcon::province_id i) {
 		payload p;
 		memset(&p, 0, sizeof(payload));
@@ -5088,10 +5048,6 @@ namespace command {
 
 		case command_type::enable_debt:
 			return true;
-
-		case command_type::move_capital:
-			return can_move_capital(state, c.source, c.data.generic_location.prov);
-
 		case command_type::toggle_unit_ai_control:
 			return true;
 		case command_type::toggle_mobilized_is_ai_controlled:
@@ -5496,9 +5452,6 @@ namespace command {
 			break;
 		case command_type::enable_debt:
 			execute_enable_debt(state, c.source);
-			break;
-		case command_type::move_capital:
-			execute_move_capital(state, c.source, c.data.generic_location.prov);
 			break;
 		case command_type::toggle_unit_ai_control:
 			execute_toggle_unit_ai_control(state, c.source, c.data.army_movement.a);
