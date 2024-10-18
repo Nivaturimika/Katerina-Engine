@@ -2469,6 +2469,9 @@ namespace sys {
 					closest_bd_dir = fname;
 				}
 			}
+			if(closest_bd_dir.empty()) { //for eu4 converters jfc
+				closest_bd_dir = NATIVE("1836.1.1");
+			}
 			//
 			auto date_directory = open_directory(pop_history, closest_bd_dir);
 			for(auto pop_file : list_files(date_directory, NATIVE(".txt"))) {
