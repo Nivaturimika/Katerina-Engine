@@ -875,6 +875,7 @@ namespace map {
 							if(auto model = model_gc_unit[uint8_t(gc)][utid.index()]; model) {
 								moving_type = utid;
 								moving_model = model;
+								n = sm.get_army().get_controller_from_army_control();
 								break;
 							}
 						}
@@ -889,9 +890,6 @@ namespace map {
 					model_render_list.emplace_back(unit_model, glm::vec2(p1.x + dist_step * 2.f, p1.y), -math::pi, emfx::animation_type::attack, 0);
 				} else if(unit_model) {
 					model_render_list.emplace_back(unit_model, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle, 0);
-					n = n ? n : state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
-					auto flag_tex_id = ogl::get_flag_handle(state, state.world.nation_get_identity_from_identity_holder(n), culture::flag_type(state.world.government_type_get_flag(state.world.nation_get_government_type(n))));
-					model_render_list.emplace_back(model_flag, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle, flag_tex_id);
 				}
 				if(moving_model) {
 					auto theta = glm::atan(p2.y - p1.y, p2.x - p1.x);
@@ -899,6 +897,11 @@ namespace map {
 						theta = -math::pi / 2.f;
 					}
 					model_render_list.emplace_back(moving_model, glm::vec2(p1.x + dist_step, p1.y + dist_step), -theta, emfx::animation_type::move, 0);
+				}
+				if(unit_model || moving_model) {
+					n = n ? n : state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id);
+					auto flag_tex_id = ogl::get_flag_handle(state, state.world.nation_get_identity_from_identity_holder(n), culture::flag_type(state.world.government_type_get_flag(state.world.nation_get_government_type(n))));
+					model_render_list.emplace_back(model_flag, glm::vec2(p1.x, p1.y), math::pi / 2.f, emfx::animation_type::idle, flag_tex_id);
 				}
 			}
 		});
