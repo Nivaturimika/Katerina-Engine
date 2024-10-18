@@ -565,7 +565,7 @@ namespace simple_fs {
 	directory get_or_create_settings_directory() {
 		wchar_t* local_path_out = nullptr;
 		native_string base_path;
-		if(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local_path_out) == S_OK) {
+		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
 			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
 		}
 		CoTaskMemFree(local_path_out);
