@@ -13,8 +13,8 @@ namespace ui {
 			}
 			auto ms_delta = std::chrono::duration_cast<std::chrono::microseconds>(now - last_render_time).count();
 			auto target_fps = 60.f;
-			auto fps = 1.f / (ms_delta * target_fps / 1000.f);
-			set_text(state, std::to_string(int32_t(fps)));
+			auto ff_ratio = ms_delta * target_fps / 1000.f;
+			set_text(state, std::to_string(int32_t(ff_ratio > 0.f ? 1.f / ff_ratio : 0.f)));
 			last_render_time = now;
 			simple_text_element_base::render(state, x, y);
 		}
