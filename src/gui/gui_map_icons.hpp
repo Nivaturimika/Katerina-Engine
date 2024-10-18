@@ -346,6 +346,9 @@ namespace ui {
 					auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
 					dp.x += 2.f * glm::sin(theta);
 					dp.y += 2.f * glm::cos(theta);
+					//
+					dp.x = std::clamp(dp.x, 0.f, 1.f);
+					dp.y = std::clamp(dp.y, 0.f, 1.f);
 					map_pos = state.map_state.normalize_map_coord(dp);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
 					auto path = army ? state.world.army_get_path(army) : state.world.navy_get_path(navy);
@@ -355,6 +358,9 @@ namespace ui {
 						auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
 						mp.x += 2.f * glm::sin(theta);
 						mp.y += 2.f * glm::cos(theta);
+						//
+						mp.x = std::clamp(mp.x, 0.f, 1.f);
+						mp.y = std::clamp(mp.y, 0.f, 1.f);
 						map_pos = state.map_state.normalize_map_coord(mp);
 					} else {
 						visible = false;
