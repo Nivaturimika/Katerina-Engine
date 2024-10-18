@@ -231,7 +231,7 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 		else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "dominion6"))
 			context.outer_context.state.world.government_type_set_flag(context.id, uint8_t(::culture::flag_type::dominion6));
 		else {
-			err.accumulated_errors += "Unknown flag type " + std::string(value) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
+			err.accumulated_warnings += "Unknown flag type " + std::string(value) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
 		}
 	}
 
