@@ -338,17 +338,17 @@ namespace ui {
 
 		void impl_render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(populated) {
+				auto const map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 				glm::vec2 map_pos;
 				if constexpr(A == unit_counter_position_type::port) {
-					auto map_size = glm::vec2(state.map_state.map_data.size_x, state.map_state.map_data.size_y);
 					auto dp = map::get_port_location(state, prov);
 					auto mp = state.world.province_get_mid_point(prov);
 					auto theta = glm::atan(dp.x - mp.x, dp.y - mp.y);
 					dp.x += 2.f * glm::sin(theta);
 					dp.y += 2.f * glm::cos(theta);
 					//
-					dp.x = std::clamp(dp.x, 0.f, 1.f);
-					dp.y = std::clamp(dp.y, 0.f, 1.f);
+					dp.x = std::clamp(dp.x, 0.f, map_size.x);
+					dp.y = std::clamp(dp.y, 0.f, map_size.y);
 					map_pos = state.map_state.normalize_map_coord(dp);
 				} else if constexpr(A == unit_counter_position_type::land_move) { //moving units
 					auto path = army ? state.world.army_get_path(army) : state.world.navy_get_path(navy);
@@ -359,8 +359,8 @@ namespace ui {
 						mp.x += 2.f * glm::sin(theta);
 						mp.y += 2.f * glm::cos(theta);
 						//
-						mp.x = std::clamp(mp.x, 0.f, 1.f);
-						mp.y = std::clamp(mp.y, 0.f, 1.f);
+						mp.x = std::clamp(mp.x, 0.f, map_size.x);
+						mp.y = std::clamp(mp.y, 0.f, map_size.y);
 						map_pos = state.map_state.normalize_map_coord(mp);
 					} else {
 						visible = false;
