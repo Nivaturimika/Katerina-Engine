@@ -17,24 +17,50 @@ namespace ogl {
 
 		HDC window_dc = state.win_ptr->opengl_window_dc;
 
-		PIXELFORMATDESCRIPTOR pfd;
-		ZeroMemory(&pfd, sizeof(pfd));
-		pfd.nSize = sizeof(pfd);
-		pfd.nVersion = 1;
-		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		pfd.iPixelType = PFD_TYPE_RGBA;
-		pfd.cColorBits = 32;
-		pfd.cDepthBits = 24;
-		pfd.cStencilBits = 8;
-		pfd.iLayerType = PFD_MAIN_PLANE;
-		int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
-		SetPixelFormat(window_dc, pixel_format, &pfd);
+		bool has_pfd_set = false;
+		auto const pfd_count = DescribePixelFormat(window_dc, 1, sizeof(PIXELFORMATDESCRIPTOR), NULL);
+		for(uint32_t i = 0; i < uint32_t(pfd_count); i++) {
+			PIXELFORMATDESCRIPTOR pfd;
+			if(!DescribePixelFormat(window_dc, i + 1, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
+				reports::write_debug(("Unable to describe PixelFormat " + std::to_string(i) + "\n").c_str());
+				continue;
+			}
+			if((pfd.dwFlags & PFD_DRAW_TO_WINDOW) != 0
+			&& (pfd.dwFlags & PFD_SUPPORT_OPENGL) != 0
+			&& (pfd.dwFlags & PFD_DOUBLEBUFFER) != 0
+			&& pfd.iPixelType == PFD_TYPE_RGBA
+			&& pfd.cDepthBits >= 8
+			&& pfd.cStencilBits >= 8
+			&& pfd.cColorBits >= 24) {
+				reports::write_debug(("Found usable pixel format #" + std::to_string(i) + "\n").c_str());
+				reports::write_debug(("Stencil=" + std::to_string(pfd.cStencilBits) + ",ColorDepth=" + std::to_string(pfd.cColorBits) + ",AccumBits=" + std::to_string(pfd.cAccumBits) + "\n").c_str());
+				auto pixel_format = ChoosePixelFormat(window_dc, &pfd);
+				if(SetPixelFormat(window_dc, pixel_format, &pfd)) {
+					has_pfd_set = true;
+					break;
+				}
+			}
+		}
+		if(!has_pfd_set) {
+			PIXELFORMATDESCRIPTOR pfd;
+			ZeroMemory(&pfd, sizeof(pfd));
+			pfd.nSize = sizeof(pfd);
+			pfd.nVersion = 1;
+			pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+			pfd.iPixelType = PFD_TYPE_RGBA;
+			pfd.cColorBits = 32;
+			pfd.cDepthBits = 24;
+			pfd.cStencilBits = 8;
+			pfd.iLayerType = PFD_MAIN_PLANE;
+			int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
+			SetPixelFormat(window_dc, pixel_format, &pfd);
+		}
 
 		auto gl_lib = LoadLibraryW(L"opengl32.dll");
 		if(gl_lib) {
 			state.open_gl.context = ((decltype(&wglCreateContext))GetProcAddress(gl_lib, "wglCreateContext"))(window_dc);
 			if(state.open_gl.context == NULL) {
-				window::emit_error_message("Unable to create WGL context", true);
+				window::emit_error_message("Unable to create WGL context" + std::to_string(GetLastError()), true);
 			}
 			((decltype(&wglMakeCurrent))GetProcAddress(gl_lib, "wglMakeCurrent"))(window_dc, HGLRC(state.open_gl.context));
 			if(gladLoadGL() == 0) {
