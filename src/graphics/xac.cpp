@@ -937,23 +937,23 @@ namespace emfx {
 
 	xsm_animation_key<xac_vector3f> xsm_animation::get_position_key(uint32_t i) const {
 		auto const& keys = position_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return keys[i < keys.size() ? i : 0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_rotation_key(uint32_t i) const {
 		auto const& keys = rotation_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return keys[i < keys.size() ? i : 0];
 	}
 	xsm_animation_key<xac_vector3f> xsm_animation::get_scale_key(uint32_t i) const {
 		auto const& keys = scale_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return keys[i < keys.size() ? i : 0];
 	}
 	xsm_animation_key<xac_vector4f> xsm_animation::get_scale_rotation_key(uint32_t i) const {
 		auto const& keys = scale_rotation_keys;
-		return i < keys.size() ? keys[i] : keys[0];
+		return keys[i < keys.size() ? i : 0];
 	}
 
 	uint32_t xsm_animation::get_position_key_index(float time) const {
-		for(int32_t i = 0; i < int32_t(position_keys.size() - 1); i++) {
+		for(uint32_t i = 0; i < uint32_t(position_keys.size() - 1); i++) {
 			if(time < position_keys[i + 1].time) {
 				return i;
 			}
@@ -961,7 +961,7 @@ namespace emfx {
 		return 0;
 	}
 	uint32_t xsm_animation::get_rotation_key_index(float time) const {
-		for(int32_t i = 0; i < int32_t(rotation_keys.size() - 1); i++) {
+		for(uint32_t i = 0; i < uint32_t(rotation_keys.size() - 1); i++) {
 			if(time < rotation_keys[i + 1].time) {
 				return i;
 			}
@@ -969,7 +969,7 @@ namespace emfx {
 		return 0;
 	}
 	uint32_t xsm_animation::get_scale_key_index(float time) const {
-		for(int32_t i = 0; i < int32_t(scale_keys.size() - 1); i++) {
+		for(uint32_t i = 0; i < uint32_t(scale_keys.size() - 1); i++) {
 			if(time < scale_keys[i + 1].time) {
 				return i;
 			}
@@ -977,7 +977,7 @@ namespace emfx {
 		return 0;
 	}
 	uint32_t xsm_animation::get_scale_rotation_key_index(float time) const {
-		for(int32_t i = 0; i < int32_t(scale_rotation_keys.size() - 1); i++) {
+		for(uint32_t i = 0; i < uint32_t(scale_rotation_keys.size() - 1); i++) {
 			if(time < scale_rotation_keys[i + 1].time) {
 				return i;
 			}
@@ -986,9 +986,9 @@ namespace emfx {
 	}
 
 	float xsm_animation::get_player_scale_factor(float t1, float t2, float time) const {
-		assert(t1 <= t2);
-		if(t1 == t2)
-			return 0.f;
+		if(t1 == t2) {
+			return 1.f;
+		}
 		float cur_frame = time - t1;
 		float end_frame = t2 - t1;
 		return cur_frame / end_frame;

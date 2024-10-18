@@ -544,49 +544,44 @@ namespace map {
 		is mod'ed into the local animation time
 		@return The local animation matrix */
 	glm::mat4x4 get_animation_bone_matrix(emfx::xsm_animation const& an, float time_counter) {
-		auto anim_time = std::fmod(time_counter * (1.f / an.total_anim_time), 1.f);
-		//auto anim_time = an.total_position_anim_time > 0.f ? std::fmod(time_counter, an.total_position_anim_time) : 0.f;
-		auto pos_index = an.get_position_key_index(anim_time);
+		auto pos_index = an.get_position_key_index(time_counter);
 		auto pos1 = an.get_position_key(pos_index);
 		auto pos2 = an.get_position_key(pos_index + 1);
 		glm::mat4x4 mt = glm::translate(glm::mat4x4(1.f),
 			glm::mix(
 				glm::vec3(pos1.value.x, pos1.value.y, pos1.value.z),
 				glm::vec3(pos2.value.x, pos2.value.y, pos2.value.z),
-				an.get_player_scale_factor(pos1.time, pos2.time, anim_time)
+				an.get_player_scale_factor(pos1.time, pos2.time, time_counter)
 			)
 		);
-		//anim_time = an.total_scale_anim_time > 0.f ? std::fmod(time_counter, an.total_scale_anim_time) : 0.f;
-		auto sca_index = an.get_scale_key_index(anim_time);
+		auto sca_index = an.get_scale_key_index(time_counter);
 		auto sca1 = an.get_scale_key(sca_index);
 		auto sca2 = an.get_scale_key(sca_index + 1);
 		glm::mat4x4 ms = glm::scale(glm::mat4x4(1.f),
 			glm::mix(
 				glm::vec3(sca1.value.x, sca1.value.y, sca1.value.z),
 				glm::vec3(sca2.value.x, sca2.value.y, sca2.value.z),
-				an.get_player_scale_factor(sca1.time, sca2.time, anim_time)
+				an.get_player_scale_factor(sca1.time, sca2.time, time_counter)
 			)
 		);
-		//anim_time = an.total_rotation_anim_time > 0.f ? std::fmod(time_counter, an.total_rotation_anim_time) : 0.f;
-		auto rot_index = an.get_rotation_key_index(anim_time);
+		auto rot_index = an.get_rotation_key_index(time_counter);
 		auto rot1 = an.get_rotation_key(rot_index);
 		auto rot2 = an.get_rotation_key(rot_index + 1);
 		glm::mat4x4 mr = glm::toMat4(glm::normalize(
 			glm::slerp(
 				glm::quat(rot1.value.x, rot1.value.y, rot1.value.z, rot1.value.w),
 				glm::quat(rot2.value.x, rot2.value.y, rot2.value.z, rot2.value.w),
-				an.get_player_scale_factor(rot1.time, rot2.time, anim_time)
+				an.get_player_scale_factor(rot1.time, rot2.time, time_counter)
 			)
 		));
-		//anim_time = an.total_scale_rotation_anim_time > 0.f ? std::fmod(time_counter, an.total_scale_rotation_anim_time) : 0.f;
-		auto rsc_index = an.get_scale_rotation_key_index(anim_time);
+		auto rsc_index = an.get_scale_rotation_key_index(time_counter);
 		auto rsc1 = an.get_scale_rotation_key(rsc_index);
 		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1);
 		glm::mat4x4 mu = glm::toMat4(glm::normalize(
 			glm::slerp(
 				glm::quat(rsc1.value.x, rsc1.value.y, rsc1.value.z, rsc1.value.w),
 				glm::quat(rsc2.value.x, rsc2.value.y, rsc2.value.z, rsc1.value.w),
-				an.get_player_scale_factor(rsc1.time, rsc2.time, anim_time)
+				an.get_player_scale_factor(rsc1.time, rsc2.time, time_counter)
 			)
 		));
 		return mt * mr * ms;
@@ -653,7 +648,8 @@ namespace map {
 					auto count = static_mesh_idle_animation_count[i];
 					auto& matrices = final_idle_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -664,7 +660,8 @@ namespace map {
 					auto count = static_mesh_move_animation_count[i];
 					auto& matrices = final_move_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -675,7 +672,8 @@ namespace map {
 					auto count = static_mesh_attack_animation_count[i];
 					auto& matrices = final_attack_matrices[i];
 					for(uint32_t k = start; k < start + count; k++) {
-						get_hierachical_animation_bone(animations, matrices, start, count, k, time_counter, glm::mat4x4(1.f));
+						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
 					}
 					for(uint32_t k = start; k < start + count; k++) {
 						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
@@ -840,7 +838,7 @@ namespace map {
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			if(state.map_state.visible_provinces[province::to_map_id(p)] && military::province_is_under_siege(state, p)) {
 				auto center = state.world.province_get_mid_point(p);
-				model_render_list.emplace_back(model_siege, center, 0.f, emfx::animation_type::none, 0);
+				model_render_list.emplace_back(model_siege, center, 0.f, emfx::animation_type::idle, 0);
 			}
 		});
 		// Render armies
@@ -2522,34 +2520,26 @@ namespace map {
 			break;
 		}
 		for(const auto& anim : anim_context.animations) {
-			if(anim.position_keys.empty() && anim.rotation_keys.empty()
-			&& anim.scale_keys.empty() && anim.scale_rotation_keys.empty()) {
-				continue;
-			}
-			for(uint32_t i = 0; i < uint32_t(model_context.nodes.size()); i++) {
-				auto const& node = model_context.nodes[i];
-				if(anim.node == node.name) {
-					auto t_anim = anim;
-					t_anim.parent_id = node.parent_id;
-					t_anim.bone_id = int32_t(i);
-					auto const vp = glm::vec3(node.position.x, node.position.y, node.position.z);
-					auto const vs = glm::vec3(node.scale.x, node.scale.y, node.scale.z);
-					auto const vq = glm::quat(node.rotation.x, node.rotation.y, node.rotation.z, node.rotation.w);
-					t_anim.bone_node_matrix = glm::translate(vp) * glm::toMat4(glm::normalize(vq)) * glm::scale(vs);
-
-					auto const pp = glm::vec3(t_anim.pose_position.x, t_anim.pose_position.y, t_anim.pose_position.z);
-					auto const ps = glm::vec3(t_anim.pose_scale.x, t_anim.pose_scale.y, t_anim.pose_scale.z);
-					auto const pq = glm::quat(t_anim.pose_rotation.x, t_anim.pose_rotation.y, t_anim.pose_rotation.z, t_anim.pose_rotation.w);
-					t_anim.bone_pose_matrix = glm::translate(pp) * glm::toMat4(glm::normalize(pq)) * glm::scale(ps);
-
-					auto const ip = glm::vec3(t_anim.bind_pose_position.x, t_anim.bind_pose_position.y, t_anim.bind_pose_position.z);
-					auto const is = glm::vec3(t_anim.bind_pose_scale.x, t_anim.bind_pose_scale.y, t_anim.bind_pose_scale.z);
-					auto const iq = glm::quat(t_anim.bind_pose_rotation.x, t_anim.bind_pose_rotation.y, t_anim.bind_pose_rotation.z, t_anim.bind_pose_rotation.w);
-					t_anim.bone_bind_pose_matrix = glm::translate(ip) * glm::toMat4(glm::normalize(iq)) * glm::scale(is);
-
-					state.map_state.map_data.animations.push_back(t_anim);
-					break;
-				}
+			auto it = std::find_if(model_context.nodes.begin(), model_context.nodes.end(), [&](const auto& e) {
+				return anim.node == e.name;
+			});
+			if(it != model_context.nodes.end()) {
+				auto t_anim = anim;
+				t_anim.parent_id = it->parent_id;
+				t_anim.bone_id = int32_t(std::distance(model_context.nodes.begin(), it));
+				auto const vp = glm::vec3(it->position.x, it->position.y, it->position.z);
+				auto const vs = glm::vec3(it->scale.x, it->scale.y, it->scale.z);
+				auto const vq = glm::quat(it->rotation.x, it->rotation.y, it->rotation.z, it->rotation.w);
+				t_anim.bone_node_matrix = glm::translate(vp) * glm::toMat4(vq) * glm::scale(vs);
+				auto const pp = glm::vec3(t_anim.pose_position.x, t_anim.pose_position.y, t_anim.pose_position.z);
+				auto const ps = glm::vec3(t_anim.pose_scale.x, t_anim.pose_scale.y, t_anim.pose_scale.z);
+				auto const pq = glm::quat(t_anim.pose_rotation.x, t_anim.pose_rotation.y, t_anim.pose_rotation.z, t_anim.pose_rotation.w);
+				t_anim.bone_pose_matrix = glm::translate(pp) * glm::toMat4(pq) * glm::scale(ps);
+				auto const ip = glm::vec3(t_anim.bind_pose_position.x, t_anim.bind_pose_position.y, t_anim.bind_pose_position.z);
+				auto const is = glm::vec3(t_anim.bind_pose_scale.x, t_anim.bind_pose_scale.y, t_anim.bind_pose_scale.z);
+				auto const iq = glm::quat(t_anim.bind_pose_rotation.x, t_anim.bind_pose_rotation.y, t_anim.bind_pose_rotation.z, t_anim.bind_pose_rotation.w);
+				t_anim.bone_bind_pose_matrix = glm::translate(ip) * glm::toMat4(iq) * glm::scale(is);
+				state.map_state.map_data.animations.push_back(t_anim);
 			}
 		}
 		switch(at) {
@@ -2837,13 +2827,6 @@ namespace map {
 									uint32_t added_count = 0;
 									for(uint32_t l = i_start; l < i_start + i_count; l++) {
 										auto influence = mesh.influences[l];
-										//if(influence.bone_id == -1
-										//|| influence.bone_id >= int32_t(context.nodes.size())
-										//|| influence.bone_id >= state.map_state.map_data.max_bone_matrices) {
-										//	reports::write_debug(("Invalid bone Id#" + std::to_string(influence.bone_id) + "\n").c_str());
-										//	continue;
-										//}
-										//assert(influence.bone_id != -1);
 										if(influence.bone_id >= int32_t(context.nodes.size())
 										|| influence.bone_id >= int32_t(state.map_state.map_data.max_bone_matrices)) {
 											influence.bone_id = -1;
