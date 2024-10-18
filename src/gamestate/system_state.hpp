@@ -417,30 +417,6 @@ enum class gui_modes : uint8_t { faithful = 0, nouveau = 1, dummycabooseval = 2 
 		bool always_potential_decisions = false;
 	};
 
-	enum class army_group_regiment_status : uint8_t {
-		idle, awaiting_orders, defend_position, awaiting_naval_travel, moving
-	};
-
-	enum class army_group_ship_status : uint8_t {
-		idle, port, 
-	};
-
-	struct army_group {
-		dcon::province_id hq;
-		std::vector<dcon::army_id> land_forces;
-		std::vector<dcon::regiment_id> land_regiments;
-		//std::array<army_group_regiment_status, 32000> regiment_status;
-
-		std::vector<dcon::navy_id> naval_forces;
-		std::vector<dcon::ship_id> ships;
-		//std::array<army_group_ship_status, 32000> ship_status;
-
-		std::vector<dcon::province_id> defensive_line;
-
-		std::vector<dcon::province_id> naval_travel_origin;
-		std::vector<dcon::province_id> naval_travel_target;
-	};
-
 	struct crisis_member_def {
 		dcon::nation_id id;
 
@@ -609,10 +585,6 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 		//control groups
 		std::array<std::vector<dcon::army_id>, 10> ctrl_armies;
 		std::array<std::vector<dcon::navy_id>, 10> ctrl_navies;
-
-		//army group
-		std::vector<army_group> army_groups;
-		army_group * selected_army_group = nullptr;
 
 		//current ui
 		game_scene::scene_properties current_scene;

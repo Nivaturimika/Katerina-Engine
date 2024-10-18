@@ -926,22 +926,6 @@ namespace game_scene {
 		}
 	}
 
-	void highlight_defensive_positions(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province) {
-		if(state.selected_army_group != nullptr) {
-			for(auto position : state.selected_army_group->defensive_line) {
-				data[province::to_map_id(position)] = 0x2B2B2B2B;
-			}
-
-			for(auto position : state.selected_army_group->naval_travel_origin) {
-				data[province::to_map_id(position)] = 0x2B2B2B2B;
-			}
-
-			for(auto position : state.selected_army_group->naval_travel_target) {
-				data[province::to_map_id(position)] = 0x2B2B2B2B;
-			}
-		}
-	}
-
 	ui::element_base* root_end_screen(sys::state& state){
 		return state.ui_state.end_screen.get();
 	}

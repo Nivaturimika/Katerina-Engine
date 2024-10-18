@@ -2373,19 +2373,6 @@ namespace map_mode {
 		default:
 			return;
 		}
-		if(mode == mode::political) {
-			uint32_t province_size = state.world.province_size();
-			uint32_t texture_size = province_size + 256 - province_size % 256;
-			// colour the battle planner
-			for(const auto& group : state.army_groups) {
-				for(const auto p : group.defensive_line) {
-					auto i = province::to_map_id(p);
-					prov_color[i + texture_size] = sys::pack_color(255, 128, 128);
-				}
-				auto i = province::to_map_id(group.hq);
-				prov_color[i + texture_size] = sys::pack_color(128, 128, 255);
-			}
-		}
 		state.map_state.set_province_color(prov_color, mode);
 	}
 
