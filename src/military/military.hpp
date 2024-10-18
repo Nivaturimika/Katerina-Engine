@@ -332,6 +332,8 @@ enum class war_role { none, attacker, defender };
 	int32_t mobilized_regiments_possible_from_province(sys::state& state, dcon::province_id p);
 	dcon::pop_id find_available_soldier(sys::state& state, dcon::province_id p, bool require_accepted);
 	dcon::pop_id find_available_soldier(sys::state& state, dcon::province_id p, dcon::culture_id pop_culture);
+	int32_t mobilized_regiments_possible_from_pop(sys::state& state, dcon::pop_id p);
+	int32_t professional_regiments_possible_from_pop(sys::state& state, dcon::pop_id p);
 	int32_t mobilized_regiments_pop_limit(sys::state& state, dcon::nation_id n);
 	uint8_t make_dice_rolls(sys::state& state, uint32_t seed);
 
@@ -377,6 +379,12 @@ enum class war_role { none, attacker, defender };
 	void add_wargoal(sys::state& state, dcon::war_id wfor, dcon::nation_id added_by, dcon::nation_id target, dcon::cb_type_id type,
 		dcon::state_definition_id sd, dcon::national_identity_id tag, dcon::nation_id secondary_nation);
 	void add_to_war(sys::state& state, dcon::war_id w, dcon::nation_id n, bool as_attacker, bool on_war_creation = false);
+
+	struct participation {
+		dcon::war_id w;
+		war_role role = war_role::none;
+	};
+	participation internal_find_war_between(sys::state const& state, dcon::nation_id a, dcon::nation_id b);
 
 	float truce_break_cb_prestige_cost(sys::state& state, dcon::cb_type_id type);
 	float truce_break_cb_militancy(sys::state& state, dcon::cb_type_id type);

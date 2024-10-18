@@ -61,11 +61,6 @@ namespace military {
 		}
 	}
 
-	struct participation {
-		dcon::war_id w;
-		war_role role = war_role::none;
-	};
-
 	participation internal_find_war_between(sys::state const& state, dcon::nation_id a, dcon::nation_id b) {
 		for(auto wa : state.world.nation_get_war_participant(a)) {
 			auto is_attacker = wa.get_is_attacker();

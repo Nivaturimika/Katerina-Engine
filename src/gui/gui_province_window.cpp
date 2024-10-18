@@ -166,7 +166,7 @@ namespace ui {
 		province_window->nf_win->set_visible(state, !province_window->nf_win->is_visible());
 	}
 
-	void province_national_focus_button::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+	void province_national_focus_button::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 		auto box = text::open_layout_box(contents, 0);
 
 		auto sid = retrieve<dcon::state_instance_id>(state, parent);
