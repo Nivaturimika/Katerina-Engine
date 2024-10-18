@@ -114,6 +114,11 @@ namespace culture {
 		green,
 		traditionalist,
 		ultranationalist,
+		dominion2,
+		dominion3,
+		dominion4,
+		dominion5,
+		dominion6,
 		count
 	};
 

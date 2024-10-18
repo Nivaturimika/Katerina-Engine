@@ -636,8 +636,16 @@ set to one or more of the following values.	*/
 			return NATIVE("_green");
 		case culture::flag_type::traditionalist:
 			return NATIVE("_traditionalist");
-		case culture::flag_type::ultranationalist:
-			return NATIVE("_ultranationalist");
+		case culture::flag_type::dominion2:
+			return NATIVE("_dominion2");
+		case culture::flag_type::dominion3:
+			return NATIVE("_dominion3");
+		case culture::flag_type::dominion4:
+			return NATIVE("_dominion4");
+		case culture::flag_type::dominion5:
+			return NATIVE("_dominion5");
+		case culture::flag_type::dominion6:
+			return NATIVE("_dominion6");
 		}
 		return NATIVE("");
 	}
