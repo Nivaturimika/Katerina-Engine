@@ -1,11 +1,13 @@
 #include <string_view>
+#include <type_traits>
 
 #include "nations.hpp"
 #include "text.hpp"
 #include "system_state.hpp"
 #include "parsers.hpp"
 #include "simple_fs.hpp"
-#include <type_traits>
+#include "reports.hpp"
+
 #include "unicode/ubrk.h"
 #include "unicode/utypes.h"
 #include "unicode/ubidi.h"
