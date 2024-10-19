@@ -662,7 +662,7 @@ namespace sys {
 					if((settings_bits & message_response::log) && ui_state.msg_log_window) {
 						static_cast<ui::message_log_window*>(ui_state.msg_log_window)->messages.push_back(*c6);
 					}
-					if(settings_bits & message_response::popup) {
+					if((settings_bits & message_response::popup) != 0) {
 						if(c6->source == local_player_nation && (base_type == message_base_type::major_event || base_type == message_base_type::national_event || base_type == message_base_type::province_event)) {
 							// do nothing -- covered by event window logic
 						} else {

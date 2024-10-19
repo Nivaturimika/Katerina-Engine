@@ -53,11 +53,11 @@ enum class gui_modes : uint8_t { faithful = 0, nouveau = 1, dummycabooseval = 2 
 		bool bind_tooltip_mouse = true;
 		bool use_classic_fonts = true;
 		bool left_mouse_click_hold_and_release = false;
-	bool outliner_views[14] = {true, true, true, true, true, true, true, true, true, true, true, true, true, true};
+		bool outliner_views[14] = {true, true, true, true, true, true, true, true, true, true, true, true, true, true};
 		uint8_t self_message_settings[int32_t(sys::message_setting_type::count)] = {
 			message_response::standard_pause,//revolt = 0,
 			message_response::standard_pause,//war_on_nation = 1,
-			message_response::standard_log,//war_by_nation = 2,
+			message_response::standard_popup,//war_by_nation = 2,
 			message_response::standard_popup,//wargoal_added = 3,
 			message_response::ignore,//siegeover_by_nation = 4,
 			message_response::ignore,//siegeover_on_nation = 5,
@@ -79,9 +79,9 @@ enum class gui_modes : uint8_t { faithful = 0, nouveau = 1, dummycabooseval = 2 
 			message_response::standard_log,//rr_complete = 21,
 			message_response::standard_log,//fort_complete = 22,
 			message_response::standard_log,//naval_base_complete = 23,
-			message_response::standard_log,//province_event = 24,
-			message_response::standard_log,//national_event = 25,
-			message_response::standard_log,//major_event = 26,
+			message_response::standard_pause,//province_event = 24,
+			message_response::standard_pause,//national_event = 25,
+			message_response::standard_pause,//major_event = 26,
 			message_response::standard_popup,//invention = 27,
 			message_response::standard_popup,//tech = 28,
 			message_response::standard_log,//leader_dies = 29,
@@ -90,7 +90,7 @@ enum class gui_modes : uint8_t { faithful = 0, nouveau = 1, dummycabooseval = 2 
 			message_response::ignore,//land_combat_starts_by_nation = 32,
 			message_response::ignore,//naval_combat_starts_by_nation = 33,
 			message_response::ignore,//movement_finishes = 34,
-			message_response::ignore,//decision = 35,
+			message_response::standard_log,//decision = 35,
 			message_response::standard_popup,//lose_great_power = 36,
 			message_response::standard_popup,//become_great_power = 37,
 			message_response::ignore,//war_subsidies_start_by_nation = 38,
