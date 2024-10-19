@@ -2609,14 +2609,11 @@ namespace ui {
 					return av > bv;
 				return a.index() < b.index();
 			});
-
-			std::vector<dcon::province_id> province_list;
 			for(auto const state_id : state_list) {
 				left_side_listbox->row_contents.push_back(pop_left_side_data(state_id));
 				// Provinces are sorted by total population too
-				province_list.clear();
-				auto fat_id = dcon::fatten(state.world, state_id);
-				province::for_each_province_in_state_instance(state, fat_id, [&](dcon::province_id id) {
+				std::vector<dcon::province_id> province_list;
+				province::for_each_province_in_state_instance(state, state_id, [&](dcon::province_id id) {
 					province_list.push_back(id);
 				});
 				pdqsort(province_list.begin(), province_list.end(), [&](dcon::province_id a, dcon::province_id b) {
