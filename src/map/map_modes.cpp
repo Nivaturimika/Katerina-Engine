@@ -9,6 +9,7 @@
 #include "pdqsort.h"
 #include "unordered_dense.h"
 #include "gui_map_legend.hpp"
+#include "province_templates.hpp"
 
 std::vector<uint32_t> admin_map_from(sys::state& state) {
 	uint32_t province_size = state.world.province_size();
