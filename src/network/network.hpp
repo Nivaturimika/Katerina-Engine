@@ -2,7 +2,7 @@
 
 #include <array>
 #include <string>
-#ifdef _WIN64 // WINDOWS
+#ifdef _WIN32 // WINDOWS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #ifndef WINSOCK2_IMPORTED
 #define WINSOCK2_IMPORTED

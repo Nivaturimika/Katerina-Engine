@@ -1,5 +1,4 @@
-#ifdef _WIN64
-
+#ifdef _WIN32
 extern "C" {
 	#include "network/pcp_api.c"
 	#include "network/pcp_client_db.c"
@@ -13,5 +12,4 @@ extern "C" {
 	#include "network/net/gateway.c"
 	#include "network/net/findsaddr-udp.c"
 };
-
 #endif

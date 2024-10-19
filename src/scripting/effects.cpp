@@ -84,7 +84,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -114,7 +114,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -141,7 +141,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -168,7 +168,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -195,7 +195,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -257,7 +257,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -284,7 +284,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -529,7 +529,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -560,7 +560,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -587,7 +587,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -614,7 +614,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -642,7 +642,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -671,7 +671,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -703,7 +703,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -730,7 +730,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -758,7 +758,7 @@ namespace effect {
 		}
 		if((tval[0] & effect::is_random_scope) != 0) {
 			if(rlist.size() != 0) {
-				auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+				auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 				return 1 + apply_subeffects(tval, ws, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, els);
 			}
 			return 0;
@@ -2611,7 +2611,7 @@ namespace effect {
 			active_reforms.push_back(ws.world.reform_get_options(issue)[0]);
 		}
 		for(int32_t i = tval[1] - 1; active_reforms.size() != 0 && i >= 0; --i) {
-			auto r = rng::get_random(ws, r_hi, uint32_t(r_lo + i)) % active_reforms.size();
+			auto r = uint32_t(rng::get_random(ws, r_hi, uint32_t(r_lo + i)) % active_reforms.size());
 			politics::set_reform_option(ws, nation_id, active_reforms[r]);
 			active_reforms[r] = active_reforms.back();
 			active_reforms.pop_back();
@@ -2629,7 +2629,7 @@ namespace effect {
 			active_reforms.push_back(ws.world.reform_get_options(issue)[0]);
 		}
 		for(int32_t i = tval[1] - 1; active_reforms.size() != 0 && i >= 0; --i) {
-			auto r = rng::get_random(ws, r_hi, uint32_t(r_lo + i)) % active_reforms.size();
+			auto r = uint32_t(rng::get_random(ws, r_hi, uint32_t(r_lo + i)) % active_reforms.size());
 			politics::set_reform_option(ws, nation_id, active_reforms[r]);
 			active_reforms[r] = active_reforms.back();
 			active_reforms.pop_back();

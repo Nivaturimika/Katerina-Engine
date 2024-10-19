@@ -266,7 +266,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto box = text::open_layout_box(layout, indentation);
 						text::add_to_layout_box(ws, layout, box, rlist[r]);
 						text::close_layout_box(layout, box);
@@ -311,7 +311,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto box = text::open_layout_box(layout, indentation);
 						text::add_to_layout_box(ws, layout, box, rlist[r]);
 						text::close_layout_box(layout, box);
@@ -347,7 +347,7 @@ namespace ui {
 					}
 				}
 				if(rlist.size() != 0) {
-					auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+					auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 					auto box = text::open_layout_box(layout, indentation);
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
@@ -382,7 +382,7 @@ namespace ui {
 					}
 				}
 				if(rlist.size() != 0) {
-					auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+					auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 					auto box = text::open_layout_box(layout, indentation);
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
@@ -418,7 +418,7 @@ namespace ui {
 					}
 				}
 				if(rlist.size() != 0) {
-					auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+					auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 					auto box = text::open_layout_box(layout, indentation);
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
@@ -489,12 +489,10 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
-
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto box = text::open_layout_box(layout, indentation);
 						text::add_to_layout_box(ws, layout, box, rlist[r]);
 						text::close_layout_box(layout, box);
-
 						show_limit(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, indentation);
 						return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1,
 											 indentation + indentation_amount);
@@ -529,8 +527,7 @@ namespace ui {
 				}
 
 				if(rlist.size() != 0) {
-					auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
-
+					auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 					auto box = text::open_layout_box(layout, indentation);
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
 					text::close_layout_box(layout, box);
@@ -705,7 +702,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto i_amount = 0;
 						if(ws.user_settings.spoilers) {
 							i_amount = indentation_amount;
@@ -716,8 +713,9 @@ namespace ui {
 							/* So that SirRunner's random_owned + has_country_flag trick works properly! */
 							if((tval[0] & effect::scope_has_limit) != 0 && primary_slot != -1) {
 								auto limit = trigger::payload(tval[2]).tr_id;
-								if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot))
-								return 0;
+								if(!trigger::evaluate(ws, limit, primary_slot, this_slot, from_slot)) {
+									return 0;
+								}
 							}
 						}
 						return 1 + display_subeffects(ws, tval, layout, trigger::to_generic(rlist[r]), this_slot, from_slot, r_hi, r_lo + 1, indentation + i_amount);
@@ -768,7 +766,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto i_amount = 0;
 						if(ws.user_settings.spoilers) {
 							i_amount = indentation_amount;
@@ -829,7 +827,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 						auto i_amount = 0;
 						if(ws.user_settings.spoilers) {
 							i_amount = indentation_amount;
@@ -885,7 +883,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 
 						auto box = text::open_layout_box(layout, indentation);
 						text::add_to_layout_box(ws, layout, box, rlist[r]);
@@ -931,7 +929,7 @@ namespace ui {
 					}
 				}
 				if(rlist.size() != 0) {
-					auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+					auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 
 					auto box = text::open_layout_box(layout, indentation);
 					text::add_to_layout_box(ws, layout, box, rlist[r]);
@@ -977,7 +975,7 @@ namespace ui {
 					}
 
 					if(rlist.size() != 0) {
-						auto r = rng::get_random(ws, r_hi, r_lo) % rlist.size();
+						auto r = uint32_t(rng::get_random(ws, r_hi, r_lo) % rlist.size());
 
 						auto box = text::open_layout_box(layout, indentation);
 						text::add_to_layout_box(ws, layout, box, rlist[r]);
