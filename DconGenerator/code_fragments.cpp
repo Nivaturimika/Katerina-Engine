@@ -567,11 +567,7 @@ basic_builder& make_object_resize(basic_builder& o, relationship_object_def cons
 
 	o + "void @obj@_resize(uint32_t new_size)" + block{
 		if(!cob.is_expandable) {
-			o + "#ifndef DCON_USE_EXCEPTIONS";
-			o + "if(new_size > @obj_sz@) std::abort();";
-			o + "#else";
-			o + "if(new_size > @obj_sz@) throw dcon::out_of_space{};";
-			o + "#endif";
+			o + "if(new_size > @obj_sz@) DCON_OUT_OF_SPACE(@obj@);";
 		}
 		o + "const uint32_t old_size = @pk_obj@.size_used;";
 		o + "if(new_size < old_size)" + block{ // contracting
@@ -1232,11 +1228,7 @@ basic_builder& make_non_erasable_create(basic_builder& o, relationship_object_de
 		if(cob.is_expandable) {
 			expandable_push_back(o, cob);
 		} else {
-			o + "#ifndef DCON_USE_EXCEPTIONS";
-			o + "if(@pk_obj@.size_used >= @size@) std::abort();";
-			o + "#else";
-			o + "if(@pk_obj@.size_used >= @size@) throw dcon::out_of_space{};";
-			o + "#endif";
+			o + "if(@pk_obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@pk_obj@);";
 			increase_size(o, cob);
 		}
 		if(cob.hook_create)
@@ -1383,11 +1375,7 @@ basic_builder& erasable_set_new_id(basic_builder& o, relationship_object_def con
 	o + substitute{ "t_obj", cob.name };
 	if(!cob.is_expandable) {
 		if (!cob.primary_key.points_to) {
-			o + "#ifndef DCON_USE_EXCEPTIONS";
-			o + "if(!bool(@t_obj@.first_free)) std::abort();";
-			o + "#else";
-			o + "if(!bool(@t_obj@.first_free)) throw dcon::out_of_space{};";
-			o + "#endif";
+			o + "if(!bool(@t_obj@.first_free)) DCON_OUT_OF_SPACE(@t_obj@);";
 			o + "@t_obj@_id new_id = @t_obj@.first_free;";
 			o + "@t_obj@.first_free = @t_obj@.m__index.vptr()[@t_obj@.first_free.index()];";
 			o + "@t_obj@.m__index.vptr()[new_id.index()] = new_id;";
@@ -1702,11 +1690,7 @@ basic_builder& make_relation_try_create(basic_builder& o, relationship_object_de
 			o + "@obj@_id new_id = @obj@_id(@obj@_id::value_base_t(@obj@.size_used));";
 
 			if(!cob.is_expandable) {
-				o + "#ifndef DCON_USE_EXCEPTIONS";
-				o + "if(@obj@.size_used >= @size@) std::abort();";
-				o + "#else";
-				o + "if(@obj@.size_used >= @size@) throw dcon::out_of_space{};";
-				o + "#endif";
+				o + "if(@obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@obj@);";
 				increase_size(o, cob);
 			} else {
 				expandable_push_back(o, cob);
@@ -1808,11 +1792,7 @@ basic_builder& make_relation_force_create(basic_builder& o, relationship_object_
 			o + "@obj@_id new_id = @obj@_id(@obj@_id::value_base_t(@obj@.size_used));";
 
 			if(!cob.is_expandable) {
-				o + "#ifndef DCON_USE_EXCEPTIONS";
-				o + "if(@obj@.size_used >= @size@) std::abort();";
-				o + "#else";
-				o + "if(@obj@.size_used >= @size@) throw dcon::out_of_space{};";
-				o + "#endif";
+				o + "if(@obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@obj@);";
 				increase_size(o, cob);
 			} else {
 				expandable_push_back(o, cob);

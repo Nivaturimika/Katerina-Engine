@@ -1,14 +1,15 @@
-#pragma once
+#include <stdio.h>
+#include "reports.hpp"
 
-#include <string_view>
+// Static globals, oooh scary!!! (dont do this)
+static FILE* fp = NULL;
+static bool tried_opening_fp = false;
 
 namespace reports {
 	void write_debug(std::string_view msg) noexcept {
 		if(msg.size() > 0) {
 			std::string s = std::string(msg);
 #ifdef _WIN32
-			static FILE* fp = NULL;
-			static bool tried_opening_fp = false;
 			if(!fp && !tried_opening_fp) {
 				fopen_s(&fp, "game_log.txt", "wt");
 				tried_opening_fp = true;

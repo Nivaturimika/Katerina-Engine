@@ -32,6 +32,7 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"src/common_types/blake2.cpp"
 	"src/common_types/date_interface.cpp"
 	"src/common_types/prng.cpp"
+	"src/common_types/reports.cpp"
 	"src/culture/culture.cpp"
 	"src/culture/politics.cpp"
 	"src/culture/rebels.cpp"

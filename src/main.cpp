@@ -56,6 +56,7 @@
 #include "platform_specific.cpp"
 #include "opengl_wrapper.cpp"
 #include "prng.cpp"
+#include "reports.cpp"
 #include "blake2.cpp"
 #include "zstd.cpp"
 #include "news.cpp"

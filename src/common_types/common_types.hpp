@@ -41,6 +41,8 @@
 #define COM_RELEASE_INLINE inline
 #endif
 
+#include "reports.hpp"
+
 namespace dcon {
 	struct bitfield_type {
 		uint8_t v = 0;
@@ -93,9 +95,7 @@ namespace dcon {
 		}
 	}
 
-#ifdef DCON_USE_EXCEPTIONS
-	struct out_of_space {};
-#endif
+#define DCON_OUT_OF_SPACE(x) do { reports::write_debug("Out of space for " #x ", aborting..."); std::abort(); } while(0);
 	struct invalid_iterator_type {};
 
 	template<typename T>
@@ -419,11 +419,7 @@ namespace dcon {
 
 
 			if (initial_base_address + qword_size >= ((static_cast<size_t>(std::numeric_limits<uint32_t>::max()) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER) / 8) {
-#ifndef DCON_USE_EXCEPTIONS
-				std::abort();
-#else
-				throw out_of_space{};
-#endif
+				DCON_OUT_OF_SPACE(stable_variable_vector3_backing);
 			}
 
 			detail::mk_2_header* new_header = (detail::mk_2_header*)(allocation + initial_base_address);
@@ -569,44 +565,6 @@ namespace dcon {
 
 		i = std::numeric_limits<stable_mk_2_tag>::max();
 	}
-
-	/*
-	template<typename object_type>
-	inline stable_mk_2_tag stable_variable_vector_base<object_type>::return_new_memory(uint32_t requested_capacity) {
-		const uint32_t real_capacity = uint32_t(1) << requested_capacity;
-
-		detail::mk_2_header* new_header;
-		stable_mk_2_tag new_mem;
-
-
-		const uint32_t qword_size = uint32_t(1) + (real_capacity * sizeof(object_type) + uint32_t(7)) / uint32_t(8);
-		auto old_position = first_free.fetch_add(qword_size, std::memory_order_acq_rel);
-
-		new_mem = old_position;
-
-		uint64_t* const backing_storage = static_cast<stable_variable_vector_storage_mk_2<object_type, 1, 1>*>(this)->backing_storage;
-		new_header = (detail::mk_2_header*)(backing_storage + old_position);
-
-
-		if(first_free >= memory_size) {
-#ifndef DCON_USE_EXCEPTIONS
-			std::abort();
-#else
-			throw out_of_space{};
-#endif
-		}
-
-		new_header->capacity = uint16_t(real_capacity);
-		new_header->size = uint16_t(0);
-		new_header->next_free = std::numeric_limits<stable_mk_2_tag>::max();
-
-		object_type* objects = detail::to_data<object_type>(new_header);
-		for(int32_t i = int32_t(real_capacity) - 1; i >= 0; --i)
-			new (objects + i) object_type();
-
-		return new_mem;
-	}
-	*/
 
 	template<typename object_type>
 	std::pair<object_type*, object_type*> get_range(stable_variable_vector_base<object_type> const& /*storage*/, stable_mk_2_tag i) {
