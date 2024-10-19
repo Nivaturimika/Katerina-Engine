@@ -112,8 +112,6 @@ void EnableCrashingOnCrashes() {
 }
 
 native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_handler& err, native_string_view path) {
-	simple_fs::restore_state(fs_root, path);
-	//
 	auto root = simple_fs::get_root(fs_root);
 	auto common = simple_fs::open_directory(root, NATIVE("common"));
 	parsers::bookmark_context bookmark_context;
@@ -408,6 +406,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		// Validator only mode
 		if(validate_only) {
 			parsers::error_handler err("");
+			simple_fs::restore_state(fs_root, path);
 			native_string selected_scenario_file = make_scenario(fs_root, err, path);
 			if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
 				auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
@@ -445,6 +444,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			}
 			if(!loaded_scenario) { //create scenario if we couldn't find it
 				parsers::error_handler err("");
+				simple_fs::restore_state(fs_root, path);
 				native_string selected_scenario_file = make_scenario(fs_root, err, path);
 				if(!err.accumulated_errors.empty() || !err.accumulated_warnings.empty()) {
 					auto assembled_file = std::string("You can still play the mod, but it might be unstable\r\nThe following problems were encountered while creating the scenario:\r\n\r\nErrors:\r\n") + err.accumulated_errors + "\r\n\r\nWarnings:\r\n" + err.accumulated_warnings;
@@ -466,10 +466,9 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 
 		// UI won't be baked onto scenario whuen not using scripted UI, nor can it be used
 		if(!game_state.cheat_data.extension_use_scripted_ui) {
-			parsers::scenario_building_context context(game_state);
+			parsers::building_gfx_context context(game_state, game_state.ui_defs);
 			parsers::error_handler err("");
-			ui::load_fixed_gui_definitions(game_state, context.gfx_context, err);
-			ui::load_text_gui_definitions(game_state, context.gfx_context, err);
+			ui::load_text_gui_definitions(game_state, context, err);
 		}
 
 		// scenario loading functions (would have to run these even when scenario is pre-built)

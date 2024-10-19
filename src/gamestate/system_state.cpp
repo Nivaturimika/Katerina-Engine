@@ -1810,8 +1810,8 @@ namespace sys {
 		parsers::scenario_building_context context(*this);
 
 		// UI doesn't affect checksum, however, when using scripted UI, it will
+		ui::load_fixed_gui_definitions(*this, context.gfx_context, err);
 		if(cheat_data.extension_use_scripted_ui) {
-			ui::load_fixed_gui_definitions(*this, context.gfx_context, err);
 			ui::load_text_gui_definitions(*this, context.gfx_context, err);
 		}
 

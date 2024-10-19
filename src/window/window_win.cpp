@@ -439,6 +439,8 @@ namespace window {
 			ShowWindow(game_state.win_ptr->hwnd, SW_SHOWNORMAL);
 		}
 		UpdateWindow(game_state.win_ptr->hwnd);
+
+		ogl::create_opengl_context(game_state);
 	}
 
 	void initialize_window(sys::state& game_state) {

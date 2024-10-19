@@ -303,6 +303,7 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		glfwSetWindowFocusCallback(window, focus_callback);
 		glfwSetWindowSizeLimits(window, 640, 400, 2400, 1800);
 
+		ogl::create_opengl_context(game_state);
 		ogl::initialize_opengl(game_state);
 
 		sound::initialize_sound_system(game_state);
