@@ -357,6 +357,7 @@ struct position_data { };
 
 	};
 
+	void load_fixed_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err);
 	void load_text_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err);
 
 enum class message_result { unseen, seen, consumed };

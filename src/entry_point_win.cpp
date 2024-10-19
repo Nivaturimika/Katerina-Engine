@@ -328,72 +328,76 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 					game_state.network_state.ip_address = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
 					i++;
 				}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-name")) {
-					if(i + 1 < num_params) {
-						std::string nickname = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-password")) {
-					if(i + 1 < num_params) {
-						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
-						std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-v6")) {
-					game_state.network_state.as_v6 = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-v4")) {
-					game_state.network_state.as_v6 = false;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-headless")) {
-					headless = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
-					headless_repeat = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-gamedir")) {
-					if(i + 1 < num_params) {
-						auto path = native_string(parsed_cmd[i + 1]);
-						simple_fs::set_steam_path(path);
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
-					if(i + 1 < num_params) {
-						auto root = get_root(fs_root);
-						auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
-						parsers::error_handler err("");
-						auto of = simple_fs::open_file(mod_dir, native_string(parsed_cmd[i + 1]));
-						if(of) {
-							auto content = view_contents(*of);
-							parsers::token_generator gen(content.data, content.data + content.file_size);
-							mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
-						}
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-scenario")) {
-					if(i + 1 < num_params) {
-						auto str = parsed_cmd[i + 1];
-						if(sys::try_read_scenario_and_save_file(game_state, parsed_cmd[i + 1])) {
-							game_state.fill_unsaved_data();
-							loaded_scenario = true;
-						} else {
-							auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
-							window::emit_error_message(msg, true);
-						}
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-autofind")) {
-					scenario_autofind = true;
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
-					if(i + 1 < num_params) {
-						auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
-						headless_speed = std::atoi(str.c_str());
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-path")) {
-					if(i + 1 < num_params) {
-						opt_fs_path = native_string(parsed_cmd[i + 1]);
-						i++;
-					}
-				} else if(native_string(parsed_cmd[i]) == NATIVE("-validate")) {
-					validate_only = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-name")) {
+				if(i + 1 < num_params) {
+					std::string nickname = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
+					i++;
 				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-password")) {
+				if(i + 1 < num_params) {
+					auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					std::memset(game_state.network_state.password, '\0', sizeof(game_state.network_state.password));
+					std::memcpy(game_state.network_state.password, str.c_str(), std::min(sizeof(game_state.network_state.password), str.length()));
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-v6")) {
+				game_state.network_state.as_v6 = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-v4")) {
+				game_state.network_state.as_v6 = false;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-headless")) {
+				headless = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-repeat")) {
+				headless_repeat = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-gamedir")) {
+				if(i + 1 < num_params) {
+					auto path = native_string(parsed_cmd[i + 1]);
+					simple_fs::set_steam_path(path);
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-mod")) {
+				if(i + 1 < num_params) {
+					auto root = get_root(fs_root);
+					auto mod_dir = simple_fs::open_directory(root, NATIVE("mod"));
+					parsers::error_handler err("");
+					auto of = simple_fs::open_file(mod_dir, native_string(parsed_cmd[i + 1]));
+					if(of) {
+						auto content = view_contents(*of);
+						parsers::token_generator gen(content.data, content.data + content.file_size);
+						mod_list.push_back(parsers::parse_mod_file(gen, err, parsers::mod_file_context{}));
+					}
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-scenario")) {
+				if(i + 1 < num_params) {
+					auto str = parsed_cmd[i + 1];
+					if(sys::try_read_scenario_and_save_file(game_state, parsed_cmd[i + 1])) {
+						game_state.fill_unsaved_data();
+						loaded_scenario = true;
+					} else {
+						auto msg = std::string("Scenario file ") + text::native_to_utf8(parsed_cmd[i + 1]) + " could not be read";
+						window::emit_error_message(msg, true);
+					}
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-autofind")) {
+				scenario_autofind = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-speed")) {
+				if(i + 1 < num_params) {
+					auto str = text::native_to_utf8(native_string(parsed_cmd[i + 1]));
+					headless_speed = std::atoi(str.c_str());
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-path")) {
+				if(i + 1 < num_params) {
+					opt_fs_path = native_string(parsed_cmd[i + 1]);
+					i++;
+				}
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-validate")) {
+				validate_only = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-daily-oos")) {
+				game_state.cheat_data.daily_oos_check = true;
+			} else if(native_string(parsed_cmd[i]) == NATIVE("-ext-script-ui")) {
+				game_state.cheat_data.extension_use_scripted_ui = true;
+			}
 		}
 
 		// if the optional fs path is defined use that one, otherwise infer from mod list
@@ -459,6 +463,14 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 		}
 		network::init(game_state);
 		LocalFree(parsed_cmd);
+
+		// UI won't be baked onto scenario whuen not using scripted UI, nor can it be used
+		if(!game_state.cheat_data.extension_use_scripted_ui) {
+			parsers::scenario_building_context context(game_state);
+			parsers::error_handler err("");
+			ui::load_fixed_gui_definitions(game_state, context.gfx_context, err);
+			ui::load_text_gui_definitions(game_state, context.gfx_context, err);
+		}
 
 		// scenario loading functions (would have to run these even when scenario is pre-built)
 		game_state.load_user_settings();

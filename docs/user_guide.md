@@ -97,6 +97,8 @@ Other controls are described directly on the tooltip (for example, right clickin
 * `-path <path>`: Set the raw mod path to `path` (separated by `?` and `;`, the former denotes a `replace_path`, the latter denotes a root).
 * `-validate`: Sets validate mode, exits upon scenario creation.
 * `-port <port>`: Use a given port to host, the default is `1984`.
+* `-ext-script-ui`: Be able to use scripted UI (otherwise any scripted buttons will fail and cause OOS)
+* `-daily-oos`: Turn on daily OOS checks (as opposed to monthly ones).
 
 ## Game directory
 

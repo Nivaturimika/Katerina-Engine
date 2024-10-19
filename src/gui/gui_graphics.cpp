@@ -4,7 +4,7 @@
 
 namespace ui {
 
-	void load_text_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err) {
+	void load_fixed_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err) {
 		// preload special background textures
 		assert(context.ui_defs.textures.size() == size_t(0));
 		{
@@ -42,7 +42,9 @@ namespace ui {
 			context.ui_defs.textures.emplace_back(context.full_state.add_key_win1252(stripped_name));
 			context.map_of_texture_names.insert_or_assign(stripped_name, definitions::no_news_image);
 		}
+	}
 
+	void load_text_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err) {
 		auto rt = get_root(state.common_fs);
 		auto interfc = open_directory(rt, NATIVE("interface"));
 		auto assets = open_directory(rt, NATIVE("assets"));

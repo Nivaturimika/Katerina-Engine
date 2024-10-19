@@ -1809,8 +1809,11 @@ namespace sys {
 
 		parsers::scenario_building_context context(*this);
 
-		//text::name_into_font_id(*this, "garamond_14");
-		ui::load_text_gui_definitions(*this, context.gfx_context, err);
+		// UI doesn't affect checksum, however, when using scripted UI, it will
+		if(cheat_data.extension_use_scripted_ui) {
+			ui::load_fixed_gui_definitions(*this, context.gfx_context, err);
+			ui::load_text_gui_definitions(*this, context.gfx_context, err);
+		}
 
 		auto map = open_directory(root, NATIVE("map"));
 		// parse default.map
