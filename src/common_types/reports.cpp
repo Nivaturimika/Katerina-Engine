@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include "reports.hpp"
 
-// Static globals, oooh scary!!! (dont do this)
-static FILE* fp = NULL;
-static bool tried_opening_fp = false;
-
 namespace reports {
+	// Static globals, oooh scary!!! (dont do this)
+	static FILE* fp = NULL;
+	static bool tried_opening_fp = false;
+
 	void write_debug(std::string_view msg) noexcept {
 		if(msg.size() > 0) {
 			std::string s = std::string(msg);
