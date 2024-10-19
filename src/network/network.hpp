@@ -25,16 +25,16 @@ namespace network {
 
 	inline constexpr short default_server_port = 1984;
 
-	#ifdef _WIN64
+#ifdef _WIN32
 	typedef SOCKET socket_t;
-	#else
+#else
 	typedef int socket_t;
-	#endif
+#endif
 
 	struct client_handshake_data {
 		sys::player_name nickname;
-	uint8_t password[16] = {0};
-	uint8_t reserved[48] = {0};
+		uint8_t password[16] = {0};
+		uint8_t reserved[48] = {0};
 	};
 
 	struct server_handshake_data {
@@ -42,11 +42,11 @@ namespace network {
 		sys::checksum_key save_checksum;
 		uint32_t seed;
 		dcon::nation_id assigned_nation;
-	uint8_t reserved[64] = {0};
+		uint8_t reserved[64] = {0};
 	};
 
 	struct client_data {
-	dcon::nation_id playing_as{};
+		dcon::nation_id playing_as{};
 		socket_t socket_fd = 0;
 		struct sockaddr_storage address;
 
