@@ -236,7 +236,7 @@ namespace map {
 		std::vector<text_line_generator_data> text_data;
 		std::vector<bool> visited(65536, false);
 		std::vector<uint16_t> group_of_regions;
-		std::unordered_map<uint16_t, std::set<uint16_t>> regions_graph;
+		ankerl::unordered_dense::map<uint16_t, std::set<uint16_t>> regions_graph;
 
 		int samples_N = 100;
 		int samples_M = 50;

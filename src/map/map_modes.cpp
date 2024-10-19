@@ -6,7 +6,7 @@
 #include "province.hpp"
 #include "nations.hpp"
 #include "economy_factory.hpp"
-#include "pdqsort.hpp"
+#include "pdqsort.h"
 #include "unordered_dense.h"
 #include "gui_map_legend.hpp"
 
@@ -699,17 +699,17 @@ std::vector<uint32_t> get_global_population_color(sys::state& state) {
 	uint32_t texture_size = province_size + 256 - province_size % 256;
 	std::vector<uint32_t> prov_color(texture_size * 2);
 
-	auto continent_max_pop = state.world.modifier_make_vectorizable_float_buffer();
+	ankerl::unordered_dense::map<dcon::modifier_id, float> continent_max_pop = {};
 	province::for_each_land_province(state, [&](dcon::province_id prov_id) {
 		auto fat_id = dcon::fatten(state.world, prov_id);
 		float population = state.world.province_get_demographics(prov_id, demographics::total);
 		auto cid = fat_id.get_continent().id;
-		continent_max_pop.set(cid, std::max(continent_max_pop.get(cid), population));
+		continent_max_pop[cid] = std::max(continent_max_pop[cid], population);
 		auto i = province::to_map_id(prov_id);
 	});
 	province::for_each_land_province(state, [&](dcon::province_id prov_id) {
 		auto fat_id = dcon::fatten(state.world, prov_id);
-		auto cid = fat_id.get_continent().id.index();
+		auto cid = fat_id.get_continent().id;
 		auto i = province::to_map_id(prov_id);
 		float gradient_index = state.world.province_get_demographics(prov_id, demographics::total) / continent_max_pop[cid];
 		auto color = ogl::color_gradient(gradient_index, 210, 100 << 8);
