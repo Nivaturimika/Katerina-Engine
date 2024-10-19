@@ -49,11 +49,6 @@ spriteTypes = {
 		texturefile = "assets\\unitrightedge.png"
 		noOfFrames = 1
 	}
-	spriteType = {
-		name = "GFX_alice_dig_in"
-		texturefile = "assets\\diginpips.png"
-		noOfFrames = 7
-	}
 	progressbartype = {
 		name = "GFX_alice_org_bar"
 		textureFile1 = "assets\\orgbar_top.png"
