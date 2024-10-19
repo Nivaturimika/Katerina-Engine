@@ -35,14 +35,16 @@ namespace ogl {
 			&& pfd.cColorBits >= 24) {
 				reports::write_debug("Found usable pixel format #" + std::to_string(i) + "\n");
 				reports::write_debug("Stencil=" + std::to_string(pfd.cStencilBits) + ",ColorDepth=" + std::to_string(pfd.cColorBits) + ",AccumBits=" + std::to_string(pfd.cAccumBits) + "\n");
-				auto pixel_format = ChoosePixelFormat(window_dc, &pfd);
-				if(SetPixelFormat(window_dc, pixel_format, &pfd)) {
+				if(SetPixelFormat(window_dc, i + 1, &pfd)) {
 					has_pfd_set = true;
 					break;
+				} else {
+					reports::write_debug("Unable to set a pixel format: " + std::to_string(GetLastError()) + "\n");
 				}
 			}
 		}
 		if(!has_pfd_set) {
+			reports::write_debug("Using default PFD as fallback\n");
 			PIXELFORMATDESCRIPTOR pfd;
 			ZeroMemory(&pfd, sizeof(pfd));
 			pfd.nSize = sizeof(pfd);
@@ -54,7 +56,9 @@ namespace ogl {
 			pfd.cStencilBits = 8;
 			pfd.iLayerType = PFD_MAIN_PLANE;
 			int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
-			SetPixelFormat(window_dc, pixel_format, &pfd);
+			if(!SetPixelFormat(window_dc, pixel_format, &pfd)) {
+				reports::write_debug("Unable to set a pixel format: " + std::to_string(GetLastError()) + "\n");
+			}
 		}
 
 		auto gl_lib = LoadLibraryW(L"opengl32.dll");

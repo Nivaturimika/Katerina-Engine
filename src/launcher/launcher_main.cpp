@@ -805,14 +805,16 @@ namespace launcher {
 			&& pfd.cColorBits >= 24) {
 				reports::write_debug("Found usable pixel format #" + std::to_string(i) + "\n");
 				reports::write_debug("Stencil=" + std::to_string(pfd.cStencilBits) + ",ColorDepth=" + std::to_string(pfd.cColorBits) + ",AccumBits=" + std::to_string(pfd.cAccumBits) + "\n");
-				auto pixel_format = ChoosePixelFormat(window_dc, &pfd);
-				if(SetPixelFormat(window_dc, pixel_format, &pfd)) {
+				if(SetPixelFormat(window_dc, i + 1, &pfd)) {
 					has_pfd_set = true;
 					break;
+				} else {
+					reports::write_debug("Unable to set a pixel format: " + std::to_string(GetLastError()) + "\n");
 				}
 			}
 		}
 		if(!has_pfd_set) {
+			reports::write_debug("Using default PFD as fallback\n");
 			PIXELFORMATDESCRIPTOR pfd;
 			ZeroMemory(&pfd, sizeof(pfd));
 			pfd.nSize = sizeof(pfd);
@@ -824,7 +826,9 @@ namespace launcher {
 			pfd.cStencilBits = 8;
 			pfd.iLayerType = PFD_MAIN_PLANE;
 			int const pixel_format = ChoosePixelFormat(window_dc, &pfd);
-			SetPixelFormat(window_dc, pixel_format, &pfd);
+			if(!SetPixelFormat(window_dc, pixel_format, &pfd)) {
+				reports::write_debug("Unable to set a pixel format: " + std::to_string(GetLastError()) + "\n");
+			}
 		}
 
 		auto gl_lib = LoadLibraryW(L"opengl32.dll");
@@ -2090,7 +2094,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 } // end launcher namespace
 
 int WINAPI wWinMain(
-	HINSTANCE /*hInstance*/,
+	HINSTANCE hInstance,
 	HINSTANCE /*hPrevInstance*/,
 	LPWSTR /*lpCmdLine*/,
 	int /*nCmdShow*/
@@ -2130,7 +2134,7 @@ int WINAPI wWinMain(
 	wcex.lpfnWndProc = launcher::WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = sizeof(LONG_PTR);
-	wcex.hInstance = GetModuleHandle(nullptr);
+	wcex.hInstance = hInstance;
 	wcex.hIcon = (HICON)LoadImage(GetModuleHandleW(nullptr), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName = NULL;
@@ -2158,14 +2162,14 @@ int WINAPI wWinMain(
 		0,
 		L"alice_launcher_class",
 		L"Launch Katerina Engine",
-		WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+		WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		0,
-		0,
+		880,
+		540,
 		NULL,
 		NULL,
-		GetModuleHandle(NULL),
+		hInstance,
 		NULL
 	);
 
