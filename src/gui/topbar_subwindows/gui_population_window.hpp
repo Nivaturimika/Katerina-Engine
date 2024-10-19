@@ -1204,29 +1204,29 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			if(parent) {
 				auto& pop_list = get_pop_window_list(state);
-
-			std::unordered_map<typename T::value_base_t, float> distrib{};
+				ankerl::unordered_dense::map<typename T::value_base_t, float> distrib{};
 				for(auto const pop_id : pop_list) {
 					auto const weight_fn = [&](auto id) {
 						auto weight = state.world.pop_get_demographics(pop_id, pop_demographics::to_key(state, id));
 						distrib[typename T::value_base_t(id.index())] += weight;
-					};
+						};
 					// Can obtain via simple pop_demographics query
-					if constexpr(std::is_same_v<T, dcon::issue_option_id>)
-					state.world.for_each_issue_option(weight_fn);
-					else if constexpr(std::is_same_v<T, dcon::ideology_id>)
-					state.world.for_each_ideology(weight_fn);
+					if constexpr(std::is_same_v<T, dcon::issue_option_id>) {
+						state.world.for_each_issue_option(weight_fn);
+					} else if constexpr(std::is_same_v<T, dcon::ideology_id>) {
+						state.world.for_each_ideology(weight_fn);
+					}
 					// Needs to be queried directly from the pop
-					if constexpr(std::is_same_v<T, dcon::culture_id>)
-					distrib[typename T::value_base_t(state.world.pop_get_culture(pop_id).id.index())] += state.world.pop_get_size(pop_id);
-					else if constexpr(std::is_same_v<T, dcon::religion_id>)
-					distrib[typename T::value_base_t(state.world.pop_get_religion(pop_id).id.index())] += state.world.pop_get_size(pop_id);
-					else if constexpr(std::is_same_v<T, dcon::pop_type_id>)
-					distrib[typename T::value_base_t(state.world.pop_get_poptype(pop_id).id.index())] += state.world.pop_get_size(pop_id);
-					else if constexpr(std::is_same_v<T, dcon::political_party_id>) {
+					if constexpr(std::is_same_v<T, dcon::culture_id>) {
+						distrib[typename T::value_base_t(state.world.pop_get_culture(pop_id).id.index())] += state.world.pop_get_size(pop_id);
+					} else if constexpr(std::is_same_v<T, dcon::religion_id>) {
+						distrib[typename T::value_base_t(state.world.pop_get_religion(pop_id).id.index())] += state.world.pop_get_size(pop_id);
+					} else if constexpr(std::is_same_v<T, dcon::pop_type_id>) {
+						distrib[typename T::value_base_t(state.world.pop_get_poptype(pop_id).id.index())] += state.world.pop_get_size(pop_id);
+					} else if constexpr(std::is_same_v<T, dcon::political_party_id>) {
 						auto prov_id = state.world.pop_location_get_province(state.world.pop_get_pop_location_as_pop(pop_id));
 						if(state.world.province_get_is_colonial(prov_id))
-						continue;
+							continue;
 						auto tag = state.world.nation_get_identity_from_identity_holder(
 							state.world.province_get_nation_from_province_ownership(prov_id));
 						auto start = state.world.national_identity_get_political_party_first(tag).id.index();
@@ -1242,20 +1242,24 @@ namespace ui {
 					}
 				}
 
-			std::vector<std::pair<T, float>> sorted_distrib{};
-				for(auto const& e : distrib)
-				if(e.second > 0.f)
-					sorted_distrib.emplace_back(T(e.first), e.second);
-				std::sort(sorted_distrib.begin(), sorted_distrib.end(),
-					[&](std::pair<T, float> a, std::pair<T, float> b) { return a.second > b.second; });
-
+				std::vector<std::pair<T, float>> sorted_distrib{};
+				for(auto const& e : distrib) {
+					if(e.second > 0.f) {
+						sorted_distrib.emplace_back(T(e.first), e.second);
+					}
+				}
+				pdqsort(sorted_distrib.begin(), sorted_distrib.end(), [&](std::pair<T, float> a, std::pair<T, float> b) {
+					return a.second > b.second;
+				});
 				distrib_listbox->row_contents.clear();
 				// Add (and scale elements) into the distribution listbox
 				auto total = 0.f;
-				for(auto const& e : sorted_distrib)
-				total += e.second;
-				for(auto const& e : sorted_distrib)
-				distrib_listbox->row_contents.emplace_back(e.first, e.second / total);
+				for(auto const& e : sorted_distrib) {
+					total += e.second;
+				}
+				for(auto const& e : sorted_distrib) {
+					distrib_listbox->row_contents.emplace_back(e.first, e.second / total);
+				}
 				distrib_listbox->update(state);
 			}
 		}
@@ -1400,11 +1404,12 @@ namespace ui {
 				std::vector<dcon::issue_option_id> distrib;
 				for(auto io : state.world.in_issue_option) {
 					auto v = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, io.id));
-					if(v > 0.f)
-					distrib.push_back(io.id);
+					if(v > 0.f) {
+						distrib.push_back(io.id);
+					}
 				}
 
-				std::sort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
+				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
 					return state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a)) > state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
 				});
 
@@ -1551,18 +1556,20 @@ namespace ui {
 				std::vector<dcon::ideology_id> distrib;
 				for(auto io : state.world.in_ideology) {
 					auto v = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, io.id));
-					if(v > 0.f)
-					distrib.push_back(io.id);
+					if(v > 0.f) {
+						distrib.push_back(io.id);
+					}
 				}
 
-				std::sort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
+				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
 					return state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a)) > state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
 				});
 
 				distrib_listbox->row_contents.clear();
 
-				for(auto const& e : distrib)
-				distrib_listbox->row_contents.emplace_back(e, state.world.pop_get_demographics(pop, pop_demographics::to_key(state, e)));
+				for(auto const& e : distrib) {
+					distrib_listbox->row_contents.emplace_back(e, state.world.pop_get_demographics(pop, pop_demographics::to_key(state, e)));
+				}
 				distrib_listbox->update(state);
 			}
 		}
@@ -2587,15 +2594,20 @@ namespace ui {
 
 			// States are sorted by total population
 			std::vector<dcon::state_instance_id> state_list;
-			for(auto si : state.world.nation_get_state_ownership(nation_id))
-			state_list.push_back(si.get_state().id);
-			std::sort(state_list.begin(), state_list.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
+				state_list.push_back(si.get_state().id);
+			}
+			pdqsort(state_list.begin(), state_list.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 				// Colonial states go last
-				if(state.world.province_get_is_colonial(state.world.state_instance_get_capital(a)) !=
-					state.world.province_get_is_colonial(state.world.state_instance_get_capital(b)))
-				return !state.world.province_get_is_colonial(state.world.state_instance_get_capital(a));
-				return state.world.state_instance_get_demographics(a, demographics::total) >
-						 state.world.state_instance_get_demographics(b, demographics::total);
+				auto ac = state.world.province_get_is_colonial(state.world.state_instance_get_capital(a));
+				auto bc = state.world.province_get_is_colonial(state.world.state_instance_get_capital(b));
+				if(ac != bc)
+					return !ac;
+				auto av = state.world.state_instance_get_demographics(a, demographics::total);
+				auto bv = state.world.state_instance_get_demographics(b, demographics::total);
+				if(av != bv)
+					return av > bv;
+				return a.index() < b.index();
 			});
 
 			std::vector<dcon::province_id> province_list;
@@ -2604,15 +2616,22 @@ namespace ui {
 				// Provinces are sorted by total population too
 				province_list.clear();
 				auto fat_id = dcon::fatten(state.world, state_id);
-			province::for_each_province_in_state_instance(state, fat_id, [&](dcon::province_id id) { province_list.push_back(id); });
-				std::sort(province_list.begin(), province_list.end(), [&](dcon::province_id a, dcon::province_id b) {
-					return state.world.province_get_demographics(a, demographics::total) >
-							 state.world.province_get_demographics(b, demographics::total);
+				province::for_each_province_in_state_instance(state, fat_id, [&](dcon::province_id id) {
+					province_list.push_back(id);
+				});
+				pdqsort(province_list.begin(), province_list.end(), [&](dcon::province_id a, dcon::province_id b) {
+					auto av = state.world.province_get_demographics(a, demographics::total);
+					auto bv = state.world.province_get_demographics(b, demographics::total);
+					if(av != bv)
+						return av > bv;
+					return a.index() < b.index();
 				});
 				// Only put if the state is "expanded"
-				if(view_expanded_state[dcon::state_instance_id::value_base_t(state_id.index())] == true)
-				for(auto const province_id : province_list)
-					left_side_listbox->row_contents.push_back(pop_left_side_data(province_id));
+				if(view_expanded_state[dcon::state_instance_id::value_base_t(state_id.index())] == true) {
+					for(auto const province_id : province_list) {
+						left_side_listbox->row_contents.push_back(pop_left_side_data(province_id));
+					}
+				}
 			}
 		}
 
