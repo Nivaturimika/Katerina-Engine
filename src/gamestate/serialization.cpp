@@ -572,7 +572,7 @@ namespace sys {
 		// dcon::load_record loaded;
 		auto szb = state.world.serialize_size(loaded);
 
-	return scenario_size{ sz + szb, sz };
+		return scenario_size{ sz + szb, sz };
 	}
 
 	uint8_t const* read_save_section(uint8_t const* ptr_in, uint8_t const* section_end, sys::state& state) {
@@ -675,9 +675,7 @@ namespace sys {
 	}
 	size_t sizeof_save_section(sys::state& state) {
 		size_t sz = 0;
-
 		// hand-written contribution
-
 		sz += serialize_size(state.unit_names);
 		sz += serialize_size(state.unit_names_indices);
 		sz += sizeof(state.local_player_nation);
@@ -715,11 +713,9 @@ namespace sys {
 			sz += sizeof(state.military_definitions.great_wars_enabled);
 			sz += sizeof(state.military_definitions.world_wars_enabled);
 		}
-
 		// data container contribution
 		dcon::load_record loaded = state.world.make_serialize_record_store_save();
-		sz += state.world.serialize_size(loaded);
-
+		sz += size_t(state.world.serialize_size(loaded));
 		return sz;
 	}
 
@@ -736,8 +732,11 @@ namespace sys {
 
 
 		// this is an upper bound, since compacting the data may require less space
-		size_t total_size =
-			sizeof_scenario_header(header) + sizeof_mod_path(simple_fs::extract_state(state.common_fs)) + ZSTD_compressBound(scenario_space.total_size) + ZSTD_compressBound(save_space) + sizeof(uint32_t) * 4;
+		size_t total_size = sizeof_scenario_header(header)
+			+ sizeof_mod_path(simple_fs::extract_state(state.common_fs))
+			+ ZSTD_compressBound(size_t(scenario_space.total_size))
+			+ ZSTD_compressBound(save_space)
+			+ sizeof(uint32_t) * 4;
 
 		uint8_t* temp_buffer = new uint8_t[total_size];
 		uint8_t* buffer_position = temp_buffer;
@@ -745,13 +744,13 @@ namespace sys {
 		buffer_position = write_scenario_header(buffer_position, header);
 		buffer_position = write_mod_path(buffer_position, simple_fs::extract_state(state.common_fs));
 
-		uint8_t* temp_scenario_buffer = new uint8_t[scenario_space.total_size];
+		uint8_t* temp_scenario_buffer = new uint8_t[size_t(scenario_space.total_size)];
 		auto last_written = write_scenario_section(temp_scenario_buffer, state);
 		auto last_written_count = last_written - temp_scenario_buffer;
 		assert(size_t(last_written_count) == scenario_space.total_size);
 		// calculate checksum
 		checksum_key* checksum = &reinterpret_cast<scenario_header*>(temp_buffer + sizeof(uint32_t))->checksum;
-		blake2b(checksum, sizeof(*checksum), temp_scenario_buffer + scenario_space.checksum_offset, scenario_space.total_size - scenario_space.checksum_offset, nullptr, 0);
+		blake2b(checksum, sizeof(*checksum), temp_scenario_buffer + size_t(scenario_space.checksum_offset), size_t(scenario_space.total_size - scenario_space.checksum_offset), nullptr, 0);
 		state.scenario_checksum = *checksum;
 
 		buffer_position = write_compressed_section(buffer_position, temp_scenario_buffer, uint32_t(scenario_space.total_size));

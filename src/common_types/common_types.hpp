@@ -276,6 +276,11 @@ namespace dcon {
 	}
 
 	using stable_mk_2_tag = uint32_t;
+#ifdef _WIN64
+	constexpr inline stable_mk_2_tag upper_mk_2_vector_bound = std::numeric_limits<stable_mk_2_tag>::max();
+#else
+	constexpr inline stable_mk_2_tag upper_mk_2_vector_bound = 128 * 4096;
+#endif
 
 	template<typename object_type, uint32_t minimum_size, size_t memory_size>
 	class stable_variable_vector_storage_mk_2;
@@ -360,17 +365,21 @@ namespace dcon {
 
 	class stable_variable_vector3_backing {
 	public:
-		uint64_t*  allocation = nullptr;
+		uint64_t* allocation = nullptr;
 		uint64_t qword_page_size = 0;
 
 		std::atomic<uint32_t> first_free = uint32_t(0);
 	
 		stable_variable_vector3_backing() {
-			constexpr auto allocation_size = ((static_cast<size_t>(std::numeric_limits<uint32_t>::max()) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER);
+			constexpr auto allocation_size = ((static_cast<size_t>(upper_mk_2_vector_bound) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER);
 #ifdef _WIN32
 			SYSTEM_INFO sSysInfo;
 			GetSystemInfo(&sSysInfo);
+#ifdef _WIN64
 			qword_page_size = uint64_t(sSysInfo.dwPageSize) * 16 / 8; // manage pages in groups of 16
+#else
+			qword_page_size = uint64_t(4096) * 16 / 8;
+#endif
 			allocation = (uint64_t*)VirtualAlloc(nullptr, allocation_size, MEM_RESERVE, PAGE_NOACCESS);
 			if (allocation == nullptr) {
 				MessageBoxW(nullptr, L"Unable to reserve memory", L"Fatal error", MB_OK);
@@ -391,22 +400,18 @@ namespace dcon {
 		}
 
 		inline stable_mk_2_tag return_new_memory(uint32_t requested_capacity) {
-
 			const uint32_t qword_size = uint32_t(1) + (requested_capacity + uint32_t(7)) / uint32_t(8);
-			
-
 #ifdef _WIN32
 			uint32_t initial_base_address = 0;
 			do {
 				initial_base_address = first_free.load(std::memory_order_acquire);
-
 				// determine if we predict that our allocation will go to uncommitted pages
 				// if so: commit
-
 				auto page_offset = initial_base_address / qword_page_size;
 				auto end_page = (initial_base_address + qword_size) / qword_page_size;
 				if (page_offset != end_page) {
-					/*auto ret = */VirtualAlloc(allocation + (page_offset + 1) * qword_page_size, (end_page - page_offset) * qword_page_size * 8, MEM_COMMIT, PAGE_READWRITE);
+					auto ret = VirtualAlloc(allocation + (page_offset + 1) * qword_page_size, (end_page - page_offset) * qword_page_size * 8, MEM_COMMIT, PAGE_READWRITE);
+					(void)ret;
 					//assert(ret);
 				}
 
@@ -414,19 +419,14 @@ namespace dcon {
 #else
 			uint32_t initial_base_address = first_free.fetch_add(qword_size);
 #endif
-
 			stable_mk_2_tag new_mem = initial_base_address;
-
-
-			if (initial_base_address + qword_size >= ((static_cast<size_t>(std::numeric_limits<uint32_t>::max()) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER) / 8) {
+			if (initial_base_address + qword_size >= ((static_cast<size_t>(upper_mk_2_vector_bound) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER) / 8) {
 				DCON_OUT_OF_SPACE(stable_variable_vector3_backing);
 			}
-
 			detail::mk_2_header* new_header = (detail::mk_2_header*)(allocation + initial_base_address);
 			new_header->capacity = uint16_t((requested_capacity + uint32_t(7)) / uint32_t(8));
 			new_header->size = uint16_t(0);
-			new_header->next_free = std::numeric_limits<stable_mk_2_tag>::max();
-
+			new_header->next_free = upper_mk_2_vector_bound;
 			return new_mem;
 		}
 	};
@@ -441,11 +441,24 @@ namespace dcon {
 		
 		std::atomic<uint32_t> first_free = uint32_t(0);
 		std::atomic<uint64_t> free_lists[17] = {
-			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
-			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
-			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
-			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
-			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value };
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value,
+			detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value
+		};
 
 		const uint64_t minimum_size;
 
@@ -484,21 +497,12 @@ namespace dcon {
 			auto actual_cap = (header->capacity * 8) / sizeof(object_type);
 
 			object_type* objects = detail::to_data<object_type>(header);
-			for (int32_t i = int32_t(actual_cap) - 1; i >= 0; --i)
+			for(int32_t i = int32_t(actual_cap) - 1; i >= 0; --i) {
 				new (objects + i) object_type();
-
+			}
 			return new_handle;
 		}
 	}
-
-	/*
-	template<typename object_type>
-	inline void stable_variable_vector_base<object_type>::reset() {
-		first_free = uint32_t(0);
-		for(uint32_t i = 0; i < std::extent_v<decltype(free_lists)>; ++i)
-			free_lists[i].store(detail::concurrent_key_pair_helper(std::numeric_limits<stable_mk_2_tag>::max(), 0).value, std::memory_order_release);
-	}
-	*/
 
 	template<typename object_type>
 	inline void stable_variable_vector_base<object_type>::increase_capacity(stable_mk_2_tag& i, uint32_t new_capacity) {
@@ -558,11 +562,7 @@ namespace dcon {
 		do {
 			header->next_free = detail::concurrent_key_pair_helper(free_list_value).parts.index;
 			header->size = uint16_t(0);
-		} while(!free_lists[free_list_pos].compare_exchange_strong(
-			free_list_value,
-			detail::concurrent_key_pair_helper(i, detail::concurrent_key_pair_helper(free_list_value).parts.counter + 1).value, std::memory_order_acq_rel));
-
-
+		} while(!free_lists[free_list_pos].compare_exchange_strong(free_list_value, detail::concurrent_key_pair_helper(i, detail::concurrent_key_pair_helper(free_list_value).parts.counter + 1).value, std::memory_order_acq_rel));
 		i = std::numeric_limits<stable_mk_2_tag>::max();
 	}
 

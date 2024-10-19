@@ -169,7 +169,7 @@ namespace sys {
 		dcon::national_identity_id tag;
 		dcon::government_type_id cgov;
 		sys::date d;
-		char save_name[32];
+		char save_name[32] = { 0 };
 	};
 
 	struct mod_identifier {
@@ -200,8 +200,8 @@ namespace sys {
 	uint8_t* write_scenario_section(uint8_t* ptr_in, sys::state& state);
 	uint8_t* write_save_section(uint8_t* ptr_in, sys::state& state);
 	struct scenario_size {
-		size_t total_size;
-		size_t checksum_offset;
+		uint64_t total_size;
+		uint64_t checksum_offset;
 	};
 	scenario_size sizeof_scenario_section(sys::state& state);
 	size_t sizeof_save_section(sys::state& state);

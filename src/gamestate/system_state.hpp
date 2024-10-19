@@ -526,20 +526,18 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 		crisis_mode current_crisis_mode = crisis_mode::inactive;
 		uint32_t crisis_last_checked_gp = 0;
 		dcon::war_id crisis_war;
-	sys::date last_crisis_end_date{0}; // initial grace period
+		sys::date last_crisis_end_date{0}; // initial grace period
 		dcon::national_identity_id crisis_liberation_tag;
 		dcon::state_definition_id crisis_colony;
 
 		//
 		// Messages
 		//
-
-	std::array<diplomatic_message::message, 128> pending_messages = {};
+		std::array<diplomatic_message::message, 128> pending_messages = {};
 
 		//
 		// Event data
 		//
-
 		std::vector<event::pending_human_n_event> pending_n_event;
 		std::vector<event::pending_human_f_n_event> pending_f_n_event;
 		std::vector<event::pending_human_p_event> pending_p_event;
@@ -573,8 +571,8 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 
 		network_mode_type network_mode = network_mode_type::single_player;
 		dcon::nation_id local_player_nation;
-	sys::date current_date = sys::date{0};
-	sys::date ui_date = sys::date{0};
+		sys::date current_date = sys::date{0};
+		sys::date ui_date = sys::date{0};
 		uint32_t game_seed = 0; // do *not* alter this value, ever
 		float inflation = 1.0f;
 		player_data player_data_cache;
@@ -643,9 +641,9 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 		// graphics data
 		ogl::data open_gl;
 
-		#ifdef DIRECTX_11
+#ifdef DIRECTX_11
 		directx::data directx;
-		#endif
+#endif
 
 		// cheat data
 		cheat_data_s cheat_data;
@@ -655,7 +653,7 @@ enum class crisis_mode : uint32_t { inactive = 0, finding_attacker = 1, finding_
 
 		// offload save loading
 		native_string load_file_name;
-		bool load_is_new_game;
+		bool load_is_new_game = false;
 
 		// the following functions will be invoked by the window subsystem
 

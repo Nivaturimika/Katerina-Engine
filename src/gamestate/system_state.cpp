@@ -4160,7 +4160,7 @@ namespace sys {
 
 	sys::checksum_key state::get_save_checksum() {
 		dcon::load_record loaded = world.make_serialize_record_store_save();
-		auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[world.serialize_size(loaded)]);
+		auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size_t(world.serialize_size(loaded))]);
 		std::byte* start = reinterpret_cast<std::byte*>(buffer.get());
 		world.serialize(start, loaded);
 
@@ -4177,7 +4177,7 @@ namespace sys {
 		{
 			// save for further inspection
 			dcon::load_record loaded = world.make_serialize_record_store_save();
-			auto save_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[world.serialize_size(loaded)]);
+			auto save_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size_t(world.serialize_size(loaded))]);
 			auto buffer_position = reinterpret_cast<std::byte*>(save_buffer.get());
 			world.serialize(buffer_position, loaded);
 			size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - save_buffer.get();
@@ -4196,14 +4196,14 @@ namespace sys {
 		{
 			// save for further inspection
 			dcon::load_record loaded = world.make_serialize_record_store_scenario();
-			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[world.serialize_size(loaded)]);
+			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size_t(world.serialize_size(loaded))]);
 			auto buffer_position = reinterpret_cast<std::byte*>(buffer.get());
 			world.serialize(buffer_position, loaded);
 			size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - buffer.get();
 			simple_fs::write_file(sdir, NATIVE("scen.bin"), reinterpret_cast<char*>(buffer.get()), uint32_t(total_size_used));
 		}
 		{
-			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[sys::sizeof_scenario_section(*this).total_size]);
+			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size_t(sys::sizeof_scenario_section(*this).total_size)]);
 			auto buffer_position = sys::write_scenario_section(buffer.get(), *this);
 			size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - buffer.get();
 			simple_fs::write_file(sdir, NATIVE("all_scen.bin"), reinterpret_cast<char*>(buffer.get()), uint32_t(total_size_used));
@@ -4215,7 +4215,7 @@ namespace sys {
 		{
 			// save for further inspection
 			dcon::load_record loaded = world.make_serialize_record_store_unsaved();
-			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[world.serialize_size(loaded)]);
+			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size_t(world.serialize_size(loaded))]);
 			auto buffer_position = reinterpret_cast<std::byte*>(buffer.get());
 			world.serialize(buffer_position, loaded);
 			size_t total_size_used = reinterpret_cast<uint8_t*>(buffer_position) - buffer.get();
