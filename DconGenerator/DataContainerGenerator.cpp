@@ -319,6 +319,7 @@ int main(int argc, char *argv[]) {
 		output += "#include <memory>\n";
 		output += "#include <assert.h>\n";
 		output += "#include <cstring>\n";
+		output += "#include \"pdqsort.h\"\n";
 		output += "#include \"common_types.hpp\"\n";
 		output += "#ifndef DCON_NO_VE\n";
 		output += "#include \"ve.hpp\"\n";

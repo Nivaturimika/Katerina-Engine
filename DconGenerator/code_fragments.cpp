@@ -1009,7 +1009,7 @@ basic_builder& make_compactable_delete(basic_builder& o, relationship_object_def
 							o + "if(@rel@.m_@r_prop@.vptr()[bk.index()][@i@] == last_id) @rel@.m_@r_prop@.vptr()[bk.index()][@i@] = id_removed;";
 						}
 						if(cr.linked_as->is_covered_by_composite_key) {
-							o + "std::sort(@rel@.m_@r_prop@.vptr()[bk.index()].begin(), @rel@.m_@r_prop@.vptr()[bk.index()].end(), [](@obj@_id l, @obj@_id r){ return l.value < r.value; });";
+							o + "pdqsort(@rel@.m_@r_prop@.vptr()[bk.index()].begin(), @rel@.m_@r_prop@.vptr()[bk.index()].end(), [](@obj@_id l, @obj@_id r){ return l.value < r.value; });";
 						}
 					} else {
 						o + "@rel@.m_@r_prop@.vptr()[bk.index()] = id_removed;";
@@ -1031,7 +1031,7 @@ basic_builder& make_compactable_delete(basic_builder& o, relationship_object_def
 								o + "if(@rel@.m_@r_prop@.vptr()[i.index()][@i@] == last_id) @rel@.m_@r_prop@.vptr()[i.index()][@i@] = id_removed;";
 							}
 							if(cr.linked_as->is_covered_by_composite_key) {
-								o + "std::sort(@rel@.m_@r_prop@.vptr()[i.index()].begin(), @rel@.m_@r_prop@.vptr()[i.index()].end(), [](@obj@_id l, @obj@_id r){ return l.value < r.value; });";
+								o + "pdqsort(@rel@.m_@r_prop@.vptr()[i.index()].begin(), @rel@.m_@r_prop@.vptr()[i.index()].end(), [](@obj@_id l, @obj@_id r){ return l.value < r.value; });";
 							}
 						} else {
 							o + "@rel@.m_@r_prop@.vptr()[i.index()] = id_removed;";
@@ -1657,7 +1657,7 @@ basic_builder& make_relation_try_create(basic_builder& o, relationship_object_de
 							o + "@prop@_p@i@,";
 						}
 					};
-					o + "std::sort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
+					o + "pdqsort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
 				}
 			}
 		}
@@ -1757,7 +1757,7 @@ basic_builder& make_relation_force_create(basic_builder& o, relationship_object_
 							o + "@prop@_p@i@,";
 						}
 					};
-					o + "std::sort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
+					o + "pdqsort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
 				}
 			}
 		}
@@ -2677,7 +2677,7 @@ basic_builder& make_composite_key_getter(basic_builder& o, std::string const& ob
 						o + "@prop@_p@i@,";
 					}
 				};
-				o + "std::sort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
+				o + "pdqsort(@prop@_p.begin(), @prop@_p.end(), [](@id_type@ a, @id_type@ b){ return a.value < b.value; });";
 			}
 		}
 		/*

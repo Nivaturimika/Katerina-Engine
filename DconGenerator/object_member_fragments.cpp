@@ -1006,7 +1006,7 @@ void make_try_current_composite_keys_text_with_multiplicity(basic_builder& o, st
 				o + substitute{ "params", params } +substitute{ "ckname", cc.name };
 				o + "auto temp = @obj@.m_@prop@.vptr()[id.index()];";
 				o + "temp[i] = value;";
-				o + "std::sort(temp.begin(), temp.end(), [](@type@ a, @type@ b){ return a.value < b.value; });";
+				o + "pdqsort(temp.begin(), temp.end(), [](@type@ a, @type@ b){ return a.value < b.value; });";
 				o + "if(@obj@.hashm_@ckname@.find( @obj@.to_@ckname@_keydata(@params@) ) != @obj@.hashm_@ckname@.end())" + block{
 					o + "return false;";
 				};
@@ -1359,7 +1359,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 						make_delete_current_composite_keys_text(o, "id", obj, i);
 						o + "@obj@.m_@prop@.vptr()[id.index()][i] = value;";
 						if(i.is_covered_by_composite_key) {
-							o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+							o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 								"[](@type@ a, @type@ b){ return a.value < b.value; });";
 						}
 						make_remove_add_current_composite_keys_text(o, "id", obj, i);
@@ -1370,7 +1370,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 							make_delete_current_composite_keys_text(o, "id", obj, i);
 							o + "@obj@.m_@prop@.vptr()[id.index()][i] = value;";
 							if(i.is_covered_by_composite_key) {
-								o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+								o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 									"[](@type@ a, @type@ b){ return a.value < b.value; });";
 							}
 							make_remove_add_current_composite_keys_text(o, "id", obj, i);
@@ -1430,7 +1430,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 					};
 					o + "@obj@.m_@prop@.vptr()[id.index()][i] = value;";
 					if(i.is_covered_by_composite_key) {
-						o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+						o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 							"[](@type@ a, @type@ b){ return a.value < b.value; });";
 					}
 					make_force_add_current_composite_keys_text(o, "id", obj, i);
@@ -1656,7 +1656,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 					make_delete_current_composite_keys_text(o, "id", obj, i);
 					o + "internal_@obj@_set_@prop@(id, i, value);";
 					if(i.is_covered_by_composite_key) {
-						o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+						o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 							"[](@type@ a, @type@ b){ return a.value < b.value; });";
 					}
 					make_remove_add_current_composite_keys_text(o, "id", obj, i);
@@ -1674,7 +1674,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 					make_try_current_composite_keys_text_with_multiplicity(o, "id", obj, i);
 					o + "internal_@obj@_set_@prop@(id, i, value);";
 					if(i.is_covered_by_composite_key) {
-						o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+						o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 							"[](@type@ a, @type@ b){ return a.value < b.value; });";
 					}
 					make_force_add_current_composite_keys_text(o, "id", obj, i);
@@ -1813,7 +1813,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 					make_delete_current_composite_keys_text(o, "id", obj, i);
 					o + "internal_@obj@_set_@prop@(id, i, value);";
 					if(i.is_covered_by_composite_key) {
-						o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+						o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 							"[](@type@ a, @type@ b){ return a.value < b.value; });";
 					}
 					make_remove_add_current_composite_keys_text(o, "id", obj, i);
@@ -1831,7 +1831,7 @@ void make_link_member_declarations(basic_builder& o, file_def const& parsed_file
 					make_try_current_composite_keys_text_with_multiplicity(o, "id", obj, i);
 					o + "internal_@obj@_set_@prop@(id, i, value);";
 					if(i.is_covered_by_composite_key) {
-						o + "std::sort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
+						o + "pdqsort(@obj@.m_@prop@.vptr()[id.index()].begin(), @obj@.m_@prop@.vptr()[id.index()].end(), "
 							"[](@type@ a, @type@ b){ return a.value < b.value; });";
 					}
 					make_force_add_current_composite_keys_text(o, "id", obj, i);
@@ -2334,7 +2334,7 @@ void many_getter_setter_text(basic_builder & o, list_type ltype, bool remove_all
 			o + "@obj@_for_each_@rel@_as_@rel_prop@(id, [&](@rel@_id j) { temp.push_back(j); });";
 		}
 		if(remove_all_needs_sort)
-			o + "std::sort(temp.begin(), temp.end(), [](@rel@_id l, @rel@_id r){ return l.value > r.value; });";
+			o + "pdqsort(temp.begin(), temp.end(), [](@rel@_id l, @rel@_id r){ return l.value > r.value; });";
 		if(has_multiplicity)
 			o + "std::for_each(temp.begin(), temp.end(), [t = this, id](@rel@_id i) { t->@rel@_replace_@rel_prop@(i, @obj@_id(), id); });";
 		else
