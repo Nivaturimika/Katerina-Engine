@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _WIN64
+#ifdef _WIN32
 // WINDOWS typedefs go here
 #include "native_types_win.hpp"
 
@@ -30,7 +30,7 @@ namespace simple_fs {
 	};
 } // namespace simple_fs
 
-#ifdef _WIN64
+#ifdef _WIN32
 // WINDOWS typedefs go here
 #include "simple_fs_types_win.hpp"
 #else

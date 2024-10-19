@@ -2218,7 +2218,7 @@ namespace text {
 		return std::string("");
 	}
 
-#ifdef _WIN64
+#ifdef _WIN32
 	native_string win1250_to_native(std::string_view data_in) {
 		native_string result;
 		for(auto ch : data_in) {

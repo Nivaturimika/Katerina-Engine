@@ -1,5 +1,5 @@
 
-#ifdef _WIN64
+#ifdef _WIN32
 // WINDOWS implementations go here
 
 #pragma comment(lib, "d2d1.lib")

@@ -23,7 +23,7 @@
 #include <x86intrin.h>
 #endif
 
-#ifdef _WIN64
+#ifdef _WIN32
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 
@@ -367,12 +367,10 @@ namespace dcon {
 	
 		stable_variable_vector3_backing() {
 			constexpr auto allocation_size = ((static_cast<size_t>(std::numeric_limits<uint32_t>::max()) + 1) * DCON_GLOBAL_BACKING_MULTIPLIER);
-#ifdef _WIN64
-
+#ifdef _WIN32
 			SYSTEM_INFO sSysInfo;
 			GetSystemInfo(&sSysInfo);
 			qword_page_size = uint64_t(sSysInfo.dwPageSize) * 16 / 8; // manage pages in groups of 16
-
 			allocation = (uint64_t*)VirtualAlloc(nullptr, allocation_size, MEM_RESERVE, PAGE_NOACCESS);
 			if (allocation == nullptr) {
 				MessageBoxW(nullptr, L"Unable to reserve memory", L"Fatal error", MB_OK);
@@ -385,7 +383,7 @@ namespace dcon {
 		}
 
 		~stable_variable_vector3_backing() {
-#ifdef _WIN64
+#ifdef _WIN32
 			VirtualFree(allocation, 0, MEM_RELEASE);
 #else
 			free(allocation);
@@ -397,7 +395,7 @@ namespace dcon {
 			const uint32_t qword_size = uint32_t(1) + (requested_capacity + uint32_t(7)) / uint32_t(8);
 			
 
-#ifdef _WIN64
+#ifdef _WIN32
 			uint32_t initial_base_address = 0;
 			do {
 				initial_base_address = first_free.load(std::memory_order_acquire);

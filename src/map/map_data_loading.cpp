@@ -5,7 +5,7 @@
 #include "parsers_declarations.hpp"
 #include "opengl_wrapper.hpp"
 
-#ifdef _WIN64
+#ifdef _WIN32
 #ifndef UNICODE
 #define UNICODE
 #endif
@@ -30,8 +30,7 @@ namespace map {
 		auto content = simple_fs::view_contents(*terrain_bmp);
 		uint8_t const* start = (uint8_t const*)(content.data);
 
-		#ifdef _WIN64
-
+#ifdef _WIN32
 		int32_t compression_type = 0;
 		int32_t size_x = 0;
 		int32_t size_y = 0;
@@ -121,11 +120,9 @@ namespace map {
 			}
 			data = decompressed_data.get();
 		}
-
 		assert(size_x == int32_t(map_size.x));
 		uint32_t free_space = uint32_t(std::max(0, map_size.y - size_y)); // schombert: find out how much water we need to add
-		#else
-
+#else
 		// Data offset is where the pixel data starts
 		uint8_t const* ptr = start + 10;
 		uint32_t data_offset = (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
@@ -136,11 +133,10 @@ namespace map {
 		ptr = start + 22;
 		uint32_t size_y = (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
 
-
 		uint8_t const* data = start + data_offset;
 		assert(size_x == uint32_t(map_size.x));
 		uint32_t free_space = std::max(uint32_t(0), map_size.y - size_y); // schombert: find out how much water we need to add
-		#endif
+#endif
 
 		// Calculate how much extra we add at the poles
 		uint32_t top_free_space = (free_space * 3) / 5;

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#ifdef _WIN64
+#ifdef _WIN32
 #include "sound_win.hpp"
 #else
 #include "sound_nix.hpp"

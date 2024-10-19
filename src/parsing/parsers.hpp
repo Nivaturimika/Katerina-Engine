@@ -236,29 +236,31 @@ namespace parsers {
 		return true;
 	}
 
-	#ifdef _WIN64
+#ifdef _WIN32
 	template<size_t N>
 	bool native_has_fixed_suffix_ci(wchar_t const* start, wchar_t const* end, const wchar_t (&t)[N]) {
-		if(end - start < ((std::ptrdiff_t)N - 1))
-		return false;
+		if(end - start < ((std::ptrdiff_t)N - 1)) {
+			return false;
+		}
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
 			if(towlower(end[-1 - i]) != t[(N - i) - 2])
 			return false;
 		}
 		return true;
 	}
-	#else
+#else
 	template<size_t N>
 	bool native_has_fixed_suffix_ci(char const* start, char const* end, char const (&t)[N]) {
-		if(end - start < ((std::ptrdiff_t)N - 1))
-		return false;
+		if(end - start < ((std::ptrdiff_t)N - 1)) {
+			return false;
+		}
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
 			if(tolower(end[-1 - i]) != t[(N - i) - 2])
 			return false;
 		}
 		return true;
 	}
-	#endif
+#endif
 
 	template<size_t N>
 	bool is_fixed_token(char const* start, char const* end, char const (&t)[N]) {

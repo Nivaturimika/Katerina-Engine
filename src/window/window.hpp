@@ -2,7 +2,7 @@
 
 // #include "system_state.hpp"
 
-#ifdef _WIN64
+#ifdef _WIN32
 
 typedef struct HWND__* HWND;
 typedef struct HDC__* HDC;
@@ -12,7 +12,7 @@ namespace window {
 		public:
 		HWND hwnd = nullptr;
 		HDC opengl_window_dc = nullptr;
-	HCURSOR cursors[8] = { HCURSOR(NULL) };
+		HCURSOR cursors[8] = { HCURSOR(NULL) };
 
 		int32_t creation_x_size = 600;
 		int32_t creation_y_size = 400;
@@ -43,7 +43,7 @@ namespace sys {
 }
 
 namespace window {
-enum class window_state : uint8_t { normal, maximized, minimized };
+	enum class window_state : uint8_t { normal, maximized, minimized };
 	struct creation_parameters {
 		int32_t size_x = 1024;
 		int32_t size_y = 768;

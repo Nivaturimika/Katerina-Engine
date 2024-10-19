@@ -464,8 +464,9 @@ namespace window {
 				if(msg.message == WM_QUIT) {
 					break;
 				}
-				if(game_state.ui_state.edit_target)
+				if(game_state.ui_state.edit_target) {
 					TranslateMessage(&msg);
+				}
 				DispatchMessageW(&msg);
 			} else {
 				// Run game code
