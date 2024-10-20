@@ -709,34 +709,41 @@ namespace map {
 				auto prepared_name = text::stored_glyphs(state, text::font_selection::map_font, name);
 				float name_extent = f.text_extent(state, prepared_name, 0, uint32_t(prepared_name.glyph_info.size()), 1);
 
+				// Columns -> n
+				// Rows -> fixed size of 4
+				// [ x0^0 x0^1 x0^2 x0^3 ]
+				// [ x1^0 x1^1 x1^2 x1^3 ]
+				// [ ...  ...  ...  ...  ]
+				// [ xn^0 xn^1 xn^2 xn^3 ]
+				// [AB]i,j = sum(n, r=1, a_(i,r) * b(r,j))
+				// [ x0^0 x0^1 x0^2 x0^3 ] * [ x0^0 x1^0 ... xn^0 ] = [ a0 a1 a2 ... an ]
+				// [ x1^0 x1^1 x1^2 x1^3 ] * [ x0^1 x1^1 ... xn^1 ] = [ b0 b1 b2 ... bn ]
+				// [ ...  ...  ...  ...  ] * [ x0^2 x1^2 ... xn^2 ] = [ c0 c1 c2 ... cn ]
+				// [ xn^0 xn^1 xn^2 xn^3 ] * [ x0^3 x1^3 ... xn^3 ] = [ d0 d1 d2 ... dn ]
+				glm::mat4x4 mi(0.f);
+				for(glm::length_t i = 0; i < mi.length(); i++) {
+					for(glm::length_t j = 0; j < mi.length(); j++) {
+						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++) {
+							mi[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
+						}
+					}
+				}
+				for(glm::length_t i = 0; i < mi.length(); i++) {
+					mi[i][i] += lambda;
+				}
+
 				bool use_quadratic = false;
 				// We will try cubic regression first, if that results in very
 				// weird lines, for example, lines that go to the infinite
 				// we will "fallback" to using a quadratic instead
 				if(state.user_settings.map_label == sys::map_label_mode::cubic) {
-					// Columns -> n
-					// Rows -> fixed size of 4
-					// [ x0^0 x0^1 x0^2 x0^3 ]
-					// [ x1^0 x1^1 x1^2 x1^3 ]
-					// [ ...  ...  ...  ...  ]
-					// [ xn^0 xn^1 xn^2 xn^3 ]
-					// [AB]i,j = sum(n, r=1, a_(i,r) * b(r,j))
-					// [ x0^0 x0^1 x0^2 x0^3 ] * [ x0^0 x1^0 ... xn^0 ] = [ a0 a1 a2 ... an ]
-					// [ x1^0 x1^1 x1^2 x1^3 ] * [ x0^1 x1^1 ... xn^1 ] = [ b0 b1 b2 ... bn ]
-					// [ ...  ...  ...  ...  ] * [ x0^2 x1^2 ... xn^2 ] = [ c0 c1 c2 ... cn ]
-					// [ xn^0 xn^1 xn^2 xn^3 ] * [ x0^3 x1^3 ... xn^3 ] = [ d0 d1 d2 ... dn ]
-					glm::mat4x4 m0(0.f);
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						for(glm::length_t j = 0; j < m0.length(); j++)
-							for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-								m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						m0[i][i] += lambda;
-					m0 = glm::inverse(m0); // m0 = (T(X)*X/n + I*lambda)^-1
+					auto const m0 = glm::inverse(mi); // m0 = (T(X)*X/n + I*lambda)^-1
 					glm::vec4 m1(0.f); // m1 = T(X)*Y / n
-					for(glm::length_t i = 0; i < m1.length(); i++)
-						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
+					for(glm::length_t i = 0; i < m1.length(); i++) {
+						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++) {
 							m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
+						}
+					}
 					glm::vec4 mo(0.f); // mo = m1 * m0
 					for(glm::length_t i = 0; i < mo.length(); i++)
 						for(glm::length_t j = 0; j < mo.length(); j++)
@@ -780,14 +787,7 @@ namespace map {
 				bool use_linear = false;
 				if(state.user_settings.map_label == sys::map_label_mode::quadratic || use_quadratic) {
 					// Now lets try quadratic
-					glm::mat3x3 m0(0.f);
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						for(glm::length_t j = 0; j < m0.length(); j++)
-							for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-								m0[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						m0[i][i] += lambda;
-					m0 = glm::inverse(m0); // m0 = (T(X)*X)^-1
+					auto const m0 = glm::inverse(glm::mat3x3(mi)); // m0 = (T(X)*X)^-1
 					glm::vec3 m1(0.f); // m1 = T(X)*Y
 					for(glm::length_t i = 0; i < m1.length(); i++)
 						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
@@ -824,14 +824,7 @@ namespace map {
 
 				if(state.user_settings.map_label == sys::map_label_mode::linear || use_linear) {
 					// Now lets try linear
-					glm::mat2x2 m0(0.f);
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						for(glm::length_t j = 0; j < m0.length(); j++)
-							for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-								m0[i][j] += in_x[r][j] * w[r] * in_x[r][i];
-					for(glm::length_t i = 0; i < m0.length(); i++)
-						m0[i][i] += lambda;
-					m0 = glm::inverse(m0); // m0 = (T(X)*X)^-1
+					auto const m0 = glm::inverse(glm::mat2x2(mi)); // m0 = (T(X)*X)^-1
 					glm::vec2 m1(0.f); // m1 = T(X)*Y
 					for(glm::length_t i = 0; i < m1.length(); i++)
 						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
