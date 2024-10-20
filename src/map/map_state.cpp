@@ -679,17 +679,15 @@ namespace map {
 					continue;
 
 				//regularisation parameters
-				float lambda = 0.00001f;
-
-				float l_0 = 1.f;
-				float l_1 = 1.f;
-				float l_2 = 1 / 4.f;
-				float l_3 = 1 / 8.f;
+				constexpr float lambda = 0.00001f;
+				constexpr float l_0 = 1.f;
+				constexpr float l_1 = 1.f;
+				constexpr float l_2 = 1 / 4.f;
+				constexpr float l_3 = 1 / 8.f;
 
 				// Populate common dataset points
 				std::vector<float> out_y;
 				std::vector<float> out_x;
-				std::vector<float> w;
 				std::vector<std::array<float, 4>> in_x;
 				std::vector<std::array<float, 4>> in_y;
 
@@ -697,13 +695,12 @@ namespace map {
 					auto e = point;
 					if(e.x < basis.x || e.x > basis.x + ratio.x)
 						continue;
-					w.push_back(1.f);
 					e -= basis;
 					e /= ratio;
 					out_y.push_back(e.y);
 					out_x.push_back(e.x);
-					in_x.push_back(std::array<float, 4>{ l_0 * 1.f, l_1* e.x, l_1* e.x* e.x, l_3* e.x* e.x* e.x});
-					in_y.push_back(std::array<float, 4>{ l_0 * 1.f, l_1* e.y, l_1* e.y* e.y, l_3* e.y* e.y* e.y});
+					in_x.push_back(std::array<float, 4>{ l_0, l_1 * e.x, l_1 * e.x * e.x, l_3 * e.x * e.x * e.x });
+					in_y.push_back(std::array<float, 4>{ l_0, l_1 * e.y, l_1 * e.y * e.y, l_3 * e.y * e.y * e.y });
 				}
 
 				auto prepared_name = text::stored_glyphs(state, text::font_selection::map_font, name);
@@ -724,12 +721,18 @@ namespace map {
 				for(glm::length_t i = 0; i < mi.length(); i++) {
 					for(glm::length_t j = 0; j < mi.length(); j++) {
 						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++) {
-							mi[i][j] += in_x[r][j] * w[r] * in_x[r][i] / in_x.size();
+							mi[i][j] += in_x[r][j] * in_x[r][i] / in_x.size();
 						}
 					}
 				}
 				for(glm::length_t i = 0; i < mi.length(); i++) {
 					mi[i][i] += lambda;
+				}
+				glm::vec4 m1(0.f); // m1 = T(X)*Y / n
+				for(glm::length_t i = 0; i < m1.length(); i++) {
+					for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++) {
+						m1[i] += in_x[r][i] * out_y[r] / in_x.size();
+					}
 				}
 
 				bool use_quadratic = false;
@@ -738,33 +741,20 @@ namespace map {
 				// we will "fallback" to using a quadratic instead
 				if(state.user_settings.map_label == sys::map_label_mode::cubic) {
 					auto const m0 = glm::inverse(mi); // m0 = (T(X)*X/n + I*lambda)^-1
-					glm::vec4 m1(0.f); // m1 = T(X)*Y / n
-					for(glm::length_t i = 0; i < m1.length(); i++) {
-						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++) {
-							m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
+					glm::vec4 mo(0.f); // mo = m1 * m0
+					for(glm::length_t i = 0; i < mo.length(); i++) {
+						for(glm::length_t j = 0; j < mo.length(); j++) {
+							mo[i] += m0[i][j] * m1[j];
 						}
 					}
-					glm::vec4 mo(0.f); // mo = m1 * m0
-					for(glm::length_t i = 0; i < mo.length(); i++)
-						for(glm::length_t j = 0; j < mo.length(); j++)
-							mo[i] += m0[i][j] * m1[j];
 					// y = a + bx + cx^2 + dx^3
 					// y = mo[0] + mo[1] * x + mo[2] * x * x + mo[3] * x * x * x
 					auto poly_fn = [&](float x) {
 						return mo[0] * l_0 + mo[1] * x * l_1 + mo[2] * x * x * l_2 + mo[3] * x * x * x * l_3;
-						};
+					};
 					auto dx_fn = [&](float x) {
 						return mo[1] * l_1 + 2.f * mo[2] * x * l_2 + 3.f * mo[3] * x * x * l_3;
-						};
-					auto error_grad = [&](float x, float y) {
-						float error_linear = poly_fn(x) - y;
-						return glm::vec4(error_linear * error_linear * error_linear * error_linear * error_linear * mo);
-						};
-
-					auto regularisation_grad = [&]() {
-						return glm::vec4(0, 0, mo[2] / 4.f, mo[3] / 6.f);
-						};
-
+					};
 					float xstep = (1.f / float(name_extent * 2.f));
 					for(float x = 0.f; x <= 1.f; x += xstep) {
 						float y = poly_fn(x);
@@ -788,10 +778,6 @@ namespace map {
 				if(state.user_settings.map_label == sys::map_label_mode::quadratic || use_quadratic) {
 					// Now lets try quadratic
 					auto const m0 = glm::inverse(glm::mat3x3(mi)); // m0 = (T(X)*X)^-1
-					glm::vec3 m1(0.f); // m1 = T(X)*Y
-					for(glm::length_t i = 0; i < m1.length(); i++)
-						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-							m1[i] += in_x[r][i] * w[r] * out_y[r] / in_x.size();
 					glm::vec3 mo(0.f); // mo = m1 * m0
 					for(glm::length_t i = 0; i < mo.length(); i++)
 						for(glm::length_t j = 0; j < mo.length(); j++)
@@ -800,10 +786,10 @@ namespace map {
 					// y = mo[0] + mo[1] * x + mo[2] * x * x
 					auto poly_fn = [&](float x) {
 						return mo[0] * l_0 + mo[1] * x * l_1 + mo[2] * x * x * l_2;
-						};
+					};
 					auto dx_fn = [&](float x) {
 						return mo[1] * l_1 + 2.f * mo[2] * x * l_2;
-						};
+					};
 					float xstep = (1.f / float(name_extent * 2.f));
 					for(float x = 0.f; x <= 1.f; x += xstep) {
 						float y = poly_fn(x);
@@ -825,20 +811,17 @@ namespace map {
 				if(state.user_settings.map_label == sys::map_label_mode::linear || use_linear) {
 					// Now lets try linear
 					auto const m0 = glm::inverse(glm::mat2x2(mi)); // m0 = (T(X)*X)^-1
-					glm::vec2 m1(0.f); // m1 = T(X)*Y
-					for(glm::length_t i = 0; i < m1.length(); i++)
-						for(glm::length_t r = 0; r < glm::length_t(in_x.size()); r++)
-							m1[i] += in_x[r][i] * w[r] * out_y[r];
 					glm::vec2 mo(0.f); // mo = m1 * m0
-					for(glm::length_t i = 0; i < mo.length(); i++)
-						for(glm::length_t j = 0; j < mo.length(); j++)
+					for(glm::length_t i = 0; i < mo.length(); i++) {
+						for(glm::length_t j = 0; j < mo.length(); j++) {
 							mo[i] += m0[i][j] * m1[j];
-
+						}
+					}
 					// y = a + bx
 					// y = mo[0] + mo[1] * x
 					auto poly_fn = [&](float x) {
 						return mo[0] * l_0 + mo[1] * x * l_1;
-						};
+					};
 
 					// check if this is really better than taking the longest horizontal
 					// firstly check if we are already horizontal
@@ -878,6 +861,7 @@ namespace map {
 
 	void update_province_text_lines(sys::state& state, display_data& map_data) {
 		std::vector<text_line_generator_data> p_text_data;
+		p_text_data.reserve(state.world.province_size());
 		for(auto p : state.world.in_province) {
 			if(p.get_name()) {
 				std::string name = text::produce_simple_string(state, p.get_name());

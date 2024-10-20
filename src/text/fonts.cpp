@@ -518,7 +518,7 @@ namespace text {
 			float const hb_y = float(font_face->glyph->metrics.horiBearingY) / 64.f;
 
 		
-		uint8_t pixel_buffer[64 * 64] = { 0 };
+			uint8_t pixel_buffer[64 * 64] = { 0 };
 			int const btmap_x_off = 32 * magnification_factor - bitmap.width / 2;
 			int const btmap_y_off = 32 * magnification_factor - bitmap.rows / 2;
 
@@ -527,15 +527,15 @@ namespace text {
 			gso.y = (-hb_y - float(btmap_y_off)) * 1.0f / float(magnification_factor);
 			gso.x_advance = float(font_face->glyph->metrics.horiAdvance) / float((1 << 6) * magnification_factor);
 
-		bool in_map[dr_size * dr_size] = {false};
-		float distance_map[dr_size * dr_size] = {0.0f};
+			bool in_map[dr_size * dr_size] = {false};
+			float distance_map[dr_size * dr_size] = {0.0f};
 			init_in_map(in_map, bitmap.buffer, btmap_x_off, btmap_y_off, bitmap.width, bitmap.rows, uint32_t(bitmap.pitch));
 			dead_reckoning(distance_map, in_map);
-			for(int y = 0; y < 64; ++y) {
-				for(int x = 0; x < 64; ++x) {
+			for(uint32_t y = 0; y < 64; ++y) {
+				for(uint32_t x = 0; x < 64; ++x) {
 					const size_t index = size_t(x + y * 64);
-					float const distance_value = distance_map[(x * magnification_factor + magnification_factor / 2) + (y * magnification_factor + magnification_factor / 2) * dr_size] / float(magnification_factor * 64);
-					int const int_value = int(distance_value * -255.0f + 128.0f);
+					const float distance_value = distance_map[(x * magnification_factor + magnification_factor / 2) + (y * magnification_factor + magnification_factor / 2) * dr_size] / float(magnification_factor * 64);
+					const int32_t int_value = int32_t(distance_value * -255.0f + 128.0f);
 					const uint8_t small_value = uint8_t(std::min(255, std::max(0, int_value)));
 					pixel_buffer[index] = small_value;
 				}
