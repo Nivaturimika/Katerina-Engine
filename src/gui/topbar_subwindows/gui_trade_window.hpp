@@ -1193,6 +1193,18 @@ namespace ui {
 		}
 	};
 
+	class trade_flow_world_production_text : public simple_text_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto cid = retrieve<dcon::commodity_id>(state, parent);
+			float total = state.world.commodity_get_total_production(cid);
+			float amount = state.world.nation_get_domestic_market_pool(state.local_player_nation, cid);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::x, text::fp_two_places{ (total > 0.f ? amount / total : 0.f) * 100.f });
+			set_text(state, text::resolve_string_substitution(state, "trade_flow_world_production", m));
+		}
+	};
+
 	class trade_flow_window : public window_element_base {
 		public:
 		void on_create(sys::state& state) noexcept override {
@@ -1243,6 +1255,8 @@ namespace ui {
 				return make_element_by_type<trade_flow_used_by_listbox>(state, id);
 			} else if(name == "may_be_used_by_listbox") {
 				return make_element_by_type<trade_flow_may_be_used_by_listbox>(state, id);
+			} else if(name == "part_of_world_production") {
+				return make_element_by_type<trade_flow_world_production_text>(state, id);
 			} else {
 				return nullptr;
 			}

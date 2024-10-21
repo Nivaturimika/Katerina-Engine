@@ -177,9 +177,10 @@ namespace ui {
 			auto box = text::open_layout_box(contents, 0);
 			text::substitution_map sub;
 			auto literacy_change = demographics::get_estimated_literacy_change(state, n);
-		text::add_to_substitution_map(sub, text::variable_type::val, text::fp_four_places{literacy_change});
+			auto lit_change = text::format_float(demographics::get_estimated_literacy_change(state, n), 8);
+			text::add_to_substitution_map(sub, text::variable_type::val, std::string_view(lit_change));
 			auto total = state.world.nation_get_demographics(n, demographics::total);
-			auto avg_literacy = text::format_percentage(total != 0.f ? (state.world.nation_get_demographics(n, demographics::literacy) / total) : 0.f, 1);
+			auto avg_literacy = text::format_float(total != 0.f ? (state.world.nation_get_demographics(n, demographics::literacy) / total) : 0.f, 1);
 			text::add_to_substitution_map(sub, text::variable_type::avg, std::string_view(avg_literacy));
 			text::localised_format_box(state, contents, box, std::string_view("topbar_avg_literacy"), sub);
 			text::add_line_break_to_layout_box(state, contents, box);
@@ -514,7 +515,7 @@ namespace ui {
 				text::localised_format_box(state, contents, box, std::string_view("tb_nationalfocus_none"), text::substitution_map{});
 			}
 			text::close_layout_box(contents, box);
-			active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::max_national_focus, false);
+			active_modifiers_description(state, contents, n, 0, sys::national_mod_offsets::max_national_focus, true);
 		}
 	};
 
