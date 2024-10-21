@@ -32,7 +32,6 @@ namespace concurrency = oneapi::tbb;
 #define RELEASE_INLINE inline
 #endif
 
-
 #ifdef __AVX512BW__
 #include "ve_avx512.hpp"
 #else
