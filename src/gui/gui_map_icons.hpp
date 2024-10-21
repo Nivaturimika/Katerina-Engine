@@ -534,7 +534,7 @@ namespace ui {
 			//
 			if(lbattle) {
 				if(!state.ui_state.army_combat_window) {
-					auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "alice_land_combat");
+					auto new_elm = ui::make_element_by_type<ui::land_combat_window>(state, "land_combat");
 					state.ui_state.army_combat_window = new_elm.get();
 					state.ui_state.root->add_child_to_front(std::move(new_elm));
 				}
@@ -551,7 +551,7 @@ namespace ui {
 				}
 			} else if(nbattle) {
 				if(!state.ui_state.naval_combat_window) {
-					auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "alice_naval_combat");
+					auto new_elm = ui::make_element_by_type<ui::naval_combat_window>(state, "naval_combat");
 					state.ui_state.naval_combat_window = new_elm.get();
 					state.ui_state.root->add_child_to_front(std::move(new_elm));
 				}

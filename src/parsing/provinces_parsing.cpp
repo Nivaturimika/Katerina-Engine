@@ -158,7 +158,7 @@ namespace parsers {
 		context.state.world.modifier_set_national_values(new_modifier, parsed_modifier.peek_national_mod());
 
 		context.map_of_modifiers.insert_or_assign(std::string(name), new_modifier);
-	context.map_of_terrain_types.insert_or_assign(std::string(name), terrain_type{new_modifier, parsed_modifier.color.value});
+		context.map_of_terrain_types.insert_or_assign(std::string(name), terrain_type{new_modifier, parsed_modifier.color.value});
 	}
 
 	void make_state_definition(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {

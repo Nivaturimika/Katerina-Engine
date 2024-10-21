@@ -5,8 +5,6 @@
 #include "military.hpp"
 
 namespace ui {
-
-
 	class lc_attacker_leader_img : public image_element_base {
 		dcon::gfx_object_id def;
 
@@ -993,7 +991,7 @@ namespace ui {
 				return make_element_by_type<province_terrain_image>(state, id);
 			} else if(name == "label_battlename") {
 				return make_element_by_type<lbattle_name>(state, id);
-			} else if(name == "combat_retreat") {
+			} else if(name == "combat_may_retreat") {
 				return make_element_by_type<lc_retreat_button>(state, id);
 			} else if(name == "closebutton") {
 				return make_element_by_type<generic_close_button>(state, id);
@@ -1001,7 +999,6 @@ namespace ui {
 				return make_element_by_type<land_combat_attacker_window>(state, id);
 			} else if(name == "defender") {
 				return make_element_by_type<land_combat_defender_window>(state, id);
-
 			} else {
 				return nullptr;
 			}

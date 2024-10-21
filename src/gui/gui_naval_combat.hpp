@@ -648,7 +648,7 @@ namespace ui {
 				return make_element_by_type<opaque_element_base>(state, id);
 			} else if(name == "label_battlename") {
 				return make_element_by_type<nbattle_name>(state, id);
-			} else if(name == "combat_retreat") {
+			} else if(name == "combat_may_retreat") {
 				return make_element_by_type<nc_retreat_button>(state, id);
 			} else if(name == "closebutton") {
 				return make_element_by_type<generic_close_button>(state, id);

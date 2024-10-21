@@ -16,58 +16,46 @@
 namespace military {
 	bool can_use_cb_against(sys::state& state, dcon::nation_id from, dcon::nation_id target) {
 		auto other_cbs = state.world.nation_get_available_cbs(from);
-		for(auto& cb : other_cbs) {
+		for(auto const& cb : other_cbs) {
 			if(cb.target == target && cb_conditions_satisfied(state, from, target, cb.cb_type)) {
 				return true;
 			}
 		}
 		for(auto cb : state.world.in_cb_type) {
-			if((cb.get_type_bits() & military::cb_flag::always) != 0) {
-				if(cb_conditions_satisfied(state, from, target, cb)) {
-					return true;
-				}
+			if((cb.get_type_bits() & military::cb_flag::always) != 0 && cb_conditions_satisfied(state, from, target, cb)) {
+				return true;
 			}
 		}
 		return false;
 	}
 
 	bool can_add_always_cb_to_war(sys::state& state, dcon::nation_id actor, dcon::nation_id target, dcon::cb_type_id cb, dcon::war_id w) {
-
 		auto can_use = state.world.cb_type_get_can_use(cb);
 		if(can_use && !trigger::evaluate(state, can_use, trigger::to_generic(target), trigger::to_generic(actor), trigger::to_generic(target))) {
 			return false;
 		}
-
 		auto allowed_countries = state.world.cb_type_get_allowed_countries(cb);
 		auto allowed_states = state.world.cb_type_get_allowed_states(cb);
-
 		bool for_all_state = (state.world.cb_type_get_type_bits(cb) & military::cb_flag::all_allowed_states) != 0;
-
 		if(!allowed_countries && allowed_states) {
 			if(for_all_state) {
 				for(auto wg : state.world.war_get_wargoals_attached(w)) {
 					if(wg.get_wargoal().get_added_by() == actor
 					&& wg.get_wargoal().get_type() == cb
 					&& wg.get_wargoal().get_target_nation() == target) {
-
 						return false;
 					}
 				}
 			}
-
 			bool any_allowed = false;
 			for(auto si : state.world.nation_get_state_ownership(target)) {
-				if(trigger::evaluate(state, allowed_states, trigger::to_generic(si.get_state().id), trigger::to_generic(actor),
-					trigger::to_generic(actor))) {
-
+				if(trigger::evaluate(state, allowed_states, trigger::to_generic(si.get_state().id), trigger::to_generic(actor), trigger::to_generic(actor))) {
 					any_allowed = true;
-
 					for(auto wg : state.world.war_get_wargoals_attached(w)) {
 						if(wg.get_wargoal().get_added_by() == actor
 						&& wg.get_wargoal().get_type() == cb
 						&& wg.get_wargoal().get_associated_state() == si.get_state().get_definition()
 						&& wg.get_wargoal().get_target_nation() == target) {
-
 							any_allowed = false;
 							break;
 						}
@@ -105,9 +93,7 @@ namespace military {
 					if(n != actor) {
 						if(trigger::evaluate(state, allowed_countries, trigger::to_generic(target), trigger::to_generic(actor), trigger::to_generic(n.id))) {
 							if(allowed_states) { // check whether any state within the target is valid for free / liberate
-
 								bool found_dup = false;
-
 								if(for_all_state) {
 									for(auto wg : state.world.war_get_wargoals_attached(w)) {
 										if(wg.get_wargoal().get_added_by() == actor
@@ -124,16 +110,13 @@ namespace military {
 								if(!found_dup) {
 									for(auto si : state.world.nation_get_state_ownership(target)) {
 										if(trigger::evaluate(state, allowed_states, trigger::to_generic(si.get_state().id), trigger::to_generic(actor), trigger::to_generic(n.id))) {
-
-
 											for(auto wg : state.world.war_get_wargoals_attached(w)) {
 												if(wg.get_wargoal().get_added_by() == actor
 												&& wg.get_wargoal().get_type() == cb
 												&& (wg.get_wargoal().get_associated_tag() == n.get_identity_from_identity_holder()
-													|| wg.get_wargoal().get_secondary_nation() == n)
+												|| wg.get_wargoal().get_secondary_nation() == n)
 												&& wg.get_wargoal().get_associated_state() == si.get_state().get_definition()
 												&& wg.get_wargoal().get_target_nation() == target) {
-
 													found_dup = true;
 													break;
 												}
@@ -141,24 +124,20 @@ namespace military {
 										}
 									}
 								}
-
-								if(!found_dup)
+								if(!found_dup) {
 									return true;
-
+								}
 							} else { // no allowed states trigger -> nation is automatically a valid target
 								bool found_dup = false;
-
 								for(auto wg : state.world.war_get_wargoals_attached(w)) {
 									if(wg.get_wargoal().get_added_by() == actor
 									&& wg.get_wargoal().get_type() == cb
 									&& (wg.get_wargoal().get_associated_tag() == n.get_identity_from_identity_holder()
-										|| wg.get_wargoal().get_secondary_nation() == n)
+									|| wg.get_wargoal().get_secondary_nation() == n)
 									&& wg.get_wargoal().get_target_nation() == target) {
-
 										found_dup = true;
 									}
 								}
-
 								if(!found_dup) {
 									return true;
 								}
@@ -167,11 +146,11 @@ namespace military {
 					}
 				}
 				return false;
-				}();
-				if(!any_allowed)
-					return false;
+			}();
+			if(!any_allowed) {
+				return false;
+			}
 		}
-
 		return true;
 
 	}
