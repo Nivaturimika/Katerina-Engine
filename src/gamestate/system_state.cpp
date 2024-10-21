@@ -3145,11 +3145,16 @@ namespace sys {
 				if(existing_scripting == ui::button_scripting::nation) {
 					err.accumulated_errors += std::string("Button ") + std::string(to_string_view(ui_defs.gui[s.button_element].name)) + "in " + err.file_name + " has both province and nation scripting set\n";
 				} else {
-				parsers::effect_building_context t_context{ context, trigger::slot_contents::province, trigger::slot_contents::province, trigger::slot_contents::nation };
+					parsers::effect_building_context t_context{ context, trigger::slot_contents::province, trigger::slot_contents::province, trigger::slot_contents::nation };
 					ui_defs.gui[s.button_element].data.button.scriptable_effect = make_effect(s.generator_state, err, t_context);
 					ui_defs.gui[s.button_element].data.button.flags |= uint16_t(ui::button_scripting::province);
 				}
 			}
+		}
+
+		// Terrain gfx also needs to be loaded separatedly -- but only after terrain has been loaded
+		if(cheat_data.extension_use_scripted_ui) {
+			ui::load_terrain_gfx(*this, context.gfx_context, err);
 		}
 
 		// Sanity checking navies & armies

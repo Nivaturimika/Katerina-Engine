@@ -469,6 +469,7 @@ int WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPWSTR
 			parsers::building_gfx_context context(game_state, game_state.ui_defs);
 			parsers::error_handler err("");
 			ui::load_text_gui_definitions(game_state, context, err);
+			ui::load_terrain_gfx(game_state, context, err);
 		}
 
 		// scenario loading functions (would have to run these even when scenario is pre-built)

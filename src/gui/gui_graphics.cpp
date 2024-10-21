@@ -111,6 +111,16 @@ namespace ui {
 		}
 	}
 
+	void load_terrain_gfx(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err) {
+		context.full_state.ui_defs.terrain_gfx.resize(context.full_state.world.modifier_size());
+		for(const auto tgfx : context.full_state.province_definitions.map_of_gfx_terrain_object_names) {
+			auto name = context.full_state.to_string_view(tgfx.second);
+			if(auto it = context.map_of_names.find(std::string(name)); it != context.map_of_names.end()) {
+				context.full_state.ui_defs.terrain_gfx[tgfx.first] = it->second;
+			}
+		}
+	}
+
 	int16_t child_relative_location_y_component(element_base const& parent, element_base const& child) {
 		auto orientation = child.base_data.get_orientation();
 		switch(orientation) {

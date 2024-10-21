@@ -19,7 +19,7 @@ namespace province {
 		int32_t num_allocated_provincial_flags = 0;
 		std::vector<dcon::province_adjacency_id> canals;
 		std::vector<dcon::province_id> canal_provinces;
-		ankerl::unordered_dense::map<dcon::modifier_id, dcon::gfx_object_id, sys::modifier_hash> terrain_to_gfx_map;
+		ankerl::unordered_dense::map<dcon::modifier_id, dcon::text_key, sys::modifier_hash> map_of_gfx_terrain_object_names;
 		std::vector<bool> connected_region_is_coastal;
 
 		dcon::province_id first_sea_province;

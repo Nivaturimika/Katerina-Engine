@@ -144,12 +144,6 @@ namespace parsers {
 		auto parsed_modifier = parse_terrain_modifier(gen, err, context);
 
 		auto new_modifier = context.state.world.create_modifier();
-
-		std::string gfx_name = std::string("GFX_terrainimg_") + std::string(name); // GFX_terrainimg_XXX
-		if(auto it = context.gfx_context.map_of_names.find(gfx_name); it != context.gfx_context.map_of_names.end()) {
-			context.state.province_definitions.terrain_to_gfx_map.insert_or_assign(new_modifier, it->second);
-		}
-
 		context.state.world.modifier_set_icon(new_modifier, uint8_t(parsed_modifier.icon_index));
 		context.state.world.modifier_set_name(new_modifier, name_id);
 		context.state.world.modifier_set_desc(new_modifier, text::find_or_add_key(context.state, std::string(name) + "_desc", false));
@@ -159,6 +153,9 @@ namespace parsers {
 
 		context.map_of_modifiers.insert_or_assign(std::string(name), new_modifier);
 		context.map_of_terrain_types.insert_or_assign(std::string(name), terrain_type{new_modifier, parsed_modifier.color.value});
+
+		auto gfx_name_id = context.state.add_key_win1252(std::string("GFX_terrainimg_") + std::string(name)); //GFX_terrainimg_XXX
+		context.state.province_definitions.map_of_gfx_terrain_object_names.insert_or_assign(new_modifier, gfx_name_id);
 	}
 
 	void make_state_definition(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {

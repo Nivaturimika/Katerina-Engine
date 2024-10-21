@@ -353,16 +353,18 @@ struct position_data { };
 		tagged_vector<dcon::text_key, dcon::texture_id> textures;
 		tagged_vector<element_data, dcon::gui_def_id> gui;
 		tagged_vector<emfx_object, dcon::emfx_object_id> emfx;
+		tagged_vector<dcon::gfx_object_id, dcon::modifier_id> terrain_gfx;
 		std::vector<window_extension> extensions;
 
 	};
 
 	void load_fixed_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err);
 	void load_text_gui_definitions(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err);
+	void load_terrain_gfx(sys::state& state, parsers::building_gfx_context& context, parsers::error_handler& err);
 
-enum class message_result { unseen, seen, consumed };
-enum class focus_result { ignored, accepted };
-enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tooltip, no_tooltip };
+	enum class message_result { unseen, seen, consumed };
+	enum class focus_result { ignored, accepted };
+	enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tooltip, no_tooltip };
 
 	class element_base;
 
@@ -420,7 +422,7 @@ enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tool
 		element_base* left_mouse_hold_target = nullptr;
 		uint16_t scrollbar_timer = 0;
 		uint16_t fps_timer = 0;
-	std::chrono::time_point<std::chrono::steady_clock> last_render_time{};
+		std::chrono::time_point<std::chrono::steady_clock> last_render_time{};
 		bool scrollbar_continuous_movement = false;
 		float last_fps = 0.f;
 		bool lazy_load_in_game = false;
@@ -429,10 +431,10 @@ enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tool
 		element_base* edit_target = nullptr;
 		element_base* last_tooltip = nullptr;
 		element_base* mouse_sensitive_target = nullptr;
-	xy_pair target_ul_bounds = xy_pair{ 0, 0 };
-	xy_pair target_lr_bounds = xy_pair{ 0, 0 };
+		xy_pair target_ul_bounds = xy_pair{ 0, 0 };
+		xy_pair target_lr_bounds = xy_pair{ 0, 0 };
 
-	xy_pair relative_mouse_location = xy_pair{0, 0};
+		xy_pair relative_mouse_location = xy_pair{0, 0};
 		std::unique_ptr<element_base> units_root;
 		std::unique_ptr<element_base> colonizations_root;
 		std::unique_ptr<element_base> rgos_root;
@@ -514,7 +516,7 @@ enum class tooltip_behavior { tooltip, variable_tooltip, position_sensitive_tool
 		std::vector<dcon::technology_id> tech_queue;
 		uint8_t chat_messages_index = 0;
 
-	dcon::gfx_object_id bg_gfx_id{};
+		dcon::gfx_object_id bg_gfx_id{};
 		dcon::gfx_object_id load_screens_gfx_id[8];
 
 		std::vector<std::unique_ptr<element_base>> endof_landcombat_windows;

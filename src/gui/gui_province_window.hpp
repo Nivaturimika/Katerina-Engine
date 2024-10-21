@@ -124,7 +124,7 @@ namespace ui {
 			dcon::province_id province_id = retrieve<dcon::province_id>(state, parent);
 			auto fat_id = dcon::fatten(state.world, province_id);
 			auto terrain_id = fat_id.get_terrain().id;
-			auto terrain_image = state.province_definitions.terrain_to_gfx_map[terrain_id];
+			auto terrain_image = state.ui_defs.terrain_gfx[terrain_id];
 			if(base_data.get_element_type() == element_type::image) {
 				base_data.data.image.gfx_object = terrain_image;
 			}

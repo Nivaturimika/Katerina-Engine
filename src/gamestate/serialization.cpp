@@ -11,6 +11,135 @@
 #include "zstd.h"
 
 namespace sys {
+	template<typename T>
+	inline size_t serialize_size(std::vector<T> const& vec) {
+		return sizeof(uint32_t) + sizeof(T) * vec.size();
+	}
+
+	template<typename T>
+	inline uint8_t* serialize(uint8_t* ptr_in, std::vector<T> const& vec) {
+		uint32_t length = uint32_t(vec.size());
+		memcpy(ptr_in, &length, sizeof(uint32_t));
+		memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
+		return ptr_in + sizeof(uint32_t) + sizeof(T) * vec.size();
+	}
+
+	template<typename T>
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, std::vector<T>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+		vec.resize(length);
+		memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
+		return ptr_in + sizeof(uint32_t) + sizeof(T) * length;
+	}
+
+	template<typename T>
+	inline uint8_t* memcpy_serialize(uint8_t* ptr_in, T const& obj) {
+		memcpy(ptr_in, &obj, sizeof(T));
+		return ptr_in + sizeof(T);
+	}
+
+	template<typename T>
+	inline uint8_t const* memcpy_deserialize(uint8_t const* ptr_in, T& obj) {
+		memcpy(&obj, ptr_in, sizeof(T));
+		return ptr_in + sizeof(T);
+	}
+
+	template<typename T, typename tag_type>
+	inline size_t serialize_size(tagged_vector<T, tag_type> const& vec) {
+		return sizeof(uint32_t) + sizeof(T) * vec.size();
+	}
+
+	template<typename T, typename tag_type>
+	inline uint8_t* serialize(uint8_t* ptr_in, tagged_vector<T, tag_type> const& vec) {
+		uint32_t length = uint32_t(vec.size());
+		memcpy(ptr_in, &length, sizeof(uint32_t));
+		memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
+		return ptr_in + sizeof(uint32_t) + sizeof(T) * vec.size();
+	}
+
+	template<typename T, typename tag_type>
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, tagged_vector<T, tag_type>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+		vec.resize(length);
+		memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
+		return ptr_in + sizeof(uint32_t) + sizeof(T) * length;
+	}
+
+	inline size_t serialize_size(ankerl::unordered_dense::map<dcon::text_key, uint32_t, text::vector_backed_ci_hash, text::vector_backed_ci_eq> const& vec) {
+		return serialize_size(vec.values());
+	}
+
+	inline size_t serialize_size(ankerl::unordered_dense::set<dcon::text_key, text::vector_backed_ci_hash, text::vector_backed_ci_eq> const& vec) {
+		return serialize_size(vec.values());
+	}
+
+	inline uint8_t* serialize(uint8_t* ptr_in, ankerl::unordered_dense::map<dcon::text_key, uint32_t, text::vector_backed_ci_hash, text::vector_backed_ci_eq> const& vec) {
+		return serialize(ptr_in, vec.values());
+	}
+	inline uint8_t* serialize(uint8_t* ptr_in, ankerl::unordered_dense::set<dcon::text_key, text::vector_backed_ci_hash, text::vector_backed_ci_eq> const& vec) {
+		return serialize(ptr_in, vec.values());
+	}
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<dcon::text_key, uint32_t, text::vector_backed_ci_hash, text::vector_backed_ci_eq>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+
+		std::remove_cvref_t<decltype(vec.values())> new_vec;
+		new_vec.resize(length);
+		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		vec.replace(std::move(new_vec));
+
+		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
+	}
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::set<dcon::text_key, text::vector_backed_ci_hash, text::vector_backed_ci_eq>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+
+		std::remove_cvref_t<decltype(vec.values())> new_vec;
+		new_vec.resize(length);
+		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		vec.replace(std::move(new_vec));
+
+		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
+	}
+
+	inline size_t serialize_size(ankerl::unordered_dense::map<dcon::modifier_id, dcon::text_key, sys::modifier_hash> const& vec) {
+		return serialize_size(vec.values());
+	}
+	inline uint8_t* serialize(uint8_t* ptr_in, ankerl::unordered_dense::map<dcon::modifier_id, dcon::text_key, sys::modifier_hash> const& vec) {
+		return serialize(ptr_in, vec.values());
+	}
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<dcon::modifier_id, dcon::text_key, sys::modifier_hash>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+
+		std::remove_cvref_t<decltype(vec.values())> new_vec;
+		new_vec.resize(length);
+		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		vec.replace(std::move(new_vec));
+
+		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
+	}
+
+	inline size_t serialize_size(ankerl::unordered_dense::map<uint16_t, dcon::text_key> const& vec) {
+		return serialize_size(vec.values());
+	}
+
+	inline uint8_t* serialize(uint8_t* ptr_in, ankerl::unordered_dense::map<uint16_t, dcon::text_key> const& vec) {
+		return serialize(ptr_in, vec.values());
+	}
+	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<uint16_t, dcon::text_key>& vec) {
+		uint32_t length = 0;
+		memcpy(&length, ptr_in, sizeof(uint32_t));
+
+		std::remove_cvref_t<decltype(vec.values())> new_vec;
+		new_vec.resize(length);
+		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		vec.replace(std::move(new_vec));
+
+		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
+	}
 
 	uint8_t const* read_scenario_header(uint8_t const* ptr_in, scenario_header& header_out) {
 		uint32_t length = 0;
@@ -246,7 +375,7 @@ namespace sys {
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.num_allocated_provincial_flags);
 			ptr_in = deserialize(ptr_in, state.province_definitions.canals);
 			ptr_in = deserialize(ptr_in, state.province_definitions.canal_provinces);
-			ptr_in = deserialize(ptr_in, state.province_definitions.terrain_to_gfx_map);
+			ptr_in = deserialize(ptr_in, state.province_definitions.map_of_gfx_terrain_object_names);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.first_sea_province);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.europe);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.asia);
@@ -273,6 +402,7 @@ namespace sys {
 			ptr_in = deserialize(ptr_in, state.ui_defs.emfx);
 			ptr_in = deserialize(ptr_in, state.font_collection.font_names);
 			ptr_in = deserialize(ptr_in, state.ui_defs.extensions);
+			ptr_in = deserialize(ptr_in, state.ui_defs.terrain_gfx);
 		}
 
 		// data container
@@ -395,7 +525,7 @@ namespace sys {
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.num_allocated_provincial_flags);
 			ptr_in = serialize(ptr_in, state.province_definitions.canals);
 			ptr_in = serialize(ptr_in, state.province_definitions.canal_provinces);
-			ptr_in = serialize(ptr_in, state.province_definitions.terrain_to_gfx_map);
+			ptr_in = serialize(ptr_in, state.province_definitions.map_of_gfx_terrain_object_names);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.first_sea_province);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.europe);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.asia);
@@ -422,6 +552,7 @@ namespace sys {
 			ptr_in = serialize(ptr_in, state.ui_defs.emfx);
 			ptr_in = serialize(ptr_in, state.font_collection.font_names);
 			ptr_in = serialize(ptr_in, state.ui_defs.extensions);
+			ptr_in = serialize(ptr_in, state.ui_defs.terrain_gfx);
 		}
 
 		dcon::load_record result = state.world.make_serialize_record_store_scenario();
@@ -538,7 +669,7 @@ namespace sys {
 			sz += sizeof(state.province_definitions.num_allocated_provincial_flags);
 			sz += serialize_size(state.province_definitions.canals);
 			sz += serialize_size(state.province_definitions.canal_provinces);
-			sz += serialize_size(state.province_definitions.terrain_to_gfx_map);
+			sz += serialize_size(state.province_definitions.map_of_gfx_terrain_object_names);
 			sz += sizeof(state.province_definitions.first_sea_province);
 			sz += sizeof(state.province_definitions.europe);
 			sz += sizeof(state.province_definitions.asia);
@@ -565,6 +696,7 @@ namespace sys {
 			sz += serialize_size(state.ui_defs.emfx);
 			sz += serialize_size(state.font_collection.font_names);
 			sz += serialize_size(state.ui_defs.extensions);
+			sz += serialize_size(state.ui_defs.terrain_gfx);
 		}
 
 		// data container contribution
