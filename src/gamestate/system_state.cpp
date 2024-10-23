@@ -181,6 +181,13 @@ namespace ui {
 			}
 		}
 		{
+			auto new_elm = ui::make_element_by_type<ui::topbar_window>(state, "topbar");
+			if(new_elm.get()) {
+				new_elm->impl_on_update(state);
+				state.ui_state.root->add_child_to_front(std::move(new_elm));
+			}
+		}
+		{
 			auto new_elm = ui::make_element_by_type<ui::minimap_container_window>(state, "alice_menubar");
 			state.ui_state.menubar_window = new_elm.get();
 			state.ui_state.root->add_child_to_front(std::move(new_elm));
@@ -207,7 +214,6 @@ namespace ui {
 				state.ui_state.root->add_child_to_front(std::move(new_elm_navy));
 			}
 		}
-	
 		{
 			auto mselection = ui::make_element_by_type<ui::mulit_unit_selection_panel>(state, "multi_unitpanel");
 			if(mselection.get()) {
@@ -254,13 +260,6 @@ namespace ui {
 			auto new_elm = ui::make_element_by_type<ui::naval_combat_end_popup>(state, "endofnavalcombatpopup");
 			if(new_elm.get()) {
 				new_elm->set_visible(state, false);
-				state.ui_state.root->add_child_to_front(std::move(new_elm));
-			}
-		}
-		{
-			auto new_elm = ui::make_element_by_type<ui::topbar_window>(state, "topbar");
-			if(new_elm.get()) {
-				new_elm->impl_on_update(state);
 				state.ui_state.root->add_child_to_front(std::move(new_elm));
 			}
 		}

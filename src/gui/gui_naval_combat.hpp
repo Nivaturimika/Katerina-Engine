@@ -528,10 +528,7 @@ namespace ui {
 			for(auto const slot : state.world.naval_battle_get_slots(nb)) {
 				bool battle_attacker = ((slot.flags & military::ship_in_battle::is_attacking) != 0);
 				if(battle_attacker == IsAttacker) {
-					auto const n = state.world.ship_get_navy_from_navy_membership(slot.ship);
-					for(auto const s : state.world.navy_get_navy_membership(n)) {
-						listbox::row_contents.push_back(slot);
-					}
+					listbox::row_contents.push_back(slot);
 				}
 			}
 			listbox::update(state);
