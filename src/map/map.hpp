@@ -349,18 +349,17 @@ namespace map {
 	GLuint bone_matrices_uniform_array[uint8_t(sys::projection_mode::num_of_modes)] = { };
 
 		// models: Textures for static meshes
-		static constexpr uint32_t max_static_meshes = 0x140;
+		static constexpr uint32_t max_static_meshes = 0x1A0;
 		static constexpr uint32_t max_static_submeshes = 16;
-	GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { };
-	float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
-	uint32_t static_mesh_submesh_node_index[max_static_meshes][max_static_submeshes] = { };
-
-	uint32_t static_mesh_idle_animation_start[max_static_meshes] = { };
-	uint32_t static_mesh_idle_animation_count[max_static_meshes] = { };
-	uint32_t static_mesh_move_animation_start[max_static_meshes] = { };
-	uint32_t static_mesh_move_animation_count[max_static_meshes] = { };
-	uint32_t static_mesh_attack_animation_start[max_static_meshes] = { };
-	uint32_t static_mesh_attack_animation_count[max_static_meshes] = { };
+		GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { };
+		float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
+		uint32_t static_mesh_submesh_node_index[max_static_meshes][max_static_submeshes] = { };
+		std::vector<uint32_t> static_mesh_idle_animation_start;
+		std::vector<uint32_t> static_mesh_idle_animation_count;
+		std::vector<uint32_t> static_mesh_move_animation_start;
+		std::vector<uint32_t> static_mesh_move_animation_count;
+		std::vector<uint32_t> static_mesh_attack_animation_start;
+		std::vector<uint32_t> static_mesh_attack_animation_count;
 
 		dcon::emfx_object_id model_wake;
 		dcon::emfx_object_id model_blockaded;

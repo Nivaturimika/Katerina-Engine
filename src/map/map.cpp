@@ -2585,6 +2585,21 @@ namespace map {
 			state.map_state.map_data.static_mesh_starts[i].clear();
 		}
 
+		//clear
+		state.map_state.map_data.static_mesh_idle_animation_start.clear();
+		state.map_state.map_data.static_mesh_idle_animation_count.clear();
+		state.map_state.map_data.static_mesh_move_animation_start.clear();
+		state.map_state.map_data.static_mesh_move_animation_count.clear();
+		state.map_state.map_data.static_mesh_attack_animation_start.clear();
+		state.map_state.map_data.static_mesh_attack_animation_count.clear();
+		//resize
+		state.map_state.map_data.static_mesh_idle_animation_start.resize(display_data::max_static_meshes);
+		state.map_state.map_data.static_mesh_idle_animation_count.resize(display_data::max_static_meshes);
+		state.map_state.map_data.static_mesh_move_animation_start.resize(display_data::max_static_meshes);
+		state.map_state.map_data.static_mesh_move_animation_count.resize(display_data::max_static_meshes);
+		state.map_state.map_data.static_mesh_attack_animation_start.resize(display_data::max_static_meshes);
+		state.map_state.map_data.static_mesh_attack_animation_count.resize(display_data::max_static_meshes);
+
 		//preload all models and all animations
 		ankerl::unordered_dense::map<std::string, emfx::xac_context> map_of_models;
 		ankerl::unordered_dense::map<std::string, emfx::xsm_context> map_of_animations;
