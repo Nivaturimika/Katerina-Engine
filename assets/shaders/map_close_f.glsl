@@ -24,8 +24,8 @@ vec4 gamma_correct(in vec4 colour);
 
 // sheet is composed of 64 files, in 4 cubes of 4 rows of 4 columns
 // so each column has 8 tiles, and each row has 8 tiles too
-float xx = 1 / map_size.x;
-float yy = 1 / map_size.y;
+float xx = 1.f / map_size.x;
+float yy = 1.f / map_size.y;
 vec2 pix = vec2(xx, yy);
 
 vec2 get_corrected_coords(vec2 coords) {
@@ -113,19 +113,21 @@ vec4 get_terrain(vec2 corner, vec2 offset) {
 	float is_water = step(64.f, index);
 	vec4 colour = texture(terrainsheet_texture_sampler, vec3(offset, index));
 	colour.a = 1.f;
+	colour.rgb *= COLOR_LIGHTNESS;
 	return mix(colour, vec4(0.f), is_water);
 }
 
 vec4 get_terrain_mix() {
+	vec3 noise = vec3(145.f / 255.f, 163.f / 255.f, 189.f / 255.f);
+
 	// Pixel size on map texture
 	vec2 scaling = fract(tex_coord * map_size + vec2(0.5f));
-	vec2 offset = tex_coord / (16.f * pix);
-	//vec2 offset = tex_coord / (4.f * pix);
+	vec2 offset = tex_coord / (4.f * pix);
 
 	vec4 colourlu = get_terrain(vec2(-1.f, -1.f), offset);
-	vec4 colourld = get_terrain(vec2(-1.f, +1.f), offset);
-	vec4 colourru = get_terrain(vec2(+1.f, -1.f), offset);
-	vec4 colourrd = get_terrain(vec2(+1.f, +1.f), offset);
+	vec4 colourld = get_terrain(vec2(-1.f, 1.f), offset);
+	vec4 colourru = get_terrain(vec2(1.f, -1.f), offset);
+	vec4 colourrd = get_terrain(vec2(1.f, 1.f), offset);
 
 	// Mix together the terrains based on close they are to the current texture coordinate
 	vec4 colour_u = mix(colourlu, colourru, scaling.x);
