@@ -55,6 +55,13 @@ namespace military {
 		dcon::ship_id ship;
 		uint16_t target_slot = 0;
 		uint16_t flags = 0;
+
+		bool operator==(ship_in_battle const& o) {
+			return o.ship == ship && o.target_slot == target_slot && o.flags == flags;
+		}
+		bool operator!=(ship_in_battle const& o) {
+			return !(this->operator==(o));
+		}
 	};
 	static_assert(sizeof(ship_in_battle) ==
 	sizeof(ship_in_battle::ship)

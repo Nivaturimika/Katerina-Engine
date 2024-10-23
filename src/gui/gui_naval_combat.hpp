@@ -5,15 +5,12 @@
 #include "gui_land_combat.hpp"
 
 namespace ui {
-
-
 	class nc_attacker_leader_img : public image_element_base {
 		dcon::gfx_object_id def;
-
 		void on_update(sys::state& state) noexcept override {
-			if(!def)
-			def = base_data.data.image.gfx_object;
-
+			if(!def) {
+				def = base_data.data.image.gfx_object;
+			}
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_attacking_admiral(b);
 
@@ -35,11 +32,9 @@ namespace ui {
 				}
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_attacking_admiral(b);
@@ -48,11 +43,10 @@ namespace ui {
 	};
 	class nc_defending_leader_img : public image_element_base {
 		dcon::gfx_object_id def;
-
 		void on_update(sys::state& state) noexcept override {
-			if(!def)
-			def = base_data.data.image.gfx_object;
-
+			if(!def) {
+				def = base_data.data.image.gfx_object;
+			}
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_defending_admiral(b);
 
@@ -74,11 +68,9 @@ namespace ui {
 				}
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_defending_admiral(b);
@@ -87,11 +79,10 @@ namespace ui {
 	};
 
 	class nc_attacking_leader_name : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_attacking_admiral(b);
-
 			if(lid) {
 				auto name = state.to_string_view(state.world.leader_get_name(lid));
 				set_text(state, std::string(name));
@@ -101,11 +92,10 @@ namespace ui {
 		}
 	};
 	class nc_defending_leader_name : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto lid = state.world.naval_battle_get_admiral_from_defending_admiral(b);
-
 			if(lid) {
 				auto name = state.to_string_view(state.world.leader_get_name(lid));
 				set_text(state, std::string(name));
@@ -114,11 +104,8 @@ namespace ui {
 			}
 		}
 	};
-
-
 	class nc_attacker_flag : public flag_button {
-		public:
-
+	public:
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			dcon::gfx_object_id gid;
 			if(base_data.get_element_type() == element_type::image) {
@@ -181,9 +168,8 @@ namespace ui {
 			return state.world.nation_get_identity_from_identity_holder(n);
 		}
 	};
-
-
-	class nc_defender_org : public progress_bar {
+	template<bool IsAttacker>
+	class naval_combat_org : public progress_bar {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
@@ -193,7 +179,7 @@ namespace ui {
 			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
 				auto owner = a.get_navy().get_controller_from_navy_control();
 				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
+				if(battle_attacker == IsAttacker) {
 					for(auto r : a.get_navy().get_navy_membership()) {
 						++count;
 						total += r.get_ship().get_org();
@@ -203,7 +189,8 @@ namespace ui {
 			progress = count > 0 ? total / count : 0.0f;
 		}
 	};
-	class nc_defender_str : public progress_bar {
+	template<bool IsAttacker>
+	class naval_combat_str : public progress_bar {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
@@ -213,7 +200,7 @@ namespace ui {
 			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
 				auto owner = a.get_navy().get_controller_from_navy_control();
 				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
+				if(battle_attacker == IsAttacker) {
 					for(auto r : a.get_navy().get_navy_membership()) {
 						++count;
 						total += r.get_ship().get_strength();
@@ -223,7 +210,8 @@ namespace ui {
 			progress = count > 0 ? total / count : 0.0f;
 		}
 	};
-	class nc_attacker_org : public progress_bar {
+	template<bool IsAttacker>
+	class naval_combat_org_text : public simple_text_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
@@ -233,49 +221,7 @@ namespace ui {
 			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
 				auto owner = a.get_navy().get_controller_from_navy_control();
 				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						++count;
-						total += r.get_ship().get_org();
-					}
-				}
-			}
-			progress = count > 0 ? total / count : 0.0f;
-		}
-	};
-	class nc_attacker_str : public progress_bar {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			float count = 0.0f;
-			float total = 0.0f;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						++count;
-						total += r.get_ship().get_strength();
-					}
-				}
-			}
-			progress = count > 0 ? total / count : 0.0f;
-		}
-	};
-
-
-	class nc_defender_org_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			float count = 0.0f;
-			float total = 0.0f;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
+				if(battle_attacker == IsAttacker) {
 					for(auto r : a.get_navy().get_navy_membership()) {
 						++count;
 						total += r.get_ship().get_org();
@@ -285,8 +231,9 @@ namespace ui {
 			set_text(state, text::format_percentage(count > 0 ? total / count : 0.0f, 1));
 		}
 	};
-	class nc_defender_str_txt : public simple_text_element_base {
-		public:
+	template<bool IsAttacker>
+	class naval_combat_str_text : public simple_text_element_base {
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
@@ -295,7 +242,7 @@ namespace ui {
 			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
 				auto owner = a.get_navy().get_controller_from_navy_control();
 				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
+				if(battle_attacker == IsAttacker) {
 					for(auto r : a.get_navy().get_navy_membership()) {
 						++count;
 						total += r.get_ship().get_strength();
@@ -305,49 +252,9 @@ namespace ui {
 			set_text(state, text::format_percentage(count > 0 ? total / count : 0.0f, 1));
 		}
 	};
-	class nc_attacker_org_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			float count = 0.0f;
-			float total = 0.0f;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						++count;
-						total += r.get_ship().get_org();
-					}
-				}
-			}
-			set_text(state, text::format_percentage(count > 0 ? total / count : 0.0f, 1));
-		}
-	};
-	class nc_attacker_str_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			float count = 0.0f;
-			float total = 0.0f;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						++count;
-						total += r.get_ship().get_strength();
-					}
-				}
-			}
-			set_text(state, text::format_percentage(count > 0 ? total / count : 0.0f, 1));
-		}
-	};
-
-	class nc_defender_bs_txt : public simple_text_element_base {
-		public:
+	template<military::unit_type U, bool IsAttacker>
+	class naval_combat_ship_count_text : public simple_text_element_base {
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto b = retrieve<dcon::naval_battle_id>(state, parent);
 			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
@@ -355,118 +262,18 @@ namespace ui {
 			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
 				auto owner = a.get_navy().get_controller_from_navy_control();
 				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
+				if(battle_attacker == IsAttacker) {
 					for(auto r : a.get_navy().get_navy_membership()) {
 						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::big_ship)
-						++count;
+						if(type && state.military_definitions.unit_base_definitions[type].type == U) {
+							++count;
+						}
 					}
 				}
 			}
 			set_text(state, text::prettify(count));
 		}
 	};
-	class nc_defender_ss_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			int32_t count = 0;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::light_ship)
-						++count;
-					}
-				}
-			}
-			set_text(state, text::prettify(count));
-		}
-	};
-	class nc_defender_ts_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			int32_t count = 0;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == false) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::transport)
-						++count;
-					}
-				}
-			}
-			set_text(state, text::prettify(count));
-		}
-	};
-	class nc_attacker_bs_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			int32_t count = 0;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::big_ship)
-						++count;
-					}
-				}
-			}
-			set_text(state, text::prettify(count));
-		}
-	};
-	class nc_attacker_ss_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			int32_t count = 0;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::light_ship)
-						++count;
-					}
-				}
-			}
-			set_text(state, text::prettify(count));
-		}
-	};
-	class nc_attacker_ts_txt : public simple_text_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto b = retrieve<dcon::naval_battle_id>(state, parent);
-			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
-			int32_t count = 0;
-			for(auto a : state.world.naval_battle_get_navy_battle_participation(b)) {
-				auto owner = a.get_navy().get_controller_from_navy_control();
-				bool battle_attacker = (military::get_role(state, w, owner) == military::war_role::attacker) == state.world.naval_battle_get_war_attacker_is_attacker(b);
-				if(battle_attacker == true) {
-					for(auto r : a.get_navy().get_navy_membership()) {
-						auto type = r.get_ship().get_type();
-						if(type && state.military_definitions.unit_base_definitions[type].type == military::unit_type::transport)
-						++count;
-					}
-				}
-			}
-			set_text(state, text::prettify(count));
-		}
-	};
-
 	class nc_defender_combat_modifiers : public overlapping_listbox_element_base<lc_modifier, lc_modifier_data> {
 		std::string_view get_row_element_name() override {
 			return "alice_combat_modifier";
@@ -489,12 +296,12 @@ namespace ui {
 			defender_bg = bool(defender_bg) ? defender_bg : state.military_definitions.no_background;
 
 			auto defence_bonus =
-			int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
+				int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
 
-		row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, defender_dice });
-			if(defence_bonus != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, defence_bonus });
-
+			row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, defender_dice });
+			if(defence_bonus != 0) {
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, defence_bonus });
+			}
 			update(state);
 		}
 	};
@@ -514,21 +321,164 @@ namespace ui {
 
 			auto attacker_per = state.world.leader_get_personality(state.world.naval_battle_get_admiral_from_attacking_admiral(b));
 			auto attacker_bg = state.world.leader_get_background(state.world.naval_battle_get_admiral_from_attacking_admiral(b));
-
 			attacker_per = bool(attacker_per) ? attacker_per : state.military_definitions.no_personality;
 			attacker_bg = bool(attacker_bg) ? attacker_bg : state.military_definitions.no_background;
 
-			auto attack_bonus =
-			int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
-
-		row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, attacker_dice });
-			if(attack_bonus != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, attack_bonus });
-
+			auto attack_bonus = int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
+			row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, attacker_dice });
+			if(attack_bonus != 0) {
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, attack_bonus });
+			}
 			update(state);
 		}
 	};
 
+	class naval_combat_ship_str : public vertical_progress_bar {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			progress = state.world.ship_get_strength(s.ship);
+		}
+	};
+	class naval_combat_ship_org : public vertical_progress_bar {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			progress = state.world.ship_get_org(s.ship);
+		}
+	};
+	class naval_combat_ship_bar_frame : public image_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			//auto s = retrieve<military::ship_in_battle>(state, parent);
+		}
+	};
+	class naval_combat_ship_flag : public flag_button {
+	public:
+		virtual dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			auto a = state.world.ship_get_navy_from_navy_membership(s.ship);
+			auto n = state.world.navy_get_controller_from_navy_control(a);
+			return state.world.nation_get_identity_from_identity_holder(n);
+		}
+	};
+
+	template<uint32_t Mode>
+	class naval_combat_ship_status_icon : public image_element_base {
+		bool visible = false;
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			visible = ((s.flags & military::ship_in_battle::mode_mask) == Mode);
+			if(auto utid = state.world.ship_get_type(s.ship); utid) {
+				auto& udef = state.military_definitions.unit_base_definitions[utid];
+				frame = udef.naval_icon - 1;
+			}
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(visible) {
+				image_element_base::render(state, x, y);
+			}
+		}
+	};
+
+	class naval_combat_ship_torpedo_icon : public image_element_base {
+		bool visible = false;
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(visible) {
+				image_element_base::render(state, x, y);
+			}
+		}
+	};
+
+	template<bool IsAttacker>
+	class naval_combat_ship_lr_slot : public window_element_base {
+	public:
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "str") {
+				return make_element_by_type<naval_combat_ship_str>(state, id);
+			} else if(name == "org") {
+				return make_element_by_type<naval_combat_ship_org>(state, id);
+			} else if(name == "mini_frame_str") {
+				return make_element_by_type<naval_combat_ship_bar_frame>(state, id);
+			} else if(name == "mini_frame_org") {
+				return make_element_by_type<naval_combat_ship_bar_frame>(state, id);
+			} else if(name == "attacker_icon_normal") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_approaching>>(state, id);
+			} else if(name == "attacker_icon_attacking") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_engaged>>(state, id);
+			} else if(name == "attacker_icon_sunk") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_sunk>>(state, id);
+			} else if(name == "attacker_icon_retreat") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_retreating>>(state, id);
+			} else if(name == "attacker_icon_disengaged") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_retreated>>(state, id);
+			} else if(name == "seeking_target") {
+				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_seeking>>(state, id);
+			} else if(name == "torpedo") {
+				return make_element_by_type<naval_combat_ship_torpedo_icon>(state, id);
+			} else {
+				return nullptr;
+			}
+		}
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<military::ship_in_battle>()) {
+				auto s = retrieve<military::ship_in_battle>(state, parent);
+				auto nb = retrieve<dcon::naval_battle_id>(state, parent);
+				auto target_slot = state.world.naval_battle_get_slots(nb)[s.target_slot];
+				payload.emplace<military::ship_in_battle>(IsAttacker ? s : target_slot);
+				return message_result::consumed;
+			}
+			return window_element_base::get(state, payload);
+		}
+	};
+
+	template<bool IsAttacker>
+	class naval_combat_ship_entry : public listbox_row_element_base<military::ship_in_battle> {
+	public:
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
+			if(name == "left_slot") {
+				return make_element_by_type<naval_combat_ship_lr_slot<!IsAttacker>>(state, id);
+			} else if(name == "right_slot") {
+				return make_element_by_type<naval_combat_ship_lr_slot<IsAttacker>>(state, id);
+			} else if(name == "defender_flag") {
+				return make_element_by_type<naval_combat_ship_flag>(state, id);
+			} else {
+				return nullptr;
+			}
+		}
+	};
+
+	template<bool IsAttacker>
+	class naval_combat_ship_listbox : public listbox_element_base<naval_combat_ship_entry<IsAttacker>, military::ship_in_battle> {
+		using listbox = listbox_element_base<naval_combat_ship_entry<IsAttacker>, military::ship_in_battle>;
+	protected:
+		std::string_view get_row_element_name() override {
+			return "ship_unit";
+		}
+	public:
+		bool sort_ascend = false;
+		void on_update(sys::state& state) noexcept override {
+			auto nb = retrieve<dcon::naval_battle_id>(state, listbox::parent);
+			auto w = state.world.naval_battle_get_war_from_naval_battle_in_war(nb);
+			listbox::row_contents.clear();
+			for(auto const slot : state.world.naval_battle_get_slots(nb)) {
+				bool battle_attacker = ((slot.flags & military::ship_in_battle::is_attacking) != 0);
+				if(battle_attacker == IsAttacker) {
+					auto const n = state.world.ship_get_navy_from_navy_membership(slot.ship);
+					for(auto const s : state.world.navy_get_navy_membership(n)) {
+						listbox::row_contents.push_back(slot);
+					}
+				}
+			}
+			listbox::update(state);
+		}
+	};
 
 	class naval_combat_attacker_window : public window_element_base {
 		public:
@@ -540,13 +490,13 @@ namespace ui {
 			} else if(name == "leader_name") {
 				return make_element_by_type<nc_attacking_leader_name>(state, id);
 			} else if(name == "morale") {
-				return make_element_by_type<nc_attacker_org>(state, id);
+				return make_element_by_type<naval_combat_org<true>>(state, id);
 			} else if(name == "strength") {
-				return make_element_by_type<nc_attacker_str>(state, id);
+				return make_element_by_type<naval_combat_str<true>>(state, id);
 			} else if(name == "morale_text") {
-				return make_element_by_type<nc_attacker_org_txt>(state, id);
+				return make_element_by_type<naval_combat_org_text<true>>(state, id);
 			} else if(name == "strength_text") {
-				return make_element_by_type<nc_attacker_str_txt>(state, id);
+				return make_element_by_type<naval_combat_str_text<true>>(state, id);
 			} else if(name == "big_ship_icon") {
 				return make_element_by_type<lc_static_icon<0>>(state, id);
 			} else if(name == "small_ship_icon") {
@@ -554,14 +504,15 @@ namespace ui {
 			} else if(name == "trade_ship_icon") {
 				return make_element_by_type<lc_static_icon<2>>(state, id);
 			} else if(name == "big_ship_value") {
-				return make_element_by_type<nc_attacker_bs_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::big_ship, true>>(state, id);
 			} else if(name == "small_ship_value") {
-				return make_element_by_type<nc_attacker_ss_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::light_ship, true>>(state, id);
 			} else if(name == "trade_ship_value") {
-				return make_element_by_type<nc_attacker_ts_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::transport, true>>(state, id);
 			} else if(name == "modifiers") {
 				return make_element_by_type<nc_attacker_combat_modifiers>(state, id);
-				//slots_list
+			} else if(name == "slots_list") {
+				return make_element_by_type<naval_combat_ship_listbox<true>>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -578,13 +529,13 @@ namespace ui {
 			} else if(name == "leader_name") {
 				return make_element_by_type<nc_defending_leader_name>(state, id);
 			} else if(name == "morale") {
-				return make_element_by_type<nc_defender_org>(state, id);
+				return make_element_by_type<naval_combat_org<false>>(state, id);
 			} else if(name == "strength") {
-				return make_element_by_type<nc_defender_str>(state, id);
+				return make_element_by_type<naval_combat_str<false>>(state, id);
 			} else if(name == "morale_text") {
-				return make_element_by_type<nc_defender_org_txt>(state, id);
+				return make_element_by_type<naval_combat_org_text<false>>(state, id);
 			} else if(name == "strength_text") {
-				return make_element_by_type<nc_defender_str_txt>(state, id);
+				return make_element_by_type<naval_combat_str_text<false>>(state, id);
 			} else if(name == "big_ship_icon") {
 				return make_element_by_type<lc_static_icon<0>>(state, id);
 			} else if(name == "small_ship_icon") {
@@ -592,21 +543,23 @@ namespace ui {
 			} else if(name == "trade_ship_icon") {
 				return make_element_by_type<lc_static_icon<2>>(state, id);
 			} else if(name == "big_ship_value") {
-				return make_element_by_type<nc_defender_bs_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::big_ship, false>>(state, id);
 			} else if(name == "small_ship_value") {
-				return make_element_by_type<nc_defender_ss_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::light_ship, false>>(state, id);
 			} else if(name == "trade_ship_value") {
-				return make_element_by_type<nc_defender_ts_txt>(state, id);
+				return make_element_by_type<naval_combat_ship_count_text<military::unit_type::transport, false>>(state, id);
 			} else if(name == "modifiers") {
 				return make_element_by_type<nc_defender_combat_modifiers>(state, id);
+			} else if(name == "slots_list") {
+				return make_element_by_type<naval_combat_ship_listbox<false>>(state, id);
 			} else {
 				return nullptr;
 			}
 		}
 	};
 
-	class nc_retreat_button : public button_element_base {
-		public:
+	class naval_combat_retreat_button : public button_element_base {
+	public:
 		void on_update(sys::state& state) noexcept override {
 			disabled = !command::can_retreat_from_naval_battle(state, state.local_player_nation, retrieve<dcon::naval_battle_id>(state, parent));
 		}
@@ -649,13 +602,13 @@ namespace ui {
 			} else if(name == "label_battlename") {
 				return make_element_by_type<nbattle_name>(state, id);
 			} else if(name == "combat_may_retreat") {
-				return make_element_by_type<nc_retreat_button>(state, id);
-			} else if(name == "closebutton") {
-				return make_element_by_type<generic_close_button>(state, id);
+				return make_element_by_type<naval_combat_retreat_button>(state, id);
 			} else if(name == "attacker") {
 				return make_element_by_type<naval_combat_attacker_window>(state, id);
 			} else if(name == "defender") {
 				return make_element_by_type<naval_combat_defender_window>(state, id);
+			} else if(name == "closebutton") {
+				return make_element_by_type<generic_close_button>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -664,7 +617,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			if(!state.world.naval_battle_is_valid(battle)) {
 				set_visible(state, false);
-			battle = dcon::naval_battle_id{};
+				battle = dcon::naval_battle_id{};
 			}
 			sound::play_effect(state, sound::get_random_naval_battle_sound(state), state.user_settings.effects_volume * state.user_settings.master_volume);
 		}
@@ -689,8 +642,9 @@ namespace ui {
 			visible = !(retrieve< military::naval_battle_report*>(state, parent)->player_on_winning_side);
 		}
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			if(visible)
-			image_element_base::render(state, x, y);
+			if(visible) {
+				image_element_base::render(state, x, y);
+			}
 		}
 	};
 	class nc_win_image : public image_element_base {
