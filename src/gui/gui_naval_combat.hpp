@@ -387,7 +387,10 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			auto s = retrieve<military::ship_in_battle>(state, parent);
-			
+			if(auto utid = state.world.ship_get_type(s.ship); utid) {
+				auto& udef = state.military_definitions.unit_base_definitions[utid];
+				visible = udef.siege_or_torpedo_attack > 0.f && ((s.flags & military::ship_in_battle::mode_mask) == military::ship_in_battle::mode_engaged);
+			}
 		}
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(visible) {
@@ -422,6 +425,8 @@ namespace ui {
 				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_seeking>>(state, id);
 			} else if(name == "torpedo") {
 				return make_element_by_type<naval_combat_ship_torpedo_icon>(state, id);
+			} else if(name == "status") {
+				return make_element_by_type<naval_combat_ship_status_text>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -438,6 +443,43 @@ namespace ui {
 		}
 	};
 
+	class naval_combat_ship_name : public simple_text_element_base {
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			auto name = state.world.ship_get_name(s.ship);
+			set_text(state, std::string(state.to_string_view(name)));
+		}
+	};
+
+	class naval_combat_ship_status : public simple_text_element_base {
+		std::string_view get_status_text(uint16_t v) {
+			switch(v & military::ship_in_battle::mode_mask) {
+			case military::ship_in_battle::mode_approaching:
+				return "naval_combat_status_approach";
+			case military::ship_in_battle::mode_retreated:
+				return "naval_combat_status_disengaged";
+			case military::ship_in_battle::mode_retreating:
+				return "naval_combat_status_retreat";
+			case military::ship_in_battle::mode_seeking:
+				return "naval_combat_status_seeking";
+			case military::ship_in_battle::mode_engaged:
+				return "naval_combat_status_firing";
+			}
+			return "";
+		}
+	public:
+		void on_update(sys::state& state) noexcept override {
+			auto s = retrieve<military::ship_in_battle>(state, parent);
+			auto nb = retrieve<dcon::naval_battle_id>(state, parent);
+			auto target_ship = state.world.naval_battle_get_slots(nb)[s.target_slot].ship;
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::str, text::fp_percentage{ state.world.ship_get_strength(target_ship) });
+			text::add_to_substitution_map(m, text::variable_type::org, text::fp_percentage{ state.world.ship_get_org(target_ship) });
+			set_text(state, text::resolve_string_substitution(state, get_status_text(s.flags), m));
+		}
+	};
+
 	template<bool IsAttacker>
 	class naval_combat_ship_entry : public listbox_row_element_base<military::ship_in_battle> {
 	public:
@@ -448,6 +490,24 @@ namespace ui {
 				return make_element_by_type<naval_combat_ship_lr_slot<IsAttacker>>(state, id);
 			} else if(name == "defender_flag") {
 				return make_element_by_type<naval_combat_ship_flag>(state, id);
+			} else if(name == "highlight") {
+				return make_element_by_type<invisible_element>(state, id);
+			} else if(name == "range_l") {
+				return make_element_by_type<invisible_element>(state, id);
+			} else if(name == "range_r") {
+				return make_element_by_type<invisible_element>(state, id);
+			} else if(name == "attacker_name") {
+				if constexpr(IsAttacker) {
+					return make_element_by_type<naval_combat_ship_name>(state, id);
+				} else {
+					return makle_element_by_type<invisible_element>(state, id);
+				}
+			} else if(name == "defender_name") {
+				if constexpr(!IsAttacker) {
+					return make_element_by_type<naval_combat_ship_name>(state, id);
+				} else {
+					return makle_element_by_type<invisible_element>(state, id);
+				}
 			} else {
 				return nullptr;
 			}
