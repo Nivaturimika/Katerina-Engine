@@ -425,8 +425,6 @@ namespace ui {
 				return make_element_by_type<naval_combat_ship_status_icon<military::ship_in_battle::mode_seeking>>(state, id);
 			} else if(name == "torpedo") {
 				return make_element_by_type<naval_combat_ship_torpedo_icon>(state, id);
-			} else if(name == "status") {
-				return make_element_by_type<naval_combat_ship_status_text>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -500,13 +498,13 @@ namespace ui {
 				if constexpr(IsAttacker) {
 					return make_element_by_type<naval_combat_ship_name>(state, id);
 				} else {
-					return makle_element_by_type<invisible_element>(state, id);
+					return make_element_by_type<invisible_element>(state, id);
 				}
 			} else if(name == "defender_name") {
 				if constexpr(!IsAttacker) {
 					return make_element_by_type<naval_combat_ship_name>(state, id);
 				} else {
-					return makle_element_by_type<invisible_element>(state, id);
+					return make_element_by_type<invisible_element>(state, id);
 				}
 			} else {
 				return nullptr;
