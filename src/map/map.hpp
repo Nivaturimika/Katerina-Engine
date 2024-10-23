@@ -349,7 +349,7 @@ namespace map {
 	GLuint bone_matrices_uniform_array[uint8_t(sys::projection_mode::num_of_modes)] = { };
 
 		// models: Textures for static meshes
-		static constexpr uint32_t max_static_meshes = 0x1A0;
+		static constexpr uint32_t max_static_meshes = 1080;
 		static constexpr uint32_t max_static_submeshes = 16;
 		GLuint static_mesh_textures[max_static_meshes][max_static_submeshes] = { };
 		float static_mesh_scrolling_factor[max_static_meshes][max_static_submeshes] = { };
