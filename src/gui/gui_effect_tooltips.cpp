@@ -1796,7 +1796,7 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
+				dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 				text::add_to_substitution_map(m, text::variable_type::text, name);
 				text::localised_format_box(ws, layout, box, "change_state_name_to", m);
 				text::close_layout_box(layout, box);
@@ -1808,7 +1808,12 @@ namespace ui {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::text, ws.world.commodity_get_name(trigger::payload(tval[1]).com_id));
-				text::localised_format_box(ws, layout, box, "change_rgo_production_to", m);
+				if(primary_slot != -1) {
+					text::add_to_substitution_map(m, text::variable_type::name, ws.world.province_get_name(trigger::to_prov(primary_slot)));
+					text::localised_format_box(ws, layout, box, "province_change_rgo_production_to", m);
+				} else {
+					text::localised_format_box(ws, layout, box, "change_rgo_production_to", m);
+				}
 				text::close_layout_box(layout, box);
 			}
 			return 0;

@@ -98,3 +98,4 @@ factory_stats_11;Total throughput multiplier: ?Y$x$?!
 last_player_that_paused;Recent pause by: ?Y$x$?!
 siege_progress;Siege progress: ?Y$x$?!
 trade_flow_world_production;?Y$x$%?! of the world production
+province_change_rgo_production_to;$x$ changes RGO to $text$
