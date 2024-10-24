@@ -2559,6 +2559,16 @@ namespace map {
 		}
 	}
 
+	void copy_static_mesh_slot(display_data& map_data, uint32_t k, uint32_t j) {
+		for(uint32_t i = 0; i < map_data.max_static_submeshes; i++) {
+			map_data.static_mesh_scrolling_factor[k][i] = map_data.static_mesh_scrolling_factor[j][i];
+			map_data.static_mesh_textures[k][i] = map_data.static_mesh_textures[j][i];
+			map_data.static_mesh_submesh_node_index[k][i] = map_data.static_mesh_submesh_node_index[j][i];
+		}
+		map_data.static_mesh_starts[k] = map_data.static_mesh_starts[j];
+		map_data.static_mesh_counts[k] = map_data.static_mesh_counts[j];
+	}
+
 	void load_static_meshes(sys::state& state) {
 		reports::write_debug("Loading static meshes\n");
 
@@ -2602,6 +2612,7 @@ namespace map {
 
 		//preload all models and all animations
 		ankerl::unordered_dense::map<std::string, emfx::xac_context> map_of_models;
+		ankerl::unordered_dense::map<std::string, uint32_t> map_of_mesh_ranges;
 		ankerl::unordered_dense::map<std::string, emfx::xsm_context> map_of_animations;
 		ankerl::unordered_dense::map<native_string, GLuint> map_of_textures;
 		for(uint32_t k = 0; k < display_data::max_static_meshes && k < uint32_t(state.ui_defs.emfx.size()); k++) {
@@ -2801,100 +2812,108 @@ namespace map {
 				if(auto it = map_of_animations.find(std::string(state.to_string_view(emfx_obj.attack))); it != map_of_animations.end()) {
 					load_animation(state, it->second, k, context, emfx::animation_type::attack);
 				}
-				uint32_t node_index = 0;
-				for(auto const& node : context.nodes) {
-					if(node.name == "polySurface95" || node.name == "polySurface97") {
-						node_index++;
-						continue;
-					}
-					int32_t mesh_index = 0;
-					for(auto const& mesh : node.meshes) {
-						bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
-						if(is_collision) {
-							mesh_index++;
+
+				if(auto it2 = map_of_mesh_ranges.find(actorfile); it2 != map_of_mesh_ranges.end()) {
+					//Copied over (copy of another given mesh)
+					copy_static_mesh_slot(state.map_state.map_data, k, it2->second);
+				} else {
+					//New unique set of meshes
+					map_of_mesh_ranges.insert_or_assign(actorfile, k);
+					uint32_t node_index = 0;
+					for(auto const& node : context.nodes) {
+						if(node.name == "polySurface95" || node.name == "polySurface97") {
+							node_index++;
 							continue;
 						}
-						uint32_t vertex_offset = 0;
-						for(auto const& sub : mesh.submeshes) {
-							auto old_size = static_mesh_vertices.size();
-							bool has_invalid_bone_ids = false;
-							for(uint32_t i = 0; i < uint32_t(sub.indices.size()); i += 3) {
-								static_mesh_vertex triangle_vertices[3];
-								for(uint32_t j = 0; j < 3; j++) {
-									static_mesh_vertex& smv = triangle_vertices[j];
-									auto const index = sub.indices[i + j] + vertex_offset;
-									auto const vv = mesh.vertices[index % mesh.vertices.size()];
-									auto const vn = mesh.normals.empty() || index >= mesh.normals.size()
-										? emfx::xac_vector3f{ vv.x, vv.y, vv.z }
+						int32_t mesh_index = 0;
+						for(auto const& mesh : node.meshes) {
+							bool is_collision = node.collision_mesh == mesh_index || node.name == "pCube1";
+							if(is_collision) {
+								mesh_index++;
+								continue;
+							}
+							uint32_t vertex_offset = 0;
+							for(auto const& sub : mesh.submeshes) {
+								auto old_size = static_mesh_vertices.size();
+								bool has_invalid_bone_ids = false;
+								for(uint32_t i = 0; i < uint32_t(sub.indices.size()); i += 3) {
+									static_mesh_vertex triangle_vertices[3];
+									for(uint32_t j = 0; j < 3; j++) {
+										static_mesh_vertex& smv = triangle_vertices[j];
+										auto const index = sub.indices[i + j] + vertex_offset;
+										auto const vv = mesh.vertices[index % mesh.vertices.size()];
+										auto const vn = mesh.normals.empty() || index >= mesh.normals.size()
+											? emfx::xac_vector3f{ vv.x, vv.y, vv.z }
 										: mesh.normals[index];
-									auto const vt = mesh.texcoords.empty() || index >= mesh.texcoords.size()
-										? emfx::xac_vector2f{ vv.x, vv.y }
+										auto const vt = mesh.texcoords.empty() || index >= mesh.texcoords.size()
+											? emfx::xac_vector2f{ vv.x, vv.y }
 										: mesh.texcoords[index];
-									smv.position_ = glm::vec3(vv.x, vv.y, vv.z);
-									smv.normal_ = glm::u8vec3(vn.x * 255.f, vn.y * 255.f, vn.z * 255.f);
-									smv.texture_coord_ = glm::u16vec2(vt.x * 65535.f / 4.f, vt.y * 65535.f / 4.f);
-									//
-									auto const inf_index = mesh.influence_indices[index];
-									assert(inf_index < mesh.influence_starts.size() && inf_index < mesh.influence_starts.size());
-									uint32_t i_start = mesh.influence_starts[inf_index];
-									uint32_t i_count = mesh.influence_counts[inf_index];
-									assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
-									for(uint32_t l = 0; l < std::extent_v<decltype(smv.bone_ids)>; l++) {
-										smv.bone_ids[l] = -1;
-										smv.bone_weights[l] = 0.f;
-									}
-									uint32_t added_count = 0;
-									for(uint32_t l = i_start; l < i_start + i_count; l++) {
-										auto influence = mesh.influences[l];
-										if(influence.bone_id >= int32_t(context.nodes.size())
-										|| influence.bone_id >= int32_t(state.map_state.map_data.max_bone_matrices)) {
-											influence.bone_id = -1;
+										smv.position_ = glm::vec3(vv.x, vv.y, vv.z);
+										smv.normal_ = glm::u8vec3(vn.x * 255.f, vn.y * 255.f, vn.z * 255.f);
+										smv.texture_coord_ = glm::u16vec2(vt.x * 65535.f / 4.f, vt.y * 65535.f / 4.f);
+										//
+										auto const inf_index = mesh.influence_indices[index];
+										assert(inf_index < mesh.influence_starts.size() && inf_index < mesh.influence_starts.size());
+										uint32_t i_start = mesh.influence_starts[inf_index];
+										uint32_t i_count = mesh.influence_counts[inf_index];
+										assert(i_count <= std::extent_v<decltype(smv.bone_ids)>);
+										for(uint32_t l = 0; l < std::extent_v<decltype(smv.bone_ids)>; l++) {
+											smv.bone_ids[l] = -1;
+											smv.bone_weights[l] = 0.f;
 										}
-										if(influence.bone_id != -1) {
-											smv.bone_ids[added_count] = int8_t(influence.bone_id);
-											smv.bone_weights[added_count] = influence.weight;
-											++added_count;
+										uint32_t added_count = 0;
+										for(uint32_t l = i_start; l < i_start + i_count; l++) {
+											auto influence = mesh.influences[l];
+											if(influence.bone_id >= int32_t(context.nodes.size())
+											|| influence.bone_id >= int32_t(state.map_state.map_data.max_bone_matrices)) {
+												influence.bone_id = -1;
+											}
+											if(influence.bone_id != -1) {
+												smv.bone_ids[added_count] = int8_t(influence.bone_id);
+												smv.bone_weights[added_count] = influence.weight;
+												++added_count;
+											}
 										}
 									}
-								}
-								for(const auto& smv : triangle_vertices) {
-									static_mesh_vertex tmp = smv;
-									tmp.position_ *= (emfx_obj.scale > 0.f ? emfx_obj.scale : 1.f) * 0.85f; //nudge for good scales
-									static_mesh_vertices.push_back(tmp);
-								}
-							}
-							vertex_offset += sub.num_vertices;
-							auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
-							assert(submesh_index < state.map_state.map_data.max_static_submeshes);
-							// This is how most models fallback to find their textures...
-							if(context.materials.size() > 0) {
-								auto const& mat = context.materials[sub.material_id];
-								auto const& layer = get_diffuse_layer(mat);
-								if(!layer.texture.empty() && layer.texture != "unionjacksquare") {
-									native_string fname = text::win1250_to_native(layer.texture) + NATIVE(".dds");
-									GLuint texid;
-									if(auto it = map_of_textures.find(fname); it != map_of_textures.end()) {
-										texid = it->second;
-									} else {
-										texid = load_dds_texture(gfx_anims, fname, 0);
-										ogl::set_gltex_parameters(texid, GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
-										map_of_textures.insert_or_assign(fname, texid);
+									for(const auto& smv : triangle_vertices) {
+										static_mesh_vertex tmp = smv;
+										tmp.position_ *= (emfx_obj.scale > 0.f ? emfx_obj.scale : 1.f) * 0.85f; //nudge for good scales
+										static_mesh_vertices.push_back(tmp);
 									}
-									if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
-										state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
-									} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
-										state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
-									}
-									state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
 								}
+								vertex_offset += sub.num_vertices;
+								auto submesh_index = state.map_state.map_data.static_mesh_starts[k].size();
+								assert(submesh_index < state.map_state.map_data.max_static_submeshes);
+								// This is how most models fallback to find their textures...
+								if(context.materials.size() > 0) {
+									auto const& mat = context.materials[sub.material_id];
+									auto const& layer = get_diffuse_layer(mat);
+									if(!layer.texture.empty() && layer.texture != "unionjacksquare") {
+										native_string fname = text::win1250_to_native(layer.texture) + NATIVE(".dds");
+										GLuint texid;
+										if(auto it = map_of_textures.find(fname); it != map_of_textures.end()) {
+											texid = it->second;
+										} else {
+											texid = load_dds_texture(gfx_anims, fname, 0);
+											ogl::set_gltex_parameters(texid, GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+											map_of_textures.insert_or_assign(fname, texid);
+										}
+										if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "smoke")) {
+											state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+										} else if(parsers::is_fixed_token_ci(layer.texture.data(), layer.texture.data() + layer.texture.length(), "texanim")) {
+											state.map_state.map_data.static_mesh_scrolling_factor[k][submesh_index] = 1.f;
+										}
+										state.map_state.map_data.static_mesh_textures[k][submesh_index] = texid;
+									}
+								}
+								state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
+								state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
+								state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
 							}
-							state.map_state.map_data.static_mesh_submesh_node_index[k][submesh_index] = node_index;
-							state.map_state.map_data.static_mesh_starts[k].push_back(GLint(old_size));
-							state.map_state.map_data.static_mesh_counts[k].push_back(GLsizei(static_mesh_vertices.size() - old_size));
+							mesh_index++;
 						}
-						mesh_index++;
+						node_index++;
 					}
-					node_index++;
 				}
 			}
 		}
