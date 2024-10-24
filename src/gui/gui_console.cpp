@@ -23,7 +23,6 @@ struct command_info {
 		help,
 		show_stats,
 		colour_guide,
-		cheat,
 		diplomacy_points,
 		research_points,
 		infamy,
@@ -37,12 +36,8 @@ struct command_info {
 		militancy,
 		dump_out_of_sync,
 		dump_event_graph,
-		dump_tooltip,
-		dump_tags_and_provinces_csv,
-		ai_elligibility,
 		prestige,
 		force_ally,
-		win_wars,
 		toggle_ai,
 		always_allow_wargoals,
 		always_allow_reforms,
@@ -56,25 +51,17 @@ struct command_info {
 		conquer_tag,
 		change_owner,
 		change_control,
-		change_control_and_owner,
 		toggle_core,
 		province_id_tooltip,
 		add_population,
-		instant_army,
-		instant_navy,
-		instant_industry,
+		instant_construction,
 		add_year,
 		innovate,
 		daily_oos_check,
 		dump_map,
-		province_names,
-		list_national_variables,
-		list_global_flags,
-		list_national_flags,
 		list_all_flags,
 		set_auto_choice_all,
-		clear_auto_choice_all,
-		economy_dump
+		clear_auto_choice_all
 	} mode = type::none;
 	std::string_view desc;
 	struct argument_info {
@@ -87,190 +74,169 @@ struct command_info {
 };
 
 inline constexpr command_info possible_commands[] = {
-		command_info{"none", command_info::type::none, "Dummy command",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"reload", command_info::type::reload, "Reloads KatEngine",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"abort", command_info::type::abort, "Abnormally terminates execution",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"clr", command_info::type::clear_log, "Clears console logs",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"fps", command_info::type::fps, "Toggles FPS counter",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"tag", command_info::type::set_tag, "Set the current player's country",
-				{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"help", command_info::type::help, "Display help",
-				{command_info::argument_info{"cmd", command_info::argument_info::type::text, true}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"stats", command_info::type::show_stats, "Shows statistics of the current resources used",
-				{command_info::argument_info{"type", command_info::argument_info::type::text, true}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"cheat", command_info::type::cheat,
-				"Finishes all casus belli, adds 99 diplo points, instant research and westernizes (if not already)",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"dp", command_info::type::diplomacy_points, "Adds the specified number of diplo points",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"rp", command_info::type::research_points, "Adds the specified number of research points",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"inf", command_info::type::infamy, "Adds the specified number of infamy",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"cbp", command_info::type::cb_progress, "Adds the specified % of progress towards CB fabrication",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"money", command_info::type::money, "Adds the specified amount of money to the national treasury",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"west", command_info::type::westernize, "Westernizes",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"unwest", command_info::type::unwesternize, "Unwesternizes",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"colour", command_info::type::colour_guide, "An overview of available colors for complex text",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"crisis", command_info::type::crisis, "Force a crisis to occur",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"end_game", command_info::type::end_game, "Ends the game",
-				{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"event", command_info::type::event, "Triggers a random country event by its legacy id",
-				{command_info::argument_info{"id", command_info::argument_info::type::numeric, false}, command_info::argument_info{"target", command_info::argument_info::type::tag, true}}},
-		command_info{"angry", command_info::type::militancy, "Makes everyone in your nation very militant",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"pr", command_info::type::prestige, "Increases prestige by amount",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}}},
-		command_info{"oos", command_info::type::dump_out_of_sync, "Dump an OOS save",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}}},
-		command_info{"graph", command_info::type::dump_event_graph, "Dump an event graph",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}}},
-		command_info{"dtt", command_info::type::dump_tooltip, "Dump the contents of a tooltip",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}}},
-		command_info{"dxlsl", command_info::type::dump_tags_and_provinces_csv, "Dump tags and province loc",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}}},
-		command_info{"aiel", command_info::type::ai_elligibility, "Display AI elligibility",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}}},
-		command_info{"fa", command_info::type::force_ally, "Force an alliance between you and a country",
-				{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"ww", command_info::type::win_wars, "Win all current wars youre involved at",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"toggle_ai", command_info::type::toggle_ai, "Toggles ON/OFF AI for countries",
-				{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		/* doesn't work, removed until someone fixes it
-		command_info{ "aw", command_info::type::always_allow_wargoals, "Always allow adding wargoals",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}}, */
-		command_info{"ar", command_info::type::always_allow_reforms, "Always allow enacting reforms",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"dida", command_info::type::always_allow_decisions, "Always allow taking decisions",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"didp", command_info::type::always_potential_decisions, "Always showing all decisions",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"cc", command_info::type::complete_constructions, "Complete all current constructions",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"ir", command_info::type::instant_research, "Instant research",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{"ym", command_info::type::always_accept_deals, "AI always accepts our deals",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{ "saopt", command_info::type::set_auto_choice_all, "Set all events to auto choice",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "caopt", command_info::type::clear_auto_choice_all, "Clear all events from auto choice",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{"gi", command_info::type::game_info, "Shows general game information",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}}},
-		command_info{ "spectate", command_info::type::spectate, "Become spectator nation",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "conquer", command_info::type::conquer_tag, "Annexes an entire nation (use 'all' for the entire world)",
-				{command_info::argument_info{"tag", command_info::argument_info::type::tag, false}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "chow", command_info::type::change_owner, "Change province owner to country",
-				{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "chcon", command_info::type::change_control, "Give province control to country",
-				{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "chcow", command_info::type::change_control_and_owner, "Give province to country",
-				{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "provid", command_info::type::province_id_tooltip, "show province id in mouse tooltip",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "addpop", command_info::type::add_population, "Add a certain ammount of population to your nation",
-				{command_info::argument_info{"ammount", command_info::argument_info::type::numeric, false }, command_info::argument_info{ },
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "instant_army", command_info::type::instant_army, "Instantly builds all armies",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "instant_navy", command_info::type::instant_navy, "Instantly builds all navies",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "instant_industry", command_info::type::instant_industry, "Instantly builds all industries",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "add_year", command_info::type::add_year, "Add years to date",
-				{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "doos", command_info::type::daily_oos_check, "Toggle daily OOS check",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "dmap", command_info::type::dump_map, "Dumps the map in a MS Paint friendly format",
-				{command_info::argument_info{"type", command_info::argument_info::type::text, true}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "provnames", command_info::type::province_names, "Toggle daily province names",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "lnv", command_info::type::list_national_variables, "List national variables",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "lgv", command_info::type::list_global_flags, "List global flags",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "lnf", command_info::type::list_national_flags, "List national flags",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "laf", command_info::type::list_all_flags, "List all flags",
-			{command_info::argument_info{}, command_info::argument_info{},
-					command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "tcore", command_info::type::toggle_core, "Toggle add/remove core",
-				{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "innovate", command_info::type::innovate, "Instantly discovers an innovation. Just use the normal innovation's name with '_' instead of spaces.",
-				{command_info::argument_info{"innovation", command_info::argument_info::type::text }, command_info::argument_info{ },
-						command_info::argument_info{}, command_info::argument_info{}} },
-		command_info{ "ecodump", command_info::type::economy_dump, "Starts writing economy info to the disk. Could deteriorate performance.",
-				{command_info::argument_info{}, command_info::argument_info{},
-						command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{"none", command_info::type::none, "Dummy command", {
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"reload", command_info::type::reload, "Reloads KatEngine", {
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"abort", command_info::type::abort, "Abnormally terminates execution", {
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"clr", command_info::type::clear_log, "Clears console logs", {
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"fps", command_info::type::fps, "Toggles FPS counter", {
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"tag", command_info::type::set_tag, "Set the current player's country", {
+		command_info::argument_info{"country", command_info::argument_info::type::tag, false},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"help", command_info::type::help, "Display help", {
+		command_info::argument_info{"cmd", command_info::argument_info::type::text, true},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"stats", command_info::type::show_stats, "Shows statistics of the current resources used", {
+		command_info::argument_info{"type", command_info::argument_info::type::text, true},
+		command_info::argument_info{},
+		command_info::argument_info{},
+		command_info::argument_info{}
+	}},
+	command_info{"dp", command_info::type::diplomacy_points, "Adds the specified number of diplo points",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"rp", command_info::type::research_points, "Adds the specified number of research points",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"inf", command_info::type::infamy, "Adds the specified number of infamy",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"cbp", command_info::type::cb_progress, "Adds the specified % of progress towards CB fabrication",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"money", command_info::type::money, "Adds the specified amount of money to the national treasury",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"west", command_info::type::westernize, "Westernizes",
+	{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"unwest", command_info::type::unwesternize, "Unwesternizes",
+	{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"crisis", command_info::type::crisis, "Force a crisis to occur",
+	{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"end_game", command_info::type::end_game, "Ends the game",
+	{command_info::argument_info{}, command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"event", command_info::type::event, "Triggers a random country event by its legacy id",
+	{command_info::argument_info{"id", command_info::argument_info::type::numeric, false},
+	command_info::argument_info{"target", command_info::argument_info::type::tag, true}}},
+	command_info{"angry", command_info::type::militancy, "Makes everyone in your nation very militant",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"pr", command_info::type::prestige, "Increases prestige by amount",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}}},
+	command_info{"oos", command_info::type::dump_out_of_sync, "Dump an OOS save",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"graph", command_info::type::dump_event_graph, "Dump an event graph",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}}},
+	command_info{"fa", command_info::type::force_ally, "Force an alliance between you and a country",
+	{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"toggle_ai", command_info::type::toggle_ai, "Toggles ON/OFF AI for countries",
+	{command_info::argument_info{"country", command_info::argument_info::type::tag, false}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	/* doesn't work, removed until someone fixes it
+	command_info{ "aw", command_info::type::always_allow_wargoals, "Always allow adding wargoals",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}}, */
+	command_info{"ar", command_info::type::always_allow_reforms, "Always allow enacting reforms",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"dida", command_info::type::always_allow_decisions, "Always allow taking decisions",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"didp", command_info::type::always_potential_decisions, "Always showing all decisions",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"cc", command_info::type::complete_constructions, "Complete all current constructions",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"ir", command_info::type::instant_research, "Instant research",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{"ym", command_info::type::always_accept_deals, "AI always accepts our deals",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}}},
+	command_info{ "saopt", command_info::type::set_auto_choice_all, "Set all events to auto choice",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "caopt", command_info::type::clear_auto_choice_all, "Clear all events from auto choice",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "spectate", command_info::type::spectate, "Become spectator nation",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "conquer", command_info::type::conquer_tag, "Annexes an entire nation (use 'all' for the entire world)",
+	{command_info::argument_info{"tag", command_info::argument_info::type::tag, false}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "chow", command_info::type::change_owner, "Change province owner to country",
+	{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "chcon", command_info::type::change_control, "Give province control to country",
+	{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "provid", command_info::type::province_id_tooltip, "show province id in mouse tooltip",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "addpop", command_info::type::add_population, "Add a certain ammount of population to your nation",
+	{command_info::argument_info{"ammount", command_info::argument_info::type::numeric, false }, command_info::argument_info{ },
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "inc", command_info::type::instant_construction, "Instantly builds all armies and navies and industry",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "add_year", command_info::type::add_year, "Add years to date",
+	{command_info::argument_info{"amount", command_info::argument_info::type::numeric, false}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "doos", command_info::type::daily_oos_check, "Toggle daily OOS check",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "dmap", command_info::type::dump_map, "Dumps the map in a MS Paint friendly format",
+	{command_info::argument_info{"type", command_info::argument_info::type::text, true}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "laf", command_info::type::list_all_flags, "List all flags",
+	{command_info::argument_info{}, command_info::argument_info{},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "tcore", command_info::type::toggle_core, "Toggle add/remove core",
+	{command_info::argument_info{"province", command_info::argument_info::type::numeric, false}, command_info::argument_info{"country", command_info::argument_info::type::tag, true},
+	command_info::argument_info{}, command_info::argument_info{}} },
+	command_info{ "innovate", command_info::type::innovate, "Instantly discovers an innovation. Just use the normal innovation's name with '_' instead of spaces.",
+	{command_info::argument_info{"innovation", command_info::argument_info::type::text }, command_info::argument_info{ },
+	command_info::argument_info{}, command_info::argument_info{}} },
 };
 
 uint32_t levenshtein_distance(std::string_view s1, std::string_view s2) {
@@ -687,20 +653,20 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		}
 	}
 	switch(pstate.cmd.mode) {
-		case command_info::type::reload:
+	case command_info::type::reload:
 		log_to_console(state, parent, "Reloading...");
 		state.map_state.map_data.clear_opengl_objects();
 		state.map_state.map_data.load_map(state);
 		//state.map_state.update_borders(state);
 		break;
-		case command_info::type::abort:
+	case command_info::type::abort:
 		log_to_console(state, parent, "Aborting...");
 		std::abort();
 		break;
-		case command_info::type::clear_log:
+	case command_info::type::clear_log:
 		static_cast<console_window*>(parent)->clear_list(state);
 		break;
-		case command_info::type::fps:
+	case command_info::type::fps:
 		if(!state.ui_state.fps_counter) {
 			auto fps_counter = make_element_by_type<fps_counter_text_box>(state, "fps_counter");
 			state.ui_state.fps_counter = fps_counter.get();
@@ -710,378 +676,266 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 			state.ui_state.root->move_child_to_front(state.ui_state.fps_counter);
 		}
 		break;
-		case command_info::type::set_tag:
-		{
-			auto tag = std::get<std::string>(pstate.arg_slots[0]);
-			if(set_active_tag(state, tag) == false) {
+	case command_info::type::set_tag:
+	{
+		auto tag = std::get<std::string>(pstate.arg_slots[0]);
+		if(set_active_tag(state, tag) == false) {
 			std::pair<uint32_t, dcon::national_identity_id> closest_tag_match{};
-				closest_tag_match.first = std::numeric_limits<uint32_t>::max();
+			closest_tag_match.first = std::numeric_limits<uint32_t>::max();
 			std::pair<uint32_t, dcon::national_identity_id> closest_name_match{};
-				closest_name_match.first = std::numeric_limits<uint32_t>::max();
-				state.world.for_each_national_identity([&](dcon::national_identity_id id) {
-					auto fat_id = dcon::fatten(state.world, id);
-					{ // Tags
-						auto name = nations::int_to_tag(state.world.national_identity_get_identifying_int(id));
-						uint32_t dist = levenshtein_distance(tag, name);
-						if(dist < closest_tag_match.first) {
-							closest_tag_match.first = dist;
-							closest_tag_match.second = id;
-						}
+			closest_name_match.first = std::numeric_limits<uint32_t>::max();
+			state.world.for_each_national_identity([&](dcon::national_identity_id id) {
+				auto fat_id = dcon::fatten(state.world, id);
+				{ // Tags
+					auto name = nations::int_to_tag(state.world.national_identity_get_identifying_int(id));
+					uint32_t dist = levenshtein_distance(tag, name);
+					if(dist < closest_tag_match.first) {
+						closest_tag_match.first = dist;
+						closest_tag_match.second = id;
 					}
-					{ // Names
-						auto name = text::produce_simple_string(state, fat_id.get_name());
+				}
+				{ // Names
+					auto name = text::produce_simple_string(state, fat_id.get_name());
 					std::transform(name.begin(), name.end(), name.begin(), [](auto c) { return char(toupper(char(c))); });
-						uint32_t dist = levenshtein_tokenized_distance(tag, name);
-						if(dist < closest_name_match.first) {
-							closest_name_match.first = dist;
-							closest_name_match.second = id;
-						}
+					uint32_t dist = levenshtein_tokenized_distance(tag, name);
+					if(dist < closest_name_match.first) {
+						closest_name_match.first = dist;
+						closest_name_match.second = id;
 					}
-				});
-				// Print results of search
-				if(tag.size() == 3) {
-					auto fat_id = dcon::fatten(state.world, closest_tag_match.second);
-					log_to_console(state, parent,
-						"Tag could refer to @" + nations::int_to_tag(fat_id.get_identifying_int()) + " \"?Y" + nations::int_to_tag(fat_id.get_identifying_int()) + "?W\" (?Y" +
-								text::produce_simple_string(state, text::get_name(state, fat_id.get_nation_from_identity_holder().id)) + "?W) Id #" +
-								std::to_string(closest_tag_match.second.value));
-				} else {
-					auto fat_id = dcon::fatten(state.world, closest_name_match.second);
-					log_to_console(state, parent,
-						"Name could refer to @" + nations::int_to_tag(fat_id.get_identifying_int()) + " \"?Y" + nations::int_to_tag(fat_id.get_identifying_int()) + "?W\" (?Y" +
-								text::produce_simple_string(state, text::get_name(state, fat_id.get_nation_from_identity_holder().id)) + "?W) Id #" +
-								std::to_string(closest_name_match.second.value));
 				}
-
-				if(tag.size() != 3)
-				log_to_console(state, parent, "You need to use ?Ytags?W (3-letters) instead of the full name");
-				else
-				log_to_console(state, parent, "Is this what you meant?");
+			});
+			// Print results of search
+			if(tag.size() == 3) {
+				auto fat_id = dcon::fatten(state.world, closest_tag_match.second);
+				log_to_console(state, parent,
+					"Tag could refer to @" + nations::int_to_tag(fat_id.get_identifying_int()) + " \"?Y" + nations::int_to_tag(fat_id.get_identifying_int()) + "?W\" (?Y" +
+							text::produce_simple_string(state, text::get_name(state, fat_id.get_nation_from_identity_holder().id)) + "?W) Id #" +
+							std::to_string(closest_tag_match.second.value));
 			} else {
-				auto nid = smart_get_national_identity_from_tag(state, parent, tag);
-				if(bool(nid)) {
-					command::c_switch_nation(state, state.local_player_nation, nid);
-					log_to_console(state, parent, "Switching to @" + std::string(tag) + " ?Y" + std::string(tag) + "?W");
-					state.game_state_updated.store(true, std::memory_order::release);
-				}
+				auto fat_id = dcon::fatten(state.world, closest_name_match.second);
+				log_to_console(state, parent,
+					"Name could refer to @" + nations::int_to_tag(fat_id.get_identifying_int()) + " \"?Y" + nations::int_to_tag(fat_id.get_identifying_int()) + "?W\" (?Y" +
+							text::produce_simple_string(state, text::get_name(state, fat_id.get_nation_from_identity_holder().id)) + "?W) Id #" +
+							std::to_string(closest_name_match.second.value));
 			}
-			state.game_state_updated.store(true, std::memory_order::release);
-		} break;
-		case command_info::type::help:
-		{
-			auto log_command_info = [&](auto cmd) {
-				std::string text = 
+
+			if(tag.size() != 3)
+				log_to_console(state, parent, "You need to use ?Ytags?W (3-letters) instead of the full name");
+			else
+				log_to_console(state, parent, "Is this what you meant?");
+		} else {
+			auto nid = smart_get_national_identity_from_tag(state, parent, tag);
+			if(bool(nid)) {
+				command::c_switch_nation(state, state.local_player_nation, nid);
+				log_to_console(state, parent, "Switching to @" + std::string(tag) + " ?Y" + std::string(tag) + "?W");
+				state.game_state_updated.store(true, std::memory_order::release);
+			}
+		}
+		state.game_state_updated.store(true, std::memory_order::release);
+	} break;
+	case command_info::type::help:
+	{
+		auto log_command_info = [&](auto cmd) {
+			std::string text =
 				"• ?Y" + std::string(cmd.name) + "?! ";
-				for(const auto& arg : cmd.args)
+			for(const auto& arg : cmd.args)
 				if(arg.mode != command_info::argument_info::type::none) {
 					if(arg.optional)
 						text += "?Y[(optional)?!" + std::string(arg.name) + "] ";
 					else
 						text += "?G(" + std::string(arg.name) + ")?! ";
 				}
-				text += "- " + std::string(cmd.desc);
-				log_to_console(state, parent, text);
+			text += "- " + std::string(cmd.desc);
+			log_to_console(state, parent, text);
 			};
-			if(std::holds_alternative<std::string>(pstate.arg_slots[0])) {
-				auto cmd_name = std::get<std::string>(pstate.arg_slots[0]);
-				bool found = false;
-				for(auto const& cmd : possible_commands)
+		if(std::holds_alternative<std::string>(pstate.arg_slots[0])) {
+			auto cmd_name = std::get<std::string>(pstate.arg_slots[0]);
+			bool found = false;
+			for(auto const& cmd : possible_commands)
 				if(cmd.name == cmd_name) {
 					log_command_info(cmd);
 					found = true;
 					break;
 				}
-				if(!found) {
-					log_to_console(state, parent, "Command " + std::string(cmd_name) + " not found :<");
-					// Give the user a command they might've mispelt!
+			if(!found) {
+				log_to_console(state, parent, "Command " + std::string(cmd_name) + " not found :<");
+				// Give the user a command they might've mispelt!
 				std::pair<uint32_t, command_info> closest_match{};
-					closest_match.first = std::numeric_limits<uint32_t>::max();
-					for(auto const& cmd : possible_commands) {
-						const uint32_t distance = levenshtein_distance(cmd_name, cmd.name);
-						if(distance < closest_match.first) {
-							closest_match.first = distance;
-							closest_match.second = cmd;
-						}
+				closest_match.first = std::numeric_limits<uint32_t>::max();
+				for(auto const& cmd : possible_commands) {
+					const uint32_t distance = levenshtein_distance(cmd_name, cmd.name);
+					if(distance < closest_match.first) {
+						closest_match.first = distance;
+						closest_match.second = cmd;
 					}
-					log_to_console(state, parent, "Did you mean ?Y" + std::string(closest_match.second.name) + "?! (" + std::string(closest_match.second.desc) + ")?");
 				}
-			} else {
-				log_to_console(state, parent, "Here's some helpful commands ^-^");
-				for(auto const& cmd : possible_commands)
+				log_to_console(state, parent, "Did you mean ?Y" + std::string(closest_match.second.name) + "?! (" + std::string(closest_match.second.desc) + ")?");
+			}
+		} else {
+			log_to_console(state, parent, "Here's some helpful commands ^-^");
+			for(auto const& cmd : possible_commands)
 				log_command_info(cmd);
-			}
-		} break;
-		case command_info::type::show_stats:
-		{
-			if(!std::holds_alternative<std::string>(pstate.arg_slots[0])) {
-				log_to_console(state, parent, "Valid options: demo(graphics), diplo(macy), eco(nomy), event(s), mil(itary)");
-				log_to_console(state, parent, "tech(nology), pol(itics), a(ll)/all");
-				log_to_console(state, parent, "Ex: \"stats pol\"");
-				break;
-			}
-			enum class flags : uint8_t {
-				none = 0x00,
-				demographics = 0x01,
-				diplomacy = 0x02,
-				economy = 0x04,
-				events = 0x08,
-				military = 0x10,
-				technology = 0x20,
-				politics = 0x40,
-				all = 0x7F,
-				count
-			};
-			uint8_t v = 0;
-			auto const k = std::get<std::string>(pstate.arg_slots[0]);
-			if(k[0] == 'd' && k[1] == 'e') { // de(mo)
-				v |= uint8_t(flags::demographics);
-			} else if(k[0] == 'd') { // d(iplo)
-				v |= uint8_t(flags::diplomacy);
-			} else if(k[0] == 'e' && k[1] == 'c') { // ec(on)
-				v |= uint8_t(flags::economy);
-			} else if(k[0] == 'e') { // e(vent)
-				v |= uint8_t(flags::events);
-			} else if(k[0] == 'm') { // m(il)
-				v |= uint8_t(flags::military);
-			} else if(k[0] == 't') { // t(ech)
-				v |= uint8_t(flags::technology);
-			} else if(k[0] == 'p') { // p(ol)
-				v |= uint8_t(flags::politics);
-			} else if(k[0] == 'a') { // a(ll)
-				v |= uint8_t(flags::all);
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent, "?YNational Identities?W: " + std::to_string(state.world.national_identity_size()));
-				log_to_console(state, parent, "?YPolitical Parties?W: " + std::to_string(state.world.political_party_size()));
-				log_to_console(state, parent, "?YReligions?W: " + std::to_string(state.world.religion_size()));
-				log_to_console(state, parent, "?YCulture Groups?W: " + std::to_string(state.world.culture_group_size()));
-				log_to_console(state, parent, "?YCultures?W: " + std::to_string(state.world.culture_size()));
-				log_to_console(state, parent, "?YCulture Group Memberships?W: " + std::to_string(state.world.culture_group_membership_size()));
-				log_to_console(state, parent, "?YCultural Unions (Of)?W: " + std::to_string(state.world.cultural_union_of_size()));
-			}
-			if((v & uint8_t(flags::economy)) != 0) {
-				log_to_console(state, parent, "?YCommodities?W: " + std::to_string(state.world.commodity_size()));
-				log_to_console(state, parent, "?YModifiers?W: " + std::to_string(state.world.modifier_size()));
-				log_to_console(state, parent, "?YFactory Types?W: " + std::to_string(state.world.factory_type_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent, "?YIdeology Groups?W: " + std::to_string(state.world.ideology_group_size()));
-				log_to_console(state, parent, "?YIdeologies?W: " + std::to_string(state.world.ideology_size()));
-				log_to_console(state, parent, "?YIdeology Group Memberships?W: " + std::to_string(state.world.ideology_group_membership_size()));
-				log_to_console(state, parent, "?YIssues?W: " + std::to_string(state.world.issue_size()));
-				log_to_console(state, parent, "?YIssue Options?W: " + std::to_string(state.world.issue_option_size()));
-				log_to_console(state, parent, "?YReforms?W: " + std::to_string(state.world.reform_size()));
-				log_to_console(state, parent, "?YReform Options?W: " + std::to_string(state.world.reform_option_size()));
-			}
-			if((v & uint8_t(flags::diplomacy)) != 0) {
-				log_to_console(state, parent, "?YCB Types?W: " + std::to_string(state.world.cb_type_size()));
-			}
-			if((v & uint8_t(flags::military)) != 0) {
-				log_to_console(state, parent, "?YLeader Traits?W: " + std::to_string(state.world.leader_trait_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent, "?YPop Types?W: " + std::to_string(state.world.pop_type_size()));
-				log_to_console(state, parent, "?YRebel Types?W: " + std::to_string(state.world.rebel_type_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent, "?YProvinces?W: " + std::to_string(state.world.province_size()));
-				log_to_console(state, parent, "?YProvince Adjacenciess?W: " + std::to_string(state.world.province_adjacency_size()));
-				log_to_console(state, parent, "?YNation Adjacencies?W: " + std::to_string(state.world.nation_adjacency_size()));
-			}
-			if((v & uint8_t(flags::military)) != 0) {
-				log_to_console(state, parent, "?YRegiments?W: " + std::to_string(state.world.regiment_size()));
-				log_to_console(state, parent, "?YShips?W: " + std::to_string(state.world.ship_size()));
-				log_to_console(state, parent, "?YArmies?W: " + std::to_string(state.world.army_size()));
-				log_to_console(state, parent, "?YNavies?W: " + std::to_string(state.world.navy_size()));
-				log_to_console(state, parent, "?YArmy Controls?W: " + std::to_string(state.world.army_control_size()));
-				log_to_console(state, parent, "?YArmy Locations?W: " + std::to_string(state.world.army_location_size()));
-				log_to_console(state, parent, "?YArmy Memberships?W: " + std::to_string(state.world.army_membership_size()));
-				log_to_console(state, parent, "?YRegiment Sources?W: " + std::to_string(state.world.regiment_source_size()));
-				log_to_console(state, parent, "?YNavy Controls?W: " + std::to_string(state.world.navy_control_size()));
-				log_to_console(state, parent, "?YNavy Locations?W: " + std::to_string(state.world.navy_location_size()));
-				log_to_console(state, parent, "?YNavy Memberships?W: " + std::to_string(state.world.navy_membership_size()));
-				log_to_console(state, parent, "?YLeaders?W: " + std::to_string(state.world.leader_size()));
-				log_to_console(state, parent, "?YArmy Leadership (leader<->army)?W: " + std::to_string(state.world.army_leadership_size()));
-				log_to_console(state, parent, "?YNavy Leadership (leader<->navy)?W: " + std::to_string(state.world.navy_leadership_size()));
-				log_to_console(state, parent, "?YLeader Loyalties (leader<->nation membership)?W: " + std::to_string(state.world.leader_loyalty_size()));
-			}
-			if((v & uint8_t(flags::diplomacy)) != 0) {
-				log_to_console(state, parent, "?YWars?W: " + std::to_string(state.world.war_size()));
-				log_to_console(state, parent, "?YWargoals?W: " + std::to_string(state.world.wargoal_size()));
-				log_to_console(state, parent, "?YWar Participants?W: " + std::to_string(state.world.war_participant_size()));
-				log_to_console(state, parent, "?YWargoals Attached (wargoal<->war)?W: " + std::to_string(state.world.wargoals_attached_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"State Definitions?W: " +
-							std::to_string(state.world.state_definition_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"State Instances?W: " +
-							std::to_string(state.world.state_instance_size()));
-			}
-			if((v & uint8_t(flags::diplomacy)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"Colonizations?W: " +
-							std::to_string(state.world.colonization_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent, "?YState Ownerships?W: " + std::to_string(state.world.state_ownership_size()));
-				log_to_console(state, parent, "?YAbstract State Memberships?W: " + std::to_string(state.world.abstract_state_membership_size()));
-				log_to_console(state, parent, "?YCores?W: " + std::to_string(state.world.core_size()));
-				log_to_console(state, parent, "?YIdentity Holders?W: " + std::to_string(state.world.identity_holder_size()));
-			}
-			if((v & uint8_t(flags::technology)) != 0) {
-				log_to_console(state, parent, "?YTechnologies?W: " + std::to_string(state.world.technology_size()));
-				log_to_console(state, parent, "?YInventions?W: " + std::to_string(state.world.invention_size()));
-			}
-			if((v & uint8_t(flags::diplomacy)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"Nations?W: " +
-							std::to_string(state.world.nation_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Diplomatic Relations?W: " +
-							std::to_string(state.world.diplomatic_relation_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Unilateral Relationships?W: " +
-							std::to_string(state.world.unilateral_relationship_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"GP Relationships?W: " +
-							std::to_string(state.world.gp_relationship_size()));
-			}
-			if((v & uint8_t(flags::economy)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"Factories?W: " +
-							std::to_string(state.world.factory_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Factory Locations?W: " +
-							std::to_string(state.world.factory_location_size()));
-			}
-			if((v & uint8_t(flags::politics)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"Province Ownerships?W: " +
-							std::to_string(state.world.province_ownership_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Province Controls?W: " +
-							std::to_string(state.world.province_control_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Province Rebel Controls?W: " +
-							std::to_string(state.world.province_rebel_control_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Overlords?W: " +
-							std::to_string(state.world.overlord_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Rebel Factions?W: " +
-							std::to_string(state.world.rebel_faction_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Rebellions Within?W: " +
-							std::to_string(state.world.rebellion_within_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Movements?W: " +
-							std::to_string(state.world.movement_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Movements Within?W: " +
-							std::to_string(state.world.movement_within_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Pop Movement Memberships?W: " +
-							std::to_string(state.world.pop_movement_membership_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Pop Rebellion Memberships?W: " +
-							std::to_string(state.world.pop_rebellion_membership_size()));
-			}
-			if((v & uint8_t(flags::demographics)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"Pops?W: " +
-							std::to_string(state.world.pop_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Pop Locations?W: " +
-							std::to_string(state.world.pop_location_size()));
-			}
-			if((v & uint8_t(flags::events)) != 0) {
-				log_to_console(state, parent,
-					"?Y"
-					"National Events?W: " +
-							std::to_string(state.world.national_event_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Provincial Events?W: " +
-							std::to_string(state.world.provincial_event_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Free National Events?W: " +
-							std::to_string(state.world.free_national_event_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Free Provincial Events?W: " +
-							std::to_string(state.world.free_provincial_event_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"National Focuses?W: " +
-							std::to_string(state.world.national_focus_size()));
-				log_to_console(state, parent,
-					"?Y"
-					"Decisions?W: " +
-							std::to_string(state.world.decision_size()));
-			}
-		} break;
-		case command_info::type::colour_guide:
-		log_to_console(state, parent,
-				"?G"
-				"\?Y for Green.");
-		log_to_console(state, parent,
-				"?R"
-				"\?Y for Red.");
-		log_to_console(state, parent,
-				"?Y"
-				"\?Y for Yellow.");
-		log_to_console(state, parent,
-				"?O"
-				"\?Y for Orange.");
-		log_to_console(state, parent,
-				"?"
-				"B"
-				"\?B for Blue.");
-		log_to_console(state, parent,
-				"?g"
-				"\?g for Dark blue (*originally grey).");
-		log_to_console(state, parent,
-				"?!"
-				"\?! for reseting to default.");
-		log_to_console(state, parent,
-				"?W"
-				"\?b for Black.");
-		log_to_console(state, parent,
-				"?W"
-				"\?W for White.");
-		log_to_console(state, parent,
-				"?L"
-				"\?L for Lilac.");
-		log_to_console(state, parent,
-				"?RRed?GGreen?"
-				"B"
-				"Blue");
-		break;
-		case command_info::type::diplomacy_points:
+		}
+	} break;
+	case command_info::type::show_stats:
+	{
+		log_to_console(state, parent, "Seed: " + std::to_string(state.game_seed));
+		log_to_console(state, parent, std::string("Great Wars: "));
+		log_to_console(state, parent, state.military_definitions.great_wars_enabled ? "@(T)" : "@(F)");
+		log_to_console(state, parent, std::string("World Wars: "));
+		log_to_console(state, parent, state.military_definitions.world_wars_enabled ? "@(T)" : "@(F)");
+		if(!std::holds_alternative<std::string>(pstate.arg_slots[0])) {
+			log_to_console(state, parent, "Valid options: demo(graphics), diplo(macy), eco(nomy), event(s), mil(itary)");
+			log_to_console(state, parent, "tech(nology), pol(itics), a(ll)/all");
+			log_to_console(state, parent, "Ex: \"stats pol\"");
+			break;
+		}
+		enum class flags : uint8_t {
+			none = 0x00,
+			demographics = 0x01,
+			diplomacy = 0x02,
+			economy = 0x04,
+			events = 0x08,
+			military = 0x10,
+			technology = 0x20,
+			politics = 0x40,
+			all = 0x7F,
+			count
+		};
+		uint8_t v = 0;
+		auto const k = std::get<std::string>(pstate.arg_slots[0]);
+		if(k[0] == 'd' && k[1] == 'e') { // de(mo)
+			v |= uint8_t(flags::demographics);
+		} else if(k[0] == 'd') { // d(iplo)
+			v |= uint8_t(flags::diplomacy);
+		} else if(k[0] == 'e' && k[1] == 'c') { // ec(on)
+			v |= uint8_t(flags::economy);
+		} else if(k[0] == 'e') { // e(vent)
+			v |= uint8_t(flags::events);
+		} else if(k[0] == 'm') { // m(il)
+			v |= uint8_t(flags::military);
+		} else if(k[0] == 't') { // t(ech)
+			v |= uint8_t(flags::technology);
+		} else if(k[0] == 'p') { // p(ol)
+			v |= uint8_t(flags::politics);
+		} else if(k[0] == 'a') { // a(ll)
+			v |= uint8_t(flags::all);
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YNational Identities?W: " + std::to_string(state.world.national_identity_size()));
+			log_to_console(state, parent, "?YPolitical Parties?W: " + std::to_string(state.world.political_party_size()));
+			log_to_console(state, parent, "?YReligions?W: " + std::to_string(state.world.religion_size()));
+			log_to_console(state, parent, "?YCulture Groups?W: " + std::to_string(state.world.culture_group_size()));
+			log_to_console(state, parent, "?YCultures?W: " + std::to_string(state.world.culture_size()));
+			log_to_console(state, parent, "?YCulture Group Memberships?W: " + std::to_string(state.world.culture_group_membership_size()));
+			log_to_console(state, parent, "?YCultural Unions (Of)?W: " + std::to_string(state.world.cultural_union_of_size()));
+		}
+		if((v & uint8_t(flags::economy)) != 0) {
+			log_to_console(state, parent, "?YCommodities?W: " + std::to_string(state.world.commodity_size()));
+			log_to_console(state, parent, "?YModifiers?W: " + std::to_string(state.world.modifier_size()));
+			log_to_console(state, parent, "?YFactory Types?W: " + std::to_string(state.world.factory_type_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YIdeology Groups?W: " + std::to_string(state.world.ideology_group_size()));
+			log_to_console(state, parent, "?YIdeologies?W: " + std::to_string(state.world.ideology_size()));
+			log_to_console(state, parent, "?YIdeology Group Memberships?W: " + std::to_string(state.world.ideology_group_membership_size()));
+			log_to_console(state, parent, "?YIssues?W: " + std::to_string(state.world.issue_size()));
+			log_to_console(state, parent, "?YIssue Options?W: " + std::to_string(state.world.issue_option_size()));
+			log_to_console(state, parent, "?YReforms?W: " + std::to_string(state.world.reform_size()));
+			log_to_console(state, parent, "?YReform Options?W: " + std::to_string(state.world.reform_option_size()));
+		}
+		if((v & uint8_t(flags::diplomacy)) != 0) {
+			log_to_console(state, parent, "?YCB Types?W: " + std::to_string(state.world.cb_type_size()));
+		}
+		if((v & uint8_t(flags::military)) != 0) {
+			log_to_console(state, parent, "?YLeader Traits?W: " + std::to_string(state.world.leader_trait_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YPop Types?W: " + std::to_string(state.world.pop_type_size()));
+			log_to_console(state, parent, "?YRebel Types?W: " + std::to_string(state.world.rebel_type_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YProvinces?W: " + std::to_string(state.world.province_size()));
+			log_to_console(state, parent, "?YProvince Adjacenciess?W: " + std::to_string(state.world.province_adjacency_size()));
+			log_to_console(state, parent, "?YNation Adjacencies?W: " + std::to_string(state.world.nation_adjacency_size()));
+		}
+		if((v & uint8_t(flags::military)) != 0) {
+			log_to_console(state, parent, "?YRegiments?W: " + std::to_string(state.world.regiment_size()));
+			log_to_console(state, parent, "?YShips?W: " + std::to_string(state.world.ship_size()));
+			log_to_console(state, parent, "?YArmies?W: " + std::to_string(state.world.army_size()));
+			log_to_console(state, parent, "?YNavies?W: " + std::to_string(state.world.navy_size()));
+			log_to_console(state, parent, "?YArmy Controls?W: " + std::to_string(state.world.army_control_size()));
+			log_to_console(state, parent, "?YArmy Locations?W: " + std::to_string(state.world.army_location_size()));
+			log_to_console(state, parent, "?YArmy Memberships?W: " + std::to_string(state.world.army_membership_size()));
+			log_to_console(state, parent, "?YRegiment Sources?W: " + std::to_string(state.world.regiment_source_size()));
+			log_to_console(state, parent, "?YNavy Controls?W: " + std::to_string(state.world.navy_control_size()));
+			log_to_console(state, parent, "?YNavy Locations?W: " + std::to_string(state.world.navy_location_size()));
+			log_to_console(state, parent, "?YNavy Memberships?W: " + std::to_string(state.world.navy_membership_size()));
+			log_to_console(state, parent, "?YLeaders?W: " + std::to_string(state.world.leader_size()));
+			log_to_console(state, parent, "?YArmy Leadership (leader<->army)?W: " + std::to_string(state.world.army_leadership_size()));
+			log_to_console(state, parent, "?YNavy Leadership (leader<->navy)?W: " + std::to_string(state.world.navy_leadership_size()));
+			log_to_console(state, parent, "?YLeader Loyalties (leader<->nation membership)?W: " + std::to_string(state.world.leader_loyalty_size()));
+		}
+		if((v & uint8_t(flags::diplomacy)) != 0) {
+			log_to_console(state, parent, "?YWars?W: " + std::to_string(state.world.war_size()));
+			log_to_console(state, parent, "?YWargoals?W: " + std::to_string(state.world.wargoal_size()));
+			log_to_console(state, parent, "?YWar Participants?W: " + std::to_string(state.world.war_participant_size()));
+			log_to_console(state, parent, "?YWargoals Attached (wargoal<->war)?W: " + std::to_string(state.world.wargoals_attached_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YState Definitions?W: " + std::to_string(state.world.state_definition_size()));
+			log_to_console(state, parent, "?YState Instances?W: " + std::to_string(state.world.state_instance_size()));
+		}
+		if((v & uint8_t(flags::diplomacy)) != 0) {
+			log_to_console(state, parent, "?YColonizations?W: " + std::to_string(state.world.colonization_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YState Ownerships?W: " + std::to_string(state.world.state_ownership_size()));
+			log_to_console(state, parent, "?YAbstract State Memberships?W: " + std::to_string(state.world.abstract_state_membership_size()));
+			log_to_console(state, parent, "?YCores?W: " + std::to_string(state.world.core_size()));
+			log_to_console(state, parent, "?YIdentity Holders?W: " + std::to_string(state.world.identity_holder_size()));
+		}
+		if((v & uint8_t(flags::technology)) != 0) {
+			log_to_console(state, parent, "?YTechnologies?W: " + std::to_string(state.world.technology_size()));
+			log_to_console(state, parent, "?YInventions?W: " + std::to_string(state.world.invention_size()));
+		}
+		if((v & uint8_t(flags::diplomacy)) != 0) {
+			log_to_console(state, parent, "?YNations?W: " + std::to_string(state.world.nation_size()));
+			log_to_console(state, parent, "?YDiplomatic Relations?W: " + std::to_string(state.world.diplomatic_relation_size()));
+			log_to_console(state, parent, "?YUnilateral Relationships?W: " + std::to_string(state.world.unilateral_relationship_size()));
+			log_to_console(state, parent, "?YGP Relationships?W: " + std::to_string(state.world.gp_relationship_size()));
+		}
+		if((v & uint8_t(flags::economy)) != 0) {
+			log_to_console(state, parent, "?YFactories?W: " + std::to_string(state.world.factory_size()));
+			log_to_console(state, parent, "?YFactory Locations?W: " + std::to_string(state.world.factory_location_size()));
+		}
+		if((v & uint8_t(flags::politics)) != 0) {
+			log_to_console(state, parent, "?YProvince Ownerships?W: " + std::to_string(state.world.province_ownership_size()));
+			log_to_console(state, parent, "?YProvince Controls?W: " + std::to_string(state.world.province_control_size()));
+			log_to_console(state, parent, "?YProvince Rebel Controls?W: " + std::to_string(state.world.province_rebel_control_size()));
+			log_to_console(state, parent, "?YOverlords?W: " + std::to_string(state.world.overlord_size()));
+			log_to_console(state, parent, "?YRebel Factions?W: " + std::to_string(state.world.rebel_faction_size()));
+			log_to_console(state, parent, "?YRebellions Within?W: " + std::to_string(state.world.rebellion_within_size()));
+			log_to_console(state, parent, "?YMovements?W: " + std::to_string(state.world.movement_size()));
+			log_to_console(state, parent, "?YMovements Within?W: " + std::to_string(state.world.movement_within_size()));
+			log_to_console(state, parent, "?YPop Movement Memberships?W: " + std::to_string(state.world.pop_movement_membership_size()));
+			log_to_console(state, parent, "?YPop Rebellion Memberships?W: " + std::to_string(state.world.pop_rebellion_membership_size()));
+		}
+		if((v & uint8_t(flags::demographics)) != 0) {
+			log_to_console(state, parent, "?YPops?W: " + std::to_string(state.world.pop_size()));
+			log_to_console(state, parent, "?YPop Locations?W: " + std::to_string(state.world.pop_location_size()));
+		}
+		if((v & uint8_t(flags::events)) != 0) {
+			log_to_console(state, parent, "?YNational Events?W: " + std::to_string(state.world.national_event_size()));
+			log_to_console(state, parent, "?YProvincial Events?W: " + std::to_string(state.world.provincial_event_size()));
+			log_to_console(state, parent, "?YFree National Events?W: " + std::to_string(state.world.free_national_event_size()));
+			log_to_console(state, parent, "?YFree Provincial Events?W: " + std::to_string(state.world.free_provincial_event_size()));
+			log_to_console(state, parent, "?YNational Focuses?W: " + std::to_string(state.world.national_focus_size()));
+			log_to_console(state, parent, "?YDecisions?W: " + std::to_string(state.world.decision_size()));
+		}
+	} break;
+	case command_info::type::diplomacy_points:
+	{
 		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
 			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
 			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
@@ -1089,9 +943,9 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		} else {
 			command::c_change_diplo_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{ });
 		}
-		
 		break;
-		case command_info::type::research_points:
+	}
+	case command_info::type::research_points:
 		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
 			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
 			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
@@ -1100,549 +954,328 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 			command::c_change_research_points(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
 		}
 		break;
-		case command_info::type::money:
+	case command_info::type::money: {
 		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
 			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
 			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
 			command::c_change_money(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
-		}
-		else
-		{
+		} else {
 			command::c_change_money(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{ });
 		}
-
-		break;
-		case command_info::type::infamy:
-		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
-			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
-			command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
-		} else {
-			command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
-		}
+	} break;
+	case command_info::type::infamy:
+	if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+		auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+		auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+		command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+	} else {
+		command::c_change_infamy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+	}
 		
-		break;
-		case command_info::type::cb_progress:
-		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
-			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
-			command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
-		} else {
-			command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
-		}
-		
-		break;
-		case command_info::type::westernize:
+	break;
+	case command_info::type::cb_progress:
+	if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+		auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+		auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+		command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+	} else {
+		command::c_change_cb_progress(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+	}
+	break;
+	case command_info::type::westernize:
+	{
 		command::c_westernize(state, state.local_player_nation);
-		break;
-		case command_info::type::unwesternize:
+	}
+	break;
+	case command_info::type::unwesternize:
+	{
 		command::c_unwesternize(state, state.local_player_nation);
-		break;
-		case command_info::type::cheat:
-		command::c_westernize(state, state.local_player_nation);
-		command::c_change_cb_progress(state, state.local_player_nation, float(1000.f), dcon::nation_id{});
-		command::c_change_research_points(state, state.local_player_nation, float(100000.f), dcon::nation_id{});
-		command::c_change_diplo_points(state, state.local_player_nation, float(99.f), dcon::nation_id{});
-		break;
-		case command_info::type::crisis:
+	}
+	break;
+	case command_info::type::crisis:
+	{
 		command::c_force_crisis(state, state.local_player_nation);
-		break;
-		case command_info::type::end_game:
+	}
+	break;
+	case command_info::type::end_game:
+	{
 		command::c_end_game(state, state.local_player_nation);
-		break;
-		case command_info::type::event:
-		{
-			dcon::national_identity_id nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
-			}
-			if(nid)
-			command::c_event_as(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid), std::get<int32_t>(pstate.arg_slots[0]));
-			else
-			command::c_event(state, state.local_player_nation, std::get<int32_t>(pstate.arg_slots[0]));
-		}
-		break;
-		case command_info::type::militancy:
-		command::c_change_national_militancy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
-		break;
-		case command_info::type::prestige:
+	}
+	break;
+	case command_info::type::event:
+	{
+		dcon::national_identity_id nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
 		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-			auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
-			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
-			command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
-		} else {
-			command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+			auto tag = std::get<std::string>(pstate.arg_slots[1]);
+			nid = smart_get_national_identity_from_tag(state, parent, tag);
 		}
+		if(nid)
+		command::c_event_as(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid), std::get<int32_t>(pstate.arg_slots[0]));
+		else
+		command::c_event(state, state.local_player_nation, std::get<int32_t>(pstate.arg_slots[0]));
+	}
+	break;
+	case command_info::type::militancy:
+	command::c_change_national_militancy(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])));
+	break;
+	case command_info::type::prestige:
+	if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+		auto nid = smart_get_national_identity_from_tag(state, parent, std::get<std::string>(pstate.arg_slots[1]));
+		auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+		command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), n);
+	} else {
+		command::c_change_prestige(state, state.local_player_nation, float(std::get<int32_t>(pstate.arg_slots[0])), dcon::nation_id{});
+	}
 		
-		break;
-		case command_info::type::force_ally:
-		{
-			dcon::national_identity_id nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
-				command::c_force_ally(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid));
-			}
+	break;
+	case command_info::type::force_ally:
+	{
+		dcon::national_identity_id nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto tag = std::get<std::string>(pstate.arg_slots[1]);
+			nid = smart_get_national_identity_from_tag(state, parent, tag);
+			command::c_force_ally(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid));
 		}
-		break;
-		case command_info::type::dump_tooltip:
-		{
-			/*
-			std::string out_text = "#Tooltip data\n";
-			if(state.ui_state.last_tooltip) {
-				auto container = text::create_columnar_layout(state, state.ui_state.tooltip->internal_layout,
-				text::layout_parameters{ 16, 16, 32762, 32762, state.ui_state.tooltip_font, 0,
-				text::alignment::left, text::text_color::white, true }, 10);
-				state.ui_state.last_tooltip->update_tooltip(state, 0, 0, container);
-				populate_shortcut_tooltip(state, *state.ui_state.last_tooltip, container);
-				int16_t old_y = 0;
-				for(const auto& e : container.base_layout.contents) {
-					if(e.y != old_y) {
-						out_text += "\n";
-						old_y = e.y;
-					}
-					out_text += " ";
-					// the raw text data is not stored, only the shaped glyphs
-					//out_text += e.unicodechars.glyph_info[0].codepoint;
-				}
-			}
-			auto sdir = simple_fs::get_or_create_oos_directory();
-			simple_fs::write_file(sdir, NATIVE("tooltip.txt"), out_text.c_str(), uint32_t(out_text.size()));
-			*/
-		}
-		break;
-		case command_info::type::dump_tags_and_provinces_csv:
-		{
-			std::string out_text = "\n";
-			for(const auto nid : state.world.in_national_identity) {
-				auto tag = nations::int_to_tag(nid.get_identifying_int());
-				out_text += tag + ";" + text::produce_simple_string(state, nid.get_name()) + "\n";
-				out_text += tag + "_ADJ" + ";" + text::produce_simple_string(state, nid.get_adjective()) + "\n";
-			}
-			for(const auto p : state.world.in_province) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == p.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, p.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			auto sdir = simple_fs::get_or_create_oos_directory();
-			simple_fs::write_file(sdir, NATIVE("pandn_localisations.txt"), out_text.c_str(), uint32_t(out_text.size()));
-			//reset csv
-			out_text = "\n";
-			for(const auto t : state.world.in_technology) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("technologies.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_invention) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("inventions.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_ideology) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("ideologies.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_issue_option) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		out_text += std::string(state.to_string_view(k.first)) + "_desc;" + text::produce_simple_string(state, t.get_desc()) + "\n";
-						//		out_text += "movement_" + std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_movement_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("issue_options.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_issue) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		out_text += std::string(state.to_string_view(k.first)) + "_desc;" + text::produce_simple_string(state, t.get_desc()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("issues.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_culture) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("cultures.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_religion) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("religions.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_government_type) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		out_text += std::string(state.to_string_view(k.first)) + "_desc;" + text::produce_simple_string(state, t.get_desc()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("government_type.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_decision) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-						//		out_text += std::string(state.to_string_view(k.first)) + "_desc;" + text::produce_simple_string(state, t.get_description()) + "\n";
-						//		break;
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("decisions.csv"), out_text.c_str(), uint32_t(out_text.size()));
-			//
-			out_text = "\n";
-			for(const auto t : state.world.in_national_event) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-					//	} else if(k.second == t.get_description()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_description()) + "\n";
-					//	} else {
-						//		for(auto i = 0; i < sys::max_event_options; i++) {
-							//			if(k.second == t.get_options()[i].name) {
-								//				out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_options()[i].name) + "\n";
-							//			}
-						//		}
-					//	}
-				//}
-			}
-			for(const auto t : state.world.in_free_national_event) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-					//	} else if(k.second == t.get_description()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_description()) + "\n";
-					//	} else {
-						//		for(auto i = 0; i < sys::max_event_options; i++) {
-							//			if(k.second == t.get_options()[i].name) {
-								//				out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_options()[i].name) + "\n";
-							//			}
-						//		}
-					//	}
-				//}
-			}
-			for(const auto t : state.world.in_provincial_event) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-					//	} else if(k.second == t.get_description()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_description()) + "\n";
-					//	} else {
-						//		for(auto i = 0; i < sys::max_event_options; i++) {
-							//			if(k.second == t.get_options()[i].name) {
-								//				out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_options()[i].name) + "\n";
-							//			}
-						//		}
-					//	}
-				//}
-			}
-			for(const auto t : state.world.in_free_provincial_event) {
-				//for(const auto& k : state.key_to_text_sequence) {
-					//	if(k.second == t.get_name()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_name()) + "\n";
-					//	} else if(k.second == t.get_description()) {
-						//		out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_description()) + "\n";
-					//	} else {
-						//		for(auto i = 0; i < sys::max_event_options; i++) {
-							//			if(k.second == t.get_options()[i].name) {
-								//				out_text += std::string(state.to_string_view(k.first)) + ";" + text::produce_simple_string(state, t.get_options()[i].name) + "\n";
-							//			}
-						//		}
-					//	}
-				//}
-			}
-			simple_fs::write_file(sdir, NATIVE("events.csv"), out_text.c_str(), uint32_t(out_text.size()));
-		}
-		break;
-		case command_info::type::dump_event_graph:
-		{
-			struct graph_event_option {
-				std::variant<
-				dcon::national_event_id,
-				dcon::free_national_event_id,
-				dcon::provincial_event_id,
-				dcon::free_provincial_event_id
-				> parent;
-				uint8_t index = 0;
-			};
-			using graph_node_data = std::variant<
+	}
+	break;
+	case command_info::type::dump_event_graph:
+	{
+		struct graph_event_option {
+			std::variant<
 			dcon::national_event_id,
 			dcon::free_national_event_id,
 			dcon::provincial_event_id,
-			dcon::free_provincial_event_id,
-			dcon::decision_id,
-			dcon::cb_type_id,
-			dcon::rebel_type_id,
-			dcon::issue_option_id,
-			graph_event_option
-			>;
-			struct graph_node {
-				std::string name;
-				graph_node_data data;
-				dcon::effect_key e;
-				uint32_t ref_count;
-			};
-			std::vector<graph_node> nodes;
-			for(const auto e : state.world.in_national_event) {
-				auto name = text::produce_simple_string(state, e.get_name());
+			dcon::free_provincial_event_id
+			> parent;
+			uint8_t index = 0;
+		};
+		using graph_node_data = std::variant<
+		dcon::national_event_id,
+		dcon::free_national_event_id,
+		dcon::provincial_event_id,
+		dcon::free_provincial_event_id,
+		dcon::decision_id,
+		dcon::cb_type_id,
+		dcon::rebel_type_id,
+		dcon::issue_option_id,
+		graph_event_option
+		>;
+		struct graph_node {
+			std::string name;
+			graph_node_data data;
+			dcon::effect_key e;
+			uint32_t ref_count;
+		};
+		std::vector<graph_node> nodes;
+		for(const auto e : state.world.in_national_event) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ name, graph_node_data(e.id), e.get_immediate_effect(), 0 });
-				auto const& opt = e.get_options();
-				for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
-					auto const opt_name = text::produce_simple_string(state, opt[i].name);
+			auto const& opt = e.get_options();
+			for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
+				auto const opt_name = text::produce_simple_string(state, opt[i].name);
 				nodes.push_back(graph_node{ opt_name, graph_node_data(graph_event_option{ e.id, i }), opt[i].effect, 0 });
-				}
 			}
-			for(const auto e : state.world.in_provincial_event) {
-				auto const name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_provincial_event) {
+			auto const name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ name, graph_node_data(e.id), e.get_immediate_effect(), 0 });
-				auto const& opt = e.get_options();
-				for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
-					auto const opt_name = text::produce_simple_string(state, opt[i].name);
+			auto const& opt = e.get_options();
+			for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
+				auto const opt_name = text::produce_simple_string(state, opt[i].name);
 				nodes.push_back(graph_node{ opt_name, graph_node_data(graph_event_option{ e.id, i }), opt[i].effect, 0 });
-				}
 			}
-			for(const auto e : state.world.in_free_national_event) {
-				auto name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_free_national_event) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ name, graph_node_data(e.id), e.get_immediate_effect(), 0 });
-				auto const& opt = e.get_options();
-				for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
-					auto const opt_name = text::produce_simple_string(state, opt[i].name);
+			auto const& opt = e.get_options();
+			for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
+				auto const opt_name = text::produce_simple_string(state, opt[i].name);
 				nodes.push_back(graph_node{ opt_name, graph_node_data(graph_event_option{ e.id, i }), opt[i].effect, 0 });
-				}
 			}
-			for(const auto e : state.world.in_free_provincial_event) {
-				auto const name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_free_provincial_event) {
+			auto const name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ name, graph_node_data(e.id), e.get_immediate_effect(), 0 });
-				auto const& opt = e.get_options();
-				for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
-					auto const opt_name = text::produce_simple_string(state, opt[i].name);
+			auto const& opt = e.get_options();
+			for(uint8_t i = 0; i < uint8_t(opt.size()); i++) {
+				auto const opt_name = text::produce_simple_string(state, opt[i].name);
 				nodes.push_back(graph_node{ opt_name, graph_node_data(graph_event_option{ e.id, i }), opt[i].effect, 0 });
-				}
 			}
-			for(const auto e : state.world.in_decision) {
-				auto name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_decision) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ name, graph_node_data(e.id), e.get_effect(), 0 });
-			}
-			for(const auto e : state.world.in_cb_type) {
-				auto name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_cb_type) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ "(add) " + name, graph_node_data(e.id), e.get_on_add(), 0 });
 			nodes.push_back(graph_node{ "(accept) " + name, graph_node_data(e.id), e.get_on_po_accepted(), 0 });
-			}
-			for(const auto e : state.world.in_rebel_type) {
-				auto name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_rebel_type) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ "(siege) " + name, graph_node_data(e.id), e.get_siege_won_effect(), 0 });
 			nodes.push_back(graph_node{ "(demands) " + name, graph_node_data(e.id), e.get_demands_enforced_effect(), 0 });
-			}
-			for(const auto e : state.world.in_issue_option) {
-				auto name = text::produce_simple_string(state, e.get_name());
+		}
+		for(const auto e : state.world.in_issue_option) {
+			auto name = text::produce_simple_string(state, e.get_name());
 			nodes.push_back(graph_node{ "(execute) " + name, graph_node_data(e.id), e.get_on_execute_effect(), 0 });
+		}
+		for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
+			auto& node = nodes[i];
+			for(auto& c : node.name) {
+				if(c == '\\' || c == '"')
+				c = '\'';
+			}
+		}
+
+		std::string out_text = "digraph {\n";
+			for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
+				const auto& node = nodes[i];
+				uint16_t* efd = state.effect_data.data() + state.effect_data_indices[node.e.index() + 1];
+				effect::recurse_over_effects(efd, [&](uint16_t* tval) {
+					if((tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_nation
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_pop
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_province
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_state
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_nation
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_pop
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_province
+					|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_state
+					|| (tval[0] & effect::code_mask) == effect::country_event_province_this_nation
+					|| (tval[0] & effect::code_mask) == effect::country_event_province_this_pop
+					|| (tval[0] & effect::code_mask) == effect::country_event_province_this_province
+					|| (tval[0] & effect::code_mask) == effect::country_event_province_this_state
+					|| (tval[0] & effect::code_mask) == effect::country_event_this_nation
+					|| (tval[0] & effect::code_mask) == effect::country_event_this_pop
+					|| (tval[0] & effect::code_mask) == effect::country_event_this_province
+					|| (tval[0] & effect::code_mask) == effect::country_event_this_state) {
+						auto ev = trigger::payload(tval[1]).nev_id;
+						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+							if(std::holds_alternative<dcon::national_event_id>(nodes[j].data)
+							&& std::get<dcon::national_event_id>(nodes[j].data) == ev) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+								break;
+							}
+						}
+						//province event
+					} else if((tval[0] & effect::code_mask) == effect::province_event_immediate_this_nation
+					|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_pop
+					|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_province
+					|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_state
+					|| (tval[0] & effect::code_mask) == effect::province_event_this_nation
+					|| (tval[0] & effect::code_mask) == effect::province_event_this_pop
+					|| (tval[0] & effect::code_mask) == effect::province_event_this_province
+					|| (tval[0] & effect::code_mask) == effect::province_event_this_state) {
+						auto ev = trigger::payload(tval[1]).pev_id;
+						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+							if(std::holds_alternative<dcon::provincial_event_id>(nodes[j].data)
+							&& std::get<dcon::provincial_event_id>(nodes[j].data) == ev) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+								break;
+							}
+						}
+					}
+				});
 			}
 			for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
-				auto& node = nodes[i];
-				for(auto& c : node.name) {
-					if(c == '\\' || c == '"')
-					c = '\'';
+				const auto& d1 = nodes[i].data;
+				if(std::holds_alternative<dcon::national_event_id>(d1)) {
+					auto id = std::get<dcon::national_event_id>(d1);
+					for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+						const auto& d2 = nodes[j].data;
+						if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
+							auto geo = std::get<graph_event_option>(d2);
+							if(std::holds_alternative<dcon::national_event_id>(geo.parent)
+							&& std::get<dcon::national_event_id>(geo.parent) == id) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+							}
+						}
+					}
+				} else if(std::holds_alternative<dcon::free_national_event_id>(d1)) {
+					auto id = std::get<dcon::free_national_event_id>(d1);
+					for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+						const auto& d2 = nodes[j].data;
+						if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
+							auto geo = std::get<graph_event_option>(d2);
+							if(std::holds_alternative<dcon::free_national_event_id>(geo.parent)
+							&& std::get<dcon::free_national_event_id>(geo.parent) == id) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+							}
+						}
+					}
+				} else if(std::holds_alternative<dcon::provincial_event_id>(d1)) {
+					auto id = std::get<dcon::provincial_event_id>(d1);
+					for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+						const auto& d2 = nodes[j].data;
+						if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
+							auto geo = std::get<graph_event_option>(d2);
+							if(std::holds_alternative<dcon::provincial_event_id>(geo.parent)
+							&& std::get<dcon::provincial_event_id>(geo.parent) == id) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+							}
+						}
+					}
+				} else if(std::holds_alternative<dcon::free_provincial_event_id>(d1)) {
+					auto id = std::get<dcon::free_provincial_event_id>(d1);
+					for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
+						const auto& d2 = nodes[j].data;
+						if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
+							auto geo = std::get<graph_event_option>(d2);
+							if(std::holds_alternative<dcon::free_provincial_event_id>(geo.parent)
+							&& std::get<dcon::free_provincial_event_id>(geo.parent) == id) {
+								nodes[i].ref_count++;
+								nodes[j].ref_count++;
+								out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
+							}
+						}
+					}
 				}
 			}
-
-			std::string out_text = "digraph {\n";
-				for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
-					const auto& node = nodes[i];
-					uint16_t* efd = state.effect_data.data() + state.effect_data_indices[node.e.index() + 1];
-					effect::recurse_over_effects(efd, [&](uint16_t* tval) {
-						if((tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_nation
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_pop
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_province
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_province_this_state
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_nation
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_pop
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_province
-						|| (tval[0] & effect::code_mask) == effect::country_event_immediate_this_state
-						|| (tval[0] & effect::code_mask) == effect::country_event_province_this_nation
-						|| (tval[0] & effect::code_mask) == effect::country_event_province_this_pop
-						|| (tval[0] & effect::code_mask) == effect::country_event_province_this_province
-						|| (tval[0] & effect::code_mask) == effect::country_event_province_this_state
-						|| (tval[0] & effect::code_mask) == effect::country_event_this_nation
-						|| (tval[0] & effect::code_mask) == effect::country_event_this_pop
-						|| (tval[0] & effect::code_mask) == effect::country_event_this_province
-						|| (tval[0] & effect::code_mask) == effect::country_event_this_state) {
-							auto ev = trigger::payload(tval[1]).nev_id;
-							for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-								if(std::holds_alternative<dcon::national_event_id>(nodes[j].data)
-								&& std::get<dcon::national_event_id>(nodes[j].data) == ev) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-									break;
-								}
-							}
-							//province event
-						} else if((tval[0] & effect::code_mask) == effect::province_event_immediate_this_nation
-						|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_pop
-						|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_province
-						|| (tval[0] & effect::code_mask) == effect::province_event_immediate_this_state
-						|| (tval[0] & effect::code_mask) == effect::province_event_this_nation
-						|| (tval[0] & effect::code_mask) == effect::province_event_this_pop
-						|| (tval[0] & effect::code_mask) == effect::province_event_this_province
-						|| (tval[0] & effect::code_mask) == effect::province_event_this_state) {
-							auto ev = trigger::payload(tval[1]).pev_id;
-							for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-								if(std::holds_alternative<dcon::provincial_event_id>(nodes[j].data)
-								&& std::get<dcon::provincial_event_id>(nodes[j].data) == ev) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-									break;
-								}
-							}
-						}
-					});
-				}
-				for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
-					const auto& d1 = nodes[i].data;
-					if(std::holds_alternative<dcon::national_event_id>(d1)) {
-						auto id = std::get<dcon::national_event_id>(d1);
-						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-							const auto& d2 = nodes[j].data;
-							if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
-								auto geo = std::get<graph_event_option>(d2);
-								if(std::holds_alternative<dcon::national_event_id>(geo.parent)
-								&& std::get<dcon::national_event_id>(geo.parent) == id) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-								}
-							}
-						}
-					} else if(std::holds_alternative<dcon::free_national_event_id>(d1)) {
-						auto id = std::get<dcon::free_national_event_id>(d1);
-						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-							const auto& d2 = nodes[j].data;
-							if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
-								auto geo = std::get<graph_event_option>(d2);
-								if(std::holds_alternative<dcon::free_national_event_id>(geo.parent)
-								&& std::get<dcon::free_national_event_id>(geo.parent) == id) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-								}
-							}
-						}
-					} else if(std::holds_alternative<dcon::provincial_event_id>(d1)) {
-						auto id = std::get<dcon::provincial_event_id>(d1);
-						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-							const auto& d2 = nodes[j].data;
-							if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
-								auto geo = std::get<graph_event_option>(d2);
-								if(std::holds_alternative<dcon::provincial_event_id>(geo.parent)
-								&& std::get<dcon::provincial_event_id>(geo.parent) == id) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-								}
-							}
-						}
-					} else if(std::holds_alternative<dcon::free_provincial_event_id>(d1)) {
-						auto id = std::get<dcon::free_provincial_event_id>(d1);
-						for(uint32_t j = 0; j < uint32_t(nodes.size()); j++) {
-							const auto& d2 = nodes[j].data;
-							if(nodes[j].ref_count > 0 && std::holds_alternative<graph_event_option>(d2)) {
-								auto geo = std::get<graph_event_option>(d2);
-								if(std::holds_alternative<dcon::free_provincial_event_id>(geo.parent)
-								&& std::get<dcon::free_provincial_event_id>(geo.parent) == id) {
-									nodes[i].ref_count++;
-									nodes[j].ref_count++;
-									out_text += "A_" + std::to_string(i) + " -> A_" + std::to_string(j) + ";\n";
-								}
-							}
-						}
+			for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
+				const auto& node = nodes[i];
+				if(node.ref_count > 0) {
+					const auto& d = node.data;
+					if(std::holds_alternative<dcon::national_event_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=crimson, shape=box];\n";
+					} else if(std::holds_alternative<dcon::free_national_event_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightcoral, shape=diamond];\n";
+					} else if(std::holds_alternative<dcon::provincial_event_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=royalblue2, shape=box];\n";
+					} else if(std::holds_alternative<dcon::free_provincial_event_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=deepskyblue, shape=diamond];\n";
+					} else if(std::holds_alternative<dcon::decision_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=darkseagreen1, shape=trapezium];\n";
+					} else if(std::holds_alternative<graph_event_option>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=mediumturquoise];\n";
+					} else if(std::holds_alternative<dcon::cb_type_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lemonchiffon1, shape=diamond];\n";
+					} else if(std::holds_alternative<dcon::rebel_type_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightsalmon2, shape=diamond];\n";
+					} else if(std::holds_alternative<dcon::issue_option_id>(d)) {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightgoldenrodyellow, shape=diamond];\n";
+					} else {
+						out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=yellow];\n";
 					}
 				}
-				for(uint32_t i = 0; i < uint32_t(nodes.size()); i++) {
-					const auto& node = nodes[i];
-					if(node.ref_count > 0) {
-						const auto& d = node.data;
-						if(std::holds_alternative<dcon::national_event_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=crimson, shape=box];\n";
-						} else if(std::holds_alternative<dcon::free_national_event_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightcoral, shape=diamond];\n";
-						} else if(std::holds_alternative<dcon::provincial_event_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=royalblue2, shape=box];\n";
-						} else if(std::holds_alternative<dcon::free_provincial_event_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=deepskyblue, shape=diamond];\n";
-						} else if(std::holds_alternative<dcon::decision_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=darkseagreen1, shape=trapezium];\n";
-						} else if(std::holds_alternative<graph_event_option>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=mediumturquoise];\n";
-						} else if(std::holds_alternative<dcon::cb_type_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lemonchiffon1, shape=diamond];\n";
-						} else if(std::holds_alternative<dcon::rebel_type_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightsalmon2, shape=diamond];\n";
-						} else if(std::holds_alternative<dcon::issue_option_id>(d)) {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=lightgoldenrodyellow, shape=diamond];\n";
-						} else {
-							out_text += "A_" + std::to_string(i) + " [label=\"" + node.name + "\", style=\"filled\", fillcolor=yellow];\n";
-						}
-					}
-				}
-			out_text += "}\n";
-			auto sdir = simple_fs::get_or_create_oos_directory();
-			simple_fs::write_file(sdir, NATIVE("graph.txt"), out_text.c_str(), uint32_t(out_text.size()));
-		}
-		break;
-		case command_info::type::ai_elligibility:
-		{
-			auto const n = state.local_player_nation;
-			log_to_console(state, parent, "Owned provinces: " + std::to_string(state.world.nation_get_owned_province_count(n)));
-			log_to_console(state, parent, state.world.nation_get_owned_province_count(n) != 0 ? "@(T)" : "@(F)");
-		}
-		break;
-		case command_info::type::dump_out_of_sync:
+			}
+		out_text += "}\n";
+		auto sdir = simple_fs::get_or_create_oos_directory();
+		simple_fs::write_file(sdir, NATIVE("graph.txt"), out_text.c_str(), uint32_t(out_text.size()));
+	}
+	break;
+	case command_info::type::dump_out_of_sync:
+	{
 		window::change_cursor(state, window::cursor_type::busy);
 		state.debug_save_oos_dump();
 		state.debug_scenario_oos_dump();
@@ -1650,379 +1283,313 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 		log_to_console(state, parent, "Check \"My Documents\\Katerina Engine\\oos\\\" for the OOS dump");
 		window::change_cursor(state, window::cursor_type::normal);
 		break;
-		case command_info::type::win_wars:
-		break;
-		case command_info::type::toggle_ai:
-		{
-			auto tag = std::get<std::string>(pstate.arg_slots[0]);
-			auto nid = smart_get_national_identity_from_tag(state, parent, tag);
-			if(nid) {
-				auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
-				if(state.world.nation_get_is_player_controlled(n)) {
-					log_to_console(state, parent, "@(T) AI");
-				} else {
-					log_to_console(state, parent, "@(F) AI");
-				}
-				command::c_toggle_ai(state, state.local_player_nation, n);
+	}
+	case command_info::type::toggle_ai:
+	{
+		auto tag = std::get<std::string>(pstate.arg_slots[0]);
+		if(auto nid = smart_get_national_identity_from_tag(state, parent, tag); nid) {
+			auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+			if(state.world.nation_get_is_player_controlled(n)) {
+				log_to_console(state, parent, "@(T) AI");
+			} else {
+				log_to_console(state, parent, "@(F) AI");
 			}
-			break;
+			command::c_toggle_ai(state, state.local_player_nation, n);
 		}
-		case command_info::type::always_allow_wargoals:
+		break;
+	}
+	case command_info::type::always_allow_wargoals:
+	{
 		log_to_console(state, parent, !state.cheat_data.always_allow_wargoals ? "@(T)" : "@(F)");
 		command::c_always_allow_wargoals(state, state.local_player_nation);
 		break;
-		case command_info::type::always_allow_reforms:
+	}
+	case command_info::type::always_allow_reforms:
+	{
 		log_to_console(state, parent, !state.cheat_data.always_allow_reforms ? "@(T)" : "@(F)");
 		command::c_always_allow_reforms(state, state.local_player_nation);
 		break;
-		case command_info::type::always_allow_decisions:
-		log_to_console(state, parent, !state.cheat_data.always_allow_decisions? "@(T)" : "@(F)" );
+	}
+	case command_info::type::always_allow_decisions:
+	{
+		log_to_console(state, parent, !state.cheat_data.always_allow_decisions ? "@(T)" : "@(F)");
 		command::c_always_allow_decisions(state, state.local_player_nation);
 		break;
-		case command_info::type::always_potential_decisions:
+	}
+	case command_info::type::always_potential_decisions:
+	{
 		log_to_console(state, parent, !state.cheat_data.always_potential_decisions ? "@(T)" : "@(F)");
 		command::c_always_potential_decisions(state, state.local_player_nation);
 		break;
-		case command_info::type::always_accept_deals:
+	}
+	case command_info::type::always_accept_deals:
+	{
 		log_to_console(state, parent, !state.cheat_data.always_accept_deals ? "@(T)" : "@(F)");
 		command::c_always_accept_deals(state, state.local_player_nation);
 		break;
-		case command_info::type::set_auto_choice_all:
+	}
+	case command_info::type::set_auto_choice_all:
+	{
 		command::c_set_auto_choice_all(state, state.local_player_nation);
 		break;
-		case command_info::type::clear_auto_choice_all:
+	}
+	case command_info::type::clear_auto_choice_all:
+	{
 		command::c_clear_auto_choice_all(state, state.local_player_nation);
 		break;
-		case command_info::type::complete_constructions:
+	}
+	case command_info::type::complete_constructions:
+	{
 		command::c_complete_constructions(state, state.local_player_nation);
 		break;
-		case command_info::type::instant_research: {
-			auto has_us = false;
-			for(const auto n : state.cheat_data.instant_research_nations)
-			if(n == state.local_player_nation) {
-				has_us = true;
-				break;
-			}
-			log_to_console(state, parent, !has_us ? "@(T)" : "@(F)");
-			command::c_instant_research(state, state.local_player_nation);
+	}
+	case command_info::type::instant_research:
+	{
+		auto has_us = false;
+		for(const auto n : state.cheat_data.instant_research_nations)
+		if(n == state.local_player_nation) {
+			has_us = true;
 			break;
 		}
-		case command_info::type::game_info:
-		log_to_console(state, parent, "Seed: " + std::to_string(state.game_seed));
-		log_to_console(state, parent, std::string("Great Wars: "));
-		log_to_console(state, parent, state.military_definitions.great_wars_enabled ? "@(T)" : "@(F)");
-		log_to_console(state, parent, std::string("World Wars: "));
-		log_to_console(state, parent, state.military_definitions.world_wars_enabled ? "@(T)" : "@(F)");
+		log_to_console(state, parent, !has_us ? "@(T)" : "@(F)");
+		command::c_instant_research(state, state.local_player_nation);
 		break;
-		case command_info::type::spectate:
+	}
+	case command_info::type::spectate:
+	{
 		command::c_switch_nation(state, state.local_player_nation, state.national_definitions.rebel_id);
 		break;
-		case command_info::type::conquer_tag:
-		{
-			auto tag = std::get<std::string>(pstate.arg_slots[0]);
-			if(tag == "ALL") {
-				for(const auto p : state.world.in_province) {
-					command::c_change_owner(state, state.local_player_nation, p, state.local_player_nation);
+	}
+	case command_info::type::conquer_tag:
+	{
+		auto tag = std::get<std::string>(pstate.arg_slots[0]);
+		if(tag == "ALL") {
+			for(const auto p : state.world.in_province) {
+				command::c_change_owner(state, state.local_player_nation, p, state.local_player_nation);
+			}
+		} else {
+			auto nid = smart_get_national_identity_from_tag(state, parent, tag);
+			if(nid) {
+				auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
+				for(const auto po : state.world.in_province_ownership) {
+					if(po.get_nation() == n)
+					command::c_change_owner(state, state.local_player_nation, po.get_province(), state.local_player_nation);
 				}
-			} else {
-				auto nid = smart_get_national_identity_from_tag(state, parent, tag);
-				if(nid) {
-					auto n = state.world.national_identity_get_nation_from_identity_holder(nid);
-					for(const auto po : state.world.in_province_ownership) {
-						if(po.get_nation() == n)
-						command::c_change_owner(state, state.local_player_nation, po.get_province(), state.local_player_nation);
+			}
+		}
+		break;
+	}
+	case command_info::type::toggle_core:
+	{
+		auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
+		auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto tag = std::get<std::string>(pstate.arg_slots[1]);
+			nid = smart_get_national_identity_from_tag(state, parent, tag);
+		}
+		command::c_toggle_core(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
+		break;
+	}
+	case command_info::type::change_owner:
+	{
+		auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
+		auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto tag = std::get<std::string>(pstate.arg_slots[1]);
+			nid = smart_get_national_identity_from_tag(state, parent, tag);
+		}
+		command::c_change_owner(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
+		break;
+	}
+	case command_info::type::change_control:
+	{
+		auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
+		auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
+		if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
+			auto tag = std::get<std::string>(pstate.arg_slots[1]);
+			nid = smart_get_national_identity_from_tag(state, parent, tag);
+		}
+		command::c_change_controller(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
+		break;
+	}
+	case command_info::type::province_id_tooltip:
+	{
+		state.cheat_data.show_province_id_tooltip = not state.cheat_data.show_province_id_tooltip;
+		log_to_console(state, parent, state.cheat_data.show_province_id_tooltip ? "✔" : "✘");
+		break;
+	}
+	case command_info::type::add_population:
+	{
+		auto ammount = std::get<std::int32_t>(pstate.arg_slots[0]);
+		command::c_add_population(state, state.local_player_nation, ammount);
+		break;
+	}
+	case command_info::type::instant_construction:
+	{
+		log_to_console(state, parent, !state.cheat_data.instant_army ? "✔" : "✘");
+		command::c_instant_army(state, state.local_player_nation);
+		log_to_console(state, parent, !state.cheat_data.instant_navy ? "✔" : "✘");
+		command::c_instant_navy(state, state.local_player_nation);
+		log_to_console(state, parent, !state.cheat_data.instant_industry ? "✔" : "✘");
+		command::c_instant_industry(state, state.local_player_nation);
+		break;
+	}
+	case command_info::type::add_year:
+	{
+		auto years = std::get<std::int32_t>(pstate.arg_slots[0]);
+		command::c_add_year(state, state.local_player_nation, years);
+		break;
+	}
+	case command_info::type::daily_oos_check:
+	{
+		state.cheat_data.daily_oos_check = not state.cheat_data.daily_oos_check;
+		log_to_console(state, parent, state.cheat_data.daily_oos_check ? "✔" : "✘");
+		break;
+	}
+	case command_info::type::dump_map:
+	{
+		bool opt_sea_lines = true;
+		bool opt_province_lines = true;
+		bool opt_blend = true;
+		if(!std::holds_alternative<std::string>(pstate.arg_slots[0])) {
+			log_to_console(state, parent, "Valid options: nosealine, noblend, nosealine2, blendnosea, vanilla");
+			log_to_console(state, parent, "Ex: \"dmap nosealine2\"");
+			break;
+		}
+		auto type = std::get<std::string>(pstate.arg_slots[0]);
+		if(type == "nosealine") {
+			opt_sea_lines = false;
+			opt_province_lines = false;
+		} else if(type == "noblend") {
+			opt_blend = false;
+		} else if(type == "nosealine2") {
+			opt_sea_lines = false;
+		} else if(type == "blendnosea") {
+			opt_sea_lines = false;
+			opt_blend = false;
+		} else if(type == "vanilla") {
+			opt_sea_lines = false;
+			opt_province_lines = false;
+			opt_blend = false;
+		}
+
+		auto total_px = state.map_state.map_data.size_x * state.map_state.map_data.size_y;
+		auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[total_px * 3]);
+		auto blend_fn = [&](uint32_t idx, bool sea_a, bool sea_b, dcon::province_id pa, dcon::province_id pb) {
+			if(sea_a != sea_b) {
+				buffer[idx * 3 + 0] = 0;
+				buffer[idx * 3 + 1] = 0;
+				buffer[idx * 3 + 2] = 0;
+			}
+			if(pa != pb) {
+				if(((sea_a || sea_b) && opt_sea_lines)
+				|| sea_a != sea_b
+				|| (opt_province_lines && !sea_a && !sea_b)) {
+					if(opt_blend) {
+						buffer[idx * 3 + 0] &= 0x7f;
+						buffer[idx * 3 + 1] &= 0x7f;
+						buffer[idx * 3 + 2] &= 0x7f;
+					} else {
+						buffer[idx * 3 + 0] = 0;
+						buffer[idx * 3 + 1] = 0;
+						buffer[idx * 3 + 2] = 0;
 					}
 				}
 			}
-			break;
-		}
-		case command_info::type::toggle_core:
-		{
-			auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
-			auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
+		};
+		for(uint32_t y = 0; y < uint32_t(state.map_state.map_data.size_y); y++) {
+			for(uint32_t x = 0; x < uint32_t(state.map_state.map_data.size_x); x++) {
+				auto idx = y * uint32_t(state.map_state.map_data.size_x) + x;
+				auto p = province::from_map_id(state.map_state.map_data.province_id_map[idx]);
+				bool p_is_sea = state.map_state.map_data.province_id_map[idx] >= province::to_map_id(state.province_definitions.first_sea_province);
+				if(p_is_sea) {
+					buffer[idx * 3 + 0] = 128;
+					buffer[idx * 3 + 1] = 128;
+					buffer[idx * 3 + 2] = 255;
+				} else {
+					auto owner = state.world.province_get_nation_from_province_ownership(p);
+					if(owner) {
+						auto owner_color = state.world.nation_get_color(owner);
+						buffer[idx * 3 + 0] = uint8_t(owner_color & 0xff);
+						buffer[idx * 3 + 1] = uint8_t((owner_color >> 8) & 0xff) & 0xff;
+						buffer[idx * 3 + 2] = uint8_t((owner_color >> 16) & 0xff) & 0xff;
+					} else {
+						buffer[idx * 3 + 0] = 170;
+						buffer[idx * 3 + 1] = 170;
+						buffer[idx * 3 + 2] = 170;
+					}
+				}
+				if(x < uint32_t(state.map_state.map_data.size_x - 1)) {
+					auto br_idx = idx + uint32_t(state.map_state.map_data.size_x);
+					if(br_idx < total_px) {
+						auto br_p = province::from_map_id(state.map_state.map_data.province_id_map[br_idx]);
+						bool br_is_sea = state.map_state.map_data.province_id_map[br_idx] >= province::to_map_id(state.province_definitions.first_sea_province);
+						blend_fn(idx, br_is_sea, p_is_sea, br_p, p);
+					}
+					auto rs_idx = idx + 1;
+					if(rs_idx < total_px) {
+						auto br_p = province::from_map_id(state.map_state.map_data.province_id_map[rs_idx]);
+						bool br_is_sea = state.map_state.map_data.province_id_map[rs_idx] >= province::to_map_id(state.province_definitions.first_sea_province);
+						blend_fn(idx, br_is_sea, p_is_sea, br_p, p);
+					}
+				}
 			}
-			command::c_toggle_core(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
-			break;
 		}
-		case command_info::type::change_control_and_owner:
-		{
-			auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
-			auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
-			}
-			command::c_change_owner(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
-			break;
+		stbi_flip_vertically_on_write(true);
+		auto func = [](void*, void* ptr_in, int size) -> void {
+			auto sdir = simple_fs::get_or_create_oos_directory();
+			simple_fs::write_file(sdir, NATIVE("map.png"), static_cast<const char*>(ptr_in), uint32_t(size));
+		};
+		stbi_write_png_to_func(func, nullptr, int(state.map_state.map_data.size_x), int(state.map_state.map_data.size_y), 3, buffer.get(), 0);
+		break;
+	}
+	case command_info::type::list_all_flags:
+	{
+		log_to_console(state, parent, std::string("-------------------------------"));
+		log_to_console(state, parent, text::produce_simple_string(state, "national_variables"));
+		for(int32_t i = 0; i < state.national_definitions.num_allocated_national_variables; i++) {
+			auto nv = dcon::national_variable_id(dcon::national_variable_id::value_base_t(i));
+			auto v = state.world.nation_get_variables(state.local_player_nation, nv);
+			if(v != 0.f)
+				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.variable_names[nv]) + ": " + text::format_float(v, 4));
 		}
-		case command_info::type::change_owner:
-		{
-			auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
-			auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
-			}
-			command::c_change_owner(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
-			break;
+		log_to_console(state, parent, std::string("-------------------------------"));
+		log_to_console(state, parent, text::produce_simple_string(state, "national_flags"));
+		for(int32_t i = 0; i < state.national_definitions.num_allocated_national_flags; i++) {
+			auto nv = dcon::national_flag_id(dcon::national_flag_id::value_base_t(i));
+			if(state.world.nation_get_flag_variables(state.local_player_nation, nv))
+				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.flag_variable_names[nv]));
 		}
-		case command_info::type::change_control:
-		{
-			auto province_id = dcon::province_id((uint16_t)std::get<std::int32_t>(pstate.arg_slots[0]));
-			auto nid = state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
-			if(std::holds_alternative<std::string>(pstate.arg_slots[1])) {
-				auto tag = std::get<std::string>(pstate.arg_slots[1]);
-				nid = smart_get_national_identity_from_tag(state, parent, tag);
-			}
-			command::c_change_controller(state, state.local_player_nation, province_id, state.world.national_identity_get_nation_from_identity_holder(nid));
-			break;
+		log_to_console(state, parent, std::string("-------------------------------"));
+		log_to_console(state, parent, text::produce_simple_string(state, "global_flags"));
+		for(int32_t i = 0; i < state.national_definitions.num_allocated_global_flags; i++) {
+			auto nv = dcon::global_flag_id(dcon::global_flag_id::value_base_t(i));
+			if(state.national_definitions.is_global_flag_variable_set(nv))
+				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.global_flag_variable_names[nv]));
 		}
-		case command_info::type::province_id_tooltip:
-		{
-			state.cheat_data.show_province_id_tooltip = not state.cheat_data.show_province_id_tooltip;
-			log_to_console(state, parent, state.cheat_data.show_province_id_tooltip ? "✔" : "✘");
-			break;
-		}
-		case command_info::type::add_population:
-		{
-			auto ammount = std::get<std::int32_t>(pstate.arg_slots[0]);
-			command::c_add_population(state, state.local_player_nation, ammount);
-			break;
-		}
-		case command_info::type::instant_army:
-		{
-			log_to_console(state, parent, !state.cheat_data.instant_army ? "✔" : "✘");
-			command::c_instant_army(state, state.local_player_nation);
-			break;
-		}
-		case command_info::type::instant_navy:
-		{
-			log_to_console(state, parent, !state.cheat_data.instant_navy ? "✔" : "✘");
-			command::c_instant_navy(state, state.local_player_nation);
-			break;
-		}
-		case command_info::type::instant_industry:
-		{
-			log_to_console(state, parent, !state.cheat_data.instant_industry ? "✔" : "✘");
-			command::c_instant_industry(state, state.local_player_nation);
-			break;
-		}
-		case command_info::type::add_year:
-		{
-			auto years = std::get<std::int32_t>(pstate.arg_slots[0]);
-			command::c_add_year(state, state.local_player_nation, years);
-			break;
-		}
-		case command_info::type::daily_oos_check:
-		{
-			state.cheat_data.daily_oos_check = not state.cheat_data.daily_oos_check;
-			log_to_console(state, parent, state.cheat_data.daily_oos_check ? "✔" : "✘");
-			break;
-		}
-		case command_info::type::dump_map:
-		{
-			bool opt_sea_lines = true;
-			bool opt_province_lines = true;
-			bool opt_blend = true;
-			if(!std::holds_alternative<std::string>(pstate.arg_slots[0])) {
-				log_to_console(state, parent, "Valid options: nosealine, noblend, nosealine2, blendnosea, vanilla");
-				log_to_console(state, parent, "Ex: \"dmap nosealine2\"");
+	} break;
+	case command_info::type::innovate: {
+		auto searched_name = std::get<std::string>(pstate.arg_slots[0]);
+		std::replace(searched_name.begin(), searched_name.end(), '_', ' ');
+		bool found = false;
+		for(auto invention : state.world.in_invention) {
+			auto innovation_name = text::produce_simple_string(state, invention.get_name());
+			std::transform(innovation_name.begin(), innovation_name.end(), innovation_name.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+
+			if(searched_name == innovation_name) {
+				command::c_innovate(state, state.local_player_nation, invention);
+				found = true;
 				break;
 			}
-			auto type = std::get<std::string>(pstate.arg_slots[0]);
-			if(type == "nosealine") {
-				opt_sea_lines = false;
-				opt_province_lines = false;
-			} else if(type == "noblend") {
-				opt_blend = false;
-			} else if(type == "nosealine2") {
-				opt_sea_lines = false;
-			} else if(type == "blendnosea") {
-				opt_sea_lines = false;
-				opt_blend = false;
-			} else if(type == "vanilla") {
-				opt_sea_lines = false;
-				opt_province_lines = false;
-				opt_blend = false;
-			}
-
-			auto total_px = state.map_state.map_data.size_x * state.map_state.map_data.size_y;
-			auto buffer = std::unique_ptr<uint8_t[]>(new uint8_t[total_px * 3]);
-			auto blend_fn = [&](uint32_t idx, bool sea_a, bool sea_b, dcon::province_id pa, dcon::province_id pb) {
-				if(sea_a != sea_b) {
-					buffer[idx * 3 + 0] = 0;
-					buffer[idx * 3 + 1] = 0;
-					buffer[idx * 3 + 2] = 0;
-				}
-				if(pa != pb) {
-					if(((sea_a || sea_b) && opt_sea_lines)
-					|| sea_a != sea_b
-					|| (opt_province_lines && !sea_a && !sea_b)) {
-						if(opt_blend) {
-							buffer[idx * 3 + 0] &= 0x7f;
-							buffer[idx * 3 + 1] &= 0x7f;
-							buffer[idx * 3 + 2] &= 0x7f;
-						} else {
-							buffer[idx * 3 + 0] = 0;
-							buffer[idx * 3 + 1] = 0;
-							buffer[idx * 3 + 2] = 0;
-						}
-					}
-				}
-			};
-			for(uint32_t y = 0; y < uint32_t(state.map_state.map_data.size_y); y++) {
-				for(uint32_t x = 0; x < uint32_t(state.map_state.map_data.size_x); x++) {
-					auto idx = y * uint32_t(state.map_state.map_data.size_x) + x;
-					auto p = province::from_map_id(state.map_state.map_data.province_id_map[idx]);
-					bool p_is_sea = state.map_state.map_data.province_id_map[idx] >= province::to_map_id(state.province_definitions.first_sea_province);
-					if(p_is_sea) {
-						buffer[idx * 3 + 0] = 128;
-						buffer[idx * 3 + 1] = 128;
-						buffer[idx * 3 + 2] = 255;
-					} else {
-						auto owner = state.world.province_get_nation_from_province_ownership(p);
-						if(owner) {
-							auto owner_color = state.world.nation_get_color(owner);
-							buffer[idx * 3 + 0] = uint8_t(owner_color & 0xff);
-							buffer[idx * 3 + 1] = uint8_t((owner_color >> 8) & 0xff) & 0xff;
-							buffer[idx * 3 + 2] = uint8_t((owner_color >> 16) & 0xff) & 0xff;
-						} else {
-							buffer[idx * 3 + 0] = 170;
-							buffer[idx * 3 + 1] = 170;
-							buffer[idx * 3 + 2] = 170;
-						}
-					}
-					if(x < uint32_t(state.map_state.map_data.size_x - 1)) {
-						auto br_idx = idx + uint32_t(state.map_state.map_data.size_x);
-						if(br_idx < total_px) {
-							auto br_p = province::from_map_id(state.map_state.map_data.province_id_map[br_idx]);
-							bool br_is_sea = state.map_state.map_data.province_id_map[br_idx] >= province::to_map_id(state.province_definitions.first_sea_province);
-							blend_fn(idx, br_is_sea, p_is_sea, br_p, p);
-						}
-						auto rs_idx = idx + 1;
-						if(rs_idx < total_px) {
-							auto br_p = province::from_map_id(state.map_state.map_data.province_id_map[rs_idx]);
-							bool br_is_sea = state.map_state.map_data.province_id_map[rs_idx] >= province::to_map_id(state.province_definitions.first_sea_province);
-							blend_fn(idx, br_is_sea, p_is_sea, br_p, p);
-						}
-					}
-				}
-			}
-			stbi_flip_vertically_on_write(true);
-			auto func = [](void*, void* ptr_in, int size) -> void {
-				auto sdir = simple_fs::get_or_create_oos_directory();
-				simple_fs::write_file(sdir, NATIVE("map.png"), static_cast<const char*>(ptr_in), uint32_t(size));
-			};
-			stbi_write_png_to_func(func, nullptr, int(state.map_state.map_data.size_x), int(state.map_state.map_data.size_y), 3, buffer.get(), 0);
-			break;
 		}
-		case command_info::type::province_names:
-		{
-			state.cheat_data.province_names = not state.cheat_data.province_names;
-			log_to_console(state, parent, state.cheat_data.province_names ? "✔" : "✘");
-			break;
+		if(!found) {
+			log_to_console(state, parent, "Couldn't find innovation: " + searched_name);
 		}
-		case command_info::type::economy_dump:
-		{
-			if(state.cheat_data.ecodump) {
-				state.cheat_data.ecodump = false;
-			} else {
-				state.cheat_data.ecodump = true;
-
-				state.world.for_each_commodity([&](dcon::commodity_id c) {
-					state.cheat_data.prices_dump_buffer += text::produce_simple_string(state, state.world.commodity_get_name(c)) + ",";
-					state.cheat_data.demand_dump_buffer += text::produce_simple_string(state, state.world.commodity_get_name(c)) + ",";
-					state.cheat_data.supply_dump_buffer += text::produce_simple_string(state, state.world.commodity_get_name(c)) + ",";
-				});
-
-				state.cheat_data.prices_dump_buffer += "\n";
-				state.cheat_data.demand_dump_buffer += "\n";
-				state.cheat_data.supply_dump_buffer += "\n";
-			}
-			log_to_console(state, parent, state.cheat_data.ecodump ? "✔" : "✘");
-			break;
-		}
-		case command_info::type::list_national_variables:
-		{
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_national_variables; i++) {
-				auto nv = dcon::national_variable_id(dcon::national_variable_id::value_base_t(i));
-				auto v = state.world.nation_get_variables(state.local_player_nation, nv);
-				if(v != 0.f)
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.variable_names[nv]) + ": " + text::format_float(v, 4));
-			}
-			break;
-		}
-		case command_info::type::list_national_flags:
-		{
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_national_flags; i++) {
-				auto nv = dcon::national_flag_id(dcon::national_flag_id::value_base_t(i));
-				if(state.world.nation_get_flag_variables(state.local_player_nation, nv))
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.flag_variable_names[nv]));
-			}
-			break;
-		}
-		case command_info::type::list_global_flags:
-		{
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_global_flags; i++) {
-				auto nv = dcon::global_flag_id(dcon::global_flag_id::value_base_t(i));
-				if(state.national_definitions.is_global_flag_variable_set(nv))
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.global_flag_variable_names[nv]));
-			}
-			break;
-		}
-		case command_info::type::list_all_flags:
-		{
-			log_to_console(state, parent, std::string("-------------------------------"));
-			log_to_console(state, parent, text::produce_simple_string(state, "national_variables"));
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_national_variables; i++) {
-				auto nv = dcon::national_variable_id(dcon::national_variable_id::value_base_t(i));
-				auto v = state.world.nation_get_variables(state.local_player_nation, nv);
-				if(v != 0.f)
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.variable_names[nv]) + ": " + text::format_float(v, 4));
-			}
-			log_to_console(state, parent, std::string("-------------------------------"));
-			log_to_console(state, parent, text::produce_simple_string(state, "national_flags"));
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_national_flags; i++) {
-				auto nv = dcon::national_flag_id(dcon::national_flag_id::value_base_t(i));
-				if(state.world.nation_get_flag_variables(state.local_player_nation, nv))
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.flag_variable_names[nv]));
-			}
-			log_to_console(state, parent, std::string("-------------------------------"));
-			log_to_console(state, parent, text::produce_simple_string(state, "global_flags"));
-			for(int32_t i = 0; i < state.national_definitions.num_allocated_global_flags; i++) {
-				auto nv = dcon::global_flag_id(dcon::global_flag_id::value_base_t(i));
-				if(state.national_definitions.is_global_flag_variable_set(nv))
-				log_to_console(state, parent, text::produce_simple_string(state, state.national_definitions.global_flag_variable_names[nv]));
-			}
-			break;
-		}
-		case command_info::type::innovate:
-		{
-			auto searched_name = std::get<std::string>(pstate.arg_slots[0]);
-			std::replace(searched_name.begin(), searched_name.end(), '_', ' ');
-			bool found = false;
-			for(auto invention: state.world.in_invention) {
-				auto innovation_name = text::produce_simple_string(state, invention.get_name());
-			std::transform(innovation_name.begin(), innovation_name.end(), innovation_name.begin(),[](unsigned char c) { return (char)std::tolower(c); });
-
-				if(searched_name == innovation_name) {
-					command::c_innovate(state, state.local_player_nation, invention);
-					found = true;
-					break;
-				}
-			}
-			if(!found) {
-				log_to_console(state, parent, "Couldn't find innovation: " + searched_name);
-			}
-			break;
-		}
-		case command_info::type::none:
+	} break;
+	case command_info::type::none:
 		log_to_console(state, parent, "Command \"" + std::string(s) + "\" not found.");
 		break;
-		default:
+	default:
 		break;
 	}
 	log_to_console(state, parent, ""); // space after command
