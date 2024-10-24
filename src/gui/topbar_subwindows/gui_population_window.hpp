@@ -2434,7 +2434,7 @@ namespace ui {
 					if(a_fat_id.get_consciousness() != b_fat_id.get_consciousness())
 						return a_fat_id.get_consciousness() < b_fat_id.get_consciousness();
 					return a_fat_id.id.index() < b_fat_id.id.index();
-					};
+				};
 				break;
 			case pop_list_sort::mil:
 				fn = [&](dcon::pop_id a, dcon::pop_id b) {
@@ -2559,9 +2559,10 @@ namespace ui {
 					auto a_mov = a_fat_id.get_movement_from_pop_movement_membership();
 					auto b_mov = b_fat_id.get_movement_from_pop_movement_membership();
 					if(a_reb != b_reb) {
-						return a_reb ? (b_reb ? a_reb.id.index() > b_reb.id.index() : true) : false;
-					} else if(a_mov != b_mov) {
-						return a_mov ? (b_mov ? a_mov.id.index() > b_mov.id.index() : true) : false;
+						return a_reb.id.index() < b_reb.id.index();
+					}
+					if(a_mov != b_mov) {
+						return a_mov.id.index() < b_mov.id.index();
 					}
 					return a_fat_id.id.index() < b_fat_id.id.index();
 				};
@@ -2586,8 +2587,7 @@ namespace ui {
 		}
 
 		void populate_left_side_list(sys::state& state) {
-			auto nation_id =
-				std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : state.local_player_nation;
+			auto nation_id = std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : state.local_player_nation;
 
 			// & then populate the separate, left side listbox
 			left_side_listbox->row_contents.push_back(pop_left_side_data(nation_id));
