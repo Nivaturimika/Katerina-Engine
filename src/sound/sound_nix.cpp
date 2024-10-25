@@ -108,7 +108,7 @@ namespace sound {
 		struct {
 			audio_instance* audio;
 			native_string_view name;
-		} vanilla_sound_table[] = {
+		} sound_table[] = {
 			//{ &state.sound_ptr->click_sound, NATIVE("GI_ValidClick.wav") },
 			{ &state.sound_ptr->technology_finished_sound, NATIVE("UI_TechnologyFinished.wav") },
 			{ &state.sound_ptr->army_move_sound, NATIVE("GI_InfantryMove.wav") },
@@ -173,7 +173,7 @@ namespace sound {
 			{ &state.sound_ptr->province_select_sounds[3], NATIVE("GI_ValidClick.wav") },
 		};
 		auto const sound_directory = simple_fs::open_directory(root_dir, NATIVE("sound"));
-		for(const auto& e : vanilla_sound_table) {
+		for(const auto& e : sound_table) {
 			auto file_peek = simple_fs::peek_file(sound_directory, e.name);
 			e.audio->set_file(file_peek ? simple_fs::get_full_name(*file_peek) : native_string());
 		}

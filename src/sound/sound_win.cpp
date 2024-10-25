@@ -310,11 +310,10 @@ namespace sound {
 				state.sound_ptr->music_list.emplace_back(file_name);
 			}
 		}
-
 		struct {
 			audio_instance* audio;
 			native_string_view name;
-		} vanilla_sound_table[] = {
+		} sound_table[] = {
 			//{ &state.sound_ptr->click_sound, NATIVE("GI_ValidClick.wav") },
 			{ &state.sound_ptr->technology_finished_sound, NATIVE("UI_TechnologyFinished.wav") },
 			{ &state.sound_ptr->army_move_sound, NATIVE("GI_InfantryMove.wav") },
@@ -350,47 +349,37 @@ namespace sound {
 			{ &state.sound_ptr->naval_battle_sounds[3], NATIVE("Combat_MinorShip_1.wav") },
 			{ &state.sound_ptr->naval_battle_sounds[4], NATIVE("Combat_MinorShip_2.wav") },
 			{ &state.sound_ptr->naval_battle_sounds[5], NATIVE("Combat_MinorShip_3.wav") },
+			{ &state.sound_ptr->click_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->click_left_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->click_right_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->console_open_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->console_close_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_budget_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->hover_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->checkbox_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->enact_sound, NATIVE("NU_EnactGI_ValidClickwav") },
+			{ &state.sound_ptr->subtab_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->delete_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->autochoose_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_politics_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_diplomacy_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_military_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_population_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_production_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_technology_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->tab_military_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->event_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->decision_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->pause_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->unpause_sound, NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->province_select_sounds[0], NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->province_select_sounds[1], NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->province_select_sounds[2], NATIVE("GI_ValidClick.wav") },
+			{ &state.sound_ptr->province_select_sounds[3], NATIVE("GI_ValidClick.wav") },
 		};
 		auto const sound_directory = simple_fs::open_directory(root_dir, NATIVE("sound"));
-		for(const auto& e : vanilla_sound_table) {
+		for(const auto& e : sound_table) {
 			auto file_peek = simple_fs::peek_file(sound_directory, e.name);
-			e.audio->set_file(file_peek ? simple_fs::get_full_name(*file_peek) : native_string());
-		}
-		struct {
-			audio_instance* audio;
-			native_string_view name;
-		} new_sound_table[] = {
-			{ &state.sound_ptr->click_sound, NATIVE("NU_AltClick.wav") },
-			{ &state.sound_ptr->click_left_sound, NATIVE("NU_ClickL.wav") },
-			{ &state.sound_ptr->click_right_sound, NATIVE("NU_ClickR.wav") },
-			{ &state.sound_ptr->console_open_sound, NATIVE("NU_OpenConsole.wav") },
-			{ &state.sound_ptr->console_close_sound, NATIVE("NU_CloseConsole.wav") },
-			{ &state.sound_ptr->tab_budget_sound, NATIVE("NU_TabBudget.wav") },
-			{ &state.sound_ptr->hover_sound, NATIVE("NU_Hover.wav") },
-			{ &state.sound_ptr->checkbox_sound, NATIVE("NU_Checkbox.wav") },
-			{ &state.sound_ptr->enact_sound, NATIVE("NU_Enact.wav") },
-			{ &state.sound_ptr->subtab_sound, NATIVE("NU_Subtab.wav") },
-			{ &state.sound_ptr->delete_sound, NATIVE("NU_Delete.wav") },
-			{ &state.sound_ptr->autochoose_sound, NATIVE("NU_Autochoose.wav") },
-			{ &state.sound_ptr->tab_politics_sound, NATIVE("NU_TabPolitics.wav") },
-			{ &state.sound_ptr->tab_diplomacy_sound, NATIVE("NU_TabDiplomacy.wav") },
-			{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
-			{ &state.sound_ptr->tab_population_sound, NATIVE("NU_TabPopulation.wav") },
-			{ &state.sound_ptr->tab_production_sound, NATIVE("NU_TabProduction.wav") },
-			{ &state.sound_ptr->tab_technology_sound, NATIVE("NU_TabTechnology.wav") },
-			{ &state.sound_ptr->tab_military_sound, NATIVE("NU_TabMilitary.wav") },
-			{ &state.sound_ptr->event_sound, NATIVE("NU_Event.wav") },
-			{ &state.sound_ptr->decision_sound, NATIVE("NU_Decision.wav") },
-			{ &state.sound_ptr->pause_sound, NATIVE("NU_Pause.wav") },
-			{ &state.sound_ptr->unpause_sound, NATIVE("NU_Unpause.wav") },
-			{ &state.sound_ptr->province_select_sounds[0], NATIVE("NU_ProvSelect1.wav") },
-			{ &state.sound_ptr->province_select_sounds[1], NATIVE("NU_ProvSelect2.wav") },
-			{ &state.sound_ptr->province_select_sounds[2], NATIVE("NU_ProvSelect3.wav") },
-			{ &state.sound_ptr->province_select_sounds[3], NATIVE("NU_ProvSelect4.wav") },
-		};
-		auto const assets_directory = simple_fs::open_directory(root_dir, NATIVE("\\assets"));
-		for(const auto& e : new_sound_table) {
-			auto file_peek = simple_fs::peek_file(assets_directory, e.name);
 			e.audio->set_file(file_peek ? simple_fs::get_full_name(*file_peek) : native_string());
 		}
 	}
