@@ -113,8 +113,8 @@ action = {
 		release = FROM
 		FROM = { all_core = { remove_core = THIS } }
 		FROM = { diplomatic_influence = { who = THIS value = 400 } } #add to sphere
-		#infamy = defines:RELEASE_NATION_INFAMY
-		#prestige = defines:RELEASE_NATION_PRESTIGE
+		badboy = defines:RELEASE_NATION_INFAMY
+		prestige = defines:RELEASE_NATION_PRESTIGE
 	}
 }
 action = {
@@ -180,6 +180,9 @@ action = {
 		is_greater_power = yes
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+		NOT = { is_sphere_leader_of = THIS }
+		diplomatic_influence = { who = THIS value > defines:INCREASEOPINION_INFLUENCE_COST }
+		is_banned_from = THIS
 	}
 }
 action = {
@@ -304,6 +307,7 @@ action = {
 	}
 	effect = {
 		release_vassal = FROM
+		
 	}
 }
 action = {
@@ -317,6 +321,6 @@ action = {
 	}
 	effect = {
 		#diplomatic_points = -defines:ADDWARGOAL_DIPLOMATIC_COST
-		#relation = { who = THIS value = defines:ADDWARGOAL_RELATION_ON_ACCEPT }
+		relation = { who = THIS value = defines:ADDWARGOAL_RELATION_ON_ACCEPT }
 	}
 }

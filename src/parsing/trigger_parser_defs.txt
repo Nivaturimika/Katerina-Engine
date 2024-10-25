@@ -1,6 +1,6 @@
 tr_diplomatic_influence
 	who              value           text               member
-	value            value           int                member_fn
+	value            extval          parse_constant   member_fn
 
 tr_party_loyalty
 	value            value           float              member_fn
@@ -21,7 +21,7 @@ tr_check_variable
 
 tr_relation
 	who              value           text               member
-	value            value           int                member_fn
+	value            extval          parse_constant   member_fn
 
 tr_pop_unemployment
 	value            value           float              member_fn

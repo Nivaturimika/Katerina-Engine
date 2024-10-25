@@ -18,7 +18,6 @@
 #include "nations.hpp"
 
 namespace parsers {
-
 	//
 	// structures and functions for parsing .gfx files
 	//
@@ -2876,6 +2875,12 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 #include "save_parsing.hpp"
 #include "news_parsing.hpp"
 #include "game_rules_parsing.hpp"
+
+namespace parsers {
+	float parse_constant(std::string_view value, int32_t line, error_handler& err, scenario_building_context& context);
+	float parse_constant(std::string_view value, int32_t line, error_handler& err, effect_building_context& context);
+	float parse_constant(std::string_view value, int32_t line, error_handler& err, trigger_building_context& context);
+}
 
 #include "parser_defs_generated.hpp"
 #include "tutorial_parser_defs_generated.hpp"

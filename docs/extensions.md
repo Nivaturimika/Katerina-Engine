@@ -934,3 +934,20 @@ AND = { T T } -> T
 ```
 
 Shocker! We were right, those are logically equivalent scopes!
+
+## Defines as constants
+
+You can use a literal named constant (fancy way of saying you can use defines instead of a fixed number).
+
+`badboy = defines:BADBOY_LIMIT`
+
+Will give the amount as given by the define, since defines are loaded before any triggers or effects, using this is safe for all of them.
+
+However, only some triggers and effects support define-named-constants:
+- `badboy`
+- `prestige`
+- `war_exhaustion`
+- `relation = { ... }`
+- `diplomatic_influence = { ... }`
+- `set_variable = { ... }`
+- `change_variable = { ... }`

@@ -2,10 +2,34 @@
 #include "system_state.hpp"
 #include "rebels.hpp"
 #include "fonts.hpp"
+#include "defines.hpp"
 
 namespace parsers {
+	float parse_constant(std::string_view v, int32_t line, error_handler& err, scenario_building_context& context) {
+		if(false) { /* ... */ }
+#define LUA_DEFINES_LIST_ELEMENT(key, const_value) if(parsers::is_fixed_token_ci(v.data(), v.data() + v.length(), "defines:" #key)) { return context.state.defines.key; }
+		LUA_DEFINES_LIST
+#undef LUA_DEFINES_LIST_ELEMENT
+		return parse_float(v, line, err);
+	}
 
-scenario_building_context::scenario_building_context(sys::state& state) : gfx_context(state, state.ui_defs), state(state) { }
+	float parse_constant(std::string_view v, int32_t line, error_handler& err, effect_building_context& context) {
+		if(false) { /* ... */ }
+#define LUA_DEFINES_LIST_ELEMENT(key, const_value) if(parsers::is_fixed_token_ci(v.data(), v.data() + v.length(), "defines:" #key)) { return context.outer_context.state.defines.key; }
+		LUA_DEFINES_LIST
+#undef LUA_DEFINES_LIST_ELEMENT
+		return parse_float(v, line, err);
+	}
+
+	float parse_constant(std::string_view v, int32_t line, error_handler& err, trigger_building_context& context) {
+		if(false) { /* ... */ }
+#define LUA_DEFINES_LIST_ELEMENT(key, const_value) if(parsers::is_fixed_token_ci(v.data(), v.data() + v.length(), "defines:" #key)) { return context.outer_context.state.defines.key; }
+		LUA_DEFINES_LIST
+#undef LUA_DEFINES_LIST_ELEMENT
+		return parse_float(v, line, err);
+	}
+
+	scenario_building_context::scenario_building_context(sys::state& state) : gfx_context(state, state.ui_defs), state(state) { }
 
 	void religion_def::icon(association_type, int32_t v, error_handler& err, int32_t line, religion_context& context) {
 		context.outer_context.state.world.religion_set_icon(context.id, uint8_t(v));

@@ -22,6 +22,7 @@ struct value_association {
 	std::string key;
 	std::string type;
 	value_and_optional handler;
+	bool is_extern = false;
 };
 struct group_association {
 	std::string key;
@@ -259,6 +260,9 @@ void parse() {
 					groups.back().set_handler = group_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, false };
 				} else if(type.data == "extern") {
 					groups.back().set_handler = group_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, true };
+				} else if(type.data == "extval") {
+					groups.back().single_value_handler_type = opt.data;
+					groups.back().single_value_handler_result = value_and_optional{ handler_type.data, handler_opt.data };
 				} else if(type.data == "value") {
 					groups.back().single_value_handler_type = opt.data;
 					groups.back().single_value_handler_result = value_and_optional{ handler_type.data, handler_opt.data };
@@ -309,7 +313,9 @@ void parse() {
 				if(type.data == "parser" || type.data == "group") {
 					groups.back().any_group_handler = group_association{ "", opt.data, value_and_optional{handler_type.data, handler_opt.data}, false };
 				} else if(type.data == "value") {
-					groups.back().any_value_handler = value_association{ "", opt.data, value_and_optional{handler_type.data, handler_opt.data} };
+					groups.back().any_value_handler = value_association{ "", opt.data, value_and_optional{handler_type.data, handler_opt.data}, false };
+				} else if(type.data == "extval") {
+					groups.back().any_value_handler = value_association{ "", opt.data, value_and_optional{handler_type.data, handler_opt.data}, true };
 				} else if(type.data == "extern") {
 					groups.back().any_group_handler = group_association{ "", opt.data, value_and_optional{handler_type.data, handler_opt.data}, true };
 					
@@ -346,12 +352,14 @@ void parse() {
 				}
 				if(type.data == "parser" || type.data == "group") {
 					groups.back().groups.push_back(group_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, false });
-				} else if(type.data == "value") {
-					groups.back().values.push_back(value_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data} });
 				} else if(type.data == "extern") {
 					groups.back().groups.push_back(group_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, true });
+				} else if(type.data == "value") {
+					groups.back().values.push_back(value_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, false });
+				} else if(type.data == "extval") {
+					groups.back().values.push_back(value_association{ key.data, opt.data, value_and_optional{handler_type.data, handler_opt.data}, true });
 				} else {
-					report_error(104, type.loc_info, "Invalid #free type '" + type.data + "'\n");
+					report_error(104, type.loc_info, "Invalid key type '" + type.data + "'\n");
 				}
 			}
 		} else if(key.type == token_type::newline) {
@@ -833,18 +841,36 @@ void file_write_out(std::fstream& stream, std::vector<group_contents>& groups) {
 			*/
 			auto match_handler = [](value_association const& v) {
 				std::string out;
-				if(v.handler.value == "discard") {
-				} else if(v.handler.value == "member") {
-					out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
-						" = parse_" + v.type + "(rh_token.content, rh_token.line, err);";
-				} else if(v.handler.value == "member_fn") {
-					out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
-						"(assoc_type, parse_" + v.type + "(rh_token.content, rh_token.line, err), err, cur.line, context);";
-				} else if(v.handler.value == "function") {
-					out = (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
-						"(cobj, assoc_type, parse_" + v.type + "(rh_token.content, rh_token.line, err), err, cur.line, context);";
+				if(v.is_extern) {
+					if(v.handler.value == "discard") {
+						out = "/* discarded */";
+					} else if(v.handler.value == "member") {
+						out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							" = " + v.type + "(rh_token.content, rh_token.line, err, context);";
+					} else if(v.handler.value == "member_fn") {
+						out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							"(assoc_type, " + v.type + "(rh_token.content, rh_token.line, err, context), err, cur.line, context);";
+					} else if(v.handler.value == "function") {
+						out = (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							"(cobj, assoc_type, " + v.type + "(rh_token.content, rh_token.line, err, context), err, cur.line, context);";
+					} else {
+						out = "err.unhandled_association_key(cur);";
+					}
 				} else {
-					out = "err.unhandled_association_key(cur);";
+					if(v.handler.value == "discard") {
+						out = "/* discarded */";
+					} else if(v.handler.value == "member") {
+						out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							" = parse_" + v.type + "(rh_token.content, rh_token.line, err);";
+					} else if(v.handler.value == "member_fn") {
+						out = "cobj." + (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							"(assoc_type, parse_" + v.type + "(rh_token.content, rh_token.line, err), err, cur.line, context);";
+					} else if(v.handler.value == "function") {
+						out = (v.handler.opt.length() > 0 ? v.handler.opt : v.key) +
+							"(cobj, assoc_type, parse_" + v.type + "(rh_token.content, rh_token.line, err), err, cur.line, context);";
+					} else {
+						out = "err.unhandled_association_key(cur);";
+					}
 				}
 				return out;
 			};

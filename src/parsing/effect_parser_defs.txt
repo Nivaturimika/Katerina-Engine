@@ -6,14 +6,14 @@ ef_trigger_revolt
 
 ef_diplomatic_influence
 	who                        value     text                           member
-	value                      value     int                            member
+	value                      extval    parse_constant               member
 
 ef_relation
 	who                        value     text                           member
 	tag                        value     text                           member (who)
 	with                       value     text                           member (who)
-	value                      value     int                            member
-	relation                   value     int                            member (value)
+	value                      extval    parse_constant               member
+	relation                   extval    parse_constant               member (value)
 
 ef_add_province_modifier
 	name                       value     text                           member_fn
@@ -68,11 +68,11 @@ ef_sub_unit
 
 ef_set_variable
 	which                      value     text                           member_fn
-	value                      value     float                          member
+	value                      extval    parse_constant               member
 
 ef_change_variable
 	which                      value     text                           member_fn
-	value                      value     float                          member
+	value                      extval    parse_constant               member
 
 ef_ideology
 	value                      value     text                           member_fn
@@ -164,21 +164,21 @@ effect_body
 	research_points                 value       int                 member_fn
 	tech_school                     value       text                member_fn
 	government                      value       text                member_fn
-	treasury                        value       float               member_fn
-	war_exhaustion                  value       float               member_fn
-	prestige                        value       float               member_fn
+	treasury                        value		float				member_fn
+	war_exhaustion                  extval		parse_constant	member_fn
+	prestige                        extval      parse_constant	member_fn
 	change_tag                      value       text                member_fn
 	change_tag_no_core_switch       value       text                member_fn
 	add_province_modifier           value       text                member_fn
 	add_country_modifier            value       text                member_fn
 	set_country_flag                value       text                member_fn
 	clr_country_flag                value       text                member_fn
-	set_news_flag                value       text                member_fn (set_country_flag)
-	clear_news_flag                value       text                member_fn (clr_country_flag)
+	set_news_flag					value       text                member_fn (set_country_flag)
+	clear_news_flag					value       text                member_fn (clr_country_flag)
 	country_event                   value       int                 member_fn
 	province_event                  value       int                 member_fn
 	military_access                 value       text                member_fn
-	badboy                          value       float               member_fn
+	badboy                          extval      parse_constant	member_fn
 	secede_province                 value       text                member_fn
 	inherit                         value       text                member_fn
 	annex_to                        value       text                member_fn
@@ -237,7 +237,7 @@ effect_body
 	railroad                        value       int                 member_fn  (infrastructure)
 	bank                            value       int                 member_fn
 	university                      value       int                 member_fn
-	kill_leader                      value       text                 member_fn
+	kill_leader						value       text                 member_fn
 	province_selector               value       int                 member_fn
 	province_immigrator             value       int                 member_fn
 	immigrator                      value       int                 member_fn (province_immigrator)
