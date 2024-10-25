@@ -7,7 +7,6 @@ layout (location = 4) in vec4 bone_weights;
 
 out vec2 tex_coord;
 out vec3 normal;
-out vec3 light_dir;
 
 uniform vec2 offset;
 uniform float zoom;
@@ -53,5 +52,4 @@ void main() {
 //
 	tex_coord = texture_coord * 4.f;
 	normal = normalize(skin_norm.xyz);
-	light_dir = -normalize(vec3(0.5f, 1.f, 1.f));
 }

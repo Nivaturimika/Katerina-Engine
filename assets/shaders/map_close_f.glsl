@@ -59,35 +59,27 @@ vec4 get_water_terrain() {
 	vec2 rounded_tex_coords = get_rounded_tex_coords(tex_coord);
 	vec2 prov_id = texture(provinces_texture_sampler, rounded_tex_coords).xy;
 	vec3 WorldColorColor = texture(colormap_water, corrected_coord).rgb;
-	if(corrected_coord.y > 1.f) {
-		WorldColorColor = vec3(0.14, 0.23, 0.36);
-	} else if(corrected_coord.y < 0.f) {
-		WorldColorColor = vec3(0.20, 0.35, 0.43);
-	}
 	tex_coord = tex_coord * 25.f + time * 0.002f;
 
-	const vec3 eyeDirection = vec3(0.f, 1.f, 1.f);
-	const vec3 lightDirection = vec3(0.f, 1.f, 1.f);
-
 	vec2 coordA = tex_coord * 3.f + vec2(0.1f, 0.1f);
-	vec2 coordB = tex_coord * 1.f + vec2(0.0f, 0.1f);
-	vec2 coordC = tex_coord * 2.f + vec2(0.0f, 0.15f);
-	vec2 coordD = tex_coord * 5.f + vec2(0.0f, 0.3f);
 
 	// Uses textureNoTile for non repeting textures,
 	// probably unnecessarily expensive
 	vec4 vBumpA = texture(water_normal, coordA);
-	coordB += vec2(0.03, -0.02) * time;
+	vec2 coordB = tex_coord * 2.8f + vec2(0.0f, 0.1f);
+	coordB += vec2(0.03f * sin(1.11f * time), -0.02f * cos(0.25f * time));
 	vec4 vBumpB = texture(water_normal, coordB);
-	coordC += vec2(0.03, -0.01) * time;
+	vec2 coordC = tex_coord * 2.3f + vec2(0.0f, 0.15f);
+	coordC += vec2(0.03f * sin(0.88f * time), -0.01f * cos(0.51f * time));
 	vec4 vBumpC = texture(water_normal, coordC);
-	coordD += vec2(0.02, -0.01) * time;
+	vec2 coordD = tex_coord * 5.5f + vec2(0.0f, 0.3f);
+	coordD += vec2(0.02f * sin(0.98f * time), -0.01f * cos(0.57f * time));
 	vec4 vBumpD = texture(water_normal, coordD);
 
-	vec3 vBumpTex = normalize(WaveModOne * (vBumpA.xyz + vBumpB.xyz +
-	vBumpC.xyz + vBumpD.xyz) - WaveModTwo);
+	vec3 vBumpTex = normalize(WaveModOne * (vBumpA.xyz + vBumpB.xyz + vBumpC.xyz + vBumpD.xyz) - WaveModTwo);
 
-	vec3 eyeDir = normalize(eyeDirection);
+	const vec3 lightDirection = vec3(0.f, 1.f, 1.f);
+	const vec3 eyeDir = normalize(vec3(0.f, 1.f, 1.f));
 	float NdotL = max(dot(eyeDir, (vBumpTex / 2.f)), 0.f);
 
 	NdotL = clamp((NdotL + WRAP) / (1 + WRAP), 0.f, 1.f);
@@ -106,15 +98,17 @@ vec4 get_water_terrain() {
 	return vec4(OutColor, vWaterTransparens);
 }
 
+float get_terrain_index(vec2 corner) {
+	float index = texture(terrain_texture_sampler, floor(tex_coord * map_size + vec2(0.5f)) / map_size + 0.5f * pix * corner).r;
+	return floor(index * 256.f);
+}
+
 // The terrain color from the current texture coordinate offset with one pixel in the "corner" direction
 vec4 get_terrain(vec2 corner, vec2 offset) {
-	float index = texture(terrain_texture_sampler, floor(tex_coord * map_size + vec2(0.5f)) / map_size + 0.5f * pix * corner).r;
-	index = floor(index * 256.f);
+	float index = get_terrain_index(corner);
 	float is_water = step(64.f, index);
 	vec4 colour = texture(terrainsheet_texture_sampler, vec3(offset, index));
-	colour.a = 1.f;
-	colour.rgb *= COLOR_LIGHTNESS;
-	return mix(colour, vec4(0.f), is_water);
+	return vec4(colour.rgb, 1.f - is_water);
 }
 
 vec4 get_terrain_mix() {
@@ -122,7 +116,8 @@ vec4 get_terrain_mix() {
 
 	// Pixel size on map texture
 	vec2 scaling = fract(tex_coord * map_size + vec2(0.5f));
-	vec2 offset = tex_coord / (4.f * pix);
+
+	vec2 offset = tex_coord / (8.f * pix);
 
 	vec4 colourlu = get_terrain(vec2(-1.f, -1.f), offset);
 	vec4 colourld = get_terrain(vec2(-1.f, 1.f), offset);
