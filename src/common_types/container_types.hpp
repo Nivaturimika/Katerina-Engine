@@ -328,4 +328,12 @@ namespace sys {
 			return std::memcmp(this, &o, sizeof(*this));
 		}
 	};
+
+	struct static_game_rule_s {
+		dcon::trigger_key limit;
+		dcon::effect_key effect;
+	};
+	static_assert(sizeof(static_game_rule_s) ==
+		sizeof(static_game_rule_s::limit)
+		+ sizeof(static_game_rule_s::effect));
 } // namespace sys

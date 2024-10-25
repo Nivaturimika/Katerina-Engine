@@ -392,4 +392,5 @@ namespace parsers {
 #include "effect_parsing.cpp"
 #include "save_parsing.cpp"
 #include "news_parsing.cpp"
+#include "game_rules_parsing.cpp"
 #include "parsers_declarations.cpp"

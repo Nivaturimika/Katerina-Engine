@@ -1,0 +1,321 @@
+#Empty triggers will default to "always = no", so explicitly say "always = yes" if needed
+#Empty effects won't do anything
+action = {
+	type = "state_transfer"
+	#THIS = nation asker
+	#FROM = nation target
+	#main = state id
+	limit = {
+		crisis_exist = no
+		THIS = {
+			tag != FROM
+			number_of_states > 1
+			is_independant = yes
+			ai = no
+			war = no
+		}
+		FROM = {
+			is_independant = yes
+			ai = no
+			war = no
+		}
+		any_owned_province = { controlled_by = THIS }
+	}
+	effect = {
+	}
+}
+action = {
+	type = "start_research"
+	#THIS/main = nation
+	limit = {
+		civilized = yes
+	}
+}
+action = {
+	type = "increase_relations"
+	#THIS/main = nation asker
+	#FROM = nation target
+	limit = {
+		tag != FROM
+		NOT = { war_with = FROM }
+		#diplomatic_points >= defines:INCREASERELATION_DIPLOMATIC_COST
+	}
+	effect = {
+		#relation = { who = FROM value = defines:INCREASERELATION_RELATION_ON_ACCEPT }
+		#diplomatic_points = -defines:INCREASERELATION_DIPLOMATIC_COST
+	}
+}
+action = {
+	type = "decrease_relations"
+	#THIS/main = nation asker
+	#FROM = nation target
+	limit = {
+		tag != FROM
+		NOT = { war_with = FROM }
+		#diplomatic_points >= defines:DECREASERELATION_DIPLOMATIC_COST
+	}
+	effect = {
+		#relation = { who = FROM value = defines:DECREASERELATION_RELATION_ON_ACCEPT }
+		#diplomatic_points = -defines:DECREASERELATION_DIPLOMATIC_COST
+	}
+}
+action = {
+	type = "factory_construction"
+	#THIS/main = nation source
+	#FROM = province location
+	limit = {
+		FROM = { is_colonial = no }
+		civilized = yes
+		OR = {
+			FROM = { #Domestic
+				owner = { tag = THIS }
+			}
+			FROM = { #Foreign
+				owner = { tag != THIS }
+				owner = { civilized = yes }
+				owner = { NOT = { war_with = THIS } }
+			}
+		}
+	}
+	effect = {
+	}
+}
+action = {
+	type = "unit_construction"
+	#THIS/main = nation source
+	#FROM = province location
+	limit = {
+		FROM = {
+			owned_by = THIS
+			controlled_by = THIS
+		}
+		is_disarmed = no
+	}
+	effect = {
+	}
+}
+action = {
+	type = "delete_factory"
+	#THIS/main = nation source
+	limit = {
+		always = yes
+	}
+}
+action = {
+	type = "release_vassal"
+	#THIS/main = nation source
+	#FROM = nation vassal
+	limit = {
+		always = yes
+	}
+	effect = {
+		release = FROM
+		FROM = { all_core = { remove_core = THIS } }
+		FROM = { diplomatic_influence = { who = THIS value = 400 } } #add to sphere
+		#infamy = defines:RELEASE_NATION_INFAMY
+		#prestige = defines:RELEASE_NATION_PRESTIGE
+	}
+}
+action = {
+	type = "start_election"
+	#THIS/main = nation source
+	limit = {
+		always = yes
+	}
+}
+action = {
+	type = "change_influence_priority"
+	#main = nation source
+	#THIS = influence target
+	limit = {
+		is_greater_power = yes
+		THIS = { is_greater_power = no }
+	}
+}
+action = {
+	type = "discredit_advisors"
+	#main = nation source
+	#THIS = influence target
+	#FROM = affected gp
+	limit = {
+		tag != FROM
+		is_greater_power = yes
+		FROM = { is_greater_power = yes }
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "expel_advisors"
+	#main = nation source
+	#THIS = influence target
+	#FROM = affected gp
+	limit = {
+		tag != FROM
+		is_greater_power = yes
+		FROM = { is_greater_power = yes }
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "ban_embassy"
+	#main = nation source
+	#THIS = influence target
+	#FROM = affected gp
+	limit = {
+		tag != FROM
+		is_greater_power = yes
+		FROM = { is_greater_power = yes }
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "increase_opinion"
+	#main = nation source
+	#THIS = influence target
+	limit = {
+		is_greater_power = yes
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "decrease_opinion"
+	#main = nation source
+	#THIS = influence target
+	#FROM = affected gp
+	limit = {
+		tag != FROM
+		is_greater_power = yes
+		FROM = { is_greater_power = yes }
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "add_to_sphere"
+	#main = nation source
+	#THIS = influence target
+	limit = {
+		is_greater_power = yes
+		THIS = { is_greater_power = no }
+		NOT = { war_with = THIS }
+		NOT = { is_sphere_leader_of = THIS }
+	}
+}
+action = {
+	type = "remove_from_sphere"
+	#main = nation source
+	#THIS = influence target
+	#FROM = affected gp
+	limit = {
+		is_greater_power = yes
+		FROM = { is_greater_power = yes }
+		THIS = { is_greater_power = no }
+		THIS = { in_sphere = FROM }
+		NOT = { war_with = THIS }
+	}
+}
+action = {
+	type = "intervene_in_war"
+	#THIS/main = nation source
+	limit = {
+		is_greater_power = yes
+		involved_in_crisis = no
+	}
+}
+action = {
+	type = "civilize"
+	#THIS/main = nation source
+	limit = {
+		civilized = no #only uncivs can civilize
+	}
+}
+action = {
+	type = "become_interested_in_crisis"
+	#THIS/main = nation source
+	limit = {
+		is_greater_power = yes
+		war = no
+		is_disarmed = no
+		crisis_exist = yes
+	}
+}
+action = {
+	type = "change_stockpile_settings"
+	#THIS/main = nation source
+	limit = {
+		always = yes
+	}
+	effect = {
+	}
+}
+action = {
+	type = "fabricate_cb"
+	#THIS/main = nation source
+	#FROM = nation target
+	limit = {
+		tag != FROM
+		NOT = { vassal_of = FROM }
+		NOT = { in_sphere = FROM }
+		NOT = { war_with = FROM }
+		NOT = { truce_with = FROM }
+	}
+	effect = {
+	}
+}
+action = {
+	type = "give_military_access"
+	#THIS/main = nation source
+	#FROM = nation target
+	limit = {
+		THIS = { tag != FROM }
+		NOT = { war_with = FROM }
+		NOT = { FROM = { military_access = THIS } }
+	}
+	effect = {
+	}
+}
+action = {
+	type = "ask_military_access"
+	#THIS/main = nation source
+	#FROM = nation target
+	limit = {
+		tag != FROM
+		NOT = { war_with = FROM }
+		NOT = { military_access = FROM }
+	}
+	effect = {
+	}
+}
+action = {
+	type = "release_subject"
+	#THIS/main = nation source
+	#FROM = nation target
+	limit = {
+		tag != FROM
+		FROM = { vassal_of = THIS }
+		war = no
+		FROM = { war = no }
+		crisis_exist = no		
+	}
+	effect = {
+		release_vassal = FROM
+	}
+}
+action = {
+	type = "add_war_goal"
+	#main = nation source
+	#THIS = nation target
+	#FROM = secondary target
+	limit = {
+		tag != THIS
+		#diplomatic_points >= defines:ADDWARGOAL_DIPLOMATIC_COST
+	}
+	effect = {
+		#diplomatic_points = -defines:ADDWARGOAL_DIPLOMATIC_COST
+		#relation = { who = THIS value = defines:ADDWARGOAL_RELATION_ON_ACCEPT }
+	}
+}

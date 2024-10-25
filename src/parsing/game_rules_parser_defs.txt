@@ -1,0 +1,8 @@
+game_rule_action
+	type				value		text						member_fn
+	limit				extern		make_game_rule_trigger		member
+	effect				extern		make_game_rule_effect		member
+
+game_rules_file
+	action				extern		make_game_rule_action		member_fn
+

@@ -3658,5 +3658,4 @@ scenario_building_context::scenario_building_context(sys::state& state) : gfx_co
 			err.accumulated_errors += "Position specified for an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
-
 } // namespace parsers

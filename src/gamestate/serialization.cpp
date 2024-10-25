@@ -344,6 +344,7 @@ namespace sys {
 			ptr_in = deserialize(ptr_in, state.national_definitions.variable_names);
 			ptr_in = deserialize(ptr_in, state.national_definitions.triggered_modifiers);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.rebel_id);
+			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.static_game_rules);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.static_modifiers);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.num_allocated_national_variables);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.num_allocated_national_flags);
@@ -494,6 +495,7 @@ namespace sys {
 			ptr_in = serialize(ptr_in, state.national_definitions.variable_names);
 			ptr_in = serialize(ptr_in, state.national_definitions.triggered_modifiers);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.rebel_id);
+			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.static_game_rules);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.static_modifiers);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.num_allocated_national_variables);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.num_allocated_national_flags);
@@ -638,6 +640,7 @@ namespace sys {
 			sz += serialize_size(state.national_definitions.variable_names);
 			sz += serialize_size(state.national_definitions.triggered_modifiers);
 			sz += sizeof(state.national_definitions.rebel_id);
+			sz += sizeof(state.national_definitions.static_game_rules);
 			sz += sizeof(state.national_definitions.static_modifiers);
 			sz += sizeof(state.national_definitions.num_allocated_national_variables);
 			sz += sizeof(state.national_definitions.num_allocated_national_flags);

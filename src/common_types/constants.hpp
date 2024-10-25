@@ -617,6 +617,36 @@ namespace sys {
 	enum class projection_mode : uint8_t {
 		globe_ortho = 0, flat = 1, globe_perspect = 2, num_of_modes = 3
 	};
+
+	enum class static_game_rule : uint8_t {
+		state_transfer,
+		start_research,
+		increase_relations,
+		decrease_relations,
+		factory_construction,
+		unit_construction,
+		delete_factory,
+		release_vassal,
+		start_election,
+		change_influence_priority,
+		discredit_advisors,
+		expel_advisors,
+		ban_embassy,
+		increase_opinion,
+		decrease_opinion,
+		add_to_sphere,
+		remove_from_sphere,
+		intervene_in_war,
+		civilize,
+		become_interested_in_crisis,
+		change_stockpile_settings,
+		fabricate_cb,
+		give_military_access,
+		ask_military_access,
+		release_subject,
+		add_war_goal,
+		count,
+	};
 };
 
 namespace ai {

@@ -3293,6 +3293,20 @@ namespace sys {
 			}
 		});
 
+		// parse game_rules.txt
+		{
+			auto assets_dir = simple_fs::open_directory(root, NATIVE("assets"));
+			if(auto f = open_file(assets_dir, NATIVE("game_rules.txt")); f) {
+				auto content = view_contents(*f);
+				err.file_name = "game_rules.txt";
+				parsers::token_generator gen(content.data, content.data + content.file_size);
+				parsers::parse_game_rules_file(gen, err, context);
+			} else {
+				err.fatal = true;
+				err.accumulated_errors += "File assets/game_rules.txt could not be opened\n";
+			}
+		}
+
 		/* run pending triggers and effects */
 		for(auto pending_decision : pending_decisions) {
 			dcon::nation_id n = pending_decision.first;

@@ -2824,7 +2824,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		}
 		void finish(bookmark_context& context) {
 			if(context.bookmark_dates.empty()) {
-			context.bookmark_dates.push_back(bookmark_definition{ sys::year_month_day{ 1836, 1, 1 }, std::string("fe_new_game") });
+				context.bookmark_dates.push_back(bookmark_definition{ sys::year_month_day{ 1836, 1, 1 }, std::string("fe_new_game") });
 			}
 		}
 	};
@@ -2846,8 +2846,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		void body_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
 		void header_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
 		void map_feature(association_type, std::string_view value, error_handler& err, int32_t line, sys::state&);
-	
-	void finish(sys::state& context) { }
+		void finish(sys::state& context) { }
 	};
 
 	void add_locale(sys::state& state, std::string_view locale_name, char const* data_start, char const* data_end);
@@ -2855,21 +2854,20 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 	struct province_xy_pair {
 		float x = 0.f;
 		float y = 0.f;
-	void finish(scenario_building_context& context) { }
+		void finish(scenario_building_context& context) { }
 	};
 
 	struct province_position {
 		float text_rotation = 0.f;
 		float text_scale = 0.f;
 		province_xy_pair text_position;
-	void finish(scenario_building_context& context) { }
+		void finish(scenario_building_context& context) { }
 	};
 
 	struct positions_file {
 		void any_group(std::string_view name, province_position v, error_handler& err, int32_t line, scenario_building_context& context);
-	void finish(scenario_building_context& context) { }
+		void finish(scenario_building_context& context) { }
 	};
-
 } // namespace parsers
 
 #include "trigger_parsing.hpp"
@@ -2877,6 +2875,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 #include "cultures_parsing.hpp"
 #include "save_parsing.hpp"
 #include "news_parsing.hpp"
+#include "game_rules_parsing.hpp"
 
 #include "parser_defs_generated.hpp"
 #include "tutorial_parser_defs_generated.hpp"
@@ -2885,3 +2884,4 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 #include "trigger_parser_defs_generated.hpp"
 #include "effect_parser_defs_generated.hpp"
 #include "save_parser_defs_generated.hpp"
+#include "game_rules_parser_defs_generated.hpp"

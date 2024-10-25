@@ -12,7 +12,7 @@ namespace nations {
 		return (uint32_t(first) << 16) | (uint32_t(second) << 8) | (uint32_t(third) << 0);
 	}
 	inline std::string int_to_tag(uint32_t v) {
-	char values[] = {char((v >> 16) & 0xFF), char((v >> 8) & 0xFF), char((v >> 0) & 0xFF)};
+		char values[] = { char((v >> 16) & 0xFF), char((v >> 8) & 0xFF), char((v >> 0) & 0xFF) };
 		return std::string(values, values + 3);
 	}
 
@@ -126,6 +126,7 @@ namespace nations {
 
 		dcon::national_identity_id rebel_id;
 
+		sys::static_game_rule_s static_game_rules[uint8_t(sys::static_game_rule::count)];
 		dcon::modifier_id static_modifiers[uint8_t(static_modifier::count)];
 
 		int32_t num_allocated_national_variables = 0;

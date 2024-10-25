@@ -134,8 +134,7 @@ namespace text {
 		return true;
 	}
 
-	#define CT_STRING_ENUM(X) else if(is_fixed_token_ci(v, #X)) return variable_type::X;
-
+#define CT_STRING_ENUM(X) else if(is_fixed_token_ci(v, #X)) return variable_type::X;
 	variable_type variable_type_from_name(std::string_view v) {
 		if(v.length() == 1) {
 			if(false) { }
