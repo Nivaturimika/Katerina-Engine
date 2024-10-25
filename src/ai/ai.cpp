@@ -4106,86 +4106,96 @@ namespace ai {
 	struct classified_province {
 		dcon::province_id id;
 		province_class c;
+		float cur_weight;
+		float max_weight;
 	};
+
+	void distribute_guards_add_province(sys::state& state, dcon::nation_id n, dcon::province_id p, std::vector<classified_province>& provinces) {
+		province_class cls = province_class::interior;
+		for(auto padj : state.world.province_get_province_adjacency(p)) {
+			auto other = padj.get_connected_provinces(0) == p ? padj.get_connected_provinces(1) : padj.get_connected_provinces(0);
+			auto n_controller = other.get_nation_from_province_control();
+			auto ovr = n_controller.get_overlord_as_subject().get_ruler();
+			if(n_controller == n) {
+				// own province
+			} else if(!n_controller && !other.get_rebel_faction_from_province_rebel_control()) {
+				// uncolonized or sea
+			} else if(other.get_rebel_faction_from_province_rebel_control()) {
+				cls = province_class::hostile_border;
+				break;
+			} else if(military::are_at_war(state, n, n_controller)) {
+				cls = province_class::hostile_border;
+				break;
+			} else if(nations::are_allied(state, n, n_controller) || (ovr && ovr == n) || (ovr && nations::are_allied(state, n, ovr))) {
+				// allied controller or subject of allied controller or our "parent" overlord
+				if(uint8_t(cls) < uint8_t(province_class::low_priority_border)) {
+					cls = province_class::low_priority_border;
+				}
+			} else {
+				/*	We will target POTENTIAL enemies of the nation; we could also check if
+					the CB can be used on us, but that is expensive, so instead we use available_cbs! */
+				bool is_threat = false;
+				if(n_controller) {
+					is_threat |= n_controller.get_ai_rival() == n;
+					is_threat |= state.world.nation_get_ai_rival(n) == n_controller.id;
+					if(ovr) {
+						/* subjects cannot negotiate by themselves, but the overlord may */
+						is_threat |= ovr.get_ai_rival() == n;
+						is_threat |= state.world.nation_get_ai_rival(n) == ovr.id;
+						//
+						is_threat |= ovr.get_constructing_cb_target() == n;
+						for(auto cb : ovr.get_available_cbs()) {
+							is_threat |= cb.target == n;
+						}
+					} else {
+						is_threat |= n_controller.get_constructing_cb_target() == n;
+						for(auto cb : n_controller.get_available_cbs()) {
+							is_threat |= cb.target == n;
+						}
+					}
+				}
+				if(is_threat) {
+					if(uint8_t(cls) < uint8_t(province_class::threat_border)) {
+						cls = province_class::threat_border;
+					}
+				} else { // other border
+					if(uint8_t(cls) < uint8_t(province_class::border)) {
+						cls = province_class::border;
+					}
+				}
+			}
+			if(cls == province_class::hostile_border) {
+				// go for mobilization centers
+				if(other.get_state_membership().get_capital() == other) {
+					cls = province_class::high_priority_hostile_border;
+				}
+			}
+		}
+		auto attrition_mod = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attrition);
+		auto cur_weight = military::local_army_weight(state, p) * attrition_mod;
+		auto max_weight = military::max_supply_weight_in_province(state, n, p);
+		if(cur_weight < max_weight) {
+			provinces.push_back(classified_province{ p, cls, cur_weight, max_weight });
+		}
+	}
 
 	void distribute_guards(sys::state& state, dcon::nation_id n) {
 		std::vector<classified_province> provinces;
 		provinces.reserve(state.world.province_size());
-
-		auto cap = state.world.nation_get_capital(n);
-		for(auto c : state.world.nation_get_province_control(n)) {
-			province_class cls = province_class::interior;
-			for(auto padj : c.get_province().get_province_adjacency()) {
-				auto other = padj.get_connected_provinces(0) == c.get_province() ? padj.get_connected_provinces(1) : padj.get_connected_provinces(0);
-				auto n_controller = other.get_nation_from_province_control();
-				auto ovr = n_controller.get_overlord_as_subject().get_ruler();
-
-				if(n_controller == n) {
-					// own province
-				} else if(!n_controller && !other.get_rebel_faction_from_province_rebel_control()) {
-					// uncolonized or sea
-				} else if(other.get_rebel_faction_from_province_rebel_control()) {
-					cls = province_class::hostile_border;
-					break;
-				} else if(military::are_at_war(state, n, n_controller)) {
-					cls = province_class::hostile_border;
-					break;
-				} else if(nations::are_allied(state, n, n_controller) || (ovr && ovr == n) || (ovr && nations::are_allied(state, n, ovr))) {
-					// allied controller or subject of allied controller or our "parent" overlord
-					if(uint8_t(cls) < uint8_t(province_class::low_priority_border)) {
-						cls = province_class::low_priority_border;
-					}
-				} else {
-					/*	We will target POTENTIAL enemies of the nation; we could also check if
-						the CB can be used on us, but that is expensive, so instead we use available_cbs! */
-					bool is_threat = false;
-					if(n_controller) {
-						is_threat |= n_controller.get_ai_rival() == n;
-						is_threat |= state.world.nation_get_ai_rival(n) == n_controller.id;
-						if(ovr) {
-							/* subjects cannot negotiate by themselves, but the overlord may */
-							is_threat |= ovr.get_ai_rival() == n;
-							is_threat |= state.world.nation_get_ai_rival(n) == ovr.id;
-							//
-							is_threat |= ovr.get_constructing_cb_target() == n;
-							for(auto cb : ovr.get_available_cbs()) {
-								is_threat |= cb.target == n;
-							}
-						} else {
-							is_threat |= n_controller.get_constructing_cb_target() == n;
-							for(auto cb : n_controller.get_available_cbs()) {
-								is_threat |= cb.target == n;
-							}
-						}
-					}
-					if(is_threat) {
-						if(uint8_t(cls) < uint8_t(province_class::threat_border)) {
-							cls = province_class::threat_border;
-						}
-					} else { // other border
-						if(uint8_t(cls) < uint8_t(province_class::border)) {
-							cls = province_class::border;
-						}
-					}
-				}
-				if(cls == province_class::hostile_border) {
-					// go for mobilization centers
-					if(other.get_state_membership().get_capital() == other) {
-						cls = province_class::high_priority_hostile_border;
-					}
-				}
-			}
-			provinces.push_back(classified_province{ c.get_province().id, cls });
+		for(auto c : state.world.nation_get_province_control(n)) { //ourselves
+			distribute_guards_add_province(state, n, c.get_province(), provinces);
 		}
-
+		for(auto ov : state.world.nation_get_overlord_as_ruler(n)) { //puppets
+			for(auto const c : ov.get_subject().get_province_control()) {
+				distribute_guards_add_province(state, n, c.get_province(), provinces);
+			}
+		}
 		pdqsort(provinces.begin(), provinces.end(), [&](classified_province& a, classified_province& b) {
-			if(a.c != b.c) {
+			if(a.c != b.c) { //by priority
 				return uint8_t(a.c) > uint8_t(b.c);
 			}
-			auto adist = province::sorting_distance(state, a.id, cap);
-			auto bdist = province::sorting_distance(state, b.id, cap);
-			if(adist != bdist) {
-				return adist < bdist;
+			if(a.max_weight - a.cur_weight != b.max_weight - b.cur_weight) { //by weight
+				return uint8_t(a.max_weight - a.cur_weight) > uint8_t(b.max_weight - b.cur_weight);
 			}
 			return a.id.index() < b.id.index();
 		});
@@ -4215,11 +4225,10 @@ namespace ai {
 				guard_assigned = false;
 				for(uint32_t j = start_of_stage; j < end_of_stage && !guards_list.empty(); ++j) {
 					auto p = provinces[j].id;
-					auto p_region = state.world.province_get_connected_region_id(provinces[j].id);
-					assert(p_region > 0);
-					bool p_region_is_coastal = state.province_definitions.connected_region_is_coastal[p_region - 1];
-
-					if(10.f * (1 + full_loops_through) <= military::local_army_weight(state, p)) {
+					if(provinces[j].cur_weight < provinces[j].max_weight) {
+						auto p_region = state.world.province_get_connected_region_id(provinces[j].id);
+						assert(p_region > 0);
+						//
 						uint32_t nearest_index = 0;
 						dcon::army_id nearest;
 						float nearest_distance = 1.0f;
@@ -4231,13 +4240,15 @@ namespace ai {
 								nearest = guards_list[k];
 							}
 						}
-
 						// assign nearest guard
 						if(nearest) {
-							state.world.army_set_ai_province(nearest, p);
-							guards_list[nearest_index] = guards_list.back();
-							guards_list.pop_back();
-							guard_assigned = true;
+							auto weight = military::total_army_weight(state, nearest);
+							if(provinces[j].cur_weight + weight < provinces[j].max_weight) {
+								state.world.army_set_ai_province(nearest, p);
+								guards_list[nearest_index] = guards_list.back();
+								guards_list.pop_back();
+								guard_assigned = true;
+							}
 						}
 					}
 				}
@@ -4298,9 +4309,8 @@ namespace ai {
 					}
 					ar.set_arrival_time(military::arrival_time_to(state, ar, path.back()));
 					ar.set_dig_in(0);
-				} else {
+				} else if(!ar.get_controller_from_army_control().get_is_player_controlled()) {
 					//Units delegated to the AI won't transport themselves on their own
-					if(!ar.get_controller_from_army_control().get_is_player_controlled())
 					require_transport.push_back(ar.id);
 				}
 			}
@@ -4349,15 +4359,13 @@ namespace ai {
 					}
 					state.world.army_set_arrival_time(require_transport[i], military::arrival_time_to(state, require_transport[i], path.back()));
 					state.world.army_set_dig_in(require_transport[i], 0);
-					state.world.army_set_dig_in(require_transport[i], 0);
 				}
 			}
-
 			{
 				auto fleet_destination = province::has_naval_access_to_province(state, controller, coastal_target_prov) ? coastal_target_prov : state.world.province_get_port_to(coastal_target_prov);
 				if(fleet_destination == state.world.navy_get_location_from_navy_location(transport_fleet)) {
 					state.world.navy_get_path(transport_fleet).clear();
-				state.world.navy_set_arrival_time(transport_fleet, sys::date{});
+					state.world.navy_set_arrival_time(transport_fleet, sys::date{});
 					state.world.navy_set_ai_activity(transport_fleet, uint8_t(fleet_activity::boarding));
 				} else if(auto fleet_path = province::make_naval_path(state, state.world.navy_get_location_from_navy_location(transport_fleet), fleet_destination); fleet_path.empty()) { // this essentially should be impossible ...
 					continue;
@@ -5046,11 +5054,10 @@ namespace ai {
 					}
 				}
 			} else if(ar.get_ai_activity() == uint8_t(army_activity::attacking)
-			&& ar.get_ai_province() != ar.get_location_from_army_location()
-			&& !ar.get_arrival_time()
-			&& !ar.get_battle_from_army_battle_participation()
-			&& !ar.get_navy_from_army_transport()) {
-
+				&& ar.get_ai_province() != ar.get_location_from_army_location()
+				&& !ar.get_arrival_time()
+				&& !ar.get_battle_from_army_battle_participation()
+				&& !ar.get_navy_from_army_transport()) {
 				bool all_gathered = true;
 				for(auto o : ar.get_controller_from_army_control().get_army_control()) {
 					if(o.get_army().get_ai_province() == ar.get_ai_province()) {
@@ -5069,7 +5076,6 @@ namespace ai {
 						}
 					}
 				}
-
 				if(all_gathered) {
 					if(province::has_access_to_province(state, ar.get_controller_from_army_control(), ar.get_ai_province())) {
 						if(ar.get_ai_province() == ar.get_location_from_army_location()) {

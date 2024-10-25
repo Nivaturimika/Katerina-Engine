@@ -444,8 +444,10 @@ enum class war_result { draw, attacker_won, defender_won };
 	float attrition_amount(sys::state& state, dcon::army_id a);
 	float relative_attrition_amount(sys::state& state, dcon::navy_id a, dcon::province_id prov);
 	float relative_attrition_amount(sys::state& state, dcon::army_id a, dcon::province_id prov);
-	float weighted_attrition_amount(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov, float total_army_weight);
+	float max_supply_weight_in_province(sys::state& state, dcon::nation_id n, dcon::province_id prov);
+	float total_army_weight(sys::state& state, dcon::army_id a);
 	float local_army_weight(sys::state& state, dcon::province_id prov);
+	float weighted_attrition_amount(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov, float weight);
 	float peacetime_attrition_limit(sys::state& state, dcon::nation_id n, dcon::province_id prov);
 	float reinforce_amount(sys::state& state, dcon::army_id a);
 

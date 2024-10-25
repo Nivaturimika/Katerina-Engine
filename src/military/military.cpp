@@ -3588,35 +3588,48 @@ namespace military {
 		return float(greatest_hostile_fort);
 	}
 
-	float local_army_weight(sys::state& state, dcon::province_id prov) {
-		float total_army_weight = 0.f;
-		for(auto ar : state.world.province_get_army_location(prov)) {
-			if(ar.get_army().get_black_flag() == false
-			&& ar.get_army().get_is_retreating() == false
-			&& !bool(ar.get_army().get_navy_from_army_transport())
-			&& !bool(ar.get_army().get_battle_from_army_battle_participation())) {
-				for(auto rg : ar.get_army().get_army_membership()) {
-					total_army_weight += 3.0f * rg.get_regiment().get_strength();
-				}
+	float total_army_weight(sys::state& state, dcon::army_id a) {
+		auto ar = dcon::fatten(state.world, a);
+		float weight = 0.f;
+		if(!ar.get_black_flag() && !ar.get_is_retreating()
+		&& !ar.get_navy_from_army_transport()
+		&& !ar.get_battle_from_army_battle_participation()) {
+			for(auto rg : ar.get_army_membership()) {
+				weight += 3.0f * rg.get_regiment().get_strength();
 			}
 		}
-		return total_army_weight;
+		return weight;
+	}
+	float local_army_weight(sys::state& state, dcon::province_id prov) {
+		float weight = 0.f;
+		for(auto ar : state.world.province_get_army_location(prov)) {
+			weight += total_army_weight(state, ar.get_army());
+		}
+		return weight;
 	}
 
+	float max_supply_weight_in_province(sys::state& state, dcon::nation_id n, dcon::province_id prov) {
+		auto prov_attrition_mod = state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::attrition);
+		auto max_attrition = std::max(0.001f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition));
+		auto supply_limit = supply_limit_in_province(state, n, prov);
+		auto attrition_mod = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attrition);
+		float greatest_hostile_fort = greatest_adjacent_hostile_fort_level(state, n, prov);
+		return supply_limit + prov_attrition_mod + greatest_hostile_fort;
+	}
 	float peacetime_attrition_limit(sys::state& state, dcon::nation_id n, dcon::province_id prov) {
 		auto supply_limit = supply_limit_in_province(state, n, prov);
 		auto prov_attrition_mod = state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::attrition);
 		auto attrition_mod = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_attrition);
 		return (supply_limit + prov_attrition_mod) / (attrition_mod * 3.0f);
 	}
-	float weighted_attrition_amount(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov, float total_army_weight) {
+	float weighted_attrition_amount(sys::state& state, dcon::nation_id nation_as, dcon::province_id prov, float weight) {
 		auto prov_attrition_mod = state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::attrition);
 		auto max_attrition = std::max(0.001f, state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::max_attrition));
 		auto supply_limit = supply_limit_in_province(state, nation_as, prov);
 		auto attrition_mod = 1.0f + state.world.nation_get_modifier_values(nation_as, sys::national_mod_offsets::land_attrition);
 		float greatest_hostile_fort = greatest_adjacent_hostile_fort_level(state, nation_as, prov);
 		float attrition_value =
-			std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
+			std::clamp(weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
 			+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.f
 			+ (!province::any_adjacent_is_friendly(state, nation_as, prov) ? 3.f : 0.f);
 		return attrition_value;
@@ -3626,9 +3639,9 @@ namespace military {
 		@param a The army to evaluate for
 		@param prov The province the army would stand on, and hence, the one that the attrition modifiers are evaluated for */
 	float relative_attrition_amount(sys::state& state, dcon::army_id a, dcon::province_id prov) {
-		float total_army_weight = local_army_weight(state, prov);
+		float weight = local_army_weight(state, prov);
 		auto army_controller = state.world.army_get_controller_from_army_control(a);
-		return weighted_attrition_amount(state, army_controller, prov, total_army_weight);
+		return weighted_attrition_amount(state, army_controller, prov, weight);
 	}
 	float relative_attrition_amount(sys::state& state, dcon::navy_id a, dcon::province_id prov) {
 		return 0.0f;
@@ -3644,7 +3657,7 @@ namespace military {
 	void apply_attrition(sys::state& state) {
 		concurrency::parallel_for(0, state.province_definitions.first_sea_province.index(), [&](int32_t i) {
 			dcon::province_id prov{dcon::province_id::value_base_t(i)};
-			float total_army_weight = military::local_army_weight(state, prov);
+			float weight = military::local_army_weight(state, prov);
 			/*
 			First we calculate (total-strength + leader-attrition-trait) x (attrition-modifier-from-technology + 1) -
 			effective-province-supply-limit (rounded down to the nearest integer) + province-attrition-modifier +
@@ -3665,7 +3678,7 @@ namespace military {
 					auto attrition_mod = 1.0f + army_controller.get_modifier_values(sys::national_mod_offsets::land_attrition);
 					float greatest_hostile_fort = greatest_adjacent_hostile_fort_level(state, army_controller, prov);
 					float attrition_value =
-						std::clamp(total_army_weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
+						std::clamp(weight * attrition_mod - (supply_limit + prov_attrition_mod + greatest_hostile_fort), 0.0f, max_attrition)
 						+ state.world.province_get_siege_progress(prov) > 0.f ? state.defines.siege_attrition : 0.0f
 						+ (!province::any_adjacent_is_friendly(state, army_controller, prov) ? 3.f : 0.f);
 					for(auto rg : ar.get_army().get_army_membership()) {

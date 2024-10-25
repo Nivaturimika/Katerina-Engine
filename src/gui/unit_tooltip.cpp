@@ -12,11 +12,9 @@ namespace ui {
 			auto result = state.military_definitions.unit_base_definitions[utid].type;
 			if(result == military::unit_type::infantry) {
 				amounts.type1++;
-			} else
-			if(result == military::unit_type::cavalry) {
+			} else if(result == military::unit_type::cavalry) {
 				amounts.type2++;
-			} else
-			if(result == military::unit_type::support || result == military::unit_type::special) {
+			} else if(result == military::unit_type::support || result == military::unit_type::special) {
 				amounts.type3++;
 			}
 		}
@@ -30,11 +28,9 @@ namespace ui {
 			auto result = state.military_definitions.unit_base_definitions[utid].type;
 			if(result == military::unit_type::big_ship) {
 				amounts.type1++;
-			} else
-			if(result == military::unit_type::light_ship) {
+			} else if(result == military::unit_type::light_ship) {
 				amounts.type2++;
-			} else
-			if(result == military::unit_type::transport) {
+			} else if(result == military::unit_type::transport) {
 				amounts.type3++;
 			}
 		}
@@ -69,35 +65,68 @@ namespace ui {
 		}
 
 		text::substitution_map sub;
-	text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ "@(A)" });
+		text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ "@(A)" });
 		text::add_to_substitution_map(sub, text::variable_type::n, int64_t(amounts.type1));
 		text::add_to_substitution_map(sub, text::variable_type::x, int64_t(amounts.type2));
 		text::add_to_substitution_map(sub, text::variable_type::y, int64_t(amounts.type3));
-	text::add_to_substitution_map(sub, text::variable_type::cost, text::fp_currency{ total_cost });
-	text::add_to_substitution_map(sub, text::variable_type::attunit, text::fp_one_place{ ai::estimate_army_offensive_strength(state, a) });
-	text::add_to_substitution_map(sub, text::variable_type::defunit, text::fp_one_place{ ai::estimate_army_defensive_strength(state, a) });
+		text::add_to_substitution_map(sub, text::variable_type::cost, text::fp_currency{ total_cost });
+		text::add_to_substitution_map(sub, text::variable_type::attunit, text::fp_one_place{ ai::estimate_army_offensive_strength(state, a) });
+		text::add_to_substitution_map(sub, text::variable_type::defunit, text::fp_one_place{ ai::estimate_army_defensive_strength(state, a) });
+		auto box = text::open_layout_box(contents);
+		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
 		if(army.get_arrival_time()) {
 			text::add_to_substitution_map(sub, text::variable_type::prov, *(army.get_path().end() - 1));
 			text::add_to_substitution_map(sub, text::variable_type::date, army.get_arrival_time());
-			auto box = text::open_layout_box(contents);
-		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id } );
 			if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
 				std::string name = rebel::rebel_name(state, rf);
 				text::add_to_layout_box(state, contents, box, std::string_view(name));
 			}
 			auto resolved = text::resolve_string_substitution(state, "unit_moving_text", sub);
 			text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
-			text::close_layout_box(contents, box);
 		} else {
-			auto box = text::open_layout_box(contents);
-		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
 			if(auto rf = army.get_controller_from_army_rebel_control(); rf) {
 				std::string name = rebel::rebel_name(state, rf);
 				text::add_to_layout_box(state, contents, box, std::string_view(name));
 			}
 			auto resolved = text::resolve_string_substitution(state, "unit_standing_text", sub);
 			text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
-			text::close_layout_box(contents, box);
+		}
+		if(state.cheat_data.show_province_id_tooltip) {
+			text::add_to_layout_box(state, contents, box, std::string("<"));
+			text::add_to_layout_box(state, contents, box, state.world.army_get_ai_province(a));
+			text::add_to_layout_box(state, contents, box, std::string(">"));
+		}
+		text::close_layout_box(contents, box);
+		if(state.cheat_data.show_province_id_tooltip) {
+			switch(ai::army_activity(state.world.army_get_ai_activity(a))) {
+			case ai::army_activity::attacking:
+				text::add_line(state, contents, "ai_activity_attacking");
+				break;
+			case ai::army_activity::attack_gathered:
+				text::add_line(state, contents, "ai_activity_gathered");
+				break;
+			case ai::army_activity::attack_transport:
+				text::add_line(state, contents, "ai_activity_transport");
+				break;
+			case ai::army_activity::merging:
+				text::add_line(state, contents, "ai_activity_merging");
+				break;
+			case ai::army_activity::on_guard:
+				text::add_line(state, contents, "ai_activity_on_guard");
+				break;
+			case ai::army_activity::transport_attack:
+				text::add_line(state, contents, "ai_activity_transport_attack");
+				break;
+			case ai::army_activity::transport_guard:
+				text::add_line(state, contents, "ai_activity_transport_guard");
+				break;
+			case ai::army_activity::unspecified:
+				text::add_line(state, contents, "ai_activity_unspecified");
+				break;
+			default:
+				text::add_line(state, contents, "ai_activity_default");
+				break;
+			}
 		}
 	}
 
@@ -129,24 +158,24 @@ namespace ui {
 		}
 
 		text::substitution_map sub;
-	text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ "@(N)" });
+		text::add_to_substitution_map(sub, text::variable_type::m, std::string_view{ "@(N)" });
 		text::add_to_substitution_map(sub, text::variable_type::n, int64_t(amounts.type1));
 		text::add_to_substitution_map(sub, text::variable_type::x, int64_t(amounts.type2));
 		text::add_to_substitution_map(sub, text::variable_type::y, int64_t(amounts.type3));
-	text::add_to_substitution_map(sub, text::variable_type::cost, text::fp_currency{ total_cost });
-	text::add_to_substitution_map(sub, text::variable_type::attunit, text::fp_one_place{ 1.f });
-	text::add_to_substitution_map(sub, text::variable_type::defunit, text::fp_one_place{ 1.f });
+		text::add_to_substitution_map(sub, text::variable_type::cost, text::fp_currency{ total_cost });
+		text::add_to_substitution_map(sub, text::variable_type::attunit, text::fp_one_place{ 1.f });
+		text::add_to_substitution_map(sub, text::variable_type::defunit, text::fp_one_place{ 1.f });
 		if(navy.get_arrival_time()) {
 			text::add_to_substitution_map(sub, text::variable_type::prov, *(navy.get_path().end() - 1));
 			text::add_to_substitution_map(sub, text::variable_type::date, navy.get_arrival_time());
 			auto box = text::open_layout_box(contents);
-		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
+			text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
 			auto resolved = text::resolve_string_substitution(state, "unit_moving_text", sub);
 			text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
 			text::close_layout_box(contents, box);
 		} else {
 			auto box = text::open_layout_box(contents);
-		text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
+			text::add_to_layout_box(state, contents, box, text::embedded_flag{ controller.get_identity_from_identity_holder().id });
 			auto resolved = text::resolve_string_substitution(state, "unit_standing_text", sub);
 			text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
 			text::close_layout_box(contents, box);
