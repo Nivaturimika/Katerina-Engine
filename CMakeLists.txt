@@ -409,16 +409,22 @@ add_custom_command(
 	VERBATIM)
 
 add_custom_command(
-  OUTPUT ${PROJECT_SOURCE_DIR}/src/text/font_defs_generated.hpp
-  COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/src/text/font_defs.txt
-  DEPENDS ${PROJECT_SOURCE_DIR}/src/text/font_defs.txt
-  VERBATIM)
+	OUTPUT ${PROJECT_SOURCE_DIR}/src/parsing/game_rules_parser_defs_generated.hpp
+	COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/src/parsing/game_rules_parser_defs.txt
+	DEPENDS ${PROJECT_SOURCE_DIR}/src/parsing/game_rules_parser_defs.txt
+	VERBATIM)
 
 add_custom_command(
-  OUTPUT ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs_generated.hpp
-  COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs.txt
-  DEPENDS ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs.txt
-  VERBATIM)
+	OUTPUT ${PROJECT_SOURCE_DIR}/src/text/font_defs_generated.hpp
+	COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/src/text/font_defs.txt
+	DEPENDS ${PROJECT_SOURCE_DIR}/src/text/font_defs.txt
+	VERBATIM)
+
+add_custom_command(
+	OUTPUT ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs_generated.hpp
+	COMMAND ParserGenerator ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs.txt
+	DEPENDS ${PROJECT_SOURCE_DIR}/src/text/bmfont_defs.txt
+	VERBATIM)
 
 # Sets a dependency on the generated file
 add_custom_target(GENERATE_PARSERS DEPENDS

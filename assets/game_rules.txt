@@ -22,6 +22,7 @@ action = {
 		any_owned_province = { controlled_by = THIS }
 	}
 	effect = {
+		any_owned_province = { secede_province = FROM }
 	}
 }
 action = {

@@ -880,9 +880,19 @@ namespace ui {
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto n = retrieve<dcon::nation_id>(state, parent);
+			auto target = retrieve<dcon::nation_id>(state, parent);
+			auto source = state.local_player_nation;
 			text::add_line(state, contents, "alice_diplo_release_subject_desc");
-			text::add_line_with_condition(state, contents, "alice_diplo_release_subject_0", state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(n)) == state.local_player_nation);
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].limit) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].effect) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -958,22 +968,21 @@ namespace ui {
 
 			text::add_line(state, contents, "addtosphere_desc");
 			text::add_line_break_to_layout(state, contents);
-
-			text::add_line_with_condition(state, contents, "iaction_explain_5", state.world.nation_get_is_great_power(source));
-
-			text::add_line_with_condition(state, contents, "iaction_explain_6", !state.world.nation_get_is_great_power(target));
-
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, source);
 			text::add_line_with_condition(state, contents, "iaction_explain_1", state.world.gp_relationship_get_influence(rel) >= state.defines.addtosphere_influence_cost, text::variable_type::x, int64_t(state.defines.addtosphere_influence_cost));
-
 			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-			text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, source, target));
-
 			auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 			text::add_line_with_condition(state, contents, "add_sphere_explain_1", clevel == nations::influence::level_friendly);
-
-			text::add_line_with_condition(state, contents, "add_sphere_explain_2", !state.world.nation_get_in_sphere_of(target));
-
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].limit) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), -1);
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].effect) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), -1, r_lo, r_hi);
+			}
 		}
 	};
 
@@ -1007,26 +1016,17 @@ namespace ui {
 			text::add_line(state, contents, "removefromsphere_desc");
 			if(in_players_sphere) {
 				if(state.defines.removefromsphere_infamy_cost != 0) {
-				text::add_line(state, contents, "rem_sphere_explain_4", text::variable_type::x, text::fp_one_place{ state.defines.removefromsphere_infamy_cost });
+					text::add_line(state, contents, "rem_sphere_explain_4", text::variable_type::x, text::fp_one_place{ state.defines.removefromsphere_infamy_cost });
 				}
 				if(state.defines.removefromsphere_prestige_cost != 0) {
-				text::add_line(state, contents, "rem_sphere_explain_5", text::variable_type::x, text::fp_one_place{ state.defines.removefromsphere_prestige_cost });
+					text::add_line(state, contents, "rem_sphere_explain_5", text::variable_type::x, text::fp_one_place{ state.defines.removefromsphere_prestige_cost });
 				}
 			}
 			text::add_line_break_to_layout(state, contents);
-
-			text::add_line_with_condition(state, contents, "iaction_explain_5", state.world.nation_get_is_great_power(state.local_player_nation));
-
-			text::add_line_with_condition(state, contents, "iaction_explain_6", !state.world.nation_get_is_great_power(target));
-
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
 			text::add_line_with_condition(state, contents, "iaction_explain_1", state.world.gp_relationship_get_influence(rel) >= state.defines.removefromsphere_influence_cost, text::variable_type::x, int64_t(state.defines.removefromsphere_influence_cost));
-
 			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-			text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, state.local_player_nation, target));
-
 			text::add_line_with_condition(state, contents, "rem_sphere_explain_1", bool(state.world.nation_get_in_sphere_of(target)));
-
 			auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 			if(!in_players_sphere) {
 				text::add_line_with_condition(state, contents, "rem_sphere_explain_2", clevel == nations::influence::level_friendly);
@@ -1034,6 +1034,17 @@ namespace ui {
 				text::add_line_with_condition(state, contents, "rem_sphere_explain_3", true);
 			}
 
+			auto affected_gp = state.world.nation_get_in_sphere_of(target);
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].limit) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].effect) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -1100,11 +1111,18 @@ namespace ui {
 			}
 			text::add_line_with_condition(state, contents, "fab_explain_3", !state.world.nation_get_constructing_cb_type(source));
 			auto ol = state.world.nation_get_overlord_as_subject(source);
-			text::add_line_with_condition(state, contents, "fab_explain_4", !state.world.overlord_get_ruler(ol) || state.world.overlord_get_ruler(ol) == target);
-			text::add_line_with_condition(state, contents, "fab_explain_5", state.world.nation_get_in_sphere_of(target) != source);
-			text::add_line_with_condition(state, contents, "fab_explain_6", !military::are_at_war(state, target, source));
 			text::add_line_with_condition(state, contents, "fab_explain_7", has_any_usable_cb(state, source, target));
-			text::add_line_with_condition(state, contents, "fab_explain_8", !military::has_truce_with(state, target, source));
+
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].limit) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].effect) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -1860,13 +1878,16 @@ namespace ui {
 			auto source = state.local_player_nation;
 
 			text::add_line(state, contents, "state_transfer_desc");
-			text::add_line_break_to_layout(state, contents);
-			text::add_line_with_condition(state, contents, "state_transfer_explain_1", state.world.nation_get_is_player_controlled(target));
-			text::add_line_with_condition(state, contents, "state_transfer_explain_2", state.current_crisis == sys::crisis_type::none);
-			text::add_line_with_condition(state, contents, "state_transfer_explain_3", !state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(source)));
-			text::add_line_with_condition(state, contents, "state_transfer_explain_4", !state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(target)));
-			text::add_line_with_condition(state, contents, "state_transfer_explain_5", !(state.world.nation_get_is_at_war(source) || state.world.nation_get_is_at_war(target)));
-			text::add_line_with_condition(state, contents, "state_transfer_explain_6", state.world.nation_get_owned_state_count(source) > 1);
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].limit) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, -1, trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].effect) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, -1, trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
