@@ -22,7 +22,7 @@ action = {
 		any_owned_province = { controlled_by = THIS }
 	}
 	effect = {
-		any_owned_province = { secede_province = FROM }
+		any_owned = { secede_province = FROM }
 	}
 }
 action = {
@@ -39,10 +39,11 @@ action = {
 	limit = {
 		tag != FROM
 		NOT = { war_with = FROM }
+		relation = { who = FROM value <= 200 }
 		#diplomatic_points >= defines:INCREASERELATION_DIPLOMATIC_COST
 	}
 	effect = {
-		#relation = { who = FROM value = defines:INCREASERELATION_RELATION_ON_ACCEPT }
+		relation = { who = FROM value = defines:INCREASERELATION_RELATION_ON_ACCEPT }
 		#diplomatic_points = -defines:INCREASERELATION_DIPLOMATIC_COST
 	}
 }
@@ -53,10 +54,11 @@ action = {
 	limit = {
 		tag != FROM
 		NOT = { war_with = FROM }
+		relation = { who = FROM value >= -200 }
 		#diplomatic_points >= defines:DECREASERELATION_DIPLOMATIC_COST
 	}
 	effect = {
-		#relation = { who = FROM value = defines:DECREASERELATION_RELATION_ON_ACCEPT }
+		relation = { who = FROM value = defines:DECREASERELATION_RELATION_ON_ACCEPT }
 		#diplomatic_points = -defines:DECREASERELATION_DIPLOMATIC_COST
 	}
 }
@@ -145,6 +147,10 @@ action = {
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
 	}
+	effect = {
+		relation = { who = THIS value = defines:DISCREDIT_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:DISCREDIT_INFLUENCE_COST }
+	}
 }
 action = {
 	type = "expel_advisors"
@@ -157,6 +163,10 @@ action = {
 		FROM = { is_greater_power = yes }
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+	}
+	effect = {
+		relation = { who = THIS value = defines:EXPELADVISORS_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:EXPELADVISORS_INFLUENCE_COST }
 	}
 }
 action = {
@@ -171,6 +181,10 @@ action = {
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
 	}
+	effect = {
+		relation = { who = THIS value = defines:BANEMBASSY_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:BANEMBASSY_INFLUENCE_COST }
+	}
 }
 action = {
 	type = "increase_opinion"
@@ -182,7 +196,11 @@ action = {
 		NOT = { war_with = THIS }
 		NOT = { is_sphere_leader_of = THIS }
 		diplomatic_influence = { who = THIS value > defines:INCREASEOPINION_INFLUENCE_COST }
-		is_banned_from = THIS
+		NOT = { is_banned_from = THIS }
+	}
+	effect = {
+		relation = { who = THIS value = defines:INCREASEOPINION_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:INCREASEOPINION_INFLUENCE_COST }
 	}
 }
 action = {
@@ -197,6 +215,10 @@ action = {
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
 	}
+	effect = {
+		relation = { who = THIS value = defines:DECREASEOPINION_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:DECREASEOPINION_INFLUENCE_COST }
+	}
 }
 action = {
 	type = "add_to_sphere"
@@ -207,6 +229,10 @@ action = {
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
 		NOT = { is_sphere_leader_of = THIS }
+	}
+	effect = {
+		relation = { who = THIS value = defines:ADDTOSPHERE_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:ADDTOSPHERE_INFLUENCE_COST }
 	}
 }
 action = {
@@ -220,6 +246,16 @@ action = {
 		THIS = { is_greater_power = no }
 		THIS = { in_sphere = FROM }
 		NOT = { war_with = THIS }
+		diplomatic_influence = { who = THIS value > defines:REMOVEFROMSPHERE_INFLUENCE_COST }
+	}
+	effect = {
+		relation = { who = THIS value = defines:REMOVEFROMSPHERE_RELATION_ON_ACCEPT }
+		diplomatic_influence = { who = THIS value = -defines:REMOVEFROMSPHERE_INFLUENCE_COST }
+		if = {
+			limit = { is_sphere_leader_of = THIS }
+			badboy = -defines:REMOVEFROMSPHERE_INFAMY_COST
+			prestige = -defines:REMOVEFROMSPHERE_PRESTIGE_COST
+		}
 	}
 }
 action = {
@@ -235,6 +271,9 @@ action = {
 	#THIS/main = nation source
 	limit = {
 		civilized = no #only uncivs can civilize
+	}
+	effect = {
+		civilized = yes
 	}
 }
 action = {
@@ -268,6 +307,7 @@ action = {
 		NOT = { truce_with = FROM }
 	}
 	effect = {
+		relation = { who = THIS value = defines:MAKE_CB_RELATION_ON_ACCEPT }
 	}
 }
 action = {
@@ -280,6 +320,7 @@ action = {
 		NOT = { FROM = { military_access = THIS } }
 	}
 	effect = {
+		relation = { who = THIS value = defines:GIVEMILACCESS_RELATION_ON_ACCEPT }
 	}
 }
 action = {
@@ -292,6 +333,7 @@ action = {
 		NOT = { military_access = FROM }
 	}
 	effect = {
+		relation = { who = THIS value = defines:ASKMILACCESS_RELATION_ON_ACCEPT }
 	}
 }
 action = {
@@ -307,7 +349,6 @@ action = {
 	}
 	effect = {
 		release_vassal = FROM
-		
 	}
 }
 action = {
