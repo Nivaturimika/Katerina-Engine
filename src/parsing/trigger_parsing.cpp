@@ -522,13 +522,13 @@ namespace parsers {
 		context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 	}
 	void tr_scope_this(token_generator& gen, error_handler& err, trigger_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
+		if(context.this_slot == trigger::slot_contents::province) {
 			context.compiled_trigger.push_back(uint16_t(trigger::this_scope_province));
-		} else if(context.main_slot == trigger::slot_contents::state) {
+		} else if(context.this_slot == trigger::slot_contents::state) {
 			context.compiled_trigger.push_back(uint16_t(trigger::this_scope_state));
-		} else if(context.main_slot == trigger::slot_contents::nation) {
+		} else if(context.this_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(uint16_t(trigger::this_scope_nation));
-		} else if(context.main_slot == trigger::slot_contents::pop) {
+		} else if(context.this_slot == trigger::slot_contents::pop) {
 			context.compiled_trigger.push_back(uint16_t(trigger::this_scope_pop));
 		} else {
 			gen.discard_group();
@@ -547,13 +547,13 @@ namespace parsers {
 		context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 	}
 	void tr_scope_from(token_generator& gen, error_handler& err, trigger_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
+		if(context.from_slot == trigger::slot_contents::province) {
 			context.compiled_trigger.push_back(uint16_t(trigger::from_scope_province));
-		} else if(context.main_slot == trigger::slot_contents::state) {
+		} else if(context.from_slot == trigger::slot_contents::state) {
 			context.compiled_trigger.push_back(uint16_t(trigger::from_scope_state));
-		} else if(context.main_slot == trigger::slot_contents::nation) {
+		} else if(context.from_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(uint16_t(trigger::from_scope_nation));
-		} else if(context.main_slot == trigger::slot_contents::pop) {
+		} else if(context.from_slot == trigger::slot_contents::pop) {
 			context.compiled_trigger.push_back(uint16_t(trigger::from_scope_pop));
 		} else {
 			gen.discard_group();
