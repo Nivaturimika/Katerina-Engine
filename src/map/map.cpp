@@ -568,7 +568,7 @@ namespace map {
 		auto rot_index = an.get_rotation_key_index(time_counter);
 		auto rot1 = an.get_rotation_key(rot_index);
 		auto rot2 = an.get_rotation_key(rot_index + 1);
-		glm::mat4x4 mr = glm::toMat4(glm::normalize(
+		glm::mat4x4 mr = glm::toMat4((
 			glm::slerp(
 				glm::quat(rot1.value.x, rot1.value.y, rot1.value.z, rot1.value.w),
 				glm::quat(rot2.value.x, rot2.value.y, rot2.value.z, rot2.value.w),
@@ -578,7 +578,7 @@ namespace map {
 		auto rsc_index = an.get_scale_rotation_key_index(time_counter);
 		auto rsc1 = an.get_scale_rotation_key(rsc_index);
 		auto rsc2 = an.get_scale_rotation_key(rsc_index + 1);
-		glm::mat4x4 mu = glm::toMat4(glm::normalize(
+		glm::mat4x4 mu = glm::toMat4((
 			glm::slerp(
 				glm::quat(rsc1.value.x, rsc1.value.y, rsc1.value.z, rsc1.value.w),
 				glm::quat(rsc2.value.x, rsc2.value.y, rsc2.value.z, rsc1.value.w),
@@ -2544,6 +2544,26 @@ namespace map {
 				auto const iq = glm::quat(t_anim.bind_pose_rotation.x, t_anim.bind_pose_rotation.y, t_anim.bind_pose_rotation.z, t_anim.bind_pose_rotation.w);
 				t_anim.bone_bind_pose_matrix = glm::translate(ip) * glm::toMat4(iq) * glm::scale(is);
 				state.map_state.map_data.animations.push_back(t_anim);
+			}
+		}
+		//add animations for non-animated nodes
+		for(uint32_t i = 0; i < uint32_t(model_context.nodes.size()); i++) {
+			const auto& node = model_context.nodes[i];
+			auto it = std::find_if(anim_context.animations.begin(), anim_context.animations.end(), [&](const auto& e) {
+				return node.name == e.node;
+			});
+			if(it == anim_context.animations.end()) {
+				emfx::xsm_animation anim;
+				anim.parent_id = node.parent_id;
+				anim.bone_id = i;
+				anim.bone_node_matrix = glm::mat4x4(1.f);
+				anim.bone_pose_matrix = glm::inverse(glm::mat4x4(1.f));
+				anim.bone_bind_pose_matrix = glm::mat4x4(1.f);
+				anim.position_keys.emplace_back(emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f);
+				anim.rotation_keys.emplace_back(emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f);
+				anim.scale_keys.emplace_back(emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f);
+				anim.scale_rotation_keys.emplace_back(emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f);
+				state.map_state.map_data.animations.push_back(anim);
 			}
 		}
 		switch(at) {

@@ -280,8 +280,8 @@ namespace emfx {
 	inline xac_vector4f vec4_to_glsl(xac_vector4f q) {
 		return xac_vector4f{
 			q.x,
-			q.y,
 			q.z,
+			q.y,
 			q.w
 		};
 	}
