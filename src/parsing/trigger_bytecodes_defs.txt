@@ -1,0 +1,13 @@
+province	x		x		port					no_payload		associate
+pop		x		x		involved_in_crisis_pop			no_payload		associate
+nation		x		x		involved_in_crisis_nation		no_payload		associate
+nation		nation		x		has_cultural_sphere			no_payload		associate
+pop		x		x		social_movement				no_payload		associate
+x		x		rebel		social_movement_from_reb		no_payload		associate
+pop		x		x		political_movement			no_payload		associate
+x		x		rebel		political_movement_from_reb		no_payload		associate
+nation		x		x		rich_tax_above_poor			no_payload		associate
+nation		x		x		is_substate				no_payload		associate
+state		x		x		has_flashpoint				no_payload		associate
+pop		x		x		is_disarmed_pop				no_payload		associate
+nation		x		x		is_disarmed				no_payload		associate

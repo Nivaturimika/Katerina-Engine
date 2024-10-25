@@ -24,7 +24,6 @@
 
 namespace parsers {
 	enum class token_type { identifier, quoted_string, special_identifier, brace, open_brace, close_brace, unknown };
-
 	enum class association_type : unsigned short { none, eq, lt, le, gt, ge, ne, eq_default, list };
 
 	struct token_and_type {
@@ -34,19 +33,16 @@ namespace parsers {
 	};
 
 	class token_generator {
-		private:
+	private:
 		char const* position = nullptr;
 		char const* file_end = nullptr;
 		int32_t current_line = 1;
-
 		token_and_type peek_1;
 		token_and_type peek_2;
-
 		token_and_type internal_next();
-
-		public:
-	token_generator() { }
-	token_generator(char const* file_start, char const* fe) : position(file_start), file_end(fe) { }
+	public:
+		token_generator() { }
+		token_generator(char const* file_start, char const* fe) : position(file_start), file_end(fe) { }
 		bool at_end() const {
 			return peek_2.type == token_type::unknown && peek_1.type == token_type::unknown && position >= file_end;
 		}
@@ -63,51 +59,39 @@ namespace parsers {
 		std::string accumulated_warnings;
 		bool fatal = false;
 
-	error_handler(std::string file_name) : file_name(std::move(file_name)) { }
-
+		error_handler(std::string file_name) : file_name(std::move(file_name)) { }
 		void unhandled_group_key(token_and_type const& t) {
-			accumulated_errors += "unexpected group key " + std::string(t.content) + " found on line " + std::to_string(t.line) +
-													" of file " + file_name + "\n";
+			accumulated_errors += "unexpected group key " + std::string(t.content) + " found on line " + std::to_string(t.line) + " of file " + file_name + "\n";
 		}
 		void unhandled_association_key(token_and_type const& t) {
-			accumulated_errors += "unexpected value key " + std::string(t.content) + " found on line " + std::to_string(t.line) +
-													" of file " + file_name + "\n";
+			accumulated_errors += "unexpected value key " + std::string(t.content) + " found on line " + std::to_string(t.line) + " of file " + file_name + "\n";
 		}
 		void unhandled_free_value(token_and_type const& t) {
-			accumulated_errors += "unexpected free value " + std::string(t.content) + " found on line " + std::to_string(t.line) +
-													" of file " + file_name + "\n";
+			accumulated_errors += "unexpected free value " + std::string(t.content) + " found on line " + std::to_string(t.line) + " of file " + file_name + "\n";
 		}
 		void unhandled_free_group(token_and_type const& t) {
-			accumulated_errors += "unhandled free set beginning with  " + std::string(t.content) + " found on line " +
-													std::to_string(t.line) + " of file " + file_name + "\n";
+			accumulated_errors += "unhandled free set beginning with  " + std::string(t.content) + " found on line " + std::to_string(t.line) + " of file " + file_name + "\n";
 		}
 		void bad_date(std::string_view s, int32_t l) {
-			accumulated_errors +=
-				"tried to parse  " + std::string(s) + " as a date on line " + std::to_string(l) + " of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as a date on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_float(std::string_view s, int32_t l) {
-			accumulated_errors +=
-				"tried to parse  " + std::string(s) + " as a float on line " + std::to_string(l) + " of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as a float on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_double(std::string_view s, int32_t l) {
-			accumulated_errors +=
-				"tried to parse  " + std::string(s) + " as a double on line " + std::to_string(l) + " of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as a double on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_bool(std::string_view s, int32_t l) {
-			accumulated_errors +=
-				"tried to parse  " + std::string(s) + " as a boolean on line " + std::to_string(l) + " of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as a boolean on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_int(std::string_view s, int32_t l) {
-			accumulated_errors +=
-				"tried to parse  " + std::string(s) + " as an integer on line " + std::to_string(l) + " of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as an integer on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_unsigned_int(std::string_view s, int32_t l) {
-			accumulated_errors += "tried to parse  " + std::string(s) + " as an unsigned integer on line " + std::to_string(l) +
-													" of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as an unsigned integer on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 		void bad_association_token(std::string_view s, int32_t l) {
-			accumulated_errors += "tried to parse  " + std::string(s) + " as equality or comparison on line " + std::to_string(l) +
-													" of file " + file_name + "\n";
+			accumulated_errors += "tried to parse  " + std::string(s) + " as equality or comparison on line " + std::to_string(l) + " of file " + file_name + "\n";
 		}
 	};
 
@@ -153,20 +137,15 @@ namespace parsers {
 			start = r.new_position + int32_t(r.found);
 		}
 		function(values);
-
 		return csv_advance_to_next_line(start, end);
 	}
 
 	template<typename T>
 	char const* parse_first_and_nth_csv_values(uint32_t nth, char const* start, char const* end, char separator, T&& function) {
 		auto first_separator = csv_find_separator_token(start, end, separator);
-
 		std::string_view first_value = std::string_view(start, first_separator.new_position - start);
-
 		start = csv_advance_n(nth - uint32_t(2), first_separator.new_position + int32_t(first_separator.found), end, separator);
-
 		auto second_end = csv_find_separator_token(start, end, separator);
-
 		function(first_value, std::string_view(start, second_end.new_position - start));
 		return csv_advance_to_next_line(second_end.new_position + int32_t(second_end.found), end);
 	}
@@ -180,8 +159,9 @@ namespace parsers {
 			auto r = csv_find_separator_token(start, end, separator);
 			function(first_value, std::string_view(start, r.new_position - start), i);
 			start = r.new_position + int32_t(r.found);
-			if(!r.found)
-			break;
+			if(!r.found) {
+				break;
+			}
 		}
 		return csv_advance_to_next_line(start, end);
 	}
@@ -197,8 +177,9 @@ namespace parsers {
 		if(end - start < ((std::ptrdiff_t)N - 1))
 		return false;
 		for(unsigned int i = 0; i < N - 1; ++i) {
-			if(start[i] != t[i])
-			return false;
+			if(start[i] != t[i]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -219,8 +200,9 @@ namespace parsers {
 		if(end - start < ((std::ptrdiff_t)N - 1))
 		return false;
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
-			if(end[-1 - i] != t[(N - i) - 2])
-			return false;
+			if(end[-1 - i] != t[(N - i) - 2]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -230,8 +212,9 @@ namespace parsers {
 		if(end - start < ((std::ptrdiff_t)N - 1))
 		return false;
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
-			if(tolower(end[-1 - i]) != t[(N - i) - 2])
-			return false;
+			if(tolower(end[-1 - i]) != t[(N - i) - 2]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -243,8 +226,9 @@ namespace parsers {
 			return false;
 		}
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
-			if(towlower(end[-1 - i]) != t[(N - i) - 2])
-			return false;
+			if(towlower(end[-1 - i]) != t[(N - i) - 2]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -255,8 +239,9 @@ namespace parsers {
 			return false;
 		}
 		for(int32_t i = 0; i < int32_t(N) - 1; ++i) {
-			if(tolower(end[-1 - i]) != t[(N - i) - 2])
-			return false;
+			if(tolower(end[-1 - i]) != t[(N - i) - 2]) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -275,11 +260,13 @@ namespace parsers {
 
 	template<size_t N>
 	bool is_fixed_token_ci(char const* start, char const* end, char const (&t)[N]) {
-		if(end - start != (N - 1))
-		return false;
-		for(unsigned int i = 0; i < N - 1; ++i) {
-			if(tolower(start[i]) != t[i])
+		if(end - start != (N - 1)) {
 			return false;
+		}
+		for(unsigned int i = 0; i < N - 1; ++i) {
+			if(tolower(start[i]) != t[i]) {
+				return false;
+			}
 		}
 		return true;
 	}

@@ -3,7 +3,8 @@
 namespace parsers {
 	// this was copied from RapidJson (thanks RapidJson)
 	inline double pow_10(int n) {
-		static double const e[] = {// 1e-0...1e308: 309 * 8 bytes = 2472 bytes
+		// 1e-0...1e308: 309 * 8 bytes = 2472 bytes
+		static double const e[] = {
 			1e+0, 1e+1, 1e+2, 1e+3, 1e+4, 1e+5, 1e+6, 1e+7, 1e+8, 1e+9, 1e+10, 1e+11, 1e+12, 1e+13, 1e+14, 1e+15, 1e+16, 1e+17, 1e+18,
 			1e+19, 1e+20, 1e+21, 1e+22, 1e+23, 1e+24, 1e+25, 1e+26, 1e+27, 1e+28, 1e+29, 1e+30, 1e+31, 1e+32, 1e+33, 1e+34, 1e+35,
 			1e+36, 1e+37, 1e+38, 1e+39, 1e+40, 1e+41, 1e+42, 1e+43, 1e+44, 1e+45, 1e+46, 1e+47, 1e+48, 1e+49, 1e+50, 1e+51, 1e+52,
@@ -23,53 +24,9 @@ namespace parsers {
 			1e+254, 1e+255, 1e+256, 1e+257, 1e+258, 1e+259, 1e+260, 1e+261, 1e+262, 1e+263, 1e+264, 1e+265, 1e+266, 1e+267, 1e+268,
 			1e+269, 1e+270, 1e+271, 1e+272, 1e+273, 1e+274, 1e+275, 1e+276, 1e+277, 1e+278, 1e+279, 1e+280, 1e+281, 1e+282, 1e+283,
 			1e+284, 1e+285, 1e+286, 1e+287, 1e+288, 1e+289, 1e+290, 1e+291, 1e+292, 1e+293, 1e+294, 1e+295, 1e+296, 1e+297, 1e+298,
-			1e+299, 1e+300, 1e+301, 1e+302, 1e+303, 1e+304, 1e+305, 1e+306, 1e+307, 1e+308};
+			1e+299, 1e+300, 1e+301, 1e+302, 1e+303, 1e+304, 1e+305, 1e+306, 1e+307, 1e+308
+		};
 		return e[n];
-	}
-
-	bool float_from_chars(char const* start, char const* end, float& float_out) { // returns true on success
-		// first read the chars into an int, keeping track of the magnitude
-		// multiply by a pow of 10
-
-		int32_t magnitude = 0;
-		int64_t accumulated = 0;
-		bool after_decimal = false;
-
-		if(start == end) {
-			float_out = 0.0f;
-			return true;
-		}
-
-		bool is_negative = false;
-		if(*start == '-') {
-			is_negative = true;
-			++start;
-		} else if(*start == '+') {
-			++start;
-		}
-
-		for(; start < end; ++start) {
-			if(*start >= '0' && *start <= '9') {
-				accumulated = accumulated * 10 + (*start - '0');
-				magnitude += int32_t(after_decimal);
-			} else if(*start == '.') {
-				after_decimal = true;
-			} else {
-				// maybe check for non space and throw an error?
-			}
-		}
-		if(!is_negative) {
-			if(magnitude > 0)
-			float_out = float(double(accumulated) / pow_10(magnitude));
-			else
-			float_out = float(accumulated);
-		} else {
-			if(magnitude > 0)
-			float_out = -float(double(accumulated) / pow_10(magnitude));
-			else
-			float_out = -float(accumulated);
-		}
-		return true;
 	}
 
 	bool double_from_chars(char const* start, char const* end, double& dbl_out) { // returns true on success
@@ -97,19 +54,20 @@ namespace parsers {
 			} else if(*start == '.') {
 				after_decimal = true;
 			} else {
+				// maybe check for non space and throw an error?
 			}
 		}
-		if(!is_negative) {
-			if(magnitude > 0)
-			dbl_out = double(accumulated) / pow_10(magnitude);
-			else
-			dbl_out = double(accumulated);
-		} else {
-			if(magnitude > 0)
-			dbl_out = -double(accumulated) / pow_10(magnitude);
-			else
-			dbl_out = -double(accumulated);
+		dbl_out = double(accumulated) / (magnitude > 0.f ? pow_10(magnitude) : 1.f);
+		if(is_negative) {
+			dbl_out = -dbl_out;
 		}
 		return true;
+	}
+
+	bool float_from_chars(char const* start, char const* end, float& float_out) { // returns true on success
+		double dbl_out = 0.0;
+		bool r = double_from_chars(start, end, dbl_out);
+		float_out = float(dbl_out);
+		return r;
 	}
 } // namespace parsers

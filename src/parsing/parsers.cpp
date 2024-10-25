@@ -13,7 +13,7 @@ namespace parsers {
 	}
 
 	bool breaking_char(char c) {
-	return ignorable_char(c) || (c == '{') || (c == '}') || special_identifier_char(c) || (c == '#');
+		return ignorable_char(c) || (c == '{') || (c == '}') || special_identifier_char(c) || (c == '#');
 	}
 
 	bool not_special_identifier_char(char c) {
@@ -33,23 +33,23 @@ namespace parsers {
 	}
 
 	bool is_positive_integer(char const* start, char const* end) {
-		if(start == end)
-		return false;
-		while(start < end) {
-			if(!isdigit(*start))
+		if(start == end) {
 			return false;
+		}
+		while(start < end) {
+			if(!isdigit(*start)) {
+				return false;
+			}
 			++start;
 		}
 		return true;
 	}
 
 	bool is_integer(char const* start, char const* end) {
-		if(start == end)
-		return false;
-		if(*start == '-')
-		return is_positive_integer(start + 1, end);
-		else
-		return is_positive_integer(start, end);
+		if(start == end) {
+			return false;
+		}
+		return is_positive_integer(start + (*start == '-' ? 1 : 0), end);
 	}
 
 	bool is_positive_fp(char const* start, char const* end) {
@@ -58,27 +58,26 @@ namespace parsers {
 			return is_positive_integer(start, end);
 		} else if(decimal == start) {
 			return is_positive_integer(decimal + 1, end);
-		} else {
-			return is_positive_integer(start, decimal) && (decimal + 1 == end || is_positive_integer(decimal + 1, end));
 		}
+		return is_positive_integer(start, decimal) && (decimal + 1 == end || is_positive_integer(decimal + 1, end));
 	}
 
 	bool is_fp(char const* start, char const* end) {
-		if(start == end)
-		return false;
-		if(*start == '-')
-		return is_positive_fp(start + 1, end);
-		else
-		return is_positive_fp(start, end);
+		if(start == end) {
+			return false;
+		}
+		return is_positive_fp(start + (*start == '-' ? 1 : 0), end);
 	}
 
 	template<typename T>
 	char const* scan_for_match(char const* start, char const* end, int32_t& current_line, T&& condition) {
 		while(start < end) {
-			if(condition(*start))
-			return start;
-			if(*start == '\n')
-			++current_line;
+			if(condition(*start)) {
+				return start;
+			}
+			if(*start == '\n') {
+				++current_line;
+			}
 			++start;
 		}
 		return start;
@@ -86,10 +85,12 @@ namespace parsers {
 	template<typename T>
 	char const* scan_for_not_match(char const* start, char const* end, int32_t& current_line, T&& condition) {
 		while(start < end) {
-			if(!condition(*start))
-			return start;
-			if(*start == '\n')
-			++current_line;
+			if(!condition(*start)) {
+				return start;
+			}
+			if(*start == '\n') {
+				++current_line;
+			}
 			++start;
 		}
 		return start;
@@ -118,42 +119,40 @@ namespace parsers {
 	}
 
 	token_and_type token_generator::internal_next() {
-		if(position >= file_end)
-		return token_and_type{std::string_view(), current_line, token_type::unknown};
-
+		if(position >= file_end) {
+			return token_and_type{ std::string_view(), current_line, token_type::unknown };
+		}
 		auto non_ws = advance_position_to_non_comment(position, file_end, current_line);
 		if(non_ws < file_end) {
 			if(*non_ws == '{') {
-					position = non_ws + 1;
+				position = non_ws + 1;
 				return token_and_type{std::string_view(non_ws, 1), current_line, token_type::open_brace};
 			} else if(*non_ws == '}') {
 				position = non_ws + 1;
-			return token_and_type{std::string_view(non_ws, 1), current_line, token_type::close_brace};
+				return token_and_type{std::string_view(non_ws, 1), current_line, token_type::close_brace};
 			} else if(*non_ws == '\"') {
 				auto const close = scan_for_match(non_ws + 1, file_end, current_line, double_quote_termination);
 				position = close + 1;
-			return token_and_type{std::string_view(non_ws + 1, close - (non_ws + 1)), current_line, token_type::quoted_string};
+				return token_and_type{std::string_view(non_ws + 1, close - (non_ws + 1)), current_line, token_type::quoted_string};
 			} else if(*non_ws == '\'') {
 				auto const close = scan_for_match(non_ws + 1, file_end, current_line, single_quote_termination);
 				position = close + 1;
-			return token_and_type{std::string_view(non_ws + 1, close - (non_ws + 1)), current_line, token_type::quoted_string};
-			} else if(has_fixed_prefix(non_ws, file_end, "==") || has_fixed_prefix(non_ws, file_end, "<=") ||
-							has_fixed_prefix(non_ws, file_end, ">=") || has_fixed_prefix(non_ws, file_end, "<>") ||
-							has_fixed_prefix(non_ws, file_end, "!=")) {
-
+				return token_and_type{std::string_view(non_ws + 1, close - (non_ws + 1)), current_line, token_type::quoted_string};
+			} else if(has_fixed_prefix(non_ws, file_end, "==") || has_fixed_prefix(non_ws, file_end, "<=")
+				|| has_fixed_prefix(non_ws, file_end, ">=") || has_fixed_prefix(non_ws, file_end, "<>")
+				|| has_fixed_prefix(non_ws, file_end, "!=")) {
 				position = non_ws + 2;
-			return token_and_type{std::string_view(non_ws, 2), current_line, token_type::special_identifier};
+				return token_and_type{std::string_view(non_ws, 2), current_line, token_type::special_identifier};
 			} else if(*non_ws == '<' || *non_ws == '>' || *non_ws == '=') {
-
 				position = non_ws + 1;
-			return token_and_type{std::string_view(non_ws, 1), current_line, token_type::special_identifier};
+				return token_and_type{std::string_view(non_ws, 1), current_line, token_type::special_identifier};
 			} else {
 				position = advance_position_to_breaking_char(non_ws + 1, file_end, current_line);
-			return token_and_type{std::string_view(non_ws, position - non_ws), current_line, token_type::identifier};
+				return token_and_type{std::string_view(non_ws, position - non_ws), current_line, token_type::identifier};
 			}
 		} else {
 			position = file_end;
-		return token_and_type{std::string_view(), current_line, token_type::unknown};
+			return token_and_type{std::string_view(), current_line, token_type::unknown};
 		}
 	}
 
@@ -164,7 +163,6 @@ namespace parsers {
 			peek_2.type = token_type::unknown;
 			return temp;
 		}
-
 		return internal_next();
 	}
 
@@ -199,19 +197,17 @@ namespace parsers {
 	}
 
 	bool parse_bool(std::string_view content, int32_t, error_handler&) {
-		if(content.length() == 0)
-		return false;
-		else
+		if(content.length() == 0) {
+			return false;
+		}
 		return (content[0] == 'Y') || (content[0] == 'y') || (content[0] == '1');
 	}
 
 	float parse_float(std::string_view content, int32_t line, error_handler& err) {
 		float rvalue = 0.0f;
-
 		if(!float_from_chars(content.data(), content.data() + content.length(), rvalue)) {
 			err.bad_float(content, line);
 		}
-
 		return rvalue;
 	}
 
@@ -255,29 +251,30 @@ namespace parsers {
 		auto value_end = position + content.length();
 
 		for(; position < value_end && !isdigit(*position); ++position) // advance to year
-		;
+			;
 		auto year_start = position;
 		for(; position < value_end && isdigit(*position); ++position) // advance to year end
-		;
+			;
 		auto year_end = position;
 
 		for(; position < value_end && !isdigit(*position); ++position) // advance to month
-		;
+			;
 		auto month_start = position;
 		for(; position < value_end && isdigit(*position); ++position) // advance to month end
-		;
+			;
 		auto month_end = position;
 
 		for(; position < value_end && !isdigit(*position); ++position) // advance to day
-		;
+			;
 		auto day_start = position;
 		for(; position < value_end && isdigit(*position); ++position) // advance to day end
-		;
+			;
 		auto day_end = position;
-
-		return sys::year_month_day{parsers::parse_int(std::string_view(year_start, year_end - year_start), line, err),
+		return sys::year_month_day{
+			parsers::parse_int(std::string_view(year_start, year_end - year_start), line, err),
 			uint16_t(parsers::parse_uint(std::string_view(month_start, month_end - month_start), line, err)),
-			uint16_t(parsers::parse_uint(std::string_view(day_start, day_end - day_start), line, err))};
+			uint16_t(parsers::parse_uint(std::string_view(day_start, day_end - day_start), line, err))
+		};
 	}
 
 	bool starts_with(std::string_view content, char v) {
@@ -286,79 +283,69 @@ namespace parsers {
 
 	association_type parse_association_type(std::string_view content, int32_t line, error_handler& err) {
 		if(content.length() == 1) {
-			if(content[0] == '>')
-			return association_type::gt;
-			else if(content[0] == '<')
-			return association_type::lt;
-			else if(content[0] == '=')
-			return association_type::eq_default;
+			if(content[0] == '>') {
+				return association_type::gt;
+			} else if(content[0] == '<') {
+				return association_type::lt;
+			} else if(content[0] == '=') {
+				return association_type::eq_default;
+			}
 		} else if(content.length() == 2) {
-			if(content[0] == '=' && content[1] == '=')
-			return association_type::eq;
-			else if(content[0] == '<' && content[1] == '=')
-			return association_type::le;
-			else if(content[0] == '>' && content[1] == '=')
-			return association_type::ge;
-			else if(content[0] == '!' && content[1] == '=')
-			return association_type::ne;
-			else if(content[0] == '<' && content[1] == '>')
-			return association_type::ne;
+			if(content[0] == '=' && content[1] == '=') {
+				return association_type::eq;
+			} else if(content[0] == '<' && content[1] == '=') {
+				return association_type::le;
+			} else if(content[0] == '>' && content[1] == '=') {
+				return association_type::ge;
+			} else if(content[0] == '!' && content[1] == '=') {
+				return association_type::ne;
+			} else if(content[0] == '<' && content[1] == '>') {
+				return association_type::ne;
+			}
 		}
 		err.bad_association_token(content, line);
 		return association_type::none;
 	}
 
-	/*
-	date_tag parse_date(std::string_view content, int32_t line, error_handler& err) {
-		const auto first_dot = std::find(start, end, '.');
-		const auto second_dot = std::find(first_dot + 1, end, '.');
-
-		const auto year = static_cast<uint16_t>(parse_uint(start, first_dot));
-		const auto month = static_cast<uint16_t>(parse_uint(first_dot + 1, second_dot));
-		const auto day = static_cast<uint16_t>(parse_uint(second_dot + 1, end));
-
-		return date_to_tag(boost::gregorian::date(year, month, day));
-	}
-	*/
-
 	separator_scan_result csv_find_separator_token(char const* start, char const* end, char seperator) {
 		while(start != end) {
-			if(line_termination(*start))
-			return separator_scan_result{start, false};
-			else if(*start == seperator)
-			return separator_scan_result{start, true};
-			else
+			if(line_termination(*start)) {
+				return separator_scan_result{ start, false };
+			} else if(*start == seperator) {
+				return separator_scan_result{ start, true };
+			}
 			++start;
 		}
-	return separator_scan_result{start, false};
+		return separator_scan_result{ start, false };
 	}
 
 	char const* csv_advance(char const* start, char const* end, char seperator) {
 		while(start != end) {
-			if(line_termination(*start))
-			return start;
-			else if(*start == seperator)
-			return start + 1;
-			else
-			++start;
+			if(line_termination(*start)) {
+				return start;
+			} else if(*start == seperator) {
+				return start + 1;
+			} else {
+				++start;
+			}
 		}
 		return start;
 	}
 
 	char const* csv_advance_n(uint32_t n, char const* start, char const* end, char seperator) {
-
-		if(n == 0)
-		return start;
+		if(n == 0) {
+			return start;
+		}
 		--n;
 
 		while(start != end) {
 			if(line_termination(*start))
-			return start;
+				return start;
 			else if(*start == seperator) {
 				if(n == 0)
-				return start + 1;
+					return start + 1;
 				else
-				--n;
+					--n;
 			}
 			++start;
 		}
@@ -370,11 +357,12 @@ namespace parsers {
 		while(start != end && !line_termination(*start)) {
 			++start;
 		}
-		while(start != end && line_termination(*start))
-		++start;
-		if(start == end || *start != '#')
-		return start;
-		else
+		while(start != end && line_termination(*start)) {
+			++start;
+		}
+		if(start == end || *start != '#') {
+			return start;
+		}
 		return csv_advance_to_next_line(start, end);
 	}
 

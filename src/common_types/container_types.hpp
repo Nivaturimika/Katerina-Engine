@@ -290,27 +290,26 @@ namespace economy {
 } // namespace economy
 
 namespace sys {
-
 	struct checksum_key {
 		static constexpr uint32_t key_size = 64;
-	uint8_t key[key_size] = { 0 };
+		uint8_t key[key_size] = { 0 };
 
 		bool is_equal(const checksum_key& a) noexcept {
 			for(size_t i = 0; i < key_size; i++)
-			if(key[i] != a.key[i])
-				return false;
+				if(key[i] != a.key[i])
+					return false;
 			return true;
 		}
 	};
 	static_assert(sizeof(checksum_key) == sizeof(checksum_key::key));
 
 	struct player_name {
-	char data[48] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		char data[48] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 		std::string_view to_string_view() noexcept {
 			for(uint32_t i = 0; i < sizeof(data); i++) {
 				if(data[i] == ' ' || data[i] == '\0') {
-				return std::string_view{ reinterpret_cast<const char*>(&data[0]), uint32_t(i) };
+					return std::string_view{ reinterpret_cast<const char*>(&data[0]), uint32_t(i) };
 				}
 			}
 			return "???";
@@ -322,12 +321,11 @@ namespace sys {
 		static constexpr uint32_t max_types = 48;
 		sys::checksum_key scenario_checksum;
 		dcon::nation_id source;
-	char name[20] = { 0 };
-	uint8_t amounts[max_types] = { 0 };
+		char name[20] = { 0 };
+		uint8_t amounts[max_types] = { 0 };
 
 		bool operator!=(macro_builder_template& o) {
 			return std::memcmp(this, &o, sizeof(*this));
 		}
 	};
-
 } // namespace sys

@@ -24,53 +24,60 @@ namespace ui {
 
 		void add_adj_this_to_map(sys::state& ws, text::substitution_map& map, dcon::nation_id n) {
 			static std::string this_nation = text::produce_simple_string(ws, "this_nation");
-			if(n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_this_to_map(sys::state& ws, text::substitution_map& map, dcon::province_id p) {
 			static std::string this_nation = text::produce_simple_string(ws, "this_nation");
-			if(auto n = ws.world.province_get_nation_from_province_ownership(p); n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(auto n = ws.world.province_get_nation_from_province_ownership(p); n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_this_to_map(sys::state& ws, text::substitution_map& map, dcon::state_instance_id p) {
 			static std::string this_nation = text::produce_simple_string(ws, "this_nation");
-			if(auto n = ws.world.state_instance_get_nation_from_state_ownership(p); n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(auto n = ws.world.state_instance_get_nation_from_state_ownership(p); n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_this_to_map(sys::state& ws, text::substitution_map& map, dcon::pop_id p) {
 			static std::string this_nation = text::produce_simple_string(ws, "this_nation");
-			if(auto n = nations::owner_of_pop(ws, p); n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(auto n = nations::owner_of_pop(ws, p); n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_from_to_map(sys::state& ws, text::substitution_map& map, dcon::rebel_faction_id p) {
 			static std::string this_nation = text::produce_simple_string(ws, "from_nation");
 			auto fp = fatten(ws.world, p);
-			if(auto n = fp.get_defection_target().get_nation_from_identity_holder(); n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(auto n = fp.get_defection_target().get_nation_from_identity_holder(); n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_from_to_map(sys::state& ws, text::substitution_map& map, dcon::nation_id n) {
 			static std::string this_nation = text::produce_simple_string(ws, "from_nation");
-			if(n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 		void add_adj_from_to_map(sys::state& ws, text::substitution_map& map, dcon::province_id p) {
 			static std::string this_nation = text::produce_simple_string(ws, "from_nation");
-			if(auto n = ws.world.province_get_nation_from_province_ownership(p); n)
-			text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
-			else
-		text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			if(auto n = ws.world.province_get_nation_from_province_ownership(p); n) {
+				text::add_to_substitution_map(map, text::variable_type::adj, text::get_adjective(ws, n));
+			} else {
+				text::add_to_substitution_map(map, text::variable_type::adj, std::string_view{ this_nation });
+			}
 		}
 
 		inline uint32_t display_subeffects(EFFECT_DISPLAY_PARAMS) {
@@ -85,86 +92,69 @@ namespace ui {
 		}
 
 		void display_value(int64_t value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
-
-			if(value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value >= 0 ? text::text_color::red : text::text_color::green);
-
+			if(value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
-		void display_value(text::fp_currency value, bool positive_is_green, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
-			if(value.value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
-
+		void display_value(text::fp_currency value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
+			if(value.value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
-		void display_value(text::fp_percentage value, bool positive_is_green, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
-			if(value.value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
-
+		void display_value(text::fp_percentage value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
+			if(value.value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
-		void display_value(text::fp_one_place value, bool positive_is_green, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
-			if(value.value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
-
+		void display_value(text::fp_one_place value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
+			if(value.value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
-		void display_value(text::fp_two_places value, bool positive_is_green, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
-			if(value.value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
-
+		void display_value(text::fp_two_places value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
+			if(value.value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
-		void display_value(text::fp_three_places value, bool positive_is_green, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
-			if(value.value >= 0)
-			text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red,
-				std::monostate{});
-
-			if(positive_is_green)
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
-			else
-			text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
-
+		void display_value(text::fp_three_places value, bool positive_is_green, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
+			if(value.value >= 0) {
+				text::add_to_layout_box(ws, layout, box, "+", positive_is_green ? text::text_color::green : text::text_color::red, std::monostate{});
+			}
+			if(positive_is_green) {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::green : text::text_color::red);
+			} else {
+				text::add_to_layout_box(ws, layout, box, value, value.value >= 0 ? text::text_color::red : text::text_color::green);
+			}
 			text::add_space_to_layout_box(ws, layout, box);
 		}
 
