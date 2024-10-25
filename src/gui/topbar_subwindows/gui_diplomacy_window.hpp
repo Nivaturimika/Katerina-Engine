@@ -37,7 +37,7 @@ namespace ui {
 			auto cb_infamy = military::has_truce_with(state, state.local_player_nation, target)
 			? military::truce_break_cb_infamy(state, content)
 			: military::cb_infamy(state, content);
-			if(state.world.nation_get_infamy(state.local_player_nation) + cb_infamy >= state.defines.badboy_.limit; k) {
+			if(state.world.nation_get_infamy(state.local_player_nation) + cb_infamy >= state.defines.badboy_limit) {
 				color = sys::pack_color(255, 196, 196);
 			} else {
 				color = sys::pack_color(255, 255, 255);
@@ -65,7 +65,7 @@ namespace ui {
 			auto cb_infamy = military::has_truce_with(state, state.local_player_nation, target)
 			? military::truce_break_cb_infamy(state, content)
 			: military::cb_infamy(state, content);
-			if(state.world.nation_get_infamy(state.local_player_nation) + cb_infamy >= state.defines.badboy_.limit; k) {
+			if(state.world.nation_get_infamy(state.local_player_nation) + cb_infamy >= state.defines.badboy_limit) {
 				text::add_line(state, contents, "alice_tt_wg_infamy_limit");
 			}
 			text::add_line_with_condition(state, contents, "alice_wg_condition_5", military::cb_conditions_satisfied(state, state.local_player_nation, target, content));

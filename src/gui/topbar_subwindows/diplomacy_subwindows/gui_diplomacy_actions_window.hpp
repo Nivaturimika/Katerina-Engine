@@ -922,13 +922,9 @@ namespace ui {
 			auto source = state.local_player_nation;
 			text::add_line(state, contents, "increaseopinion_desc");
 			text::add_line_break_to_layout(state, contents);
-			text::add_line_with_condition(state, contents, "iaction_explain_5", state.world.nation_get_is_great_power(source));
-			text::add_line_with_condition(state, contents, "iaction_explain_6", !state.world.nation_get_is_great_power(target));
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, source);
 			text::add_line_with_condition(state, contents, "iaction_explain_1", state.world.gp_relationship_get_influence(rel) >= state.defines.increaseopinion_influence_cost, text::variable_type::x, int64_t(state.defines.increaseopinion_influence_cost));
 			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-			auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
-			text::add_line_with_condition(state, contents, "inc_op_explain_1", clevel != nations::influence::level_friendly && clevel != nations::influence::level_in_sphere);
 
 			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::increase_opinion)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
@@ -1677,7 +1673,6 @@ namespace ui {
 				auto orel = state.world.get_gp_relationship_by_gp_influence_pair(target, affected_gp);
 				text::add_line_with_condition(state, contents, "discredit_explain_3", (state.world.gp_relationship_get_status(orel) & nations::influence::is_banned) == 0);
 				text::add_line_with_condition(state, contents, "iaction_explain_4", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, affected_gp, target)));
-				auto source = state.local_player_nation;
 				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::discredit_advisors)].limit; k) {
 					text::add_line_break_to_layout(state, contents);
 					ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
