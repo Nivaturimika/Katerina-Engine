@@ -592,10 +592,17 @@ namespace ui {
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			text::add_line(state, contents, "crisis_add_interest_button");
-			text::add_line_break_to_layout(state, contents);
-			text::add_line_with_condition(state, contents, "crisis_add_interest_button_ex_1", state.world.nation_get_is_great_power(state.local_player_nation));
-			text::add_line_with_condition(state, contents, "crisis_add_interest_button_ex_2", state.current_crisis_mode == sys::crisis_mode::heating_up);
-			text::add_line_with_condition(state, contents, "crisis_add_interest_button_ex_3", state.world.nation_get_diplomatic_points(state.local_player_nation) >= 1.0f);
+			auto source = state.local_player_nation;
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::become_interested_in_crisis)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), -1);
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::become_interested_in_crisis)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (source.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), -1, r_lo, r_hi);
+			}
 		}
 	};
 

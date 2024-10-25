@@ -883,11 +883,11 @@ namespace ui {
 			auto target = retrieve<dcon::nation_id>(state, parent);
 			auto source = state.local_player_nation;
 			text::add_line(state, contents, "alice_diplo_release_subject_desc");
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].limit) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
 			}
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].effect) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_subject)].effect; k) {
 				auto const r_lo = uint32_t(source.value);
 				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 				text::add_line_break_to_layout(state, contents);
@@ -918,26 +918,28 @@ namespace ui {
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-
 			auto target = retrieve<dcon::nation_id>(state, parent);
 			auto source = state.local_player_nation;
-
 			text::add_line(state, contents, "increaseopinion_desc");
 			text::add_line_break_to_layout(state, contents);
-
 			text::add_line_with_condition(state, contents, "iaction_explain_5", state.world.nation_get_is_great_power(source));
-
 			text::add_line_with_condition(state, contents, "iaction_explain_6", !state.world.nation_get_is_great_power(target));
-
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, source);
 			text::add_line_with_condition(state, contents, "iaction_explain_1", state.world.gp_relationship_get_influence(rel) >= state.defines.increaseopinion_influence_cost, text::variable_type::x, int64_t(state.defines.increaseopinion_influence_cost));
-
 			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-			text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, source, target));
-
 			auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 			text::add_line_with_condition(state, contents, "inc_op_explain_1", clevel != nations::influence::level_friendly && clevel != nations::influence::level_in_sphere);
 
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::increase_opinion)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), -1);
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::increase_opinion)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), -1, r_lo, r_hi);
+			}
 		}
 	};
 
@@ -973,11 +975,12 @@ namespace ui {
 			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
 			auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
 			text::add_line_with_condition(state, contents, "add_sphere_explain_1", clevel == nations::influence::level_friendly);
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].limit) {
+
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), -1);
 			}
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].effect) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::add_to_sphere)].effect; k) {
 				auto const r_lo = uint32_t(source.value);
 				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 				text::add_line_break_to_layout(state, contents);
@@ -1035,11 +1038,11 @@ namespace ui {
 			}
 
 			auto affected_gp = state.world.nation_get_in_sphere_of(target);
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].limit) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
 			}
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].effect) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::remove_from_sphere)].effect; k) {
 				auto const r_lo = uint32_t(source.value);
 				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 				text::add_line_break_to_layout(state, contents);
@@ -1113,11 +1116,11 @@ namespace ui {
 			auto ol = state.world.nation_get_overlord_as_subject(source);
 			text::add_line_with_condition(state, contents, "fab_explain_7", has_any_usable_cb(state, source, target));
 
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].limit) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
 			}
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].effect) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::fabricate_cb)].effect; k) {
 				auto const r_lo = uint32_t(source.value);
 				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 				text::add_line_break_to_layout(state, contents);
@@ -1659,106 +1662,88 @@ namespace ui {
 			return tooltip_behavior::variable_tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto gp = nations::get_nth_great_power(state, uint16_t(retrieve<gp_choice_get_selection>(state, parent).value));
+			auto source = state.local_player_nation;
 			auto target = retrieve<dcon::nation_id>(state, parent);
+			auto affected_gp = nations::get_nth_great_power(state, uint16_t(retrieve<gp_choice_get_selection>(state, parent).value));
 
+			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
+			text::add_line_with_condition(state, contents, "iaction_explain_1", rel && state.world.gp_relationship_get_influence(rel) >= state.defines.decreaseopinion_influence_cost, text::variable_type::x, int64_t(state.defines.decreaseopinion_influence_cost));
+			text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
 			switch(retrieve<gp_choice_actions>(state, parent)) {
-				case gp_choice_actions::discredit:
-				{
-					if(state.local_player_nation == gp) {
-						text::add_line_with_condition(state, contents, "discredit_explain_1", false);
-					}
-
-					auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_1", rel && state.world.gp_relationship_get_influence(rel) >= state.defines.discredit_influence_cost, text::variable_type::x, int64_t(state.defines.discredit_influence_cost));
-
-					text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-					text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, state.local_player_nation, target));
-
-					auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
-					text::add_line_with_condition(state, contents, "discredit_explain_2", clevel != nations::influence::level_hostile);
-
-
-					auto orel = state.world.get_gp_relationship_by_gp_influence_pair(target, gp);
-					text::add_line_with_condition(state, contents, "discredit_explain_3", (state.world.gp_relationship_get_status(orel) & nations::influence::is_banned) == 0);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_4", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, gp, target)));
+			case gp_choice_actions::discredit:
+			{
+				auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
+				text::add_line_with_condition(state, contents, "discredit_explain_2", clevel != nations::influence::level_hostile);
+				auto orel = state.world.get_gp_relationship_by_gp_influence_pair(target, affected_gp);
+				text::add_line_with_condition(state, contents, "discredit_explain_3", (state.world.gp_relationship_get_status(orel) & nations::influence::is_banned) == 0);
+				text::add_line_with_condition(state, contents, "iaction_explain_4", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, affected_gp, target)));
+				auto source = state.local_player_nation;
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::discredit_advisors)].limit; k) {
+					text::add_line_break_to_layout(state, contents);
+					ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
+				}
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::discredit_advisors)].effect; k) {
+					auto const r_lo = uint32_t(source.value);
+					auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+					text::add_line_break_to_layout(state, contents);
+					ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp), r_lo, r_hi);
 				}
 				break;
-				case gp_choice_actions::expel_advisors:
-				{
-					if(state.local_player_nation == gp) {
-						text::add_line_with_condition(state, contents, "expel_explain_1", false);
-					}
-
-					auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_1", rel && state.world.gp_relationship_get_influence(rel) >= state.defines.expeladvisors_influence_cost, text::variable_type::x, int64_t(state.defines.expeladvisors_influence_cost));
-
-					text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, state.local_player_nation, target));
-
-					auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
-
-					text::add_line_with_condition(state, contents, "expel_explain_2", clevel != nations::influence::level_hostile && clevel != nations::influence::level_opposed);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_4", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, gp, target)));
+			}
+			case gp_choice_actions::expel_advisors:
+			{
+				auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
+				text::add_line_with_condition(state, contents, "expel_explain_2", clevel != nations::influence::level_hostile && clevel != nations::influence::level_opposed);
+				text::add_line_with_condition(state, contents, "iaction_explain_4", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, affected_gp, target)));
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::expel_advisors)].limit; k) {
+					text::add_line_break_to_layout(state, contents);
+					ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
+				}
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::expel_advisors)].effect; k) {
+					auto const r_lo = uint32_t(source.value);
+					auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+					text::add_line_break_to_layout(state, contents);
+					ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp), r_lo, r_hi);
 				}
 				break;
-				case gp_choice_actions::ban_embassy:
-				{
-					if(state.local_player_nation == gp) {
-						text::add_line_with_condition(state, contents, "ban_explain_1", false);
-					}
-
-					auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_1", rel && state.world.gp_relationship_get_influence(rel) >= state.defines.banembassy_influence_cost, text::variable_type::x, int64_t(state.defines.banembassy_influence_cost));
-
-					text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, state.local_player_nation, target));
-
-					auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
-					text::add_line_with_condition(state, contents, "ban_explain_2", clevel == nations::influence::level_friendly || clevel == nations::influence::level_in_sphere);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_5", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, gp, target)));
+			}
+			case gp_choice_actions::ban_embassy:
+			{
+				auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
+				text::add_line_with_condition(state, contents, "ban_explain_2", clevel == nations::influence::level_friendly || clevel == nations::influence::level_in_sphere);
+				text::add_line_with_condition(state, contents, "iaction_explain_5", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, affected_gp, target)));
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::ban_embassy)].limit; k) {
+					text::add_line_break_to_layout(state, contents);
+					ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
+				}
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::ban_embassy)].effect; k) {
+					auto const r_lo = uint32_t(source.value);
+					auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+					text::add_line_break_to_layout(state, contents);
+					ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp), r_lo, r_hi);
 				}
 				break;
-				case gp_choice_actions::decrease_opinion:
-				{
-					if(state.local_player_nation == gp) {
-						text::add_line_with_condition(state, contents, "dec_op_explain_1", false);
-					}
-
-					if(state.world.nation_get_in_sphere_of(target) == gp) {
-						text::add_line_with_condition(state, contents, "dec_op_explain_2", false);
-					}
-
-					auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, state.local_player_nation);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_1", rel && state.world.gp_relationship_get_influence(rel) >= state.defines.decreaseopinion_influence_cost, text::variable_type::x, int64_t(state.defines.decreaseopinion_influence_cost));
-
-					text::add_line_with_condition(state, contents, "iaction_explain_2", (state.world.gp_relationship_get_status(rel) & nations::influence::is_banned) == 0);
-
-					text::add_line_with_condition(state, contents, "iaction_explain_3", !military::are_at_war(state, state.local_player_nation, target));
-
-					auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
-					text::add_line_with_condition(state, contents, "dec_op_explain_3", clevel != nations::influence::level_hostile);
-
-
-					if((nations::influence::level_mask &
-					state.world.gp_relationship_get_status(state.world.get_gp_relationship_by_gp_influence_pair(target,
-					gp))) == nations::influence::level_hostile) {
-						text::add_line_with_condition(state, contents, "dec_op_explain_4", false);
-					}
-
-					text::add_line_with_condition(state, contents, "iaction_explain_5", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, gp, target)));
-
+			}
+			case gp_choice_actions::decrease_opinion:
+			{
+				auto clevel = (nations::influence::level_mask & state.world.gp_relationship_get_status(rel));
+				text::add_line_with_condition(state, contents, "dec_op_explain_3", clevel != nations::influence::level_hostile);
+				if((nations::influence::level_mask & state.world.gp_relationship_get_status(state.world.get_gp_relationship_by_gp_influence_pair(target, affected_gp))) == nations::influence::level_hostile) {
+					text::add_line_with_condition(state, contents, "dec_op_explain_4", false);
+				}
+				text::add_line_with_condition(state, contents, "iaction_explain_5", nations::influence::is_influence_level_greater_or_equal(clevel, nations::influence::get_level(state, affected_gp, target)));
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::decrease_opinion)].limit; k) {
+					text::add_line_break_to_layout(state, contents);
+					ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp));
+				}
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::decrease_opinion)].effect; k) {
+					auto const r_lo = uint32_t(source.value);
+					auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+					text::add_line_break_to_layout(state, contents);
+					ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(target), trigger::to_generic(affected_gp), r_lo, r_hi);
 				}
 				break;
+			}
 			}
 		}
 	};
@@ -1878,11 +1863,11 @@ namespace ui {
 			auto source = state.local_player_nation;
 
 			text::add_line(state, contents, "state_transfer_desc");
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].limit) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, -1, trigger::to_generic(source), trigger::to_generic(target));
 			}
-			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].effect) {
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].effect; k) {
 				auto const r_lo = uint32_t(source.value);
 				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 				text::add_line_break_to_layout(state, contents);
