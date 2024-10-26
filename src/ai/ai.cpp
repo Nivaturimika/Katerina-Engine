@@ -4993,10 +4993,6 @@ namespace ai {
 		}
 	}
 
-	void perform_cycling(sys::state& state) {
-
-	}
-
 	void make_attacks(sys::state& state) {
 		perform_cycling(state);
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
