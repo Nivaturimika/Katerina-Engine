@@ -4937,6 +4937,17 @@ namespace ai {
 		}
 	}
 
+	/*bool retreating_would_end_battle(sys::state& state, dcon::land_battle_id lb, bool is_attacker) {
+		auto w = state.world.land_battle_get_war_from_land_battle_in_war(lb);
+		for(auto const ar : state.world.land_battle_get_army_battle_participation_as_battle(lb)) {
+			auto const controller = ar.get_army().get_controller_from_army_control();
+			if(is_attacker == (military::get_role(state, w, controller) == military::war_role::attacker)) {
+				return false; //an ally is on the battle
+			}
+		}
+		return true;
+	}*/
+
 	void perform_cycling(sys::state& state) {
 		//code in charge of cycling armies
 		for(auto lb : state.world.in_land_battle) {
@@ -4954,7 +4965,7 @@ namespace ai {
 					} else {
 						auto avg_str = average_army_strength(state, ar.get_army());
 						auto avg_org = average_army_org(state, ar.get_army());
-						if(avg_str < 0.3f || avg_org < 0.3f) {
+						if(avg_str < 0.25f || avg_org < 0.25f) {
 							dcon::province_id best_prov;
 							auto const p = ar.get_battle().get_location_from_land_battle_location();
 							for(auto const adj : p.get_province_adjacency()) {
@@ -4969,8 +4980,10 @@ namespace ai {
 									}
 								}
 							}
-							if(best_prov
-							&& command::can_move_army(state, n, ar.get_army(), best_prov).size() > 0) {
+							if(best_prov && command::can_move_army(state, n, ar.get_army(), best_prov).size() > 0) {
+								//bool is_attacker = lb.get_war_attacker_is_attacker();
+								//auto role = military::get_role(state, lb.get_war_from_land_battle_in_war(), ar.get_army().get_controller_from_army_control());
+								//if(retreating_would_end_battle(state, lb, is_attacker == (role == military::war_role::attacker))) {
 								command::move_army(state, n, ar.get_army(), best_prov, true);
 							}
 						}
@@ -4978,6 +4991,10 @@ namespace ai {
 				}
 			}
 		}
+	}
+
+	void perform_cycling(sys::state& state) {
+
 	}
 
 	void make_attacks(sys::state& state) {
