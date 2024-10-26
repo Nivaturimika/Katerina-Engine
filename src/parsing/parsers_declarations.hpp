@@ -2748,7 +2748,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		std::string user_dir_;
 		std::vector<std::string> replace_paths;
 		std::vector<std::string> dependent_mods;
-
+		bool extension_script_ui = false;
 		bool mod_selected = false;
 
 		void name(association_type, std::string_view value, error_handler& err, int32_t line, mod_file_context& context);
@@ -2756,10 +2756,11 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		void user_dir(association_type, std::string_view value, error_handler& err, int32_t line, mod_file_context& context);
 		void replace_path(association_type, std::string_view value, error_handler& err, int32_t line, mod_file_context& context);
 		void dependencies(dependencies_list const& value, error_handler& err, int32_t line, mod_file_context& context) {
-			for(auto& s : value.names)
-			dependent_mods.push_back(s);
+			for(auto& s : value.names) {
+				dependent_mods.push_back(s);
+			}
 		}
-	void finish(mod_file_context& context) { }
+		void finish(mod_file_context& context) { }
 		void add_to_file_system(simple_fs::file_system& fs);
 	};
 

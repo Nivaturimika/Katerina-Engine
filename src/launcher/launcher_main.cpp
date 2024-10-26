@@ -1036,6 +1036,15 @@ namespace launcher {
 			native_string mod_path = produce_mod_path();
 			native_string temp_command_line = native_string(NATIVE("KatEngine.exe -autofind -path "));
 			temp_command_line += NATIVE("\"") + mod_path + NATIVE("\"");
+
+			for(auto const& mod : mod_list) {
+				if(mod.mod_selected && mod.extension_script_ui) {
+					temp_command_line += NATIVE(" -ext-script-ui");
+					break;
+				}
+			}
+
+
 			if(obj_under_mouse == ui_obj_host_game) {
 				temp_command_line += NATIVE(" -host");
 			} else if(obj_under_mouse == ui_obj_join_game) {

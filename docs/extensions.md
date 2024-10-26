@@ -376,6 +376,13 @@ This control will then automatically be inserted into the window named `province
 
 In order to use this extension, the mod has to manifest it's intent to use scriptable UI, either via the command like `-ext-script-ui`.
 
+For mods to explicitly enable them in their `.mod` file they must add the following:
+```
+name = "My cool mod"
+path = "mod/My Cool Mod"
+extension_script_ui = yes #<- Add this
+```
+
 Of course, adding new buttons wouldn't mean much if you couldn't make them do things. To allow you to add custom button effects to the game, we have introduced two new ui element types: `provinceScriptButtonType` and `nationScriptButtonType`. These buttons are defined in the same way as a `guiButtonType`, except that they can be given additional `allow` and `effect` parameters. For example:
 ```
 	provinceScriptButtonType = {

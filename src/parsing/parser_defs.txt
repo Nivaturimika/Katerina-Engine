@@ -1243,6 +1243,7 @@ mod_file
 	extend							value		text					discard
 	replace							value		text					member_fn (replace_path)
 	dependencies					group		dependencies_list		member_fn
+	extension_script_ui				value		bool					member
 
 battleplan_option
 	name					value		text					discard
