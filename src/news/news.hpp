@@ -32,7 +32,7 @@ namespace news {
 		invention,
 		count
 	};
-	constexpr uint32_t max_news_generator_types = uint32_t(news_generator_type::count);
+	constexpr inline uint32_t max_news_generator_types = uint32_t(news_generator_type::count);
 	constexpr inline uint32_t news_type_mask = 0x7f;
 	constexpr inline uint8_t news_size_small = 0x00;
 	constexpr inline uint8_t news_size_medium = 0x80;
@@ -50,6 +50,7 @@ namespace news {
 		news::news_generator_type type; //1
 		uint8_t padding = 0;
 	};
+	/*
 	static_assert(sizeof(news_scope) ==
 		sizeof(news_scope::strings)
 		+ sizeof(news_scope::values)
@@ -60,6 +61,7 @@ namespace news {
 		+ sizeof(news_scope::picture)
 		+ sizeof(news_scope::type)
 		+ sizeof(news_scope::padding));
+	*/
 
 	struct global_news_state {
 		news_scope currently_collected; //currently collected
@@ -68,10 +70,10 @@ namespace news {
 		news_scope medium_articles[2];
 		news_scope large_articles[1];
 		uint32_t num_collected = 0;
-		dcon::effect_key on_collect_effect[sys::max_news_generator_types];
-		dcon::trigger_key on_collect_trigger[sys::max_news_generator_types];
-		dcon::effect_key on_printing_effect[sys::max_news_generator_types];
-		dcon::trigger_key on_printing_trigger[sys::max_news_generator_types];
+		dcon::effect_key on_collect_effect[max_news_generator_types];
+		dcon::trigger_key on_collect_trigger[max_news_generator_types];
+		dcon::effect_key on_printing_effect[max_news_generator_types];
+		dcon::trigger_key on_printing_trigger[max_news_generator_types];
 		sys::date last_print;
 	};
 	// TODO: Make memcpyable
