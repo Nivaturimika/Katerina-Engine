@@ -627,6 +627,11 @@ namespace sys {
 				// Log messages
 				auto* c6 = new_messages.front();
 				while(c6) {
+					{
+						auto ymd = current_date.to_ymd(start_date);
+						reports::write_debug(std::to_string(ymd.year) + "." + std::to_string(ymd.month) + std::to_string(ymd.day) + ": " + std::string(c6->title));
+					}
+
 					auto base_type = c6->type;
 					auto setting_types = sys::message_setting_map[int32_t(base_type)];
 					uint8_t settings_bits = 0;
