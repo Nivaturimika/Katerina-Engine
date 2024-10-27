@@ -2066,11 +2066,11 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			news::news_scope scope;
-			if constexpr(size == sys::news_size_huge) {
+			if constexpr(size == news::news_size_huge) {
 				scope = state.news_definitions.large_articles[index];
-			} else if constexpr(size == sys::news_size_medium) {
+			} else if constexpr(size == news::news_size_medium) {
 				scope = state.news_definitions.medium_articles[index];
-			} else if constexpr(size == sys::news_size_small) {
+			} else if constexpr(size == news::news_size_small) {
 				scope = state.news_definitions.small_articles[index];
 			}
 			auto contents = text::create_endless_layout(state, internal_layout,
@@ -2111,11 +2111,11 @@ namespace ui {
 	public:
 		void on_update(sys::state& state) noexcept override {
 			news::news_scope scope;
-			if constexpr(size == sys::news_size_huge) {
+			if constexpr(size == news::news_size_huge) {
 				scope = state.news_definitions.large_articles[index];
-			} else if constexpr(size == sys::news_size_medium) {
+			} else if constexpr(size == news::news_size_medium) {
 				scope = state.news_definitions.medium_articles[index];
-			} else if constexpr(size == sys::news_size_small) {
+			} else if constexpr(size == news::news_size_small) {
 				scope = state.news_definitions.small_articles[index];
 			}
 			auto contents = text::create_endless_layout(state, delegate->internal_layout,
