@@ -11,6 +11,7 @@
 #include "economy_factory.hpp"
 #include "economy_rgo.hpp"
 #include "pdqsort.h"
+#include "news.hpp"
 
 namespace economy {
 	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
@@ -2506,7 +2507,7 @@ namespace economy {
 							break;
 						}
 						news::news_scope scope;
-						scope.type = sys::news_generator_type::construction_complete;
+						scope.type = news::news_generator_type::construction_complete;
 						//value 0,0 is province id
 						scope.values[0][1] = state.world.province_get_building_level(for_province, t);
 						scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(state.world.province_building_construction_get_nation(c));

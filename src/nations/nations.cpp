@@ -15,6 +15,7 @@
 #include "rebels.hpp"
 #include "economy_estimations.hpp"
 #include "pdqsort.h"
+#include "news.hpp"
 
 namespace nations {
 
@@ -2321,7 +2322,7 @@ namespace nations {
 				}
 
 				news::news_scope scope;
-				scope.type = sys::news_generator_type::crisis_started;
+				scope.type = news::news_generator_type::crisis_started;
 				scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(state.primary_crisis_defender);
 				scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(state.primary_crisis_attacker);
 				scope.strings[0][0] = state.world.state_definition_get_name(state.world.state_instance_get_definition(state.crisis_state));

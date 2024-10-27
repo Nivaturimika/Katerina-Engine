@@ -11,6 +11,7 @@
 #include "triggers.hpp"
 #include "economy_factory.hpp"
 #include "economy_rgo.hpp"
+#include "news.hpp"
 
 namespace province {
 
@@ -887,7 +888,7 @@ namespace province {
 
 		if(state_is_new && old_owner) {
 			news::news_scope scope;
-			scope.type = sys::news_generator_type::province_change_owner;
+			scope.type = news::news_generator_type::province_change_owner;
 			scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(old_owner);
 			scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(new_owner);
 			scope.strings[0][0] = state.world.province_get_name(id);

@@ -6,6 +6,7 @@
 #include "province_templates.hpp"
 #include "system_state.hpp"
 #include "triggers.hpp"
+#include "news.hpp"
 
 namespace culture {
 
@@ -910,7 +911,7 @@ namespace culture {
 						});
 
 						news::news_scope scope;
-						scope.type = sys::news_generator_type::research_complete;
+						scope.type = news::news_generator_type::research_complete;
 						scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
 						scope.strings[0][0] = state.world.technology_get_name(n.get_current_research());
 						scope.strings[0][1] = state.world.technology_get_name(n.get_current_research());
@@ -960,7 +961,7 @@ namespace culture {
 										sys::message_base_type::invention
 									});
 									news::news_scope scope;
-									scope.type = sys::news_generator_type::invention;
+									scope.type = news::news_generator_type::invention;
 									scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
 									scope.strings[0][0] = state.world.invention_get_name(inv);
 									scope.strings[0][1] = state.world.invention_get_name(inv);
@@ -995,7 +996,7 @@ namespace culture {
 										sys::message_base_type::invention
 									});
 									news::news_scope scope;
-									scope.type = sys::news_generator_type::invention;
+									scope.type = news::news_generator_type::invention;
 									scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(n);
 									scope.strings[0][0] = state.world.invention_get_name(inv);
 									scope.strings[0][1] = state.world.invention_get_name(inv);

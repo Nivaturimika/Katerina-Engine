@@ -12,6 +12,7 @@
 #include "triggers.hpp"
 #include "container_types.hpp"
 #include "pdqsort.h"
+#include "news.hpp"
 
 namespace military {
 
@@ -945,7 +946,7 @@ namespace military {
 			sys::message_base_type::war
 		});
 		news::news_scope scope;
-		scope.type = sys::news_generator_type::war_declared;
+		scope.type = news::news_generator_type::war_declared;
 		scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(primary_attacker);
 		scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(primary_defender);
 		scope.tags[1][0] = primary_wargoal_tag;
@@ -1855,7 +1856,7 @@ namespace military {
 				sys::message_base_type::peace_accepted
 			});
 			news::news_scope scope;
-			scope.type = sys::news_generator_type::peace_offer_accept;
+			scope.type = news::news_generator_type::peace_offer_accept;
 			scope.tags[0][0] = state.world.nation_get_identity_from_identity_holder(state.world.war_get_primary_attacker(war));
 			scope.tags[0][1] = state.world.nation_get_identity_from_identity_holder(state.world.war_get_primary_defender(war));
 			scope.strings[0][0] = state.world.war_get_name(war);

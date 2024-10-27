@@ -1,4 +1,5 @@
 #include "news_parsing.hpp"
+#include "news.hpp"
 
 namespace parsers {
 
@@ -34,45 +35,45 @@ void news_picture_case::picture(association_type, std::string_view name, error_h
 
 void news_generate_article::type(association_type, std::string_view value, error_handler& err, int32_t line, news_context& context) {
 	if(is_fixed_token_ci(value.data(), value.data() + value.length(), "peace_offer_accept")) {
-		flags |= uint8_t(sys::news_generator_type::peace_offer_accept);
+		flags |= uint8_t(news::news_generator_type::peace_offer_accept);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "game_event")) {
-		flags |= uint8_t(sys::news_generator_type::game_event);
+		flags |= uint8_t(news::news_generator_type::game_event);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "province_change_controller")) {
-		flags |= uint8_t(sys::news_generator_type::province_change_controller);
+		flags |= uint8_t(news::news_generator_type::province_change_controller);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "province_change_owner")) {
-		flags |= uint8_t(sys::news_generator_type::province_change_owner);
+		flags |= uint8_t(news::news_generator_type::province_change_owner);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "construction_complete")) {
-		flags |= uint8_t(sys::news_generator_type::construction_complete);
+		flags |= uint8_t(news::news_generator_type::construction_complete);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "research_complete")) {
-		flags |= uint8_t(sys::news_generator_type::research_complete);
+		flags |= uint8_t(news::news_generator_type::research_complete);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "battle_over")) {
-		flags |= uint8_t(sys::news_generator_type::battle_over);
+		flags |= uint8_t(news::news_generator_type::battle_over);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "rebel_break_country")) {
-		flags |= uint8_t(sys::news_generator_type::rebel_break_country);
+		flags |= uint8_t(news::news_generator_type::rebel_break_country);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "new_party")) {
-		flags |= uint8_t(sys::news_generator_type::new_party);
+		flags |= uint8_t(news::news_generator_type::new_party);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "war_declared")) {
-		flags |= uint8_t(sys::news_generator_type::war_declared);
+		flags |= uint8_t(news::news_generator_type::war_declared);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "crisis_started")) {
-		flags |= uint8_t(sys::news_generator_type::crisis_started);
+		flags |= uint8_t(news::news_generator_type::crisis_started);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "crisis_backer")) {
-		flags |= uint8_t(sys::news_generator_type::crisis_backer);
+		flags |= uint8_t(news::news_generator_type::crisis_backer);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "crisis_side_joined")) {
-		flags |= uint8_t(sys::news_generator_type::crisis_side_joined);
+		flags |= uint8_t(news::news_generator_type::crisis_side_joined);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "crisis_resolved")) {
-		flags |= uint8_t(sys::news_generator_type::crisis_resolved);
+		flags |= uint8_t(news::news_generator_type::crisis_resolved);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "decision")) {
-		flags |= uint8_t(sys::news_generator_type::decision);
+		flags |= uint8_t(news::news_generator_type::decision);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "goods_price_change")) {
-		flags |= uint8_t(sys::news_generator_type::goods_price_change);
+		flags |= uint8_t(news::news_generator_type::goods_price_change);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "ai_afraid_of")) {
-		flags |= uint8_t(sys::news_generator_type::ai_afraid_of);
+		flags |= uint8_t(news::news_generator_type::ai_afraid_of);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "ai_likes_very_much")) {
-		flags |= uint8_t(sys::news_generator_type::ai_likes_very_much);
+		flags |= uint8_t(news::news_generator_type::ai_likes_very_much);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "fake")) {
-		flags |= uint8_t(sys::news_generator_type::fake);
+		flags |= uint8_t(news::news_generator_type::fake);
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "invention")) {
-		flags |= uint8_t(sys::news_generator_type::invention);
+		flags |= uint8_t(news::news_generator_type::invention);
 	} else {
 		err.accumulated_errors += "Unknown news type " + std::string(value) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
 	}
@@ -80,12 +81,12 @@ void news_generate_article::type(association_type, std::string_view value, error
 
 void news_generate_article::size(association_type, std::string_view value, error_handler& err, int32_t line, news_context& context) {
 	if(is_fixed_token_ci(value.data(), value.data() + value.length(), "small")) {
-		flags |= sys::news_size_small;
+		flags |= news::news_size_small;
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "medium")) {
-		flags |= sys::news_size_medium;
+		flags |= news::news_size_medium;
 	} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "huge")
 		|| is_fixed_token_ci(value.data(), value.data() + value.length(), "large")) {
-		flags |= sys::news_size_huge;
+		flags |= news::news_size_huge;
 	} else {
 		err.accumulated_errors += "Unknown news size " + std::string(value) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
 	}

@@ -2035,11 +2035,11 @@ namespace ui {
 		}
 		void on_update(sys::state& state) noexcept override {
 			base_data.data.image.gfx_object = no_news_image;
-			if constexpr(size == sys::news_size_huge) {
+			if constexpr(size == news::news_size_huge) {
 				base_data.data.image.gfx_object = state.news_definitions.large_articles[index].picture;
-			} else if constexpr(size == sys::news_size_medium) {
+			} else if constexpr(size == news::news_size_medium) {
 				base_data.data.image.gfx_object = state.news_definitions.medium_articles[index].picture;
-			} else if constexpr(size == sys::news_size_small) {
+			} else if constexpr(size == news::news_size_small) {
 				base_data.data.image.gfx_object = state.news_definitions.small_articles[index].picture;
 			}
 		}
@@ -2176,21 +2176,21 @@ namespace ui {
 			} else if(name == "date") {
 				return make_element_by_type<news_page_date>(state, id);
 			} else if(name == "article_main") {
-				return make_element_by_type<news_article_window<sys::news_size_huge, 0>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_huge, 0>>(state, id);
 			} else if(name == "article_medium_1") {
-				return make_element_by_type<news_article_window<sys::news_size_medium, 0>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_medium, 0>>(state, id);
 			} else if(name == "article_medium_2") {
-				return make_element_by_type<news_article_window<sys::news_size_medium, 1>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_medium, 1>>(state, id);
 			} else if(name == "article_small_1") {
-				return make_element_by_type<news_article_window<sys::news_size_small, 0>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_small, 0>>(state, id);
 			} else if(name == "article_small_2") {
-				return make_element_by_type<news_article_window<sys::news_size_small, 1>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_small, 1>>(state, id);
 			} else if(name == "article_small_3") {
-				return make_element_by_type<news_article_window<sys::news_size_small, 2>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_small, 2>>(state, id);
 			} else if(name == "article_small_4") {
-				return make_element_by_type<news_article_window<sys::news_size_small, 3>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_small, 3>>(state, id);
 			} else if(name == "article_small_5") {
-				return make_element_by_type<news_article_window<sys::news_size_small, 4>>(state, id);
+				return make_element_by_type<news_article_window<news::news_size_small, 4>>(state, id);
 			} else {
 				return nullptr;
 			}

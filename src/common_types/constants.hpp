@@ -212,57 +212,24 @@ constexpr inline float ui_scales[] = {0.25f, 0.30f, 0.35f, 0.5f, 0.75f, 1.0f, 1.
 		achroma, //black and white
 	};
 
-	constexpr int32_t max_event_options = 18;
-	constexpr uint32_t max_factory_bonuses = 8;
-	constexpr uint32_t max_languages = 64;
+	constexpr inline uint32_t max_event_options = 18;
+	constexpr inline uint32_t max_factory_bonuses = 8;
+	constexpr inline uint32_t max_languages = 64;
+	constexpr inline uint32_t max_news_generator_cases = 8;
 
 	enum save_type : uint8_t {
 		normal,
 		autosave,
 		bookmark
 	};
-
-
-	enum class news_generator_type {
-		none,
-		peace_offer_accept,
-		game_event,
-		province_change_controller,
-		province_change_owner,
-		construction_complete,
-		research_complete,
-		battle_over,
-		rebel_break_country,
-		new_party,
-		war_declared,
-		crisis_started,
-		crisis_backer,
-		crisis_side_joined,
-		crisis_resolved,
-		decision,
-		goods_price_change,
-		ai_afraid_of,
-		ai_likes_very_much,
-		fake,
-		invention,
-		count
-	};
-	constexpr uint32_t max_news_generator_types = uint32_t(news_generator_type::count);
-	constexpr inline uint32_t news_type_mask = 0x7f;
-	constexpr inline uint8_t news_size_small = 0x00;
-	constexpr inline uint8_t news_size_medium = 0x80;
-	constexpr inline uint8_t news_size_huge = 0xC0;
-	constexpr inline uint8_t news_size_mask = 0x80 | 0xC0;
-	constexpr int32_t max_news_generator_cases = 8;
-
 } // namespace sys
 
 namespace culture {
-	inline constexpr int32_t max_issue_options = 11;
+	constexpr inline uint32_t max_issue_options = 11;
 }
 
 namespace economy {
-enum class province_building_type : uint8_t { railroad, fort, naval_base, bank, university, mine, farmland, urban_center, last, factory, province_selector, province_immigrator };
+	enum class province_building_type : uint8_t { railroad, fort, naval_base, bank, university, mine, farmland, urban_center, last, factory, province_selector, province_immigrator };
 	constexpr inline int32_t max_building_types = 8;
 }
 
