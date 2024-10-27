@@ -657,7 +657,7 @@ namespace culture {
 	}
 
 	uint32_t get_remapped_flag_type(sys::state const& state, flag_type type) {
-		return state.flag_type_map[static_cast<size_t>(type)];
+		return state.flag_type_map[size_t(type)];
 	}
 
 	flag_type get_current_flag_type(sys::state const& state, dcon::nation_id target_nation) {

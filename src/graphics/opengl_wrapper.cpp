@@ -497,8 +497,9 @@ namespace ogl {
 
 		// Automatically assign texture offsets to the flag_types
 		auto id = 0;
-		for(auto type : state.flag_types)
+		for(auto type : state.flag_types) {
 			state.flag_type_map[uint32_t(type)] = uint8_t(id++);
+		}
 		assert(state.flag_type_map[0] == 0); // default_flag
 
 		// Allocate textures for the flags
