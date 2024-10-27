@@ -2,9 +2,9 @@
 
 #include "container_types.hpp"
 #include "text.hpp"
+#include "message_types.hpp"
 
 namespace notification {
-
 	struct message {
 		std::function<void(sys::state&, text::layout_base&)> body;
 		char const* title = nullptr;

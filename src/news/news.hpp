@@ -1,6 +1,7 @@
 #pragma once
 #include "dcon_generated.hpp"
 #include "date_interface.hpp"
+#include "constants.hpp"
 
 namespace sys {
 	struct state;
