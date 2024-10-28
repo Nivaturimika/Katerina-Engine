@@ -75,6 +75,20 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `masquerade_as_nation = THIS/FROM`: Use the visual flag of `THIS/FROM` as the flag of the nation, most useful for dynamic rebellions for example.
 - `set_province_flag = flag`: Didn't work in the original but now it does
 - `clr_province_flag = flag`: Didn't work in the original but now it does
+- `change_party_name = { ... }`: This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`. This member determines which party the effect will apply to. If an ideology is provided, it will apply to the first active political party with that ideology (generally the "first" party is the political party defined earlier in the files). If `ruling_party` is provided, the current ruling party of the nation in scope will be affected. The second member is `name = ...`. This value is the new name that the party will be given. This effect can be used only within a national scope. Example:
+```
+	change_party_name = {
+		ideology = conservative
+		name = NEW_PARTY_NAME
+	}
+```
+- `change_party_position = { ... }` : This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`, which determines which party the effect applies to as described above. The second member is `position = ...` where `...` is one of the options for a party issue or a political or social reform. The effect will cause the political party determined by the `ideology` member to change their party position to the given `position`, if it is a party issue or it will give them a voting preference in favor of that particular reform and remove any voting preference in favor of another reform in that group (see below for more on the extension of party preferences). This effect can be used only within a national scope. Example:
+```
+	change_party_position = {
+		ideology = ruling_party
+		position = free_trade
+	}
+```
 
 As for `build_xxx_in_capital`, the game doesn't allow custom defined buildings to be used in this mode as an effect.
 
@@ -511,6 +525,28 @@ Inside the `vote_modifiers` section one or more modifiers can be defined for ref
 		}
 ```
 When these modifiers are present, instead of using the generic add/remove political/social reform modifiers for an ideology to determine reform support the support for a particular reform option, the game will first attempt to use the modifier(s) associated with the active issue options of the active party associated with that ideology (if there is more than one such party, one will be picked arbitrarily for this). This will completely override the generic add/remove reform modifiers, allowing a party-ideology combination to support (or oppose) particular reforms in a category even when it would otherwise generically oppose (or support) all such reforms.
+
+### Party reform support overrides
+
+Previously in a party definition it was possible to insert a line such as `economic_policy = laissez_faire` which would define the specific party issue that the party would have. This has been extended so that any political or social reform category and option may appear there. For example `pensions = good_pensions` in the following party description is now valid
+
+```
+party = {
+	name = "ENG_liberal"
+	start_date = 1830.1.1
+	end_date = 1859.1.1
+	ideology = liberal
+	economic_policy = laissez_faire
+	trade_policy = free_trade
+	religious_policy = pluralism
+	citizenship_policy = limited_citizenship
+	war_policy = anti_military
+	
+	pensions = good_pensions
+}
+```
+
+What this means is that the party will always support that particular reform in that category (or the closest reform if the category can only be changed step by step) and that it will not support any other reforms in that category. This will override any other preference either via ideology or the extended support weights described above. 
 
 ### Political party triggers
 

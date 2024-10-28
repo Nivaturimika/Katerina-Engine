@@ -146,6 +146,14 @@ ef_clear_news_scopes
 	type							value		text				member
 	limit							extern		ef_limit			member_fn
 
+ef_change_party_name
+	ideology                       value     text                           member_fn
+	name                            value     text                           member_fn
+
+ef_change_party_position
+	ideology                       value     text                           member_fn
+	position                            value     text                           member_fn
+
 effect_body
 	if                              extern      ef_scope_if         discard
 	else_if                         extern      ef_scope_else_if    discard
@@ -331,6 +339,8 @@ effect_body
 	this_bounce						extern		ef_scope_this_bounce		discard
 	masquerade_as_nation			value		text						member_fn
 	random_by_modifier				extern		ef_random_by_modifier		discard
+	change_party_name				group		ef_change_party_name		member_fn
+	change_party_position			group		ef_change_party_position	member_fn
 	#any                            extern      ef_scope_variable           discard
 
 ef_scope_random_by_modifier
