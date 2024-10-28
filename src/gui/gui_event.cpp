@@ -978,7 +978,7 @@ namespace ui {
 		}
 		//sort
 		std::function<bool(dcon::issue_option_id a, dcon::issue_option_id b)> fn;
-		switch(sort) {
+		switch(sort_type) {
 		case politics_issue_sort_order::name:
 			fn = ([&](dcon::issue_option_id a, dcon::issue_option_id b) {
 				auto a_name = text::get_name_as_string(state, dcon::fatten(state.world, a));
@@ -1116,11 +1116,11 @@ namespace ui {
 			return message_result::consumed;
 		} else if(payload.holds_type<politics_issue_sort_order>()) {
 			auto enum_val = any_cast<politics_issue_sort_order>(payload);
-			if(issues_listbox->sort == enum_val) {
+			if(issues_listbox->sort_type == enum_val) {
 				issues_listbox->is_asc = !issues_listbox->is_asc;
 			} else {
 				issues_listbox->is_asc = false;
-				issues_listbox->sort = enum_val;
+				issues_listbox->sort_type = enum_val;
 			}
 			issues_listbox->impl_on_update(state);
 			return message_result::consumed;

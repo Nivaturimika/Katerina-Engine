@@ -113,7 +113,7 @@ namespace ui {
 			return "ew_issue_option_window";
 		}
 	public:
-		politics_issue_sort_order sort = politics_issue_sort_order::name;
+		politics_issue_sort_order sort_type = politics_issue_sort_order::name;
 		bool is_asc = false;
 		void on_update(sys::state& state) noexcept override;
 	};

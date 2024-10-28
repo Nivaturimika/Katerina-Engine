@@ -582,6 +582,7 @@ namespace ui {
 					set_visible(state, false);
 					break;
 				case reorg_win_action::balance:
+				{
 					// Disregard any of the units the player already selected, because its our way or the hi(fi)-way
 					selected_sub_units.erase(selected_sub_units.begin(), selected_sub_units.end());
 					if constexpr(std::is_same_v<T, dcon::army_id>) {
@@ -615,6 +616,7 @@ namespace ui {
 					}
 					impl_on_update(state);
 					break;
+				}
 				default:
 					break;
 				}

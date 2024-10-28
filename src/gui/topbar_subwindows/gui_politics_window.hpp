@@ -48,11 +48,6 @@ namespace ui {
 		}
 	};
 
-
-enum class politics_window_tab : uint8_t { reforms = 0x0, movements = 0x1, decisions = 0x2, releasables = 0x3 };
-
-enum class politics_issue_sort_order : uint8_t { name, popular_support, voter_support };
-
 	class nation_plurality_text : public standard_nation_text {
 		public:
 		std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
