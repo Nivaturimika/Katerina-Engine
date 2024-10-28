@@ -1254,4 +1254,32 @@ namespace parsers {
 		context.compiled_trigger.push_back(uint16_t(value));
 	}
 
+	void trigger_body::party_name(tr_party_name const& value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(context.main_slot != trigger::slot_contents::nation) {
+			err.accumulated_errors += "party_name effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+		context.compiled_trigger.push_back(trigger::party_name);
+		context.compiled_trigger.push_back(trigger::payload(value.ideology_).value);
+		context.add_int32_t_to_payload(value.name_.index());
+	}
+	void trigger_body::party_position(tr_party_position const& value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(context.main_slot != trigger::slot_contents::nation) {
+			err.accumulated_errors += "party_position trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		} else if(!value.opt_) {
+			err.accumulated_errors += "party_position trigger used without a valid position " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+		context.compiled_trigger.push_back(trigger::party_position);
+		context.compiled_trigger.push_back(trigger::payload(value.ideology_).value);
+		context.compiled_trigger.push_back(trigger::payload(value.opt_).value);
+	}
+	void tr_party_position::position(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(auto it = context.outer_context.map_of_ioptions.find(std::string(v)); it != context.outer_context.map_of_ioptions.end()) {
+			opt_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid issue position " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
 } // namespace parsers

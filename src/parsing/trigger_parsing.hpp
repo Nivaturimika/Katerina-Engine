@@ -293,6 +293,38 @@ namespace parsers {
 		}
 		void finish(trigger_building_context&) { }
 	};
+	struct tr_party_name {
+		dcon::ideology_id ideology_;
+		dcon::text_key name_;
+		void ideology(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+			if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+				// leave invalid
+			} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+				ideology_ = it->second.id;
+			} else {
+				err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			}
+		}
+		void name(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+			name_ = text::find_or_add_key(context.outer_context.state, v, false);
+		}
+		void finish(trigger_building_context&) { }
+	};
+	struct tr_party_position {
+		dcon::ideology_id ideology_;
+		dcon::issue_option_id opt_;
+		void ideology(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+			if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+				// leave invalid
+			} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+				ideology_ = it->second.id;
+			} else {
+				err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			}
+		}
+		void position(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context);
+		void finish(trigger_building_context&) { }
+	};
 
 	inline bool is_from(std::string_view value) {
 		return is_fixed_token_ci(value.data(), value.data() + value.length(), "from");
@@ -5845,6 +5877,9 @@ namespace parsers {
 		void dates_contains(tr_news_data_parameters const& value, error_handler& err, int32_t line, trigger_building_context& context);
 		void length_greater(tr_news_data_parameters const& value, error_handler& err, int32_t line, trigger_building_context& context);
 		void news_printing_count(association_type, int32_t value, error_handler& err, int32_t line, trigger_building_context& context);
+
+		void party_name(tr_party_name const& value, error_handler& err, int32_t line, trigger_building_context& context);
+		void party_position(tr_party_position const& value, error_handler& err, int32_t line, trigger_building_context& context);
 
 		void any_value(std::string_view label, association_type a, std::string_view value, error_handler& err, int32_t line,
 			trigger_building_context& context) {

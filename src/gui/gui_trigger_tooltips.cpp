@@ -7652,6 +7652,43 @@ namespace ui {
 			text::close_layout_box(layout, box);
 		}
 
+		void tf_party_name(TRIGGER_DISPLAY_PARAMS) {
+			auto ideology = trigger::payload(tval[1]).ideo_id;
+			dcon::text_key new_name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 2)) };
+			//
+			auto box = text::open_layout_box(layout, indentation);
+			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+			if(ideology) {
+				auto id_name = ws.world.ideology_get_name(ideology);
+				text::substitution_map s;
+				text::add_to_substitution_map(s, text::variable_type::x, id_name);
+				auto left_str = text::resolve_string_substitution(ws, "pname_is", s);
+				display_with_comparison(tval[0], left_str, new_name, ws, layout, box);
+			} else {
+				display_with_comparison(tval[0], text::produce_simple_string(ws, "rpname_is"), new_name, ws, layout, box);
+			}
+			text::close_layout_box(layout, box);
+		}
+
+		void tf_party_position(TRIGGER_DISPLAY_PARAMS) {
+			auto ideology = trigger::payload(tval[1]).ideo_id;
+			dcon::issue_option_id new_opt = trigger::payload(tval[2]).opt_id;
+			auto opt_name = ws.world.issue_option_get_name(new_opt);
+			//
+			auto box = text::open_layout_box(layout, indentation);
+			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+			if(ideology) {
+				auto id_name = ws.world.ideology_get_name(ideology);
+				text::substitution_map s;
+				text::add_to_substitution_map(s, text::variable_type::x, id_name);
+				auto left_str = text::resolve_string_substitution(ws, "pposition_is", s);
+				display_with_comparison(tval[0], left_str, opt_name, ws, layout, box);
+			} else {
+				display_with_comparison(tval[0], text::produce_simple_string(ws, "rpposition_is"), opt_name, ws, layout, box);
+			}
+			text::close_layout_box(layout, box);
+		}
+
 		constexpr inline void (*trigger_functions[])(TRIGGER_DISPLAY_PARAMS) = {
 			tf_none,
 			tf_year,																			// constexpr inline uint16_t year = 0x0001;
@@ -8430,6 +8467,8 @@ namespace ui {
 			tf_none, // TRIGGER_BYTECODE_ELEMENT(0x02F1, length_greater_values, 4)
 			tf_none, // TRIGGER_BYTECODE_ELEMENT(0x02F2, length_greater_dates, 4)
 			tf_none, // TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 1)
+			tf_party_name, //TRIGGER_BYTECODE_ELEMENT(0x02E2, party_name, 3)
+			tf_party_position, //TRIGGER_BYTECODE_ELEMENT(0x02E3, party_position, 2)
 
 			//
 			// scopes
