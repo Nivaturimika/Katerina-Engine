@@ -2026,6 +2026,7 @@ namespace province {
 				auto distance = adj.get_distance();
 				if((bits & province::border::impassible_bit) == 0 && !origins_vector.get(other_prov)) {
 					if((bits & province::border::coastal_bit) == 0) { // doesn't cross coast -- i.e. is land province
+						// As how it is in the original, TODO: allow customization
 						if(province::has_access_to_province(state, nation_as, other_prov)) {
 							path_heap.push_back(retreat_province_and_distance{ nearest.distance_covered + distance, other_prov });
 							std::push_heap(path_heap.begin(), path_heap.end());
