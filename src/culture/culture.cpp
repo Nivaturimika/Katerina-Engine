@@ -47,6 +47,12 @@ namespace culture {
 			return "second_century_tech";
 		case culture::tech_category::third_century:
 			return "third_century_tech";
+		case culture::tech_category::army_techs:
+			return "army_techs";
+		case culture::tech_category::naval_techs:
+			return "naval_techs";
+		case culture::tech_category::economic_techs:
+			return "economic_techs";
 		default:
 			break;
 		}

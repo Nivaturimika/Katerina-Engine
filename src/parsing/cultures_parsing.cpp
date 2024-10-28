@@ -309,6 +309,12 @@ namespace parsers {
 			cat = ::culture::tech_category::second_century;
 		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "third_century")) {
 			cat = ::culture::tech_category::third_century;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "army_techs")) {
+			cat = ::culture::tech_category::army_techs;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "naval_techs")) {
+			cat = ::culture::tech_category::naval_techs;
+		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "economic_techs")) {
+			cat = ::culture::tech_category::economic_techs;
 		} else {
 			err.accumulated_errors += "Unknown technology category " + std::string(name) + " in file " + err.file_name + "\n";
 		}

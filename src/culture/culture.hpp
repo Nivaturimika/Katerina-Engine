@@ -136,7 +136,7 @@ namespace culture {
 		bool available_by_default = false;
 	};
 
-	enum class tech_category : uint8_t { army, navy, commerce, culture, industry, military_theory, population, diplomacy, flavor, theory, economic, society, naval, production, first_century, second_century, third_century, unknown };
+	enum class tech_category : uint8_t { army, navy, commerce, culture, industry, military_theory, population, diplomacy, flavor, theory, economic, society, naval, production, first_century, second_century, army_techs, naval_techs, economic_techs, third_century, unknown };
 	std::string get_tech_category_name(tech_category t);
 
 	struct folder_info {
