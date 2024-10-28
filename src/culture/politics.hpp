@@ -28,6 +28,7 @@ namespace politics {
 	float get_military_reform_multiplier(sys::state& state, dcon::nation_id nation);
 	float get_economic_reform_multiplier(sys::state& state, dcon::nation_id nation);
 	bool political_party_is_active(sys::state& state, dcon::nation_id n, dcon::political_party_id p);
+	void set_ruling_party(sys::state& state, dcon::nation_id n, dcon::political_party_id p);
 
 	// sets upperhouse to 100% and changes ruling party to match the ideology
 	void force_nation_ideology(sys::state& state, dcon::nation_id n, dcon::ideology_id i);
