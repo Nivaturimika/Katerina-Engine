@@ -163,13 +163,13 @@ namespace command {
 	void execute_c_event(sys::state& state, dcon::nation_id source, int32_t id) {
 		for(auto v : state.world.in_free_national_event) {
 			if(v.get_legacy_id() == uint32_t(id)) {
-				event::trigger_national_event(state, v, source, state.current_date.value, id ^ as.index());
+				event::trigger_national_event(state, v, source, state.current_date.value, id ^ source.index());
 				return;
 			}
 		}
 		/*for(auto v : state.world.in_free_provincial_event) {
 			if(v.get_legacy_id() == uint32_t(id)) {
-				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ source.index());
 				return;
 			}
 		}*/
@@ -181,7 +181,7 @@ namespace command {
 		}
 		/*for(auto v : state.world.in_provincial_event) {
 			if(v.get_legacy_id() == uint32_t(id)) {
-				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ source.index());
 				return;
 			}
 		}*/

@@ -4945,6 +4945,11 @@ object {
 		tag{ scenario }
 	}
 	property{
+		name{ legacy_id }
+		type{ uint32_t }
+		tag{ scenario }
+	}
+	property{
 		name{ auto_choice }
 		type{ uint8_t }
 		tag{ unsaved }

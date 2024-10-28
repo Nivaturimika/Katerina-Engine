@@ -987,6 +987,29 @@ namespace parsers {
 			sys::value_modifier_description{ multiplier, overall_factor, uint16_t(old_count), uint16_t(new_count - old_count)});
 	}
 
+	void tr_party_name::ideology(association_type t, std::string_view v, error_handler & err, int32_t line, trigger_building_context & context) {
+		if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+			// leave invalid
+		} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+			ideology_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void tr_party_name::name(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+		name_ = text::find_or_add_key(context.outer_context.state, v, false);
+	}
+
+	void tr_party_position::ideology(association_type t, std::string_view v, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+			// leave invalid
+		} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+			ideology_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+
 	void trigger_body::is_canal_enabled(association_type a, int32_t value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(1 <= value && value <= int32_t(context.outer_context.state.province_definitions.canals.size())) {

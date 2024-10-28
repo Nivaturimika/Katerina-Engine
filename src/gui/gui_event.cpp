@@ -503,7 +503,7 @@ namespace ui {
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("Legacy:"));
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, std::to_string(state.world.free_provincial_event_get_legacy_id(phe.e)));
+				//text::add_to_layout_box(state, contents, box, std::to_string(state.world.free_provincial_event_get_legacy_id(phe.e)));
 			} else if(std::holds_alternative<event::pending_human_f_n_event>(content)) {
 				auto phe = std::get<event::pending_human_f_n_event>(content);
 				text::add_to_layout_box(state, contents, box, std::string_view("Free Nation Event ID:"));

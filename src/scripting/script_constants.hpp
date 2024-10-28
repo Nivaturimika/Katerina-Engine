@@ -460,13 +460,15 @@ namespace effect {
 	EFFECT_BYTECODE_ELEMENT(0x01B9, masquerade_as_nation_from, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x01BA, set_province_flag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01BB, clr_province_flag, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x01BC, change_party_name, 3) \
+	EFFECT_BYTECODE_ELEMENT(0x01BD, change_party_position, 2) \
 
 	#define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	EFFECT_BYTECODE_LIST
 	#undef EFFECT_BYTECODE_ELEMENT
 
 	// invalid
-	constexpr inline uint16_t first_scope_code = 0x01BC;
+	constexpr inline uint16_t first_scope_code = 0x01BE;
 
 	// scopes
 	constexpr inline uint16_t generic_scope = first_scope_code + 0x0000; // default grouping of effects (or hidden_tooltip)
@@ -1380,12 +1382,14 @@ namespace trigger {
 	TRIGGER_BYTECODE_ELEMENT(0x02F1, length_greater_values, 4) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F2, length_greater_dates, 4) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 1) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F4, party_name, 3) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F5, party_position, 2)
 
 	#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	TRIGGER_BYTECODE_LIST
 	#undef TRIGGER_BYTECODE_ELEMENT
 
-	constexpr inline uint16_t first_scope_code = 0x02F4;
+	constexpr inline uint16_t first_scope_code = 0x02F6;
 
 	// technology name -- payload 1
 	// ideology name -- 4 variants payload 2

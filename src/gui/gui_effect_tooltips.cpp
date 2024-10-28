@@ -6733,9 +6733,6 @@ namespace ui {
 				text::add_to_substitution_map(m, text::variable_type::x, id_name);
 				text::localised_format_box(ws, layout, box, "change_pname_to", m);
 			} else {
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::add_to_substitution_map(m, text::variable_type::text, new_name);
 				text::localised_format_box(ws, layout, box, "change_rpname_to", m);
 			}
 			text::close_layout_box(layout, box);
