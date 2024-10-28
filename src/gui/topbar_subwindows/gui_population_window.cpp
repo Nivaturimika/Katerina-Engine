@@ -22,11 +22,11 @@ namespace ui {
 
 		// pops of the state religion do not convert
 		if(state_religion == pr)
-		base_amount = 0.0f;
+			base_amount = 0.0f;
 
 		// need at least 1 pop following the religion in the province
 		if(state.world.province_get_demographics(location, demographics::to_key(state, state_religion.id)) < 1.f)
-		base_amount = 0.0f;
+			base_amount = 0.0f;
 
 		text::add_line(state, contents, "pop_conver_1", text::variable_type::x, int64_t(std::max(0.0f, state.world.pop_get_size(ids) * base_amount)));
 		text::add_line_break_to_layout(state, contents);
@@ -41,13 +41,13 @@ namespace ui {
 			return; // early exit
 		}
 		text::add_line(state, contents, "pop_conver_4");
-	text::add_line(state, contents, "pop_conver_5", text::variable_type::x, text::fp_three_places{state.defines.conversion_scale});
-	text::add_line(state, contents, "pop_conver_6", text::variable_type::x, text::fp_two_places{ std::max(0.0f,state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f)});
+		text::add_line(state, contents, "pop_conver_5", text::variable_type::x, text::fp_three_places{ state.defines.conversion_scale });
+		text::add_line(state, contents, "pop_conver_6", text::variable_type::x, text::fp_two_places{ std::max(0.0f,state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_conversion_rate) + 1.0f) });
 		active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::global_conversion_rate, true);
-	text::add_line(state, contents, "pop_conver_7", text::variable_type::x, text::fp_two_places{ std::max(0.0f, state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f)});
+		text::add_line(state, contents, "pop_conver_7", text::variable_type::x, text::fp_two_places{ std::max(0.0f, state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::conversion_rate) + 1.0f) });
 		active_modifiers_description(state, contents, location, 15, sys::provincial_mod_offsets::conversion_rate, true);
 
-	text::add_line(state, contents, "pop_conver_8", text::variable_type::x, text::fp_four_places{conversion_chances});
+		text::add_line(state, contents, "pop_conver_8", text::variable_type::x, text::fp_four_places{ conversion_chances });
 		additive_value_modifier_description(state, contents, state.culture_definitions.conversion_chance, trigger::to_generic(ids),
 			trigger::to_generic(ids), 0);
 	}
@@ -70,8 +70,7 @@ namespace ui {
 		auto prov_mod = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
 		auto scale = state.defines.immigration_scale;
 
-	text::add_line(state, contents, "pop_mig_3", text::variable_type::x, text::fp_three_places{scale}, text::variable_type::y,
-			text::fp_percentage{prov_mod}, text::variable_type::val, text::fp_two_places{migration_chance});
+		text::add_line(state, contents, "pop_mig_3", text::variable_type::x, text::fp_three_places{ scale }, text::variable_type::y, text::fp_percentage{ prov_mod }, text::variable_type::val, text::fp_two_places{ migration_chance });
 
 		active_modifiers_description(state, contents, loc, 0, sys::provincial_mod_offsets::immigrant_push, true);
 
@@ -106,14 +105,14 @@ namespace ui {
 			return;
 		}
 
-		auto mig_chance = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f);
+		auto mig_chance = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
 		auto im_push = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
 		auto cmig = (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::colonial_migration) + 1.0f);
 		auto scale = state.defines.immigration_scale;
 
-	text::add_line(state, contents, "pop_cmig_6", text::variable_type::x, text::fp_three_places{scale}, text::variable_type::y,
-			text::fp_percentage{im_push}, text::variable_type::num, text::fp_percentage{cmig}, text::variable_type::val,
-			text::fp_two_places{mig_chance});
+		text::add_line(state, contents, "pop_cmig_6", text::variable_type::x, text::fp_three_places{ scale }, text::variable_type::y,
+			text::fp_percentage{ im_push }, text::variable_type::num, text::fp_percentage{ cmig }, text::variable_type::val,
+			text::fp_two_places{ mig_chance });
 
 		active_modifiers_description(state, contents, loc, 0, sys::provincial_mod_offsets::immigrant_push, true);
 		active_modifiers_description(state, contents, owner, 0, sys::national_mod_offsets::colonial_migration, true);
@@ -138,18 +137,17 @@ namespace ui {
 			text::add_line(state, contents, "pop_emg_3");
 			return;
 		}
-		if(state.world.culture_group_get_is_overseas(
-				 state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids))) == false) {
+		if(state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids))) == false) {
 			text::add_line(state, contents, "pop_emg_4");
 			return;
 		}
 
 		auto impush = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
 		auto emig = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.emigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
-		auto scale =  state.defines.immigration_scale;
+		auto scale = state.defines.immigration_scale;
 
-	text::add_line(state, contents, "pop_emg_5", text::variable_type::x, text::fp_three_places{scale}, text::variable_type::y,
-			text::fp_percentage{impush}, text::variable_type::val, text::fp_two_places{emig});
+		text::add_line(state, contents, "pop_emg_5", text::variable_type::x, text::fp_three_places{ scale }, text::variable_type::y,
+			text::fp_percentage{ impush }, text::variable_type::val, text::fp_two_places{ emig });
 
 		active_modifiers_description(state, contents, loc, 0, sys::provincial_mod_offsets::immigrant_push, true);
 
@@ -179,7 +177,7 @@ namespace ui {
 			if(promoted_type == ptype) {
 				text::add_line(state, contents, "pop_prom_3");
 			} else if(state.world.pop_type_get_strata(promoted_type) >= strata) {
-			text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{promotion_bonus});
+				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ promotion_bonus });
 				promotion_chance += promotion_bonus;
 			} else if(state.world.pop_type_get_strata(promoted_type) <= strata) {
 				demotion_chance += promotion_bonus;
@@ -197,12 +195,10 @@ namespace ui {
 			} else if(state.world.pop_type_get_strata(promoted_type) >= strata) {
 
 			} else if(state.world.pop_type_get_strata(promoted_type) <= strata) {
-			text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{promotion_bonus});
+				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ promotion_bonus });
 			}
 		}
-		additive_value_modifier_description(state, contents, state.culture_definitions.demotion_chance, trigger::to_generic(ids),
-			trigger::to_generic(ids), 0);
-
+		additive_value_modifier_description(state, contents, state.culture_definitions.demotion_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0);
 		text::add_line_break_to_layout(state, contents);
 
 		if(promotion_chance <= 0.0f && demotion_chance <= 0.0f) {
@@ -213,13 +209,13 @@ namespace ui {
 		bool promoting = promotion_chance >= demotion_chance;
 		if(promoting) {
 			text::add_line(state, contents, "pop_prom_5");
-		text::add_line(state, contents, "pop_prom_8", text::variable_type::x, text::fp_three_places{state.defines.promotion_scale},
-				text::variable_type::val, text::fp_two_places{promotion_chance}, text::variable_type::y,
-				text::fp_percentage{state.world.nation_get_administrative_efficiency(owner)});
+			text::add_line(state, contents, "pop_prom_8", text::variable_type::x, text::fp_three_places{ state.defines.promotion_scale },
+				text::variable_type::val, text::fp_two_places{ promotion_chance }, text::variable_type::y,
+				text::fp_percentage{ state.world.nation_get_administrative_efficiency(owner) });
 		} else {
 			text::add_line(state, contents, "pop_prom_6");
-		text::add_line(state, contents, "pop_prom_9", text::variable_type::x, text::fp_three_places{state.defines.promotion_scale},
-				text::variable_type::val, text::fp_two_places{demotion_chance});
+			text::add_line(state, contents, "pop_prom_9", text::variable_type::x, text::fp_three_places{ state.defines.promotion_scale },
+				text::variable_type::val, text::fp_two_places{ demotion_chance });
 		}
 	}
 
@@ -233,12 +229,12 @@ namespace ui {
 		auto types = state.world.pop_get_poptype(ids);
 
 		float lx_mod = state.world.pop_get_luxury_needs_satisfaction(ids) * state.defines.con_luxury_goods;
-		float cl_mod = cfrac * (state.world.pop_type_get_strata(types) == int32_t(culture::pop_strata::poor) ?
-														state.defines.con_poor_clergy : state.defines.con_midrich_clergy);
+		float cl_mod = cfrac * (state.world.pop_type_get_strata(types) == int32_t(culture::pop_strata::poor)
+			? state.defines.con_poor_clergy : state.defines.con_midrich_clergy);
 		float lit_mod = ((state.world.nation_get_plurality(owner) / 10.0f) *
-								 (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f) *
-								 state.defines.con_literacy * state.world.pop_get_literacy(ids) *
-								 (state.world.province_get_is_colonial(loc) ? state.defines.con_colonial_factor : 1.0f)) / 10.f;
+			(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f) *
+			state.defines.con_literacy * state.world.pop_get_literacy(ids) *
+			(state.world.province_get_is_colonial(loc) ? state.defines.con_colonial_factor : 1.0f)) / 10.f;
 
 		float pmod = state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::pop_consciousness_modifier);
 		float omod = state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_pop_consciousness_modifier);
@@ -256,42 +252,42 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_con_1");
 			if(total >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{total}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ total }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{total}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ total }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 		}
 		text::add_line_break_to_layout(state, contents);
 		text::add_line(state, contents, "pop_con_2");
-	text::add_line(state, contents, "pop_con_3", text::variable_type::x, text::fp_two_places{lx_mod});
-	text::add_line(state, contents, "pop_con_4", text::variable_type::val, text::fp_percentage{cfrac}, text::variable_type::x,
-			text::fp_two_places{cl_mod});
-	text::add_line(state, contents, "pop_con_5", text::variable_type::x, text::fp_two_places{lit_mod});
+		text::add_line(state, contents, "pop_con_3", text::variable_type::x, text::fp_two_places{ lx_mod });
+		text::add_line(state, contents, "pop_con_4", text::variable_type::val, text::fp_percentage{ cfrac }, text::variable_type::x,
+				text::fp_two_places{ cl_mod });
+		text::add_line(state, contents, "pop_con_5", text::variable_type::x, text::fp_two_places{ lit_mod });
 
 		text::add_line(state, contents, "pop_con_6", text::variable_type::x,
-			text::fp_two_places{state.world.nation_get_plurality(owner)}, 15);
+			text::fp_two_places{ state.world.nation_get_plurality(owner) }, 15);
 		text::add_line(state, contents, "pop_con_7", text::variable_type::x,
-			text::fp_percentage{state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f},
+			text::fp_percentage{ state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f },
 			15);
 		active_modifiers_description(state, contents, owner, 30, sys::national_mod_offsets::literacy_con_impact, false);
-	text::add_line(state, contents, "pop_con_8", text::variable_type::x, text::fp_two_places{state.defines.con_literacy}, 15);
-	text::add_line(state, contents, "pop_con_9", text::variable_type::x, text::fp_percentage{state.world.pop_get_literacy(ids)},
-			15);
-		if(state.world.province_get_is_colonial(loc)) {
-		text::add_line(state, contents, "pop_con_10", text::variable_type::x, text::fp_two_places{state.defines.con_colonial_factor},
+		text::add_line(state, contents, "pop_con_8", text::variable_type::x, text::fp_two_places{ state.defines.con_literacy }, 15);
+		text::add_line(state, contents, "pop_con_9", text::variable_type::x, text::fp_percentage{ state.world.pop_get_literacy(ids) },
 				15);
+		if(state.world.province_get_is_colonial(loc)) {
+			text::add_line(state, contents, "pop_con_10", text::variable_type::x, text::fp_two_places{ state.defines.con_colonial_factor },
+					15);
 		}
 		text::add_line(state, contents, "pop_con_11", 15);
 		{
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_con_12");
 			if(pmod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{pmod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ pmod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{pmod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ pmod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, loc, 15, sys::provincial_mod_offsets::pop_consciousness_modifier, false);
@@ -300,10 +296,10 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_con_13");
 			if(omod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{omod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ omod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{omod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ omod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::global_pop_consciousness_modifier, false);
@@ -312,10 +308,10 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_con_14");
 			if(cmod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{cmod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ cmod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{cmod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ cmod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::core_pop_consciousness_modifier, false);
@@ -324,16 +320,16 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_con_15");
 			if(sep_mod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{sep_mod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ sep_mod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{sep_mod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ sep_mod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::non_accepted_pop_consciousness_modifier,
 				false);
 		}
-	text::add_line(state, contents, "alice_con_decay_description", text::variable_type::x, text::fp_three_places{ state.world.pop_get_consciousness(ids) * 0.01f });
+		text::add_line(state, contents, "alice_con_decay_description", text::variable_type::x, text::fp_three_places{ state.world.pop_get_consciousness(ids) * 0.01f });
 	}
 
 	void describe_mil(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
@@ -347,12 +343,12 @@ namespace ui {
 		float lx_mod = std::max(state.world.pop_get_luxury_needs_satisfaction(ids) - 0.5f, 0.0f) * state.defines.mil_has_luxury_need;
 		float con_sup = (state.world.pop_get_demographics(ids, conservatism_key) * state.defines.mil_ideology);
 		float ruling_sup = ruling_ideology ? state.world.pop_get_demographics(ids, pop_demographics::to_key(state, ruling_ideology)) *
-																					 state.defines.mil_ruling_party
-																		 : 0.0f;
+			state.defines.mil_ruling_party
+			: 0.0f;
 		float ref_mod = state.world.province_get_is_colonial(loc)
-											? 0.0f
-											: (state.world.pop_get_social_reform_desire(ids) + state.world.pop_get_political_reform_desire(ids)) *
-														(state.defines.mil_require_reform * 0.25f);
+			? 0.0f
+			: (state.world.pop_get_social_reform_desire(ids) + state.world.pop_get_political_reform_desire(ids)) *
+			(state.defines.mil_require_reform * 0.25f);
 
 		float sub_t = (lx_mod + ruling_sup) + (con_sup + ref_mod);
 
@@ -380,7 +376,7 @@ namespace ui {
 			std::max(0.0f, (state.world.pop_get_everyday_needs_satisfaction(ids) - 0.5f)) * state.defines.mil_has_everyday_need;
 		//Ranges from +0.00 - +0.50 militancy monthly, 0 - 100 war exhaustion
 		float war_exhaustion =
-		state.world.nation_get_war_exhaustion(owner) * state.defines.mil_war_exhaustion;
+			state.world.nation_get_war_exhaustion(owner) * state.defines.mil_war_exhaustion;
 		auto old_mil = state.world.pop_get_militancy(ids) * 0.01f;
 		float total = (sub_t + local_mod) + ((sep_mod - ln_mod - old_mil) + (en_mod_b - en_mod_a) + war_exhaustion);
 
@@ -388,39 +384,39 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_mil_1");
 			if(total >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::red);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{total}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ total }, text::text_color::red);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{total}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ total }, text::text_color::green);
 			}
 			text::close_layout_box(contents, box);
 		}
 		text::add_line_break_to_layout(state, contents);
 		text::add_line(state, contents, "pop_mil_2");
-	text::add_line(state, contents, "pop_mil_3", text::variable_type::x, text::fp_two_places{ln_mod < 0.0f ? -ln_mod : 0.0f});
+		text::add_line(state, contents, "pop_mil_3", text::variable_type::x, text::fp_two_places{ ln_mod < 0.0f ? -ln_mod : 0.0f });
 		{
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_mil_4");
 			if(en_mod_b - en_mod_a >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::red);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{en_mod_b - en_mod_a}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ en_mod_b - en_mod_a }, text::text_color::red);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{en_mod_b - en_mod_a}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ en_mod_b - en_mod_a }, text::text_color::green);
 			}
 			text::close_layout_box(contents, box);
 		}
-	text::add_line(state, contents, "pop_mil_5", text::variable_type::x, text::fp_two_places{lx_mod});
-	text::add_line(state, contents, "pop_mil_6", text::variable_type::x, text::fp_two_places{con_sup});
-	text::add_line(state, contents, "pop_mil_7", text::variable_type::x, text::fp_two_places{ruling_sup});
-	text::add_line(state, contents, "pop_mil_8", text::variable_type::x, text::fp_two_places{ref_mod});
+		text::add_line(state, contents, "pop_mil_5", text::variable_type::x, text::fp_two_places{ lx_mod });
+		text::add_line(state, contents, "pop_mil_6", text::variable_type::x, text::fp_two_places{ con_sup });
+		text::add_line(state, contents, "pop_mil_7", text::variable_type::x, text::fp_two_places{ ruling_sup });
+		text::add_line(state, contents, "pop_mil_8", text::variable_type::x, text::fp_two_places{ ref_mod });
 		{
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_mil_9");
 			if(pmod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{pmod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ pmod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{pmod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ pmod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, loc, 15, sys::provincial_mod_offsets::pop_militancy_modifier, false);
@@ -429,10 +425,10 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_mil_10");
 			if(omod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{omod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ omod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{omod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ omod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::global_pop_militancy_modifier, false);
@@ -441,37 +437,37 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_mil_11");
 			if(cmod >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{cmod}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ cmod }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_two_places{cmod}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_two_places{ cmod }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::core_pop_militancy_modifier, false);
 		}
 		if(!state.world.pop_get_is_primary_or_accepted_culture(ids)) {
 			text::add_line(state, contents, "pop_mil_12",
-			text::variable_type::val, text::fp_two_places{sep_mod},
-			text::variable_type::x, text::fp_two_places{state.defines.mil_non_accepted},
-			text::variable_type::y, text::fp_percentage{state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::non_accepted_pop_militancy_modifier) + 1.0f});
+			text::variable_type::val, text::fp_two_places{ sep_mod },
+			text::variable_type::x, text::fp_two_places{ state.defines.mil_non_accepted },
+			text::variable_type::y, text::fp_percentage{ state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::non_accepted_pop_militancy_modifier) + 1.0f });
 			active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::non_accepted_pop_militancy_modifier, false);
 		}
 		if(war_exhaustion > 0) {
-		text::add_line(state, contents, "pop_mil_13", text::variable_type::val, text::fp_three_places{war_exhaustion});
+			text::add_line(state, contents, "pop_mil_13", text::variable_type::val, text::fp_three_places{ war_exhaustion });
 		}
 
 		auto box = text::open_layout_box(contents);
 		text::localised_format_box(state, contents, box, "alice_overseas_mil_description");
 		text::add_space_to_layout_box(state, contents, box);
 		if(overseas_mil <= 0) {
-		text::add_to_layout_box(state, contents, box, text::fp_two_places{ overseas_mil }, text::text_color::green);
+			text::add_to_layout_box(state, contents, box, text::fp_two_places{ overseas_mil }, text::text_color::green);
 		} else {
-		text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::red);
-		text::add_to_layout_box(state, contents, box, text::fp_two_places{ overseas_mil }, text::text_color::red);
+			text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::red);
+			text::add_to_layout_box(state, contents, box, text::fp_two_places{ overseas_mil }, text::text_color::red);
 		}
 		text::close_layout_box(contents, box);
 
-	text::add_line(state, contents, "alice_mil_decay_description", text::variable_type::x, text::fp_three_places{ state.world.pop_get_militancy(ids) * 0.01f });
+		text::add_line(state, contents, "alice_mil_decay_description", text::variable_type::x, text::fp_three_places{ state.world.pop_get_militancy(ids) * 0.01f });
 	}
 
 	void describe_lit(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
@@ -487,7 +483,7 @@ namespace ui {
 		auto espending =
 			(float(state.world.nation_get_education_spending(owner)) / 100.0f) * state.world.nation_get_spending_level(owner);
 		auto cmod = std::max(0.0f, std::min(1.0f, (cfrac - state.defines.base_clergy_for_literacy) /
-																 (state.defines.max_clergy_for_literacy - state.defines.base_clergy_for_literacy)));
+			(state.defines.max_clergy_for_literacy - state.defines.base_clergy_for_literacy)));
 
 		float total = (0.01f * state.defines.literacy_change_speed) * ((espending * cmod) * (tmod * nmod));
 
@@ -495,23 +491,22 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_lit_1");
 			if(total >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
-			text::add_to_layout_box(state, contents, box, text::fp_three_places{total}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, text::fp_three_places{ total }, text::text_color::green);
 			} else {
-			text::add_to_layout_box(state, contents, box, text::fp_three_places{total}, text::text_color::red);
+				text::add_to_layout_box(state, contents, box, text::fp_three_places{ total }, text::text_color::red);
 			}
 			text::close_layout_box(contents, box);
 		}
 		text::add_line_break_to_layout(state, contents);
 		text::add_line(state, contents, "pop_lit_2");
-	text::add_line(state, contents, "pop_lit_3", text::variable_type::val, text::fp_percentage{cfrac}, text::variable_type::x,
-			text::fp_two_places{cmod});
-	text::add_line(state, contents, "pop_lit_4", text::variable_type::x, text::fp_two_places{espending});
-	text::add_line(state, contents, "pop_lit_5", text::variable_type::x, text::fp_percentage{tmod});
+		text::add_line(state, contents, "pop_lit_3", text::variable_type::val, text::fp_percentage{ cfrac }, text::variable_type::x, text::fp_two_places{ cmod });
+		text::add_line(state, contents, "pop_lit_4", text::variable_type::x, text::fp_two_places{ espending });
+		text::add_line(state, contents, "pop_lit_5", text::variable_type::x, text::fp_percentage{ tmod });
 		active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::education_efficiency, false);
-	text::add_line(state, contents, "pop_lit_6", text::variable_type::x, text::fp_percentage{nmod});
+		text::add_line(state, contents, "pop_lit_6", text::variable_type::x, text::fp_percentage{ nmod });
 		active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::education_efficiency_modifier, false);
-	text::add_line(state, contents, "pop_lit_7", text::variable_type::x, text::fp_two_places{state.defines.literacy_change_speed});
+		text::add_line(state, contents, "pop_lit_7", text::variable_type::x, text::fp_two_places{ state.defines.literacy_change_speed });
 		text::add_line(state, contents, "pop_lit_8");
 	}
 
@@ -530,18 +525,18 @@ namespace ui {
 
 		auto ln_factor = state.world.pop_get_life_needs_satisfaction(ids) - state.defines.life_need_starvation_limit;
 		auto mod_sum = state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::population_growth) +
-								 state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth);
+			state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth);
 
 		auto total_factor = ln_factor * province_factor * 4.0f + mod_sum * 0.1f;
 
 		if(type == state.culture_definitions.slaves)
-		total_factor = 0.0f;
+			total_factor = 0.0f;
 
 		{
 			auto box = text::open_layout_box(contents);
 			text::localised_format_box(state, contents, box, "pop_growth_1");
 			if(total_factor >= 0) {
-			text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
+				text::add_to_layout_box(state, contents, box, std::string_view{ "+" }, text::text_color::green);
 				text::add_to_layout_box(state, contents, box, int64_t(total_factor * state.world.pop_get_size(ids)), text::text_color::green);
 			} else {
 				text::add_to_layout_box(state, contents, box, int64_t(total_factor * state.world.pop_get_size(ids)),
@@ -556,24 +551,24 @@ namespace ui {
 			return;
 		}
 		text::add_line(state, contents, "pop_growth_3");
-	text::add_line(state, contents, "pop_growth_4", text::variable_type::x, text::fp_three_places{ln_factor * province_factor * 4.0f});
-	text::add_line(state, contents, "pop_growth_5", text::variable_type::x, text::fp_four_places{province_factor}, 15);
-	text::add_line(state, contents, "pop_growth_6", text::variable_type::x, text::fp_one_place{mod_life_rating},
-			text::variable_type::y, text::fp_one_place{state.defines.min_life_rating_for_growth}, text::variable_type::val,
-			text::fp_four_places{state.defines.life_rating_growth_bonus},
-			30);
-	text::add_line(state, contents, "pop_growth_7", text::variable_type::x, text::fp_three_places{state.defines.base_popgrowth},
-			30);
-	text::add_line(state, contents, "pop_growth_8", text::variable_type::x, text::fp_two_places{ln_factor},
-			text::variable_type::y, text::fp_two_places{state.world.pop_get_life_needs_satisfaction(ids)}, text::variable_type::val,
-			text::fp_two_places{state.defines.life_need_starvation_limit},
+		text::add_line(state, contents, "pop_growth_4", text::variable_type::x, text::fp_three_places{ ln_factor * province_factor * 4.0f });
+		text::add_line(state, contents, "pop_growth_5", text::variable_type::x, text::fp_four_places{ province_factor }, 15);
+		text::add_line(state, contents, "pop_growth_6", text::variable_type::x, text::fp_one_place{ mod_life_rating },
+				text::variable_type::y, text::fp_one_place{ state.defines.min_life_rating_for_growth }, text::variable_type::val,
+				text::fp_four_places{ state.defines.life_rating_growth_bonus },
+				30);
+		text::add_line(state, contents, "pop_growth_7", text::variable_type::x, text::fp_three_places{ state.defines.base_popgrowth },
+				30);
+		text::add_line(state, contents, "pop_growth_8", text::variable_type::x, text::fp_two_places{ ln_factor },
+			text::variable_type::y, text::fp_two_places{ state.world.pop_get_life_needs_satisfaction(ids) }, text::variable_type::val,
+			text::fp_two_places{ state.defines.life_need_starvation_limit },
 			15);
 		text::add_line(state, contents, "pop_growth_9", 15);
 		text::add_line(state, contents, "pop_growth_10", text::variable_type::x,
-			text::fp_three_places{state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::population_growth)});
+			text::fp_three_places{ state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::population_growth) });
 		active_modifiers_description(state, contents, loc, 15, sys::provincial_mod_offsets::population_growth, false);
 		text::add_line(state, contents, "pop_growth_11", text::variable_type::x,
-			text::fp_three_places{state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth)});
+			text::fp_three_places{ state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::pop_growth) });
 		active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::pop_growth, false);
 	}
 
@@ -612,15 +607,15 @@ namespace ui {
 
 		// slaves do not assimilate
 		if(state.world.pop_get_poptype(ids) == state.culture_definitions.slaves)
-		base_amount = 0.0f;
+			base_amount = 0.0f;
 
 		// pops of an accepted culture do not assimilate
 		if(state.world.pop_get_is_primary_or_accepted_culture(ids))
-		base_amount = 0.0f;
+			base_amount = 0.0f;
 
 		// pops in an overseas and colonial province do not assimilate
 		if(state.world.province_get_is_colonial(location) && province::is_overseas(state, location))
-		base_amount = 0.0f;
+			base_amount = 0.0f;
 
 		text::add_line(state, contents, "pop_assim_1", text::variable_type::x, int64_t(std::max(0.0f, state.world.pop_get_size(ids) * base_amount)));
 		text::add_line_break_to_layout(state, contents);
@@ -642,10 +637,10 @@ namespace ui {
 			return;
 		}
 		text::add_line(state, contents, "pop_assim_6");
-	text::add_line(state, contents, "pop_assim_7", text::variable_type::x, text::fp_three_places{state.defines.assimilation_scale});
-	text::add_line(state, contents, "pop_assim_8", text::variable_type::x, text::fp_two_places{ std::max(0.0f,state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_assimilation_rate) + 1.0f)});
+		text::add_line(state, contents, "pop_assim_7", text::variable_type::x, text::fp_three_places{ state.defines.assimilation_scale });
+		text::add_line(state, contents, "pop_assim_8", text::variable_type::x, text::fp_two_places{ std::max(0.0f,state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_assimilation_rate) + 1.0f) });
 		active_modifiers_description(state, contents, owner, 15, sys::national_mod_offsets::global_assimilation_rate, true);
-	text::add_line(state, contents, "pop_assim_9", text::variable_type::x, text::fp_two_places{ std::max(0.0f, state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::assimilation_rate) + 1.0f)});
+		text::add_line(state, contents, "pop_assim_9", text::variable_type::x, text::fp_two_places{ std::max(0.0f, state.world.province_get_modifier_values(location, sys::provincial_mod_offsets::assimilation_rate) + 1.0f) });
 		active_modifiers_description(state, contents, location, 15, sys::provincial_mod_offsets::assimilation_rate, true);
 
 		if(!state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(pc))) {
@@ -658,26 +653,26 @@ namespace ui {
 			}
 		}
 		if(core_factor < 1.0f) {
-		text::add_line(state, contents, "pop_assim_11", text::variable_type::x, text::fp_four_places{core_factor});
+			text::add_line(state, contents, "pop_assim_11", text::variable_type::x, text::fp_four_places{ core_factor });
 		}
-	text::add_line(state, contents, "pop_assim_12", text::variable_type::x, text::fp_four_places{assimilation_chances});
+		text::add_line(state, contents, "pop_assim_12", text::variable_type::x, text::fp_four_places{ assimilation_chances });
 		additive_value_modifier_description(state, contents, state.culture_definitions.assimilation_chance, trigger::to_generic(ids),
 			trigger::to_generic(ids), 0);
 	}
 
 	std::vector<dcon::pop_id> const& get_pop_window_list(sys::state& state) {
-	static const std::vector<dcon::pop_id> empty{};
+		static const std::vector<dcon::pop_id> empty{};
 		auto win = static_cast<population_window*>(state.ui_state.population_subwindow);
 		if(win && win->country_pop_listbox)
-		return win->country_pop_listbox->row_contents;
+			return win->country_pop_listbox->row_contents;
 		return empty;
 	}
 
 	dcon::pop_id get_pop_details_pop(sys::state& state) {
 		auto win = static_cast<population_window*>(state.ui_state.population_subwindow);
 		if(win)
-		return retrieve<dcon::pop_id>(state, win);
-	return dcon::pop_id{};
+			return retrieve<dcon::pop_id>(state, win);
+		return dcon::pop_id{};
 	}
 
 	void pop_national_focus_button::button_action(sys::state& state) noexcept {

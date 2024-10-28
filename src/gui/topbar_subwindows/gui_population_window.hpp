@@ -1249,7 +1249,10 @@ namespace ui {
 					}
 				}
 				pdqsort(sorted_distrib.begin(), sorted_distrib.end(), [&](std::pair<T, float> a, std::pair<T, float> b) {
-					return a.second > b.second;
+					if(a.second != b.second) {
+						return a.second > b.second;
+					}
+					return a.first.index() > b.first.index();
 				});
 				distrib_listbox->row_contents.clear();
 				// Add (and scale elements) into the distribution listbox
@@ -1286,9 +1289,7 @@ namespace ui {
 			auto is_social_issue = state.world.issue_get_issue_type(parent_issue) == uint8_t(culture::issue_type::social);
 			auto is_political_issue = state.world.issue_get_issue_type(parent_issue) == uint8_t(culture::issue_type::political);
 			auto has_modifier = is_social_issue || is_political_issue;
-
 			auto modifier_key = is_social_issue ? sys::national_mod_offsets::social_reform_desire : sys::national_mod_offsets::political_reform_desire;
-
 
 			auto ids = retrieve<dcon::pop_id>(state, parent);
 			auto owner = nations::owner_of_pop(state, ids);
@@ -1410,13 +1411,18 @@ namespace ui {
 				}
 
 				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
-					return state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a)) > state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
+					auto av = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a));
+					auto bv = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
+					if(av != bv) {
+						return av > bv;
+					}
+					return a.index() > b.index();
 				});
 
 				distrib_listbox->row_contents.clear();
-
-				for(auto const& e : distrib)
-				distrib_listbox->row_contents.emplace_back(e, state.world.pop_get_demographics(pop, pop_demographics::to_key(state, e)));
+				for(auto const& e : distrib) {
+					distrib_listbox->row_contents.emplace_back(e, state.world.pop_get_demographics(pop, pop_demographics::to_key(state, e)));
+				}
 				distrib_listbox->update(state);
 			}
 		}
@@ -1562,7 +1568,12 @@ namespace ui {
 				}
 
 				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
-					return state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a)) > state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
+					auto av = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a));
+					auto bv = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
+					if(av != bv) {
+						return av > bv;
+					}
+					return a.index() > b.index();
 				});
 
 				distrib_listbox->row_contents.clear();
@@ -2375,20 +2386,22 @@ namespace ui {
 				// Apply pop filters properly...
 				auto pop_id = state.world.pop_location_get_pop(id);
 				auto pt_id = state.world.pop_get_poptype(pop_id);
-				if(pop_filters[dcon::pop_type_id::value_base_t(pt_id.id.index())])
-				country_pop_listbox->row_contents.push_back(pop_id);
+				if(pop_filters[dcon::pop_type_id::value_base_t(pt_id.id.index())]) {
+					country_pop_listbox->row_contents.push_back(pop_id);
+				}
 			});
 		}
 
 		void update_pop_list(sys::state& state) {
 			country_pop_listbox->row_contents.clear();
-		auto filter_nation = std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : dcon::nation_id{};
-		auto filter_state = std::holds_alternative<dcon::state_instance_id>(filter) ? std::get<dcon::state_instance_id>(filter) : dcon::state_instance_id{};
-		auto filter_prov = std::holds_alternative<dcon::province_id>(filter) ? std::get<dcon::province_id>(filter) : dcon::province_id{};
-		std::vector<dcon::province_id> province_list{};
+			auto filter_nation = std::holds_alternative<dcon::nation_id>(filter) ? std::get<dcon::nation_id>(filter) : dcon::nation_id{};
+			auto filter_state = std::holds_alternative<dcon::state_instance_id>(filter) ? std::get<dcon::state_instance_id>(filter) : dcon::state_instance_id{};
+			auto filter_prov = std::holds_alternative<dcon::province_id>(filter) ? std::get<dcon::province_id>(filter) : dcon::province_id{};
+			std::vector<dcon::province_id> province_list{};
 			if(filter_nation) { //nation
-				for(auto po : state.world.nation_get_province_ownership(filter_nation))
-				add_pops_from_province_to_list(state, po.get_province());
+				for(auto po : state.world.nation_get_province_ownership(filter_nation)) {
+					add_pops_from_province_to_list(state, po.get_province());
+				}
 			} else if(filter_state) { //state
 				province::for_each_province_in_state_instance(state, filter_state, [&](dcon::province_id id) {
 					add_pops_from_province_to_list(state, id);
@@ -2416,7 +2429,7 @@ namespace ui {
 					if(a_loc != b_loc)
 						return a_loc < b_loc;
 					return a_fat_id.id.index() < b_fat_id.id.index();
-					};
+				};
 				break;
 			case pop_list_sort::size:
 				fn = [&](dcon::pop_id a, dcon::pop_id b) {
@@ -2425,7 +2438,7 @@ namespace ui {
 					if(a_fat_id.get_size() != b_fat_id.get_size())
 						return a_fat_id.get_size() < b_fat_id.get_size();
 					return a_fat_id.id.index() < b_fat_id.id.index();
-					};
+				};
 				break;
 			case pop_list_sort::con:
 				fn = [&](dcon::pop_id a, dcon::pop_id b) {
@@ -2556,11 +2569,11 @@ namespace ui {
 					auto b_fat_id = dcon::fatten(state.world, b);
 					auto a_reb = a_fat_id.get_rebel_faction_from_pop_rebellion_membership();
 					auto b_reb = b_fat_id.get_rebel_faction_from_pop_rebellion_membership();
-					auto a_mov = a_fat_id.get_movement_from_pop_movement_membership();
-					auto b_mov = b_fat_id.get_movement_from_pop_movement_membership();
 					if(a_reb != b_reb) {
 						return a_reb.id.index() < b_reb.id.index();
 					}
+					auto a_mov = a_fat_id.get_movement_from_pop_movement_membership();
+					auto b_mov = b_fat_id.get_movement_from_pop_movement_membership();
 					if(a_mov != b_mov) {
 						return a_mov.id.index() < b_mov.id.index();
 					}
@@ -2580,6 +2593,10 @@ namespace ui {
 				};
 				break;
 			}
+			auto it = std::unique(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			country_pop_listbox->row_contents.erase(it, country_pop_listbox->row_contents.end());
 			pdqsort(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end());
