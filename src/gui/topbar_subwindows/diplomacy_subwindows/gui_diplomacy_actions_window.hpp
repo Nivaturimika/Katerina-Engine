@@ -849,11 +849,11 @@ namespace ui {
 				text::add_line_with_condition(state, contents, "war_explain_2", military::can_use_cb_against(state, state.local_player_nation, target));
 				text::add_line_with_condition(state, contents, "war_explain_4", !military::are_in_common_war(state, state.local_player_nation, target));
 
-				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].limit; k) {
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::declare_war)].limit; k) {
 					text::add_line_break_to_layout(state, contents);
 					ui::trigger_description(state, contents, k, -1, trigger::to_generic(source), trigger::to_generic(target));
 				}
-				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::state_transfer)].effect; k) {
+				if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::declare_war)].effect; k) {
 					auto const r_lo = uint32_t(source.value);
 					auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
 					text::add_line_break_to_layout(state, contents);
