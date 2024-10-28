@@ -292,6 +292,7 @@ namespace sys {
 		ask_military_access,
 		release_subject,
 		add_war_goal,
+		declare_war,
 		count,
 	};
 };

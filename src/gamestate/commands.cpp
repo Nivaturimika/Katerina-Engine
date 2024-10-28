@@ -2716,6 +2716,14 @@ namespace command {
 		if(!military::cb_instance_conditions_satisfied(state, source, target, primary_cb, cb_state, cb_tag, cb_secondary_nation))
 		return false;
 
+		//no armies on nation
+		for(auto const pc : state.world.nation_get_province_ownership(target)) {
+			for(auto const al : pc.get_province().get_army_location()) {
+				if(al.get_army().get_controller_from_army_control() == source) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 

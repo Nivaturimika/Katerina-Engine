@@ -311,6 +311,19 @@ action = {
 	}
 }
 action = {
+	type = "declare_war"
+	#THIS/main = nation source
+	#FROM = target
+	limit = {
+		tag != THIS
+		#diplomatic_points = defines:DECLAREWAR_DIPLOMATIC_COST
+		any_state = { country_units_in_state = THIS }
+		casus_belli = FROM
+	}
+	effect = {
+	}
+}
+action = {
 	type = "give_military_access"
 	#THIS/main = nation source
 	#FROM = nation target

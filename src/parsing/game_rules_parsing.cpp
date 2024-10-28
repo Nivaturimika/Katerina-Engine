@@ -37,6 +37,7 @@ namespace parsers {
 		CT_STRING_ENUM(ask_military_access)
 		CT_STRING_ENUM(release_subject)
 		CT_STRING_ENUM(add_war_goal)
+		CT_STRING_ENUM(declare_war)
 #undef CT_STRING_ENUM
 	}
 
