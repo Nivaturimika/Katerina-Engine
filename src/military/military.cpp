@@ -2863,9 +2863,10 @@ namespace military {
 	bool retreat(sys::state& state, dcon::army_id n) {
 		auto province_start = state.world.army_get_location_from_army_location(n);
 		auto nation_controller = state.world.army_get_controller_from_army_control(n);
-
-		if(!nation_controller)
-		return false; // rebels don't retreat
+		if(!nation_controller) {
+			// TODO: allow rebels to retreat
+			return false; // rebels don't retreat
+		}
 
 		auto retreat_path = province::make_land_retreat_path(state, nation_controller, province_start);
 		if(retreat_path.size() > 0) {
