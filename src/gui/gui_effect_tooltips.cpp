@@ -1799,7 +1799,7 @@ namespace ui {
 				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::text, ws.world.commodity_get_name(trigger::payload(tval[1]).com_id));
 				if(primary_slot != -1) {
-					text::add_to_substitution_map(m, text::variable_type::name, trigger::to_prov(primary_slot));
+					text::add_to_substitution_map(m, text::variable_type::x, trigger::to_prov(primary_slot));
 					text::localised_format_box(ws, layout, box, "province_change_rgo_production_to", m);
 				} else {
 					text::localised_format_box(ws, layout, box, "change_rgo_production_to", m);
