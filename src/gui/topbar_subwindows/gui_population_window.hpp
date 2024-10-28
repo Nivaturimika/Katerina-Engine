@@ -2593,6 +2593,7 @@ namespace ui {
 				};
 				break;
 			}
+			//needs to ensure stable sorting, and pop ids can change at any time
 			auto it = std::unique(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end(), [&](auto a, auto b) {
 				return a.index() == b.index();
 			});

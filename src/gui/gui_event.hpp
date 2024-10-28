@@ -12,7 +12,7 @@ namespace ui {
 	using event_data_wrapper =  std::variant< event::pending_human_n_event, event::pending_human_f_n_event, event::pending_human_p_event, event::pending_human_f_p_event>;
 
 	class event_option_button : public button_element_base {
-		public:
+	public:
 		sound::audio_instance& get_click_sound(sys::state& state) noexcept override {
 			return sound::get_event_sound(state);
 		}
@@ -24,7 +24,7 @@ namespace ui {
 		void button_action(sys::state& state) noexcept override;
 	};
 	class event_auto_button : public button_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::tooltip;
 		}
@@ -34,7 +34,7 @@ namespace ui {
 		void button_action(sys::state& state) noexcept override;
 	};
 	class event_option_button_row : public listbox_row_element_base<int32_t> {
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "opt_button") {
 				return make_element_by_type<event_option_button>(state, id);
@@ -46,7 +46,7 @@ namespace ui {
 		}
 	};
 	class event_image : public image_element_base {
-		public:
+	public:
 		bool get_horizontal_flip(sys::state& state) noexcept override {
 			return false; //never flip
 		}
@@ -54,12 +54,12 @@ namespace ui {
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override;
 	};
 	class event_desc_text : public scrollable_text {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override;
 		void on_update(sys::state& state) noexcept override;
 	};
 	class event_name_text : public multiline_text_element_base {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			multiline_text_element_base::on_create(state);
 			black_text = true;
@@ -77,14 +77,14 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override;
 	};
 	class event_requirements_icon : public image_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 	class event_odds_icon : public image_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
@@ -92,27 +92,29 @@ namespace ui {
 	};
 
 	class event_subtitle_text : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override;
 	};
 	class event_state_name_text : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override;
 	};
 	class event_population_amount_text : public simple_text_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override;
 	};
 	class election_issue_support_item : public listbox_row_element_base<dcon::issue_option_id> {
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override;
 	};
 	class elections_issue_option_listbox : public listbox_element_base<election_issue_support_item, dcon::issue_option_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "ew_issue_option_window";
 		}
-		public:
+	public:
+		politics_issue_sort_order sort = politics_issue_sort_order::name;
+		bool is_asc = false;
 		void on_update(sys::state& state) noexcept override;
 	};
 

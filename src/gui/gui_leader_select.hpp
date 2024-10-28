@@ -431,12 +431,12 @@ namespace ui {
 			return "alice_leader_entry";
 		}
 
-		public:
+	public:
 		leader_select_sort sort_type = leader_select_sort::attack;
+		bool is_asc = false;
 
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-
 			if(auto a = retrieve<dcon::army_id>(state, parent);  a) {
 				for(auto l : state.world.nation_get_leader_loyalty(state.local_player_nation)) {
 					if(l.get_leader().get_is_admiral() == false) {
@@ -453,9 +453,10 @@ namespace ui {
 				}
 			}
 
+			std::function<bool(dcon::leader_id a, dcon::leader_id b)> fn;
 			switch(sort_type) {
 			case leader_select_sort::attack:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_attack(state.world.leader_get_background(a)) + state.world.leader_trait_get_attack(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_attack(state.world.leader_get_background(b)) + state.world.leader_trait_get_attack(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -464,7 +465,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::defense:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_defense(state.world.leader_get_background(a)) + state.world.leader_trait_get_defense(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_defense(state.world.leader_get_background(b)) + state.world.leader_trait_get_defense(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -473,7 +474,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::recon:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_reconnaissance(state.world.leader_get_background(a)) + state.world.leader_trait_get_reconnaissance(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_reconnaissance(state.world.leader_get_background(b)) + state.world.leader_trait_get_reconnaissance(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -482,7 +483,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::morale:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_morale(state.world.leader_get_background(a)) + state.world.leader_trait_get_morale(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_morale(state.world.leader_get_background(b)) + state.world.leader_trait_get_morale(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -491,7 +492,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::reliability:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_reliability(state.world.leader_get_background(a)) + state.world.leader_trait_get_reliability(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_reliability(state.world.leader_get_background(b)) + state.world.leader_trait_get_reliability(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -500,7 +501,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::org:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_organisation(state.world.leader_get_background(a)) + state.world.leader_trait_get_organisation(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_organisation(state.world.leader_get_background(b)) + state.world.leader_trait_get_organisation(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -509,7 +510,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::speed:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_speed(state.world.leader_get_background(a)) + state.world.leader_trait_get_speed(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_speed(state.world.leader_get_background(b)) + state.world.leader_trait_get_speed(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -518,7 +519,7 @@ namespace ui {
 				});
 				break;
 			case leader_select_sort::experience:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				fn = ([&](dcon::leader_id a, dcon::leader_id b) {
 					auto av = state.world.leader_trait_get_experience(state.world.leader_get_background(a)) + state.world.leader_trait_get_experience(state.world.leader_get_personality(a));
 					auto bv = state.world.leader_trait_get_experience(state.world.leader_get_background(b)) + state.world.leader_trait_get_experience(state.world.leader_get_personality(b));
 					if(av != bv)
@@ -527,7 +528,14 @@ namespace ui {
 				});
 				break;
 			}
-
+			auto it = std::unique(row_contents.begin(), row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			row_contents.erase(it, row_contents.end());
+			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			if(is_asc) {
+				std::reverse(row_contents.begin(), row_contents.end());
+			}
 			update(state);
 		}
 	};
@@ -603,10 +611,11 @@ namespace ui {
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
 			if(payload.holds_type<dcon::leader_id>()) {
-				if(a)
-				payload.emplace<dcon::leader_id>(state.world.army_get_general_from_army_leadership(a));
-				else if(v)
-				payload.emplace<dcon::leader_id>(state.world.navy_get_admiral_from_navy_leadership(v));
+				if(a) {
+					payload.emplace<dcon::leader_id>(state.world.army_get_general_from_army_leadership(a));
+				} else if(v) {
+					payload.emplace<dcon::leader_id>(state.world.navy_get_admiral_from_navy_leadership(v));
+				}
 				return message_result::consumed;
 			} else if(payload.holds_type<dcon::army_id>()) {
 				payload.emplace<dcon::army_id>(a);
@@ -615,7 +624,13 @@ namespace ui {
 				payload.emplace<dcon::navy_id>(v);
 				return message_result::consumed;
 			} else if(payload.holds_type<leader_select_sort>()) {
-				lb->sort_type = any_cast<leader_select_sort>(payload);
+				auto const s = any_cast<leader_select_sort>(payload);
+				if(lb->sort_type == s) {
+					lb->is_asc = !lb->is_asc;
+				} else {
+					lb->is_asc = false;
+					lb->sort_type = s;
+				}
 				lb->impl_on_update(state);
 				return message_result::consumed;
 			}

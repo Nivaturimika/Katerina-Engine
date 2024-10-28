@@ -269,9 +269,10 @@ namespace ui {
 			});
 			auto lsort = retrieve<ledger_sort>(state, parent);
 			ledger_sort_type st = std::holds_alternative<ledger_sort_type>(lsort.type) ? std::get<ledger_sort_type>(lsort.type) : ledger_sort_type::country_name;
+			std::function<bool(dcon::nation_id a, dcon::nation_id b)> fn;
 			switch(st) {
 			case ledger_sort_type::country_status:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = int32_t(nations::get_status(state, a));
 					auto bv = int32_t(nations::get_status(state, b));
 					if(av != bv)
@@ -280,7 +281,7 @@ namespace ui {
 				});
 				break;
 			case ledger_sort_type::military_score:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_military_score(a);
 					auto bv = state.world.nation_get_military_score(b);
 					if(av != bv)
@@ -289,7 +290,7 @@ namespace ui {
 				});
 				break;
 			case ledger_sort_type::industrial_score:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_industrial_score(a);
 					auto bv = state.world.nation_get_industrial_score(b);
 					if(av != bv)
@@ -298,7 +299,7 @@ namespace ui {
 				});
 				break;
 			case ledger_sort_type::prestige:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = nations::prestige_score(state, a);
 					auto bv = nations::prestige_score(state, b);
 					if(av != bv)
@@ -307,7 +308,7 @@ namespace ui {
 				});
 				break;
 			case ledger_sort_type::total_score:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_military_score(a) + state.world.nation_get_industrial_score(a) + nations::prestige_score(state, a);
 					auto bv = state.world.nation_get_military_score(b) + state.world.nation_get_industrial_score(b) + nations::prestige_score(state, b);
 					if(av != bv)
@@ -316,7 +317,7 @@ namespace ui {
 				});
 				break;
 			default:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = text::produce_simple_string(state, text::get_name(state, a));
 					auto bv = text::produce_simple_string(state, text::get_name(state, b));
 					if(av != bv)
@@ -325,6 +326,7 @@ namespace ui {
 				});
 				break;
 			}
+			pdqsort(row_contents.begin(), row_contents.end(), fn);
 			if(lsort.reversed) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -1401,10 +1403,11 @@ namespace ui {
 			}
 
 			auto lsort = retrieve<ledger_sort>(state, parent);
+			std::function<bool(dcon::province_id a, dcon::province_id b)> fn;
 			if(std::holds_alternative<dcon::pop_type_id>(lsort.type)) {
 				auto pt = std::get<dcon::pop_type_id>(lsort.type);
 				auto dkey = demographics::to_key(state, pt);
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
+				fn = ([&](dcon::province_id a, dcon::province_id b) {
 					auto av = state.world.province_get_demographics(a, dkey);
 					auto bv = state.world.province_get_demographics(b, dkey);
 					if(av != bv)
@@ -1412,7 +1415,7 @@ namespace ui {
 					return a.index() < b.index();
 				});
 			} else {
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::province_id a, dcon::province_id b) {
+				fn = ([&](dcon::province_id a, dcon::province_id b) {
 					auto av = text::produce_simple_string(state, state.world.province_get_name(a));
 					auto bv = text::produce_simple_string(state, state.world.province_get_name(b));
 					if(av != bv)
@@ -1420,11 +1423,14 @@ namespace ui {
 					return a.index() < b.index();
 				});
 			}
-
+			auto it = std::unique(row_contents.begin(), row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			row_contents.erase(it, row_contents.end());
+			pdqsort(row_contents.begin(), row_contents.end(), fn);
 			if(lsort.reversed) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
-
 			update(state);
 		}
 	};

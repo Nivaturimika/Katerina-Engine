@@ -796,6 +796,10 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				auto rid = state.world.army_membership_get_regiment(amid);
 				row_contents.push_back(rid);
 			});
+			auto it = std::unique(row_contents.begin(), row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			row_contents.erase(it, row_contents.end());
 			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
 				auto au = state.world.regiment_get_type(a);
 				auto bu = state.world.regiment_get_type(b);
@@ -829,6 +833,10 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				auto sid = state.world.navy_membership_get_ship(nmid);
 				row_contents.push_back(sid);
 			});
+			auto it = std::unique(row_contents.begin(), row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			row_contents.erase(it, row_contents.end());
 			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
 				auto au = state.world.ship_get_type(a);
 				auto bu = state.world.ship_get_type(b);

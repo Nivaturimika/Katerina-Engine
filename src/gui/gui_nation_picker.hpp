@@ -453,9 +453,10 @@ namespace ui {
 			}
 			auto s = retrieve<picker_sort>(state, parent);
 			auto is_asc = retrieve<bool>(state, parent);
+			std::function<bool(dcon::nation_id a, dcon::nation_id b)> fn;
 			switch(s) {
 			case picker_sort::name:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = text::get_name_as_string(state, fatten(state.world, a));
 					auto bv = text::get_name_as_string(state, fatten(state.world, b));
 					if(av != bv)
@@ -464,7 +465,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::mil_rank:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_military_rank(a);
 					auto bv = state.world.nation_get_military_rank(b);
 					if(av != bv)
@@ -473,7 +474,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::indust_rank:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_industrial_rank(a);
 					auto bv = state.world.nation_get_industrial_rank(b);
 					if(av != bv)
@@ -482,7 +483,7 @@ namespace ui {
 				});
 				break;
 			case picker_sort::p_rank:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+				fn = ([&](dcon::nation_id a, dcon::nation_id b) {
 					auto av = state.world.nation_get_prestige_rank(a);
 					auto bv = state.world.nation_get_prestige_rank(b);
 					if(av != bv)
@@ -491,6 +492,11 @@ namespace ui {
 				});
 				break;
 			}
+			auto it = std::unique(row_contents.begin(), row_contents.end(), [&](auto a, auto b) {
+				return a.index() == b.index();
+			});
+			row_contents.erase(it, row_contents.end());
+			pdqsort(row_contents.begin(), row_contents.end(), fn);
 			if(is_asc) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}

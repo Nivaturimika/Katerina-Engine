@@ -339,6 +339,10 @@ namespace ui {
 						}
 					}
 				}
+				auto it = std::unique(listbox_left::row_contents.begin(), listbox_left::row_contents.end(), [&](auto a, auto b) {
+					return a.index() == b.index();
+				});
+				listbox_left::row_contents.erase(it, listbox_left::row_contents.end());
 				pdqsort(listbox_left::row_contents.begin(), listbox_left::row_contents.end(), [&](auto a, auto b) {
 					auto au = dcon::fatten(state.world, a).get_type();
 					auto bu = dcon::fatten(state.world, b).get_type();
@@ -389,6 +393,10 @@ namespace ui {
 						}
 					}
 				}
+				auto it = std::unique(listbox_right::row_contents.begin(), listbox_right::row_contents.end(), [&](auto a, auto b) {
+					return a.index() == b.index();
+				});
+				listbox_right::row_contents.erase(it, listbox_right::row_contents.end());
 				pdqsort(listbox_right::row_contents.begin(), listbox_right::row_contents.end(), [&](auto a, auto b) {
 					auto au = dcon::fatten(state.world, a).get_type();
 					auto bu = dcon::fatten(state.world, b).get_type();
@@ -585,6 +593,10 @@ namespace ui {
 							selected_sub_units.push_back(reg.get_ship().id);
 						}
 					}
+					auto it = std::unique(selected_sub_units.begin(), selected_sub_units.end(), [&](auto a, auto b) {
+						return a.index() == b.index();
+					});
+					selected_sub_units.erase(it, selected_sub_units.end());
 					pdqsort(selected_sub_units.begin(), selected_sub_units.end(), [&](auto a, auto b) {
 						auto au = dcon::fatten(state.world, a).get_type();
 						auto bu = dcon::fatten(state.world, b).get_type();
