@@ -1038,9 +1038,10 @@ namespace demographics {
 
 				auto amount = owner_modifier * ve::select(allowed_by_owner,
 				ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-					 if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger)
-						 return trigger::evaluate_multiplicative_modifier(state, mtrigger,  trigger::to_generic(pid), trigger::to_generic(pid), 0);
-					 return 0.0f;
+					if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
+						return trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0);
+					}
+					return 0.0f;
 				}, ids, state.world.pop_get_poptype(ids), owner), 0.0f);
 
 				ibuf.temp_buffers[iid].set(ids, amount);
@@ -1067,7 +1068,7 @@ namespace demographics {
 				auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
 				auto current = state.world.pop_get_demographics(ids, i_key);
 				auto owner = nations::owner_of_pop(state, ids);
-				auto owner_rate_modifier = (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f);
+				auto owner_rate_modifier = ve::max(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f, 0.f);
 				state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, issues_change_rate * owner_rate_modifier * avalue + (1.0f - issues_change_rate * owner_rate_modifier) * current, current));
 			});
 		});
