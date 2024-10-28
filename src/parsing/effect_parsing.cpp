@@ -1895,4 +1895,29 @@ namespace parsers {
 		}
 	}
 
+	void ef_change_party_name::ideology(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+			// leave invalid
+		} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+			ideology_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void ef_change_party_position::ideology(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(is_fixed_token_ci(v.data(), v.data() + v.length(), "ruling_party")) {
+			// leave invalid
+		} else if(auto it = context.outer_context.map_of_ideologies.find(std::string(v)); it != context.outer_context.map_of_ideologies.end()) {
+			ideology_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid ideology " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void ef_change_party_position::position(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(auto it = context.outer_context.map_of_ioptions.find(std::string(v)); it != context.outer_context.map_of_ioptions.end()) {
+			opt_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid issue option " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
 } // namespace parsers

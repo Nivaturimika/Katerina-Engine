@@ -5538,6 +5538,12 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(tf_news_printing_count) {
 		return true;
 	}
+	TRIGGER_FUNCTION(tf_party_name) {
+		return true;
+	}
+	TRIGGER_FUNCTION(tf_party_position) {
+		return true;
+	}
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
 	struct trigger_container {
