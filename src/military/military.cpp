@@ -2884,8 +2884,9 @@ namespace military {
 
 	dcon::nation_id get_naval_battle_lead_attacker(sys::state& state, dcon::naval_battle_id b) {
 		auto by_admiral = state.world.leader_get_nation_from_leader_loyalty(state.world.naval_battle_get_admiral_from_attacking_admiral(b));
-		if(by_admiral)
-		return by_admiral;
+		if(by_admiral) {
+			return by_admiral;
+		}
 
 		auto war = state.world.naval_battle_get_war_from_naval_battle_in_war(b);
 		bool war_attackers = state.world.naval_battle_get_war_attacker_is_attacker(b);
@@ -2897,8 +2898,7 @@ namespace military {
 				return nbp.get_navy().get_controller_from_navy_control();
 			}
 		}
-
-	return dcon::nation_id{};
+		return dcon::nation_id{};
 	}
 
 	dcon::nation_id get_naval_battle_lead_defender(sys::state& state, dcon::naval_battle_id b) {

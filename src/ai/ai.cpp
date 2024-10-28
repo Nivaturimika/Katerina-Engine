@@ -4244,6 +4244,17 @@ namespace ai {
 						if(nearest) {
 							auto weight = military::total_army_weight(state, nearest);
 							if(provinces[j].cur_weight + weight < provinces[j].max_weight) {
+								//army moving out of location province, so subtract weight
+								auto guard_loc = state.world.army_get_location_from_army_location(nearest);
+								if(guard_loc != p) {
+									for(uint32_t k = 0; k < provinces.size(); k++) {
+										if(provinces[k].id == guard_loc) {
+											provinces[k].cur_weight -= weight;
+											break;
+										}
+									}
+								}
+
 								state.world.army_set_ai_province(nearest, p);
 								guards_list[nearest_index] = guards_list.back();
 								guards_list.pop_back();
