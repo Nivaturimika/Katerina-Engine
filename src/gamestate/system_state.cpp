@@ -2330,7 +2330,7 @@ namespace sys {
 		world.national_identity_resize_unit_names_count(uint32_t(military_definitions.unit_base_definitions.size()));
 		world.national_identity_resize_unit_names_first(uint32_t(military_definitions.unit_base_definitions.size()));
 
-		world.political_party_resize_party_issues(uint32_t(culture_definitions.party_issues.size()));
+		world.political_party_resize_party_issues(world.issue_size());
 
 		world.province_resize_party_loyalty(world.ideology_size());
 		world.province_resize_building_level(economy::max_building_types);
