@@ -996,6 +996,7 @@ namespace parsers {
 			fid.set_only_once(event_result.fire_only_once);
 			fid.set_trigger(event_result.trigger);
 			fid.get_options() = event_result.options;
+			fid.set_legacy_id(uint32_t(event_result.id));
 		}
 	}
 	void scan_country_event(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -1297,6 +1298,7 @@ namespace parsers {
 					fid.set_is_major(event_result.major);
 					fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 					fid.get_options() = event_result.options;
+					fid.set_legacy_id(uint32_t(event_result.id));
 
 					for(auto& r : context.state.national_definitions.on_yearly_pulse) {
 						if(r.id == data_copy.id) {
@@ -1417,6 +1419,7 @@ namespace parsers {
 					fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 					fid.set_name(event_result.title_);
 					fid.get_options() = event_result.options;
+					fid.set_legacy_id(uint32_t(event_result.id));
 
 					for(auto& r : context.state.national_definitions.on_battle_won) {
 						if(r.id == data_copy.id) {
