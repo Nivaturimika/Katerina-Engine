@@ -385,7 +385,7 @@ namespace sys {
 		bool notify_rebels_defeat = true;
 		sys::color_blind_mode color_blind_mode = sys::color_blind_mode::none;
 		uint32_t UNUSED_UINT32_T = 0;
-		char locale[16] = "en-US";
+		char locale[16] = "en_US";
 		float map_counter_factor = 0.185f;
 	};
 
