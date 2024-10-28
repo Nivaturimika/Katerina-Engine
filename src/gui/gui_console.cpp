@@ -1009,10 +1009,11 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 			auto tag = std::get<std::string>(pstate.arg_slots[1]);
 			nid = smart_get_national_identity_from_tag(state, parent, tag);
 		}
-		if(nid)
-		command::c_event_as(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid), std::get<int32_t>(pstate.arg_slots[0]));
-		else
-		command::c_event(state, state.local_player_nation, std::get<int32_t>(pstate.arg_slots[0]));
+		if(nid) {
+			command::c_event_as(state, state.local_player_nation, state.world.national_identity_get_nation_from_identity_holder(nid), std::get<int32_t>(pstate.arg_slots[0]));
+		} else {
+			command::c_event(state, state.local_player_nation, std::get<int32_t>(pstate.arg_slots[0]));
+		}
 	}
 	break;
 	case command_info::type::militancy:

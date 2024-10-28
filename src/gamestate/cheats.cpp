@@ -161,19 +161,30 @@ namespace command {
 		add_to_command_queue(state, p);
 	}
 	void execute_c_event(sys::state& state, dcon::nation_id source, int32_t id) {
-		if(!source)
-		return;
-		dcon::free_national_event_id e;
 		for(auto v : state.world.in_free_national_event) {
 			if(v.get_legacy_id() == uint32_t(id)) {
-				e = v;
-				break;
+				event::trigger_national_event(state, v, source, state.current_date.value, id ^ as.index());
+				return;
 			}
 		}
-		if(!e)
-		return;
-
-		event::trigger_national_event(state, e, source, state.current_date.value, id ^ source.index());
+		/*for(auto v : state.world.in_free_provincial_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				return;
+			}
+		}*/
+		for(auto v : state.world.in_national_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, source, state.current_date.value, id ^ source.index(), trigger::to_generic(source), event::slot_type::nation);
+				return;
+			}
+		}
+		/*for(auto v : state.world.in_provincial_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				return;
+			}
+		}*/
 	}
 	void c_event_as(sys::state& state, dcon::nation_id source, dcon::nation_id as, int32_t id) {
 		payload p;
@@ -185,19 +196,33 @@ namespace command {
 		add_to_command_queue(state, p);
 	}
 	void execute_c_event_as(sys::state& state, dcon::nation_id source, dcon::nation_id as, int32_t id) {
-		if(!as)
-		return;
-		dcon::free_national_event_id e;
+		if(!as) {
+			return;
+		}
 		for(auto v : state.world.in_free_national_event) {
 			if(v.get_legacy_id() == uint32_t(id)) {
-				e = v;
-				break;
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				return;
 			}
 		}
-		if(!e)
-		return;
-
-		event::trigger_national_event(state, e, as, state.current_date.value, id ^ as.index());
+		/*for(auto v : state.world.in_free_provincial_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				return;
+			}
+		}*/
+		for(auto v : state.world.in_national_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, source, state.current_date.value, id ^ as.index(), trigger::to_generic(as), event::slot_type::nation);
+				return;
+			}
+		}
+		/*for(auto v : state.world.in_provincial_event) {
+			if(v.get_legacy_id() == uint32_t(id)) {
+				event::trigger_national_event(state, v, as, state.current_date.value, id ^ as.index());
+				return;
+			}
+		}*/
 	}
 	void c_force_crisis(sys::state& state, dcon::nation_id source) {
 		payload p;
