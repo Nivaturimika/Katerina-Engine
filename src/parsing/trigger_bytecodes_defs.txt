@@ -1,13 +1,24 @@
+#port
 province	x		x		port					no_payload		associate
+#involved_in_crisis_nation
 pop		x		x		involved_in_crisis_pop			no_payload		associate
 nation		x		x		involved_in_crisis_nation		no_payload		associate
+#has_cultural_sphere
 nation		nation		x		has_cultural_sphere			no_payload		associate
+#social_movement
 pop		x		x		social_movement				no_payload		associate
 x		x		rebel		social_movement_from_reb		no_payload		associate
+#political_movement
 pop		x		x		political_movement			no_payload		associate
 x		x		rebel		political_movement_from_reb		no_payload		associate
+#rich_tax_above_poor
 nation		x		x		rich_tax_above_poor			no_payload		associate
+#is_substate
 nation		x		x		is_substate				no_payload		associate
+#has_flashpoint
 state		x		x		has_flashpoint				no_payload		associate
-pop		x		x		is_disarmed_pop				no_payload		associate
+#is_disarmed
 nation		x		x		is_disarmed				no_payload		associate
+pop		x		x		is_disarmed_pop				no_payload		associate
+#can_nationalize
+nation		x		x		can_nationalize				no_payload		associate
