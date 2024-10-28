@@ -948,7 +948,7 @@ namespace demographics {
 						auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 							if(state.world.nation_get_is_civilized(o)) {
 								auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-								return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
+								return ptrigger ? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)) : 0.0f;
 							}
 							return 0.0f;
 						}, ids, state.world.pop_get_poptype(ids), owner);
@@ -960,7 +960,7 @@ namespace demographics {
 						auto owner = nations::owner_of_pop(state, ids);
 						auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 							auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-							return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
+							return ptrigger ? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)) : 0.0f;
 						}, ids, state.world.pop_get_poptype(ids), owner);
 						ibuf.temp_buffers[i].set(ids, amount);
 						ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
@@ -1039,7 +1039,7 @@ namespace demographics {
 				auto amount = owner_modifier * ve::select(allowed_by_owner,
 				ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 					if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
-						return trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0);
+						return std::max(0.f, trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0));
 					}
 					return 0.0f;
 				}, ids, state.world.pop_get_poptype(ids), owner), 0.0f);
