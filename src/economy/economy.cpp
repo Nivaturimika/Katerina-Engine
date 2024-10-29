@@ -1002,27 +1002,15 @@ namespace economy {
 					base_everyday += state.world.pop_type_get_everyday_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
 					base_luxury += state.world.pop_type_get_luxury_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
 				}
-				float total_r_demand = 0.0f;
-				state.world.for_each_nation([&](dcon::nation_id n) {
-					total_r_demand += state.world.nation_get_real_demand(n, cid);
-				});
+				float total_r_demand = state.world.commodity_get_total_real_demand(cid);
 				float last_t_production = state.world.commodity_get_last_total_production(cid);
 				float average = 0.0f;
 				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.5f) / (base_life + base_everyday + base_luxury);
 				average = last_t_production * std::max((1.0f - (which_type < 2.0f ? which_type * 0.125f : which_type * 0.4f)), 0.0f)
-					+ total_r_demand * std::max(((5.5f-which_type)*1.5f),0.0f) * (which_type >= 2.5f ? 1.0f : 0.0f);
-				//if(which_type < 2.0f) {
-				//	average = last_t_production;
-				//}
-				//else if(which_type >= 2.0f && which_type <= 3.0f) {
-				//	average = last_t_production * 0.75f;
-				//}
-				//else {
-				//	average = total_r_demand;
-				//}
+					+ total_r_demand * std::max(((5.5f - which_type) * 1.5f), 0.0f) * (which_type >= 2.5f ? 1.0f : 0.0f);
+				float limitation = std::min(std::max(average, 1.f) / std::max(total_r_demand, 1.f), 1.0f);
 
-				float limitation = std::min(std::max(average, 1.0f) /
-					std::max(total_r_demand, 1.0f), 1.0f);
+				state.world.commodity_get_total_real_demand(cid) *= limitation;
 				state.world.for_each_nation([&](dcon::nation_id n) {
 					state.world.nation_get_real_demand(n, cid) *= limitation;
 				}); 
@@ -1868,11 +1856,8 @@ namespace economy {
 				total_consumption += state.world.nation_get_real_demand(n, cid) * state.world.nation_get_demand_satisfaction(n, cid);
 				total_production += state.world.nation_get_domestic_market_pool(n, cid);
 			});
-
 			state.world.commodity_set_total_consumption(cid, total_consumption);
 			state.world.commodity_set_total_real_demand(cid, total_r_demand);
-
-			auto prior_production = state.world.commodity_get_total_production(cid);
 			state.world.commodity_set_total_production(cid, total_production);
 
 			/*
@@ -1887,7 +1872,7 @@ namespace economy {
 			domestic supply or demand, unless noted otherwise, it should be taken as given that the same is added to world
 			supply or demand. Also, world supply and demand for all commodities should be treated as at least 1.
 			*/
-			float supply = prior_production;// +state.world.commodity_get_global_market_pool(cid);
+			float supply = total_production;
 			float demand = total_r_demand;
 			auto base_price = state.world.commodity_get_cost(cid);
 			auto current_price = state.world.commodity_get_current_price(cid);
