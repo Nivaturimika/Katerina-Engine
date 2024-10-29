@@ -562,8 +562,8 @@ namespace economy {
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(supply_cost.commodity_type[i]) {
 						state.world.nation_get_navy_demand(owner, supply_cost.commodity_type[i]) +=
-						supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption
-						* o_sc_mod * admin_cost_factor;
+							supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption
+							* o_sc_mod * admin_cost_factor;
 					} else {
 						break;
 					}
@@ -608,8 +608,9 @@ namespace economy {
 
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto owner = state.world.province_get_nation_from_province_ownership(p);
-			if(!owner || state.world.province_get_nation_from_province_control(p) != owner)
-			return;
+			if(!owner || state.world.province_get_nation_from_province_control(p) != owner) {
+				return;
+			}
 			auto rng = state.world.province_get_province_naval_construction(p);
 			if(rng.begin() != rng.end()) {
 				auto c = *(rng.begin());
@@ -624,7 +625,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount / construction_time);
 						}
 					} else {
 						break;
@@ -645,7 +646,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
 							float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount / construction_time);
 						}
 					} else {
 						break;
@@ -691,8 +692,9 @@ namespace economy {
 				float construction_time = float(state.economy_definitions.building_definitions[int32_t(t)].time);
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i])
-						state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += base_cost.commodity_amounts[i] / construction_time;
+						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i]) {
+							state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += base_cost.commodity_amounts[i] / construction_time;
+						}
 					} else {
 						break;
 					}
@@ -708,8 +710,9 @@ namespace economy {
 				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod)
-						state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += base_cost.commodity_amounts[i] * cost_mod / construction_time;
+						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
+							state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += base_cost.commodity_amounts[i] * cost_mod / construction_time;
+						}
 					} else {
 						break;
 					}
@@ -1121,9 +1124,8 @@ namespace economy {
 					for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 						if(base_cost.commodity_type[i]) {
 							if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-								auto amount = base_cost.commodity_amounts[i] / construction_time;
 								auto& source = gbuf.get(base_cost.commodity_type[i]);
-								auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
+								auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 								current_purchased.commodity_amounts[i] += delta;
 								source -= delta;
 							}
@@ -1144,9 +1146,8 @@ namespace economy {
 					for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 						if(base_cost.commodity_type[i]) {
 							if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-								auto amount = base_cost.commodity_amounts[i] / construction_time;
 								auto& source = gbuf.get(base_cost.commodity_type[i]);
-								auto delta = std::clamp(base_cost.commodity_amounts[i] / construction_time, 0.f, source);
+								auto delta = std::clamp(base_cost.commodity_amounts[i] * admin_cost_factor / construction_time, 0.f, source);
 								current_purchased.commodity_amounts[i] += delta;
 								source -= delta;
 							}
@@ -2284,10 +2285,10 @@ namespace economy {
 					total += goods.commodity_amounts[i] * cost_mod;
 					purchased += std::clamp(st_con.get_purchased_goods().commodity_amounts[i], 0.f, goods.commodity_amounts[i] * cost_mod);
 				}
-			return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
+				return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
 			}
 		}
-	return construction_status{ 0.0f, false };
+		return construction_status{ 0.0f, false };
 	}
 
 	construction_status province_building_construction(sys::state& state, dcon::province_id p, province_building_type t) {
@@ -2302,7 +2303,7 @@ namespace economy {
 					total += state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor;
 					purchased += std::clamp(pb_con.get_purchased_goods().commodity_amounts[i], 0.0f, state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor);
 				}
-			return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
+				return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
 			}
 		}
 		return construction_status{ 0.0f, false };
