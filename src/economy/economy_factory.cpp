@@ -375,6 +375,13 @@ namespace economy_factory {
 		new_factory_fat_id.set_building_type(factory_type_id);
 		new_factory_fat_id.set_level(uint8_t(1));
 		new_factory_fat_id.set_production_scale(1.0f);
+		// new factories start subsidized
+		if(auto owner = state.world.state_instance_get_nation_from_state_ownership(state_instance_id); owner) {
+			auto rules = state.world.nation_get_combined_issue_rules(owner);
+			if((rules & issue_rule::can_subsidise) != 0) {
+				new_factory_fat_id.set_subsidized(true);
+			}
+		}
 		state.world.try_create_factory_location(new_factory_fat_id, state_capital_province_fat_id);
 	}
 

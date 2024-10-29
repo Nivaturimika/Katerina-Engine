@@ -885,7 +885,7 @@ namespace demographics {
 		auto old_lit = state.world.pop_get_literacy(ids);
 		auto new_lit = ve::min(ve::max(old_lit + (0.01f * state.defines.literacy_change_speed)
 			* (((espending * cmod) * (tmod * nmod))
-				* (1.f - old_lit)), 0.01f), 1.0f);
+			* (1.f - old_lit)), 0.01f), 1.0f);
 		return ve::select(owner != dcon::nation_id{}, new_lit, old_lit);
 	}
 
@@ -945,23 +945,23 @@ namespace demographics {
 				if(state.world.ideology_get_is_civilized_only(i)) {
 					pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
 						auto owner = nations::owner_of_pop(state, ids);
-						auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
+						auto amount = ve::max(ve::fp_vector{}, ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 							if(state.world.nation_get_is_civilized(o)) {
 								auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-								return ptrigger ? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)) : 0.0f;
+								return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
 							}
 							return 0.0f;
-						}, ids, state.world.pop_get_poptype(ids), owner);
+						}, ids, state.world.pop_get_poptype(ids), owner));
 						ibuf.temp_buffers[i].set(ids, amount);
 						ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
 					});
 				} else {
 					pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
 						auto owner = nations::owner_of_pop(state, ids);
-						auto amount = ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
+						auto amount = ve::max(ve::fp_vector{}, ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 							auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-							return ptrigger ? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)) : 0.0f;
-						}, ids, state.world.pop_get_poptype(ids), owner);
+							return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
+						}, ids, state.world.pop_get_poptype(ids), owner));
 						ibuf.temp_buffers[i].set(ids, amount);
 						ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
 					});
@@ -1030,19 +1030,18 @@ namespace demographics {
 				auto allowed_by_owner =
 				(state.world.nation_get_is_civilized(owner) || ve::mask_vector(is_party_issue))
 				&& (ve::mask_vector(!state.world.issue_get_is_next_step_only(parent_issue)) ||
-						(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index()) ||
-						(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index() - 1) ||
-						(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index() + 1));
+					(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index()) ||
+					(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index() - 1) ||
+					(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index() + 1));
 				auto owner_modifier =
 					has_modifier ? (state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f) : ve::fp_vector(1.0f);
 
-				auto amount = owner_modifier * ve::select(allowed_by_owner,
-				ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
+				auto amount = ve::max(ve::fp_vector{}, owner_modifier * ve::select(allowed_by_owner, ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
 					if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
-						return std::max(0.f, trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0));
+						return trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0);
 					}
 					return 0.0f;
-				}, ids, state.world.pop_get_poptype(ids), owner), 0.0f);
+				}, ids, state.world.pop_get_poptype(ids), owner), 0.0f));
 
 				ibuf.temp_buffers[iid].set(ids, amount);
 				ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
@@ -1068,7 +1067,7 @@ namespace demographics {
 				auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
 				auto current = state.world.pop_get_demographics(ids, i_key);
 				auto owner = nations::owner_of_pop(state, ids);
-				auto owner_rate_modifier = ve::max(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f, 0.f);
+				auto owner_rate_modifier = ve::min(ve::max(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f, 0.0f), 5.0f);
 				state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, issues_change_rate * owner_rate_modifier * avalue + (1.0f - issues_change_rate * owner_rate_modifier) * current, current));
 			});
 		});
@@ -1817,8 +1816,8 @@ namespace demographics {
 			for(auto loc : state.world.nation_get_province_ownership(n)) {
 				if(loc.get_province().get_is_colonial() == false) {
 					if(!limit_to_capitals || loc.get_province().get_state_membership().get_capital().id == loc.get_province().id) {
-						auto weight = trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(loc.get_province().id), trigger::to_generic(p), 0)
-							* (loc.get_province().get_modifier_values(sys::provincial_mod_offsets::immigrant_attract) + 1.0f);
+						auto weight = std::max(0.f, trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(loc.get_province().id), trigger::to_generic(p), 0)
+							* (loc.get_province().get_modifier_values(sys::provincial_mod_offsets::immigrant_attract) + 1.0f));
 
 						if(weight > 0.0f) {
 							weights_buffer.set(loc.get_province(), weight);
@@ -1862,8 +1861,8 @@ namespace demographics {
 				if(loc.get_province().get_is_colonial() == true) {
 					if((overseas_culture || loc.get_province().get_continent() == home_continent) &&
 					(!limit_to_capitals || loc.get_province().get_state_membership().get_capital().id == loc.get_province().id)) {
-						auto weight = trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(loc.get_province().id), trigger::to_generic(p), 0)
-							* (loc.get_province().get_modifier_values(sys::provincial_mod_offsets::immigrant_attract) + 1.0f);
+						auto weight = std::max(0.f, trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(loc.get_province().id), trigger::to_generic(p), 0)
+							* (loc.get_province().get_modifier_values(sys::provincial_mod_offsets::immigrant_attract) + 1.0f));
 
 						if(weight > 0.0f) {
 							if(!limit_to_capitals || loc.get_province().get_state_membership().get_capital().id == loc.get_province().id) {
@@ -1921,8 +1920,8 @@ namespace demographics {
 					return; // ignore same continent, non-adjacent nations
 				}
 
-				auto weight = trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(inner), trigger::to_generic(p), 0)
-					* std::max(0.0f, (state.world.nation_get_modifier_values(inner, sys::national_mod_offsets::global_immigrant_attract) + 1.0f));
+				auto weight = std::max(0.0f, trigger::evaluate_multiplicative_modifier(state, modifier, trigger::to_generic(inner), trigger::to_generic(p), 0)
+					* (state.world.nation_get_modifier_values(inner, sys::national_mod_offsets::global_immigrant_attract) + 1.0f));
 
 				if(weight > top_weights[2]) {
 					top_weights[2] = weight;
@@ -2023,11 +2022,11 @@ namespace demographics {
 			auto loc = state.world.pop_get_province_from_pop_location(ids);
 			auto owners = state.world.province_get_nation_from_province_ownership(loc);
 			auto pop_sizes = state.world.pop_get_size(ids);
-			auto amounts = ve::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f) *
-			 pop_sizes *
-			ve::max((state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f), 0.0f) *
-			ve::max((state.world.nation_get_modifier_values(owners, sys::national_mod_offsets::colonial_migration) + 1.0f), 0.0f) *
-			state.defines.immigration_scale;
+			auto amounts = ve::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f)
+				* pop_sizes
+				* ve::max((state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f), 0.0f)
+				* ve::max((state.world.nation_get_modifier_values(owners, sys::national_mod_offsets::colonial_migration) + 1.0f), 0.0f)
+				* state.defines.immigration_scale;
 
 			ve::apply([&](dcon::pop_id p, dcon::province_id location, dcon::nation_id owner, float amount, float pop_size) {
 				if(amount <= 0.0f)
@@ -2220,14 +2219,16 @@ namespace demographics {
 						auto owner = nations::owner_of_pop(state, np);
 						if(state.world.ideology_get_is_civilized_only(i)) {
 							if(state.world.nation_get_is_civilized(owner)) {
-								auto amount = ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(np.id),
-								trigger::to_generic(owner), 0) : 0.0f;
+								auto amount = ptrigger
+									? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(np.id), trigger::to_generic(owner), 0))
+									: 0.0f;
 								state.world.pop_set_demographics(np, i_key, amount);
 								totals += amount;
 							}
 						} else {
-							auto amount = ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(np.id),
-							trigger::to_generic(owner), 0) : 0.0f;
+							auto amount = ptrigger
+								? std::max(0.f, trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(np.id), trigger::to_generic(owner), 0))
+								: 0.0f;
 							state.world.pop_set_demographics(np, i_key, amount);
 							totals += amount;
 						}
@@ -2262,10 +2263,8 @@ namespace demographics {
 					auto owner_modifier = has_modifier ? (state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f) : 1.0f;
 					if(allowed_by_owner) {
 						if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
-							auto amount = owner_modifier * trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(np.id),
-																						 trigger::to_generic(owner), 0);
-
-							state.world.pop_set_demographics(np, i_key, amount);
+							auto amount = owner_modifier * trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(np.id), trigger::to_generic(owner), 0);
+							state.world.pop_set_demographics(np, i_key, std::max(0.f, amount));
 							totals += amount;
 						}
 					}
