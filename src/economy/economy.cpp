@@ -1004,9 +1004,8 @@ namespace economy {
 				}
 				float total_r_demand = state.world.commodity_get_total_real_demand(cid);
 				float last_t_production = state.world.commodity_get_last_total_production(cid);
-				float average = 0.0f;
 				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.5f) / (base_life + base_everyday + base_luxury);
-				average = last_t_production * std::max((1.0f - (which_type < 2.0f ? which_type * 0.125f : which_type * 0.4f)), 0.0f)
+				float average = last_t_production * std::max((1.0f - (which_type < 2.0f ? which_type * 0.125f : which_type * 0.4f)), 0.0f)
 					+ total_r_demand * std::max(((5.5f - which_type) * 1.5f), 0.0f) * (which_type >= 2.5f ? 1.0f : 0.0f);
 				float limitation = std::min(std::max(average, 1.f) / std::max(total_r_demand, 1.f), 1.0f);
 
