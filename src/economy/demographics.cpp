@@ -1,4 +1,4 @@
-#include "demographics.hpp"
+f#include "demographics.hpp"
 #include "dcon_generated.hpp"
 #include "system_state.hpp"
 #include "prng.hpp"
@@ -1211,12 +1211,6 @@ namespace demographics {
 					float base_amount = promoting
 						? (std::ceil(promotion_chance * state.world.nation_get_administrative_efficiency(owner) * state.defines.promotion_scale * current_size))
 						: (std::ceil(demotion_chance * state.defines.promotion_scale * current_size));
-
-					if(!promoting) {
-						if(ptype == state.culture_definitions.artisans) {
-							base_amount *= 10.f;
-						}
-					}
 
 					if(current_size < small_pop_size && base_amount > 0.0f) {
 						pbuf.amounts.set(p, current_size);
