@@ -62,7 +62,7 @@ namespace diplomatic_message {
 								text::add_line(state, contents, "msg_alliance_ends_1", text::variable_type::x, to, text::variable_type::y, from);
 							},
 							"msg_alliance_ends_title",
-						m.to, m.from, dcon::nation_id{},
+							m.to, m.from, dcon::nation_id{},
 							sys::message_base_type::alliance_ends
 						});
 					}
@@ -79,10 +79,10 @@ namespace diplomatic_message {
 						text::add_to_substitution_map(sub, text::variable_type::state, st);
 
 						std::string resolved_war_name = text::resolve_string_substitution(state, name, sub);
-					text::add_line(state, contents, "msg_ally_call_decline_1", text::variable_type::x, to, text::variable_type::y, from, text::variable_type::val, std::string_view{resolved_war_name});
+						text::add_line(state, contents, "msg_ally_call_decline_1", text::variable_type::x, to, text::variable_type::y, from, text::variable_type::val, std::string_view{resolved_war_name});
 					},
 					"msg_ally_call_declined_title",
-				m.to, m.from, dcon::nation_id{},
+					m.to, m.from, dcon::nation_id{},
 					sys::message_base_type::ally_called_declined
 				});
 

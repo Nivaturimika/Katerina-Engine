@@ -959,7 +959,12 @@ namespace culture {
 
 									notification::post(state, notification::message{
 										[inv](sys::state& state, text::layout_base& contents) {
-											text::add_line(state, contents, "msg_inv_1", text::variable_type::x, state.world.invention_get_name(inv));
+											text::substitution_map m;
+											text::add_to_substitution_map(m, text::variable_type::x, state.world.invention_get_name(inv));
+											auto resolved = text::resolve_string_substitution(state, "msg_inv_1", m);
+											auto box = text::open_layout_box(contents);
+											text::add_unparsed_text_to_layout_box(state, contents, box, resolved);
+											text::close_layout_box(contents, box);
 											ui::invention_description(state, contents, inv, 0);
 										},
 										"msg_inv_title",
