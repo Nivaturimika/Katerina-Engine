@@ -4009,7 +4009,7 @@ namespace sys {
 			break;
 		case 14:
 			ai::update_focuses(*this);
-			//ai::perform_foreign_investments(*this);
+			ai::perform_foreign_investments(*this);
 			break;
 		case 15:
 			culture::discover_inventions(*this);
