@@ -2134,8 +2134,9 @@ namespace ai {
 		// Attacking people from other continents only if we have naval superiority
 		if(state.world.province_get_continent(state.world.nation_get_capital(from)) != state.world.province_get_continent(state.world.nation_get_capital(target))) {
 			// We must achieve naval superiority to even invade them
-			if(state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.5f * state.world.nation_get_capital_ship_score(target)))
+			if(std::max(1.f, state.world.nation_get_capital_ship_score(from)) < 1.25f * state.world.nation_get_capital_ship_score(target)) {
 				return false;
+			}
 		}
 		return true;
 	}
