@@ -40,8 +40,16 @@ namespace ai {
 		return v;
 	}
 
+	/*	Estimates the strenght of a given nation - puppets count their overlord in the final calculation
+		this is so like Belgium doesn't declare on Luxembourgh (puppet of germany) because lux by itself
+		is weak, but it's overlord is not */
 	float estimate_strength(sys::state& state, dcon::nation_id n) {
-		float value = state.world.nation_get_military_score(n);
+		float value = 0.f;
+		if(auto ovr = state.world.nation_get_overlord_as_subject(n); ovr && state.world.overlord_get_ruler(ovr)) {
+			value = estimate_strength(state, state.world.overlord_get_ruler(ovr));
+		} else {
+			value = state.world.nation_get_military_score(n);
+		}
 		for(auto subj : state.world.nation_get_overlord_as_ruler(n)) {
 			value += subj.get_subject().get_military_score();
 		}
