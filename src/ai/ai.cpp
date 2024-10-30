@@ -2115,9 +2115,24 @@ namespace ai {
 			return false;
 		}
 		// Attacking people from other regions only if we have naval superiority
-		if(auto path = province::make_unowned_land_path(state, state.world.nation_get_capital(from), state.world.nation_get_capital(target)); path.empty()) {
+		if(state.world.province_get_continent(state.world.nation_get_capital(from)) != state.world.province_get_continent(state.world.nation_get_capital(target))) {
 			// We must achieve naval superiority to even invade them
-			if(std::max(1.f, state.world.nation_get_capital_ship_score(from)) < 1.25f * state.world.nation_get_capital_ship_score(target)) {
+			if(state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
+				return false;
+			}
+		} else {
+			bool has_adj = false;
+			for(const auto adj : state.world.nation_get_nation_adjacency(target)) {
+				auto const n = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
+				if(n == from) {
+					has_adj = true;
+					break;
+				} else if(auto ovr = n.get_overlord_as_subject(); ovr && ovr.get_ruler() == from) {
+					has_adj = true;
+					break;
+				}
+			}
+			if(!has_adj) {
 				return false;
 			}
 		}
