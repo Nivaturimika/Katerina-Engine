@@ -603,6 +603,7 @@ namespace ai {
 					// so prussia wants to fucking murder austria
 					for(auto other_gprl : gprl.get_influence_target().get_gp_relationship_as_influence_target()) {
 						if(current_sphere && other_gprl.get_great_power() != gprl.get_great_power()) {
+							// Ban first, then decrease after
 							if((other_gprl.get_status() & nations::influence::is_banned) != 0
 							&& command::can_decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power())) {
 								command::decrease_opinion(state, gprl.get_great_power(), gprl.get_influence_target(), other_gprl.get_great_power());
@@ -5624,7 +5625,10 @@ namespace ai {
 				if(!gprl.get_influence_target().get_is_civilized()) {
 					continue;
 				}
-				if(gprl.get_status())
+				if((gprl.get_status() & nations::influence::level_mask) == nations::influence::level_friendly
+				|| (gprl.get_status() & nations::influence::level_mask) == nations::influence::level_in_sphere) {
+					continue;
+				}
 				{ //spam railroads!
 					float amount = 0.0f;
 					auto& base_cost = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].cost;
