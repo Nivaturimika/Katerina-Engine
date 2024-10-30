@@ -2316,6 +2316,7 @@ namespace demographics {
 							? state.world.nation_get_religion(o)
 							: state.world.province_get_dominant_religion(l);
 						rel = rel ? rel : state.world.nation_get_religion(o);
+						rel = rel ? rel : state.world.pop_get_religion(p);
 						assert(state.world.pop_get_poptype(p));
 						auto target_pop = impl::find_or_make_pop(state, l, cul, rel, state.world.pop_get_poptype(p), state.world.pop_get_literacy(p));
 						state.world.pop_get_size(p) -= pbuf.amounts.get(p);
