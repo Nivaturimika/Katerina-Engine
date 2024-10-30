@@ -2114,8 +2114,8 @@ namespace ai {
 		if(state.world.nation_get_owned_province_count(from) <= 2) {
 			return false;
 		}
-		// Attacking people from other continents only if we have naval superiority
-		if(state.world.province_get_continent(state.world.nation_get_capital(from)) != state.world.province_get_continent(state.world.nation_get_capital(target))) {
+		// Attacking people from other regions only if we have naval superiority
+		if(auto path = province::make_unowned_land_path(state, state.world.nation_get_capital(from), state.world.nation_get_capital(target)); path.empty()) {
 			// We must achieve naval superiority to even invade them
 			if(std::max(1.f, state.world.nation_get_capital_ship_score(from)) < 1.25f * state.world.nation_get_capital_ship_score(target)) {
 				return false;
