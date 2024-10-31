@@ -2107,7 +2107,7 @@ namespace ai {
 		if(state.world.nation_get_constructing_cb_type(from))
 			return false;
 		auto ol = state.world.nation_get_overlord_as_subject(from);
-		if(state.world.overlord_get_ruler(ol))
+		if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
 			return false;
 		if(state.world.nation_get_in_sphere_of(target) == from)
 			return false;
@@ -2115,8 +2115,9 @@ namespace ai {
 			return false;
 		if(military::has_truce_with(state, target, from))
 			return false;
+		// Not game rules, but checks for other thingies
 		auto sl = state.world.nation_get_in_sphere_of(target);
-		if(sl == from)
+		if(sl && sl == state.world.nation_get_in_sphere_of(from))
 			return false;
 		// OPMs wont justify because why would they
 		if(state.world.nation_get_owned_province_count(from) <= 2) {

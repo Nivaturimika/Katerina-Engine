@@ -301,8 +301,12 @@ action = {
 	#FROM = nation target
 	limit = {
 		tag != FROM
-		NOT = { vassal_of = FROM }
-		NOT = { in_sphere = FROM }
+		NOT = { constructing_cb = FROM }
+		OR = {
+			is_independant = yes
+			vassal_of = FROM
+		}
+		NOT = { FROM = { in_sphere = THIS } }
 		NOT = { war_with = FROM }
 		NOT = { truce_with = FROM }
 	}
@@ -315,7 +319,7 @@ action = {
 	#THIS/main = nation source
 	#FROM = target
 	limit = {
-		tag != THIS
+		tag != FROM
 		#diplomatic_points = defines:DECLAREWAR_DIPLOMATIC_COST
 		any_state = { country_units_in_state = THIS }
 		casus_belli = FROM
@@ -328,7 +332,7 @@ action = {
 	#THIS/main = nation source
 	#FROM = nation target
 	limit = {
-		THIS = { tag != FROM }
+		tag != FROM
 		NOT = { war_with = FROM }
 		NOT = { FROM = { military_access = THIS } }
 	}
@@ -376,5 +380,28 @@ action = {
 	effect = {
 		#diplomatic_points = -defines:ADDWARGOAL_DIPLOMATIC_COST
 		relation = { who = THIS value = defines:ADDWARGOAL_RELATION_ON_ACCEPT }
+	}
+}
+
+#
+# AI rulesets
+#
+action = {
+	type = "ai_valid_construction_target"
+	#THIS/main = nation source
+	#FROM = nation target
+	limit = {
+		NOT = { tag = FROM }
+		OR = {
+			is_independant = yes
+			FROM = { overlord = { tag = THIS } }
+		}
+		NOT = { constructing_cb = FROM }
+		NOT = { war_with = FROM }
+		NOT = { truce_with = FROM }
+		NOT = { is_sphere_leader_of = FROM }
+		NOT = { in_sphere = FROM }
+		#Game rule above
+		
 	}
 }

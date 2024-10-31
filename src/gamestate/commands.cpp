@@ -2250,7 +2250,7 @@ namespace command {
 		*/
 
 		auto ol = state.world.nation_get_overlord_as_subject(source);
-		if(state.world.overlord_get_ruler(ol))
+		if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
 			return false;
 
 		if(state.world.nation_get_in_sphere_of(target) == source)
