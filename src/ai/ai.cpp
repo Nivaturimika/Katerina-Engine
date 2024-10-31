@@ -2101,6 +2101,10 @@ namespace ai {
 	}
 
 	bool valid_construction_target(sys::state& state, dcon::nation_id from, dcon::nation_id target) {
+		// OPMs wont justify because why would they
+		if(state.world.nation_get_owned_province_count(from) <= 2) {
+			return false;
+		}
 		// Copied from commands.cpp:can_fabricate_cb()
 		if(from == target)
 			return false;
@@ -2115,14 +2119,10 @@ namespace ai {
 			return false;
 		if(military::has_truce_with(state, target, from))
 			return false;
-		// Not game rules, but checks for other thingies
+		// Not game rules, but checks for other thingies -- like declaring on our spherelord is no no
 		auto sl = state.world.nation_get_in_sphere_of(target);
 		if(sl && sl == state.world.nation_get_in_sphere_of(from))
 			return false;
-		// OPMs wont justify because why would they
-		if(state.world.nation_get_owned_province_count(from) <= 2) {
-			return false;
-		}
 		// Attacking people from other regions only if we have naval superiority
 		if(state.world.province_get_continent(state.world.nation_get_capital(from)) != state.world.province_get_continent(state.world.nation_get_capital(target))) {
 			// We must achieve naval superiority to even invade them
