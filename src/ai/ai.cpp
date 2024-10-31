@@ -2107,7 +2107,7 @@ namespace ai {
 		if(state.world.nation_get_constructing_cb_type(from))
 			return false;
 		auto ol = state.world.nation_get_overlord_as_subject(from);
-		if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
+		if(state.world.overlord_get_ruler(ol))
 			return false;
 		if(state.world.nation_get_in_sphere_of(target) == from)
 			return false;
@@ -2159,7 +2159,7 @@ namespace ai {
 				if(n.get_is_at_war())
 					continue;
 				// Uncivilized nations are more aggressive to westernize faster
-				float infamy_limit = state.world.nation_get_is_civilized(n) ? state.defines.badboy_limit / 2.5f : state.defines.badboy_limit;
+				float infamy_limit = state.world.nation_get_is_civilized(n) ? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
 				if(n.get_infamy() > infamy_limit)
 					continue;
 				if(n.get_constructing_cb_type())
@@ -2171,9 +2171,7 @@ namespace ai {
 				&& !military::are_at_war(state, n, n.get_ai_rival())
 				&& !military::can_use_cb_against(state, n, n.get_ai_rival())
 				&& !military::has_truce_with(state, n, n.get_ai_rival())) {
-
-					auto cb = pick_fabrication_type(state, n, n.get_ai_rival());
-					if(cb) {
+					if(auto cb = pick_fabrication_type(state, n, n.get_ai_rival()); cb) {
 						n.set_constructing_cb_target(n.get_ai_rival());
 						n.set_constructing_cb_type(cb);
 					}

@@ -1062,23 +1062,14 @@ namespace ui {
 			auto target = retrieve<dcon::nation_id>(state, parent);
 
 			auto ol = state.world.nation_get_overlord_as_subject(source);
-			disabled = false;
-			if(source == target)
-			disabled = true;
-			else if(state.world.nation_get_constructing_cb_type(source))
-			disabled = true;
-			else if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
-			disabled = true;
-			else if(state.world.nation_get_in_sphere_of(target) == source)
-			disabled = true;
-			else if(state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
-			disabled = true;
-			else if(military::are_at_war(state, target, source))
-			disabled = true;
-			else if(military::has_truce_with(state, target, source))
-			disabled = true;
-			else if(!has_any_usable_cb(state, source, target))
-			disabled = true;
+			disabled = (source == target)
+				|| (state.world.nation_get_constructing_cb_type(source))
+				|| (state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
+				|| (state.world.nation_get_in_sphere_of(target) == source)
+				|| (state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
+				|| (military::are_at_war(state, target, source))
+				|| (military::has_truce_with(state, target, source))
+				|| (!has_any_usable_cb(state, source, target));
 		}
 
 		void button_action(sys::state& state) noexcept override {
