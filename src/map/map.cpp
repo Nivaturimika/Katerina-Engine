@@ -2335,12 +2335,6 @@ namespace map {
 					x_offset = float(bm_char.x_offset);
 					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
-					//hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
-					//auto const& gso = f.glyph_positions[glyphid];
-					//x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
-					//x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
-					//y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-					//glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
 					auto const& gso = f.glyph_positions[glyphid];
@@ -2498,13 +2492,8 @@ namespace map {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
 					x_offset = float(bm_char.x_offset);
-					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
+					y_offset = float(bm_char.y_offset);
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
-					//auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
-					//x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
-					//x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
-					//y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-					//glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
 					x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
@@ -2532,9 +2521,9 @@ namespace map {
 					float rx = float(bm_char.width) / font_size;
 					float ry = float(bm_char.height) / font_size;
 					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, -ry), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, -1), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -1), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -1), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
 					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, ry), shader_direction, glm::vec2(tx + sx, ty), real_text_size);
 					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
 					province_text_line_texture_per_quad.emplace_back(bm_font.ftexid);
