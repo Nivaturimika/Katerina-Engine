@@ -231,6 +231,9 @@ namespace map {
 
 	void update_text_lines(sys::state& state, display_data& map_data) {
 		auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
+		auto const font_id = text::name_into_font_id(state, "mapfont_56");
+		//auto const& bm_font = text::get_bm_font(state, font_id);
+		auto font_size = float(text::size_from_font_id(font_id));
 
 		// retroscipt
 		std::vector<text_line_generator_data> text_data;
@@ -704,7 +707,8 @@ namespace map {
 				}
 
 				auto prepared_name = text::stored_glyphs(state, text::font_selection::map_font, name);
-				float name_extent = f.text_extent(state, prepared_name, 0, uint32_t(prepared_name.glyph_info.size()), 1);
+				float name_extent = f.text_extent(state, prepared_name, 0, uint32_t(prepared_name.glyph_info.size()), int32_t(font_size)) / font_size;
+				//float name_extent = state.font_collection.text_extent(state, prepared_name, 0, uint32_t(prepared_name.glyph_info.size()), font_id) / font_size;
 
 				// Columns -> n
 				// Rows -> fixed size of 4
@@ -771,7 +775,7 @@ namespace map {
 					}
 
 					if(!use_quadratic)
-						text_data.emplace_back(std::move(prepared_name), mo, basis, ratio, n);
+						text_data.emplace_back(std::move(prepared_name), name, mo, basis, ratio, n);
 				}
 
 				bool use_linear = false;
@@ -805,7 +809,7 @@ namespace map {
 						}
 					}
 					if(!use_linear)
-						text_data.emplace_back(std::move(prepared_name), glm::vec4(mo, 0.f), basis, ratio, n);
+						text_data.emplace_back(std::move(prepared_name), name, glm::vec4(mo, 0.f), basis, ratio, n);
 				}
 
 				if(state.user_settings.map_label == sys::map_label_mode::linear || use_linear) {
@@ -851,7 +855,7 @@ namespace map {
 						}
 					}
 					if(ratio.x <= map_size.x * 0.75f && ratio.y <= map_size.y * 0.75f) {
-						text_data.emplace_back(std::move(prepared_name), glm::vec4(mo, 0.f, 0.f), basis, ratio, n);
+						text_data.emplace_back(std::move(prepared_name), name, glm::vec4(mo, 0.f, 0.f), basis, ratio, n);
 					}
 				}
 			}
@@ -870,7 +874,7 @@ namespace map {
 				auto r_sin = std::sin(p.get_text_rotation());
 				auto t_origin = t_position + t_size * glm::vec2(0.f, r_sin < 0.f ? -r_sin : 0.25f * r_sin);
 				auto mo = glm::rotate(-p.get_text_rotation(), glm::vec3(0.f, 1.f, 0.f));
-				p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), mo[0], t_origin, t_size, dcon::nation_id{});
+				p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), name, mo[0], t_origin, t_size, dcon::nation_id{});
 			}
 		}
 		map_data.set_province_text_lines(state, p_text_data);

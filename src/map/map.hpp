@@ -118,8 +118,9 @@ namespace map {
 
 	struct text_line_generator_data {
 		text_line_generator_data() { };
-		text_line_generator_data(text::stored_glyphs&& text_, glm::vec4 coeff_, glm::vec2 basis_, glm::vec2 ratio_, dcon::nation_id n_) : text(std::move(text_)), coeff{ coeff_ }, basis{ basis_ }, ratio{ ratio_ }, n{ n_ } { };
+		text_line_generator_data(text::stored_glyphs&& text_, std::string& original_text_, glm::vec4 coeff_, glm::vec2 basis_, glm::vec2 ratio_, dcon::nation_id n_) : text(std::move(text_)), original_text(original_text_), coeff{ coeff_ }, basis{ basis_ }, ratio{ ratio_ }, n{ n_ } { };
 		text::stored_glyphs text;
+		std::string original_text;
 		glm::vec4 coeff;
 		glm::vec2 basis;
 		glm::vec2 ratio;
@@ -250,8 +251,8 @@ namespace map {
 		static constexpr uint32_t vo_land_globe = 16;
 		static constexpr uint32_t vo_capital = 17;
 		static constexpr uint32_t vo_count = 18;
-	GLuint vao_array[vo_count] = { 0 };
-	GLuint vbo_array[vo_count] = { 0 };
+		GLuint vao_array[vo_count] = { 0 };
+		GLuint vbo_array[vo_count] = { 0 };
 		// Textures
 		static constexpr uint32_t texture_provinces = 0;
 		static constexpr uint32_t texture_terrain = 1;
@@ -282,12 +283,12 @@ namespace map {
 		static constexpr uint32_t texture_selection = 26;
 		static constexpr uint32_t texture_capital = 27;
 		static constexpr uint32_t texture_count = 28;
-	GLuint textures[texture_count] = { 0 };
+		GLuint textures[texture_count] = { 0 };
 		// Texture Array
 		static constexpr uint32_t texture_array_terrainsheet = 0;
 		static constexpr uint32_t texture_array_province_color = 1;
 		static constexpr uint32_t texture_array_count = 2;
-	GLuint texture_arrays[texture_array_count] = { 0 };
+		GLuint texture_arrays[texture_array_count] = { 0 };
 		// Shaders
 		static constexpr uint32_t shader_far_terrain = 0;
 		static constexpr uint32_t shader_close_terrain = 1;
@@ -295,13 +296,14 @@ namespace map {
 		static constexpr uint32_t shader_textured_line = 3;
 		static constexpr uint32_t shader_line_unit_arrow = 4;
 		static constexpr uint32_t shader_text_line = 5;
-		static constexpr uint32_t shader_drag_box = 6;
-		static constexpr uint32_t shader_borders = 7;
-		static constexpr uint32_t shader_railroad_line = 8;
-		static constexpr uint32_t shader_map_standing_object = 9;
-		static constexpr uint32_t shader_selection = 10;
-		static constexpr uint32_t shader_count = 11;
-	GLuint shaders[uint8_t(sys::projection_mode::num_of_modes)][shader_count] = { 0 };
+		static constexpr uint32_t shader_text_ttf_line = 6;
+		static constexpr uint32_t shader_drag_box = 7;
+		static constexpr uint32_t shader_borders = 8;
+		static constexpr uint32_t shader_railroad_line = 9;
+		static constexpr uint32_t shader_map_standing_object = 10;
+		static constexpr uint32_t shader_selection = 11;
+		static constexpr uint32_t shader_count = 12;
+		GLuint shaders[uint8_t(sys::projection_mode::num_of_modes)][shader_count] = { 0 };
 
 		static constexpr uint32_t uniform_offset = 0;
 		static constexpr uint32_t uniform_aspect_ratio = 1;
@@ -343,10 +345,9 @@ namespace map {
 		static constexpr uint32_t uniform_model_scale_rotation = 36;
 		static constexpr uint32_t uniform_model_proj_view = 37;
 		static constexpr uint32_t uniform_count = 38;
-	GLuint shader_uniforms[uint8_t(sys::projection_mode::num_of_modes)][shader_count][uniform_count] = { };
-
+		GLuint shader_uniforms[uint8_t(sys::projection_mode::num_of_modes)][shader_count][uniform_count] = { };
 		static constexpr uint32_t max_bone_matrices = 100;
-	GLuint bone_matrices_uniform_array[uint8_t(sys::projection_mode::num_of_modes)] = { };
+		GLuint bone_matrices_uniform_array[uint8_t(sys::projection_mode::num_of_modes)] = { };
 
 		// models: Textures for static meshes
 		static constexpr uint32_t max_static_meshes = 1080;

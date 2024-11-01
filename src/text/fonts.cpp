@@ -9,6 +9,8 @@
 #include "simple_fs.hpp"
 #include "system_state.hpp"
 #include "reports.hpp"
+#include "math_fns.hpp"
+
 #include "unicode/ubrk.h"
 #include "unicode/utypes.h"
 #include "unicode/ubidi.h"
@@ -20,41 +22,43 @@ namespace text {
 	}
 
 	bool is_black_font(std::string_view txt) {
-		if(parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "_bl") ||
-			parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "black") ||
-			parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "black_bold")) {
+		if(parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "_bl")
+		|| parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "black")
+		|| parsers::has_fixed_suffix_ci(txt.data(), txt.data() + txt.length(), "black_bold")) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	uint32_t font_size(std::string_view txt) {
 		char const* first_int = txt.data();
 		char const* end = txt.data() + txt.size();
-		while(first_int != end && !isdigit(*first_int))
-		++first_int;
+		while(first_int != end && !isdigit(*first_int)) {
+			++first_int;
+		}
 		char const* last_int = first_int;
-		while(last_int != end && isdigit(*last_int))
-		++last_int;
+		while(last_int != end && isdigit(*last_int)) {
+			++last_int;
+		}
 
 		if(first_int == last_int) {
-			if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "fps_font"))
-			return uint32_t(14);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "tooltip_font"))
-			return uint32_t(16);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "frangoth_bold"))
-			return uint32_t(18);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "impact_small"))
-			return uint32_t(24);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "old_english"))
-			return uint32_t(50);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "timefont"))
-			return uint32_t(24);
-			else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "vic_title"))
-			return uint32_t(42);
-			else
-			return uint32_t(14);
+			if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "fps_font")) {
+				return uint32_t(14);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "tooltip_font")) {
+				return uint32_t(16);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "frangoth_bold")) {
+				return uint32_t(18);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "impact_small")) {
+				return uint32_t(24);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "old_english")) {
+				return uint32_t(50);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "timefont")) {
+				return uint32_t(24);
+			} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "vic_title")) {
+				return uint32_t(42);
+			} else {
+				return uint32_t(14);
+			}
 		}
 
 		uint32_t rvalue = 0;
@@ -63,28 +67,21 @@ namespace text {
 	}
 
 	uint32_t font_index(std::string_view txt) {
-		if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "arial"))
-		return 1;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "fps"))
-		return 1;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "main"))
-		return 2;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "tooltip"))
-		return 1;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "frangoth"))
-		return 2;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "garamond"))
-		return 2;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "impact"))
-		return 2;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "old"))
-		return 2;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "timefont"))
-		return 1;
-		else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "vic"))
-		return 2;
-		else
-		return 1;
+		if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "arial")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "fps")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "tooltip")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "timefont")) {
+			return 1;
+		} else if(parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "main")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "frangoth")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "garamond")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "impact")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "old")
+		|| parsers::has_fixed_prefix_ci(txt.data(), txt.data() + txt.size(), "vic")) {
+			return 2;
+		} else {
+			return 1;
+		}
 	}
 
 	uint16_t name_into_font_id(sys::state& state, std::string_view txt) {
@@ -115,9 +112,9 @@ namespace text {
 
 	int32_t size_from_font_id(uint16_t id) {
 		auto index = uint32_t(((id >> 7) & 0x01) + 1);
-		if(index == 2)
-		return (int32_t(id & 0x3F) * 3) / 4;
-		else
+		if(index == 2) {
+			return (int32_t(id & 0x3F) * 3) / 4;
+		}
 		return (int32_t(id & 0x3F) * 5) / 6;
 	}
 
@@ -126,15 +123,13 @@ namespace text {
 	}
 	font_selection font_index_from_font_id(sys::state& state, uint16_t id) {
 		uint32_t offset = 0;
-		if(((id >> 7) & 0x01) == 0)
-		return font_selection::body_font;
-		else
+		if(((id >> 7) & 0x01) == 0) {
+			return font_selection::body_font;
+		}
 		return font_selection::header_font;
 	}
 
 	float font_manager::text_extent(sys::state& state, stored_glyphs const& txt, uint32_t starting_offset, uint32_t count, uint16_t font_id) {
-		auto& font = get_font(state, text::font_index_from_font_id(state, font_id));
-		auto size = text::size_from_font_id(font_id);
 		if(state.user_settings.use_classic_fonts) {
 			std::string codepoints = "";
 			for(uint32_t i = starting_offset; i < starting_offset + count; i++) {
@@ -142,6 +137,8 @@ namespace text {
 			}
 			return text::get_bm_font(state, font_id).get_string_width(state, codepoints.c_str(), uint32_t(codepoints.size()));
 		}
+		auto& font = get_font(state, text::font_index_from_font_id(state, font_id));
+		auto const size = text::size_from_font_id(font_id);
 		return float(font.text_extent(state, txt, starting_offset, count, size));
 	}
 
@@ -160,20 +157,19 @@ namespace text {
 	}
 
 	font::~font() {
-		if(hb_buf)
-		hb_buffer_destroy(hb_buf);
+		if(hb_buf) {
+			hb_buffer_destroy(hb_buf);
+		}
 		// if(loaded)
 		//	FT_Done_Face(font_face);
 	}
 
-	int32_t transform_offset_b(int32_t x, int32_t y, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height,
-		uint32_t pitch) {
-		int bmp_x = x - btmap_x_off;
-		int bmp_y = y - btmap_y_off;
-
-		if((bmp_x < 0) || (bmp_x >= (int32_t)width) || (bmp_y < 0) || (bmp_y >= (int32_t)height))
-		return -1;
-		else
+	int32_t transform_offset_b(int32_t x, int32_t y, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
+		int32_t bmp_x = x - btmap_x_off;
+		int32_t bmp_y = y - btmap_y_off;
+		if((bmp_x < 0) || (bmp_x >= (int32_t)width) || (bmp_y < 0) || (bmp_y >= (int32_t)height)) {
+			return -1;
+		}
 		return bmp_x + bmp_y * (int32_t)pitch;
 	}
 
@@ -195,9 +191,8 @@ namespace text {
 	//
 
 	void dead_reckoning(float distance_map[dr_size * dr_size], bool const in_map[dr_size * dr_size]) {
-	int16_t yborder[dr_size * dr_size] = {0};
-	int16_t xborder[dr_size * dr_size] = {0};
-
+		int16_t yborder[dr_size * dr_size] = { 0 };
+		int16_t xborder[dr_size * dr_size] = { 0 };
 		for(uint32_t i = 0; i < dr_size * dr_size; ++i) {
 			distance_map[i] = std::numeric_limits<float>::infinity();
 		}
@@ -206,72 +201,64 @@ namespace text {
 				if(in_map[i - 1 + dr_size * j] != in_map[i + dr_size * j] || in_map[i + 1 + dr_size * j] != in_map[i + dr_size * j] ||
 					in_map[i + dr_size * (j + 1)] != in_map[i + dr_size * j] || in_map[i + dr_size * (j - 1)] != in_map[i + dr_size * j]) {
 					distance_map[i + dr_size * j] = 0.0f;
-					yborder[i + dr_size * j] = static_cast<int16_t>(j);
-					xborder[i + dr_size * j] = static_cast<int16_t>(i);
+					yborder[i + dr_size * j] = int16_t(j);
+					xborder[i + dr_size * j] = int16_t(i);
 				}
 			}
 		}
+		// TODO: add math::sqrti
 		for(int32_t j = 1; j < dr_size - 1; ++j) {
 			for(int32_t i = 1; i < dr_size - 1; ++i) {
 				if(distance_map[(i - 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i) + dr_size * (j - 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i + 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i - 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 			}
 		}
-
 		for(int32_t j = dr_size - 2; j > 0; --j) {
 			for(int32_t i = dr_size - 2; i > 0; --i) {
 				if(distance_map[(i + 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i - 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i) + dr_size * (j + 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 				if(distance_map[(i + 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = (float)std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) +
-																														 (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
 				}
 			}
 		}
-
 		for(uint32_t i = 0; i < dr_size * dr_size; ++i) {
-			if(in_map[i])
-			distance_map[i] *= -1.0f;
+			if(in_map[i]) {
+				distance_map[i] *= -1.0f;
+			}
 		}
 	}
 
@@ -281,7 +268,6 @@ namespace text {
 		uint32_t end_language = 0;
 		auto locale_name = state.world.locale_get_locale_name(l);
 		std::string_view localename_sv((char const*)locale_name.begin(), locale_name.size());
-
 		std::string localename_str(localename_sv);
 		for(uint32_t i = 0; i < uint32_t(localename_str.size()); i++) {
 			if(localename_str[i] == '_') {
@@ -290,15 +276,14 @@ namespace text {
 		}
 
 		while(end_language < locale_name.size()) {
-			if(localename_str[end_language] == '-')
-			break;
+			if(localename_str[end_language] == '-') {
+				break;
+			}
 			++end_language;
 		}
 
-	std::string lang_str{ localename_str .substr(0, end_language) };
-	
+		std::string lang_str{ localename_str .substr(0, end_language) };
 		state.world.locale_set_resolved_language(l, hb_language_from_string(localename_str.data(), int(end_language)));
-
 		{
 			auto f = state.world.locale_get_body_font(l);
 			std::string fname((char const*)f.begin(), (char const*)f.end());
@@ -317,8 +302,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
-				if(ff) {
+				if(auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname)); ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);
 					load_font(font_array.back(), content.data, content.file_size);
@@ -350,8 +334,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
-				if(ff) {
+				if(auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname)); ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);
 					load_font(font_array.back(), content.data, content.file_size);
@@ -383,8 +366,7 @@ namespace text {
 				auto r = simple_fs::get_root(state.common_fs);
 				auto assets = simple_fs::open_directory(r, NATIVE("assets"));
 				auto fonts = simple_fs::open_directory(assets, NATIVE("fonts"));
-				auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname));
-				if(ff) {
+				if(auto ff = simple_fs::open_file(fonts, text::utf8_to_native(fname)); ff) {
 					font_array.emplace_back();
 					auto content = simple_fs::view_contents(*ff);
 					load_font(font_array.back(), content.data, content.file_size);
@@ -400,9 +382,7 @@ namespace text {
 		}
 
 		state.reset_locale_pool();
-
-		auto fb_name = state.world.locale_get_fallback(l);
-		if(fb_name.size() > 0) {
+		if(auto fb_name = state.world.locale_get_fallback(l); fb_name.size() > 0) {
 			std::string_view fb_name_sv((char const*)fb_name.begin(), fb_name.size());
 			state.load_locale_strings(fb_name_sv);
 		}
@@ -434,14 +414,14 @@ namespace text {
 		}
 		uint32_t index = 0;
 		switch(s) {
-			case font_selection::body_font:
-			default:
+		case font_selection::body_font:
+		default:
 			index = state.world.locale_get_resolved_body_font(current_locale);
 			break;
-			case font_selection::header_font:
+		case font_selection::header_font:
 			index = state.world.locale_get_resolved_header_font(current_locale);
 			break;
-			case font_selection::map_font:
+		case font_selection::map_font:
 			index = state.world.locale_get_resolved_map_font(current_locale);
 			break;
 		}
@@ -493,8 +473,9 @@ namespace text {
 		return glyph_positions[ch_in].x_advance;
 	}
 	void font::make_glyph(char32_t ch_in) {
-		if(glyph_positions.find(ch_in) != glyph_positions.end())
-		return;
+		if(glyph_positions.find(ch_in) != glyph_positions.end()) {
+			return;
+		}
 
 		// load all glyph metrics
 		if(ch_in) {
@@ -596,10 +577,9 @@ namespace text {
 
 	void font::remake_cache(sys::state& state, font_selection type, stored_glyphs& txt, std::span<uint16_t> source) {
 		txt.glyph_info.clear();
-
-		if(source.size() == 0)
-		return;
-
+		if(source.empty()) {
+			return;
+		}
 		if(only_raw_codepoints && type != font_selection::map_font) {
 			for(uint32_t i = 0; i < uint32_t(source.size()); i++) {
 				text::stored_glyph glyph;
