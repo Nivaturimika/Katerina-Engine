@@ -2468,16 +2468,7 @@ namespace map {
 				text_size *= 0.66f;
 			}
 			auto real_text_size = text_size / (size_x * 2.0f);
-			float letter_spacing_map = std::clamp(0.5f * (total_size - text_size) / 2.f, 0.f, text_size * 2.f);
-			if(state.world.locale_get_prevent_letterspace(state.font_collection.get_current_locale())) {
-				letter_spacing_map = 0.f;
-			}
-			if(state.user_settings.use_classic_fonts) {
-				// quick hack to fix kerning, idfk why kerning is broken
-				letter_spacing_map *= 2.5f;
-			}
-
-			float margin = (curve_length - text_length * (text_size + letter_spacing_map * 2.f) + letter_spacing_map) / 2.f;
+			float margin = (curve_length - text_length * text_size) / 2.f;
 			float x = 0.f;
 			for(float accumulated_length = 0.f; ; x += x_step) {
 				auto added_distance = 2.f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
@@ -2514,7 +2505,7 @@ namespace map {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
 					x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 					x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
-					//y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
+					y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
@@ -2566,8 +2557,8 @@ namespace map {
 				float glyph_advance = x_advance * text_size / 64.f;
 				for(float glyph_length = 0.f; ; x += x_step) {
 					auto added_distance = 2.f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
-					if(glyph_length + added_distance >= glyph_advance + letter_spacing_map) {
-						x += x_step * (glyph_advance + letter_spacing_map - glyph_length) / added_distance;
+					if(glyph_length + added_distance >= glyph_advance) {
+						x += x_step * (glyph_advance - glyph_length) / added_distance;
 						break;
 					}
 					glyph_length += added_distance;
