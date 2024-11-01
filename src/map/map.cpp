@@ -2318,30 +2318,29 @@ namespace map {
 				accumulated_length += added_distance;
 			}
 
-			for(uint32_t i = 0; i < uint32_t(e.text.glyph_info.size()); i++) {
+			// le epic trickster for utf8, learn bitches
+			auto glyph_count = uint32_t(state.user_settings.use_classic_fonts ? e.original_text.size() : e.text.glyph_info.size());
+			for(uint32_t i = 0; i < glyph_count; i++) {
 				float x_advance = 0.f;
 				float x_offset = 0.f;
 				float y_offset = 0.f;
 				glm::vec2 glyph_positions;
 				if(state.user_settings.use_classic_fonts) {
-					/*
-					auto const ch = uint8_t(e.text.glyph_info[i].codepoint);
+					auto const ch = uint8_t(e.original_text[i]);
 					auto const& bm_char = bm_font.chars[ch];
 					x_advance = float(bm_char.x_advance);
-					if(i != uint32_t(e.text.glyph_info.size()) - 1) {
+					if(i != glyph_count - 1) {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
-					x_advance = (x_advance / text_size) * 64.f;
 					x_offset = float(bm_char.x_offset);
 					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
-					*/
-					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
-					auto const& gso = f.glyph_positions[glyphid];
-					x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
-					x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
-					y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
+					//hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
+					//auto const& gso = f.glyph_positions[glyphid];
+					//x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
+					//x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
+					//y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
+					//glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
 					auto const& gso = f.glyph_positions[glyphid];
@@ -2485,7 +2484,7 @@ namespace map {
 				return e.coeff[1] + 2.f * e.coeff[2] * x + 3.f * e.coeff[3] * x * x;
 			};
 			// le epic trickster for utf8, learn bitches
-			auto glyph_count = uint32_t(state.user_settings.use_classic_fonts ? e.text.glyph_info.size() : e.original_text.size());
+			auto glyph_count = uint32_t(state.user_settings.use_classic_fonts ? e.original_text.size() : e.text.glyph_info.size());
 			for(uint32_t i = 0; i < glyph_count; i++) {
 				float x_advance = 0.f;
 				float x_offset = 0.f;
@@ -2495,18 +2494,17 @@ namespace map {
 					auto const ch = uint8_t(e.original_text[i]);
 					auto const& bm_char = bm_font.chars[ch];
 					x_advance = float(bm_char.x_advance);
-					//if(i != glyph_count - 1) {
-					//	x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
-					//}
+					if(i != glyph_count - 1) {
+						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
+					}
 					x_offset = float(bm_char.x_offset);
 					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
-					
-					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
-					x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
-					x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
-					y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
-					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
+					//auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
+					//x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
+					//x_offset = float(e.text.glyph_info[i].x_offset) / (float((1 << 6) * text::magnification_factor)) + float(gso.x);
+					//y_offset = float(gso.y) - float(e.text.glyph_info[i].y_offset) / (float((1 << 6) * text::magnification_factor));
+					//glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
 					x_advance = float(e.text.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
