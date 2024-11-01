@@ -366,7 +366,7 @@ namespace sys {
 			message_response::standard_log,//chat_message = 101,
 		};
 		bool fow_enabled = false;
-		map_label_mode map_label = map_label_mode::quadratic;
+		map_label_mode map_label = map_label_mode::cubic;
 		uint8_t antialias_level = 4;
 		float gaussianblur_level = 1.f;
 		float gamma = 1.f;
