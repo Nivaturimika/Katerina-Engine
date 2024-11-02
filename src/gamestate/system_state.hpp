@@ -365,7 +365,7 @@ namespace sys {
 			message_response::standard_popup,//bankruptcy = 100,
 			message_response::standard_log,//chat_message = 101,
 		};
-		bool fow_enabled = false;
+		bool fow_enabled = true;
 		map_label_mode map_label = map_label_mode::cubic;
 		uint8_t antialias_level = 4;
 		float gaussianblur_level = 1.f;
