@@ -3279,13 +3279,22 @@ namespace ai {
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 				return;
 
-			float base_income = economy_estimations::estimate_daily_income(state, n) + n.get_stockpiles(economy::money) / 365.f;
+			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
 
 			// they don't have to add up to 1.f
 			// the reason they are there is to slow down AI spendings,
 			// make them more or less balanced
 			// and stabilize economy faster
 			// not to allow it to hoard money
+
+			auto tariff_min=int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff));
+			auto tariff_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff));
+			auto military_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
+			auto military_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
+			auto tax_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax));
+			auto tax_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax));
+			auto social_spending_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending));
+			auto social_spending_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending));
 
 			float land_budget_ratio = 0.50f;
 			float sea_budget_ratio = 0.25f;
