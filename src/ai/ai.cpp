@@ -3279,6 +3279,7 @@ namespace ai {
 				return;
 
 			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
+			
 
 			// they don't have to add up to 1.f
 			// the reason they are there is to slow down AI spendings,
@@ -3294,7 +3295,32 @@ namespace ai {
 			auto tax_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax));
 			auto social_spending_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending));
 			auto social_spending_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending));
+			auto construction_min = int32_t(100.0f * state.defines.trade_cap_low_limit_constructions);
+			auto construction_max = int32_t(100.0f);
+			auto land_min = int32_t(100.0f * state.defines.trade_cap_low_limit_land);
+			auto land_max = int32_t(100.0f);
+			auto naval_min = int32_t(100.0f * state.defines.trade_cap_low_limit_naval);
+			auto naval_max = int32_t(100.0f);
 
+			float income_min = economy_estimations::estimate_gold_income(state, n)
+				+ economy_estimations::estimate_war_subsidies_income(state, n)
+				+ economy_estimations::estimate_tariff_income(state, n)*tariff_min
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor) * tax_min
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle) * tax_min
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich) * tax_min;
+			float income_max = economy_estimations::estimate_gold_income(state, n)
+				+ economy_estimations::estimate_war_subsidies_income(state, n)
+				+ economy_estimations::estimate_tariff_income(state, n) * tariff_max
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor) * tax_max
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle) * tax_max
+				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich) * tax_max;
+			float expenses_min = 0.0f;
+			float expenses_max = 0.0f;
+
+
+
+
+			
 			float land_budget_ratio = 0.50f;
 			float sea_budget_ratio = 0.25f;
 			float education_budget_ratio = 0.10f;
