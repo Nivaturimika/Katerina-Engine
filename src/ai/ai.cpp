@@ -3302,18 +3302,19 @@ namespace ai {
 			auto naval_min = int32_t(100.0f * state.defines.trade_cap_low_limit_naval);
 			auto naval_max = int32_t(100.0f);
 
-			float income_min = economy_estimations::estimate_gold_income(state, n)
-				+ economy_estimations::estimate_war_subsidies_income(state, n)
-				+ economy_estimations::estimate_tariff_income(state, n)*tariff_min
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor) * tax_min
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle) * tax_min
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich) * tax_min;
-			float income_max = economy_estimations::estimate_gold_income(state, n)
-				+ economy_estimations::estimate_war_subsidies_income(state, n)
-				+ economy_estimations::estimate_tariff_income(state, n) * tariff_max
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor) * tax_max
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle) * tax_max
-				+ economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich) * tax_max;
+
+			float est_gold_income = economy_estimations::estimate_gold_income(state, n);
+			float est_war_sub_income = economy_estimations::estimate_war_subsidies_income(state, n);
+			float est_tariff_income = economy_estimations::estimate_tariff_income(state, n);
+			float est_poor_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor);
+			float est_middle_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
+			float est_rich_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
+
+			float income_min = est_gold_income + est_war_sub_income + est_tariff_income * tariff_min
+				+ est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
+			float income_max = est_gold_income + est_war_sub_income + est_tariff_income * tariff_max
+				+ est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
+
 			float expenses_min = 0.0f;
 			float expenses_max = 0.0f;
 
