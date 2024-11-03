@@ -42,7 +42,7 @@ namespace sys {
 	struct user_settings_s {
 		float ui_scale = 1.0f;
 		float master_volume = 0.5f;
-		float music_volume = 1.0f;
+		float music_volume = 0.5f;
 		float effects_volume = 1.0f;
 		float interface_volume = 1.0f;
 		bool prefer_fullscreen = false;
