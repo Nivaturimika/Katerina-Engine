@@ -49,7 +49,7 @@ namespace parsers {
 		}
 	}
 
-	game_rule_action meke_game_rule_action(token_generator& gen, error_handler& err, scenario_building_context& context) {
+	game_rule_action make_game_rule_action(token_generator& gen, error_handler& err, scenario_building_context& context) {
 		game_rules_action_context a_context{ context };
 		return parse_game_rule_action(gen, err, a_context);
 	}

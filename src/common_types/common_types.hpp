@@ -276,7 +276,8 @@ namespace dcon {
 	}
 
 	using stable_mk_2_tag = uint32_t;
-#ifdef _WIN64
+
+#if defined(_WIN64) || defined(__x86_64__)
 	constexpr inline stable_mk_2_tag upper_mk_2_vector_bound = std::numeric_limits<stable_mk_2_tag>::max();
 #else
 	constexpr inline stable_mk_2_tag upper_mk_2_vector_bound = 128 * 4096;

@@ -85,44 +85,33 @@ namespace game_scene {
 		return current_view;
 	}
 
-	float get_effects_volume(sys::state& state) {
-		return state.user_settings.effects_volume * state.user_settings.master_volume;
-	}
-
 	void selected_units_control(sys::state& state, dcon::nation_id nation, dcon::province_id target, sys::key_modifiers mod) {
 		bool army_moved = false;
 		bool navy_moved = false;
 		bool army_play = false;
-		//as opposed to queueing
+		//As opposed to queueing
 		bool reset_orders = (uint8_t(mod) & uint8_t(sys::key_modifiers::modifiers_shift)) == 0;
-		float volume = get_effects_volume(state);
-
 		for(auto a : state.selected_armies) {
-			if(command::can_move_army(state, nation, a, target).empty()) {
-
-			} else {
+			if(command::can_move_army(state, nation, a, target).size() > 0) {
 				command::move_army(state, nation, a, target, reset_orders);
 				army_moved = true;
 				army_play = true;
 			}
 		}
 		for(auto a : state.selected_navies) {
-			if(command::can_move_navy(state, nation, a, target).empty()) {
-
-			} else {
+			if(command::can_move_navy(state, nation, a, target).size() > 0) {
 				command::move_navy(state, nation, a, target, reset_orders);
 				navy_moved = true;
 			}
 		}
-
 		if(army_moved || navy_moved) {
 			if(army_play) {
-				sound::play_effect(state, sound::get_army_move_sound(state), volume);
+				sound::play_effect(state, sound::get_army_move_sound(state), state.user_settings.effects_volume * state.user_settings.master_volume);
 			} else {
-				sound::play_effect(state, sound::get_navy_move_sound(state), volume);
+				sound::play_effect(state, sound::get_navy_move_sound(state), state.user_settings.effects_volume * state.user_settings.master_volume);
 			}
 		} else {
-			sound::play_effect(state, sound::get_error_sound(state), volume);
+			sound::play_effect(state, sound::get_error_sound(state), state.user_settings.effects_volume * state.user_settings.master_volume);
 		}
 	}
 
@@ -250,18 +239,15 @@ namespace game_scene {
 		}
 		map_pos *= glm::vec2(float(state.map_state.map_data.size_x), float(state.map_state.map_data.size_y));
 		auto idx = int32_t(state.map_state.map_data.size_y - map_pos.y) * int32_t(state.map_state.map_data.size_x) + int32_t(map_pos.x);
-
 		if(0 <= idx && size_t(idx) < state.map_state.map_data.province_id_map.size()) {
-			sound::play_interface_sound(state, sound::get_random_province_select_sound(state), get_effects_volume(state));
 			auto id = province::from_map_id(state.map_state.map_data.province_id_map[idx]);
-
 			if(state.selected_armies.size() > 0 || state.selected_navies.size() > 0) {
 				state.current_scene.rbutton_selected_units(state, state.local_player_nation, id, mod);
 			} else {
+				sound::play_interface_sound(state, sound::get_random_province_select_sound(state), state.user_settings.effects_volume * state.user_settings.master_volume);
 				state.current_scene.rbutton_province(state, state.local_player_nation, id, mod);
 			}
 		}
-
 		on_rbutton_down_map(state, x, y, mod);
 	}
 
@@ -401,10 +387,12 @@ namespace game_scene {
 				}
 			}
 		}
-		for(auto a : state.world.nation_get_navy_control(state.local_player_nation)) {
-			if(!a.get_navy().get_is_retreating()) {
-				if(navy_is_in_selection(state, x, y, a.get_navy())) {
-					state.select(a.get_navy());
+		if(state.selected_armies.empty()) {
+			for(auto a : state.world.nation_get_navy_control(state.local_player_nation)) {
+				if(!a.get_navy().get_is_retreating()) {
+					if(navy_is_in_selection(state, x, y, a.get_navy())) {
+						state.select(a.get_navy());
+					}
 				}
 			}
 		}

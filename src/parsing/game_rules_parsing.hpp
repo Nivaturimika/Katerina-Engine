@@ -27,7 +27,8 @@ namespace parsers {
 		void action(game_rule_action value, error_handler& err, int32_t line, scenario_building_context&);
 		void finish(scenario_building_context& context);
 	};
-	game_rule_action meke_game_rule_action(token_generator& gen, error_handler& err, scenario_building_context& context);
-	dcon::trigger_key meke_game_rule_trigger(token_generator& gen, error_handler& err, game_rules_action_context& context);
-	dcon::effect_key meke_game_rule_effect(token_generator& gen, error_handler& err, game_rules_action_context& context);
+
+	game_rule_action make_game_rule_action(token_generator& gen, error_handler& err, scenario_building_context& context);
+	dcon::trigger_key make_game_rule_trigger(token_generator& gen, error_handler& err, game_rules_action_context& context);
+	dcon::effect_key make_game_rule_effect(token_generator& gen, error_handler& err, game_rules_action_context& context);
 }

@@ -454,7 +454,7 @@ namespace command {
 				text::add_line(state, contents, "msg_inc_rel_1", text::variable_type::x, source, text::variable_type::y, target);
 			},
 			"msg_inc_rel_title",
-		source, target, dcon::nation_id{},
+			source, target, dcon::nation_id{},
 			sys::message_base_type::increase_relation
 		});
 	}
@@ -2071,7 +2071,7 @@ namespace command {
 						text::add_line(state, contents, join_attacker ? "msg_crisis_vol_join_1" : "msg_crisis_vol_join_2", text::variable_type::x, source);
 					},
 					"msg_crisis_vol_join_title",
-				source, dcon::nation_id{}, dcon::nation_id{},
+					source, dcon::nation_id{}, dcon::nation_id{},
 					sys::message_base_type::crisis_voluntary_join
 				});
 

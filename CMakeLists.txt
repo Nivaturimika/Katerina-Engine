@@ -182,13 +182,13 @@ else() # GCC or CLANG
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_compile_options(KatEngineCommon INTERFACE
 			-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wdangling-else -Wno-unused-private-field -std=c++20
-			$<$<CONFIG:Debug>:			-mfpmath=sse -mavx2 -mfma -g -pipe>
-			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
+			$<$<CONFIG:Debug>:			-mfpmath=sse -msse4.2 -g -pipe>
+			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -msse4.2 -O3 -pipe -fno-rtti -DNDEBUG>)
 	else()
 		target_compile_options(KatEngineCommon INTERFACE
 										# -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field -Wno-unused-but-set-variable -Wno-parentheses
-			$<$<CONFIG:Debug>:			-mfpmath=sse -mavx2 -mfma -g -pipe>
-			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -mavx2 -mfma -O3 -pipe -fno-rtti -DNDEBUG>)
+			$<$<CONFIG:Debug>:			-mfpmath=sse -msse4.2 -g -pipe>
+			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -msse4.2 -O3 -pipe -fno-rtti -DNDEBUG>)
 	endif()
 endif()
 target_link_libraries(KatEngineCommon INTERFACE freetype)
@@ -435,6 +435,7 @@ add_custom_target(GENERATE_PARSERS DEPENDS
 	${PROJECT_SOURCE_DIR}/src/parsing/news_parser_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/parsing/effect_parser_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/parsing/trigger_parser_defs_generated.hpp
+	${PROJECT_SOURCE_DIR}/src/parsing/game_rules_parser_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/text/bmfont_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/text/font_defs_generated.hpp)
 add_dependencies(KatEngine GENERATE_PARSERS)

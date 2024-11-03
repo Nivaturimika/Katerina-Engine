@@ -827,8 +827,7 @@ namespace ai {
 								? trigger::evaluate(state, allow, trigger::to_generic(n), trigger::to_generic(n), 0)
 								: true);
 							if(second_validity) {
-								effect::execute(state, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(state.current_date.value),
-								uint32_t(n.index() << 4 ^ d.id.index()));
+								effect::execute(state, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(state.current_date.value), uint32_t(n.index() << 4 ^ d.id.index()));
 								notification::post(state, notification::message{
 									[e, n, did = d.id, when = state.current_date](sys::state& state, text::layout_base& contents) {
 										text::add_line(state, contents, "msg_decision_1", text::variable_type::x, n, text::variable_type::y, state.world.decision_get_name(did));
@@ -836,7 +835,7 @@ namespace ai {
 										ui::effect_description(state, contents, e, trigger::to_generic(n), trigger::to_generic(n), 0, uint32_t(when.value), uint32_t(n.index() << 4 ^ did.index()));
 									},
 									"msg_decision_title",
-								n, dcon::nation_id{}, dcon::nation_id{},
+									n, dcon::nation_id{}, dcon::nation_id{},
 									sys::message_base_type::decision
 								});
 							}
