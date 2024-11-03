@@ -1370,10 +1370,10 @@ namespace nations {
 						text::add_line(state, contents, "msg_rem_sphere_1", text::variable_type::x, n, text::variable_type::y, o);
 					},
 					"msg_rem_sphere_title",
-				n, o, dcon::nation_id{},
+					n, o, dcon::nation_id{},
 					sys::message_base_type::rem_sphere
 				});
-			o.set_in_sphere_of(dcon::nation_id{});
+				o.set_in_sphere_of(dcon::nation_id{});
 			}
 		}
 
@@ -1512,22 +1512,21 @@ namespace nations {
 		if(auto r = state.world.get_diplomatic_relation_by_diplomatic_pair(a, b); r) {
 			if(state.world.diplomatic_relation_get_are_allied(r)) {
 				break_alliance(state, r);
-				if(a != state.local_player_nation) {
-					notification::post(state, notification::message{
-						[from = text::get_name(state, a), to = text::get_name(state, b)](sys::state& state, text::layout_base& contents) {
-							text::add_line(state, contents, "msg_alliance_ends_1", text::variable_type::x, to, text::variable_type::y, from);
-						},
-						"msg_alliance_ends_title",
+				notification::post(state, notification::message{
+					[from = text::get_name(state, a), to = text::get_name(state, b)](sys::state& state, text::layout_base& contents) {
+						text::add_line(state, contents, "msg_alliance_ends_1", text::variable_type::x, to, text::variable_type::y, from);
+					},
+					"msg_alliance_ends_title",
 					a, b, dcon::nation_id{},
-						sys::message_base_type::alliance_ends
-					});
-				}
+					sys::message_base_type::alliance_ends
+				});
 			}
 		}
 	}
 	void make_alliance(sys::state& state, dcon::nation_id a, dcon::nation_id b) {
-		if(a == b)
-		return;
+		if(a == b) {
+			return;
+		}
 		auto r = state.world.get_diplomatic_relation_by_diplomatic_pair(a, b);
 		if(!r) {
 			r = state.world.force_create_diplomatic_relation(a, b);
@@ -1537,17 +1536,14 @@ namespace nations {
 			state.world.nation_get_allies_count(b)++;
 			state.world.diplomatic_relation_set_are_allied(r, true);
 		}
-
-		if(a != state.local_player_nation && b != state.local_player_nation) {
-			notification::post(state, notification::message{
-				[from = a, to = b](sys::state& state, text::layout_base& contents) {
-					text::add_line(state, contents, "msg_alliance_starts_1", text::variable_type::x, to, text::variable_type::y, from);
-				},
-				"msg_alliance_starts_title",
+		notification::post(state, notification::message{
+			[from = a, to = b](sys::state& state, text::layout_base& contents) {
+				text::add_line(state, contents, "msg_alliance_starts_1", text::variable_type::x, to, text::variable_type::y, from);
+			},
+			"msg_alliance_starts_title",
 			a, b, dcon::nation_id{},
-				sys::message_base_type::alliance_starts
-			});
-		}
+			sys::message_base_type::alliance_starts
+		});
 	}
 
 	bool other_nation_is_influencing(sys::state& state, dcon::nation_id target, dcon::gp_relationship_id rel) {
@@ -1971,7 +1967,7 @@ namespace nations {
 
 			},
 			"msg_crisis_defender_title",
-		n, dcon::nation_id{}, dcon::nation_id{},
+			n, dcon::nation_id{}, dcon::nation_id{},
 			sys::message_base_type::crisis_defender_backer
 		});
 	}
@@ -1985,7 +1981,7 @@ namespace nations {
 
 			},
 			"msg_crisis_attacker_title",
-		n, dcon::nation_id{}, dcon::nation_id{},
+			n, dcon::nation_id{}, dcon::nation_id{},
 			sys::message_base_type::crisis_attacker_backer
 		});
 	}

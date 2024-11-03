@@ -10,8 +10,9 @@ namespace notification {
 		// as that will probably be a more computationally expensive check
 		//
 
-		bool v = state.new_messages.try_emplace(std::move(m));
-		assert(v);
+		//bool v = state.new_messages.try_emplace(std::move(m));
+		//assert(v);
+		state.new_messages.emplace(std::move(m));
 	}
 
 	bool nation_is_interesting(sys::state& state, dcon::nation_id n) {

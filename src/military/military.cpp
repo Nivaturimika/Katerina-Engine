@@ -775,7 +775,7 @@ namespace military {
 								text::add_line(state, contents, "msg_wsub_end_1", text::variable_type::x, source, text::variable_type::y, target);
 							},
 							"msg_wsub_end_title",
-						n, ul.get_target().id, dcon::nation_id{},
+							n, ul.get_target().id, dcon::nation_id{},
 							sys::message_base_type::war_subsidies_end
 						});
 					}
@@ -794,7 +794,7 @@ namespace military {
 								text::add_line(state, contents, "msg_wsub_end_1", text::variable_type::x, source, text::variable_type::y, target);
 							},
 							"msg_wsub_end_title",
-						n, ul.get_target().id, dcon::nation_id{},
+							n, ul.get_target().id, dcon::nation_id{},
 							sys::message_base_type::war_subsidies_end
 						});
 					}
@@ -818,7 +818,7 @@ namespace military {
 			if(gp_attackers >= 2 && gp_defenders >= 2) {
 				auto old_name = get_war_name(state, w);
 				state.world.war_set_is_great(w, true);
-			auto it = state.lookup_key(std::string_view{"great_war_name"});
+				auto it = state.lookup_key(std::string_view{"great_war_name"});
 				if(it) {
 					state.world.war_set_name(w, it);
 				}
@@ -826,10 +826,10 @@ namespace military {
 				notification::post(state, notification::message{
 					[old_name, w](sys::state& state, text::layout_base& contents) {
 						std::string new_war_name = get_war_name(state, w);
-					text::add_line(state, contents, "msg_war_becomes_great_1", text::variable_type::x, std::string_view{old_name}, text::variable_type::y, std::string_view{new_war_name});
+						text::add_line(state, contents, "msg_war_becomes_great_1", text::variable_type::x, std::string_view{old_name}, text::variable_type::y, std::string_view{new_war_name});
 					},
 					"msg_war_becomes_great_title",
-				state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+					state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 					sys::message_base_type::war_becomes_great
 				});
 			}
@@ -841,7 +841,7 @@ namespace military {
 			text::add_line(state, contents, "msg_war_join_1", text::variable_type::x, n, text::variable_type::val, std::string_view{war_name});
 			},
 			"msg_war_join_title",
-		n, get_role(state, w, state.local_player_nation) != war_role::none ? state.local_player_nation : dcon::nation_id{}, dcon::nation_id{ },
+			n, get_role(state, w, state.local_player_nation) != war_role::none ? state.local_player_nation : dcon::nation_id{}, dcon::nation_id{ },
 			sys::message_base_type::join_war
 		});
 
@@ -1125,10 +1125,11 @@ namespace military {
 					text::substitution_map sub;
 					text::add_to_substitution_map(sub, text::variable_type::recipient, target);
 					text::add_to_substitution_map(sub, text::variable_type::from, added_by);
-					if(secondary_nation)
-					text::add_to_substitution_map(sub, text::variable_type::third, secondary_nation);
-					else if(tag)
-					text::add_to_substitution_map(sub, text::variable_type::third, tag);
+					if(secondary_nation) {
+						text::add_to_substitution_map(sub, text::variable_type::third, secondary_nation);
+					} else if(tag) {
+						text::add_to_substitution_map(sub, text::variable_type::third, tag);
+					}
 					text::add_to_substitution_map(sub, text::variable_type::state, sd);
 
 					auto box = text::open_layout_box(contents);

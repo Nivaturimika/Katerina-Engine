@@ -1,5 +1,7 @@
 #include <string_view>
 #include <type_traits>
+#include <locale>
+#include <codecvt>
 
 #include "nations.hpp"
 #include "text.hpp"
@@ -2177,10 +2179,9 @@ namespace text {
 		if(auto k = state.lookup_key(key); k) {
 			source_text = k;
 		}
-
-		if(!source_text)
-		return std::string{key};
-
+		if(!source_text) {
+			return std::string{key};
+		}
 		return resolve_string_substitution(state, source_text, mp);
 	}
 
@@ -2245,10 +2246,14 @@ namespace text {
 	}
 #else
 	native_string win1250_to_native(std::string_view data_in) {
+		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter; 
 		std::string result;
-		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
 		for(auto const ch : data_in) {
-			result += ch >= 0 ? ch : converter.to_bytes(text::win1250toUTF16(ch));
+			if(ch >= 0) {
+				result += ch;
+			} else {
+				result += converter.to_bytes(text::win1250toUTF16(ch));
+			}
 		}
 		return result;
 	}

@@ -346,17 +346,14 @@ namespace military {
 				auto target = n.get_constructing_cb_target();
 				if(military::are_at_war(state, n, target) || state.world.nation_get_owned_province_count(target) == 0 ||
 					!cb_conditions_satisfied(state, n, target, n.get_constructing_cb_type())) {
-					if(n == state.local_player_nation) {
-						notification::post(state, notification::message{
-							[](sys::state& state, text::layout_base& contents) {
-								text::add_line(state, contents, "msg_fab_canceled_1");
-							},
-							"msg_fab_canceled_title",
+					notification::post(state, notification::message{
+						[](sys::state& state, text::layout_base& contents) {
+							text::add_line(state, contents, "msg_fab_canceled_1");
+						},
+						"msg_fab_canceled_title",
 						n, dcon::nation_id{}, dcon::nation_id{},
-							sys::message_base_type::cb_fab_cancelled
-						});
-					}
-
+						sys::message_base_type::cb_fab_cancelled
+					});
 					n.set_constructing_cb_is_discovered(false);
 					n.set_constructing_cb_progress(0.0f);
 					n.set_constructing_cb_target(dcon::nation_id{});

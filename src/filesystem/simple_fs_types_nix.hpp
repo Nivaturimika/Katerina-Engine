@@ -66,11 +66,11 @@ namespace simple_fs {
 
 	class file {
 		int file_descriptor = -1;
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		void* mapping_handle = nullptr;
-		#else
+#else
 		void* file_buffer = nullptr;
-		#endif
+#endif
 
 		native_string absolute_path;
 		file_contents content;
@@ -90,5 +90,6 @@ namespace simple_fs {
 		friend class std::optional<file>;
 		friend file_contents view_contents(file const& f);
 		friend native_string get_full_name(file const& f);
+		friend uint64_t get_write_time(file const& f);
 	};
 } // namespace simple_fs

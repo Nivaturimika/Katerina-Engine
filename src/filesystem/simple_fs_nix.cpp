@@ -26,17 +26,17 @@ namespace simple_fs {
 	}
 
 	file::~file() {
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		if(mapping_handle) {
 			if(munmap(mapping_handle, content.file_size) == -1) {
 				// error
 			}
 		}
-		#else
+#else
 		if(file_buffer) {
 			free(file_buffer);
 		}
-		#endif
+#endif
 		if(file_descriptor != -1) {
 			close(file_descriptor);
 		}
@@ -44,37 +44,37 @@ namespace simple_fs {
 
 	file::file(file&& other) noexcept {
 		file_descriptor = other.file_descriptor;
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		mapping_handle = other.mapping_handle;
-		#else
+#else
 		file_buffer = other.file_buffer;
-		#endif
+#endif
 		content = other.content;
 		absolute_path = std::move(other.absolute_path);
 
 		other.file_descriptor = -1;
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		other.mapping_handle = nullptr;
-		#else
+#else
 		other.file_buffer = nullptr;
-		#endif
+#endif
 	}
 	void file::operator=(file&& other) noexcept {
 		file_descriptor = other.file_descriptor;
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		mapping_handle = other.mapping_handle;
-		#else
+#else
 		file_buffer = other.file_buffer;
-		#endif
+#endif
 		content = other.content;
 		absolute_path = std::move(other.absolute_path);
 
 		other.file_descriptor = -1;
-		#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 		other.mapping_handle = nullptr;
-		#else
+#else
 		other.file_buffer = nullptr;
-		#endif
+#endif
 	}
 
 	file::file(native_string const& full_path) {
@@ -84,20 +84,20 @@ namespace simple_fs {
 			struct stat sb;
 			if(fstat(file_descriptor, &sb) != -1) {
 				content.file_size = sb.st_size;
-				#if _POSIX_C_SOURCE >= 200112L
+#if _POSIX_C_SOURCE >= 200112L
 				posix_fadvise(file_descriptor, 0, static_cast<off_t>(content.file_size), POSIX_FADV_WILLNEED);
-				#endif
-				#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#endif
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 				mapping_handle = mmap(0, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
 				if(mapping_handle == MAP_FAILED) {
 					// error
 				}
 				content.data = static_cast<char*>(mapping_handle);
-				#else
+#else
 				file_buffer = malloc(content.file_size);
 				read(file_descriptor, file_buffer, content.file_size);
 				content.data = static_cast<char*>(file_buffer);
-				#endif
+#endif
 			}
 		}
 	}
@@ -106,17 +106,17 @@ namespace simple_fs {
 		struct stat sb;
 		if(fstat(file_descriptor, &sb) != -1) {
 			content.file_size = sb.st_size;
-			#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
+#if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
 			mapping_handle = mmap(0, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
 			if(mapping_handle == MAP_FAILED) {
 				// error
 			}
 			content.data = static_cast<char*>(mapping_handle);
-			#else
+#else
 			file_buffer = malloc(content.file_size);
 			read(file_descriptor, file_buffer, content.file_size);
 			content.data = static_cast<char*>(file_buffer);
-			#endif
+#endif
 		}
 	}
 
@@ -206,8 +206,9 @@ namespace simple_fs {
 	namespace impl {
 		bool contains_non_ascii(native_char const* str) {
 			for(auto c = str; *c != 0; ++c) {
-				if(int32_t(*c) > 127 || int32_t(*c) < 0)
-				return true;
+				if(int32_t(*c) > 127 || int32_t(*c) < 0) {
+					return true;
+				}
 			}
 			return false;
 		}
@@ -215,7 +216,8 @@ namespace simple_fs {
 
 	bool list_files_compare_func(native_char const& char1, native_char const& char2) {
 		auto const to_alpha_prec = [](native_char const& ch) -> native_char {
-			switch(ch) {
+			// force unsigned comparator
+			switch(static_cast<std::make_unsigned_t<native_char>>(ch)) {
 				case NATIVE('0'): return 123;
 				case NATIVE('1'): return 124;
 				case NATIVE('2'): return 125;
@@ -250,7 +252,6 @@ namespace simple_fs {
 				if(simple_fs::is_ignored_path(*dir.parent_system, appended_path + NATIVE("/"))) {
 					continue;
 				}
-
 				DIR* d = opendir(appended_path.c_str());
 				if(d) {
 					struct dirent* dir_ent = nullptr;
@@ -262,10 +263,12 @@ namespace simple_fs {
 						// Check if the file is of the right extension
 						if(extension && extension[0] != 0) {
 							char* dot = strrchr(dir_ent->d_name, '.');
-							if(!dot || dot == dir_ent->d_name)
-							continue;
-							if(strcmp(dot, extension))
-							continue;
+							if(!dot || dot == dir_ent->d_name) {
+								continue;
+							}
+							if(strcmp(dot, extension)) {
+								continue;
+							}
 						}
 
 						if(impl::contains_non_ascii(dir_ent->d_name))
@@ -288,21 +291,22 @@ namespace simple_fs {
 				struct dirent* dir_ent = nullptr;
 				while((dir_ent = readdir(d)) != nullptr) {
 					// Check if it's a file. Not POSIX standard but included in Linux
-					if(dir_ent->d_type != DT_REG)
-					continue;
-
+					if(dir_ent->d_type != DT_REG) {
+						continue;
+					}
 					// Check if the file is of the right extension
 					if(extension && extension[0] != 0) {
 						char* dot = strrchr(dir_ent->d_name, '.');
-						if(!dot || dot == dir_ent->d_name)
-						continue;
-						if(strcmp(dot, extension))
+						if(!dot || dot == dir_ent->d_name) {
+							continue;
+						}
+						if(strcmp(dot, extension)) {
+							continue;
+						}
+					}
+					if(impl::contains_non_ascii(dir_ent->d_name)) {
 						continue;
 					}
-
-					if(impl::contains_non_ascii(dir_ent->d_name))
-					continue;
-
 					accumulated_results.emplace_back(dir.relative_path + NATIVE("/") + dir_ent->d_name, dir_ent->d_name);
 				}
 				closedir(d);
@@ -326,10 +330,12 @@ namespace simple_fs {
 					struct dirent* dir_ent = nullptr;
 					while((dir_ent = readdir(d)) != nullptr) {
 						// Check if it's a directory. Not POSIX standard but included in Linux
-						if(dir_ent->d_type != DT_DIR)
+						if(dir_ent->d_type != DT_DIR) {
 							continue;
-						if(impl::contains_non_ascii(dir_ent->d_name))
+						}
+						if(impl::contains_non_ascii(dir_ent->d_name)) {
 							continue;
+						}
 						native_string const rel_name = dir.relative_path + NATIVE("/") + dir_ent->d_name;
 						if(dir_ent->d_name[0] != NATIVE('.')) {
 							auto search_result = std::find_if(accumulated_results.begin(), accumulated_results.end(),
@@ -374,6 +380,9 @@ namespace simple_fs {
 	}
 
 	std::optional<file> open_file(directory const& dir, native_string_view file_name) {
+		if(file_name.empty()) {
+			return std::optional<file>{};
+		}
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 				native_string dir_path = dir.parent_system->ordered_roots[i] + dir.relative_path;
@@ -385,6 +394,12 @@ namespace simple_fs {
 				if(file_descriptor != -1) {
 					return std::optional<file>(file(file_descriptor, full_path));
 				}
+				if(steam_path.size() > 0) {
+					file_descriptor = open((steam_path + NATIVE('/') + full_path).c_str(), O_RDONLY | O_NONBLOCK);
+					if(file_descriptor != -1) {
+						return std::optional<file>(file(file_descriptor, full_path));
+					}
+				}
 			}
 		} else {
 			native_string full_path = dir.relative_path + NATIVE('/') + native_string(file_name);
@@ -392,11 +407,20 @@ namespace simple_fs {
 			if(file_descriptor != -1) {
 				return std::optional<file>(file(file_descriptor, full_path));
 			}
+			if(steam_path.size() > 0) {
+				file_descriptor = open((steam_path + NATIVE('/') + full_path).c_str(), O_RDONLY | O_NONBLOCK);
+				if(file_descriptor != -1) {
+					return std::optional<file>(file(file_descriptor, full_path));
+				}
+			}
 		}
-	return std::optional<file>{};
+		return std::optional<file>{};
 	}
 
 	std::optional<unopened_file> peek_file(directory const& dir, native_string_view file_name) {
+		if(file_name.empty()) {
+			return std::optional<unopened_file>{};
+		}
 		if(dir.parent_system) {
 			for(size_t i = dir.parent_system->ordered_roots.size(); i-- > 0;) {
 				native_string full_path = dir.parent_system->ordered_roots[i] + dir.relative_path + NATIVE('/') + native_string(file_name);
@@ -417,7 +441,7 @@ namespace simple_fs {
 				return std::optional<unopened_file>(unopened_file(full_path, file_name));
 			}
 		}
-	return std::optional<unopened_file>{};
+		return std::optional<unopened_file>{};
 	}
 
 	void add_ignore_path(file_system& fs, native_string_view replaced_path) {
@@ -430,8 +454,9 @@ namespace simple_fs {
 
 	bool is_ignored_path(file_system const& fs, native_string_view path) {
 		for(auto const& replace_path : fs.ignored_paths) {
-			if(path.starts_with(replace_path))
-			return true;
+			if(path.starts_with(replace_path)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -453,8 +478,9 @@ namespace simple_fs {
 	}
 
 	void write_file(directory const& dir, native_string_view file_name, char const* file_data, uint32_t file_size) {
-		if(dir.parent_system)
-		std::abort();
+		if(dir.parent_system) {
+			std::abort();
+		}
 
 		native_string full_path = dir.relative_path + NATIVE('/') + native_string(file_name);
 
@@ -497,28 +523,24 @@ namespace simple_fs {
 	directory get_or_create_settings_directory() {
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/settings/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_save_game_directory() {
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/saves/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_templates_directory() {
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/templates/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_oos_directory() {
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/oos/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
@@ -532,7 +554,6 @@ namespace simple_fs {
 	directory get_or_create_scenario_directory() {
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/scenarios/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
@@ -542,8 +563,9 @@ namespace simple_fs {
 		for(uint32_t i = 0; i < data_in.size(); ++i) {
 			if(data_in[i] == '\\') {
 				res += '/';
-				if(i + 1 < data_in.size() && data_in[i + 1] == '\\')
-				++i;
+				if(i + 1 < data_in.size() && data_in[i + 1] == '\\') {
+					++i;
+				}
 			} else {
 				res += data_in[i];
 			}
@@ -563,6 +585,6 @@ namespace simple_fs {
 	uint64_t get_write_time(file const& f) {
 		struct stat st;
 		fstat(f.file_descriptor, &st);
-		return uint64_t(st.m_time);
+		return uint64_t(st.st_mtime);
 	}
 } // namespace simple_fs

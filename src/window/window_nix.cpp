@@ -5,8 +5,7 @@
 #include <unordered_map>
 
 namespace window {
-
-static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key = {{GLFW_KEY_UNKNOWN, sys::virtual_key::NONE},
+	static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key = {{GLFW_KEY_UNKNOWN, sys::virtual_key::NONE},
 		{GLFW_KEY_SPACE, sys::virtual_key::SPACE}, {GLFW_KEY_APOSTROPHE, sys::virtual_key::QUOTE},
 		{GLFW_KEY_COMMA, sys::virtual_key::COMMA}, {GLFW_KEY_EQUAL, sys::virtual_key::PLUS},
 		{GLFW_KEY_MINUS, sys::virtual_key::MINUS}, {GLFW_KEY_PERIOD, sys::virtual_key::PERIOD},
@@ -55,61 +54,61 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		{GLFW_KEY_LEFT_CONTROL, sys::virtual_key::LCONTROL}, {GLFW_KEY_LEFT_ALT, sys::virtual_key::LMENU},
 		{GLFW_KEY_LEFT_SUPER, sys::virtual_key::LWIN}, {GLFW_KEY_RIGHT_SHIFT, sys::virtual_key::RSHIFT},
 		{GLFW_KEY_RIGHT_CONTROL, sys::virtual_key::RCONTROL}, {GLFW_KEY_RIGHT_ALT, sys::virtual_key::RMENU},
-		{GLFW_KEY_RIGHT_SUPER, sys::virtual_key::RWIN}, {GLFW_KEY_MENU, sys::virtual_key::MENU}};
+		{GLFW_KEY_RIGHT_SUPER, sys::virtual_key::RWIN}, {GLFW_KEY_MENU, sys::virtual_key::MENU}
+	};
 
-	bool is_key_depressed(sys::state const& game_state, sys::virtual_key key) {
-		for(auto it = glfw_key_to_virtual_key.begin(); it != glfw_key_to_virtual_key.end(); ++it)
-		if(it->second == key)
-			return glfwGetKey(game_state.win_ptr->window, it->first) == GLFW_PRESS;
-
+	bool is_key_depressed(sys::state const& state, sys::virtual_key key) {
+		for(auto it = glfw_key_to_virtual_key.begin(); it != glfw_key_to_virtual_key.end(); ++it) {
+			if(it->second == key) {
+				return glfwGetKey(state.win_ptr->window, it->first) == GLFW_PRESS;
+			}
+		}
 		return false;
 	}
 
-	void get_window_size(sys::state const& game_state, int& width, int& height) {
-		glfwGetWindowSize(game_state.win_ptr->window, &width, &height);
+	void get_window_size(sys::state const& state, int& width, int& height) {
+		glfwGetWindowSize(state.win_ptr->window, &width, &height);
 	}
 
-	bool is_in_fullscreen(sys::state const& game_state) {
-		return (game_state.win_ptr) && game_state.win_ptr->in_fullscreen;
+	bool is_in_fullscreen(sys::state const& state) {
+		return (state.win_ptr) && state.win_ptr->in_fullscreen;
 	}
 
-	void set_borderless_full_screen(sys::state& game_state, bool fullscreen) {
-		if(game_state.win_ptr && game_state.win_ptr->window) {
+	void set_borderless_full_screen(sys::state& state, bool fullscreen) {
+		if(state.win_ptr && state.win_ptr->window) {
 			// Maybe fix this at some point. Just maximize atm
-			if(fullscreen)
-			glfwMaximizeWindow(game_state.win_ptr->window);
-			else
-			glfwRestoreWindow(game_state.win_ptr->window);
+			if(fullscreen) {
+				glfwMaximizeWindow(state.win_ptr->window);
+			} else {
+				glfwRestoreWindow(state.win_ptr->window);
+			}
 		}
 	}
 
-	void close_window(sys::state& game_state) {
+	void close_window(sys::state& state) {
 		// Signal to close window (should close = yes)
-		glfwSetWindowShouldClose(game_state.win_ptr->window, 1);
+		glfwSetWindowShouldClose(state.win_ptr->window, 1);
 	}
 
 	sys::key_modifiers get_current_modifiers(GLFWwindow* window) {
-		bool control =
-			(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
+		bool control = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 		bool alt = (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS);
-		bool shift =
-			(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
-		uint32_t val = uint32_t(control ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none) |
-								 uint32_t(alt ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none) |
-								 uint32_t(shift ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
+		bool shift = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
+		uint32_t val = uint32_t(control ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none)
+			| uint32_t(alt ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none)
+			| uint32_t(shift ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
 		return sys::key_modifiers(val);
 	}
 
 	sys::key_modifiers get_current_modifiers(int glfw_mods) {
-		uint32_t val =
-			uint32_t((glfw_mods & GLFW_MOD_CONTROL) ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none) |
-			uint32_t((glfw_mods & GLFW_MOD_ALT) ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none) |
-			uint32_t((glfw_mods & GLFW_MOD_SHIFT) ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
+		uint32_t val = uint32_t((glfw_mods & GLFW_MOD_CONTROL) ? sys::key_modifiers::modifiers_ctrl : sys::key_modifiers::modifiers_none)
+			| uint32_t((glfw_mods & GLFW_MOD_ALT) ? sys::key_modifiers::modifiers_alt : sys::key_modifiers::modifiers_none)
+			| uint32_t((glfw_mods & GLFW_MOD_SHIFT) ? sys::key_modifiers::modifiers_shift : sys::key_modifiers::modifiers_none);
 		return sys::key_modifiers(val);
 	}
 
 	static void glfw_error_callback(int error, char const* description) {
-	emit_error_message(std::string{ "Glfw Error " } + std::to_string(error) + std::string{ description }, false);
+		emit_error_message(std::string{ "Glfw Error " } + std::to_string(error) + std::string{ description }, false);
 	}
 
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -117,28 +116,28 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 
 		sys::virtual_key virtual_key = glfw_key_to_virtual_key.at(key);
 		switch(action) {
-			case GLFW_PRESS:
+		case GLFW_PRESS:
 			state->on_key_down(virtual_key, get_current_modifiers(mods));
 			break;
-			case GLFW_RELEASE:
+		case GLFW_RELEASE:
 			state->on_key_up(virtual_key, get_current_modifiers(mods));
 			break;
-			case GLFW_REPEAT:
+		case GLFW_REPEAT:
 			switch(virtual_key) {
-				case sys::virtual_key::RETURN: [[fallthrough]];
-				case sys::virtual_key::BACK: [[fallthrough]];
-				case sys::virtual_key::DELETE_KEY: [[fallthrough]];
-				case sys::virtual_key::LEFT: [[fallthrough]];
-				case sys::virtual_key::RIGHT: [[fallthrough]];
-				case sys::virtual_key::UP: [[fallthrough]];
-				case sys::virtual_key::DOWN:
+			case sys::virtual_key::RETURN: [[fallthrough]];
+			case sys::virtual_key::BACK: [[fallthrough]];
+			case sys::virtual_key::DELETE_KEY: [[fallthrough]];
+			case sys::virtual_key::LEFT: [[fallthrough]];
+			case sys::virtual_key::RIGHT: [[fallthrough]];
+			case sys::virtual_key::UP: [[fallthrough]];
+			case sys::virtual_key::DOWN:
 				state->on_key_down(virtual_key, get_current_modifiers(mods));
 				break;
-				default:
+			default:
 				break;
 			}
 			break;
-			default:
+		default:
 			break;
 		}
 	}
@@ -150,8 +149,9 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
 		state->on_mouse_move(x, y, get_current_modifiers(window));
 
-		if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-		state->on_mouse_drag(x, y, get_current_modifiers(window));
+		if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+			state->on_mouse_drag(x, y, get_current_modifiers(window));
+		}
 
 		state->mouse_x_position = x;
 		state->mouse_y_position = y;
@@ -166,7 +166,7 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		int32_t y = (ypos > 0 ? (int32_t)std::round(ypos) : 0);
 
 		switch(action) {
-			case GLFW_PRESS:
+		case GLFW_PRESS:
 			if(button == GLFW_MOUSE_BUTTON_LEFT) {
 				state->on_lbutton_down(x, y, get_current_modifiers(window));
 				state->win_ptr->left_mouse_down = true;
@@ -178,7 +178,7 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 			state->mouse_x_position = x;
 			state->mouse_y_position = y;
 			break;
-			case GLFW_RELEASE:
+		case GLFW_RELEASE:
 			if(button == GLFW_MOUSE_BUTTON_LEFT) {
 				state->on_lbutton_up(x, y, get_current_modifiers(window));
 				state->win_ptr->left_mouse_down = false;
@@ -217,10 +217,11 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		sys::state* state = (sys::state*)glfwGetWindowUserPointer(window);
 
 		window_state t = window_state::normal;
-		if(glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_MAXIMIZED)
-		t = window_state::maximized;
-		else if(glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_ICONIFIED)
-		t = window_state::minimized;
+		if(glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_MAXIMIZED) {
+			t = window_state::maximized;
+		} else if(glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_ICONIFIED) {
+			t = window_state::minimized;
+		}
 
 		// redo OpenGL viewport
 		int width, height;
@@ -260,36 +261,30 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		}
 	}
 
-	void create_window(sys::state& game_state, creation_parameters const& params) {
-		game_state.win_ptr = std::make_unique<window_data_impl>();
-		game_state.win_ptr->creation_x_size = params.size_x;
-		game_state.win_ptr->creation_y_size = params.size_y;
-		game_state.win_ptr->in_fullscreen = params.borderless_fullscreen;
-	}
+	void create_window(sys::state& state, creation_parameters const& params) {
+		state.win_ptr = std::make_unique<window_data_impl>();
+		state.win_ptr->creation_x_size = params.size_x;
+		state.win_ptr->creation_y_size = params.size_y;
+		state.win_ptr->in_fullscreen = params.borderless_fullscreen;
 
-	void initialize_window(sys::state& game_state, creation_parameters const& params) {
 		// Setup window
 		glfwSetErrorCallback(glfw_error_callback);
 		if(!glfwInit()) {
 			emit_error_message("Failed to init glfw\n", true);
 		}
-
 		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-		//glfwWindowHint(GLFW_SAMPLES, game_state.user_settings.antialias_level);
-
+		//glfwWindowHint(GLFW_SAMPLES, state.user_settings.antialias_level);
 		// Create window with graphics context
 		auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
 		if(window == NULL) {
 			emit_error_message("Failed to create window\n", true);
 		}
-		game_state.win_ptr->window = window;
-
-		glfwSetWindowUserPointer(window, &game_state);
-
+		state.win_ptr->window = window;
+		glfwSetWindowUserPointer(window, &state);
 		// event callbacks
 		glfwSetKeyCallback(window, key_callback);
 		glfwSetCursorPosCallback(window, cursor_position_callback);
@@ -302,30 +297,32 @@ static const std::unordered_map<int, sys::virtual_key> glfw_key_to_virtual_key =
 		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 		glfwSetWindowFocusCallback(window, focus_callback);
 		glfwSetWindowSizeLimits(window, 640, 400, 2400, 1800);
+	}
 
-		ogl::create_opengl_context(game_state);
-		ogl::initialize_opengl(game_state);
+	void initialize_window(sys::state& state) {
+		ogl::create_opengl_context(state);
+		ogl::initialize_opengl(state);
 
-		sound::initialize_sound_system(game_state);
-		sound::start_music(game_state, game_state.user_settings.master_volume * game_state.user_settings.music_volume);
+		sound::initialize_sound_system(state);
+		sound::start_music(state, state.user_settings.master_volume * state.user_settings.music_volume);
 
-		on_window_change(window); // Init the window size
+		on_window_change(state.win_ptr->window); // Init the window size
 
-		change_cursor(game_state, cursor_type::busy);
-		game_state.on_create();
-		change_cursor(game_state, cursor_type::normal);
+		change_cursor(state, cursor_type::busy);
+		state.on_create();
+		change_cursor(state, cursor_type::normal);
 
-		while(!glfwWindowShouldClose(window)) {
+		while(!glfwWindowShouldClose(state.win_ptr->window)) {
 			glfwPollEvents();
 			// Run game code
 
-			game_state.render();
-			glfwSwapBuffers(window);
+			state.render();
+			glfwSwapBuffers(state.win_ptr->window);
 
-			sound::update_music_track(game_state);
+			sound::update_music_track(state);
 		}
 
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(state.win_ptr->window);
 		glfwTerminate();
 	}
 

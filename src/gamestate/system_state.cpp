@@ -629,7 +629,11 @@ namespace sys {
 				while(c6) {
 					{
 						auto ymd = current_date.to_ymd(start_date);
-						reports::write_debug(std::to_string(ymd.year) + "." + std::to_string(ymd.month) + std::to_string(ymd.day) + ": " + std::string(c6->title));
+						auto source_tag = c6->source ? nations::int_to_tag(world.national_identity_get_identifying_int(world.nation_get_identity_from_identity_holder(c6->source))) : std::string("___");
+						auto target_tag = c6->target ? nations::int_to_tag(world.national_identity_get_identifying_int(world.nation_get_identity_from_identity_holder(c6->target))) : std::string("___");
+						auto third_tag = c6->third ? nations::int_to_tag(world.national_identity_get_identifying_int(world.nation_get_identity_from_identity_holder(c6->third))) : std::string("___");
+						auto date_str = std::to_string(ymd.year) + "." + std::to_string(ymd.month) + "." + std::to_string(ymd.day);
+						reports::write_debug(date_str + "> " + source_tag + "," + target_tag + "," + third_tag + ": " + std::string(c6->title) + "\n");
 					}
 
 					auto base_type = c6->type;

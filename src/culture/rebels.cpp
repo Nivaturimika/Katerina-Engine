@@ -1230,9 +1230,8 @@ namespace rebel {
 
 				notification::post(state, notification::message{
 					[type = state.world.rebel_faction_get_type(reb).id, ploss, new_gov, within, when = state.current_date, i = reb.index()](sys::state& state, text::layout_base& contents) {
-
 						text::add_line(state, contents, "msg_rebels_win_1", text::variable_type::x, state.world.rebel_type_get_title(type));
-					text::add_line(state, contents, "msg_rebels_win_2", text::variable_type::x, text::fp_one_place{ploss});
+						text::add_line(state, contents, "msg_rebels_win_2", text::variable_type::x, text::fp_one_place{ploss});
 						if(new_gov) {
 							text::add_line(state, contents, "msg_rebels_win_3", text::variable_type::x, state.world.government_type_get_name(new_gov));
 						}

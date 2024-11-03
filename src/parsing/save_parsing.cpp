@@ -471,7 +471,7 @@ void save_country::any_group(std::string_view name, save_relations v, error_hand
 }
 
 void save_file::date(association_type, sys::year_month_day ymd, error_handler& err, int32_t line, save_parser_context& context) {
-	context.state.current_date = sys::date::date(ymd, context.state.start_date);
+	context.state.current_date = sys::date(ymd, context.state.start_date);
 }
 void save_file::player(association_type, uint32_t v, error_handler& err, int32_t line, save_parser_context& context) {
 	auto const tag = nations::int_to_tag(v);
