@@ -3308,10 +3308,11 @@ namespace ai {
 			float est_middle_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
 			float est_rich_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
 
-			float income_min = est_gold_income + est_war_sub_income + est_rep_income + est_tariff_income * tariff_min
-				+ est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
-			float income_max = est_gold_income + est_war_sub_income + est_rep_income + est_tariff_income * tariff_max
-				+ est_poor_tax_income * tax_max + est_middle_tax_income * tax_max + est_rich_tax_income * tax_max;
+			float base_income = est_gold_income + est_war_sub_income + est_rep_income;
+			float tax_income_min = est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
+			float tariff_income_min = est_tariff_income * tariff_min;
+			float tax_income_max = est_poor_tax_income * tax_max + est_middle_tax_income * tax_max + est_rich_tax_income * tax_max;
+			float tariff_income_max = est_tariff_income * tariff_max;
 
 			float est_sub_spending = economy_estimations::estimate_subsidy_spending(state, n);
 			float est_war_sub_spending = economy_estimations::estimate_war_subsidies_income(state, n);
@@ -3326,14 +3327,19 @@ namespace ai {
 			float est_education_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::education);
 			float est_rerforms_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::reforms);
 
-			float expenses_min = est_sub_spending + est_war_sub_spending + est_rep_spending + est_dom_investment * min_percentage
+			float base_expenses = est_sub_spending + est_war_sub_spending + est_rep_spending;
+			float expenses_min = est_dom_investment * min_percentage
 				+ est_overseas_spending * min_percentage + est_construct_spending * construction_min + est_land_spending * land_min
 				+ est_naval_spending * naval_min + est_military_payouts * military_min + est_rerforms_payouts * social_spending_min;
-			float expenses_max = est_sub_spending + est_war_sub_spending + est_rep_spending + est_dom_investment * max_percentage
+			float expenses_max = est_dom_investment * max_percentage
 				+ est_overseas_spending * max_percentage + est_construct_spending * construction_max + est_land_spending * land_max
 				+ est_naval_spending * naval_max + est_military_payouts * military_max + est_rerforms_payouts * social_spending_max;
 
+			if(n.get_is_at_war()) {
 
+			} else {
+
+			}
 
 
 			// they don't have to add up to 1.f
