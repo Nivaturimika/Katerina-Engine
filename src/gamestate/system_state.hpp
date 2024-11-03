@@ -379,7 +379,7 @@ namespace sys {
 		bool black_map_font = true;
 		bool spoilers = false;
 		float zoom_speed = 20.f;
-		bool mute_on_focus_lost = false;
+		bool mute_on_focus_lost = true;
 		bool diplomatic_message_popup = false;
 		bool wasd_for_map_movement = false;
 		bool notify_rebels_defeat = true;
