@@ -599,22 +599,249 @@ namespace text {
 			/*6*/ u'`', u'a', u'b', u'c', u'd', u'e', u'f', u'g', u'h', u'i', u'j', u'k', u'l', u'm', u'n', u'o',
 			/*7*/ u'p', u'q', u'r', u's', u't', u'u', u'v', u'w', u'x', u'y', u'z', u'{', u'|', u'}', u'~', u' ',
 			/*8*/ u'\u20AC', u' ', u'\u201A', u' ', u'\u201E', u'\u2026', u'\u2020', u'\u2021', u' ', u'\u2030', u'\u0160', u'\u2039', u'\u015A', u'\u0164', u'\u017D', u'\u0179',
-			/*9*/ u' ', u'\u2018', u'\u2019', u'\u201C', u'\u201D', u'\u2022', u'\u2013', u'\u2014', u' ', u'\u2122', u'\u0161',
-					u'\u203A', u'\u015B', u'\u0165', u'\u017E', u'\u017A',
+			/*9*/ u' ', u'\u2018', u'\u2019', u'\u201C', u'\u201D', u'\u2022', u'\u2013', u'\u2014', u' ', u'\u2122', u'\u0161', u'\u203A', u'\u015B', u'\u0165', u'\u017E', u'\u017A',
 			/*A*/ u'\u00A0', u'\u02C7', u'\u02D8', u'\u00A2', u'\u00A3', u'\u0104', u'\u00A6', u'\u00A7', u'\u00A8', u'\u00A9',
-					u'\u015E', u'\u00AB', u'\u00AC', u'-', u'\u00AE', u'\u017B',
+			u'\u015E', u'\u00AB', u'\u00AC', u'-', u'\u00AE', u'\u017B',
 			/*B*/ u'\u00B0', u'\u00B1', u'\u02DB', u'\u0142', u'\u00B4', u'\u00B5', u'\u00B6', u'\u00B7', u'\u00B8', u'\u0105',
-					u'\u015F', u'\u00BB', u'\u013D', u'\u02DD', u'\u013E', u'\u017C',
+			u'\u015F', u'\u00BB', u'\u013D', u'\u02DD', u'\u013E', u'\u017C',
 			/*C*/ u'\u0154', u'\u00C1', u'\u00C2', u'\u0102', u'\u00C4', u'\u0139', u'\u0106', u'\u00C7', u'\u010C', u'\u00C9',
-					u'\u0118', u'\u00CB', u'\u011A', u'\u00CD', u'\u00CE', u'\u010E',
+			u'\u0118', u'\u00CB', u'\u011A', u'\u00CD', u'\u00CE', u'\u010E',
 			/*D*/ u'\u0110', u'\u0143', u'\u0147', u'\u00D3', u'\u00D4', u'\u0150', u'\u00D6', u'\u00D7', u'\u0158', u'\u016E',
-					u'\u00DA', u'\u0170', u'\u00DC', u'\u00DD', u'\u0162', u'\u00DF',
+			u'\u00DA', u'\u0170', u'\u00DC', u'\u00DD', u'\u0162', u'\u00DF',
 			/*E*/ u'\u0115', u'\u00E1', u'\u00E2', u'\u0103', u'\u00E4', u'\u013A', u'\u0107', u'\u00E7', u'\u00E8', u'\u00E9',
-					u'\u0119', u'\u00EB', u'\u011B', u'\u00ED', u'\u00EE', u'\u010F',
-			/*F*/ u'\u0111', u'\u0144', u'\u0148', u'\u00F3', u'\u00F4', u'\u0151', u'\u00F6', u'\u00F7', u'\u0159', u'\u016F',
-					u'\u00FA', u'\u0171', u'\u00FC', u'\u00FD', u'\u0163', u'\u02D9'};
-
+			u'\u0119', u'\u00EB', u'\u011B', u'\u00ED', u'\u00EE', u'\u010F',
+			/*F*/ u'\u0111', u'\u0144', u'\u0148', u'\u00F3', u'\u00F4', u'\u0151', u'\u00F6', u'\u00F7', u'\u0159', u'\u016F', u'\u00FA', u'\u0171', u'\u00FC', u'\u00FD', u'\u0163', u'\u02D9'
+		};
 		return converted[(uint8_t)in];
+	}
+
+	char utf16_to_win1250(char16_t ch) {
+		switch(ch) {
+		case u'\u0001': return 0x01;
+		case u'\u0002': return 0x02;
+		case u'\u0003': return 0x03;
+		case u'\u0004': return 0x04;
+		case u'\u0009': return 0x09;
+		case u'\u000A': return 0x0A;
+		case u'\u0020': return 0x20;
+		case u'\u0021': return 0x21;
+		case u'\u0022': return 0x22;
+		case u'\u0023': return 0x23;
+		case u'\u0024': return 0x24;
+		case u'\u0025': return 0x25;
+		case u'\u0026': return 0x26;
+		case u'\u0027': return 0x27;
+		case u'\u0028': return 0x28;
+		case u'\u0029': return 0x29;
+		case u'\u002A': return 0x2A;
+		case u'\u002B': return 0x2B;
+		case u'\u002C': return 0x2C;
+		case u'\u002D': return 0x2D;
+		case u'\u002E': return 0x2E;
+		case u'\u002F': return 0x2F;
+		case u'\u0030': return 0x30;
+		case u'\u0031': return 0x31;
+		case u'\u0032': return 0x32;
+		case u'\u0033': return 0x33;
+		case u'\u0034': return 0x34;
+		case u'\u0035': return 0x35;
+		case u'\u0036': return 0x36;
+		case u'\u0037': return 0x37;
+		case u'\u0038': return 0x38;
+		case u'\u0039': return 0x39;
+		case u'\u003A': return 0x3A;
+		case u'\u003B': return 0x3B;
+		case u'\u003C': return 0x3C;
+		case u'\u003D': return 0x3D;
+		case u'\u003E': return 0x3E;
+		case u'\u003F': return 0x3F;
+		case u'\u0040': return 0x40;
+		case u'\u0041': return 0x41;
+		case u'\u0042': return 0x42;
+		case u'\u0043': return 0x43;
+		case u'\u0044': return 0x44;
+		case u'\u0045': return 0x45;
+		case u'\u0046': return 0x46;
+		case u'\u0047': return 0x47;
+		case u'\u0048': return 0x48;
+		case u'\u0049': return 0x49;
+		case u'\u004A': return 0x4A;
+		case u'\u004B': return 0x4B;
+		case u'\u004C': return 0x4C;
+		case u'\u004D': return 0x4D;
+		case u'\u004E': return 0x4E;
+		case u'\u004F': return 0x4F;
+		case u'\u0050': return 0x50;
+		case u'\u0051': return 0x51;
+		case u'\u0052': return 0x52;
+		case u'\u0053': return 0x53;
+		case u'\u0054': return 0x54;
+		case u'\u0055': return 0x55;
+		case u'\u0056': return 0x56;
+		case u'\u0057': return 0x57;
+		case u'\u0058': return 0x58;
+		case u'\u0059': return 0x59;
+		case u'\u005A': return 0x5A;
+		case u'\u005B': return 0x5B;
+		case u'\u005C': return 0x5C;
+		case u'\u005D': return 0x5D;
+		case u'\u005E': return 0x5E;
+		case u'\u005F': return 0x5F;
+		case u'\u0060': return 0x60;
+		case u'\u0061': return 0x61;
+		case u'\u0062': return 0x62;
+		case u'\u0063': return 0x63;
+		case u'\u0064': return 0x64;
+		case u'\u0065': return 0x65;
+		case u'\u0066': return 0x66;
+		case u'\u0067': return 0x67;
+		case u'\u0068': return 0x68;
+		case u'\u0069': return 0x69;
+		case u'\u006A': return 0x6A;
+		case u'\u006B': return 0x6B;
+		case u'\u006C': return 0x6C;
+		case u'\u006D': return 0x6D;
+		case u'\u006E': return 0x6E;
+		case u'\u006F': return 0x6F;
+		case u'\u0070': return 0x70;
+		case u'\u0071': return 0x71;
+		case u'\u0072': return 0x72;
+		case u'\u0073': return 0x73;
+		case u'\u0074': return 0x74;
+		case u'\u0075': return 0x75;
+		case u'\u0076': return 0x76;
+		case u'\u0077': return 0x77;
+		case u'\u0078': return 0x78;
+		case u'\u0079': return 0x79;
+		case u'\u007A': return 0x7A;
+		case u'\u007B': return 0x7B;
+		case u'\u007C': return 0x7C;
+		case u'\u007D': return 0x7D;
+		case u'\u007E': return 0x7E;
+		case u'\u00A0': return 0xA0;
+		case u'\u00A2': return 0xA3;
+		case u'\u00A3': return 0xA4;
+		case u'\u00A6': return 0xA6;
+		case u'\u00A7': return 0xA7;
+		case u'\u00A8': return 0xA8;
+		case u'\u00A9': return 0xA9;
+		case u'\u00AB': return 0xAB;
+		case u'\u00AC': return 0xAC;
+		case u'\u00AE': return 0xAE;
+		case u'\u00B0': return 0xB0;
+		case u'\u00B1': return 0xB1;
+		case u'\u00B4': return 0xB4;
+		case u'\u00B5': return 0xB5;
+		case u'\u00B6': return 0xB6;
+		case u'\u00B7': return 0xB7;
+		case u'\u00B8': return 0xB8;
+		case u'\u00BB': return 0xBB;
+		case u'\u00C1': return 0xC1;
+		case u'\u00C2': return 0xC2;
+		case u'\u00C4': return 0xC4;
+		case u'\u00C7': return 0xC7;
+		case u'\u00C9': return 0xC9;
+		case u'\u00CB': return 0xCB;
+		case u'\u00CD': return 0xCD;
+		case u'\u00CE': return 0xCE;
+		case u'\u00D3': return 0xD3;
+		case u'\u00D4': return 0xD4;
+		case u'\u00D6': return 0xD6;
+		case u'\u00D7': return 0xD7;
+		case u'\u00DA': return 0xDA;
+		case u'\u00DC': return 0xDC;
+		case u'\u00DD': return 0xDD;
+		case u'\u00DF': return 0xDF;
+		case u'\u00E1': return 0xE1;
+		case u'\u00E2': return 0xE2;
+		case u'\u00E4': return 0xE4;
+		case u'\u00E7': return 0xE7;
+		case u'\u00E8': return 0xE8;
+		case u'\u00E9': return 0xE9;
+		case u'\u00EB': return 0xEB;
+		case u'\u00ED': return 0xED;
+		case u'\u00EE': return 0xEE;
+		case u'\u00F3': return 0xF3;
+		case u'\u00F4': return 0xF4;
+		case u'\u00F6': return 0xF6;
+		case u'\u00F7': return 0xF7;
+		case u'\u00FA': return 0xFA;
+		case u'\u00FC': return 0xFC;
+		case u'\u00FD': return 0xFD;
+		case u'\u0102': return 0xC3;
+		case u'\u0103': return 0xE3;
+		case u'\u0104': return 0xA5;
+		case u'\u0105': return 0xB9;
+		case u'\u0106': return 0xC6;
+		case u'\u0107': return 0xE6;
+		case u'\u010C': return 0xC8;
+		case u'\u010E': return 0xCF;
+		case u'\u010F': return 0xEF;
+		case u'\u0110': return 0xD0;
+		case u'\u0111': return 0xF0;
+		case u'\u0115': return 0xE0;
+		case u'\u0118': return 0xCA;
+		case u'\u0119': return 0xEA;
+		case u'\u011A': return 0xCC;
+		case u'\u011B': return 0xEC;
+		case u'\u0139': return 0xC5;
+		case u'\u013A': return 0xE5;
+		case u'\u013D': return 0xBC;
+		case u'\u013E': return 0xBE;
+		case u'\u0142': return 0xB3;
+		case u'\u0143': return 0xD1;
+		case u'\u0144': return 0xF1;
+		case u'\u0147': return 0xD2;
+		case u'\u0148': return 0xF2;
+		case u'\u0150': return 0xD5;
+		case u'\u0151': return 0xF5;
+		case u'\u0154': return 0xC0;
+		case u'\u0158': return 0xD8;
+		case u'\u0159': return 0xF8;
+		case u'\u015A': return 0x8C;
+		case u'\u015B': return 0x9C;
+		case u'\u015E': return 0xAA;
+		case u'\u015F': return 0xBA;
+		case u'\u0160': return 0x8A;
+		case u'\u0161': return 0x9A;
+		case u'\u0162': return 0xDE;
+		case u'\u0163': return 0xFE;
+		case u'\u0164': return 0x8D;
+		case u'\u0165': return 0x9D;
+		case u'\u016E': return 0xD9;
+		case u'\u016F': return 0xF9;
+		case u'\u0170': return 0xDB;
+		case u'\u0171': return 0xFB;
+		case u'\u0179': return 0x8F;
+		case u'\u017A': return 0x9F;
+		case u'\u017B': return 0xAF;
+		case u'\u017C': return 0xBF;
+		case u'\u017D': return 0x8E;
+		case u'\u017E': return 0x9E;
+		case u'\u02C7': return 0xA1;
+		case u'\u02D8': return 0xA2;
+		case u'\u02D9': return 0xFF;
+		case u'\u02DB': return 0xB2;
+		case u'\u02DD': return 0xBD;
+		case u'\u2013': return 0x96;
+		case u'\u2014': return 0x97;
+		case u'\u2018': return 0x91;
+		case u'\u2019': return 0x92;
+		case u'\u201A': return 0x82;
+		case u'\u201C': return 0x93;
+		case u'\u201D': return 0x94;
+		case u'\u201E': return 0x84;
+		case u'\u2020': return 0x86;
+		case u'\u2021': return 0x87;
+		case u'\u2022': return 0x95;
+		case u'\u2026': return 0x85;
+		case u'\u2030': return 0x89;
+		case u'\u2039': return 0x8B;
+		case u'\u203A': return 0x9B;
+		case u'\u20AC': return 0x80;
+		case u'\u2122': return 0x99;
+		}
+		return 0;
 	}
 
 	std::string produce_simple_string(sys::state const& state, dcon::text_key id) {
@@ -2211,6 +2438,20 @@ namespace text {
 					temp.push_back(char(0x80 | uint8_t(0x3F & (uc >> 6))));
 					temp.push_back(char(0x80 | uint8_t(0x3F & uc)));
 				}
+			}
+			assert(temp[temp.size()] == '\0');
+			return temp;
+		}
+		return std::string("");
+	}
+
+	std::string utf8_to_win1250(std::string_view s) {
+		if(s.size() > 0) {
+			std::string temp;
+			for(uint32_t i = 0; i < s.size(); i++) {
+				uint32_t c = text::codepoint_from_utf8(s.data() + i, s.data() + s.size());
+				temp.push_back(utf16_to_win1250(char16_t(c)));
+				i += text::size_from_utf8(s.data() + i, s.data() + s.size());
 			}
 			assert(temp[temp.size()] == '\0');
 			return temp;

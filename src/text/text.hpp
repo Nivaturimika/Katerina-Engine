@@ -1020,7 +1020,7 @@ void add_unparsed_text_to_layout_box(sys::state& state, layout_base& dest, layou
 	bool codepoint_is_line_break(uint32_t c) noexcept;
 
 	std::string win1250_to_utf8(std::string_view s);
-
+	std::string utf8_to_win1250(std::string_view s);
 	// necessary for reading paths out of data from inside older paradox files:
 	// even on linux, this must do something, because win1250 isn't ascii or utf8
 	native_string win1250_to_native(std::string_view data_in);

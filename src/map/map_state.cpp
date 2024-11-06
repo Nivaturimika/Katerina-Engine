@@ -774,8 +774,10 @@ namespace map {
 						}
 					}
 
-					if(!use_quadratic)
-						text_data.emplace_back(std::move(prepared_name), name, mo, basis, ratio, n);
+					if(!use_quadratic) {
+						auto w1250_name = text::utf8_to_win1250(name);
+						text_data.emplace_back(std::move(prepared_name), w1250_name, mo, basis, ratio, n);
+					}
 				}
 
 				bool use_linear = false;
@@ -808,8 +810,10 @@ namespace map {
 							break;
 						}
 					}
-					if(!use_linear)
-						text_data.emplace_back(std::move(prepared_name), name, glm::vec4(mo, 0.f), basis, ratio, n);
+					if(!use_linear) {
+						auto w1250_name = text::utf8_to_win1250(name);
+						text_data.emplace_back(std::move(prepared_name), w1250_name, glm::vec4(mo, 0.f), basis, ratio, n);
+					}
 				}
 
 				if(state.user_settings.map_label == sys::map_label_mode::linear || use_linear) {
@@ -855,7 +859,8 @@ namespace map {
 						}
 					}
 					if(ratio.x <= map_size.x * 0.75f && ratio.y <= map_size.y * 0.75f) {
-						text_data.emplace_back(std::move(prepared_name), name, glm::vec4(mo, 0.f, 0.f), basis, ratio, n);
+						auto w1250_name = text::utf8_to_win1250(name);
+						text_data.emplace_back(std::move(prepared_name), w1250_name, glm::vec4(mo, 0.f, 0.f), basis, ratio, n);
 					}
 				}
 			}
@@ -874,7 +879,9 @@ namespace map {
 				auto r_sin = std::sin(p.get_text_rotation());
 				auto t_origin = t_position + t_size * glm::vec2(0.f, r_sin < 0.f ? -r_sin : 0.25f * r_sin);
 				auto mo = glm::rotate(-p.get_text_rotation(), glm::vec3(0.f, 1.f, 0.f));
-				p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, name), name, mo[0], t_origin, t_size, dcon::nation_id{});
+
+				auto w1250_name = text::utf8_to_win1250(name);
+				p_text_data.emplace_back(text::stored_glyphs(state, text::font_selection::map_font, w1250_name), name, mo[0], t_origin, t_size, dcon::nation_id{});
 			}
 		}
 		map_data.set_province_text_lines(state, p_text_data);
