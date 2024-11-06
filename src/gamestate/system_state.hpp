@@ -42,7 +42,7 @@ namespace sys {
 	struct user_settings_s {
 		float ui_scale = 1.0f;
 		float master_volume = 0.5f;
-		float music_volume = 1.0f;
+		float music_volume = 0.5f;
 		float effects_volume = 1.0f;
 		float interface_volume = 1.0f;
 		bool prefer_fullscreen = false;
@@ -379,7 +379,7 @@ namespace sys {
 		bool black_map_font = true;
 		bool spoilers = false;
 		float zoom_speed = 20.f;
-		bool mute_on_focus_lost = false;
+		bool mute_on_focus_lost = true;
 		bool diplomatic_message_popup = false;
 		bool wasd_for_map_movement = false;
 		bool notify_rebels_defeat = true;

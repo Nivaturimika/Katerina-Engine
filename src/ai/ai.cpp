@@ -3279,21 +3279,141 @@ namespace ai {
 				return;
 
 			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
+			
+
+			
+
+			auto max_percentage = 1.0f;
+			auto min_percentage = 0.0f;
+			auto tariff_min= state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff);
+			auto tariff_max = std::clamp( state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff),0.0f,0.95f);
+			auto military_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending);
+			auto military_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending);
+			auto tax_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax);
+			auto tax_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax);
+			auto social_spending_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending);
+			auto social_spending_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending);
+			auto construction_min = state.defines.trade_cap_low_limit_constructions;
+			auto construction_max = 1.0f;
+			auto land_min = state.defines.trade_cap_low_limit_land;
+			auto land_max = 1.0f;
+			auto naval_min = state.defines.trade_cap_low_limit_naval;
+			auto naval_max = 1.0f;
+
+			float est_gold_income = economy_estimations::estimate_gold_income(state, n);
+			float est_war_sub_income = economy_estimations::estimate_war_subsidies_income(state, n);
+			float est_rep_income = economy_estimations::estimate_reparations_income(state, n);
+			float est_tariff_income = economy_estimations::estimate_tariff_income(state, n);
+			float est_poor_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::poor);
+			float est_middle_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
+			float est_rich_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
+
+			float base_income = est_gold_income + est_war_sub_income + est_rep_income;
+			float tax_income_min = est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
+			float tariff_income_min = est_tariff_income * tariff_min;
+			float tax_income_max = est_poor_tax_income * tax_max + est_middle_tax_income * tax_max + est_rich_tax_income * tax_max;
+			float tariff_income_max = est_tariff_income * tariff_max;
+
+			float est_sub_spending = economy_estimations::estimate_subsidy_spending(state, n);
+			float est_war_sub_spending = economy_estimations::estimate_war_subsidies_income(state, n);
+			float est_rep_spending = economy_estimations::estimate_reparations_spending(state, n);
+			float est_dom_investment = economy_estimations::estimate_domestic_investment(state, n);
+			float est_overseas_spending = economy_estimations::estimate_overseas_penalty_spending(state, n);
+			float est_construct_spending = economy_estimations::estimate_construction_spending(state, n);
+			float est_land_spending = economy_estimations::estimate_land_spending(state, n);
+			float est_naval_spending = economy_estimations::estimate_naval_spending(state, n);
+			float est_military_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::military);
+			float est_admin_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::administration);
+			float est_education_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::education);
+			float est_reforms_payouts = economy_estimations::estimate_pop_payouts_by_income_type(state, n, culture::income_type::reforms);
+
+			float base_expenses = est_sub_spending + est_war_sub_spending + est_rep_spending;
+
+			float payout_expenses_min = est_admin_payouts * min_percentage + est_education_payouts * min_percentage
+				+ est_military_payouts * military_min + est_reforms_payouts * social_spending_min;
+			float payout_expenses_max = est_admin_payouts * max_percentage + est_education_payouts * max_percentage
+				+ est_military_payouts * military_max + est_reforms_payouts * social_spending_max;
+
+			float military_expenses_min = est_land_spending * land_min + est_naval_spending * naval_min + est_overseas_spending * min_percentage;
+			float military_expenses_max = est_land_spending * land_max + est_naval_spending * naval_max + est_overseas_spending * max_percentage;
+
+			float construction_expenses_min = est_construct_spending * construction_min;
+			float construction_expenses_max = est_construct_spending * construction_max;
+
+			float domestic_expenses_min = est_dom_investment * min_percentage;
+			float domestic_expenses_max = est_dom_investment * max_percentage;
+
+			float set_taxes_to = tax_min;
+			float set_tariff_to = tariff_min;
+			float set_military_to = military_min;
+			float set_social_to = social_spending_min;
+			float set_educ_to = 0.0f;
+			float set_admin_to = 0.0f;
+			float set_land_to = land_min;
+			float set_naval_to = naval_min;
+			float set_construction_to = construction_min;
+			float set_domestic_to = 0.0f;
+			float set_oversees_to = 0.0f;
+			float budget = tax_income_max + base_income - construction_expenses_min - payout_expenses_min - base_expenses;
+			if(n.get_is_at_war()) {
+				if(budget > military_expenses_max) {
+					set_taxes_to = std::clamp((military_expenses_max - base_income)*1.05f / tax_income_max,0.0f,1.0f);
+					float remaining_budget = std::clamp(budget - military_expenses_max, 0.0f, budget);
+					float military_split = remaining_budget * 0.75f;
+					float other_split = (remaining_budget - military_split)/3.0f;
+					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
+					set_educ_to = other_split / est_education_payouts * max_percentage;
+					set_admin_to = other_split / est_admin_payouts * max_percentage;
+					set_social_to = other_split / est_reforms_payouts * max_percentage;
+					
+
+					set_land_to = 1.0f;
+					set_naval_to = 1.0f;
+					set_oversees_to = 1.0f;
+				}
+				else if(budget <= military_expenses_max && budget + tariff_income_max > military_expenses_max) {
+					set_taxes_to = 1.0f;
+					set_tariff_to = (military_expenses_max - budget)*1.05f / tariff_income_max;
+					float remaining_budget = std::clamp(budget + est_tariff_income * set_tariff_to - military_expenses_max, 0.0f, budget);
+					float military_split = remaining_budget * 0.75f;
+					float other_split = (remaining_budget - military_split) / 3.0f;
+					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
+					set_educ_to = other_split / est_education_payouts * max_percentage;
+					set_admin_to = other_split / est_admin_payouts * max_percentage;
+					set_social_to = other_split / est_reforms_payouts * max_percentage;
+
+
+					set_land_to = 1.0f;
+					set_naval_to = 1.0f;
+					set_oversees_to = 1.0f;
+				}
+				else {
+					set_taxes_to = 1.0f;
+					set_tariff_to = 0.9f;
+					float remaining_budget = std::clamp(budget + est_tariff_income * set_tariff_to - military_expenses_max, 0.0f, budget);
+					float military_split = remaining_budget * 0.75f;
+					float other_split = (remaining_budget - military_split) / 3.0f;
+					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
+					set_educ_to = other_split / est_education_payouts * max_percentage;
+					set_admin_to = other_split / est_admin_payouts * max_percentage;
+					set_social_to = other_split / est_reforms_payouts * max_percentage;
+
+
+					set_land_to = 1.0f;
+					set_naval_to = 1.0f;
+					set_oversees_to = 1.0f;
+				}
+
+			} else {
+
+			}
+
 
 			// they don't have to add up to 1.f
 			// the reason they are there is to slow down AI spendings,
 			// make them more or less balanced
 			// and stabilize economy faster
 			// not to allow it to hoard money
-
-			auto tariff_min=int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff));
-			auto tariff_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff));
-			auto military_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
-			auto military_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
-			auto tax_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax));
-			auto tax_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax));
-			auto social_spending_min = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending));
-			auto social_spending_max = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending));
 
 			float land_budget_ratio = 0.50f;
 			float sea_budget_ratio = 0.25f;
