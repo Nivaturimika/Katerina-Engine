@@ -2300,7 +2300,7 @@ namespace text {
 	std::string utf8_to_win1250(std::string_view s) {
 		if(s.size() > 0) {
 			std::string temp;
-			for(uint32_t i = 0; i < s.size(); i++) {
+			for(uint32_t i = 0; i < s.size(); ) {
 				uint32_t c = text::codepoint_from_utf8(s.data() + i, s.data() + s.size());
 				temp.push_back(utf16_to_win1250(char16_t(c)));
 				i += uint32_t(text::size_from_utf8(s.data() + i, s.data() + s.size()));
