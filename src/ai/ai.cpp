@@ -3308,7 +3308,7 @@ namespace ai {
 			float est_middle_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::middle);
 			float est_rich_tax_income = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata::rich);
 
-			float base_income = est_gold_income + est_war_sub_income + est_rep_income;
+			float base_income_t = est_gold_income + est_war_sub_income + est_rep_income;
 			float tax_income_min = est_poor_tax_income * tax_min + est_middle_tax_income * tax_min + est_rich_tax_income * tax_min;
 			float tariff_income_min = est_tariff_income * tariff_min;
 			float tax_income_max = est_poor_tax_income * tax_max + est_middle_tax_income * tax_max + est_rich_tax_income * tax_max;
@@ -3354,10 +3354,10 @@ namespace ai {
 			float set_construction_to = construction_min;
 			float set_domestic_to = 0.0f;
 			float set_oversees_to = 0.0f;
-			float budget = tax_income_max + base_income - construction_expenses_min - payout_expenses_min - base_expenses;
+			float budget = tax_income_max + base_income_t - construction_expenses_min - payout_expenses_min - base_expenses;
 			if(n.get_is_at_war()) {
 				if(budget > military_expenses_max) {
-					set_taxes_to = std::clamp((military_expenses_max - base_income)*1.05f / tax_income_max,0.0f,1.0f);
+					set_taxes_to = std::clamp((military_expenses_max - base_income_t)*1.05f / tax_income_max,0.0f,1.0f);
 					float remaining_budget = std::clamp(budget - military_expenses_max, 0.0f, budget);
 					float military_split = remaining_budget * 0.75f;
 					float other_split = (remaining_budget - military_split)/3.0f;
