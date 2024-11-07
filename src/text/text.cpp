@@ -2303,7 +2303,7 @@ namespace text {
 			for(uint32_t i = 0; i < s.size(); i++) {
 				uint32_t c = text::codepoint_from_utf8(s.data() + i, s.data() + s.size());
 				temp.push_back(utf16_to_win1250(char16_t(c)));
-				i += text::size_from_utf8(s.data() + i, s.data() + s.size());
+				i += uint32_t(text::size_from_utf8(s.data() + i, s.data() + s.size()));
 			}
 			assert(temp[temp.size()] == '\0');
 			return temp;
