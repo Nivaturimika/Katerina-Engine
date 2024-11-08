@@ -339,9 +339,9 @@ namespace map {
 	void display_data::clear_opengl_objects() {
 		assert(loaded_map);
 		loaded_map = false;
-		/* We don't need to check against 0, since the delete functions already do that for us */
+		/* Still don't need ot check for zero (i need to double check) :3 */
 		glDeleteTextures(texture_count, textures);
-		glDeleteTextures(texture_count, texture_arrays);
+		glDeleteTextures(texture_array_count, texture_arrays);
 		glDeleteTextures(max_static_meshes * max_static_submeshes, &static_mesh_textures[0][0]);
 		glDeleteVertexArrays(vo_count, vao_array);
 		glDeleteBuffers(vo_count, vbo_array);
@@ -2492,7 +2492,8 @@ namespace map {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
 					x_offset = float(bm_char.x_offset);
-					y_offset = float(bm_char.y_offset);
+					float ry = float(bm_char.height) / font_size;
+					y_offset = float(bm_char.y_offset) * ry;//float(bm_char.y_offset) * (1.f - ry) - float(bm_font.line_height);
 					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
 				} else {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
@@ -2521,9 +2522,9 @@ namespace map {
 					float rx = float(bm_char.width) / font_size;
 					float ry = float(bm_char.height) / font_size;
 					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, -1), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -1), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -1), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, -ry), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
 					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, ry), shader_direction, glm::vec2(tx + sx, ty), real_text_size);
 					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
 					province_text_line_texture_per_quad.emplace_back(bm_font.ftexid);
