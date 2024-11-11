@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;تفريغ جميع الجيوش التي ينقله�
 auto_save_lb;تردد الحفظ التلقائي
 auto_save_1;يوميًا
 auto_save_2;شهريا
-auto_save_3;سنوي
+auto_save_4;سنوي
 auto_save_0;لا أحد
 monthly_emigration_lab;الهجرة الشهرية إلى (أعلى ?Y$y$?! $x$
 monthly_immigration_lab;الهجرة الشهرية من (أعلى ?Y$y$?! $x$

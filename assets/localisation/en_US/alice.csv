@@ -935,7 +935,8 @@ unload_all_armies_of_fleet;Unload all armies transported by the fleet
 auto_save_lb;Auto-save frequency
 auto_save_1;Daily
 auto_save_2;Monthly
-auto_save_3;Yearly
+auto_save_3;Six monthly
+auto_save_4;Yearly
 auto_save_0;None
 monthly_emigration_lab;Monthly emigration to (top ?Y$y$?!), total of $x$
 monthly_immigration_lab;Monthly immigration from (top ?Y$y$?!), total of $x$

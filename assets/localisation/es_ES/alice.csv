@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;
 auto_save_lb;Frecuencia de auto-guardado
 auto_save_1;Diario
 auto_save_2;Mensual
-auto_save_3;Anual
+auto_save_4;Anual
 auto_save_0;Ninguno
 monthly_emigration_lab;
 monthly_immigration_lab;

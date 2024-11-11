@@ -4176,6 +4176,10 @@ namespace sys {
 			if(ymd_date.day == 1)
 				write_save_file(*this, sys::save_type::autosave);
 			break;
+		case autosave_frequency::sixmonthly:
+			if((ymd_date.month == 7 || ymd_date.month == 1) && ymd_date.day == 1)
+				write_save_file(*this, sys::save_type::autosave);
+			break;
 		case autosave_frequency::yearly:
 			if(ymd_date.month == 1 && ymd_date.day == 1)
 				write_save_file(*this, sys::save_type::autosave);

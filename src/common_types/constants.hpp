@@ -170,7 +170,8 @@ namespace sys {
 		none = 0,
 		yearly = 1,
 		monthly = 2,
-		daily = 3,
+		sixmonthly = 3,
+		daily = 4,
 	};
 
 	constexpr inline int32_t max_autosaves = 16;

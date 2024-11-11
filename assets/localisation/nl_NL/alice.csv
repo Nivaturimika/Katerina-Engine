@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;Ontlaad alle legers die door de vloot worden vervoerd
 auto_save_lb;Frequentie voor automatisch opslaan
 auto_save_1;Dagelijks
 auto_save_2;Maandelijks
-auto_save_3;Jaarlijks
+auto_save_4;Jaarlijks
 auto_save_0;Geen
 monthly_emigration_lab;Maandelijkse emigratie naar (top ?Y$y$?!), total $x$
 monthly_immigration_lab;Maandelijkse immigratie uit (top ?Y$y$?!), total $x$

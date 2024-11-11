@@ -935,7 +935,8 @@ unload_all_armies_of_fleet;Rakd ki a flotta által szállított összes hadsereg
 auto_save_lb;Automatikus mentési frekvencia
 auto_save_1;Napi
 auto_save_2;Havi
-auto_save_3;Évi
+auto_save_3;Hat havi
+auto_save_4;Évi
 auto_save_0;Egyik sem
 monthly_emigration_lab;Havi kivándorlás ide (első ?Y$y$?!), total $x$
 monthly_immigration_lab;Havi bevándorlás innen: (?Y$y$?! legjobb), total $x$

@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;함대에 의해 수송된 모든 군대를 하역시
 auto_save_lb;자동 저장 빈도
 auto_save_1;일일
 auto_save_2;월간 간행물
-auto_save_3;매년
+auto_save_4;매년
 auto_save_0;없음
 monthly_emigration_lab;월별 이주(상위 위?Y$y$?!), total $x$
 monthly_immigration_lab;월간 이민 (상위 위?Y$y$?!), total $x$

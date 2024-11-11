@@ -74,14 +74,14 @@ namespace ui {
 	}
 	void autosave_right::button_action(sys::state& state) noexcept {
 		auto scale_index = uint8_t(state.user_settings.autosaves);
-		if(scale_index < 3) {
+		if(scale_index < 4) {
 			state.user_settings.autosaves = sys::autosave_frequency(scale_index + 1);
 		send(state, parent, notify_setting_update{});
 		}
 	}
 	void autosave_right::on_update(sys::state& state) noexcept {
 		auto scale_index = uint8_t(state.user_settings.autosaves);
-		disabled = (scale_index >= 3);
+		disabled = (scale_index >= 4);
 	}
 	void autosave_display::on_update(sys::state& state) noexcept {
 		switch(state.user_settings.autosaves) {
@@ -94,8 +94,11 @@ namespace ui {
 			case sys::autosave_frequency::monthly:
 			set_text(state, text::produce_simple_string(state, "auto_save_2"));
 			break;
-			case sys::autosave_frequency::yearly:
+			case sys::autosave_frequency::sixmonthly:
 			set_text(state, text::produce_simple_string(state, "auto_save_3"));
+			break;
+			case sys::autosave_frequency::yearly:
+			set_text(state, text::produce_simple_string(state, "auto_save_4"));
 			break;
 			default:
 			set_text(state, "???");

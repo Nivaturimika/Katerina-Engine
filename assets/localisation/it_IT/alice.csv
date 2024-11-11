@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;Scarica tutti gli eserciti trasportati dalla flotta
 auto_save_lb;Frequenza di salvataggio automatico
 auto_save_1;Quotidiano
 auto_save_2;Mensile
-auto_save_3;Annuale
+auto_save_4;Annuale
 auto_save_0;Nessuno
 monthly_emigration_lab;Emigrazione mensile verso (top ?Y$y$?!), total $x$
 monthly_immigration_lab;Immigrazione mensile da (top ?Y$y$?!), total $x$

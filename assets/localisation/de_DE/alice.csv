@@ -935,7 +935,7 @@ unload_all_armies_of_fleet;Entladen Sie alle von der Flotte transportierten Arme
 auto_save_lb;Frequenz automatisch speichern
 auto_save_1;Täglich
 auto_save_2;Monatlich
-auto_save_3;Jährlich
+auto_save_4;Jährlich
 auto_save_0;Keiner
 monthly_emigration_lab;Monatliche Auswanderung nach (Top ?Y$y$?!), total $x$
 monthly_immigration_lab;Monatliche Einwanderung aus (Top ?Y$y$?!), total $x$
