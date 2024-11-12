@@ -461,7 +461,7 @@ namespace effect {
 	EFFECT_BYTECODE_ELEMENT(0x01BA, set_province_flag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01BB, clr_province_flag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01BC, change_party_name, 3) \
-	EFFECT_BYTECODE_ELEMENT(0x01BD, change_party_position, 2) \
+	EFFECT_BYTECODE_ELEMENT(0x01BD, change_party_position, 2)
 
 	#define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	EFFECT_BYTECODE_LIST
@@ -540,7 +540,8 @@ namespace effect {
 	constexpr inline uint16_t from_bounce_scope = first_scope_code + 0x0041;
 	constexpr inline uint16_t this_bounce_scope = first_scope_code + 0x0042;
 	constexpr inline uint16_t random_by_modifier_scope = first_scope_code + 0x0043;
-	constexpr inline uint16_t first_invalid_code = first_scope_code + 0x0044;
+	constexpr inline uint16_t loop_bounded_scope = first_scope_code + 0x0044;
+	constexpr inline uint16_t first_invalid_code = first_scope_code + 0x0045;
 
 	inline constexpr int8_t data_sizes[] = {
 		0, // none
@@ -567,8 +568,8 @@ namespace effect {
 		(masked_code == effect::pop_type_scope_nation) || (masked_code == effect::pop_type_scope_state) ||
 		(masked_code == effect::pop_type_scope_province) || (masked_code == effect::region_scope) ||
 		(masked_code == effect::region_proper_scope) || (masked_code == effect::random_scope) ||
-		(masked_code == effect::random_by_modifier_scope))
-		return 1 + ((code & effect::scope_has_limit) != 0);
+		(masked_code == effect::random_by_modifier_scope) || (masked_code == effect::loop_bounded_scope))
+			return 1 + ((code & effect::scope_has_limit) != 0);
 		return 0 + ((code & effect::scope_has_limit) != 0);
 	}
 	inline bool effect_scope_has_single_member(uint16_t const* source) { // precondition: scope known to not be empty

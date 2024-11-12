@@ -445,6 +445,17 @@ namespace ui {
 			return display_subeffects(ws, tval, layout, primary_slot, primary_slot, from_slot, r_lo, r_hi + 1, indentation + indentation_amount);
 		}
 
+		uint32_t es_loop_bounded_scope(EFFECT_DISPLAY_PARAMS) {
+			//See es_from_bounce_scope, similarly here, but for THIS
+			auto box = text::open_layout_box(layout, indentation);
+			text::add_to_layout_box(ws, layout, box, text::pretty_integer{ trigger::read_int32_t_from_payload(tval + 2) });
+			text::add_space_to_layout_box(ws, layout, box);
+			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "repeats_n_times"));
+			text::close_layout_box(layout, box);
+			show_limit(ws, tval, layout, primary_slot, this_slot, from_slot, indentation);
+			return display_subeffects(ws, tval, layout, primary_slot, this_slot, from_slot, r_lo, r_hi + 1, indentation + indentation_amount);
+		}
+
 		uint32_t es_x_country_scope(EFFECT_DISPLAY_PARAMS) {
 		return es_x_country_scope_nation(ws, tval, layout, trigger::to_generic(dcon::nation_id{}), this_slot, from_slot, r_lo, r_hi, indentation);
 		}
@@ -1039,7 +1050,7 @@ namespace ui {
 				auto chance = trigger::evaluate_multiplicative_modifier(ws, mod_k, primary_slot, this_slot, from_slot);
 				assert(chance >= 0.f);
 				auto box = text::open_layout_box(layout, indentation);
-			text::add_to_layout_box(ws, layout, box, text::fp_percentage{ float(chance) / 100.f });
+				text::add_to_layout_box(ws, layout, box, text::fp_percentage{ float(chance) / 100.f });
 				text::add_space_to_layout_box(ws, layout, box);
 				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "chance_of"));
 				text::close_layout_box(layout, box);
@@ -7282,6 +7293,7 @@ namespace ui {
 			es_from_bounce_scope, // constexpr inline uint16_t from_bounce_scope = first_scope_code + 0x0041;
 			es_this_bounce_scope, // constexpr inline uint16_t this_bounce_scope = first_scope_code + 0x0042;
 			es_random_by_modifier_scope,//constexpr inline uint16_t random_by_modifier_scope = first_scope_code + 0x0043;
+			es_loop_bounded_scope,
 		};
 
 		uint32_t internal_make_effect_description(EFFECT_DISPLAY_PARAMS) {

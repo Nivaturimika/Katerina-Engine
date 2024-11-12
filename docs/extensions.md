@@ -75,14 +75,23 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `masquerade_as_nation = THIS/FROM`: Use the visual flag of `THIS/FROM` as the flag of the nation, most useful for dynamic rebellions for example.
 - `set_province_flag = flag`: Didn't work in the original but now it does
 - `clr_province_flag = flag`: Didn't work in the original but now it does
-- `change_party_name = { ... }`: This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`. This member determines which party the effect will apply to. If an ideology is provided, it will apply to the first active political party with that ideology (generally the "first" party is the political party defined earlier in the files). If `ruling_party` is provided, the current ruling party of the nation in scope will be affected. The second member is `name = ...`. This value is the new name that the party will be given. This effect can be used only within a national scope. Example:
+- `loop_bounded = { ... }`: See below.
+- `change_party_name = { ... }`: See below.
+- `change_party_position = { ... }` : See below.
+
+#### change_party_name
+
+This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`. This member determines which party the effect will apply to. If an ideology is provided, it will apply to the first active political party with that ideology (generally the "first" party is the political party defined earlier in the files). If `ruling_party` is provided, the current ruling party of the nation in scope will be affected. The second member is `name = ...`. This value is the new name that the party will be given. This effect can be used only within a national scope. Example:
 ```
 	change_party_name = {
 		ideology = conservative
 		name = NEW_PARTY_NAME
 	}
 ```
-- `change_party_position = { ... }` : This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`, which determines which party the effect applies to as described above. The second member is `position = ...` where `...` is one of the options for a party issue or a political or social reform. The effect will cause the political party determined by the `ideology` member to change their party position to the given `position`, if it is a party issue or it will give them a voting preference in favor of that particular reform and remove any voting preference in favor of another reform in that group (see below for more on the extension of party preferences). This effect can be used only within a national scope. Example:
+
+#### change_party_position
+
+This effect is defined using a block with two members. The first member is `ideology = ...` where `...` is either the name of an ideology or `ruling_party`, which determines which party the effect applies to as described above. The second member is `position = ...` where `...` is one of the options for a party issue or a political or social reform. The effect will cause the political party determined by the `ideology` member to change their party position to the given `position`, if it is a party issue or it will give them a voting preference in favor of that particular reform and remove any voting preference in favor of another reform in that group (see below for more on the extension of party preferences). This effect can be used only within a national scope. Example:
 ```
 	change_party_position = {
 		ideology = ruling_party
@@ -90,14 +99,22 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 	}
 ```
 
-As for `build_xxx_in_capital`, the game doesn't allow custom defined buildings to be used in this mode as an effect.
+#### build_xxx_in_capital
 
-The syntax for `build_bank_in_capital` and it's university counterpart is the same:
-
+The game doesn't allow custom defined buildings to be used in this mode as an effect. But hence syntax for `build_bank_in_capital` and it's university counterpart is the same:
 ```
 build_bank_in_capital = {
 	in_whole_capital_state = yes/no
 	limit_to_world_greatest_level = yes/no
+}
+```
+
+#### loop_bounded
+
+For looping over elements without using a meta-region:
+```
+loop_bounded = {
+
 }
 ```
 

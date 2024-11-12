@@ -207,6 +207,31 @@ namespace parsers {
 		context.limit_position = old_limit_offset;
 	}
 
+	void ef_scope_loop_bounded(token_generator& gen, error_handler& err, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension loop_bounded but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+
+		auto old_limit_offset = context.limit_position;
+
+		context.compiled_effect.push_back(uint16_t(effect::loop_bounded_scope | effect::scope_has_limit));
+
+		context.compiled_effect.push_back(uint16_t(0));
+		auto payload_size_offset = context.compiled_effect.size() - 1;
+
+		context.limit_position = context.compiled_effect.size();
+		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
+		context.compiled_effect.push_back(uint16_t(0));
+
+		auto read_body = parse_ef_scope_random_by_modifier(gen, err, context);
+		
+		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
+		context.compiled_effect[payload_size_offset + 2] = uint16_t(read_body.loop_iterations);
+		static_assert(sizeof(dcon::value_modifier_key::value_base_t) == sizeof(uint16_t));
+		context.limit_position = old_limit_offset;
+	}
+
 	void ef_scope_any_existing_country_except_scoped(token_generator& gen, error_handler& err, effect_building_context& context) {
 		if(!context.outer_context.use_extensions) {
 			err.accumulated_errors += "Usage of effect extension any_existing_country_except_scoped but parser isn't in extension mode (" + err.file_name + ")\n";

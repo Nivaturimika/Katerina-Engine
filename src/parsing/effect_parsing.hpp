@@ -535,6 +535,7 @@ namespace parsers {
 
 	struct effect_body {
 		int32_t chance = 0;
+		int32_t loop_iterations = 0;
 	void finish(effect_building_context&) { }
 		void capital(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(context.main_slot == trigger::slot_contents::nation) {

@@ -794,13 +794,22 @@ namespace effect {
 		return 1;
 	}
 	uint32_t es_random_by_modifier_scope(EFFECT_PARAMTERS) {
-	auto mod_k = dcon::value_modifier_key{ dcon::value_modifier_key::value_base_t(tval[2]) };
+		auto mod_k = dcon::value_modifier_key{ dcon::value_modifier_key::value_base_t(tval[2]) };
 		auto chance = trigger::evaluate_multiplicative_modifier(ws, mod_k, primary_slot, this_slot, from_slot);
 		assert(chance >= 0.f);
 		auto r = int32_t(rng::get_random(ws, r_hi, r_lo) % 100);
 		if(r < chance)
-		return 1 + apply_subeffects(tval, ws, primary_slot, this_slot, from_slot, r_hi, r_lo + 1, els);
+			return 1 + apply_subeffects(tval, ws, primary_slot, this_slot, from_slot, r_hi, r_lo + 1, els);
 		return 1;
+	}
+	uint32_t es_loop_bounded_scope(EFFECT_PARAMTERS) {
+		auto amount = trigger::read_int32_t_from_payload(tval + 2);
+		uint32_t i = 0;
+		while(amount--) {
+			auto r = int32_t(rng::get_random(ws, r_hi, r_lo) % 100);
+			i = 1 + apply_subeffects(tval, ws, primary_slot, this_slot, from_slot, r_hi, r_lo + 1, els);
+		}
+		return i;
 	}
 	uint32_t es_owner_scope_state(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(primary_slot)); owner)
@@ -4723,6 +4732,7 @@ namespace effect {
 		es_from_bounce_scope,//constexpr inline uint16_t from_bounce_scope = first_scope_code + 0x0041;
 		es_this_bounce_scope,//constexpr inline uint16_t this_bounce_scope = first_scope_code + 0x0042;
 		es_random_by_modifier_scope,//constexpr inline uint16_t random_by_modifier_scope = first_scope_code + 0x0043;
+		es_loop_bounded_scope,
 	};
 
 	uint32_t internal_execute_effect(EFFECT_PARAMTERS) {
