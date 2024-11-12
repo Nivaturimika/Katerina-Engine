@@ -2211,6 +2211,11 @@ namespace ui {
 		}
 	};
 
+	class pop_filter_select_action {
+		public:
+		bool value;
+	};
+
 	typedef std::variant< std::monostate, dcon::pop_type_id, bool> pop_filter_data;
 	class pop_filter_button : public generic_settable_element<button_element_base, dcon::pop_type_id> {
 		public:
@@ -2222,6 +2227,15 @@ namespace ui {
 			if(parent) {
 				Cyto::Any payload = pop_filter_data(content);
 				parent->impl_set(state, payload);
+			}
+		}
+
+		void button_right_action(sys::state& state) noexcept override {
+			if(parent) {
+				Cyto::Any p1 = pop_filter_select_action{false};
+				parent->impl_set(state, p1);
+				Cyto::Any p2 = pop_filter_data(content);
+				parent->impl_set(state, p2);
 			}
 		}
 
@@ -2278,16 +2292,12 @@ namespace ui {
 		}
 	};
 
-	class pop_filter_select_action {
-		public:
-		bool value;
-	};
 	template<bool B>
 	class pop_filter_select_button : public button_element_base {
 		public:
 		void button_action(sys::state& state) noexcept override {
 			if(parent) {
-			Cyto::Any payload = pop_filter_select_action{B};
+				Cyto::Any payload = pop_filter_select_action{B};
 				parent->impl_set(state, payload);
 			}
 		}
@@ -2860,7 +2870,7 @@ namespace ui {
 				return message_result::consumed;
 			} else if(payload.holds_type<pop_filter_select_action>()) {
 				auto data = any_cast<pop_filter_select_action>(payload);
-			state.world.for_each_pop_type([&](dcon::pop_type_id id) { pop_filters[dcon::pop_type_id::value_base_t(id.index())] = data.value; });
+				state.world.for_each_pop_type([&](dcon::pop_type_id id) { pop_filters[dcon::pop_type_id::value_base_t(id.index())] = data.value; });
 				impl_on_update(state);
 				return message_result::consumed;
 			} else if(payload.holds_type<pop_list_sort>()) {
