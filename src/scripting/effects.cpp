@@ -805,7 +805,7 @@ namespace effect {
 		return 1;
 	}
 	uint32_t es_loop_bounded_scope(EFFECT_PARAMTERS) {
-		auto amount = trigger::read_int32_t_from_payload(tval + 2);
+		auto amount = tval[2];
 		uint32_t i = 0;
 		while(amount--) {
 			auto r = int32_t(rng::get_random(ws, r_hi, r_lo) % 100);
