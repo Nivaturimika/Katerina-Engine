@@ -1,5 +1,7 @@
 #include "effect_parsing.hpp"
+#include "parsers.hpp"
 #include "parsers_declarations.hpp"
+#include "system_state.hpp"
 
 namespace parsers {
 
@@ -1943,6 +1945,19 @@ namespace parsers {
 			opt_ = it->second.id;
 		} else {
 			err.accumulated_errors += "Invalid issue option " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void ef_trigger_crisis::type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(parsers::is_fixed_token(v.data(), v.data() + v.length(), "claim")) {
+			type_ = sys::crisis_type::claim;
+		} else if(parsers::is_fixed_token(v.data(), v.data() + v.length(), "colonial")) {
+			type_ = sys::crisis_type::colonial;
+		} else if(parsers::is_fixed_token(v.data(), v.data() + v.length(), "influence")) {
+			type_ = sys::crisis_type::influence;
+		} else if(parsers::is_fixed_token(v.data(), v.data() + v.length(), "liberation")) {
+			type_ = sys::crisis_type::liberation;
+		} else {
+			err.accumulated_errors += "Invalid crisis type " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 } // namespace parsers

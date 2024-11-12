@@ -410,6 +410,7 @@ namespace ui {
 					text::add_line_break_to_layout(state, contents);
 					text::add_line(state, contents, "factory_delete_not_allowed");
 				}
+				
 			}
 		}
 	};

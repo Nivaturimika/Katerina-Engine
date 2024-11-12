@@ -1,4 +1,5 @@
 #include "effects.hpp"
+#include "dcon_generated.hpp"
 #include "nations.hpp"
 #include "system_state.hpp"
 #include "ai.hpp"
@@ -4338,6 +4339,55 @@ namespace effect {
 	}
 	uint32_t ef_remove_crisis(EFFECT_PARAMTERS) {
 		nations::cleanup_crisis(ws);
+		return 0;
+	}
+	uint32_t ef_trigger_crisis(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive) {
+			ws.world.state_instance_set_flashpoint_tension(ws.crisis_state, 0.0f);
+			ws.current_crisis_mode = sys::crisis_mode::finding_defender;
+			if(ws.current_crisis == sys::crisis_type::liberation) {
+				if(auto owner = ws.world.state_instance_get_nation_from_state_ownership(ws.crisis_state);
+					ws.world.nation_get_is_great_power(owner)) {
+					ws.primary_crisis_defender = owner;
+					ws.current_crisis_mode = sys::crisis_mode::finding_attacker;
+				}
+			}
+		}
+		return 0;
+	}
+	uint32_t ef_set_crisis_type(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.current_crisis = sys::crisis_type(tval[1]);
+		return 0;
+	}
+	uint32_t ef_set_crisis_colony(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_colony = trigger::payload(tval[1]).state_id;
+		return 0;
+	}
+	uint32_t ef_set_crisis_colony_this(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_colony = ws.world.state_instance_get_definition(trigger::to_state(this_slot));
+		return 0;
+	}
+	uint32_t ef_set_crisis_colony_from(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_colony = ws.world.state_instance_get_definition(trigger::to_state(from_slot));
+		return 0;
+	}
+	uint32_t ef_set_crisis_liberation_tag(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_liberation_tag = trigger::payload(tval[1]).tag_id;
+		return 0;
+	}
+	uint32_t ef_set_crisis_liberation_tag_this(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_liberation_tag = ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(this_slot));
+		return 0;
+	}
+	uint32_t ef_set_crisis_liberation_tag_from(EFFECT_PARAMTERS) {
+		if(ws.current_crisis_mode == sys::crisis_mode::inactive)
+			ws.crisis_liberation_tag = ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(from_slot));
 		return 0;
 	}
 	uint32_t ef_add_country_modifier_province(EFFECT_PARAMTERS) {

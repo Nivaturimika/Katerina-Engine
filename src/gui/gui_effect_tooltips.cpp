@@ -6329,6 +6329,93 @@ namespace ui {
 			text::close_layout_box(layout, box);
 			return 0;
 		}
+
+		uint32_t ef_trigger_crisis(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "trigger_crisis", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_type(EFFECT_DISPLAY_PARAMS) {
+			auto type = sys::crisis_type(tval[1]);
+			return 0;
+		}
+		uint32_t ef_set_crisis_colony(EFFECT_DISPLAY_PARAMS) {
+			auto sdef = trigger::payload(tval[1]).state_id;
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::text, sdef);
+			text::localised_format_box(ws, layout, box, "set_crisis_colony", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_colony_this(EFFECT_DISPLAY_PARAMS) {
+			auto sdef = ws.world.state_instance_get_definition(trigger::to_state(this_slot));
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			if(this_slot != -1)
+				text::add_to_substitution_map(m, text::variable_type::x, sdef);
+			else {
+				auto t = text::produce_simple_string(ws, "this_state");
+				text::add_to_substitution_map(m, text::variable_type::x, std::string_view(t));
+			}
+			text::localised_format_box(ws, layout, box, "set_crisis_colony", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_colony_from(EFFECT_DISPLAY_PARAMS) {
+			auto sdef = ws.world.state_instance_get_definition(trigger::to_state(from_slot));
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			if(this_slot != -1)
+				text::add_to_substitution_map(m, text::variable_type::x, sdef);
+			else {
+				auto t = text::produce_simple_string(ws, "from_state");
+				text::add_to_substitution_map(m, text::variable_type::x, std::string_view(t));
+			}
+			text::localised_format_box(ws, layout, box, "set_crisis_colony", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_liberation_tag(EFFECT_DISPLAY_PARAMS) {
+			auto tag = trigger::payload(tval[1]).tag_id;
+				auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::x, tag);
+			text::localised_format_box(ws, layout, box, "set_crisis_liberation_tag", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_liberation_tag_this(EFFECT_DISPLAY_PARAMS) {
+			auto tag = ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(this_slot));
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			if(this_slot != -1)
+				text::add_to_substitution_map(m, text::variable_type::x, tag);
+			else {
+				auto t = text::produce_simple_string(ws, "this_nation");
+				text::add_to_substitution_map(m, text::variable_type::x, std::string_view(t));
+			}
+			text::localised_format_box(ws, layout, box, "set_crisis_liberation_tag", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_set_crisis_liberation_tag_from(EFFECT_DISPLAY_PARAMS) {
+			auto tag = ws.world.nation_get_identity_from_identity_holder(trigger::to_nation(from_slot));
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			if(this_slot != -1)
+				text::add_to_substitution_map(m, text::variable_type::x, tag);
+			else {
+				auto t = text::produce_simple_string(ws, "from_nation");
+				text::add_to_substitution_map(m, text::variable_type::x, std::string_view(t));
+			}
+			text::localised_format_box(ws, layout, box, "set_crisis_liberation_tag", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+
 		uint32_t ef_add_country_modifier_province(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
@@ -7227,6 +7314,14 @@ namespace ui {
 			ef_change_party_name, //EFFECT_BYTECODE_ELEMENT(0x01BE, change_party_name, 3) 
 			ef_change_party_position, //EFFECT_BYTECODE_ELEMENT(0x01BF, change_party_position, 2) 
 			ef_remove_crisis,
+			ef_trigger_crisis,
+			ef_set_crisis_type,
+			ef_set_crisis_colony,
+			ef_set_crisis_colony_this,
+			ef_set_crisis_colony_from,
+			ef_set_crisis_liberation_tag,
+			ef_set_crisis_liberation_tag_this,
+			ef_set_crisis_liberation_tag_from,
 
 			//
 			// SCOPES

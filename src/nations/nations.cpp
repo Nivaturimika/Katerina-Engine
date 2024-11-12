@@ -2150,8 +2150,8 @@ namespace nations {
 				}
 			});
 			for(uint32_t i = 0; i < 3 && i < most_likely_states.size(); ++i) {
-				auto chance = uint32_t(state.defines.crisis_base_chance *
-														 state.world.state_instance_get_flashpoint_tension(most_likely_states[i])); // out of 10,000
+				auto chance = uint32_t(state.defines.crisis_base_chance
+					* state.world.state_instance_get_flashpoint_tension(most_likely_states[i])); // out of 10,000
 				auto rvalue = rng::get_random(state, uint32_t(most_likely_states[i].index())) % 10000;
 				if(rvalue < chance) {
 					state.crisis_state = most_likely_states[i];
@@ -2162,14 +2162,12 @@ namespace nations {
 						state.world.nation_get_is_great_power(owner)) {
 						state.primary_crisis_defender = owner;
 					}
-
-
 					notification::post(state, notification::message{
 						[st = state.crisis_state](sys::state& state, text::layout_base& contents) {
 							text::add_line(state, contents, "msg_new_crisis_1", text::variable_type::x, st);
 						},
 						"msg_new_crisis_title",
-					state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
+						state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 						sys::message_base_type::crisis_starts
 					});
 

@@ -1,8 +1,11 @@
 #pragma once
+#include "nations.hpp"
 #include "parsers.hpp"
 #include "script_constants.hpp"
+#include "system_state.hpp"
 #include "trigger_parsing.hpp"
 #include "text.hpp"
+#include "triggers.hpp"
 
 namespace economy {
 	dcon::modifier_id get_province_selector_modifier(sys::state& state);
@@ -496,6 +499,14 @@ namespace parsers {
 		dcon::issue_option_id opt_;
 		void ideology(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
 		void position(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
+		void finish(effect_building_context&) { }
+	};
+	struct ef_trigger_crisis {
+		bool overwrite;
+		sys::crisis_type type_;
+		std::string liberation_tag;
+		std::string colony;
+		void type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
 		void finish(effect_building_context&) { }
 	};
 	struct ef_build_railway_in_capital {
@@ -1193,6 +1204,63 @@ namespace parsers {
 				return;
 			}
 			context.compiled_effect.push_back(uint16_t(effect::remove_crisis));
+		}
+		void trigger_crisis(association_type t, ef_trigger_crisis value, error_handler& err, int32_t line, effect_building_context& context) {
+			if(!context.outer_context.use_extensions) {
+				err.accumulated_errors += "Usage of effect extension trigger_crisis but parser isn't in extension mode (" + err.file_name + ")\n";
+				return;
+			}
+			if(value.type_ == sys::crisis_type::none) {
+				err.accumulated_errors += "Invalid crisis type (" + err.file_name + ")\n";
+				return;
+			} else {
+				if(value.overwrite) {
+					context.compiled_effect.push_back(uint16_t(effect::remove_crisis));
+				}
+				context.compiled_effect.push_back(uint16_t(effect::set_crisis_type));
+				context.compiled_effect.push_back(uint16_t(value.type_));
+			}
+			if(value.colony.empty()) {
+				/* Nothing */
+			} else if(is_this(value.colony)) {
+				if(context.this_slot == trigger::slot_contents::state)
+					context.compiled_effect.push_back(uint16_t(effect::set_crisis_colony_this));
+				else {
+					err.accumulated_errors += "Invalid THIS slot " +  slot_contents_to_string(context.this_slot) + " for crisis colony (" + err.file_name + ")\n";
+				}
+			} else if(is_from(value.colony)) {
+				if(context.from_slot == trigger::slot_contents::state)
+					context.compiled_effect.push_back(uint16_t(effect::set_crisis_colony_from));
+				else {
+					err.accumulated_errors += "Invalid FROM slot " +  slot_contents_to_string(context.from_slot) + " for crisis colony (" + err.file_name + ")\n";
+				}
+			} else if(auto it = context.outer_context.map_of_state_names.find(std::string(value.colony)); it != context.outer_context.map_of_state_names.end()) {
+				context.compiled_effect.push_back(uint16_t(effect::set_crisis_colony));
+				context.compiled_effect.push_back(trigger::payload(it->second).value);
+			} else {
+				err.accumulated_errors += "Invalid state " + std::string(value.colony) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			}
+			if(value.liberation_tag.empty()) {
+				/* Nothing */
+			} else if(is_this(value.liberation_tag)) {
+				if(context.this_slot == trigger::slot_contents::nation)
+					context.compiled_effect.push_back(uint16_t(effect::set_crisis_liberation_tag_this));
+				else {
+					err.accumulated_errors += "Invalid THIS slot " +  slot_contents_to_string(context.this_slot) + " for crisis colony (" + err.file_name + ")\n";
+				}
+			} else if(is_from(value.liberation_tag)) {
+				if(context.from_slot == trigger::slot_contents::nation)
+					context.compiled_effect.push_back(uint16_t(effect::set_crisis_liberation_tag_from));
+				else {
+					err.accumulated_errors += "Invalid FROM slot " +  slot_contents_to_string(context.from_slot) + " for crisis colony (" + err.file_name + ")\n";
+				}
+			} else if(auto it = context.outer_context.map_of_ident_names.find(nations::tag_to_int(value.colony[0], value.colony[1], value.colony[2])); it != context.outer_context.map_of_ident_names.end()) {
+				context.compiled_effect.push_back(uint16_t(effect::set_crisis_liberation_tag));
+				context.compiled_effect.push_back(trigger::payload(it->second).value);
+			} else {
+				err.accumulated_errors += "Invalid liberation_tag " + std::string(value.liberation_tag) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			}
+			context.compiled_effect.push_back(uint16_t(effect::trigger_crisis));
 		}
 		void country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);

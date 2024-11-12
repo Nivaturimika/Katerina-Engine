@@ -79,6 +79,20 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `change_party_name = { ... }`: See below.
 - `change_party_position = { ... }` : See below.
 - `remove_crisis = yes`: Removes a crisis, value `yes/no` is ignored, for obvious reasons
+- `trigger_crisis = { ... }`: See below.
+
+#### trigger_crisis
+
+```
+trigger_crisis = {
+	overwrite = yes/no
+	type = claim/liberation/colonial/influence
+	liberation_tag = TAG/THIS/FROM
+	colony = State/THIS/FROM
+}
+```
+
+If the colony specified is on the ownership of a nation that is a great power, said nation becomes the primary defender automatically.
 
 #### change_party_name
 

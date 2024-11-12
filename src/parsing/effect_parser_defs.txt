@@ -154,6 +154,12 @@ ef_change_party_position
 	ideology                       value     text                           member_fn
 	position                            value     text                           member_fn
 
+ef_trigger_crisis
+	overwrite						value	bool							member
+	type							value	text							member_fn
+	liberation_tag					value	text							member_fn
+	colony							value	text							member_fn
+
 effect_body
 	if                              extern      ef_scope_if         discard
 	else_if                         extern      ef_scope_else_if    discard
@@ -344,6 +350,7 @@ effect_body
 	loop_bounded					group		ef_loop_bounded				discard
 	loop_iterations					value		int							member
 	remove_crisis					value		bool						member_fn
+	trigger_crisis					group		ef_trigger_crisis			member_fn
 	#any                            extern      ef_scope_variable           discard
 
 ef_scope_random_by_modifier
