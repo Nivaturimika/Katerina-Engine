@@ -3278,7 +3278,7 @@ namespace ai {
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 				return;
 
-			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
+			//float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
 			
 
 			
