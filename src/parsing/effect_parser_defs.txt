@@ -157,8 +157,8 @@ ef_change_party_position
 ef_trigger_crisis
 	overwrite						value	bool							member
 	type							value	text							member_fn
-	liberation_tag					value	text							member_fn
-	colony							value	text							member_fn
+	liberation_tag					value	text							member
+	colony							value	text							member
 
 effect_body
 	if                              extern      ef_scope_if         discard
