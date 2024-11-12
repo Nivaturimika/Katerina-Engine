@@ -1187,7 +1187,7 @@ namespace parsers {
 				return;
 			}
 		}
-		void ef_remove_crisis(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		void remove_crisis(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(!context.outer_context.use_extensions) {
 				err.accumulated_errors += "Usage of effect extension remove_crisis but parser isn't in extension mode (" + err.file_name + ")\n";
 				return;
