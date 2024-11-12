@@ -16,8 +16,8 @@ namespace ui {
 		}
 		for(auto ar : state.world.province_get_army_location(prov)) {
 			if(ar.get_army().get_black_flag() == false && ar.get_army().get_is_retreating() == false && !bool(ar.get_army().get_navy_from_army_transport())) {
-				if(std::find_if(list.begin(), list.end(), [&](auto const e) { return e == ar.get_army().id }) == list.end()) {
-					total_army_weight += military::total_army_weight(state, ar);
+				if(std::find_if(list.begin(), list.end(), [&](auto const e) { return e == ar.get_army().id; }) == list.end()) {
+					total_army_weight += military::total_army_weight(state, ar.get_army());
 				}
 			}
 		}
