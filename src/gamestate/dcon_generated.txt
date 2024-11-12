@@ -546,8 +546,12 @@ object {
 		type{ value_modifier_key }
 		tag{ scenario }
 	}
+	property{
+		name{ input_bonus }
+		type{ value_modifier_key }
+		tag{ scenario }
+	}
 }
-
 
 object {
 	name{ ideology_group }
@@ -4132,6 +4136,11 @@ object {
 	}
 	property {
 		name{ triggered_modifiers }
+		type{ float }
+		tag{ unsaved }
+	}
+	property {
+		name{ triggered_input_modifiers }
 		type{ float }
 		tag{ unsaved }
 	}

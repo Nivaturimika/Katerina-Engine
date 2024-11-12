@@ -2099,8 +2099,10 @@ namespace economy {
 							}
 
 							pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
-								auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s);
-								auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s);
+								auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s)
+									+ economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
+								auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s)
+									+ economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
 								if(a_bonus != b_bonus)
 									return a_bonus > b_bonus;
 								return a.index() < b.index(); // force total ordering

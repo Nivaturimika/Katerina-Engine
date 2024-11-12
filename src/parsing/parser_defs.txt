@@ -1144,6 +1144,7 @@ production_type
 	employees                       group      production_employee_set           member
 	input_goods                     extern     make_prod_commodity_array         member
 	bonus                           group      production_bonus                  member_fn
+	input_bonus						group		production_bonus				member_fn
 	type                            value      text                              member_fn
 	workforce                       value      int                               member
 	farm                            value      bool                              member

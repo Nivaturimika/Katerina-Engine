@@ -994,3 +994,14 @@ However, only some triggers and effects support define-named-constants:
 - `diplomatic_influence = { ... }`
 - `set_variable = { ... }`
 - `change_variable = { ... }`
+
+## Input, throughput bonuses
+
+Factories can define `input_bonus`, `bonus` (throughput). Those modifiers are additive (x-multiplier + the-bonus), where `x` is the applied multiplier (output, throughput, input, etc). The default for not defining a bonus is 0.
+
+```
+input_bonus = {
+	value = 0.5 # +50%
+	trigger = { port = 1 }
+}
+```

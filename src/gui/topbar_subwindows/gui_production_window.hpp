@@ -786,6 +786,9 @@ namespace ui {
 			if(auto mod_k = state.world.factory_type_get_throughput_bonus(ft); mod_k) {
 				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(sid), trigger::to_generic(n), 0);
 			}
+			if(auto mod_k = state.world.factory_type_get_input_bonus(ft); mod_k) {
+				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(sid), trigger::to_generic(n), 0);
+			}
 		}
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
@@ -863,6 +866,9 @@ namespace ui {
 			text::add_line(state, contents, "factory_stats_10", text::variable_type::x, text::fp_percentage{ economy_factory::sum_of_factory_triggered_modifiers(state, ft, s) });
 			text::add_line(state, contents, "factory_stats_11", text::variable_type::x, text::fp_percentage{ economy_factory::factory_throughput_multiplier(state, ft, n, p, s) + economy_factory::sum_of_factory_triggered_modifiers(state, ft, s) });
 			if(auto mod_k = state.world.factory_type_get_throughput_bonus(ft); mod_k) {
+				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(s), trigger::to_generic(n), 0);
+			}
+			if(auto mod_k = state.world.factory_type_get_input_bonus(ft); mod_k) {
 				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(s), trigger::to_generic(n), 0);
 			}
 		}

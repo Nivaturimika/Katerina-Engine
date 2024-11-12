@@ -212,7 +212,7 @@ namespace economy_factory {
 				float input_total = factory_input_total_cost(state, n, ft);
 				float min_input_available = factory_min_input_available(state, n, ft);
 				//modifiers
-				float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, province_fat_id, state_instance_fat_id));
+				float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, province_fat_id, state_instance_fat_id) + f.get_triggered_input_modifiers());
 				float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, province_fat_id, state_instance_fat_id) + f.get_triggered_modifiers());
 				float effective_production_scale = std::min(f.get_production_scale() * f.get_level(), max_production_scale);
 				//
@@ -264,6 +264,14 @@ namespace economy_factory {
 	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid) {
 		auto nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		if(auto mod_k = state.world.factory_type_get_throughput_bonus(ft); mod_k) {
+			return trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(sid), trigger::to_generic(nation_id), 0);
+		}
+		return 0.f;
+	}
+
+	float sum_of_factory_triggered_input_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid) {
+		auto nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
+		if(auto mod_k = state.world.factory_type_get_input_bonus(ft); mod_k) {
 			return trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(sid), trigger::to_generic(nation_id), 0);
 		}
 		return 0.f;
@@ -549,14 +557,21 @@ namespace economy_factory {
 	void update_factory_triggered_modifiers(sys::state& state) {
 		state.world.for_each_factory([&](dcon::factory_id f) {
 			auto fac_type = fatten(state.world, state.world.factory_get_building_type(f));
-			float sum = 1.0f;
 			auto p = state.world.factory_get_province_from_factory_location(f);
 			auto sid = state.world.province_get_state_membership(p);
 			auto owner = state.world.province_get_nation_from_province_ownership(p);
+			//
+			float t_sum = 0.f;
 			if(owner && sid) {
-				sum = sum_of_factory_triggered_modifiers(state, state.world.factory_get_building_type(f), sid);
+				t_sum = sum_of_factory_triggered_modifiers(state, state.world.factory_get_building_type(f), sid);
 			}
-			state.world.factory_set_triggered_modifiers(f, sum);
+			state.world.factory_set_triggered_modifiers(f, t_sum);
+			//
+			float i_sum = 0.f;
+			if(owner && sid) {
+				i_sum = sum_of_factory_triggered_input_modifiers(state, state.world.factory_get_building_type(f), sid);
+			}
+			state.world.factory_set_triggered_input_modifiers(f, i_sum);
 		});
 	}
 
@@ -567,7 +582,7 @@ namespace economy_factory {
 		float min_input_available = factory_min_input_available(state, n, ft);
 		float min_efficiency_input_available = factory_min_efficiency_input_available(state, n, ft);
 		//modifiers
-		float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, p, sid));
+		float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, p, sid) + state.world.factory_get_triggered_input_modifiers(f));
 		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, p, sid) + state.world.factory_get_triggered_modifiers(f));
 		float output_multiplier = std::max(0.f, factory_output_multiplier(state, f, n, p));
 		return state.world.factory_type_get_output_amount(ft)

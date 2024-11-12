@@ -2533,6 +2533,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		float value = 0.0f;
 
 		std::vector<production_bonus> bonuses;
+		std::vector<production_bonus> input_bonuses;
 		dcon::commodity_id output_goods_;
 		production_type_enum type_ = production_type_enum::none;
 
@@ -2548,15 +2549,18 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		void bonus(production_bonus const& v, error_handler& err, int32_t line, production_context& context) {
 			bonuses.push_back(v);
 		}
+		void input_bonus(production_bonus const& v, error_handler& err, int32_t line, production_context& context) {
+			input_bonuses.push_back(v);
+		}
 		void type(association_type, std::string_view v, error_handler& err, int32_t line, production_context& context) {
 			if(is_fixed_token_ci(v.data(), v.data() + v.length(), "factory"))
-			type_ = production_type_enum::factory;
+				type_ = production_type_enum::factory;
 			else if(is_fixed_token_ci(v.data(), v.data() + v.length(), "rgo"))
-			type_ = production_type_enum::rgo;
+				type_ = production_type_enum::rgo;
 			else if(is_fixed_token_ci(v.data(), v.data() + v.length(), "artisan"))
-			type_ = production_type_enum::artisan;
+				type_ = production_type_enum::artisan;
 			else
-			err.accumulated_errors +=
+				err.accumulated_errors +=
 					"Invalid production type " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 		void as_template(association_type, std::string_view v, error_handler& err, int32_t line, production_context& context) {

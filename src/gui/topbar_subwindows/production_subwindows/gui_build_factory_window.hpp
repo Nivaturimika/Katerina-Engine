@@ -158,8 +158,10 @@ namespace ui {
 					text::close_layout_box(contents, box);
 				}
 			}
-			//
 			if(auto mod_k = state.world.factory_type_get_throughput_bonus(content); mod_k) {
+				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(sid), trigger::to_generic(n), 0);
+			}
+			if(auto mod_k = state.world.factory_type_get_input_bonus(content); mod_k) {
 				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(sid), trigger::to_generic(n), 0);
 			}
 		}

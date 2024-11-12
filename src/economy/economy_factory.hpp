@@ -73,8 +73,8 @@ namespace economy_factory {
 	float pop_factory_min_wage(sys::state& state, dcon::nation_id n, float min_wage_factor);
 
 	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid);
+	float sum_of_factory_triggered_input_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid);
 	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit);
-
 
 	int32_t factory_priority(sys::state const& state, dcon::factory_id factory_id);
 

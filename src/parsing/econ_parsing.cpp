@@ -245,17 +245,30 @@ namespace parsers {
 				factory_handle.set_is_coastal(pt.is_coastal);
 				factory_handle.set_base_workforce(pt.workforce);
 
-				auto old_count = context.outer_context.state.value_modifier_segments.size();
-				value_modifier_definition vmd;
-				for(uint32_t i = 0; i < uint32_t(pt.bonuses.size()); i++) {
-					context.outer_context.state.value_modifier_segments.push_back(sys::value_modifier_segment{pt.bonuses[i].value, pt.bonuses[i].trigger});
+				if(pt.bonuses.size() > 0) {
+					auto old_count = context.outer_context.state.value_modifier_segments.size();
+					value_modifier_definition vmd;
+					for(uint32_t i = 0; i < uint32_t(pt.bonuses.size()); i++) {
+						context.outer_context.state.value_modifier_segments.push_back(sys::value_modifier_segment{pt.bonuses[i].value, pt.bonuses[i].trigger});
+					}
+					auto multiplier = vmd.factor ? *vmd.factor : 1.0f;
+					auto overall_factor = vmd.base;
+					auto new_count = context.outer_context.state.value_modifier_segments.size();
+					auto vm_key = context.outer_context.state.value_modifiers.push_back(sys::value_modifier_description{ multiplier, overall_factor, uint16_t(old_count), uint16_t(new_count - old_count) });
+					factory_handle.set_throughput_bonus(vm_key);
 				}
-				auto multiplier = vmd.factor ? *vmd.factor : 1.0f;
-				auto overall_factor = vmd.base;
-				auto new_count = context.outer_context.state.value_modifier_segments.size();
-				//
-				auto vm_key = context.outer_context.state.value_modifiers.push_back(sys::value_modifier_description{ multiplier, overall_factor, uint16_t(old_count), uint16_t(new_count - old_count) });
-				factory_handle.set_throughput_bonus(vm_key);
+				if(pt.input_bonuses.size() > 0) {
+					auto old_count = context.outer_context.state.value_modifier_segments.size();
+					value_modifier_definition vmd;
+					for(uint32_t i = 0; i < uint32_t(pt.input_bonuses.size()); i++) {
+						context.outer_context.state.value_modifier_segments.push_back(sys::value_modifier_segment{pt.input_bonuses[i].value, pt.input_bonuses[i].trigger});
+					}
+					auto multiplier = vmd.factor ? *vmd.factor : 1.0f;
+					auto overall_factor = vmd.base;
+					auto new_count = context.outer_context.state.value_modifier_segments.size();
+					auto vm_key = context.outer_context.state.value_modifiers.push_back(sys::value_modifier_description{ multiplier, overall_factor, uint16_t(old_count), uint16_t(new_count - old_count) });
+					factory_handle.set_input_bonus(vm_key);
+				}
 			} else {
 				err.accumulated_warnings += "Unused factory production type: " + std::string(name) + "\n";
 			}
