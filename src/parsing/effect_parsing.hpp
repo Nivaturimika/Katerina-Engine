@@ -1205,7 +1205,7 @@ namespace parsers {
 			}
 			context.compiled_effect.push_back(uint16_t(effect::remove_crisis));
 		}
-		void trigger_crisis(association_type t, ef_trigger_crisis value, error_handler& err, int32_t line, effect_building_context& context) {
+		void trigger_crisis(ef_trigger_crisis value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(!context.outer_context.use_extensions) {
 				err.accumulated_errors += "Usage of effect extension trigger_crisis but parser isn't in extension mode (" + err.file_name + ")\n";
 				return;
