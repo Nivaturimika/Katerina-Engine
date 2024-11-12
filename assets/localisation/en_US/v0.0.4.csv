@@ -100,7 +100,7 @@ siege_progress;Siege progress: ?Y$x$?!
 trade_flow_world_production;?Y$x$%?! of the world production
 province_change_rgo_production_to;$x$ changes RGO to $text$
 remove_crisis;Removes current crisis
-repeats_n_times;Repeat $n$ times
+repeats_x_times;Repeat $x$ times
 trigger_crisis;Triggers a crisis
 set_crisis_colony;Set crisis colony to $x$
 set_crisis_liberation_tag;Set crisis liberation tag to $x$

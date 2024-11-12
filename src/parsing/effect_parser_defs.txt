@@ -347,7 +347,7 @@ effect_body
 	random_by_modifier				extern		ef_random_by_modifier		discard
 	change_party_name				group		ef_change_party_name		member_fn
 	change_party_position			group		ef_change_party_position	member_fn
-	loop_bounded					group		ef_loop_bounded				discard
+	loop_bounded					extern		ef_scope_loop_bounded		discard
 	loop_iterations					value		int							member
 	remove_crisis					value		bool						member_fn
 	trigger_crisis					group		ef_trigger_crisis			member_fn

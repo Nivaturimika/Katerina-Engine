@@ -448,8 +448,8 @@ namespace ui {
 		uint32_t es_loop_bounded_scope(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
-			text::add_to_substitution_map(m, text::variable_type::text, text::pretty_integer{ trigger::read_int32_t_from_payload(tval + 2) });
-			text::localised_format_box(ws, layout, box, "repeats_n_times", m);
+			text::add_to_substitution_map(m, text::variable_type::x, text::pretty_integer{ trigger::read_int32_t_from_payload(tval + 2) });
+			text::localised_format_box(ws, layout, box, "repeats_x_times", m);
 			text::close_layout_box(layout, box);
 			show_limit(ws, tval, layout, primary_slot, this_slot, from_slot, indentation);
 			return display_subeffects(ws, tval, layout, primary_slot, this_slot, from_slot, r_lo, r_hi + 1, indentation + indentation_amount);
