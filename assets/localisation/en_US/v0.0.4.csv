@@ -99,3 +99,5 @@ last_player_that_paused;Recent pause by: ?Y$x$?!
 siege_progress;Siege progress: ?Y$x$?!
 trade_flow_world_production;?Y$x$%?! of the world production
 province_change_rgo_production_to;$x$ changes RGO to $text$
+remove_crisis;Removes current crisis
+repeats_n_times;Repeat $n$ times
