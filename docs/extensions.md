@@ -115,8 +115,9 @@ build_bank_in_capital = {
 For looping over elements without using a meta-region:
 ```
 loop_bounded = {
-
-}
+	loop_iterations = 10 #will repeat 10 times
+	badboy = 1
+} #effectively giving 10 infamy
 ```
 
 ### New trigger conditions
