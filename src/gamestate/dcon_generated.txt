@@ -542,13 +542,8 @@ object {
 		tag{ scenario }
 	}
 	property{
-		name{ bonus_trigger }
-		type{ std::array<trigger_key,sys::max_factory_bonuses> }
-		tag{ scenario }
-	}
-	property{
-		name{ bonus_amount }
-		type{ std::array<float,sys::max_factory_bonuses> }
+		name{ throughput_bonus }
+		type{ value_modifier_key }
 		tag{ scenario }
 	}
 }

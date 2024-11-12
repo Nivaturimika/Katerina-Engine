@@ -150,26 +150,18 @@ namespace ui {
 
 					text::substitution_map m;
 					text::add_to_substitution_map(m, text::variable_type::name, state.world.commodity_get_name(cid));
-				text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
-				text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
-				text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
+					text::add_to_substitution_map(m, text::variable_type::val, text::fp_currency{ cost });
+					text::add_to_substitution_map(m, text::variable_type::need, text::fp_four_places{ amount });
+					text::add_to_substitution_map(m, text::variable_type::cost, text::fp_currency{ cost * amount });
 					auto box = text::open_layout_box(contents, 0);
 					text::localised_format_box(state, contents, box, "alice_factory_input_item", m);
 					text::close_layout_box(contents, box);
 				}
 			}
 			//
-			float sum = 0.f;
-			for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
-				if(auto b1 = state.world.factory_type_get_bonus_trigger(content)[i]; b1) {
-					text::add_line(state, contents, "alice_factory_bonus", text::variable_type::x, text::fp_four_places{ state.world.factory_type_get_bonus_amount(content)[i] });
-					if(trigger::evaluate(state, b1, trigger::to_generic(sid), trigger::to_generic(n), 0)) {
-						sum -= state.world.factory_type_get_bonus_amount(content)[i];
-					}
-					ui::trigger_description(state, contents, b1, trigger::to_generic(sid), trigger::to_generic(n), 0);
-				}
+			if(auto mod_k = state.world.factory_type_get_throughput_bonus(content); mod_k) {
+				ui::additive_value_modifier_description(state, contents, mod_k, trigger::to_generic(sid), trigger::to_generic(n), 0);
 			}
-			text::add_line(state, contents, "alice_factory_total_bonus", text::variable_type::x, text::fp_four_places{ sum });
 		}
 	};
 

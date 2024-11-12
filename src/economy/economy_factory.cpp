@@ -262,15 +262,11 @@ namespace economy_factory {
 
 	/* Obtains the sum of factory throughput modifiers */
 	float sum_of_factory_triggered_modifiers(sys::state& state, dcon::factory_type_id ft, dcon::state_instance_id sid) {
-		auto factory_type_fat_id = fatten(state.world, ft);
 		auto nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
-		float sum = 1.f;
-		for(uint32_t i = 0; i < sys::max_factory_bonuses; i++) {
-			if(auto bonus_trigger = factory_type_fat_id.get_bonus_trigger()[i]; bonus_trigger && trigger::evaluate(state, bonus_trigger, trigger::to_generic(sid), trigger::to_generic(nation_id), 0)) {
-				sum += factory_type_fat_id.get_bonus_amount()[i];
-			}
+		if(auto mod_k = state.world.factory_type_get_throughput_bonus(ft); mod_k) {
+			return trigger::evaluate_additive_modifier(state, mod_k, trigger::to_generic(sid), trigger::to_generic(nation_id), 0);
 		}
-		return sum;
+		return 0.f;
 	}
 
 	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit) {
