@@ -693,7 +693,8 @@
 	LUA_DEFINES_LIST_ELEMENT(ke_needs_scaling_factor, 166662.0) \
 	LUA_DEFINES_LIST_ELEMENT(ke_pop_payout_factor, 0.0000036) \
 	LUA_DEFINES_LIST_ELEMENT(ke_pop_consumption_factor, 166662.0) \
-	LUA_DEFINES_LIST_ELEMENT(ke_profitability_factor, 0.04)
+	LUA_DEFINES_LIST_ELEMENT(ke_profitability_factor, 0.04) \
+	LUA_DEFINES_LIST_ELEMENT(ke_allow_sphere_dup, 1.0)
 
 // scales the needs values so that they are needs per this many pops
 // this value was arrived at by looking at farmers: 40'000 farmers produces enough grain to satisfy about 2/3

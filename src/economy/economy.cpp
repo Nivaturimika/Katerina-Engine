@@ -413,12 +413,19 @@ namespace economy {
 	void give_sphere_leader_production(sys::state& state, dcon::nation_id n) {
 		if(auto sl = state.world.nation_get_in_sphere_of(n); sl) {
 			float share = sphere_leader_share_factor(state, sl, n);
-			state.world.for_each_commodity([&](dcon::commodity_id c) {
-				auto local_supply = state.world.nation_get_domestic_market_pool(n, c);
-				auto leader_supply = state.world.nation_get_domestic_market_pool(sl, c);
-				//Yep here it be, the sphere dup bug!
-				state.world.nation_set_domestic_market_pool(n, c, (1.0f - share) * local_supply + leader_supply);
-			});
+			if(bool(state.defines.ke_allow_sphere_dup)) {
+				state.world.for_each_commodity([&](dcon::commodity_id c) {
+					auto local_supply = state.world.nation_get_domestic_market_pool(n, c);
+					state.world.nation_set_domestic_market_pool(n, c, (1.0f - share) * local_supply);
+				});
+			} else {
+				// Leader supply is added to sphereling, hence the sphere dup bug
+				state.world.for_each_commodity([&](dcon::commodity_id c) {
+					auto local_supply = state.world.nation_get_domestic_market_pool(n, c);
+					auto leader_supply = state.world.nation_get_domestic_market_pool(sl, c);
+					state.world.nation_set_domestic_market_pool(n, c, (1.0f - share) * local_supply + leader_supply);
+				});
+			}
 		}
 	}
 
