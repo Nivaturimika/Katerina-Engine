@@ -221,7 +221,7 @@ namespace economy_factory {
 				for(uint32_t i = 0; i < economy::commodity_set::set_size; i++) {
 					if(inputs.commodity_type[i]) {
 						if(inputs.commodity_type[i] == c) {
-							factory_consumption_amount += inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
+							factory_consumption_amount += input_scale * inputs.commodity_amounts[i] * fl.get_factory().get_actual_production();
 						}
 					} else {
 						break;
@@ -582,7 +582,6 @@ namespace economy_factory {
 		float min_input_available = factory_min_input_available(state, n, ft);
 		float min_efficiency_input_available = factory_min_efficiency_input_available(state, n, ft);
 		//modifiers
-		float input_multiplier = std::max(0.f, factory_input_multiplier(state, f, n, p, sid) + state.world.factory_get_triggered_input_modifiers(f));
 		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, p, sid) + state.world.factory_get_triggered_modifiers(f));
 		float output_multiplier = std::max(0.f, factory_output_multiplier(state, f, n, p));
 		return state.world.factory_type_get_output_amount(ft)
