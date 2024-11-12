@@ -211,7 +211,7 @@ namespace economy_estimations {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			total += state.world.nation_get_construction_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 		}
-		return total * true_construction_demand;
+		return total * economy::true_construction_demand;
 	}
 
 	float estimate_war_subsidies(sys::state& state, dcon::nation_id n) {
