@@ -561,9 +561,9 @@ namespace economy_factory {
 			auto sid = state.world.province_get_state_membership(p);
 			auto owner = state.world.province_get_nation_from_province_ownership(p);
 			//
-			float t_sum = 0.f;
+			float t_sum = 1.f;
 			if(owner && sid) {
-				t_sum = sum_of_factory_triggered_modifiers(state, state.world.factory_get_building_type(f), sid);
+				t_sum += sum_of_factory_triggered_modifiers(state, state.world.factory_get_building_type(f), sid);
 			}
 			state.world.factory_set_triggered_modifiers(f, t_sum);
 			//
