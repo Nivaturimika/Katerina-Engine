@@ -1187,13 +1187,12 @@ namespace parsers {
 				return;
 			}
 		}
-		void remove_crisis(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+		void remove_crisis(association_type t, bool value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(!context.outer_context.use_extensions) {
 				err.accumulated_errors += "Usage of effect extension remove_crisis but parser isn't in extension mode (" + err.file_name + ")\n";
 				return;
 			}
 			context.compiled_effect.push_back(uint16_t(effect::remove_crisis));
-			context.compiled_effect.push_back(trigger::payload(context.outer_context.get_provincial_flag(std::string(value))).value);
 		}
 		void country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
@@ -3829,6 +3828,7 @@ namespace parsers {
 	void ef_scope_random_list(token_generator& gen, error_handler& err, effect_building_context& context);
 	void ef_scope_variable(std::string_view label, token_generator& gen, error_handler& err, effect_building_context& context);
 	void ef_scope_any_substate(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_loop_bounded(token_generator& gen, error_handler& err, effect_building_context& context);
 	dcon::value_modifier_key read_chance_modifier(token_generator& gen, error_handler& err, effect_building_context& context);
 	int32_t add_to_random_list(std::string_view label, token_generator& gen, error_handler& err, effect_building_context& context);
 
