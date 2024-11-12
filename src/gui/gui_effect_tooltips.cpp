@@ -6323,6 +6323,13 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_remove_crisis(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "remove_crisis", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
 		uint32_t ef_add_country_modifier_province(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
@@ -7220,6 +7227,7 @@ namespace ui {
 			ef_clr_province_flag,
 			ef_change_party_name, //EFFECT_BYTECODE_ELEMENT(0x01BE, change_party_name, 3) 
 			ef_change_party_position, //EFFECT_BYTECODE_ELEMENT(0x01BF, change_party_position, 2) 
+			ef_remove_crisis,
 
 			//
 			// SCOPES

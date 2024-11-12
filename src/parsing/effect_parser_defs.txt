@@ -343,6 +343,7 @@ effect_body
 	change_party_position			group		ef_change_party_position	member_fn
 	loop_bounded					group		ef_loop_bounded				discard
 	loop_iterations					value		int							member
+	remove_crisis					value		bool						member_fn
 	#any                            extern      ef_scope_variable           discard
 
 ef_scope_random_by_modifier

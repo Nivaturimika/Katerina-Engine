@@ -78,6 +78,7 @@ Additionally, triggers such as technology triggers no longer suffer from having 
 - `loop_bounded = { ... }`: See below.
 - `change_party_name = { ... }`: See below.
 - `change_party_position = { ... }` : See below.
+- `remove_crisis = yes`: Removes a crisis, value `yes/no` is ignored, for obvious reasons
 
 #### change_party_name
 

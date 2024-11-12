@@ -1187,6 +1187,14 @@ namespace parsers {
 				return;
 			}
 		}
+		void ef_remove_crisis(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
+			if(!context.outer_context.use_extensions) {
+				err.accumulated_errors += "Usage of effect extension remove_crisis but parser isn't in extension mode (" + err.file_name + ")\n";
+				return;
+			}
+			context.compiled_effect.push_back(uint16_t(effect::remove_crisis));
+			context.compiled_effect.push_back(trigger::payload(context.outer_context.get_provincial_flag(std::string(value))).value);
+		}
 		void country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void military_access(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {

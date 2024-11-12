@@ -1,4 +1,5 @@
 #include "effects.hpp"
+#include "nations.hpp"
 #include "system_state.hpp"
 #include "ai.hpp"
 #include "demographics.hpp"
@@ -4333,6 +4334,10 @@ namespace effect {
 	}
 	uint32_t ef_clr_province_flag(EFFECT_PARAMTERS) {
 		ws.world.province_set_flag_variables(trigger::to_prov(primary_slot), trigger::payload(tval[1]).provf_id, false);
+		return 0;
+	}
+	uint32_t ef_remove_crisis(EFFECT_PARAMTERS) {
+		nations::cleanup_crisis(ws);
 		return 0;
 	}
 	uint32_t ef_add_country_modifier_province(EFFECT_PARAMTERS) {

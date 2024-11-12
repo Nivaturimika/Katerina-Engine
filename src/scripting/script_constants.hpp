@@ -461,14 +461,15 @@ namespace effect {
 	EFFECT_BYTECODE_ELEMENT(0x01BA, set_province_flag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01BB, clr_province_flag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01BC, change_party_name, 3) \
-	EFFECT_BYTECODE_ELEMENT(0x01BD, change_party_position, 2)
+	EFFECT_BYTECODE_ELEMENT(0x01BD, change_party_position, 2) \
+	EFFECT_BYTECODE_ELEMENT(0x01BE, remove_crisis, 2)
 
-	#define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
+#define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	EFFECT_BYTECODE_LIST
-	#undef EFFECT_BYTECODE_ELEMENT
+#undef EFFECT_BYTECODE_ELEMENT
 
 	// invalid
-	constexpr inline uint16_t first_scope_code = 0x01BE;
+	constexpr inline uint16_t first_scope_code = 0x01BF;
 
 	// scopes
 	constexpr inline uint16_t generic_scope = first_scope_code + 0x0000; // default grouping of effects (or hidden_tooltip)
