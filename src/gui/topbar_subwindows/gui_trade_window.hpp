@@ -963,13 +963,14 @@ namespace ui {
 		template<typename F>
 		void populate_rows(sys::state& state, F&& factory_func, enum trade_flow_data::value_type vt) {
 			auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
-			for(auto const fat_stown_id : state.world.nation_get_state_ownership(state.local_player_nation)) {
+			auto n = state.local_player_nation;
+			for(auto const fat_stown_id : state.world.nation_get_state_ownership(n)) {
 				province::for_each_province_in_state_instance(state, fat_stown_id.get_state(), [&](dcon::province_id pid) {
-					auto fat_id = dcon::fatten(state.world, pid);
-					fat_id.for_each_factory_location_as_province([&](dcon::factory_location_id flid) {
+					// factories
+					state.world.province_for_each_factory_location_as_province(pid, [&](dcon::factory_location_id flid) {
 						auto fid = state.world.factory_location_get_factory(flid);
 						if(factory_func(fid)) {
-						trade_flow_data td{};
+							trade_flow_data td{};
 							td.type = trade_flow_data::type::factory;
 							td.value_type = vt;
 							td.data.factory_id = fid;
@@ -977,14 +978,48 @@ namespace ui {
 							row_contents.push_back(td);
 						}
 					});
-					if(vt == trade_flow_data::value_type::produced_by)
-					if(state.world.province_get_rgo_actual_production_per_good(pid, commodity_id) > 0.f) {
-						trade_flow_data td{};
-						td.type = trade_flow_data::type::province;
-						td.value_type = vt;
-						td.data.province_id = pid;
-						td.trade_good = commodity_id;
-						row_contents.push_back(td);
+					// rgos
+					if(vt == trade_flow_data::value_type::produced_by) {
+						if(state.world.province_get_rgo_actual_production_per_good(pid, commodity_id) > 0.f) {
+							trade_flow_data td{};
+							td.type = trade_flow_data::type::province;
+							td.value_type = vt;
+							td.data.province_id = pid;
+							td.trade_good = commodity_id;
+							row_contents.push_back(td);
+						}
+					}
+					// artisans
+					if(state.world.nation_get_artisan_actual_production(n, commodity_id) > 0.f) {
+						// production of artisans
+						//auto total_artisans = 0.f;
+						//for(const auto pl : state.world.province_get_pop_location(pid)) {
+						//	total_artisans = pl.get_pop().get_size();
+						//}
+						if(vt == trade_flow_data::value_type::produced_by) {
+							trade_flow_data td{};
+							td.type = trade_flow_data::type::pop;
+							td.value_type = vt;
+							td.data.province_id = pid;
+							td.trade_good = commodity_id;
+							row_contents.push_back(td);
+						}
+						// ingredients needed by artisans
+						if(vt == trade_flow_data::value_type::used_by) {
+							auto const& inputs = state.world.commodity_get_artisan_inputs(commodity_id);
+							for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
+								if(inputs.commodity_type[j]) {
+									trade_flow_data td{};
+									td.type = trade_flow_data::type::pop;
+									td.value_type = vt;
+									td.data.province_id = pid;
+									td.trade_good = inputs.commodity_type[j];
+									row_contents.push_back(td);
+								} else {
+									break;
+								}
+							}
+						}
 					}
 				});
 			}
@@ -1017,8 +1052,8 @@ namespace ui {
 				auto ftid = state.world.factory_get_building_type(fid);
 				auto& inputs = state.world.factory_type_get_inputs(ftid);
 				for(uint32_t i = 0; i < inputs.set_size; ++i)
-				if(inputs.commodity_type[i] == commodity_id)
-					return inputs.commodity_amounts[i] > 0.f; // Some inputs taken
+					if(inputs.commodity_type[i] == commodity_id)
+						return inputs.commodity_amounts[i] > 0.f; // Some inputs taken
 				return false;
 			}, trade_flow_data::value_type::used_by);
 			update(state);
@@ -1034,8 +1069,8 @@ namespace ui {
 				auto ftid = state.world.factory_get_building_type(fid);
 				auto& inputs = state.world.factory_type_get_inputs(ftid);
 				for(uint32_t i = 0; i < inputs.set_size; ++i)
-				if(inputs.commodity_type[i] == commodity_id)
-					return inputs.commodity_amounts[i] == 0.f; // No inputs intaken
+					if(inputs.commodity_type[i] == commodity_id)
+						return inputs.commodity_amounts[i] == 0.f; // No inputs intaken
 				return false;
 			},
 			trade_flow_data::value_type::may_be_used_by);
@@ -1177,23 +1212,22 @@ namespace ui {
 	class trade_flow_total_produced_text : public simple_text_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
-			auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
-
-			auto amount = 0.f;
-			for(auto const fat_stown_id : state.world.nation_get_state_ownership(state.local_player_nation)) {
+			auto cid = retrieve<dcon::commodity_id>(state, parent);
+			auto n = state.local_player_nation;
+			auto amount = state.world.nation_get_artisan_actual_production(n, cid);
+			for(auto const fat_stown_id : state.world.nation_get_state_ownership(n)) {
 				province::for_each_province_in_state_instance(state, fat_stown_id.get_state(), [&](dcon::province_id pid) {
 					auto fat_id = dcon::fatten(state.world, pid);
 					fat_id.for_each_factory_location_as_province([&](dcon::factory_location_id flid) {
 						auto fid = state.world.factory_location_get_factory(flid);
 						auto ftid = state.world.factory_get_building_type(fid);
-						if(state.world.factory_type_get_output(ftid) == commodity_id)
+						if(state.world.factory_type_get_output(ftid) == cid)
 						amount += state.world.factory_get_actual_production(fid);
 					});
-					if(state.world.province_get_rgo(pid) == commodity_id)
-					amount += state.world.province_get_rgo_actual_production_per_good(pid, commodity_id);
+					if(state.world.province_get_rgo(pid) == cid)
+						amount += state.world.province_get_rgo_actual_production_per_good(pid, cid);
 				});
 			}
-
 			set_text(state, text::format_float(amount, 2));
 		}
 	};
@@ -1201,7 +1235,8 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto commodity_id = retrieve<dcon::commodity_id>(state, parent);
-			set_text(state, text::format_float(economy_factory::nation_factory_consumption(state, state.local_player_nation, commodity_id), 2));
+			auto v = economy_factory::nation_factory_consumption(state, state.local_player_nation, commodity_id);
+			set_text(state, text::format_float(v, 2));
 		}
 	};
 

@@ -11,15 +11,13 @@ namespace ui {
 		for(auto army : list) {
 			auto ar = dcon::fatten(state.world, army);
 			if(ar.get_black_flag() == false && ar.get_is_retreating() == false && !bool(ar.get_navy_from_army_transport())) {
-				for(auto rg : ar.get_army_membership()) {
-					total_army_weight += 3.0f * rg.get_regiment().get_strength();
-				}
+				total_army_weight += military::total_army_weight(state, ar);
 			}
 		}
 		for(auto ar : state.world.province_get_army_location(prov)) {
 			if(ar.get_army().get_black_flag() == false && ar.get_army().get_is_retreating() == false && !bool(ar.get_army().get_navy_from_army_transport())) {
-				for(auto rg : ar.get_army().get_army_membership()) {
-					total_army_weight += 3.0f * rg.get_regiment().get_strength();
+				if(std::find_if(list.begin(), list.end(), [&](auto const e) { return e == ar.id }) == list.end()) {
+					total_army_weight += military::total_army_weight(state, ar);
 				}
 			}
 		}
