@@ -14,10 +14,6 @@
 #include "news.hpp"
 
 namespace economy {
-	// Demand more for construction than required (won't affect the intaken goods daily)
-	// only will affect demand
-	constexpr inline float excess_construction_demand = 1.25f;
-
 	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
@@ -822,7 +818,7 @@ namespace economy {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto v = state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
-			total += v;
+			total += v * true_construction_demand;
 		}
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
@@ -1626,7 +1622,7 @@ namespace economy {
 				for(uint32_t k = 1; k < state.world.commodity_size(); ++k) {
 					dcon::commodity_id c{ dcon::commodity_id::value_base_t(k) };
 					auto sat = state.world.nation_get_demand_satisfaction(n, c);
-					auto val = state.world.nation_get_construction_demand(n, c);
+					auto val = state.world.nation_get_construction_demand(n, c) * true_construction_demand;
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
 					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
@@ -1634,7 +1630,7 @@ namespace economy {
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
-				max_sp /= total;
+					max_sp /= total;
 				state.world.nation_set_effective_construction_spending(n, max_sp * spending_level);
 			}
 			/* fill stockpiles */
