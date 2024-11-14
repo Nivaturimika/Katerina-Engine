@@ -3726,8 +3726,13 @@ namespace parsers {
 			context.compiled_effect.push_back(effect::add_war_goal);
 			context.compiled_effect.push_back(trigger::payload(value.casus_belli_).value);
 		}
-		void move_issue_percentage(ef_move_issue_percentage const& value, error_handler& err, int32_t line,
-			effect_building_context& context) {
+		void move_issue_percentage(ef_move_issue_percentage const& value, error_handler& err, int32_t line, effect_building_context& context) {
+			float norm_value = value.value;
+			if(norm_value < 0.f || norm_value > 1.f) {
+				err.accumulated_errors += "move_issue_percentage with value out of bounds " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				norm_value = std::clamp(norm_value, 0.f, 1.f);
+			}
+
 			if(context.main_slot == trigger::slot_contents::nation)
 			context.compiled_effect.push_back(effect::move_issue_percentage_nation);
 			else if(context.main_slot == trigger::slot_contents::state)
@@ -3743,7 +3748,7 @@ namespace parsers {
 			}
 			context.compiled_effect.push_back(trigger::payload(value.from_).value);
 			context.compiled_effect.push_back(trigger::payload(value.to_).value);
-			context.add_float_to_payload(value.value);
+			context.add_float_to_payload(norm_value);
 		}
 		void party_loyalty(ef_party_loyalty const& value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(bool(value.province_id_)) {
