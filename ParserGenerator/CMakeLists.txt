@@ -1,3 +1,4 @@
+message(STATUS "ParserGenerator ${ARCHITECTURE}")
 if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 	project (ParserGenerator LANGUAGES CXX)
 	set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
