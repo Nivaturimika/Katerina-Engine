@@ -2476,7 +2476,7 @@ namespace sys {
 			//
 			std::vector<native_string> date_directories;
 			native_string closest_bd_dir;
-			for(const auto closest_dir : simple_fs::list_subdirectories(pop_history)) {
+			for(const auto& closest_dir : simple_fs::list_subdirectories(pop_history)) {
 				auto fname = simple_fs::get_full_name(closest_dir);
 				// TODO: very naive way to obtain the directory... smh
 				if(fname[fname.size() - 1] == NATIVE('\\')

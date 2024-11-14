@@ -204,8 +204,7 @@ namespace ui {
 			} else if(name.length() >= 7 && name.substr(0, 7) == "filter_") {
 				auto const filter_name = name.substr(7);
 				auto ptr = make_element_by_type<continent_filter_button>(state, id);
-				auto k = state.lookup_key(name);
-				if(k) {
+				if(auto k = state.lookup_key(filter_name); k) {
 					for(auto m : state.world.in_modifier) {
 						if(m.get_name() == k) {
 							ptr->continent = m;
