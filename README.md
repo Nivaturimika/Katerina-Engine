@@ -69,6 +69,19 @@ From here compiling is straightforward
 4. `cmake -B build . -DCMAKE_BUILD_TYPE=Debug`
 5. `cmake --build build -j$(nproc)`
 
+#### Targetting for AArch64 and ARM
+
+Install an Aarch64 cross compiler (if your host arch isn't ARM):
+`yay aarch64-linux-gnu-gcc`
+
+Then build as such:
+```sh
+mkdir -p build-arm
+cd build-arm
+cmake -DARCHITECTURE=aarch64 -DIMPORT_PATH=${PWD}/../build -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc ..
+cmake --build .
+```
+
 #### Final touches
 
 Because the project in its current state needs to use the existing game files (as a source of graphics, for starters), everyone needs to tell the compiler where their copy of the game is installed and to put the new files in that directory as well.

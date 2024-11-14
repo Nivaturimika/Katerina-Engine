@@ -109,10 +109,6 @@ endif()
 
 target_compile_definitions(KatEngineIncremental PRIVATE INCREMENTAL=1)
 
-if(NOT WIN32)
-	add_compile_definitions(PREFER_ONE_TBB)
-endif()
-
 # Include sub-projects.
 add_subdirectory(dependencies)
 add_subdirectory(ParserGenerator)
@@ -203,8 +199,11 @@ if (WIN32)
 else()
 	if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 		target_link_libraries(KatEngineCommon INTERFACE dependency_tbb)
+		add_compile_definitions(PREFER_ONE_TBB)
 	else()
-		target_compile_options(KatEngineCommon INTERFACE -DVE_NO_TBB=1)
+		message(STATUS "Non-x86 based architecture, disabling TBB")
+		target_link_libraries(KatEngineCommon INTERFACE stdc++)
+		add_compile_definitions(VE_NO_TBB)
 	endif()
 	target_link_libraries(KatEngineCommon INTERFACE glfw)
 	target_link_libraries(KatEngineCommon INTERFACE miniaudio)
@@ -366,10 +365,12 @@ add_custom_command(
 	DEPENDS ${CONTAINER_PATH}.txt
 	VERBATIM)
 
-# Sets a dependency on the generated file
-add_custom_target(GENERATE_CONTAINER DEPENDS ${CONTAINER_PATH}.hpp)
-add_dependencies(KatEngine GENERATE_CONTAINER ParserGenerator)
-add_dependencies(KatEngineIncremental GENERATE_CONTAINER ParserGenerator)
+if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
+	# Sets a dependency on the generated file
+	add_custom_target(GENERATE_CONTAINER DEPENDS ${CONTAINER_PATH}.hpp)
+	add_dependencies(KatEngine GENERATE_CONTAINER ParserGenerator)
+	add_dependencies(KatEngineIncremental GENERATE_CONTAINER ParserGenerator)
+endif()
 
 # The command to build the generated parsers file
 add_custom_command(
@@ -447,15 +448,16 @@ add_custom_target(GENERATE_PARSERS DEPENDS
 add_dependencies(KatEngine GENERATE_PARSERS)
 add_dependencies(KatEngineIncremental GENERATE_PARSERS)
 
-if (BUILD_TESTING)
-    enable_testing()
-	add_subdirectory(tests)
-endif()
-
-add_subdirectory(SaveEditor)
-if(WIN32)
-	add_subdirectory(DbgKatEngine)
-	add_subdirectory(Launcher)
+if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
+	if (BUILD_TESTING)
+		enable_testing()
+		add_subdirectory(tests)
+	endif()
+	add_subdirectory(SaveEditor)
+	if(WIN32)
+		add_subdirectory(DbgKatEngine)
+		add_subdirectory(Launcher)
+	endif()
 endif()
 
 # Installation
