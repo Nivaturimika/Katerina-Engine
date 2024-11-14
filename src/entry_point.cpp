@@ -115,7 +115,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 		NATIVE("tutorial"),
 		NATIVE("units")
 	};
-	for(const auto sc_dir : scan_dirs) {
+	for(const auto& sc_dir : scan_dirs) {
 		auto dir = simple_fs::open_directory(root, sc_dir);
 		reports::write_debug("Checksum directory: " + text::native_to_utf8(sc_dir) + "\n");
 		// history/provinces/africa/thing.txt
