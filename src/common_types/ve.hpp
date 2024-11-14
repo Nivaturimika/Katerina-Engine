@@ -11,13 +11,17 @@
 #include <cstdint>
 #include "common_types.hpp"
 
-#ifndef VE_NO_TBB
+#if defined(__x86_64__) || defined(__i686__)
+/* x86 family */
 #ifdef PREFER_ONE_TBB
 #include "oneapi/tbb.h"
 namespace concurrency = oneapi::tbb;
 #else
 #include <ppl.h>
 #endif
+#else
+/* emulated concurrency (aka none) */
+#include "fake_tbb.h"
 #endif
 
 #ifdef NDEBUG 
