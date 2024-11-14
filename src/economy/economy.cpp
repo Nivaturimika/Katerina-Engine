@@ -745,11 +745,13 @@ namespace economy {
 			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists)
 			+ state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))
 			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.aristocrat));
+		assert(std::isfinite(total) && total >= 0.0f);
 		state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
 			auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 			if(adj_pop_of_type <= 0)
 				return;
-
+			assert(std::isfinite(adj_pop_of_type) && adj_pop_of_type >= 0.0f);
+			//
 			auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
 			if(ln_type == culture::income_type::administration) {
 				total += a_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
@@ -786,7 +788,6 @@ namespace economy {
 			assert(std::isfinite(total) && total >= 0.0f);
 		});
 		total *= pop_payout_factor;
-		assert(std::isfinite(total) && total >= 0.0f);
 		return total;
 	}
 
@@ -833,7 +834,7 @@ namespace economy {
 		auto overseas_factor = state.defines.province_overseas_penalty * float(state.world.nation_get_owned_province_count(n) - state.world.nation_get_central_province_count(n));
 		if(overseas_factor > 0.f) {
 			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 				auto kf = state.world.commodity_get_key_factory(cid);
 				if(state.world.commodity_get_overseas_penalty(cid) && (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf)))) {
 					auto v = overseas_factor * state.world.commodity_get_current_price(cid) * o_spending;
@@ -1889,7 +1890,9 @@ namespace economy {
 			} else if(ratio_adjusted_price > current_price + 0.01f) {
 				current_price += 0.01f;
 			}
-			state.world.commodity_set_current_price(cid, std::clamp(current_price, base_price / 5.f, base_price * 5.f));
+			auto min_price = base_price * (1.f / 5.f);
+			auto max_price = base_price * 5.f;
+			state.world.commodity_set_current_price(cid, std::clamp(current_price, min_price, max_price));
 		});
 
 		/* DIPLOMATIC EXPENSES */
@@ -2571,11 +2574,11 @@ namespace economy {
 			min_tax = std::max(min_tax, 0);
 			max_tax = std::max(min_tax, max_tax);
 			auto& ptax = state.world.nation_get_poor_tax(n);
-			ptax = int8_t(std::clamp(int32_t(ptax), min_tax, max_tax);
+			ptax = int8_t(std::clamp(int32_t(ptax), min_tax, max_tax));
 			auto& mtax = state.world.nation_get_middle_tax(n);
-			mtax = int8_t(std::clamp(int32_t(mtax), min_tax, max_tax);
+			mtax = int8_t(std::clamp(int32_t(mtax), min_tax, max_tax));
 			auto& rtax = state.world.nation_get_rich_tax(n);
-			rtax = int8_t(std::clamp(int32_t(rtax), min_tax, max_tax);
+			rtax = int8_t(std::clamp(int32_t(rtax), min_tax, max_tax));
 		}
 		{
 			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
@@ -2631,6 +2634,24 @@ namespace economy {
 			min_spend = std::max(min_spend, 0);
 			max_spend = std::max(min_spend, max_spend);
 			auto& v = state.world.nation_get_naval_spending(n);
+			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
+		}
+		{
+			auto min_spend = int32_t(0);
+			auto max_spend = int32_t(100);
+			auto& v = state.world.nation_get_overseas_spending(n);
+			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
+		}
+		{
+			auto min_spend = int32_t(0);
+			auto max_spend = int32_t(100);
+			auto& v = state.world.nation_get_administrative_spending(n);
+			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
+		}
+		{
+			auto min_spend = int32_t(0);
+			auto max_spend = int32_t(100);
+			auto& v = state.world.nation_get_education_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
 	}
