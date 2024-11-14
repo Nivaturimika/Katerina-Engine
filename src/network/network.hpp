@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string>
+#include <thread>
 #ifdef _WIN32 // WINDOWS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #ifndef WINSOCK2_IMPORTED
