@@ -2564,7 +2564,7 @@ namespace economy {
 			auto min_tariff = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff));
 			auto max_tariff = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff));
 			min_tariff = std::max(min_tariff, 0);
-			max_tariff = std::max(min_tariff, max_tariff);
+			max_tariff = std::max(min_tariff, max_tariff <= 0 ? 100 : max_tariff);
 			auto& tariff = state.world.nation_get_tariffs(n);
 			tariff = int8_t(std::clamp(int32_t(tariff), min_tariff, max_tariff));
 		}
@@ -2572,7 +2572,7 @@ namespace economy {
 			auto min_tax = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax));
 			auto max_tax = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax));
 			min_tax = std::max(min_tax, 0);
-			max_tax = std::max(min_tax, max_tax);
+			max_tax = std::max(min_tax, max_tax <= 0 ? 100 : max_tax);
 			auto& ptax = state.world.nation_get_poor_tax(n);
 			ptax = int8_t(std::clamp(int32_t(ptax), min_tax, max_tax));
 			auto& mtax = state.world.nation_get_middle_tax(n);
@@ -2584,7 +2584,7 @@ namespace economy {
 			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
 			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_military_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2592,7 +2592,7 @@ namespace economy {
 			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending));
 			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending));
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_social_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2600,7 +2600,7 @@ namespace economy {
 			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending));
 			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending));
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_military_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2608,7 +2608,7 @@ namespace economy {
 			auto min_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_domestic_investment));
 			auto max_spend = int32_t(100.0f * state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_domestic_investment));
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_domestic_investment_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2616,7 +2616,7 @@ namespace economy {
 			auto min_spend = std::max(0, int32_t(100.0f * state.defines.trade_cap_low_limit_constructions));
 			auto max_spend = int32_t(100.f);
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_construction_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2624,7 +2624,7 @@ namespace economy {
 			auto min_spend = std::max(0, int32_t(100.0f * state.defines.trade_cap_low_limit_land));
 			auto max_spend = int32_t(100.f);
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_land_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
@@ -2632,7 +2632,7 @@ namespace economy {
 			auto min_spend = std::max(0, int32_t(100.0f * state.defines.trade_cap_low_limit_naval));
 			auto max_spend = int32_t(100.f);
 			min_spend = std::max(min_spend, 0);
-			max_spend = std::max(min_spend, max_spend);
+			max_spend = std::max(min_spend, max_spend <= 0 ? 100 : max_spend);
 			auto& v = state.world.nation_get_naval_spending(n);
 			v = int8_t(std::clamp(int32_t(v), min_spend, max_spend));
 		}
