@@ -1,4 +1,5 @@
 #include "modifiers.hpp"
+#include "constants.hpp"
 #include "system_state.hpp"
 #include "demographics.hpp"
 #include "military.hpp"
@@ -241,6 +242,39 @@ namespace sys {
 				state.world.nation_set_modifier_values(owners, fixed_offset, old_value + modifier_amount * scale);
 			});
 		}
+	}
+
+	dcon::modifier_id get_player_difficulty_modifier(sys::state& state, sys::difficulty_level v) {
+		switch(v) {
+		case sys::difficulty_level::very_easy:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_easy_player)];
+		case sys::difficulty_level::easy:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::easy_player)];
+		case sys::difficulty_level::hard:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::hard_player)];
+		case sys::difficulty_level::very_hard:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_hard_player)];
+		case sys::difficulty_level::normal:
+		default:
+			break;
+		}
+		return dcon::modifier_id{};
+	}
+	dcon::modifier_id get_ai_difficulty_modifier(sys::state& state, sys::difficulty_level v) {
+		switch(v) {
+		case sys::difficulty_level::very_easy:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_easy_ai)];
+		case sys::difficulty_level::easy:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::easy_ai)];
+		case sys::difficulty_level::hard:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::hard_ai)];
+		case sys::difficulty_level::very_hard:
+			return state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::very_hard_ai)];
+		case sys::difficulty_level::normal:
+		default:
+			break;
+		}
+		return dcon::modifier_id{};
 	}
 
 	void recreate_national_modifiers(sys::state& state, bool update_tm) {
@@ -536,6 +570,17 @@ namespace sys {
 		} else {
 			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)])
 			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]);
+		}
+
+		switch(state.difficulty) {
+		case sys::difficulty_level::very_easy:
+		case sys::difficulty_level::easy:
+		case sys::difficulty_level::hard:
+		case sys::difficulty_level::very_hard:
+			break;
+		case sys::difficulty_level::normal:
+		default:
+			break;
 		}
 
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]) {

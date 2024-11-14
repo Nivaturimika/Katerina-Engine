@@ -804,15 +804,14 @@ namespace culture {
 				state.world.for_each_ideology([&](dcon::ideology_id iid) {
 					buf.set(iid, 0.0f);
 					if(state.world.ideology_get_enabled(iid) && (!state.world.ideology_get_is_civilized_only(iid) || state.world.nation_get_is_civilized(owner))) {
-						auto ptrigger = state.world.pop_type_get_ideology(ptype, iid);
-						if(ptrigger) {
+						if(auto ptrigger = state.world.pop_type_get_ideology(ptype, iid); ptrigger) {
 							auto amount = trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0);
 							buf.set(iid, amount);
 							total += amount;
 						}
 					}
 				});
-				if(total != 0) {
+				if(total > 0.f) {
 					float adjustment_factor = 1.0f / total;
 					state.world.for_each_ideology([&state, &buf, pid, adjustment_factor](dcon::ideology_id iid) {
 						auto normalized_amount = buf.get(iid) * adjustment_factor;
@@ -838,7 +837,7 @@ namespace culture {
 						}
 					}
 				});
-				if(total != 0) {
+				if(total > 0.f) {
 					float adjustment_factor = 1.0f / total;
 					state.world.for_each_issue_option([&state, &buf, pid, adjustment_factor](dcon::issue_option_id iid) {
 						auto normalized_amount = buf.get(iid) * adjustment_factor;

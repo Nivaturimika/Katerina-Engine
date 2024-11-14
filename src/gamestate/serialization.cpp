@@ -729,6 +729,7 @@ namespace sys {
 		ptr_in = memcpy_deserialize(ptr_in, state.last_crisis_end_date);
 		ptr_in = memcpy_deserialize(ptr_in, state.crisis_liberation_tag);
 		ptr_in = memcpy_deserialize(ptr_in, state.crisis_colony);
+		ptr_in = memcpy_deserialize(ptr_in, state.difficulty);
 		ptr_in = memcpy_deserialize(ptr_in, state.inflation);
 		ptr_in = deserialize(ptr_in, state.great_nations);
 		ptr_in = deserialize(ptr_in, state.pending_n_event);
@@ -780,6 +781,7 @@ namespace sys {
 		ptr_in = memcpy_serialize(ptr_in, state.last_crisis_end_date);
 		ptr_in = memcpy_serialize(ptr_in, state.crisis_liberation_tag);
 		ptr_in = memcpy_serialize(ptr_in, state.crisis_colony);
+		ptr_in = memcpy_serialize(ptr_in, state.difficulty);
 		ptr_in = memcpy_serialize(ptr_in, state.inflation);
 		ptr_in = serialize(ptr_in, state.great_nations);
 		ptr_in = serialize(ptr_in, state.pending_n_event);
@@ -828,6 +830,7 @@ namespace sys {
 		sz += sizeof(state.last_crisis_end_date);
 		sz += sizeof(state.crisis_liberation_tag);
 		sz += sizeof(state.crisis_colony);
+		sz += sizeof(state.difficulty);
 		sz += sizeof(state.inflation);
 		sz += serialize_size(state.great_nations);
 		sz += serialize_size(state.pending_n_event);

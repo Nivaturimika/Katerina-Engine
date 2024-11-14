@@ -192,7 +192,7 @@ namespace demographics {
 								return state.world.pop_get_size(p);
 							}
 							return 0.0f;
-						} else
+						}
 						return 0.0f;
 					});
 					break;
@@ -207,7 +207,7 @@ namespace demographics {
 								return state.world.pop_get_size(p);
 							}
 							return 0.0f;
-						} else
+						}
 						return 0.0f;
 					});
 					break;

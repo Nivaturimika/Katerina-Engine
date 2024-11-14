@@ -76,7 +76,7 @@ namespace ui {
 		}
 		if(auto desc = reform.get_desc();  state.key_is_localized(desc)) {
 		text::substitution_map sub{};
-			text::add_to_substitution_map(sub, text::variable_type::country, state.local_player_nation);
+				text::add_to_substitution_map(sub, text::variable_type::country, state.local_player_nation);
 			text::add_to_substitution_map(sub, text::variable_type::country_adj, text::get_adjective(state, state.local_player_nation));
 			text::add_to_substitution_map(sub, text::variable_type::capital, state.world.nation_get_capital(state.local_player_nation));
 			auto box = text::open_layout_box(contents);
@@ -87,7 +87,7 @@ namespace ui {
 		auto total = state.world.nation_get_demographics(state.local_player_nation, demographics::total);
 		auto support = state.world.nation_get_demographics(state.local_player_nation, demographics::to_key(state, ref));
 		if(total > 0) {
-		text::add_line(state, contents, "there_are_backing", text::variable_type::val, text::fp_percentage{ support / total });
+			text::add_line(state, contents, "there_are_backing", text::variable_type::val, text::fp_percentage{ support / total });
 		}
 
 		auto mod_id = reform.get_modifier();

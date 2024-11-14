@@ -522,6 +522,8 @@ namespace sys {
 		dcon::national_identity_id crisis_liberation_tag;
 		dcon::state_definition_id crisis_colony;
 
+		sys::difficulty_level difficulty = sys::difficulty_level::normal;
+
 		//
 		// Messages
 		//
