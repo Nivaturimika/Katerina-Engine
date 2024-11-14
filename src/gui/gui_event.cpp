@@ -608,28 +608,28 @@ namespace ui {
 		event_data_wrapper content = retrieve<event_data_wrapper>(state, parent);
 		if(std::holds_alternative<event::pending_human_n_event>(content)) {
 			auto e = std::get<event::pending_human_n_event>(content).e;
-			for(int32_t i = 0; i < sys::max_event_options; ++i) {
+			for(uint32_t i = 0; i < sys::max_event_options; ++i) {
 				if(!event::is_valid_option(state.world.national_event_get_options(e)[i]))
 				break;
 				row_contents.push_back(i);
 			}
 		} else if(std::holds_alternative<event::pending_human_f_n_event>(content)) {
 			auto e = std::get<event::pending_human_f_n_event>(content).e;
-			for(int32_t i = 0; i < sys::max_event_options; ++i) {
+			for(uint32_t i = 0; i < sys::max_event_options; ++i) {
 				if(!event::is_valid_option(state.world.free_national_event_get_options(e)[i]))
 				break;
 				row_contents.push_back(i);
 			}
 		} else if(std::holds_alternative<event::pending_human_p_event>(content)) {
 			auto e = std::get<event::pending_human_p_event>(content).e;
-			for(int32_t i = 0; i < sys::max_event_options; ++i) {
+			for(uint32_t i = 0; i < sys::max_event_options; ++i) {
 				if(!event::is_valid_option(state.world.provincial_event_get_options(e)[i]))
 				break;
 				row_contents.push_back(i);
 			}
 		} else if(std::holds_alternative<event::pending_human_f_p_event>(content)) {
 			auto e = std::get<event::pending_human_f_p_event>(content).e;
-			for(int32_t i = 0; i < sys::max_event_options; ++i) {
+			for(uint32_t i = 0; i < sys::max_event_options; ++i) {
 				if(!event::is_valid_option(state.world.free_provincial_event_get_options(e)[i]))
 				break;
 				row_contents.push_back(i);
