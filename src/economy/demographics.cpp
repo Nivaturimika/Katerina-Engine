@@ -2228,7 +2228,7 @@ namespace demographics {
 						}
 					}
 				});
-				if(totals > 0) {
+				if(totals > 0.f) {
 					state.world.for_each_ideology([&](dcon::ideology_id i) {
 						auto const i_key = pop_demographics::to_key(state, i);
 						state.world.pop_get_demographics(np, i_key) /= totals;
@@ -2254,7 +2254,7 @@ namespace demographics {
 					auto allowed_by_owner =
 					(state.world.nation_get_is_civilized(owner) || is_party_issue) &&
 					(!state.world.issue_get_is_next_step_only(parent_issue) || (current_issue_setting.id.index() == iid.index()) || (current_issue_setting.id.index() == iid.index() - 1) || (current_issue_setting.id.index() == iid.index() + 1));
-					auto owner_modifier = has_modifier ? (state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f) : 1.0f;
+					auto owner_modifier = has_modifier ? std::max(0.f, std::min(5.f, state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f)) : 0.0f;
 					if(allowed_by_owner) {
 						if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {
 							auto amount = owner_modifier * trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(np.id), trigger::to_generic(owner), 0);
@@ -2263,7 +2263,7 @@ namespace demographics {
 						}
 					}
 				});
-				if(totals > 0) {
+				if(totals > 0.f) {
 					state.world.for_each_issue_option([&](dcon::issue_option_id i) {
 						auto const i_key = pop_demographics::to_key(state, i);
 						state.world.pop_get_demographics(np, i_key) /= totals;
