@@ -871,6 +871,10 @@ namespace ve {
 	RELEASE_INLINE fp_vector ceil(fp_vector a) {
 		return _mm256_ceil_ps(a);
 	}
+	//new funcs
+	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
+		return (x * a) + ((1.0f - x) * b);
+	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {
 		return _mm256_cmp_ps(a, b, _CMP_LT_OQ);

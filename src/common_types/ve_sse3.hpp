@@ -829,6 +829,10 @@ namespace ve {
 		u.lane[3] = std::ceilf(u.lane[3]);
 		return u.tmp;
 	}
+	//new funcs
+	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
+		return (x * a) + ((1.0f - x) * b);
+	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {
 		return _mm_cmplt_ps(a, b);
