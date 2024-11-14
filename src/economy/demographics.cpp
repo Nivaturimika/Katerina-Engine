@@ -1058,17 +1058,16 @@ namespace demographics {
 		(national-issue-change-speed-modifier + 1.0) x 0.05 (instead of a fixed 0.05 or 0.25). Finally, there is an additional "bin"
 		at 5x more or less where the adjustment is a flat 1.0.
 		*/
-
 		state.world.for_each_issue_option([&](dcon::issue_option_id i) {
 			auto const i_key = pop_demographics::to_key(state, i);
-
 			execute_staggered_blocks(offset, divisions, std::min(state.world.pop_size(), pbuf.size), [&](auto ids) {
 				auto ttotal = pbuf.totals.get(ids);
 				auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
 				auto current = state.world.pop_get_demographics(ids, i_key);
 				auto owner = nations::owner_of_pop(state, ids);
 				auto owner_rate_modifier = ve::min(ve::max(state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::issue_change_speed) + 1.0f, 0.0f), 5.0f);
-				state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, issues_change_rate * owner_rate_modifier * avalue + (1.0f - issues_change_rate * owner_rate_modifier) * current, current));
+				auto value = ve::lerp(avalue, current, issues_change_rate * owner_rate_modifier);
+				state.world.pop_set_demographics(ids, i_key, ve::select(ttotal > 0.0f, value, current));
 			});
 		});
 	}
@@ -2252,8 +2251,8 @@ namespace demographics {
 					auto owner = nations::owner_of_pop(state, np);
 					auto current_issue_setting = state.world.nation_get_issues(owner, parent_issue);
 					auto allowed_by_owner =
-					(state.world.nation_get_is_civilized(owner) || is_party_issue) &&
-					(!state.world.issue_get_is_next_step_only(parent_issue) || (current_issue_setting.id.index() == iid.index()) || (current_issue_setting.id.index() == iid.index() - 1) || (current_issue_setting.id.index() == iid.index() + 1));
+						(state.world.nation_get_is_civilized(owner) || is_party_issue) &&
+						(!state.world.issue_get_is_next_step_only(parent_issue) || (current_issue_setting.id.index() == iid.index()) || (current_issue_setting.id.index() == iid.index() - 1) || (current_issue_setting.id.index() == iid.index() + 1));
 					auto owner_modifier = has_modifier ? std::max(0.f, std::min(5.f, state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f)) : 0.0f;
 					if(allowed_by_owner) {
 						if(auto mtrigger = state.world.pop_type_get_issues(ptid, iid); mtrigger) {

@@ -971,7 +971,7 @@ namespace ve {
 		return _mm512_max_ps(a, b);
 	}
 	RELEASE_INLINE fp_vector abs(fp_vector a) {
-		return max(a, -a);
+		return _mm512_abs_ps(a);
 	}
 	RELEASE_INLINE fp_vector floor(fp_vector a) {
 		return _mm512_floor_ps(a);
@@ -981,7 +981,7 @@ namespace ve {
 	}
 	//new funcs
 	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
-		return (x * a) + ((1.0f - x) * b);
+		return _mm512_fmadd_ps(x, a, _mm512_mul_ps(1.f - x, b));
 	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {

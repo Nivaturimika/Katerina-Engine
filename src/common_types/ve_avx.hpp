@@ -873,7 +873,7 @@ namespace ve {
 	}
 	//new funcs
 	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
-		return (x * a) + ((1.0f - x) * b);
+		return _mm256_fmadd_ps(x, a, _mm256_mul_ps(1.f - x, b));
 	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {
