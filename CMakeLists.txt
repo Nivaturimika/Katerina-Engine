@@ -14,6 +14,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CTest)
 
+option(ARCHITECTURE "Target architecture (valid values: x64, x86, aarch64, arm, riscv64)" "x64")
+
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 list(APPEND ALICE_CORE_SOURCES_LIST
@@ -199,7 +201,11 @@ if (WIN32)
 	target_link_libraries(KatEngineCommon INTERFACE ws2_32)
 	target_link_libraries(KatEngineCommon INTERFACE wsock32)
 else()
-	target_link_libraries(KatEngineCommon INTERFACE dependency_tbb)
+	if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
+		target_link_libraries(KatEngineCommon INTERFACE dependency_tbb)
+	else()
+		target_compile_options(KatEngineCommon INTERFACE -DVE_NO_TBB=1)
+	endif()
 	target_link_libraries(KatEngineCommon INTERFACE glfw)
 	target_link_libraries(KatEngineCommon INTERFACE miniaudio)
 endif()
