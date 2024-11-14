@@ -1,12 +1,10 @@
 message(STATUS "Fetching freetype ...")
-
 set(FT_DISABLE_ZLIB ON)
 set(FT_DISABLE_BZIP2 ON)
 set(FT_DISABLE_PNG ON)
 set(FT_DISABLE_BROTLI ON)
-set(FT_DISABLE_HARFBUZZ OFF)
+set(FT_DISABLE_HARFBUZZ OFF) #Enable HB
 set(SKIP_INSTALL_ALL ON)
-
 FetchContent_Declare(
 	freetype
 	GIT_REPOSITORY https://github.com/freetype/freetype.git
@@ -15,7 +13,6 @@ FetchContent_Declare(
 	GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(freetype)
-
 if(WIN32)
 	set(CMAKE_CXX_FLAGS "")
 	set(CMAKE_CXX_FLAGS_DEBUG "")
@@ -35,6 +32,9 @@ if(WIN32)
 		endif()
 	endif()
 endif()
+add_library(dependency_freetype INTERFACE)
+target_include_directories(dependency_freetype SYSTEM INTERFACE "${freetype_SOURCE_DIR}/include")
+target_link_libraries(dependency_freetype INTERFACE freetype)
 
 message(STATUS "Fetching harfbuzz...")
 set(HB_BUILD_UTILS OFF)
@@ -66,3 +66,6 @@ if(WIN32)
 		endif()
 	endif()
 endif()
+add_library(dependency_harfbuzz INTERFACE)
+target_include_directories(dependency_harfbuzz SYSTEM INTERFACE "${harfbuzz_SOURCE_DIR}/include")
+target_link_libraries(dependency_harfbuzz INTERFACE harfbuzz)

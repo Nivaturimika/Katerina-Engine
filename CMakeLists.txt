@@ -195,8 +195,8 @@ else() # GCC or CLANG
 	endif()
 endif()
 
-target_link_libraries(KatEngineCommon INTERFACE freetype)
-target_link_libraries(KatEngineCommon INTERFACE harfbuzz)
+target_link_libraries(KatEngineCommon INTERFACE dependency_freetype)
+target_link_libraries(KatEngineCommon INTERFACE dependency_harfbuzz)
 target_link_libraries(KatEngineCommon INTERFACE glm)
 target_link_libraries(KatEngineCommon INTERFACE dependency_icu)
 if (WIN32)
