@@ -3357,11 +3357,12 @@ namespace ai {
 					set_taxes_to = std::clamp((military_expenses_max - base_income_t)*1.05f / tax_income_max,0.0f,1.0f);
 					float remaining_budget = std::clamp(budget - military_expenses_max, 0.0f, budget);
 					float military_split = remaining_budget * 0.75f;
-					float other_split = (remaining_budget - military_split)/3.0f;
+					float other_split = (remaining_budget - military_split)/4.0f;
 					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
 					set_educ_to = other_split / est_education_payouts * max_percentage;
 					set_admin_to = other_split / est_admin_payouts * max_percentage;
 					set_social_to = other_split / est_reforms_payouts * max_percentage;
+					set_construction_to = other_split / construction_expenses_max;
 					set_land_to = 1.0f;
 					set_naval_to = 1.0f;
 					set_overseas_to = 1.0f;
@@ -3370,11 +3371,12 @@ namespace ai {
 					set_tariff_to = (military_expenses_max - budget)*1.05f / tariff_income_max;
 					float remaining_budget = std::clamp(budget + est_tariff_income * set_tariff_to - military_expenses_max, 0.0f, budget);
 					float military_split = remaining_budget * 0.75f;
-					float other_split = (remaining_budget - military_split) / 3.0f;
+					float other_split = (remaining_budget - military_split) / 4.0f;
 					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
 					set_educ_to = other_split / est_education_payouts * max_percentage;
 					set_admin_to = other_split / est_admin_payouts * max_percentage;
 					set_social_to = other_split / est_reforms_payouts * max_percentage;
+					set_construction_to = other_split / construction_expenses_max;
 					set_land_to = 1.0f;
 					set_naval_to = 1.0f;
 					set_overseas_to = 1.0f;
@@ -3383,17 +3385,18 @@ namespace ai {
 					set_tariff_to = 0.9f;
 					float remaining_budget = std::clamp(budget + est_tariff_income * set_tariff_to - military_expenses_max, 0.0f, budget + est_tariff_income * set_tariff_to);
 					float military_split = remaining_budget * 0.75f;
-					float other_split = (remaining_budget - military_split) / 3.0f;
+					float other_split = (remaining_budget - military_split) / 4.0f;
 					set_military_to = std::clamp(military_split / (est_military_payouts * military_max), 0.0f, 1.0f);
 					set_educ_to = other_split / est_education_payouts * max_percentage;
 					set_admin_to = other_split / est_admin_payouts * max_percentage;
 					set_social_to = other_split / est_reforms_payouts * max_percentage;
+					set_construction_to = other_split / construction_expenses_max;
 					set_land_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget)/3.0f)/(est_land_spending * land_max) ;
 					set_naval_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 3.0f) / (est_naval_spending * naval_max);
 					set_overseas_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 3.0f) / (est_overseas_spending * max_percentage);
 				}
 			} else {
-				if(budget > payout_expenses_max) {
+				if(budget > payout_expenses_max + construction_expenses_max - construction_expenses_min) {
 					set_taxes_to = std::clamp((payout_expenses_max - base_income_t) * 1.05f / tax_income_max, 0.0f, 1.0f);
 					float remaining_budget = std::clamp(budget - payout_expenses_max, 0.0f, budget);
 					set_land_to = std::clamp((remaining_budget/3.0f) / est_land_spending * land_max,0.0f,1.0f);
@@ -3403,7 +3406,8 @@ namespace ai {
 					set_educ_to = 1.0f;
 					set_admin_to = 1.0f;
 					set_social_to = 1.0f;
-				} else if(budget <= payout_expenses_max && budget + tariff_income_max > payout_expenses_max) {
+					set_construction_to= 1.0f;
+				} else if(budget <= payout_expenses_max + construction_expenses_max - construction_expenses_min && budget + tariff_income_max > payout_expenses_max + construction_expenses_max - construction_expenses_min) {
 					set_taxes_to = 1.0f;
 					set_tariff_to = (payout_expenses_max - budget) * 1.05f / tariff_income_max;
 					float remaining_budget = std::clamp(budget + est_tariff_income * set_tariff_to - payout_expenses_max, 0.0f, budget);
@@ -3414,6 +3418,7 @@ namespace ai {
 					set_educ_to = 1.0f;
 					set_admin_to = 1.0f;
 					set_social_to = 1.0f;
+					set_construction_to = 1.0f;
 				} else {
 					set_taxes_to = 1.0f;
 					set_tariff_to = 0.9f;
@@ -3421,10 +3426,11 @@ namespace ai {
 					set_land_to = std::clamp((remaining_budget / 3.0f) / est_land_spending * land_max, 0.0f, 1.0f);
 					set_naval_to = std::clamp((remaining_budget / 3.0f) / est_naval_spending * naval_max, 0.0f, 1.0f);
 					set_overseas_to = std::clamp((remaining_budget / 3.0f) / est_overseas_spending * max_percentage, 0.0f, 1.0f);
-					set_military_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 4.0f) / (est_military_payouts * military_max);
-					set_educ_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 4.0f) / (est_education_payouts * max_percentage);
-					set_admin_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 4.0f) / (est_admin_payouts * max_percentage);
-					set_social_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 4.0f) / (est_reforms_payouts * social_spending_max);
+					set_military_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 5.0f) / (est_military_payouts * military_max);
+					set_educ_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 5.0f) / (est_education_payouts * max_percentage);
+					set_admin_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 5.0f) / (est_admin_payouts * max_percentage);
+					set_social_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 5.0f) / (est_reforms_payouts * social_spending_max);
+					set_construction_to = ((budget + est_tariff_income * set_tariff_to - remaining_budget) / 5.0f) / construction_expenses_max;
 				}
 			}
 
