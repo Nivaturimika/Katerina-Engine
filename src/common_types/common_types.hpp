@@ -17,10 +17,12 @@
 #include <vector>
 #include <bit>
 
+#if defined(__x86_64__) || defined(__i686__)
 #ifdef _MSC_VER 
 #include <intrin.h>
 #else
 #include <x86intrin.h>
+#endif
 #endif
 
 #ifdef _WIN32

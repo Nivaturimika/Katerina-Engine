@@ -4,14 +4,12 @@
 // This file provided as part of the DataContainer project
 //
 
-#include <immintrin.h>
 #include <cstdint>
 #include <new>
 #include <cassert>
 #include <type_traits>
 #include <cstdint>
 #include "common_types.hpp"
-
 
 #ifndef VE_NO_TBB
 #ifdef PREFER_ONE_TBB
@@ -32,25 +30,24 @@ namespace concurrency = oneapi::tbb;
 #define RELEASE_INLINE inline
 #endif
 
-
-#ifdef __AVX512BW__
+#if defined(__x86_64__) || defined(__i686__)
+/* x86 family */
+#if defined(__AVX512BW__)
 #include "ve_avx512.hpp"
-#else
-#ifdef __AVX2__
+#elif defined(__AVX2__)
 #include "ve_avx2.hpp"
-#else
-#ifdef __AVX__
+#elif defined(__AVX__)
 #include "ve_avx.hpp"
-#else
-#ifdef __SSE3__ //MSVC won't define it by default
+#elif defined(__SSE3__) //MSVC won't define it by default
 #include "ve_sse3.hpp"
 #else
 #include "ve_sse.hpp"
 #endif
-#endif
-#endif
-#endif
 
+#else
+/* aarch64 */
+#include "ve_neon.hpp"
+#endif
 
 namespace ve {
 

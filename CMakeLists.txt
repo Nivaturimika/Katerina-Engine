@@ -116,6 +116,15 @@ add_subdirectory(DconGenerator)
 
 add_library(KatEngineCommon INTERFACE)
 target_compile_definitions(KatEngineCommon INTERFACE "PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\"")
+if(ARCHITECTURE STREQUAL "x64")
+	target_compile_definitions(KatEngineCommon INTERFACE __x86_64__)
+elif(ARCHITECTURE STREQUAL "x86")
+	target_compile_definitions(KatEngineCommon INTERFACE __i686__)
+elif(ARCHITECTURE STREQUAL "aarch64")
+	target_compile_definitions(KatEngineCommon INTERFACE __aarch64__)
+elif(ARCHITECTURE STREQUAL "riscv64")
+	target_compile_definitions(KatEngineCommon INTERFACE __riscv64__)
+endif()
 if(WIN32)
 	# string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 	# string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -177,18 +186,14 @@ if(WIN32)
 	endif()
 else() # GCC or CLANG
 	# See for FMA support: https://stackoverflow.com/questions/21001388/fma3-in-gcc-how-to-enable
-	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		target_compile_options(KatEngineCommon INTERFACE
-			-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wdangling-else -Wno-unused-private-field -std=c++20
-			$<$<CONFIG:Debug>:			-mfpmath=sse -msse4.2 -g -pipe>
-			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -msse4.2 -O3 -pipe -fno-rtti -DNDEBUG>)
-	else()
-		target_compile_options(KatEngineCommon INTERFACE
-										# -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field -Wno-unused-but-set-variable -Wno-parentheses
-			$<$<CONFIG:Debug>:			-mfpmath=sse -msse4.2 -g -pipe>
-			$<$<NOT:$<CONFIG:Debug>>: 	-mfpmath=sse -msse4.2 -O3 -pipe -fno-rtti -DNDEBUG>)
+	target_compile_options(KatEngineCommon INTERFACE -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field)
+	target_compile_options(KatEngineCommon INTERFACE $<$<CONFIG:Debug>: -g -pipe>)
+	target_compile_options(KatEngineCommon INTERFACE $<$<NOT:$<CONFIG:Debug>>: -O3 -pipe -fno-rtti -DNDEBUG>)
+	if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
+		target_compile_options(KatEngineCommon INTERFACE -mfpmath=sse -msse4.2)
 	endif()
 endif()
+
 target_link_libraries(KatEngineCommon INTERFACE freetype)
 target_link_libraries(KatEngineCommon INTERFACE harfbuzz)
 target_link_libraries(KatEngineCommon INTERFACE glm)
