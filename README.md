@@ -12,28 +12,97 @@ Join us on [discord](https://discord.gg/3WNyk7SWvf).
 - Mods may or may not run with more or less problems (see the October update and the compatibility patches channel in the discord for more information about particular mods).
 - Read up the [User and multiplayer guide](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/user_guide.md) for further information and troubleshooting
 
-## Contributing
-- Please, [visit this page](https://schombert.github.io/Project-KatEngine/md_contributing.html) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/zh-cn/contributing.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/es-es/contributing.md), [Deutsch](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/de-de/contributing.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/pt/contributing.md))
+## Interested in contributing?
 
-## Updates
+We would recommend joining the Discord as the main development activity occurs there.
 
-- [2024 04](docs/Devlogs/2024-04/log_en.md), [简中](docs/Devlogs/2024-04/log_cn.md)
-- [2024 02](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-02/log_en.md), [简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-02/log_cn.md)
-- [January 2024 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-01/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-01/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-01/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2024-01/log_pt.md))
-- [December 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-12/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-12/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-12/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-12/log_pt.md))
-- [November 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-11/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/november/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-11/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-11/log_pt.md))
-- [October 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-10/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-10/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-10/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-10/log_pt.md))
-- [September 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-09/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-09/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-09/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-09/log_pt.md))
-- [August 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-08/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-08/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-08/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-08/log_pt.md))
-- [July 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-07/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-07/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-07/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-07/log_pt.md))
-- [June 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-06/log_en.md) ([简体](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-06/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-06/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-06/log_pt.md))
-- [May 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-05/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-05/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-05/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-05/log_pt.md))
-- [April 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-04/log_pt.md))
-- [March 2023 update](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_en.md) ([简中](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_cn.md), [Español](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_es.md), [Português](https://github.com/Nivaturimika/Katerina-Engine/blob/main/docs/Devlogs/2023-03/log_pt.md))
+### Building the project
 
-## About Katerina Engine (translated)
+The build uses CMake and should "just work", with some annoying exceptions.
 
-- [简中介绍](./docs/zh-cn/about.md)
-- [Versión en español](./docs/es-es/about.md)
-- [Deutsche Version](./docs/de-de/about.md)
-- [Versão em português](./docs/pt/about.md)
+#### Windows
+
+1. You will need a full copy of git installed (https://git-scm.com/downloads), as the one that ships with Visual Studio is not sufficient for CMake, for some reason.
+2. Make sure that you have a relatively up-to-date version of the Windows SDK installed (you can update your local version of the Windows SDK through the Visual Studio installer).
+3. Open the project in Visual Studio and let it configure (CMake should run in the output window and download dependencies; this may take some time).
+4. Go look at the "Final Touches" section at the bottom of this page.
+
+If you experience problems with audio playback, you may wish to install Windows Media Player and Windows Media Feature Pack (https://support.microsoft.com/en-us/windows/get-windows-media-player-81718e0d-cfce-25b1-aee3-94596b658287) to be able to properly playback MP3 files (the music jukebox).
+
+#### Linux (Debian-based distro)
+
+Make sure to install the required dependencies.
+
+```bash
+sudo apt update
+sudo apt install git build-essential clang cmake libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libicu-dev
+```
+
+After the installation is done, download the `cmake-tools` extension for Visual Studio Code and open the project. CMake should automatically configure the project for you.
+
+If you get the error, `/usr/bin/ld: cannot find -lstdc++`, it might be caused by a broken gcc-12 package in Ubuntu jammy.
+```bash
+sudo apt remove gcc-12
+```
+https://stackoverflow.com/questions/67712376/after-updating-gcc-clang-cant-find-libstdc-anymore
+
+(Linux only) The version of Intel's TBB library we use seems to fail to compile if you have any spaces in the path, so you need to make sure that wherever you put the project has no spaces anywhere in its path (yes, this seems dumb to me too).
+
+#### Linux (Generic)
+
+This is for non-Debian based distributions, utilities needed:
+Basic Compiling Tools, (C Compiler & C++ Compiler)
+CMake
+Git
+onetbb
+GLFW3
+X11 (support *should* exist for wayland but there is not guarantee.)
+
+With Arch-based distrobutions you can use the following:
+```bash
+yay cmake onetbb
+```
+
+From here compiling is straightforward
+1. `cd Project-KatEngine`
+2. do something to make the debugger launch the program in your V2 directory so that it can find the game files (I don't know how this is done on linux)
+4. `cmake -B build . -DCMAKE_BUILD_TYPE=Debug`
+5. `cmake --build build -j$(nproc)`
+
+#### Final touches
+
+Because the project in its current state needs to use the existing game files (as a source of graphics, for starters), everyone needs to tell the compiler where their copy of the game is installed and to put the new files in that directory as well.
+
+Copy the assets folder to your V2 directory. **Note: when the asset files are updated by you or someone else you will need to copy any changed files to your V2 directory and rebuild any scenarios. Not doing so will probably result in crashes**. Then, you will need to configure your debugger to launch KatEngine and the Launcher *as if* they were located in your V2 directory. For visual studio and visual studio code you can do that by creating a launch configuration file. (See [here for Visual Studio](https://learn.microsoft.com/en-us/visualstudio/ide/customize-build-and-debug-tasks-in-visual-studio?view=vs-2022) and [here for VS code](https://code.visualstudio.com/docs/cpp/launch-json-reference)). The contents of that file will look something like mine (copied below) except with the directory location changed to point to your V2 directory.
+
+```
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "KatEngine_Launcher.exe (Launcher\\KatEngine_Launcher.exe)",
+      "name": "KatEngine_Launcher.exe (Launcher\\KatEngine_Launcher.exe)",
+      "currentDir": "C:\\programs\\V2"
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "KatEngine.exe",
+      "name": "KatEngine.exe",
+      "currentDir": "C:\\programs\\V2",
+      "args": [
+        ""
+      ]
+    }
+  ]
+}
+```
+
+Note that `args` contains the command line parameters to launch the program with. If you want to debug a specific scenario file, you would change it to something like `"9DCA2D56-0.bin"`.
+
+### Incremental Build
+
+The `KatEngine` build target combines nearly all of the game's source files into one large translation unit which means that changing a single line of source code almost always requires recompiling the entire game. This can take up to 10 minutes depending on build configuration and system specifications even if you change a single line. Therefore it's recommended that any contributors use the `KatEngineIncremental` build target as this breaks the game into smaller translation units that can be compiled in parallel and also greatly reduces the amount of time required to recompile any changes. Github CI builds the `KatEngine` target so it will catch any changes that do not compile under the `KatEngine` target.
