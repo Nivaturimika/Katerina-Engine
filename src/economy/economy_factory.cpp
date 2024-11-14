@@ -411,16 +411,19 @@ namespace economy_factory {
 				}
 			});
 
-			// aggressive pruning
-			// to help building more healthy economy instead of 1 profitable giant factory with 6 small 0 scale factories
-			if(deletion_choice && (4 + factory_count) >= int32_t(state.defines.factories_per_state)) {
+			// do way less pruning of factories so we have a more stable economy
+			// (as opposed to a diverse one)
+			if(deletion_choice && (1 + factory_count) >= int32_t(state.defines.factories_per_state)) {
 				auto production_type = state.world.factory_get_building_type(deletion_choice);
-				state.world.delete_factory(deletion_choice);
-
-				for(auto sbc : state.world.state_instance_get_state_building_construction(state_instance_fat_id)) {
-					if(sbc.get_type() == production_type) {
-						state.world.delete_state_building_construction(sbc);
-						break;
+				// and only iff production > real demand
+				if(production_type.get_output().get_total_production() > production_type.get_output().get_total_real_demand()) {
+					state.world.delete_factory(deletion_choice);
+					// only delete pop projects, not player's
+					for(auto sbc : state.world.state_instance_get_state_building_construction(state_instance_fat_id)) {
+						if(sbc.get_type() == production_type && sbc.get_is_pop_project()) {
+							state.world.delete_state_building_construction(sbc);
+							break;
+						}
 					}
 				}
 			}
