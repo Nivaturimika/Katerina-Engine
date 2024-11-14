@@ -3577,7 +3577,7 @@ namespace parsers {
 			return;
 
 		// Add root of mod_path
-		for(auto const s : replace_paths) {
+		for(auto const& s : replace_paths) {
 			auto const replace_path = simple_fs::correct_slashes(text::utf8_to_native(s));
 			if(replace_path == NATIVE("history")) {
 				simple_fs::add_ignore_path(fs, simple_fs::list_roots(fs)[0] + NATIVE("\\history\\countries\\"));
