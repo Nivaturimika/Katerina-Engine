@@ -2313,7 +2313,7 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_ask_for_access(sys::state& state, dcon::nation_id asker, dcon::nation_id target, bool ignore_cost) {
+	bool can_ask_for_access(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
 		/*
 		Must have defines:ASKMILACCESS_DIPLOMATIC_COST diplomatic points. Must not be at war against each other. Must not already have
 		military access.
@@ -2321,7 +2321,7 @@ namespace command {
 		if(asker == target)
 		return false;
 
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(asker) && state.world.nation_get_diplomatic_points(asker) < state.defines.askmilaccess_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(asker) < state.defines.askmilaccess_diplomatic_cost)
 		return false;
 
 		auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, asker);
@@ -2353,11 +2353,11 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_give_military_access(sys::state& state, dcon::nation_id asker, dcon::nation_id target, bool ignore_cost) {
+	bool can_give_military_access(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
 		if(asker == target)
 		return false;
 
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(asker) && state.world.nation_get_diplomatic_points(asker) < state.defines.givemilaccess_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(asker) < state.defines.givemilaccess_diplomatic_cost)
 		return false;
 
 		auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(asker, target);
@@ -2388,7 +2388,7 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_ask_for_alliance(sys::state& state, dcon::nation_id asker, dcon::nation_id target, bool ignore_cost) {
+	bool can_ask_for_alliance(sys::state& state, dcon::nation_id asker, dcon::nation_id target) {
 		/*
 		Must not have an alliance. Must not be in a war against each other. Costs defines:ALLIANCE_DIPLOMATIC_COST diplomatic points.
 		Great powers may not form an alliance while there is an active crisis. Vassals and substates may only form an alliance with
@@ -2397,7 +2397,7 @@ namespace command {
 		if(asker == target)
 		return false;
 
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(asker) && state.world.nation_get_diplomatic_points(asker) < state.defines.alliance_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(asker) < state.defines.alliance_diplomatic_cost)
 		return false;
 
 		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, asker);
@@ -2499,11 +2499,11 @@ namespace command {
 		p.data.call_to_arms.war = w;
 		add_to_command_queue(state, p);
 	}
-	bool can_call_to_arms(sys::state& state, dcon::nation_id asker, dcon::nation_id target, dcon::war_id w, bool ignore_cost) {
+	bool can_call_to_arms(sys::state& state, dcon::nation_id asker, dcon::nation_id target, dcon::war_id w) {
 		if(asker == target)
 		return false;
 
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(asker) && state.world.nation_get_diplomatic_points(asker) < state.defines.callally_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(asker) < state.defines.callally_diplomatic_cost)
 		return false;
 
 		if(!nations::are_allied(state, asker, target) && !(state.world.war_get_primary_defender(w) == asker && state.world.nation_get_in_sphere_of(asker) == target))
@@ -2569,11 +2569,11 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_cancel_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target, bool ignore_cost) {
+	bool can_cancel_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target)
 		return false;
 		auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(target, source);
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.cancelaskmilaccess_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.cancelaskmilaccess_diplomatic_cost)
 		return false;
 		return bool(state.world.unilateral_relationship_get_military_access(rel));
 	}
@@ -2603,11 +2603,11 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_cancel_given_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target, bool ignore_cost) {
+	bool can_cancel_given_military_access(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target)
 		return false;
 		auto rel = state.world.get_unilateral_relationship_by_unilateral_pair(source, target);
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.cancelgivemilaccess_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.cancelgivemilaccess_diplomatic_cost)
 		return false;
 		return bool(state.world.unilateral_relationship_get_military_access(rel));
 	}
@@ -2639,11 +2639,11 @@ namespace command {
 		p.data.diplo_action.target = target;
 		add_to_command_queue(state, p);
 	}
-	bool can_cancel_alliance(sys::state& state, dcon::nation_id source, dcon::nation_id target, bool ignore_cost) {
+	bool can_cancel_alliance(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target)
 		return false;
 
-		if(!ignore_cost && state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.cancelalliance_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.cancelalliance_diplomatic_cost)
 		return false;
 
 		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, source);
