@@ -3139,6 +3139,16 @@ namespace ai {
 		return true;
 	}
 
+	/* Whetever or not this declaration of war would be geopolitically/strategically viable */
+	bool will_make_strategic_war_dec(sys::state& state, dcon::nation_id n, dcon::nation_id target) {
+		/* Non-tryhard AI behaviour -- will not declare on people with >100 relations */
+		if(uint8_t(state.difficulty) <= uint8_t(sys::difficulty_level::normal)) {
+			auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(n, target);
+			return state.world.diplomatic_relation_get_value(rel) < 100.f;
+		}
+		return true;
+	}
+
 	void make_war_decs(sys::state& state) {
 		auto targets = ve::vectorizable_buffer<dcon::nation_id, dcon::nation_id>(state.world.nation_size());
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
@@ -3181,6 +3191,8 @@ namespace ai {
 					}
 					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target) && !ai::naval_supremacy(state, n, target))
 						continue;
+					if(!will_make_strategic_war_dec(state, n, target))
+						continue;
 					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
@@ -3194,6 +3206,8 @@ namespace ai {
 				if(!ai::can_go_war_with(state, n, real_target, other))
 					continue;
 				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+					continue;
+				if(!will_make_strategic_war_dec(state, n, other))
 					continue;
 				auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 				if(str_difference > best_difference) {
@@ -3213,6 +3227,8 @@ namespace ai {
 					if(state.world.nation_get_central_ports(other) == 0 || state.world.nation_get_central_ports(real_target) == 0)
 						continue;
 					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+						continue;
+					if(!will_make_strategic_war_dec(state, n, other))
 						continue;
 					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
 					if(str_difference > best_difference) {
