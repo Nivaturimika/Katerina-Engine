@@ -2,6 +2,7 @@
 #include <functional>
 #include <thread>
 #include "system_state.hpp"
+#include "constants.hpp"
 #include "dcon_generated.hpp"
 #include "map_modes.hpp"
 #include "opengl_wrapper.hpp"
@@ -4013,7 +4014,9 @@ namespace sys {
 			break;
 		case 14:
 			ai::update_focuses(*this);
-			ai::perform_foreign_investments(*this);
+			if(uint8_t(difficulty) >= uint8_t(sys::difficulty_level::hard)) {
+				ai::perform_foreign_investments(*this);
+			}
 			break;
 		case 15:
 			culture::discover_inventions(*this);
