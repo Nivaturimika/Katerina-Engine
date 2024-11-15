@@ -1935,9 +1935,11 @@ namespace economy {
 		*/
 		for(auto n : state.world.in_nation) {
 			auto m = n.get_stockpiles(money);
-			if(m < 0) {
-				if(m < -max_loan(state, n)) {
+			if(m < 0 && m < -max_loan(state, n)) {
+				if(n.get_is_player_controlled()) {
 					go_bankrupt(state, n);
+				} else {
+					n.set_stockpiles(money, 0.f);
 				}
 			}
 		}

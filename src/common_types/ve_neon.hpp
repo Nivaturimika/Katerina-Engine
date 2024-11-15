@@ -5,7 +5,7 @@
 // Originally for x86/64 only, now extended for NEON
 //
 
-//#include <arm_neon.h>
+#include <arm_neon.h>
 #include "sse2neon.h"
 
 namespace ve {
