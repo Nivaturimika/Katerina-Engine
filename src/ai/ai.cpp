@@ -196,7 +196,7 @@ namespace ai {
 					});
 					if(state.world.nation_get_is_player_controlled(alliance_targets[0])) {
 						if(ymd.day == 1 && ymd.month == 1) {
-							assert(command::can_ask_for_alliance(state, n, alliance_targets[0], true));
+							assert(command::can_ask_for_alliance(state, n, alliance_targets[0]));
 							command::execute_ask_for_alliance(state, n, alliance_targets[0]);
 						}
 					} else {
@@ -253,11 +253,11 @@ namespace ai {
 					auto weakest_str = estimate_strength(state, pt);
 					if(weakest_str * 1.25 < safety_margin) {
 						safety_margin -= weakest_str;
-						assert(command::can_cancel_alliance(state, n, pt, true));
+						assert(command::can_cancel_alliance(state, n, pt));
 						command::execute_cancel_alliance(state, n, pt);
 					} else if(state.world.nation_get_infamy(pt) >= state.defines.badboy_limit) {
 						safety_margin -= weakest_str;
-						assert(command::can_cancel_alliance(state, n, pt, true));
+						assert(command::can_cancel_alliance(state, n, pt));
 						command::execute_cancel_alliance(state, n, pt);
 					} else {
 						break;
