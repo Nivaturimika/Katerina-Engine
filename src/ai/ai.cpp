@@ -3294,8 +3294,8 @@ namespace ai {
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 				return;
 
-			//float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
-
+			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
+			/*
 			auto max_percentage = 1.0f;
 			auto min_percentage = 0.0f;
 			auto tariff_min= state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff);
@@ -3469,8 +3469,8 @@ namespace ai {
 			n.set_education_spending(int8_t(set_educ_to * 100.f));
 			n.set_administrative_spending(int8_t(set_admin_to * 100.f));			
 			n.set_social_spending(int8_t(set_social_to * 100.f));
+			*/
 
-			/*
 			// they don't have to add up to 1.f
 			// the reason they are there is to slow down AI spendings,
 			// make them more or less balanced
@@ -3660,7 +3660,6 @@ namespace ai {
 			n.set_administrative_spending(int8_t(administration_max_ratio));
 			n.set_military_spending(int8_t(std::min(int8_t(soldiers_max_ratio), n.get_military_spending())));
 			n.set_overseas_spending(int8_t(overseas_max_ratio));
-			*/
 			economy::bound_budget_settings(state, n);
 		});
 	}
