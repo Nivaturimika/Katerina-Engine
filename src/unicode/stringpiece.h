@@ -130,13 +130,13 @@ class U_COMMON_API StringPiece : public UMemory {
    * @stable ICU 65
    */
   template <typename T,
-            typename = std::enable_if_t<
-                (std::is_same_v<decltype(T().data()), const char*>
+            typename = typename std::enable_if<
+                (std::is_same<decltype(T().data()), const char*>::value
 #if defined(__cpp_char8_t)
-                    || std::is_same_v<decltype(T().data()), const char8_t*>
+                    || std::is_same<decltype(T().data()), const char8_t*>::value
 #endif
                 ) &&
-                std::is_same_v<decltype(T().size()), size_t>>>
+                std::is_same<decltype(T().size()), size_t>::value>::type>
   StringPiece(T str)
       : ptr_(reinterpret_cast<const char*>(str.data())),
         length_(static_cast<int32_t>(str.size())) {}

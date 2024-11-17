@@ -444,7 +444,7 @@ public:
      * @return    the locale of the object.
      * @stable ICU 2.0
      */
-    virtual const Locale& getLocale() const;
+    virtual const Locale& getLocale(void) const;
 
     /**
      * Applies the given pattern string to this message format.
@@ -483,7 +483,7 @@ public:
      * @param aposMode   The new apostrophe mode.
      * @param parseError Struct to receive information on the position
      *                   of an error within the pattern.
-     *                   Can be nullptr.
+     *                   Can be NULL.
      * @param status    Input/output error code.  If the
      *                  pattern cannot be parsed, set to failure code.
      * @stable ICU 4.8
@@ -637,8 +637,8 @@ public:
      * about format numbering.
      *
      * @param count output parameter to receive the size of the array
-     * @return an array of count Format* objects, or nullptr if out of
-     * memory.  Any or all of the array elements may be nullptr.
+     * @return an array of count Format* objects, or NULL if out of
+     * memory.  Any or all of the array elements may be NULL.
      * @stable ICU 2.0
      */
     virtual const Format** getFormats(int32_t& count) const;
@@ -768,7 +768,7 @@ public:
      * @param status    Input/output error code.  If the
      *                  pattern cannot be parsed, set to failure code.
      * @return an array of parsed arguments.  The caller owns both
-     * the array and its contents. Returns nullptr if status is not U_ZERO_ERROR.
+     * the array and its contents. Returns NULL if status is not U_ZERO_ERROR.
      *
      * @stable ICU 2.0
      */
@@ -850,7 +850,7 @@ public:
      *                  other classes have different class IDs.
      * @stable ICU 2.0
      */
-    virtual UClassID getDynamicClassID() const override;
+    virtual UClassID getDynamicClassID(void) const override;
 
     /**
      * Return the class ID for this class.  This is useful only for
@@ -863,15 +863,15 @@ public:
      * @return          The class ID for all objects of this class.
      * @stable ICU 2.0
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
 #ifndef U_HIDE_INTERNAL_API
     /**
      * Compares two Format objects. This is used for constructing the hash
      * tables.
      *
-     * @param left pointer to a Format object. Must not be nullptr.
-     * @param right pointer to a Format object. Must not be nullptr.
+     * @param left pointer to a Format object. Must not be NULL.
+     * @param right pointer to a Format object. Must not be NULL.
      *
      * @return whether the two objects are the same
      * @internal
@@ -886,7 +886,7 @@ private:
     Format**            formatAliases; // see getFormats
     int32_t             formatAliasesCapacity;
 
-    MessageFormat() = delete; // default constructor not implemented
+    MessageFormat(); // default constructor not implemented
 
      /**
       * This provider helps defer instantiation of a PluralRules object
@@ -946,7 +946,7 @@ private:
     PluralSelectorProvider ordinalProvider;
 
     /**
-     * Method to retrieve default formats (or nullptr on failure).
+     * Method to retrieve default formats (or NULL on failure).
      * These are semantically const, but may modify *this.
      */
     const NumberFormat* getDefaultNumberFormat(UErrorCode&) const;
@@ -978,13 +978,13 @@ private:
      * AppendableWrapper, updates the field position.
      *
      * @param msgStart      Index to msgPattern part to start formatting from.
-     * @param plNumber      nullptr except when formatting a plural argument sub-message
+     * @param plNumber      NULL except when formatting a plural argument sub-message
      *                      where a '#' is replaced by the format string for this number.
-     * @param arguments     The formattable objects array. (Must not be nullptr.)
-     * @param argumentNames nullptr if numbered values are used. Otherwise the same
+     * @param arguments     The formattable objects array. (Must not be NULL.)
+     * @param argumentNames NULL if numbered values are used. Otherwise the same
      *                      length as "arguments", and each entry is the name of the
      *                      corresponding argument in "arguments".
-     * @param cnt           The length of arguments (and of argumentNames if that is not nullptr).
+     * @param cnt           The length of arguments (and of argumentNames if that is not NULL).
      * @param appendTo      Output parameter to receive the result.
      *                      The result string is appended to existing contents.
      * @param pos           Field position status.
@@ -1010,6 +1010,8 @@ private:
     UBool argNameMatches(int32_t partIndex, const UnicodeString& argName, int32_t argNumber);
 
     void cacheExplicitFormats(UErrorCode& status);
+
+    int32_t skipLeadingSpaces(UnicodeString& style);
 
     Format* createAppropriateFormat(UnicodeString& type,
                                     UnicodeString& style,
@@ -1081,8 +1083,8 @@ private:
     void resetPattern();
 
     /**
-     * A DummyFormatter that we use solely to store a nullptr value. UHash does
-     * not support storing nullptr values.
+     * A DummyFormatter that we use solely to store a NULL value. UHash does
+     * not support storing NULL values.
      */
     class U_I18N_API DummyFormat : public Format {
     public:

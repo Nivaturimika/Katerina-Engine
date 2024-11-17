@@ -25,8 +25,10 @@
 U_NAMESPACE_BEGIN
 
 // Forward declaration:
-namespace number::impl {
+namespace number {
+namespace impl {
 class SimpleModifier;
+}
 }
 
 /**
@@ -57,7 +59,7 @@ class SimpleModifier;
  * @see UMessagePatternApostropheMode
  * @stable ICU 57
  */
-class U_COMMON_API SimpleFormatter final : public UMemory {
+class U_COMMON_API SimpleFormatter U_FINAL : public UMemory {
 public:
     /**
      * Default constructor.
@@ -215,13 +217,13 @@ public:
      *
      * @param values The argument values.
      *               An argument value must not be the same object as appendTo.
-     *               Can be nullptr if valuesLength==getArgumentLimit()==0.
+     *               Can be NULL if valuesLength==getArgumentLimit()==0.
      * @param valuesLength The length of the values array.
      *                     Must be at least getArgumentLimit().
      * @param appendTo Gets the formatted pattern and values appended.
      * @param offsets offsets[i] receives the offset of where
      *                values[i] replaced pattern argument {i}.
-     *                Can be shorter or longer than values. Can be nullptr if offsetsLength==0.
+     *                Can be shorter or longer than values. Can be NULL if offsetsLength==0.
      *                If there is no {i} in the pattern, then offsets[i] is set to -1.
      * @param offsetsLength The length of the offsets array.
      * @param errorCode ICU error code in/out parameter.
@@ -241,13 +243,13 @@ public:
      *
      * @param values The argument values.
      *               An argument value may be the same object as result.
-     *               Can be nullptr if valuesLength==getArgumentLimit()==0.
+     *               Can be NULL if valuesLength==getArgumentLimit()==0.
      * @param valuesLength The length of the values array.
      *                     Must be at least getArgumentLimit().
      * @param result Gets its contents replaced by the formatted pattern and values.
      * @param offsets offsets[i] receives the offset of where
      *                values[i] replaced pattern argument {i}.
-     *                Can be shorter or longer than values. Can be nullptr if offsetsLength==0.
+     *                Can be shorter or longer than values. Can be NULL if offsetsLength==0.
      *                If there is no {i} in the pattern, then offsets[i] is set to -1.
      * @param offsetsLength The length of the offsets array.
      * @param errorCode ICU error code in/out parameter.

@@ -77,7 +77,7 @@ class UnicodeString;
  *
  * @stable ICU 59
  */
-class U_COMMON_API Edits final : public UMemory {
+class U_COMMON_API Edits U_FINAL : public UMemory {
 public:
     /**
      * Constructs an empty object.
@@ -103,7 +103,7 @@ public:
      * @param src source edits
      * @stable ICU 60
      */
-    Edits(Edits &&src) noexcept :
+    Edits(Edits &&src) U_NOEXCEPT :
             array(stackArray), capacity(STACK_CAPACITY), length(src.length),
             delta(src.delta), numChanges(src.numChanges),
             errorCode_(src.errorCode_) {
@@ -132,13 +132,13 @@ public:
      * @return *this
      * @stable ICU 60
      */
-    Edits &operator=(Edits &&src) noexcept;
+    Edits &operator=(Edits &&src) U_NOEXCEPT;
 
     /**
      * Resets the data but may not release memory.
      * @stable ICU 59
      */
-    void reset() noexcept;
+    void reset() U_NOEXCEPT;
 
     /**
      * Adds a no-change edit: a record for an unchanged segment of text.
@@ -200,7 +200,7 @@ public:
      * @see getFineIterator
      * @stable ICU 59
      */
-    struct U_COMMON_API Iterator final : public UMemory {
+    struct U_COMMON_API Iterator U_FINAL : public UMemory {
         /**
          * Default constructor, empty iterator.
          * @stable ICU 60
@@ -504,9 +504,9 @@ public:
     Edits &mergeAndAppend(const Edits &ab, const Edits &bc, UErrorCode &errorCode);
 
 private:
-    void releaseArray() noexcept;
+    void releaseArray() U_NOEXCEPT;
     Edits &copyArray(const Edits &other);
-    Edits &moveArray(Edits &src) noexcept;
+    Edits &moveArray(Edits &src) U_NOEXCEPT;
 
     void setLastUnit(int32_t last) { array[length - 1] = (uint16_t)last; }
     int32_t lastUnit() const { return length > 0 ? array[length - 1] : 0xffff; }

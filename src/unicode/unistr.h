@@ -253,7 +253,7 @@ class UnicodeStringAppendable;  // unicode/appendable.h
  *   target object, e.g., calling str.append(str), an extra copy may take place
  *   to ensure safety.
  * - If primitive string pointer values (e.g., const char16_t * or char *)
- *   for input strings are nullptr, then those input string parameters are treated
+ *   for input strings are NULL, then those input string parameters are treated
  *   as if they pointed to an empty string.
  *   However, this is *not* the case for char * parameters for charset names
  *   or other IDs.
@@ -1542,7 +1542,7 @@ public:
    *
    * @param start offset of first character which will be copied
    * @param startLength the number of characters to extract
-   * @param target the target buffer for extraction, can be nullptr
+   * @param target the target buffer for extraction, can be NULL
    *               if targetLength is 0
    * @param targetCapacity the length of the target buffer
    * @param inv Signature-distinguishing parameter, use US_INV.
@@ -1571,7 +1571,7 @@ public:
    * @param startLength the number of characters to extract
    * @param target the target buffer for extraction
    * @param targetLength the length of the target buffer
-   * If `target` is nullptr, then the number of bytes required for
+   * If `target` is NULL, then the number of bytes required for
    * `target` is returned.
    * @return the output string length, not including the terminating NUL
    * @stable ICU 2.0
@@ -1604,16 +1604,16 @@ public:
    * If `codepage` is an empty string (`""`),
    * then a simple conversion is performed on the codepage-invariant
    * subset ("invariant characters") of the platform encoding. See utypes.h.
-   * If `target` is nullptr, then the number of bytes required for
+   * If `target` is NULL, then the number of bytes required for
    * `target` is returned. It is assumed that the target is big enough
    * to fit all of the characters.
    * @return the output string length, not including the terminating NUL
    * @stable ICU 2.0
    */
   inline int32_t extract(int32_t start,
-                         int32_t startLength,
-                         char* target,
-                         const char* codepage = nullptr) const;
+                 int32_t startLength,
+                 char *target,
+                 const char *codepage = 0) const;
 
   /**
    * Copy the characters in the range
@@ -1639,7 +1639,7 @@ public:
    * If `codepage` is an empty string (`""`),
    * then a simple conversion is performed on the codepage-invariant
    * subset ("invariant characters") of the platform encoding. See utypes.h.
-   * If `target` is nullptr, then the number of bytes required for
+   * If `target` is NULL, then the number of bytes required for
    * `target` is returned.
    * @return the output string length, not including the terminating NUL
    * @stable ICU 2.0
@@ -1657,10 +1657,10 @@ public:
    * This function avoids the overhead of opening and closing a converter if
    * multiple strings are extracted.
    *
-   * @param dest destination string buffer, can be nullptr if destCapacity==0
+   * @param dest destination string buffer, can be NULL if destCapacity==0
    * @param destCapacity the number of chars available at dest
    * @param cnv the converter object to be used (ucnv_resetFromUnicode() will be called),
-   *        or nullptr for the default converter
+   *        or NULL for the default converter
    * @param errorCode normal ICU error code
    * @return the length of the output string, not counting the terminating NUL;
    *         if the length is greater than destCapacity, then the string will not fit
@@ -1737,7 +1737,7 @@ public:
    * Unpaired surrogates are replaced with U+FFFD.
    * Calls u_strToUTF32WithSub().
    *
-   * @param utf32 destination string buffer, can be nullptr if capacity==0
+   * @param utf32 destination string buffer, can be NULL if capacity==0
    * @param capacity the number of UChar32s available at utf32
    * @param errorCode Standard ICU error code. Its input value must
    *                  pass the U_SUCCESS() test, or else the function returns
@@ -1759,7 +1759,7 @@ public:
    * @see countChar32
    * @stable ICU 2.0
    */
-  inline int32_t length() const;
+  inline int32_t length(void) const;
 
   /**
    * Count Unicode code points in the length char16_t code units of the string.
@@ -1808,7 +1808,7 @@ public:
    * @return true if this string contains 0 characters, false otherwise.
    * @stable ICU 2.0
    */
-  inline UBool isEmpty() const;
+  inline UBool isEmpty(void) const;
 
   /**
    * Return the capacity of the internal buffer of the UnicodeString object.
@@ -1819,7 +1819,7 @@ public:
    * @see getBuffer
    * @stable ICU 2.0
    */
-  inline int32_t getCapacity() const;
+  inline int32_t getCapacity(void) const;
 
   /* Other operations */
 
@@ -1828,21 +1828,22 @@ public:
    * @return The hash code of this UnicodeString.
    * @stable ICU 2.0
    */
-  inline int32_t hashCode() const;
+  inline int32_t hashCode(void) const;
 
   /**
    * Determine if this object contains a valid string.
    * A bogus string has no value. It is different from an empty string,
    * although in both cases isEmpty() returns true and length() returns 0.
    * setToBogus() and isBogus() can be used to indicate that no string value is available.
-   * For a bogus string, getBuffer() and getTerminatedBuffer() return nullptr, and
+   * For a bogus string, getBuffer() and getTerminatedBuffer() return NULL, and
    * length() returns 0.
    *
    * @return true if the string is bogus/invalid, false otherwise
    * @see setToBogus()
    * @stable ICU 2.0
    */
-  inline UBool isBogus() const;
+  inline UBool isBogus(void) const;
+
 
   //========================================
   // Write operations
@@ -1905,14 +1906,14 @@ public:
    * @return *this
    * @stable ICU 56
    */
-  UnicodeString &operator=(UnicodeString &&src) noexcept;
+  UnicodeString &operator=(UnicodeString &&src) U_NOEXCEPT;
 
   /**
    * Swap strings.
    * @param other other string
    * @stable ICU 56
    */
-  void swap(UnicodeString &other) noexcept;
+  void swap(UnicodeString &other) U_NOEXCEPT;
 
   /**
    * Non-member UnicodeString swap function.
@@ -1921,7 +1922,7 @@ public:
    * @stable ICU 56
    */
   friend inline void U_EXPORT2
-  swap(UnicodeString &s1, UnicodeString &s2) noexcept {
+  swap(UnicodeString &s1, UnicodeString &s2) U_NOEXCEPT {
     s1.swap(s2);
   }
 
@@ -2071,7 +2072,7 @@ public:
    *
    * A bogus string has no value. It is different from an empty string.
    * It can be used to indicate that no string value is available.
-   * getBuffer() and getTerminatedBuffer() return nullptr, and
+   * getBuffer() and getTerminatedBuffer() return NULL, and
    * length() returns 0.
    *
    * This utility function is used throughout the UnicodeString
@@ -2623,7 +2624,8 @@ public:
    * @return a reference to this
    * @stable ICU 2.0
    */
-  UnicodeString& trim();
+  UnicodeString& trim(void);
+
 
   /* Miscellaneous operations */
 
@@ -2632,7 +2634,7 @@ public:
    * @return a reference to this
    * @stable ICU 2.0
    */
-  inline UnicodeString& reverse();
+  inline UnicodeString& reverse(void);
 
   /**
    * Reverse the range [`start`, `start + length`) in
@@ -2651,7 +2653,7 @@ public:
    * @return A reference to this.
    * @stable ICU 2.0
    */
-  UnicodeString& toUpper();
+  UnicodeString& toUpper(void);
 
   /**
    * Convert the characters in this to UPPER CASE following the conventions of
@@ -2668,7 +2670,7 @@ public:
    * @return A reference to this.
    * @stable ICU 2.0
    */
-  UnicodeString& toLower();
+  UnicodeString& toLower(void);
 
   /**
    * Convert the characters in this to lower case following the conventions of
@@ -2976,7 +2978,7 @@ public:
    * `-DUNISTR_FROM_STRING_EXPLICIT=explicit`
    * on the compiler command line or similar.
    * @param text The characters to place in the UnicodeString.  `text`
-   * must be NUL (U+0000) terminated.
+   * must be NULL (U+0000) terminated.
    * @stable ICU 2.0
    */
   UNISTR_FROM_STRING_EXPLICIT UnicodeString(const char16_t *text);
@@ -3243,7 +3245,7 @@ public:
    * @param src input codepage string
    * @param srcLength length of the input string, can be -1 for NUL-terminated strings
    * @param cnv converter object (ucnv_resetToUnicode() will be called),
-   *        can be nullptr for the default converter
+   *        can be NULL for the default converter
    * @param errorCode normal ICU error code
    * @stable ICU 2.0
    */
@@ -3304,7 +3306,7 @@ public:
    * @param src source string
    * @stable ICU 56
    */
-  UnicodeString(UnicodeString &&src) noexcept;
+  UnicodeString(UnicodeString &&src) U_NOEXCEPT;
 
   /**
    * 'Substring' constructor from tail of source string.
@@ -3327,7 +3329,7 @@ public:
    * Clone this object, an instance of a subclass of Replaceable.
    * Clones can be used concurrently in multiple threads.
    * If a subclass does not implement clone(), or if an error occurs,
-   * then nullptr is returned.
+   * then NULL is returned.
    * The caller must delete the clone.
    *
    * @return a clone of this object
@@ -3363,7 +3365,7 @@ public:
    * Illegal input is replaced with U+FFFD. Otherwise, errors result in a bogus string.
    * Calls u_strFromUTF32WithSub().
    *
-   * @param utf32 UTF-32 input string. Must not be nullptr.
+   * @param utf32 UTF-32 input string. Must not be NULL.
    * @param length Length of the input string, or -1 if NUL-terminated.
    * @return A UnicodeString with equivalent UTF-16 contents.
    * @see toUTF32
@@ -3487,19 +3489,6 @@ private:
    */
   UBool doEquals(const UnicodeString &text, int32_t len) const;
 
-  inline UBool
-  doEqualsSubstring(int32_t start,
-           int32_t length,
-           const UnicodeString& srcText,
-           int32_t srcStart,
-           int32_t srcLength) const;
-
-  UBool doEqualsSubstring(int32_t start,
-           int32_t length,
-           const char16_t *srcChars,
-           int32_t srcStart,
-           int32_t srcLength) const;
-
   inline int8_t
   doCompare(int32_t start,
            int32_t length,
@@ -3588,12 +3577,12 @@ private:
                int32_t length);
 
   // calculate hash code
-  int32_t doHashCode() const;
+  int32_t doHashCode(void) const;
 
   // get pointer to start of array
   // these do not check for kOpenGetBuffer, unlike the public getBuffer() function
-  inline char16_t* getArrayStart();
-  inline const char16_t* getArrayStart() const;
+  inline char16_t* getArrayStart(void);
+  inline const char16_t* getArrayStart(void) const;
 
   inline UBool hasShortLength() const;
   inline int32_t getShortLength() const;
@@ -3620,7 +3609,7 @@ private:
   UBool allocate(int32_t capacity);
 
   // release the array if owned
-  void releaseArray();
+  void releaseArray(void);
 
   // turn a bogus string into an empty one
   void unBogus();
@@ -3629,7 +3618,7 @@ private:
   UnicodeString &copyFrom(const UnicodeString &src, UBool fastCopy=false);
 
   // Copies just the fields without memory management.
-  void copyFieldsFrom(UnicodeString &src, UBool setSrcToBogus) noexcept;
+  void copyFieldsFrom(UnicodeString &src, UBool setSrcToBogus) U_NOEXCEPT;
 
   // Pin start and limit to acceptable values.
   inline void pinIndex(int32_t& start) const;
@@ -3682,10 +3671,10 @@ private:
    * Return false if memory could not be allocated.
    */
   UBool cloneArrayIfNeeded(int32_t newCapacity = -1,
-                           int32_t growCapacity = -1,
-                           UBool doCopyArray = true,
-                           int32_t** pBufferToDelete = nullptr,
-                           UBool forceClone = false);
+                            int32_t growCapacity = -1,
+                            UBool doCopyArray = true,
+                            int32_t **pBufferToDelete = 0,
+                            UBool forceClone = false);
 
   /**
    * Common function for UnicodeString case mappings.
@@ -3700,9 +3689,9 @@ private:
           UStringCaseMapper *stringCaseMapper);
 
   // ref counting
-  void addRef();
-  int32_t removeRef();
-  int32_t refCount() const;
+  void addRef(void);
+  int32_t removeRef(void);
+  int32_t refCount(void) const;
 
   // constants
   enum {
@@ -3717,7 +3706,7 @@ private:
     kEmptyHashCode=1, // hash code for empty string
 
     // bit flag values for fLengthAndFlags
-    kIsBogus=1,         // this string is bogus, i.e., not valid or nullptr
+    kIsBogus=1,         // this string is bogus, i.e., not valid or NULL
     kUsingStackBuffer=2,// using fUnion.fStackFields instead of fUnion.fFields
     kRefCounted=4,      // there is a refCount field before the characters in fArray
     kBufferIsReadonly=8,// do not write to this buffer
@@ -3954,21 +3943,6 @@ UnicodeString::doCompare(int32_t start,
   } else {
     srcText.pinIndices(srcStart, srcLength);
     return doCompare(start, thisLength, srcText.getArrayStart(), srcStart, srcLength);
-  }
-}
-
-inline UBool
-UnicodeString::doEqualsSubstring(int32_t start,
-              int32_t thisLength,
-              const UnicodeString& srcText,
-              int32_t srcStart,
-              int32_t srcLength) const
-{
-  if(srcText.isBogus()) {
-    return isBogus();
-  } else {
-    srcText.pinIndices(srcStart, srcLength);
-    return !isBogus() && doEqualsSubstring(start, thisLength, srcText.getArrayStart(), srcStart, srcLength);
   }
 }
 
@@ -4352,20 +4326,20 @@ UnicodeString::lastIndexOf(UChar32 c,
 
 inline UBool
 UnicodeString::startsWith(const UnicodeString& text) const
-{ return doEqualsSubstring(0, text.length(), text, 0, text.length()); }
+{ return compare(0, text.length(), text, 0, text.length()) == 0; }
 
 inline UBool
 UnicodeString::startsWith(const UnicodeString& srcText,
               int32_t srcStart,
               int32_t srcLength) const
-{ return doEqualsSubstring(0, srcLength, srcText, srcStart, srcLength); }
+{ return doCompare(0, srcLength, srcText, srcStart, srcLength) == 0; }
 
 inline UBool
 UnicodeString::startsWith(ConstChar16Ptr srcChars, int32_t srcLength) const {
   if(srcLength < 0) {
     srcLength = u_strlen(toUCharPtr(srcChars));
   }
-  return doEqualsSubstring(0, srcLength, srcChars, 0, srcLength);
+  return doCompare(0, srcLength, srcChars, 0, srcLength) == 0;
 }
 
 inline UBool
@@ -4373,21 +4347,21 @@ UnicodeString::startsWith(const char16_t *srcChars, int32_t srcStart, int32_t sr
   if(srcLength < 0) {
     srcLength = u_strlen(toUCharPtr(srcChars));
   }
-  return doEqualsSubstring(0, srcLength, srcChars, srcStart, srcLength);
+  return doCompare(0, srcLength, srcChars, srcStart, srcLength) == 0;
 }
 
 inline UBool
 UnicodeString::endsWith(const UnicodeString& text) const
-{ return doEqualsSubstring(length() - text.length(), text.length(),
-           text, 0, text.length()); }
+{ return doCompare(length() - text.length(), text.length(),
+           text, 0, text.length()) == 0; }
 
 inline UBool
 UnicodeString::endsWith(const UnicodeString& srcText,
             int32_t srcStart,
             int32_t srcLength) const {
   srcText.pinIndices(srcStart, srcLength);
-  return doEqualsSubstring(length() - srcLength, srcLength,
-                   srcText, srcStart, srcLength);
+  return doCompare(length() - srcLength, srcLength,
+                   srcText, srcStart, srcLength) == 0;
 }
 
 inline UBool
@@ -4396,7 +4370,8 @@ UnicodeString::endsWith(ConstChar16Ptr srcChars,
   if(srcLength < 0) {
     srcLength = u_strlen(toUCharPtr(srcChars));
   }
-  return doEqualsSubstring(length() - srcLength, srcLength, srcChars, 0, srcLength);
+  return doCompare(length() - srcLength, srcLength,
+                   srcChars, 0, srcLength) == 0;
 }
 
 inline UBool
@@ -4406,8 +4381,8 @@ UnicodeString::endsWith(const char16_t *srcChars,
   if(srcLength < 0) {
     srcLength = u_strlen(toUCharPtr(srcChars + srcStart));
   }
-  return doEqualsSubstring(length() - srcLength, srcLength,
-                   srcChars, srcStart, srcLength);
+  return doCompare(length() - srcLength, srcLength,
+                   srcChars, srcStart, srcLength) == 0;
 }
 
 //========================================
@@ -4508,7 +4483,7 @@ UnicodeString::extract(int32_t start,
 
 {
   // This dstSize value will be checked explicitly
-  return extract(start, _length, dst, dst != nullptr ? 0xffffffff : 0, codepage);
+  return extract(start, _length, dst, dst!=0 ? 0xffffffff : 0, codepage);
 }
 
 #endif
@@ -4737,18 +4712,18 @@ UnicodeString::remove(int32_t start,
         // remove(guaranteed everything) of a bogus string makes the string empty and non-bogus
         return remove();
     }
-    return doReplace(start, _length, nullptr, 0, 0);
+    return doReplace(start, _length, NULL, 0, 0);
 }
 
 inline UnicodeString&
 UnicodeString::removeBetween(int32_t start,
                 int32_t limit)
-{ return doReplace(start, limit - start, nullptr, 0, 0); }
+{ return doReplace(start, limit - start, NULL, 0, 0); }
 
 inline UnicodeString &
 UnicodeString::retainBetween(int32_t start, int32_t limit) {
   truncate(limit);
-  return doReplace(0, start, nullptr, 0, 0);
+  return doReplace(0, start, NULL, 0, 0);
 }
 
 inline UBool

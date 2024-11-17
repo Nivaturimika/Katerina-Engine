@@ -590,7 +590,7 @@ protected:
      * variant.
      * @param id a basic ID of the form S-T or S-T/V.
      * @param canon canonical ID to assign to the object, or
-     * nullptr to leave the ID unchanged
+     * NULL to leave the ID unchanged
      * @return a newly created Transliterator or null if the ID is
      * invalid.
      * @stable ICU 2.4
@@ -938,7 +938,7 @@ public:
      * transliterator needs to examine
      * @stable ICU 2.0
      */
-    int32_t getMaximumContextLength() const;
+    int32_t getMaximumContextLength(void) const;
 
 protected:
 
@@ -962,7 +962,7 @@ public:
      * @see #getAvailableIDs
      * @stable ICU 2.0
      */
-    virtual const UnicodeString& getID() const;
+    virtual const UnicodeString& getID(void) const;
 
     /**
      * Returns a name for this transliterator that is appropriate for
@@ -1002,24 +1002,24 @@ public:
                                          UnicodeString& result);
 
     /**
-     * Returns the filter used by this transliterator, or <tt>nullptr</tt>
+     * Returns the filter used by this transliterator, or <tt>NULL</tt>
      * if this transliterator uses no filter.
-     * @return the filter used by this transliterator, or <tt>nullptr</tt>
+     * @return the filter used by this transliterator, or <tt>NULL</tt>
      *         if this transliterator uses no filter.
      * @stable ICU 2.0
      */
-    const UnicodeFilter* getFilter() const;
+    const UnicodeFilter* getFilter(void) const;
 
     /**
-     * Returns the filter used by this transliterator, or <tt>nullptr</tt> if this
+     * Returns the filter used by this transliterator, or <tt>NULL</tt> if this
      * transliterator uses no filter.  The caller must eventually delete the
      * result.  After this call, this transliterator's filter is set to
-     * <tt>nullptr</tt>.
-     * @return the filter used by this transliterator, or <tt>nullptr</tt> if this
+     * <tt>NULL</tt>.
+     * @return the filter used by this transliterator, or <tt>NULL</tt> if this
      *         transliterator uses no filter.
      * @stable ICU 2.4
      */
-    UnicodeFilter* orphanFilter();
+    UnicodeFilter* orphanFilter(void);
 
     /**
      * Changes the filter used by this transliterator.  If the filter
@@ -1374,7 +1374,7 @@ public:
      * @return the number of registered source specifiers.
      * @stable ICU 2.0
      */
-    static int32_t U_EXPORT2 countAvailableSources();
+    static int32_t U_EXPORT2 countAvailableSources(void);
 
     /**
      * Return a registered source specifier.
@@ -1448,7 +1448,7 @@ protected:
      * Non-mutexed internal method
      * @internal
      */
-    static int32_t _countAvailableSources();
+    static int32_t _countAvailableSources(void);
 
     /**
      * Non-mutexed internal method
@@ -1510,7 +1510,7 @@ public:
      * @return       The class ID for class Transliterator.
      * @stable ICU 2.0
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * Returns a unique class ID <b>polymorphically</b>.  This method
@@ -1527,7 +1527,7 @@ public:
      * different class IDs.
      * @stable ICU 2.0
      */
-    virtual UClassID getDynamicClassID() const override = 0;
+    virtual UClassID getDynamicClassID(void) const override = 0;
 
 private:
     static UBool initializeRegistry(UErrorCode &status);
@@ -1541,7 +1541,7 @@ public:
      * @return the number of IDs currently registered with the system.
      * @obsolete ICU 3.4 use getAvailableIDs() instead
      */
-    static int32_t U_EXPORT2 countAvailableIDs();
+    static int32_t U_EXPORT2 countAvailableIDs(void);
 
     /**
      * Return the index-th available ID.  index must be between 0
@@ -1559,7 +1559,7 @@ public:
 #endif  /* U_HIDE_OBSOLETE_API */
 };
 
-inline int32_t Transliterator::getMaximumContextLength() const {
+inline int32_t Transliterator::getMaximumContextLength(void) const {
     return maximumContextLength;
 }
 

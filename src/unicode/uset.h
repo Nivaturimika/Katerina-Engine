@@ -53,12 +53,6 @@ typedef struct USet USet;
 /**
  * Bitmask values to be passed to uset_openPatternOptions() or
  * uset_applyPattern() taking an option parameter.
- *
- * Use at most one of USET_CASE_INSENSITIVE, USET_ADD_CASE_MAPPINGS, USET_SIMPLE_CASE_INSENSITIVE.
- * These case options are mutually exclusive.
- *
- * Undefined options bits are ignored, and reserved for future use.
- *
  * @stable ICU 2.4
  */
 enum {
@@ -66,13 +60,13 @@ enum {
      * Ignore white space within patterns unless quoted or escaped.
      * @stable ICU 2.4
      */
-    USET_IGNORE_SPACE = 1,
+    USET_IGNORE_SPACE = 1,  
 
     /**
      * Enable case insensitive matching.  E.g., "[ab]" with this flag
      * will match 'a', 'A', 'b', and 'B'.  "[^ab]" with this flag will
      * match all except 'a', 'A', 'b', and 'B'. This performs a full
-     * closure over case mappings, e.g. 'ſ' (U+017F long s) for 's'.
+     * closure over case mappings, e.g. U+017F for s.
      *
      * The resulting set is a superset of the input for the code points but
      * not for the strings.
@@ -94,34 +88,17 @@ enum {
      *
      * @stable ICU 2.4
      */
-    USET_CASE_INSENSITIVE = 2,
+    USET_CASE_INSENSITIVE = 2,  
 
     /**
-     * Adds all case mappings for each element in the set.
-     * This adds the full lower-, title-, and uppercase mappings as well as the full case folding
+     * Enable case insensitive matching.  E.g., "[ab]" with this flag
+     * will match 'a', 'A', 'b', and 'B'.  "[^ab]" with this flag will
+     * match all except 'a', 'A', 'b', and 'B'. This adds the lower-,
+     * title-, and uppercase mappings as well as the case folding
      * of each existing element in the set.
-     *
-     * Unlike the “case insensitive” options, this does not perform a closure.
-     * For example, it does not add 'ſ' (U+017F long s) for 's',
-     * 'K' (U+212A Kelvin sign) for 'k', or replace set strings by their case-folded versions.
-     *
      * @stable ICU 3.2
      */
-    USET_ADD_CASE_MAPPINGS = 4,
-
-    /**
-     * Enable case insensitive matching.
-     * Same as USET_CASE_INSENSITIVE but using only Simple_Case_Folding (scf) mappings,
-     * which map each code point to one code point,
-     * not full Case_Folding (cf) mappings, which map some code points to multiple code points.
-     *
-     * This is designed for case-insensitive matches, for example in certain
-     * regular expression implementations where only Simple_Case_Folding mappings are used,
-     * such as in ECMAScript (JavaScript) regular expressions.
-     *
-     * @stable ICU 73
-     */
-    USET_SIMPLE_CASE_INSENSITIVE = 6
+    USET_ADD_CASE_MAPPINGS = 4
 };
 
 /**
@@ -322,9 +299,7 @@ uset_openPattern(const UChar* pattern, int32_t patternLength,
  * @param patternLength the length of the pattern, or -1 if null
  * terminated
  * @param options bitmask for options to apply to the pattern.
- * Valid options are USET_IGNORE_SPACE and
- * at most one of USET_CASE_INSENSITIVE, USET_ADD_CASE_MAPPINGS, USET_SIMPLE_CASE_INSENSITIVE.
- * These case options are mutually exclusive.
+ * Valid options are USET_IGNORE_SPACE and USET_CASE_INSENSITIVE.
  * @param ec the error code
  * @stable ICU 2.4
  */
@@ -439,10 +414,7 @@ uset_set(USet* set,
  *                          The character at pattern[0] must be a '['.
  * @param patternLength     The length of the UChar string. -1 if NUL terminated.
  * @param options           A bitmask for options to apply to the pattern.
- *                          Valid options are USET_IGNORE_SPACE and
- *                          at most one of USET_CASE_INSENSITIVE, USET_ADD_CASE_MAPPINGS,
- *                          USET_SIMPLE_CASE_INSENSITIVE.
- *                          These case options are mutually exclusive.
+ *                          Valid options are USET_IGNORE_SPACE and USET_CASE_INSENSITIVE.
  * @param status            Returns an error if the pattern cannot be parsed.
  * @return                  Upon successful parse, the value is either
  *                          the index of the character after the closing ']' 
@@ -656,6 +628,7 @@ uset_removeRange(USet* set, UChar32 start, UChar32 end);
 U_CAPI void U_EXPORT2
 uset_removeString(USet* set, const UChar* str, int32_t strLen);
 
+#ifndef U_HIDE_DRAFT_API
 /**
  * Removes EACH of the characters in this string. Note: "ch" == {"c", "h"}
  * A frozen set will not be modified.
@@ -663,10 +636,11 @@ uset_removeString(USet* set, const UChar* str, int32_t strLen);
  * @param set the object to be modified
  * @param str the string
  * @param length the length of the string, or -1 if NUL-terminated
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_removeAllCodePoints(USet *set, const UChar *str, int32_t length);
+#endif  // U_HIDE_DRAFT_API
 
 /**
  * Removes from this set all of its elements that are contained in the
@@ -697,6 +671,7 @@ uset_removeAll(USet* set, const USet* removeSet);
 U_CAPI void U_EXPORT2
 uset_retain(USet* set, UChar32 start, UChar32 end);
 
+#ifndef U_HIDE_DRAFT_API
 /**
  * Retains only the specified string from this set if it is present.
  * Upon return this set will be empty if it did not contain s, or
@@ -706,7 +681,7 @@ uset_retain(USet* set, UChar32 start, UChar32 end);
  * @param set the object to be modified
  * @param str the string
  * @param length the length of the string, or -1 if NUL-terminated
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_retainString(USet *set, const UChar *str, int32_t length);
@@ -718,10 +693,11 @@ uset_retainString(USet *set, const UChar *str, int32_t length);
  * @param set the object to be modified
  * @param str the string
  * @param length the length of the string, or -1 if NUL-terminated
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_retainAllCodePoints(USet *set, const UChar *str, int32_t length);
+#endif  // U_HIDE_DRAFT_API
 
 /**
  * Retains only the elements in this set that are contained in the
@@ -765,6 +741,7 @@ uset_compact(USet* set);
 U_CAPI void U_EXPORT2
 uset_complement(USet* set);
 
+#ifndef U_HIDE_DRAFT_API
 /**
  * Complements the specified range in this set.  Any character in
  * the range will be removed if it is in this set, or will be
@@ -776,7 +753,7 @@ uset_complement(USet* set);
  * @param set the object to be modified
  * @param start first character, inclusive, of range
  * @param end last character, inclusive, of range
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_complementRange(USet *set, UChar32 start, UChar32 end);
@@ -789,7 +766,7 @@ uset_complementRange(USet *set, UChar32 start, UChar32 end);
  * @param set the object to be modified
  * @param str the string
  * @param length the length of the string, or -1 if NUL-terminated
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_complementString(USet *set, const UChar *str, int32_t length);
@@ -801,10 +778,11 @@ uset_complementString(USet *set, const UChar *str, int32_t length);
  * @param set the object to be modified
  * @param str the string
  * @param length the length of the string, or -1 if NUL-terminated
- * @stable ICU 69
+ * @draft ICU 69
  */
 U_CAPI void U_EXPORT2
 uset_complementAllCodePoints(USet *set, const UChar *str, int32_t length);
+#endif  // U_HIDE_DRAFT_API
 
 /**
  * Complements in this set all elements contained in the specified
@@ -832,7 +810,7 @@ uset_clear(USet* set);
 
 /**
  * Close this set over the given attribute.  For the attribute
- * USET_CASE_INSENSITIVE, the result is to modify this set so that:
+ * USET_CASE, the result is to modify this set so that:
  *
  * 1. For each character or string 'a' in this set, all strings or
  * characters 'b' such that foldCase(a) == foldCase(b) are added
@@ -852,10 +830,8 @@ uset_clear(USet* set);
  * @param set the set
  *
  * @param attributes bitmask for attributes to close over.
- * Valid options:
- * At most one of USET_CASE_INSENSITIVE, USET_ADD_CASE_MAPPINGS, USET_SIMPLE_CASE_INSENSITIVE.
- * These case options are mutually exclusive.
- * Unrelated options bits are ignored.
+ * Currently only the USET_CASE bit is supported.  Any undefined bits
+ * are ignored.
  * @stable ICU 4.2
  */
 U_CAPI void U_EXPORT2
@@ -880,13 +856,15 @@ uset_removeAllStrings(USet* set);
 U_CAPI UBool U_EXPORT2
 uset_isEmpty(const USet* set);
 
+#ifndef U_HIDE_DRAFT_API
 /**
  * @param set the set
  * @return true if this set contains multi-character strings or the empty string.
- * @stable ICU 70
+ * @draft ICU 70
  */
 U_CAPI UBool U_EXPORT2
 uset_hasStrings(const USet *set);
+#endif  // U_HIDE_DRAFT_API
 
 /**
  * Returns true if the given USet contains the given character.
@@ -969,16 +947,18 @@ uset_charAt(const USet* set, int32_t charIndex);
 U_CAPI int32_t U_EXPORT2
 uset_size(const USet* set);
 
+#ifndef U_HIDE_DRAFT_API
 /**
  * @param set the set
  * @return the number of ranges in this set.
- * @stable ICU 70
+ * @draft ICU 70
  * @see uset_getItemCount
  * @see uset_getItem
  * @see uset_size
  */
 U_CAPI int32_t U_EXPORT2
 uset_getRangeCount(const USet *set);
+#endif  // U_HIDE_DRAFT_API
 
 /**
  * Returns the number of items in this set.  An item is either a range

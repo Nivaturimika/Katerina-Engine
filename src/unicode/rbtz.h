@@ -217,7 +217,7 @@ public:
      * @return   The TimeZone's raw GMT offset.
      * @stable ICU 3.8
      */
-    virtual int32_t getRawOffset() const override;
+    virtual int32_t getRawOffset(void) const override;
 
     /**
      * Queries if this time zone uses daylight savings time.
@@ -225,7 +225,7 @@ public:
      * false, otherwise.
      * @stable ICU 3.8
      */
-    virtual UBool useDaylightTime() const override;
+    virtual UBool useDaylightTime(void) const override;
 
 #ifndef U_FORCE_HIDE_DEPRECATED_API
     /**
@@ -287,7 +287,7 @@ public:
     /**
      * Gets the <code>InitialTimeZoneRule</code> and the set of <code>TimeZoneRule</code>
      * which represent time transitions for this time zone.  On successful return,
-     * the argument initial points to non-nullptr <code>InitialTimeZoneRule</code> and
+     * the argument initial points to non-NULL <code>InitialTimeZoneRule</code> and
      * the array trsrules is filled with 0 or multiple <code>TimeZoneRule</code>
      * instances up to the size specified by trscount.  The results are referencing the
      * rule instance held by this time zone instance.  Therefore, after this time zone
@@ -303,18 +303,20 @@ public:
     virtual void getTimeZoneRules(const InitialTimeZoneRule*& initial,
         const TimeZoneRule* trsrules[], int32_t& trscount, UErrorCode& status) const override;
 
+#ifndef U_FORCE_HIDE_DRAFT_API
     /**
      * Get time zone offsets from local wall time.
-     * @stable ICU 69
+     * @draft ICU 69
      */
     virtual void getOffsetFromLocal(
         UDate date, UTimeZoneLocalOption nonExistingTimeOpt,
         UTimeZoneLocalOption duplicatedTimeOpt,
         int32_t& rawOffset, int32_t& dstOffset, UErrorCode& status) const override;
+#endif /* U_FORCE_HIDE_DRAFT_API */
 
 private:
-    void deleteRules();
-    void deleteTransitions();
+    void deleteRules(void);
+    void deleteTransitions(void);
     UVector* copyRules(UVector* source);
     TimeZoneRule* findRuleInFinal(UDate date, UBool local,
         int32_t NonExistingTimeOpt, int32_t DuplicatedTimeOpt) const;
@@ -346,7 +348,7 @@ public:
      * @return          The class ID for all objects of this class.
      * @stable ICU 3.8
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * Returns a unique class ID POLYMORPHICALLY. Pure virtual override. This
@@ -359,7 +361,7 @@ public:
      *                  other classes have different class IDs.
      * @stable ICU 3.8
      */
-    virtual UClassID getDynamicClassID() const override;
+    virtual UClassID getDynamicClassID(void) const override;
 };
 
 U_NAMESPACE_END

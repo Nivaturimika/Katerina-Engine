@@ -156,14 +156,14 @@ public:
    * @return a class ID for this object.
    * @stable ICU 2.0
    */
-  virtual UClassID getDynamicClassID() const override;
+  virtual UClassID         getDynamicClassID(void) const override;
 
   /**
    * Return a class ID for this class (not really public)
    * @return a class ID for this class
    * @stable ICU 2.0
    */
-  static UClassID U_EXPORT2 getStaticClassID();
+  static UClassID   U_EXPORT2 getStaticClassID(void);
 
 protected:
   /**
@@ -171,6 +171,14 @@ protected:
    * @stable ICU 2.0
    */
   StringCharacterIterator();
+
+  /**
+   * Sets the iterator to iterate over the provided string.
+   * @param newText The string to be iterated over
+   * @param newTextLength The length of the String
+   * @stable ICU 2.0
+   */
+  void setText(const char16_t* newText, int32_t newTextLength);
 
   /**
    * Copy of the iterated string object.

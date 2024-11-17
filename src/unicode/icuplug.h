@@ -187,12 +187,8 @@ typedef enum {
 
 /**
  * Entrypoint for an ICU plugin.
- * @param plug the UPlugData handle.
- * @param reason the reason code for the entrypoint's call.
- * @param status Standard ICU error code. Its input value must
- *               pass the U_SUCCESS() test, or else the function returns
- *               immediately. Check for U_FAILURE() on output or use with
- *               function chaining. (See User Guide for details.)
+ * @param plug the UPlugData handle. 
+ * @param status the plugin's extended status code.
  * @return A valid plugin must return UPLUG_TOKEN
  * @internal ICU 4.4 Technology Preview
  */

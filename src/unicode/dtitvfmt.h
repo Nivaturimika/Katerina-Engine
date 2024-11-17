@@ -68,13 +68,13 @@ class U_I18N_API FormattedDateInterval : public UMemory, public FormattedValue {
      * Move constructor: Leaves the source FormattedDateInterval in an undefined state.
      * @stable ICU 64
      */
-    FormattedDateInterval(FormattedDateInterval&& src) noexcept;
+    FormattedDateInterval(FormattedDateInterval&& src) U_NOEXCEPT;
 
     /**
      * Destruct an instance of FormattedDateInterval.
      * @stable ICU 64
      */
-    virtual ~FormattedDateInterval() override;
+    virtual ~FormattedDateInterval() U_OVERRIDE;
 
     /** Copying not supported; use move constructor instead. */
     FormattedDateInterval(const FormattedDateInterval&) = delete;
@@ -86,19 +86,19 @@ class U_I18N_API FormattedDateInterval : public UMemory, public FormattedValue {
      * Move assignment: Leaves the source FormattedDateInterval in an undefined state.
      * @stable ICU 64
      */
-    FormattedDateInterval& operator=(FormattedDateInterval&& src) noexcept;
+    FormattedDateInterval& operator=(FormattedDateInterval&& src) U_NOEXCEPT;
 
     /** @copydoc FormattedValue::toString() */
-    UnicodeString toString(UErrorCode& status) const override;
+    UnicodeString toString(UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::toTempString() */
-    UnicodeString toTempString(UErrorCode& status) const override;
+    UnicodeString toTempString(UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::appendTo() */
-    Appendable &appendTo(Appendable& appendable, UErrorCode& status) const override;
+    Appendable &appendTo(Appendable& appendable, UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::nextPosition() */
-    UBool nextPosition(ConstrainedFieldPosition& cfpos, UErrorCode& status) const override;
+    UBool nextPosition(ConstrainedFieldPosition& cfpos, UErrorCode& status) const U_OVERRIDE;
 
   private:
     FormattedDateIntervalData *fData;
@@ -344,6 +344,11 @@ public:
      * @param status    output param set to success/failure code on exit
      * @return          a date time interval formatter which the caller owns.
      * @stable ICU 4.0
+	 * <p>
+	 * <h4>Sample code</h4>
+	 * \snippet samples/dtitvfmtsample/dtitvfmtsample.cpp dtitvfmtPreDefined1
+	 * \snippet samples/dtitvfmtsample/dtitvfmtsample.cpp dtitvfmtPreDefined
+	 * <p>
      */
 
     static DateIntervalFormat* U_EXPORT2 createInstance(
@@ -405,6 +410,11 @@ public:
      * @param status    output param set to success/failure code on exit
      * @return          a date time interval formatter which the caller owns.
      * @stable ICU 4.0
+	 * <p>
+	 * <h4>Sample code</h4>
+	 * \snippet samples/dtitvfmtsample/dtitvfmtsample.cpp dtitvfmtPreDefined1
+	 * \snippet samples/dtitvfmtsample/dtitvfmtsample.cpp dtitvfmtCustomized
+	 * <p>
      */
     static DateIntervalFormat* U_EXPORT2 createInstance(
                                               const UnicodeString& skeleton,
@@ -578,7 +588,7 @@ public:
      *                  If parse fails, return contents are undefined.
      * @param parse_pos The position to start parsing at. Since no parsing
      *                  is supported, upon return this param is unchanged.
-     * @return          A newly created Formattable* object, or nullptr
+     * @return          A newly created Formattable* object, or NULL
      *                  on failure.  The caller owns this and should
      *                  delete it when done.
      * @internal ICU 4.0
@@ -594,7 +604,8 @@ public:
      * this date interval formatter.
      * @stable ICU 4.0
      */
-    const DateIntervalInfo* getDateIntervalInfo() const;
+    const DateIntervalInfo* getDateIntervalInfo(void) const;
+
 
     /**
      * Set the date time interval patterns.
@@ -617,14 +628,14 @@ public:
      * @return the date formatter associated with this date interval formatter.
      * @stable ICU 4.0
      */
-    const DateFormat* getDateFormat() const;
+    const DateFormat* getDateFormat(void) const;
 
     /**
      * Returns a reference to the TimeZone used by this DateIntervalFormat's calendar.
      * @return the time zone associated with the calendar of DateIntervalFormat.
      * @stable ICU 4.8
      */
-    virtual const TimeZone& getTimeZone() const;
+    virtual const TimeZone& getTimeZone(void) const;
 
     /**
      * Sets the time zone for the calendar used by this DateIntervalFormat object. The
@@ -678,7 +689,7 @@ public:
      * @return          The class ID for all objects of this class.
      * @stable ICU 4.0
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * Returns a unique class ID POLYMORPHICALLY. Pure virtual override. This
@@ -691,7 +702,7 @@ public:
      *                  other classes have different class IDs.
      * @stable ICU 4.0
      */
-    virtual UClassID getDynamicClassID() const override;
+    virtual UClassID getDynamicClassID(void) const override;
 
 protected:
 
@@ -984,8 +995,8 @@ private:
                              const UnicodeString* skeleton,
                              const UnicodeString* bestSkeleton,
                              int8_t differenceInfo,
-                             UnicodeString* extendedSkeleton = nullptr,
-                             UnicodeString* extendedBestSkeleton = nullptr);
+                             UnicodeString* extendedSkeleton = NULL,
+                             UnicodeString* extendedBestSkeleton = NULL);
 
     /**
      * Adjust field width in best match interval pattern to match

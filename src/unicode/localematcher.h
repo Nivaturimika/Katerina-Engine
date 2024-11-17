@@ -11,8 +11,6 @@
 
 #if U_SHOW_CPLUSPLUS_API
 
-#include <optional>
-
 #include "unicode/locid.h"
 #include "unicode/stringpiece.h"
 #include "unicode/uobject.h"
@@ -135,10 +133,10 @@ U_NAMESPACE_BEGIN
 
 struct LSR;
 
-class LikelySubtags;
 class LocaleDistance;
 class LocaleLsrIterator;
 class UVector;
+class XLikelySubtags;
 
 /**
  * Immutable class that picks the best match between a user's desired locales and
@@ -200,7 +198,7 @@ public:
          * @param src Result to move contents from.
          * @stable ICU 65
          */
-        Result(Result &&src) noexcept;
+        Result(Result &&src) U_NOEXCEPT;
 
         /**
          * Destructor.
@@ -216,7 +214,7 @@ public:
          * @param src Result to move contents from.
          * @stable ICU 65
          */
-        Result &operator=(Result &&src) noexcept;
+        Result &operator=(Result &&src) U_NOEXCEPT;
 
         /**
          * Returns the best-matching desired locale.
@@ -315,7 +313,7 @@ public:
          * @param src Builder to move contents from.
          * @stable ICU 65
          */
-        Builder(Builder &&src) noexcept;
+        Builder(Builder &&src) U_NOEXCEPT;
 
         /**
          * Destructor.
@@ -331,7 +329,7 @@ public:
          * @param src Builder to move contents from.
          * @stable ICU 65
          */
-        Builder &operator=(Builder &&src) noexcept;
+        Builder &operator=(Builder &&src) U_NOEXCEPT;
 
         /**
          * Parses an Accept-Language string
@@ -463,13 +461,13 @@ public:
          * Option for whether to include or ignore one-way (fallback) match data.
          * By default, they are included.
          *
-         * @param matchDirection the match direction to set.
+         * @param direction the match direction to set.
          * @return this Builder object
          * @stable ICU 67
          */
-        Builder &setDirection(ULocMatchDirection matchDirection) {
+        Builder &setDirection(ULocMatchDirection direction) {
             if (U_SUCCESS(errorCode_)) {
-                direction_ = matchDirection;
+                direction_ = direction;
             }
             return *this;
         }
@@ -550,7 +548,7 @@ public:
      * @param src source matcher
      * @stable ICU 65
      */
-    LocaleMatcher(LocaleMatcher &&src) noexcept;
+    LocaleMatcher(LocaleMatcher &&src) U_NOEXCEPT;
 
     /**
      * Destructor.
@@ -566,7 +564,7 @@ public:
      * @return *this
      * @stable ICU 65
      */
-    LocaleMatcher &operator=(LocaleMatcher &&src) noexcept;
+    LocaleMatcher &operator=(LocaleMatcher &&src) U_NOEXCEPT;
 
     /**
      * Returns the supported locale which best matches the desired locale.
@@ -680,9 +678,9 @@ private:
 
     int32_t putIfAbsent(const LSR &lsr, int32_t i, int32_t suppLength, UErrorCode &errorCode);
 
-    std::optional<int32_t> getBestSuppIndex(LSR desiredLSR, LocaleLsrIterator *remainingIter, UErrorCode &errorCode) const;
+    int32_t getBestSuppIndex(LSR desiredLSR, LocaleLsrIterator *remainingIter, UErrorCode &errorCode) const;
 
-    const LikelySubtags &likelySubtags;
+    const XLikelySubtags &likelySubtags;
     const LocaleDistance &localeDistance;
     int32_t thresholdDistance;
     int32_t demotionPerDesiredLocale;

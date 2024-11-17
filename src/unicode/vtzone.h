@@ -88,7 +88,7 @@ public:
      * Create a <code>VTimeZone</code> instance by the time zone ID.
      * @param ID The time zone ID, such as America/New_York
      * @return A <code>VTimeZone</code> object initialized by the time zone ID,
-     * or nullptr when the ID is unknown.
+     * or NULL when the ID is unknown.
      * @stable ICU 3.8
      */
     static VTimeZone* createVTimeZoneByID(const UnicodeString& ID);
@@ -109,7 +109,7 @@ public:
      * @param vtzdata The string including VTIMEZONE data block
      * @param status Output param to filled in with a success or an error.
      * @return A <code>VTimeZone</code> initialized by the VTIMEZONE data or
-     * nullptr if failed to load the rule from the VTIMEZONE data.
+     * NULL if failed to load the rule from the VTIMEZONE data.
      * @stable ICU 3.8
      */
     static VTimeZone* createVTimeZone(const UnicodeString& vtzdata, UErrorCode& status);
@@ -264,14 +264,16 @@ public:
     virtual void getOffset(UDate date, UBool local, int32_t& rawOffset,
                            int32_t& dstOffset, UErrorCode& ec) const override;
 
+#ifndef U_FORCE_HIDE_DRAFT_API
     /**
      * Get time zone offsets from local wall time.
-     * @stable ICU 69
+     * @draft ICU 69
      */
     virtual void getOffsetFromLocal(
         UDate date, UTimeZoneLocalOption nonExistingTimeOpt,
         UTimeZoneLocalOption duplicatedTimeOpt,
         int32_t& rawOffset, int32_t& dstOffset, UErrorCode& status) const override;
+#endif /* U_FORCE_HIDE_DRAFT_API */
 
     /**
      * Sets the TimeZone's raw GMT offset (i.e., the number of milliseconds to add
@@ -289,7 +291,7 @@ public:
      * @return   The TimeZone's raw GMT offset.
      * @stable ICU 3.8
      */
-    virtual int32_t getRawOffset() const override;
+    virtual int32_t getRawOffset(void) const override;
 
     /**
      * Queries if this time zone uses daylight savings time.
@@ -297,7 +299,7 @@ public:
      * false, otherwise.
      * @stable ICU 3.8
      */
-    virtual UBool useDaylightTime() const override;
+    virtual UBool useDaylightTime(void) const override;
 
 #ifndef U_FORCE_HIDE_DEPRECATED_API
     /**
@@ -359,7 +361,7 @@ public:
     /**
      * Gets the <code>InitialTimeZoneRule</code> and the set of <code>TimeZoneRule</code>
      * which represent time transitions for this time zone.  On successful return,
-     * the argument initial points to non-nullptr <code>InitialTimeZoneRule</code> and
+     * the argument initial points to non-NULL <code>InitialTimeZoneRule</code> and
      * the array trsrules is filled with 0 or multiple <code>TimeZoneRule</code>
      * instances up to the size specified by trscount.  The results are referencing the
      * rule instance held by this time zone instance.  Therefore, after this time zone
@@ -382,6 +384,7 @@ private:
      * Default constructor.
      */
     VTimeZone();
+    static VTimeZone* createVTimeZone(VTZReader* reader);
     void write(VTZWriter& writer, UErrorCode& status) const;
     void write(UDate start, VTZWriter& writer, UErrorCode& status) const;
     void writeSimple(UDate time, VTZWriter& writer, UErrorCode& status) const;
@@ -445,7 +448,7 @@ public:
      * @return          The class ID for all objects of this class.
      * @stable ICU 3.8
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * Returns a unique class ID POLYMORPHICALLY. Pure virtual override. This
@@ -458,7 +461,7 @@ public:
      *                  other classes have different class IDs.
      * @stable ICU 3.8
      */
-    virtual UClassID getDynamicClassID() const override;
+    virtual UClassID getDynamicClassID(void) const override;
 };
 
 U_NAMESPACE_END

@@ -148,7 +148,7 @@ public:
 
     /**
      * Returns the name of this numbering system if it was created using one of the predefined names
-     * known to ICU.  Otherwise, returns nullptr.
+     * known to ICU.  Otherwise, returns NULL.
      * The predefined names are identical to the numbering system names as defined by
      * the BCP47 definition in Unicode CLDR.
      * See also, http://www.unicode.org/repos/cldr/tags/latest/common/bcp47/number.xml
@@ -185,7 +185,7 @@ public:
      * @stable ICU 4.2
      *
     */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * ICU "poor man's RTTI", returns a UClassID for the actual class.
@@ -208,6 +208,10 @@ private:
     void setDesc(const UnicodeString &desc);
 
     void setName(const char* name);
+
+    static UBool isValidDigitString(const UnicodeString &str);
+
+    UBool hasContiguousDecimalDigits() const;
 };
 
 U_NAMESPACE_END

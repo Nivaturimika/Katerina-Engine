@@ -337,7 +337,7 @@ public:
      * ICU "poor man's RTTI", returns a UClassID for this class.
      * @stable ICU 4.4
      */
-    static UClassID U_EXPORT2 getStaticClassID();
+    static UClassID U_EXPORT2 getStaticClassID(void);
 
     /**
      * ICU "poor man's RTTI", returns a UClassID for the actual class.
@@ -348,7 +348,7 @@ public:
 private:
     friend class MessageFormat;
 
-    SelectFormat() = delete;   // default constructor not implemented.
+    SelectFormat();   // default constructor not implemented.
 
     /**
      * Finds the SelectFormat sub-message for the given keyword, or the "other" sub-message.

@@ -95,13 +95,13 @@ class U_I18N_API FormattedList : public UMemory, public FormattedValue {
      * Move constructor: Leaves the source FormattedList in an undefined state.
      * @stable ICU 64
      */
-    FormattedList(FormattedList&& src) noexcept;
+    FormattedList(FormattedList&& src) U_NOEXCEPT;
 
     /**
      * Destruct an instance of FormattedList.
      * @stable ICU 64
      */
-    virtual ~FormattedList() override;
+    virtual ~FormattedList() U_OVERRIDE;
 
     /** Copying not supported; use move constructor instead. */
     FormattedList(const FormattedList&) = delete;
@@ -113,19 +113,19 @@ class U_I18N_API FormattedList : public UMemory, public FormattedValue {
      * Move assignment: Leaves the source FormattedList in an undefined state.
      * @stable ICU 64
      */
-    FormattedList& operator=(FormattedList&& src) noexcept;
+    FormattedList& operator=(FormattedList&& src) U_NOEXCEPT;
 
     /** @copydoc FormattedValue::toString() */
-    UnicodeString toString(UErrorCode& status) const override;
+    UnicodeString toString(UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::toTempString() */
-    UnicodeString toTempString(UErrorCode& status) const override;
+    UnicodeString toTempString(UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::appendTo() */
-    Appendable &appendTo(Appendable& appendable, UErrorCode& status) const override;
+    Appendable &appendTo(Appendable& appendable, UErrorCode& status) const U_OVERRIDE;
 
     /** @copydoc FormattedValue::nextPosition() */
-    UBool nextPosition(ConstrainedFieldPosition& cfpos, UErrorCode& status) const override;
+    UBool nextPosition(ConstrainedFieldPosition& cfpos, UErrorCode& status) const U_OVERRIDE;
 
   private:
     FormattedListData *fData;
@@ -268,10 +268,14 @@ class U_I18N_API ListFormatter : public UObject{
 
     static void initializeHash(UErrorCode& errorCode);
     static const ListFormatInternal* getListFormatInternal(const Locale& locale, const char *style, UErrorCode& errorCode);
-    struct U_HIDDEN ListPatternsSink;
+    struct ListPatternsSink;
     static ListFormatInternal* loadListFormatInternal(const Locale& locale, const char* style, UErrorCode& errorCode);
 
-    ListFormatter() = delete;
+    UnicodeString& format_(
+        const UnicodeString items[], int32_t n_items, UnicodeString& appendTo,
+        int32_t index, int32_t &offset, FieldPositionHandler* handler, UErrorCode& errorCode) const;
+
+    ListFormatter();
 
     ListFormatInternal* owned;
     const ListFormatInternal* data;
