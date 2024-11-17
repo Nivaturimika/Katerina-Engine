@@ -236,7 +236,7 @@ namespace ui {
 			return bool(state.world.get_nation_adjacency_by_nation_adjacency_pair(a, b));
 		case country_list_filter::find_allies:
 			return ai::ai_will_accept_alliance(state, b, a)
-				&& command::can_ask_for_alliance(state, a, b, false);
+				&& command::can_ask_for_alliance(state, a, b);
 		case country_list_filter::influenced:
 			return (state.world.gp_relationship_get_status(state.world.get_gp_relationship_by_gp_influence_pair(b, a))
 			& nations::influence::priority_mask) != nations::influence::priority_zero

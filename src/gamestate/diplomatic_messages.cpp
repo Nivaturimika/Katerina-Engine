@@ -276,11 +276,11 @@ namespace diplomatic_message {
 			case type::none:
 			return true;
 			case type::access_request:
-			return command::can_ask_for_access(state, m.from, m.to, true);
+			return command::can_ask_for_access(state, m.from, m.to);
 			case type::alliance_request:
-			return command::can_ask_for_alliance(state, m.from, m.to, true);
+			return command::can_ask_for_alliance(state, m.from, m.to);
 			case type::call_ally_request:
-			return command::can_call_to_arms(state, m.from, m.to, m.data.war, true);
+			return command::can_call_to_arms(state, m.from, m.to, m.data.war);
 			case type::be_crisis_primary_attacker:
 			case type::be_crisis_primary_defender:
 			case type::peace_offer:
@@ -405,7 +405,7 @@ namespace diplomatic_message {
 		case type::alliance_request:
 			return ai::ai_will_accept_alliance(state, m.to, m.from);
 		case type::call_ally_request:
-			if(!command::can_call_to_arms(state, m.from, m.to, m.data.war, true))
+			if(!command::can_call_to_arms(state, m.from, m.to, m.data.war))
 				return false;
 			return ai::will_join_war(state, m.to, m.data.war, military::get_role(state, m.data.war, m.from) == military::war_role::attacker);
 		case type::be_crisis_primary_defender:
