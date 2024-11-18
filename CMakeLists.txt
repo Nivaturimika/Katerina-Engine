@@ -19,90 +19,92 @@ option(ARCHITECTURE "Target architecture (valid values: x64, x86, aarch64, arm, 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 list(APPEND ALICE_CORE_SOURCES_LIST
-	"src/main.cpp"
-	"src/map/map_state.cpp"
-	"src/map/map_data_loading.cpp"
-	"src/map/map_borders.cpp"
-	"src/map/map.cpp"
-	"src/graphics/xac.cpp"
-	"src/graphics/glad.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
 )
 
 list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	${ALICE_CORE_SOURCES_LIST}
-	"src/ai/ai.cpp"
-	"src/common_types/blake2.cpp"
-	"src/common_types/date_interface.cpp"
-	"src/common_types/prng.cpp"
-	"src/common_types/reports.cpp"
-	"src/culture/culture.cpp"
-	"src/culture/politics.cpp"
-	"src/culture/rebels.cpp"
-	"src/economy/demographics.cpp"
-	"src/economy/economy.cpp"
-	"src/economy/economy_estimations.cpp"
- 	"src/economy/economy_factory.cpp"
-	"src/economy/economy_rgo.cpp"
-	"src/gamestate/commands.cpp"
-	"src/gamestate/diplomatic_messages.cpp"
-	"src/gamestate/modifiers.cpp"
-	"src/gamestate/notifications.cpp"
-	"src/gamestate/serialization.cpp"
-	"src/graphics/opengl_wrapper.cpp"
-	"src/graphics/texture.cpp"
-	"src/gui/gui_common_elements.cpp"
-	"src/gui/gui_effect_tooltips.cpp"
-	"src/gui/gui_graphics.cpp"
-	"src/gui/gui_leader_select.cpp"
-	"src/gui/gui_leader_tooltip.cpp"
-	"src/gui/gui_modifier_tooltips.cpp"
-	"src/gui/gui_province_window.cpp"
-	"src/gui/gui_trigger_tooltips.cpp"
-	"src/gui/gui_error_window.cpp"
-	"src/gui/map_tooltip.cpp"
-	"src/gui/topbar_subwindows/gui_population_window.cpp"
-	"src/gui/topbar_subwindows/gui_production_window.cpp"
-	"src/gui/topbar_subwindows/gui_technology_window.cpp"
-	"src/gui/topbar_subwindows/gui_budget_window.cpp"
-	"src/gui/unit_tooltip.cpp"
-	"src/map/map_modes.cpp"
-	"src/military/military.cpp"
-	"src/military/military_cb.cpp"
-	"src/military/military_units.cpp"
-	"src/military/military_wars.cpp"
-	"src/nations/nations.cpp"
-	"src/network/network.cpp"
-	"src/parsing/float_from_chars.cpp"
-	"src/parsing/parsers.cpp"
-	"src/platform_specific.cpp"
-	"src/provinces/province.cpp"
-	"src/scripting/effects.cpp"
-	"src/scripting/events.cpp"
-	"src/scripting/triggers.cpp"
-	"src/text/bmfont.cpp"
-	"src/text/fonts.cpp"
-	"src/text/text.cpp"
-	"src/zstd/zstd.cpp"
-	"src/news/news.cpp"
-	"src/network/pcp.cpp"
-	"src/gamestate/game_scene.cpp"
+	"${PROJECT_SOURCE_DIR}/src/ai/ai.cpp"
+	"${PROJECT_SOURCE_DIR}/src/common_types/blake2.cpp"
+	"${PROJECT_SOURCE_DIR}/src/common_types/date_interface.cpp"
+	"${PROJECT_SOURCE_DIR}/src/common_types/prng.cpp"
+	"${PROJECT_SOURCE_DIR}/src/common_types/reports.cpp"
+	"${PROJECT_SOURCE_DIR}/src/culture/culture.cpp"
+	"${PROJECT_SOURCE_DIR}/src/culture/politics.cpp"
+	"${PROJECT_SOURCE_DIR}/src/culture/rebels.cpp"
+	"${PROJECT_SOURCE_DIR}/src/economy/demographics.cpp"
+	"${PROJECT_SOURCE_DIR}/src/economy/economy.cpp"
+	"${PROJECT_SOURCE_DIR}/src/economy/economy_estimations.cpp"
+ 	"${PROJECT_SOURCE_DIR}/src/economy/economy_factory.cpp"
+	"${PROJECT_SOURCE_DIR}/src/economy/economy_rgo.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/commands.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/diplomatic_messages.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/modifiers.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/notifications.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/serialization.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/opengl_wrapper.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/texture.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_common_elements.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_effect_tooltips.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_graphics.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_leader_select.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_leader_tooltip.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_modifier_tooltips.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_province_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_trigger_tooltips.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_error_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/map_tooltip.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_population_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_production_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_technology_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_budget_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/unit_tooltip.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_modes.cpp"
+	"${PROJECT_SOURCE_DIR}/src/military/military.cpp"
+	"${PROJECT_SOURCE_DIR}/src/military/military_cb.cpp"
+	"${PROJECT_SOURCE_DIR}/src/military/military_units.cpp"
+	"${PROJECT_SOURCE_DIR}/src/military/military_wars.cpp"
+	"${PROJECT_SOURCE_DIR}/src/nations/nations.cpp"
+	"${PROJECT_SOURCE_DIR}/src/network/network.cpp"
+	"${PROJECT_SOURCE_DIR}/src/parsing/float_from_chars.cpp"
+	"${PROJECT_SOURCE_DIR}/src/parsing/parsers.cpp"
+	"${PROJECT_SOURCE_DIR}/src/platform_specific.cpp"
+	"${PROJECT_SOURCE_DIR}/src/provinces/province.cpp"
+	"${PROJECT_SOURCE_DIR}/src/scripting/effects.cpp"
+	"${PROJECT_SOURCE_DIR}/src/scripting/events.cpp"
+	"${PROJECT_SOURCE_DIR}/src/scripting/triggers.cpp"
+	"${PROJECT_SOURCE_DIR}/src/text/bmfont.cpp"
+	"${PROJECT_SOURCE_DIR}/src/text/fonts.cpp"
+	"${PROJECT_SOURCE_DIR}/src/text/text.cpp"
+	"${PROJECT_SOURCE_DIR}/src/zstd/zstd.cpp"
+	"${PROJECT_SOURCE_DIR}/src/news/news.cpp"
+	"${PROJECT_SOURCE_DIR}/src/network/pcp.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/game_scene.cpp"
  
 )
 
 if(WIN32)
 add_executable(KatEngine WIN32
+	"${PROJECT_SOURCE_DIR}/src/main.cpp"
 	${ALICE_CORE_SOURCES_LIST}
-	"src/alice.rc"
+	"${PROJECT_SOURCE_DIR}/src/alice.rc"
 	${ASSET_FILES})
 add_executable(KatEngineIncremental WIN32
 	${ALICE_INCREMENTAL_SOURCES_LIST}
-	"src/alice.rc"
+	"${PROJECT_SOURCE_DIR}/src/alice.rc"
 	${ASSET_FILES})
 else()
 add_executable(KatEngine WIN32
+	"${PROJECT_SOURCE_DIR}/src/main.cpp"
 	${ALICE_CORE_SOURCES_LIST}
 	${ASSET_FILES})
 add_executable(KatEngineIncremental WIN32
+	"${PROJECT_SOURCE_DIR}/src/main.cpp"
 	${ALICE_INCREMENTAL_SOURCES_LIST}
 	${ASSET_FILES})
 endif()
@@ -188,7 +190,7 @@ else() # GCC or CLANG
 	# See for FMA support: https://stackoverflow.com/questions/21001388/fma3-in-gcc-how-to-enable
 	target_compile_options(KatEngineCommon INTERFACE -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field)
 	target_compile_options(KatEngineCommon INTERFACE -fpermissive)
-	target_compile_options(KatEngineCommon INTERFACE $<$<CONFIG:Debug>: -O1 -g -pipe>)
+	target_compile_options(KatEngineCommon INTERFACE $<$<CONFIG:Debug>: -O0 -g -pipe>)
 	target_compile_options(KatEngineCommon INTERFACE $<$<NOT:$<CONFIG:Debug>>: -O3 -pipe -fno-rtti -DNDEBUG>)
 	if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 		target_compile_options(KatEngineCommon INTERFACE -mfpmath=sse -msse4.2)

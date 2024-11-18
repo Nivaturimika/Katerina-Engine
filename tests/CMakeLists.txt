@@ -1,7 +1,22 @@
 #94723 <-- DO NOT REMOVE ... the file system tests are looking for this
 
+list(APPEND TESTS_CORE_SOURCES_LIST
+	"${PROJECT_SOURCE_DIR}/tests/test_main.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/dcon_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/determinism_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/file_system_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/gui_graphics_parsing_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/misc_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/parsers_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/test_bench.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/triggers_tests.cpp"
+)
+
 if(WIN32)
-add_executable(tests_project "${PROJECT_SOURCE_DIR}/tests/test_main.cpp"
+add_executable(tests_project
+	${TESTS_CORE_SOURCES_LIST}
+	${ALICE_INCREMENTAL_SOURCES_LIST}
+	
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
@@ -9,7 +24,10 @@ add_executable(tests_project "${PROJECT_SOURCE_DIR}/tests/test_main.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
 	"${PROJECT_SOURCE_DIR}/src/alice.rc")
 else()
-add_executable(tests_project "${PROJECT_SOURCE_DIR}/tests/test_main.cpp"
+add_executable(tests_project
+	${TESTS_CORE_SOURCES_LIST}
+	${ALICE_INCREMENTAL_SOURCES_LIST}
+
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
