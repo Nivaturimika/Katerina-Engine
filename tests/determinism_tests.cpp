@@ -1,5 +1,7 @@
 #include <cstring>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/catch_approx.hpp>
 #include "parsers_declarations.hpp"
 #include "dcon_generated.hpp"
 #include "nations.hpp"
@@ -51,11 +53,11 @@ TEST_CASE("fp_fmadd", "[determinism]") {
 	float fmadd_5 = f3 * ((f1 * f2) / f3 + f4); //factorization by f3
 	float fmadd_6 = f4 * ((f1 * f2) / f4 + f3); //factorization by f4
 
-	REQUIRE(fmadd_1 == Approx(fmadd_2));
-	REQUIRE(fmadd_1 == Approx(fmadd_3));
-	REQUIRE(fmadd_1 == Approx(fmadd_4));
-	REQUIRE(fmadd_1 == Approx(fmadd_5));
-	REQUIRE(fmadd_1 == Approx(fmadd_6));
+	REQUIRE(fmadd_1 == Catch::Approx(fmadd_2));
+	REQUIRE(fmadd_1 == Catch::Approx(fmadd_3));
+	REQUIRE(fmadd_1 == Catch::Approx(fmadd_4));
+	REQUIRE(fmadd_1 == Catch::Approx(fmadd_5));
+	REQUIRE(fmadd_1 == Catch::Approx(fmadd_6));
 }
 
 TEST_CASE("fp_fprec", "[determinism]") {
@@ -68,24 +70,24 @@ TEST_CASE("fp_fprec", "[determinism]") {
 	float fprec_3 = f1 * (f2 / f3); //same
 	float fprec_4 = (f1 / f3) * f2; //same
 
-	REQUIRE(fprec_1 == Approx(fprec_2));
-	REQUIRE(fprec_1 == Approx(fprec_3));
-	REQUIRE(fprec_1 == Approx(fprec_4));
+	REQUIRE(fprec_1 == Catch::Approx(fprec_2));
+	REQUIRE(fprec_1 == Catch::Approx(fprec_3));
+	REQUIRE(fprec_1 == Catch::Approx(fprec_4));
 }
 
 TEST_CASE("math_fns", "[determinism]") {
 	for(float k = 1.f; k <= 128.f; k += 1.f) {
 		UNOPTIMIZABLE_FLOAT(f1, k);
-		REQUIRE(math::sqrt(f1) == Approx(std::sqrt(f1)).margin(0.01f));
+		REQUIRE(math::sqrt(f1) == Catch::Approx(std::sqrt(f1)).margin(0.01f));
 	}
 	for(float k = -1.f; k <= 1.f; k += 0.01f) {
 		UNOPTIMIZABLE_FLOAT(f1, k);
-		REQUIRE(math::acos(f1) == Approx(std::acos(f1)).margin(0.018f));
+		REQUIRE(math::acos(f1) == Catch::Approx(std::acos(f1)).margin(0.018f));
 	}
 	for(float k = -math::pi; k <= math::pi; k += 0.01f) {
 		UNOPTIMIZABLE_FLOAT(f1, k);
-		REQUIRE(math::sin(f1) == Approx(std::sin(f1)).margin(0.01f));
-		REQUIRE(math::cos(f1) == Approx(std::cos(f1)).margin(0.01f));
+		REQUIRE(math::sin(f1) == Catch::Approx(std::sin(f1)).margin(0.01f));
+		REQUIRE(math::cos(f1) == Catch::Approx(std::cos(f1)).margin(0.01f));
 	}
 }
 
