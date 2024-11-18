@@ -6,10 +6,10 @@
 namespace economy {
 	// Demand more for construction than required (won't affect the intaken goods daily)
 	// only will affect demand
-	constexpr inline float excess_construction_demand = 1.25f;
+	constexpr inline float excess_construction_demand = 1.f;
 	// From the total construction demand, multiply the budget by this factor to obtain the actual
 	// spending (and also to not get refunded for non-existing goods)
-	constexpr inline float true_construction_demand = 0.75f;
+	constexpr inline float true_construction_demand = 1.f;
 
 	constexpr float default_workforce = 40000.f;
 

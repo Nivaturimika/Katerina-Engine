@@ -1090,7 +1090,7 @@ namespace economy {
 			auto d_sat = state.world.nation_get_demand_satisfaction(n, c);
 			auto& nat_demand = state.world.nation_get_construction_demand(n, c);
 			assert(d_sat >= 0.f && d_sat <= 1.f);
-			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * economy::commodity_effective_price(state, n, c);
+			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * state.world.commodity_get_current_price(c);
 			nat_demand *= c_spending * d_sat;
 			state.world.nation_get_private_construction_demand(n, c) *= p_spending * d_sat;
 		}
@@ -1590,12 +1590,12 @@ namespace economy {
 					auto val = state.world.nation_get_navy_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
+					refund += val * (1.f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
-				max_sp /= total;
+					max_sp /= total;
 				state.world.nation_set_effective_naval_spending(n, max_sp * spending_level);
 			}
 			{
@@ -1608,12 +1608,12 @@ namespace economy {
 					auto val = state.world.nation_get_army_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
+					refund += val * (1.f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
-				max_sp /= total;
+					max_sp /= total;
 				state.world.nation_set_effective_land_spending(n, max_sp * spending_level);
 			}
 			{
@@ -1626,8 +1626,8 @@ namespace economy {
 					auto val = state.world.nation_get_construction_demand(n, c) * true_construction_demand;
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					refund += val * (1.0f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					total += val;
+					refund += val * (1.f - sat) * spending_level * state.world.commodity_get_current_price(c);
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
