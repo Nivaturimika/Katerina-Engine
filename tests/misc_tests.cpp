@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include "system_state.hpp"
 #include "date_interface.hpp"
 #include "cyto_any.hpp"

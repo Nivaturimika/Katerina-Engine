@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include "text.hpp"
 
 TEST_CASE("text from csv", "[parsers]") {

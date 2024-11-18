@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING 1
 #define CATCH_CONFIG_MAIN 1
-#include "catch2/catch.hpp"
+#include <catch2/catch.hpp>
 
 #ifndef DCON_TRAP_INVALID_STORE
 #define DCON_TRAP_INVALID_STORE 1
@@ -40,7 +40,6 @@ std::unique_ptr<sys::state> load_testing_scenario_file() {
 #include "parsers_tests.cpp"
 #include "file_system_tests.cpp"
 #include "text_tests.cpp"
-//#include "scenario_building.cpp"
 #include "defines_tests.cpp"
 #include "triggers_tests.cpp"
 #include "dcon_tests.cpp"

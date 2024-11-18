@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include "dcon_generated.hpp"
 #include "container_types.hpp"
 #include "system_state.hpp"

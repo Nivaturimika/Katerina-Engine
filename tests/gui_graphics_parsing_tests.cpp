@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 TEST_CASE("gfx parsers tests", "[parsers]") {
 	SECTION("empty_file_with_types") {
