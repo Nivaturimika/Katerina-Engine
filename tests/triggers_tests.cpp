@@ -1,11 +1,27 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include "effect_parsing.hpp"
+#include "parsers.hpp"
+#include "simple_fs.hpp"
+#include "constants.hpp"
+#include "dcon_generated.hpp"
+#include "economy.hpp"
+#include "container_types.hpp"
+#include "system_state.hpp"
 #include "parsers_declarations.hpp"
 #include "trigger_parsing.hpp"
+#include "effect_parsing.hpp"
+#include "script_constants.hpp"
+#include "effects.hpp"
+#include "triggers.hpp"
+#include "nations_templates.hpp"
 
 namespace parsers {
-	extern template void recurse_over_effects(uint16_t*, std::function<void(uint16_t*)> const&);
+	void ef_scope_from_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_this_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
+	void lambda_country_event(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_random_greater_power(token_generator& gen, error_handler& err, effect_building_context& context);
+	void lambda_province_event(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_any_empty_neighbor_province(token_generator& gen, error_handler& err, effect_building_context& context);
 }
 
 TEST_CASE("trigger scope recursion", "[trigger_tests]") {
@@ -53,15 +69,15 @@ TEST_CASE("effect scope recursion", "[effect_tests]") {
 		t.push_back(uint16_t(3));
 
 		int32_t total = 0;
-		parsers::recurse_over_effects(t.data(), [&total](uint16_t *) { ++total; });
+		effect::recurse_over_effects(t.data(), [&total](uint16_t *) { ++total; });
 		REQUIRE(6 == total);
 
 		int32_t no_payload_count = 0;
-		parsers::recurse_over_effects(t.data(), [&no_payload_count](uint16_t *v) { if(effect::get_generic_effect_payload_size(v) == 0) ++no_payload_count; });
+		effect::recurse_over_effects(t.data(), [&no_payload_count](uint16_t *v) { if(effect::get_generic_effect_payload_size(v) == 0) ++no_payload_count; });
 		REQUIRE(2 == no_payload_count);
 
 		int32_t total_payload = 0;
-		parsers::recurse_over_effects(t.data(), [&total_payload](uint16_t *v) { total_payload += effect::get_generic_effect_payload_size(v); });
+		effect::recurse_over_effects(t.data(), [&total_payload](uint16_t *v) { total_payload += effect::get_generic_effect_payload_size(v); });
 		REQUIRE(23 == total_payload);
 	}
 	{
@@ -84,15 +100,15 @@ TEST_CASE("effect scope recursion", "[effect_tests]") {
 		t.push_back(uint16_t(8));
 
 		int32_t total = 0;
-		parsers::recurse_over_effects(t.data(), [&total](uint16_t *) { ++total; });
+		effect::recurse_over_effects(t.data(), [&total](uint16_t *) { ++total; });
 		REQUIRE(6 == total);
 
 		int32_t no_payload_count = 0;
-		parsers::recurse_over_effects(t.data(), [&no_payload_count](uint16_t *v) { if(effect::get_generic_effect_payload_size(v) == 0) ++no_payload_count; });
+		effect::recurse_over_effects(t.data(), [&no_payload_count](uint16_t *v) { if(effect::get_generic_effect_payload_size(v) == 0) ++no_payload_count; });
 		REQUIRE(2 == no_payload_count);
 
 		int32_t total_payload = 0;
-		parsers::recurse_over_effects(t.data(), [&total_payload](uint16_t *v) { total_payload += effect::get_generic_effect_payload_size(v); });
+		effect::recurse_over_effects(t.data(), [&total_payload](uint16_t *v) { total_payload += effect::get_generic_effect_payload_size(v); });
 		REQUIRE(30 == total_payload);
 	}
 }
@@ -784,6 +800,8 @@ TEST_CASE("complex full reduction", "[trigger_tests]") {
 	REQUIRE(tc.compiled_trigger[4] == uint16_t(4));
 	REQUIRE(tc.compiled_trigger[5] == uint16_t(trigger::association_lt | trigger::average_consciousness_province));
 }
+
+std::unique_ptr<sys::state> load_testing_scenario_file();
 
 TEST_CASE("batch-individual comparision", "[trigger_tests]") {
 	auto ws = load_testing_scenario_file();

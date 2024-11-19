@@ -2,13 +2,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/catch_approx.hpp>
-#include "parsers_declarations.hpp"
-#include "dcon_generated.hpp"
-#include "nations.hpp"
-#include "container_types.hpp"
 #include "system_state.hpp"
-#include "serialization.hpp"
 #include "prng.hpp"
+#include "math_fns.hpp"
 
 TEST_CASE("prng_simple", "[determinism]") {
 	std::unique_ptr<sys::state> game_state = std::make_unique<sys::state>(); // too big for the stack

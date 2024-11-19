@@ -3,6 +3,12 @@
 #include "simple_fs.hpp"
 #include <algorithm>
 
+#ifdef _WIN32
+#define NATIVE_SEP "\\"
+#else
+#define NATIVE_SEP "/"
+#endif
+
 TEST_CASE("File system reading", "[file_system]") {
 	SECTION("single root") {
 		simple_fs::file_system fs;

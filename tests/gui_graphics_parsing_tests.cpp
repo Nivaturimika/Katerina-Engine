@@ -1,5 +1,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include "system_state.hpp"
+#include "constants.hpp"
+#include "simple_fs.hpp"
+#include "parsers_declarations.hpp"
+
+#define RANGE(x) (x), (x) + ((sizeof(x)) / sizeof((x)[0])) - 1
+#define RANGE_SZ(x) (x), ((sizeof(x)) / sizeof((x)[0])) - 1
+
+#ifdef _WIN32
+#define NATIVE_SEP "\\"
+#else
+#define NATIVE_SEP "/"
+#endif
 
 TEST_CASE("gfx parsers tests", "[parsers]") {
 	SECTION("empty_file_with_types") {

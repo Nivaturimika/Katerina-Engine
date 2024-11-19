@@ -11,15 +11,6 @@
 #define ALICE_NO_ENTRY_POINT 1
 #include "main.cpp"
 
-#define RANGE(x) (x), (x) + ((sizeof(x)) / sizeof((x)[0])) - 1
-#define RANGE_SZ(x) (x), ((sizeof(x)) / sizeof((x)[0])) - 1
-
-#ifdef _WIN32
-#define NATIVE_SEP "\\"
-#else
-#define NATIVE_SEP "/"
-#endif
-
 std::unique_ptr<sys::state> load_testing_scenario_file() {
 	std::unique_ptr<sys::state> game_state = std::make_unique<sys::state>(); // too big for the stack
 
