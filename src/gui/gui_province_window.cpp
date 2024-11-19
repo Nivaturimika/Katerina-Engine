@@ -1,4 +1,5 @@
 #include "gui_province_window.hpp"
+#include "nations.hpp"
 
 namespace ui {
 	void province_liferating::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
@@ -180,15 +181,8 @@ namespace ui {
 			text::add_line_break_to_layout_box(state, contents, box);
 			auto color = text::text_color::white;
 			if(fat_nf.get_promotion_type()) {
-				//Is the NF not optimal? Recolor it
-				if(fat_nf.get_promotion_type() == state.culture_definitions.clergy) {
-					if((fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total)) > state.defines.max_clergy_for_literacy) {
-						color = text::text_color::red;
-					}
-				} else if(fat_nf.get_promotion_type() == state.culture_definitions.bureaucrat) {
-					if(province::state_admin_efficiency(state, fat_si.id) > state.defines.max_bureaucracy_percentage) {
-						color = text::text_color::red;
-					}
+				if(nations::national_focus_is_unoptimal(state, state.local_player_nation, sid, content)) {
+					color = text::text_color::red;
 				}
 				auto full_str = text::format_percentage(fat_si.get_demographics(demographics::to_key(state, fat_nf.get_promotion_type())) / fat_si.get_demographics(demographics::total));
 				text::add_to_layout_box(state, contents, box, std::string_view(full_str), color);
