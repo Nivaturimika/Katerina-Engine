@@ -85,7 +85,6 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/news/news.cpp"
 	"${PROJECT_SOURCE_DIR}/src/network/pcp.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/game_scene.cpp"
- 
 )
 
 if(WIN32)

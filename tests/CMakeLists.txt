@@ -60,6 +60,7 @@ add_dependencies(tests_project GENERATE_TEST_PARSERS)
 add_dependencies(tests_project GENERATE_PARSERS)
 add_dependencies(tests_project GENERATE_CONTAINER ParserGenerator)
 
+target_compile_definitions(tests_project PUBLIC ALICE_NO_ENTRY_POINT)
 #target_precompile_headers(tests_project REUSE_FROM KatEngine)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/contrib)

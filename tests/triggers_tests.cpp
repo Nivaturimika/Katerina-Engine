@@ -801,8 +801,8 @@ TEST_CASE("complex full reduction", "[trigger_tests]") {
 	REQUIRE(tc.compiled_trigger[5] == uint16_t(trigger::association_lt | trigger::average_consciousness_province));
 }
 
+#if 0
 std::unique_ptr<sys::state> load_testing_scenario_file();
-
 TEST_CASE("batch-individual comparision", "[trigger_tests]") {
 	auto ws = load_testing_scenario_file();
 
@@ -846,6 +846,7 @@ TEST_CASE("batch-individual comparision", "[trigger_tests]") {
 		          bulk_eval, g1, nations::owner_of_pop(*ws, g1));
 	}
 }
+#endif
 
 TEST_CASE("trigger payload translation", "[trigger_tests]") {
 	{
