@@ -1,3 +1,5 @@
+#include "system_state.hpp"
+
 static sys::state game_state; // too big for the stack
 
 native_string produce_mod_path(std::vector<parsers::mod_file>& mod_list) {
@@ -86,7 +88,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 	uint64_t max_time = 0;
 	auto root = simple_fs::get_root(fs_root);
 	auto scan_files = [&](auto const dir) {
-		for(const auto f : simple_fs::list_files(dir, NATIVE(".txt"))) {
+		for(const auto& f : simple_fs::list_files(dir, NATIVE(".txt"))) {
 			if(auto of = simple_fs::open_file(f); of) {
 				auto file_time = simple_fs::get_write_time(*of);
 				max_time = std::max(max_time, file_time);
@@ -130,7 +132,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 	// Check also against interface
 	reports::write_debug("Checksum interface directory (*.gfx/*.gui)\n");
 	auto interface_dir = simple_fs::open_directory(root, NATIVE("interface"));
-	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gui"))) {
+	for(const auto& f : simple_fs::list_files(interface_dir, NATIVE(".gui"))) {
 		if(auto of = simple_fs::open_file(f); of) {
 			auto file_time = simple_fs::get_write_time(*of);
 			max_time = std::max(max_time, file_time);
@@ -139,7 +141,7 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 			}
 		}
 	}
-	for(const auto f : simple_fs::list_files(interface_dir, NATIVE(".gfx"))) {
+	for(const auto& f : simple_fs::list_files(interface_dir, NATIVE(".gfx"))) {
 		if(auto of = simple_fs::open_file(f); of) {
 			auto file_time = simple_fs::get_write_time(*of);
 			max_time = std::max(max_time, file_time);
