@@ -1,4 +1,3 @@
-#include "military.hpp"
 #include "military_templates.hpp"
 #include "dcon_generated.hpp"
 #include "prng.hpp"
@@ -12,6 +11,7 @@
 #include "triggers.hpp"
 #include "container_types.hpp"
 #include "pdqsort.h"
+#include "military.hpp"
 
 namespace military {
 	int32_t total_regiments(sys::state& state, dcon::nation_id n) {

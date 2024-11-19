@@ -4,16 +4,16 @@
 #include "hb.h"
 #include "hb-ft.h"
 
-#include "fonts.hpp"
-#include "parsers.hpp"
-#include "simple_fs.hpp"
-#include "system_state.hpp"
-#include "reports.hpp"
-#include "math_fns.hpp"
-
 #include "unicode/ubrk.h"
 #include "unicode/utypes.h"
 #include "unicode/ubidi.h"
+
+#include "system_state.hpp"
+#include "fonts.hpp"
+#include "parsers.hpp"
+#include "simple_fs.hpp"
+#include "reports.hpp"
+#include "math_fns.hpp"
 
 namespace text {
 

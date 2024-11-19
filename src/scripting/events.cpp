@@ -1,8 +1,8 @@
+#include "system_state.hpp"
 #include "events.hpp"
 #include "effects.hpp"
 #include "gui_event.hpp"
 #include "prng.hpp"
-#include "system_state.hpp"
 #include "triggers.hpp"
 
 namespace event {

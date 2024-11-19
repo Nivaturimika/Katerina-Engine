@@ -1,4 +1,3 @@
-#include "military.hpp"
 #include "military_templates.hpp"
 #include "dcon_generated.hpp"
 #include "prng.hpp"
@@ -12,6 +11,7 @@
 #include "triggers.hpp"
 #include "container_types.hpp"
 #include "pdqsort.h"
+#include "military.hpp"
 
 namespace military {
 	bool can_use_cb_against(sys::state& state, dcon::nation_id from, dcon::nation_id target) {

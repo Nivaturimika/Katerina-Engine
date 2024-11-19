@@ -1,18 +1,8 @@
-#include "map.hpp"
-
-#include "province.hpp"
 #include "system_state.hpp"
+#include "map.hpp"
 #include "parsers_declarations.hpp"
+#include "province.hpp"
 #include "opengl_wrapper.hpp"
-
-#ifdef _WIN32
-#ifndef UNICODE
-#define UNICODE
-#endif
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include "Windows.h"
-#endif
 #include "reports.hpp"
 
 namespace map {

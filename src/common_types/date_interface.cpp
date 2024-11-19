@@ -1,4 +1,6 @@
 #include "date_interface.hpp"
+#include <limits>
+#include <algorithm>
 
 namespace sys {
 

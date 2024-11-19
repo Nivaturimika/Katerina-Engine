@@ -1,5 +1,5 @@
-#include "triggers.hpp"
 #include "system_state.hpp"
+#include "triggers.hpp"
 #include "demographics.hpp"
 #include "military_templates.hpp"
 #include "nations_templates.hpp"

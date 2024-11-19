@@ -167,6 +167,7 @@ namespace text {
 			internal_top_adj = o.internal_top_adj;
 			first_free_slot = o.first_free_slot;
 			only_raw_codepoints = o.only_raw_codepoints;
+			return *this;
 		}
 	};
 

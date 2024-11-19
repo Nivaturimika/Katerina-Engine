@@ -5,7 +5,9 @@
 #include <vector>
 #include <string>
 #include <string_view>
+
 #include "dcon_generated.hpp"
+#include "gui_graphics.hpp"
 #include "nations.hpp"
 #include "unordered_dense.h"
 #include "fonts.hpp"

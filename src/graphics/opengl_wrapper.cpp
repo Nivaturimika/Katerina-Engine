@@ -1,10 +1,11 @@
-#include "opengl_wrapper.hpp"
 #include "system_state.hpp"
+#include "opengl_wrapper.hpp"
 #include "simple_fs.hpp"
 #include "fonts.hpp"
 #include "bmfont.hpp"
 #include "pdqsort.h"
 #include "reports.hpp"
+#include "stb_image.h"
 
 namespace ogl {
 	void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, GLchar const* message, void const*) {

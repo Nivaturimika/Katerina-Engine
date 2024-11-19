@@ -3,16 +3,16 @@
 #include <locale>
 #include <codecvt>
 
-#include "nations.hpp"
-#include "text.hpp"
-#include "system_state.hpp"
-#include "parsers.hpp"
-#include "simple_fs.hpp"
-#include "reports.hpp"
-
 #include "unicode/ubrk.h"
 #include "unicode/utypes.h"
 #include "unicode/ubidi.h"
+
+#include "system_state.hpp"
+#include "nations.hpp"
+#include "text.hpp"
+#include "parsers.hpp"
+#include "simple_fs.hpp"
+#include "reports.hpp"
 
 namespace text {
 	text_color char_to_color(char in) {

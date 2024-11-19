@@ -1,4 +1,4 @@
-
+#include "system_state.hpp"
 #include "province_templates.hpp"
 #include "demographics.hpp"
 #include "economy_rgo.hpp"

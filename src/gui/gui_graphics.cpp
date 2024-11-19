@@ -1,6 +1,9 @@
-#include "gui_graphics.hpp"
+#include "system_state.hpp"
 #include "simple_fs.hpp"
 #include "gui_element_base.hpp"
+#include "gui_graphics.hpp"
+#include "parsers.hpp"
+#include "parsers_declarations.hpp"
 
 namespace ui {
 

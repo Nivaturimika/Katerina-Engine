@@ -1,5 +1,5 @@
-#include "ai.hpp"
 #include "system_state.hpp"
+#include "ai.hpp"
 #include "demographics.hpp"
 #include "effects.hpp"
 #include "gui_effect_tooltips.hpp"

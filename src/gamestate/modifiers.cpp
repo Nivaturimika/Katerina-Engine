@@ -1,6 +1,6 @@
+#include "system_state.hpp"
 #include "modifiers.hpp"
 #include "constants.hpp"
-#include "system_state.hpp"
 #include "demographics.hpp"
 #include "military.hpp"
 #include "military_templates.hpp"

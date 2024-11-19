@@ -1,7 +1,6 @@
-#include "map.hpp"
-
-#include "province.hpp"
 #include "system_state.hpp"
+#include "map.hpp"
+#include "province.hpp"
 #include "parsers_declarations.hpp"
 
 namespace map {

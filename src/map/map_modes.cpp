@@ -1,4 +1,3 @@
-#include "map_modes.hpp"
 #include "color.hpp"
 #include "demographics.hpp"
 #include "system_state.hpp"
@@ -10,6 +9,7 @@
 #include "unordered_dense.h"
 #include "gui_map_legend.hpp"
 #include "province_templates.hpp"
+#include "map_modes.hpp"
 
 std::vector<uint32_t> admin_map_from(sys::state& state) {
 	uint32_t province_size = state.world.province_size();

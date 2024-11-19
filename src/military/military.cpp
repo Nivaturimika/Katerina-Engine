@@ -1,4 +1,3 @@
-#include "military.hpp"
 #include "military_templates.hpp"
 #include "dcon_generated.hpp"
 #include "prng.hpp"
@@ -13,6 +12,7 @@
 #include "container_types.hpp"
 #include "pdqsort.h"
 #include "news.hpp"
+#include "military.hpp"
 
 namespace military {
 

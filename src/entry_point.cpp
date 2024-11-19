@@ -1,4 +1,6 @@
 #include "system_state.hpp"
+#include "parsers.hpp"
+#include "parsers_declarations.hpp"
 
 static sys::state game_state; // too big for the stack
 
@@ -122,9 +124,9 @@ bool scenario_modify_time_is_outdated(native_string path, uint64_t scenario_time
 		reports::write_debug("Checksum directory: " + text::native_to_utf8(sc_dir) + "\n");
 		// history/provinces/africa/thing.txt
 		scan_files(dir); //history
-		for(const auto s2 : simple_fs::list_subdirectories(dir)) {
+		for(const auto& s2 : simple_fs::list_subdirectories(dir)) {
 			scan_files(s2); //provinces
-			for(const auto s3 : simple_fs::list_subdirectories(s2)) {
+			for(const auto& s3 : simple_fs::list_subdirectories(s2)) {
 				scan_files(s3); //africa
 			}
 		}

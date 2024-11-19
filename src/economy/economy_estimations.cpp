@@ -1,3 +1,4 @@
+#include "system_state.hpp"
 #include "demographics.hpp"
 #include "economy.hpp"
 #include "economy_factory.hpp"

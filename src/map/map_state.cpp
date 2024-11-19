@@ -1,19 +1,14 @@
-#include "map_state.hpp"
-
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/polar_coordinates.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/transform.hpp>
+#include <set>
 
 #include "system_state.hpp"
-#include "military.hpp"
-#include "parsers_declarations.hpp"
-#include "gui_graphics.hpp"
-#include "gui_element_base.hpp"
 #include "province_templates.hpp"
 #include "math_fns.hpp"
-
-#include <set>
+#include "map_modes.hpp"
+#include "map_state.hpp"
 
 namespace map {
 	dcon::province_id map_state::get_selected_province() {

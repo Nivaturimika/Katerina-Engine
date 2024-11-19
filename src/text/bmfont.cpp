@@ -46,10 +46,12 @@ aaedev@gmail.com 2012
 #include <string>
 #include <stdarg.h>
 #include "glad.h"
+#include "system_state.hpp"
 #include "bmfont.hpp"
 #include "texture.hpp"
 #include "fonts.hpp"
-#include "system_state.hpp"
+#include "parsers.hpp"
+#include "parsers_declarations.hpp"
 
 #ifdef _WIN32
 #pragma warning(disable : 4996)

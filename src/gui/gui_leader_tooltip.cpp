@@ -1,3 +1,4 @@
+#include "system_state.hpp"
 #include "gui_leader_tooltip.hpp"
 
 namespace ui {

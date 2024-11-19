@@ -1,5 +1,5 @@
-#include "sound.hpp"
 #include "system_state.hpp"
+#include "sound.hpp"
 #include "reports.hpp"
 
 #define MINIAUDIO_IMPLEMENTATION 1

@@ -1,12 +1,13 @@
-#include "xac.hpp"
-#include "parsers.hpp"
-#include "reports.hpp"
 #include <cassert>
-
+#include <cstring>
 #include <glm/common.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtx/quaternion.hpp>
+
+#include "xac.hpp"
+#include "parsers.hpp"
+#include "reports.hpp"
 
 #define XAC_DEBUG 1
 

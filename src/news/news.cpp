@@ -1,6 +1,6 @@
+#include "system_state.hpp"
 #include "news.hpp"
 #include "triggers.hpp"
-#include "system_state.hpp"
 
 namespace news {
 	void collect_news_scope(sys::state& state, news_scope& scope) {

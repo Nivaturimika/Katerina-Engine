@@ -1,3 +1,4 @@
+#include "system_state.hpp"
 #include "gui_effect_tooltips.hpp"
 #include "dcon_generated.hpp"
 #include "gui_event.hpp"
@@ -5,7 +6,6 @@
 #include "gui_trigger_tooltips.hpp"
 #include "prng.hpp"
 #include "script_constants.hpp"
-#include "system_state.hpp"
 #include "text.hpp"
 #include "triggers.hpp"
 
