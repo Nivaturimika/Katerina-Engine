@@ -189,7 +189,7 @@ else() # GCC or CLANG
 	# See for FMA support: https://stackoverflow.com/questions/21001388/fma3-in-gcc-how-to-enable
 	target_compile_options(KatEngineCommon INTERFACE -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-unused-variable -Wno-switch -Wno-unused-private-field)
 	target_compile_options(KatEngineCommon INTERFACE -fpermissive)
-	target_compile_options(KatEngineCommon INTERFACE $<$<CONFIG:Debug>: -O0 -g -pipe>)
+	target_compile_options(KatEngineCommon INTERFACE $<$<CONFIG:Debug>: -O1 -g -pipe>)
 	target_compile_options(KatEngineCommon INTERFACE $<$<NOT:$<CONFIG:Debug>>: -O3 -pipe -fno-rtti -DNDEBUG>)
 	if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 		target_compile_options(KatEngineCommon INTERFACE -mfpmath=sse -msse4.2)
