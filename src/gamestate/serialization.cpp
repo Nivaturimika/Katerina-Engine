@@ -336,7 +336,6 @@ namespace sys {
 			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.crisis_liberate);
 			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.irregular);
 			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.infantry);
-			ptr_in = memcpy_deserialize(ptr_in, state.military_definitions.artillery);
 		}
 		{ // national definitions
 			ptr_in = deserialize(ptr_in, state.national_definitions.flag_variable_names);
@@ -487,7 +486,6 @@ namespace sys {
 			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.crisis_liberate);
 			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.irregular);
 			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.infantry);
-			ptr_in = memcpy_serialize(ptr_in, state.military_definitions.artillery);
 		}
 		{ // national definitions
 			ptr_in = serialize(ptr_in, state.national_definitions.flag_variable_names);
@@ -632,7 +630,6 @@ namespace sys {
 			sz += sizeof(state.military_definitions.crisis_liberate);
 			sz += sizeof(state.military_definitions.irregular);
 			sz += sizeof(state.military_definitions.infantry);
-			sz += sizeof(state.military_definitions.artillery);
 		}
 		{ // national definitions
 			sz += serialize_size(state.national_definitions.flag_variable_names);
