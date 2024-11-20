@@ -1315,7 +1315,7 @@ namespace ui {
 			return display_subeffects(ws, tval, layout, trigger::to_generic(ws.world.overlord_get_ruler(olr)), this_slot, from_slot, r_hi,
 			r_lo, indentation + indentation_amount);
 		}
-		uint32_t es_ssingular_nationphere_owner_scope(EFFECT_DISPLAY_PARAMS) {
+		uint32_t es_sphere_owner_scope(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "sphere_leader_of"));
@@ -1886,7 +1886,7 @@ namespace ui {
 			return 0;
 		}
 
-		uint32_t ef_remove_core_nation_tag(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_remove_core_tag_nation(EFFECT_DISPLAY_PARAMS) {
 			auto tag = trigger::payload(tval[1]).tag_id;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -7149,7 +7149,7 @@ namespace ui {
 			}
 			return 0;
 		}
-		uint32_t ef_bank_province(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_bank(EFFECT_DISPLAY_PARAMS) {
 			auto type = economy::province_building_type::bank;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
@@ -7175,7 +7175,7 @@ namespace ui {
 			}
 			return 0;
 		}
-		uint32_t ef_university_province(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_university(EFFECT_DISPLAY_PARAMS) {
 			auto type = economy::province_building_type::university;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
