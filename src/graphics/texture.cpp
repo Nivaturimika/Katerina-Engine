@@ -426,7 +426,7 @@ set to one or more of the following values.	*/
 	}
 
 	texture::~texture() {
-		STBI_FREE(data);
+		stbi_image_free(data);
 		data = nullptr;
 	}
 
@@ -533,7 +533,7 @@ set to one or more of the following values.	*/
 			if(keep_data) {
 				reports::write_debug("Texture is marked persistent in RAM\n");
 			} else {
-				STBI_FREE(asset_texture.data);
+				stbi_image_free(asset_texture.data);
 				asset_texture.data = nullptr;
 			}
 			asset_texture.loaded = true;
@@ -764,7 +764,7 @@ set to one or more of the following values.	*/
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			STBI_FREE(data);
+			stbi_image_free(data);
 		}
 		return font_texture_result{ uint32_t(ftexid), uint32_t(size_x) };
 	}
