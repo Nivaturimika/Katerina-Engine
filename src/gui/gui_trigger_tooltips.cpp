@@ -4,6 +4,7 @@
 #include "text.hpp"
 #include "script_constants.hpp"
 #include "triggers.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 

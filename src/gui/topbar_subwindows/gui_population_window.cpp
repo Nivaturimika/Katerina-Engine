@@ -3,6 +3,7 @@
 #include "gui_modifier_tooltips.hpp"
 #include "gui_trigger_tooltips.hpp"
 #include "triggers.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 

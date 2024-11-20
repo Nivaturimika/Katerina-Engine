@@ -1,6 +1,7 @@
 #include "gui_common_elements.hpp"
 #include "ai.hpp"
 #include "pdqsort.h"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 	void simple_multiline_body_text::render(sys::state& state, int32_t x, int32_t y) noexcept {

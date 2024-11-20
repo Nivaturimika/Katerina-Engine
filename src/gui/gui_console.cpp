@@ -7,6 +7,7 @@
 #include "nations.hpp"
 #include "serialization.hpp"
 #include "stb_image_write.h"
+#include "gui_element_templates.hpp"
 
 struct command_info {
 	static constexpr uint32_t max_arg_slots = 4;

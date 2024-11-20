@@ -1,5 +1,6 @@
 #include "gui_province_window.hpp"
 #include "nations.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 	void province_liferating::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {

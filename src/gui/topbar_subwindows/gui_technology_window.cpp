@@ -1,4 +1,5 @@
 #include "gui_technology_window.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 

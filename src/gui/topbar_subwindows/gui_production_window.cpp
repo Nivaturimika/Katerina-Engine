@@ -7,6 +7,7 @@
 #include "gui_build_factory_window.hpp"
 #include "gui_project_investment_window.hpp"
 #include "gui_foreign_investment_window.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 	void populate_production_states_list(sys::state& state, std::vector<dcon::state_instance_id>& row_contents, dcon::nation_id n, bool show_empty, production_sort_order sort_order) {

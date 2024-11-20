@@ -3,6 +3,7 @@
 #include "gui_politics_window.hpp"
 #include "triggers.hpp"
 #include "pdqsort.h"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 
