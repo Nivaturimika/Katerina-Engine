@@ -1069,12 +1069,33 @@ struct empty_mask { };
 		auto cap = ws.world.nation_get_capital(nations::owner_of_pop(ws, to_pop(primary_slot)));
 		return apply_subtriggers<return_type, gathered_t<primary_type>, this_type, from_type>(tval, ws, to_generic(cap), this_slot, from_slot);
 	}
-	TRIGGER_FUNCTION(tf_this_scope) {
+	//
+	TRIGGER_FUNCTION(tf_this_scope_nation) {
 		return apply_subtriggers<return_type, this_type, this_type, from_type>(tval, ws, this_slot, this_slot, from_slot);
 	}
-	TRIGGER_FUNCTION(tf_from_scope) {
+	TRIGGER_FUNCTION(tf_this_scope_state) {
+		return apply_subtriggers<return_type, this_type, this_type, from_type>(tval, ws, this_slot, this_slot, from_slot);
+	}
+	TRIGGER_FUNCTION(tf_this_scope_province) {
+		return apply_subtriggers<return_type, this_type, this_type, from_type>(tval, ws, this_slot, this_slot, from_slot);
+	}
+	TRIGGER_FUNCTION(tf_this_scope_pop) {
+		return apply_subtriggers<return_type, this_type, this_type, from_type>(tval, ws, this_slot, this_slot, from_slot);
+	}
+	//
+	TRIGGER_FUNCTION(tf_from_scope_nation) {
 		return apply_subtriggers<return_type, from_type, this_type, from_type>(tval, ws, from_slot, this_slot, from_slot);
 	}
+	TRIGGER_FUNCTION(tf_from_scope_state) {
+		return apply_subtriggers<return_type, from_type, this_type, from_type>(tval, ws, from_slot, this_slot, from_slot);
+	}
+	TRIGGER_FUNCTION(tf_from_scope_province) {
+		return apply_subtriggers<return_type, from_type, this_type, from_type>(tval, ws, from_slot, this_slot, from_slot);
+	}
+	TRIGGER_FUNCTION(tf_from_scope_pop) {
+		return apply_subtriggers<return_type, from_type, this_type, from_type>(tval, ws, from_slot, this_slot, from_slot);
+	}
+	//
 	TRIGGER_FUNCTION(tf_sea_zone_scope) {
 		auto sea_zones = ve::apply(
 			[&ws](int32_t p_slot) {
@@ -5555,69 +5576,16 @@ struct empty_mask { };
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
 	struct trigger_container {
-		constexpr static return_type(
-			CALLTYPE* trigger_functions[])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
+		constexpr static return_type(CALLTYPE* trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
 			tf_none<return_type, primary_type, this_type, from_type>,
-			#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) tf_##name <return_type, primary_type, this_type, from_type>,
+			// non-scopes
+#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) tf_##name <return_type, primary_type, this_type, from_type>,
 			TRIGGER_BYTECODE_LIST
-			#undef TRIGGER_BYTECODE_ELEMENT
-			//
+#undef TRIGGER_BYTECODE_ELEMENT
 			// scopes
-			//
-			tf_generic_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t generic_scope = 0x0000; // or & and
-			tf_x_neighbor_province_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_neighbor_province_scope = 0x0001;
-			tf_x_neighbor_country_scope_nation<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_neighbor_country_scope_nation = 0x0002;
-			tf_x_neighbor_country_scope_pop<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_neighbor_country_scope_pop = 0x0003;
-			tf_x_war_countries_scope_nation<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_war_countries_scope_nation = 0x0004;
-			tf_x_war_countries_scope_pop<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_war_countries_scope_pop = 0x0005;
-			tf_x_greater_power_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_greater_power_scope = 0x0006;
-			tf_x_owned_province_scope_state<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_owned_province_scope_state = 0x0007;
-			tf_x_owned_province_scope_nation<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_owned_province_scope_nation = 0x0008;
-			tf_x_core_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_core_scope_province = 0x0009;
-			tf_x_core_scope_nation<return_type, primary_type, this_type, from_type>,	 // constexpr uint16_t x_core_scope_nation = 0x000A;
-			tf_x_state_scope<return_type, primary_type, this_type, from_type>,		// constexpr uint16_t x_state_scope = 0x000B;
-			tf_x_substate_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_substate_scope = 0x000C;
-			tf_x_sphere_member_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_sphere_member_scope = 0x000D;
-			tf_x_pop_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_pop_scope_province = 0x000E;
-			tf_x_pop_scope_state<return_type, primary_type, this_type, from_type>,	// constexpr uint16_t x_pop_scope_state = 0x000F;
-			tf_x_pop_scope_nation<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_pop_scope_nation = 0x0010;
-			tf_x_provinces_in_variable_region<return_type, primary_type, this_type, from_type>, // constexpr uint16_t x_provinces_in_variable_region = 0x0011; // variable name
-			tf_owner_scope_state<return_type, primary_type, this_type, from_type>, // constexpr uint16_t owner_scope_state = 0x0012;
-			tf_owner_scope_province<return_type, primary_type, this_type, from_type>,  // constexpr uint16_t owner_scope_province = 0x0013;
-			tf_controller_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t controller_scope = 0x0014;
-			tf_location_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t location_scope = 0x0015;
-			tf_country_scope_state<return_type, primary_type, this_type, from_type>, // constexpr uint16_t country_scope_state = 0x0016;
-			tf_country_scope_pop<return_type, primary_type, this_type, from_type>, // constexpr uint16_t country_scope_pop = 0x0017;
-			tf_capital_scope<return_type, primary_type, this_type, from_type>,		 // constexpr uint16_t capital_scope = 0x0018;
-			tf_this_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t this_scope_pop = 0x0019;
-			tf_this_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t this_scope_nation = 0x001A;
-			tf_this_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t this_scope_state = 0x001B;
-			tf_this_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t this_scope_province = 0x001C;
-			tf_from_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t from_scope_pop = 0x001D;
-			tf_from_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t from_scope_nation = 0x001E;
-			tf_from_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t from_scope_state = 0x001F;
-			tf_from_scope<return_type, primary_type, this_type, from_type>,				 // constexpr uint16_t from_scope_province = 0x0020;
-			tf_sea_zone_scope<return_type, primary_type, this_type, from_type>,		 // constexpr uint16_t sea_zone_scope = 0x0021;
-			tf_cultural_union_scope<return_type, primary_type, this_type, from_type>,  // constexpr uint16_t cultural_union_scope = 0x0022;
-			tf_overlord_scope<return_type, primary_type, this_type, from_type>,			// constexpr uint16_t overlord_scope = 0x0023;
-			tf_sphere_owner_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t sphere_owner_scope = 0x0024;
-			tf_independence_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t independence_scope = 0x0025;
-			tf_flashpoint_tag_scope<return_type, primary_type, this_type, from_type>,	 // constexpr uint16_t flashpoint_tag_scope = 0x0026;
-			tf_crisis_state_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t crisis_state_scope = 0x0027;
-			tf_state_scope_pop<return_type, primary_type, this_type, from_type>,		// constexpr uint16_t state_scope_pop = 0x0028;
-			tf_state_scope_province<return_type, primary_type, this_type, from_type>,	 // constexpr uint16_t state_scope_province = 0x0029;
-			tf_tag_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t tag_scope = 0x002A; // variable name
-			tf_integer_scope<return_type, primary_type, this_type, from_type>, // constexpr uint16_t integer_scope = 0x002B; // variable name
-			tf_country_scope_nation<return_type, primary_type, this_type, from_type>, // constexpr uint16_t country_scope_nation = 0x002C;
-			tf_country_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t country_scope_province = 0x002D;
-			tf_cultural_union_scope_pop<return_type, primary_type, this_type, from_type>, // constexpr uint16_t cultural_union_scope_pop = 0x002E;
-			tf_capital_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t capital_scope_province = 0x002F;
-			tf_capital_scope_pop<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t capital_scope_pop = first_scope_code + 0x0030;
-			tf_x_country_scope<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_country_scope = first_scope_code + 0x0031;
-			tf_x_neighbor_province_scope_state<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_neighbor_province_scope_state = first_scope_code + 0x0032;
-			tf_x_provinces_in_variable_region_proper<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_provinces_in_variable_region_proper = first_scope_code + 0x0033;
-			tf_crisis_attacker_scope<return_type, primary_type, this_type, from_type>,
-			tf_crisis_defender_scope<return_type, primary_type, this_type, from_type>,
+#define TRIGGER_SCOPE_BYTECODE_ELEMENT(name, code) tf_##name <return_type, primary_type, this_type, from_type>,
+		TRIGGER_SCOPE_BYTECODE_LIST
+#undef TRIGGER_SCOPE_BYTECODE_ELEMENT
 		};
 	};
 

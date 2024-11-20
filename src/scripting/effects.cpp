@@ -4711,83 +4711,16 @@ namespace effect {
 		return 0;
 	}
 
-	inline constexpr uint32_t(*effect_functions[])(EFFECT_PARAMTERS) = {
+	inline constexpr uint32_t(*effect_functions[effect::first_invalid_code])(EFFECT_PARAMTERS) = {
 		ef_none,
-		#define EFFECT_BYTECODE_ELEMENT(code, name, arg) ef_##name,
+		// non-scopes
+#define EFFECT_BYTECODE_ELEMENT(code, name, arg) ef_##name,
 		EFFECT_BYTECODE_LIST
-		#undef EFFECT_BYTECODE_ELEMENT
-		//
-		// SCOPES
-		//
-		es_generic_scope, // constexpr inline uint16_t generic_scope = first_scope_code + 0x0000; // default grouping of effects (or hidden_tooltip)
-		es_x_neighbor_province_scope,				// constexpr inline uint16_t x_neighbor_province_scope = first_scope_code + 0x0001;
-		es_x_neighbor_country_scope,				// constexpr inline uint16_t x_neighbor_country_scope = first_scope_code + 0x0002;
-		es_x_country_scope,									// constexpr inline uint16_t x_country_scope = first_scope_code + 0x0003;
-		es_x_country_scope_nation,					// constexpr inline uint16_t x_country_scope_nation = first_scope_code + 0x0004;
-		es_x_empty_neighbor_province_scope, // constexpr inline uint16_t x_empty_neighbor_province_scope = first_scope_code + 0x0005;
-		es_x_greater_power_scope,						// constexpr inline uint16_t x_greater_power_scope = first_scope_code + 0x0006;
-		es_poor_strata_scope_nation,				// constexpr inline uint16_t poor_strata_scope_nation = first_scope_code + 0x0007;
-		es_poor_strata_scope_state,					// constexpr inline uint16_t poor_strata_scope_state = first_scope_code + 0x0008;
-		es_poor_strata_scope_province,			// constexpr inline uint16_t poor_strata_scope_province = first_scope_code + 0x0009;
-		es_middle_strata_scope_nation,			// constexpr inline uint16_t middle_strata_scope_nation = first_scope_code + 0x000A;
-		es_middle_strata_scope_state,				// constexpr inline uint16_t middle_strata_scope_state = first_scope_code + 0x000B;
-		es_middle_strata_scope_province,		// constexpr inline uint16_t middle_strata_scope_province = first_scope_code + 0x000C;
-		es_rich_strata_scope_nation,				// constexpr inline uint16_t rich_strata_scope_nation = first_scope_code + 0x000D;
-		es_rich_strata_scope_state,					// constexpr inline uint16_t rich_strata_scope_state = first_scope_code + 0x000E;
-		es_rich_strata_scope_province,			// constexpr inline uint16_t rich_strata_scope_province = first_scope_code + 0x000F;
-		es_x_pop_scope_nation,							// constexpr inline uint16_t x_pop_scope_nation = first_scope_code + 0x0010;
-		es_x_pop_scope_state,								// constexpr inline uint16_t x_pop_scope_state = first_scope_code + 0x0011;
-		es_x_pop_scope_province,						// constexpr inline uint16_t x_pop_scope_province = first_scope_code + 0x0012;
-		es_x_owned_scope_nation,						// constexpr inline uint16_t x_owned_scope_nation = first_scope_code + 0x0013;
-		es_x_owned_scope_state,							// constexpr inline uint16_t x_owned_scope_state = first_scope_code + 0x0014;
-		es_x_core_scope,										// constexpr inline uint16_t x_core_scope = first_scope_code + 0x0015;
-		es_x_state_scope,										// constexpr inline uint16_t x_state_scope = first_scope_code + 0x0016;
-		es_random_list_scope,								// constexpr inline uint16_t random_list_scope = first_scope_code + 0x0017;
-		es_random_scope,										// constexpr inline uint16_t random_scope = first_scope_code + 0x0018;
-		es_owner_scope_state,								// constexpr inline uint16_t owner_scope_state = first_scope_code + 0x0019;
-		es_owner_scope_province,						// constexpr inline uint16_t owner_scope_province = first_scope_code + 0x001A;
-		es_controller_scope,								// constexpr inline uint16_t controller_scope = first_scope_code + 0x001B;
-		es_location_scope,									// constexpr inline uint16_t location_scope = first_scope_code + 0x001C;
-		es_country_scope_pop,								// constexpr inline uint16_t country_scope_pop = first_scope_code + 0x001D;
-		es_country_scope_state,							// constexpr inline uint16_t country_scope_state = first_scope_code + 0x001E;
-		es_capital_scope,										// constexpr inline uint16_t capital_scope = first_scope_code + 0x001F;
-		es_this_scope_nation,								// constexpr inline uint16_t this_scope_nation = first_scope_code + 0x0020;
-		es_this_scope_state,								// constexpr inline uint16_t this_scope_state = first_scope_code + 0x0021;
-		es_this_scope_province,							// constexpr inline uint16_t this_scope_province = first_scope_code + 0x0022;
-		es_this_scope_pop,									// constexpr inline uint16_t this_scope_pop = first_scope_code + 0x0023;
-		es_from_scope_nation,								// constexpr inline uint16_t from_scope_nation = first_scope_code + 0x0024;
-		es_from_scope_state,								// constexpr inline uint16_t from_scope_state = first_scope_code + 0x0025;
-		es_from_scope_province,							// constexpr inline uint16_t from_scope_province = first_scope_code + 0x0026;
-		es_from_scope_pop,									// constexpr inline uint16_t from_scope_pop = first_scope_code + 0x0027;
-		es_sea_zone_scope,									// constexpr inline uint16_t sea_zone_scope = first_scope_code + 0x0028;
-		es_cultural_union_scope,						// constexpr inline uint16_t cultural_union_scope = first_scope_code + 0x0029;
-		es_overlord_scope,									// constexpr inline uint16_t overlord_scope = first_scope_code + 0x002A;
-		es_sphere_owner_scope,							// constexpr inline uint16_t sphere_owner_scope = first_scope_code + 0x002B;
-		es_independence_scope,							// constexpr inline uint16_t independence_scope = first_scope_code + 0x002C;
-		es_flashpoint_tag_scope,						// constexpr inline uint16_t flashpoint_tag_scope = first_scope_code + 0x002D;
-		es_crisis_state_scope,							// constexpr inline uint16_t crisis_state_scope = first_scope_code + 0x002E;
-		es_state_scope_pop,									// constexpr inline uint16_t state_scope_pop = first_scope_code + 0x002F;
-		es_state_scope_province,						// constexpr inline uint16_t state_scope_province = first_scope_code + 0x0030;
-		es_x_substate_scope,										// constexpr inline uint16_t x_state_scope = first_scope_code + 0x0031;
-		es_capital_scope_province,								// constexpr inline uint16_t capital_scope = first_scope_code + 0x0032;
-		es_x_core_scope_province,                  //constexpr inline uint16_t x_core_scope_province = first_scope_code + 0x0033;
-		es_tag_scope,												// constexpr inline uint16_t tag_scope = first_scope_code + 0x0034;
-		es_integer_scope,										// constexpr inline uint16_t integer_scope = first_scope_code + 0x0035;
-		es_pop_type_scope_nation,						// constexpr inline uint16_t pop_type_scope_nation = first_scope_code + 0x0036;
-		es_pop_type_scope_state,						// constexpr inline uint16_t pop_type_scope_state = first_scope_code + 0x0037;
-		es_pop_type_scope_province,					// constexpr inline uint16_t pop_type_scope_province = first_scope_code + 0x0038;
-		es_region_proper_scope, //constexpr inline uint16_t region_proper_scope = first_scope_code + 0x0039;
-		es_region_scope,										// constexpr inline uint16_t region_scope = first_scope_code + 0x003A;
-		es_if_scope, // constexpr inline uint16_t if_scope = first_scope_code + 0x003B;
-		es_else_if_scope, // constexpr inline uint16_t else_if_scope = first_scope_code + 0x003C;
-		es_x_event_country_scope, // constexpr inline uint16_t x_event_country_scope = first_scope_code + 0x003D;
-		es_x_decision_country_scope, // constexpr inline uint16_t x_decision_country_scope = first_scope_code + 0x003E;
-		es_x_event_country_scope_nation,//constexpr inline uint16_t x_event_country_scope_nation = first_scope_code + 0x003F;
-		es_x_decision_country_scope_nation,//constexpr inline uint16_t x_decision_country_scope_nation = first_scope_code + 0x0040;
-		es_from_bounce_scope,//constexpr inline uint16_t from_bounce_scope = first_scope_code + 0x0041;
-		es_this_bounce_scope,//constexpr inline uint16_t this_bounce_scope = first_scope_code + 0x0042;
-		es_random_by_modifier_scope,//constexpr inline uint16_t random_by_modifier_scope = first_scope_code + 0x0043;
-		es_loop_bounded_scope,
+#undef EFFECT_BYTECODE_ELEMENT
+		// scopes
+#define EFFECT_SCOPE_BYTECODE_ELEMENT(name, code) es_##name,
+		EFFECT_SCOPE_BYTECODE_LIST
+#undef EFFECT_SCOPE_BYTECODE_ELEMENT
 	};
 
 	uint32_t internal_execute_effect(EFFECT_PARAMTERS) {
