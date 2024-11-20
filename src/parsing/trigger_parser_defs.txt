@@ -311,6 +311,8 @@ trigger_body
 	independence                 extern tr_scope_independence           discard
 	flashpoint_tag_scope         extern tr_flashpoint_tag_scope         discard
 	crisis_state_scope           extern tr_crisis_state_scope           discard
+	crisis_attacker_scope        extern tr_crisis_attacker_scope        discard
+	crisis_defender_scope        extern tr_crisis_defender_scope        discard
 	state_scope                  extern tr_state_scope                  discard
 	any_country                  extern tr_scope_any_country            discard
 	every_country                extern tr_scope_every_country          discard

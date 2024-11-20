@@ -1128,6 +1128,14 @@ struct empty_mask { };
 		return apply_subtriggers<return_type, int32_t, this_type, from_type>(tval, ws, to_generic(ws.crisis_state), this_slot,
 			from_slot);
 	}
+	TRIGGER_FUNCTION(tf_crisis_attacker_scope) {
+		return apply_subtriggers<return_type, int32_t, this_type, from_type>(tval, ws, to_generic(ws.primary_crisis_attacker), this_slot,
+			from_slot);
+	}
+	TRIGGER_FUNCTION(tf_crisis_defender_scope) {
+		return apply_subtriggers<return_type, int32_t, this_type, from_type>(tval, ws, to_generic(ws.primary_crisis_defender), this_slot,
+			from_slot);
+	}
 	TRIGGER_FUNCTION(tf_state_scope_province) {
 		auto state_instance = ws.world.province_get_state_membership(to_prov(primary_slot));
 		return apply_subtriggers<return_type, gathered_t<primary_type>, this_type, from_type>(tval, ws, to_generic(state_instance),
@@ -5604,10 +5612,12 @@ struct empty_mask { };
 			tf_country_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t country_scope_province = 0x002D;
 			tf_cultural_union_scope_pop<return_type, primary_type, this_type, from_type>, // constexpr uint16_t cultural_union_scope_pop = 0x002E;
 			tf_capital_scope_province<return_type, primary_type, this_type, from_type>, // constexpr uint16_t capital_scope_province = 0x002F;
-			tf_capital_scope_pop, //constexpr inline uint16_t capital_scope_pop = first_scope_code + 0x0030;
-			tf_x_country_scope, //constexpr inline uint16_t x_country_scope = first_scope_code + 0x0031;
-			tf_x_neighbor_province_scope_state, //constexpr inline uint16_t x_neighbor_province_scope_state = first_scope_code + 0x0032;
-			tf_x_provinces_in_variable_region_proper, //constexpr inline uint16_t x_provinces_in_variable_region_proper = first_scope_code + 0x0033;
+			tf_capital_scope_pop<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t capital_scope_pop = first_scope_code + 0x0030;
+			tf_x_country_scope<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_country_scope = first_scope_code + 0x0031;
+			tf_x_neighbor_province_scope_state<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_neighbor_province_scope_state = first_scope_code + 0x0032;
+			tf_x_provinces_in_variable_region_proper<return_type, primary_type, this_type, from_type>, //constexpr inline uint16_t x_provinces_in_variable_region_proper = first_scope_code + 0x0033;
+			tf_crisis_attacker_scope<return_type, primary_type, this_type, from_type>,
+			tf_crisis_defender_scope<return_type, primary_type, this_type, from_type>,
 		};
 	};
 

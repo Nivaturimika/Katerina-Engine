@@ -1395,9 +1395,9 @@ namespace trigger {
 	TRIGGER_BYTECODE_ELEMENT(0x02F4, party_name, 3) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F5, party_position, 2)
 
-	#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
+#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	TRIGGER_BYTECODE_LIST
-	#undef TRIGGER_BYTECODE_ELEMENT
+#undef TRIGGER_BYTECODE_ELEMENT
 
 	constexpr inline uint16_t first_scope_code = 0x02F6;
 
@@ -1461,8 +1461,10 @@ namespace trigger {
 	constexpr inline uint16_t x_country_scope = first_scope_code + 0x0031;
 	constexpr inline uint16_t x_neighbor_province_scope_state = first_scope_code + 0x0032;
 	constexpr inline uint16_t x_provinces_in_variable_region_proper = first_scope_code + 0x0033;
+	constexpr inline uint16_t crisis_attacker_scope = first_scope_code + 0x0034;
+	constexpr inline uint16_t crisis_defender_scope = first_scope_code + 0x0035;
 
-	constexpr inline uint16_t first_invalid_code = first_scope_code + 0x0034;
+	constexpr inline uint16_t first_invalid_code = first_scope_code + 0x0036;
 
 	constexpr inline uint16_t placeholder_not_scope = code_mask;
 
@@ -1473,9 +1475,9 @@ namespace trigger {
 
 	inline constexpr int8_t data_sizes[] = {
 		0, //none
-		#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) arg,
+#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) arg,
 		TRIGGER_BYTECODE_LIST
-		#undef TRIGGER_BYTECODE_ELEMENT
+#undef TRIGGER_BYTECODE_ELEMENT
 	};
 	static_assert(sizeof(data_sizes) == first_scope_code);
 

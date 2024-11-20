@@ -1057,17 +1057,49 @@ namespace ui {
 				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "crisis_state"));
 				text::close_layout_box(layout, box);
 			}
-
 			if(ui_count_subtriggers(ws, tval) > 1) {
 				auto box = text::open_layout_box(layout, indentation + indentation_amount);
 				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
 				text::close_layout_box(layout, box);
 			}
-
 			auto cstate = ws.crisis_state ? trigger::to_generic(ws.crisis_state) : -1;
 			display_subtriggers(tval, ws, layout, cstate, this_slot, from_slot, indentation + indentation_amount,
 			show_condition && cstate != -1);
 		}
+
+		void tf_crisis_attacker_scope(TRIGGER_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "primary_crisis_attacker"));
+				text::close_layout_box(layout, box);
+			}
+			if(ui_count_subtriggers(ws, tval) > 1) {
+				auto box = text::open_layout_box(layout, indentation + indentation_amount);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
+				text::close_layout_box(layout, box);
+			}
+			auto cstate = ws.primary_crisis_attacker ? trigger::to_generic(ws.primary_crisis_attacker) : -1;
+			display_subtriggers(tval, ws, layout, cstate, this_slot, from_slot, indentation + indentation_amount,
+			show_condition && cstate != -1);
+		}
+		void tf_crisis_defender_scope(TRIGGER_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "primary_crisis_defender"));
+				text::close_layout_box(layout, box);
+			}
+			if(ui_count_subtriggers(ws, tval) > 1) {
+				auto box = text::open_layout_box(layout, indentation + indentation_amount);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, any_all_code_to_fixed_ui(tval[0])));
+				text::close_layout_box(layout, box);
+			}
+			auto cstate = ws.primary_crisis_defender ? trigger::to_generic(ws.primary_crisis_defender) : -1;
+			display_subtriggers(tval, ws, layout, cstate, this_slot, from_slot, indentation + indentation_amount,
+			show_condition && cstate != -1);
+		}
+
 		void tf_state_scope_province(TRIGGER_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -8526,6 +8558,8 @@ namespace ui {
 			tf_x_country_scope, //constexpr inline uint16_t x_country_scope = first_scope_code + 0x0031;
 			tf_x_neighbor_province_scope_state, //constexpr inline uint16_t x_neighbor_province_scope_state = first_scope_code + 0x0032;
 			tf_x_provinces_in_variable_region_proper, //constexpr inline uint16_t x_provinces_in_variable_region_proper = first_scope_code + 0x0033;
+			tf_crisis_attacker_scope,
+			tf_crisis_defender_scope,
 		};
 
 		// #define TRIGGER_DISPLAY_PARAMS uint16_t const* tval, sys::state& ws, text::columnar_layout& layout,

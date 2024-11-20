@@ -104,3 +104,5 @@ repeats_x_times;Repeat $x$ times
 trigger_crisis;Triggers a crisis
 set_crisis_colony;Set crisis colony to $x$
 set_crisis_liberation_tag;Set crisis liberation tag to $x$
+primary_crisis_attacker;Primary crisis attacker
+primary_crisis_defender;Primary crisis defender

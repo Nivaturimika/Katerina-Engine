@@ -150,6 +150,8 @@ loop_bounded = {
 - `have_core_in = THIS/FROM/TAG`: Doesn't work in vanilla, but will work here.
 - `treasury = x`: Alias of `money`.
 - `has_province_flag = flag`: Didn't work in the original but now it does
+- `crisis_attacker = { ... }`: Scopes into the primary attacker of a crisis
+- `crisis_defender = { ... }`: Scopes into the primary defender of a crisis
 
 ### FROM bounce
 FROM bouncing is a technique where before, modders would do:

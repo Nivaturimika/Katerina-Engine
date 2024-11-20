@@ -690,6 +690,28 @@ namespace parsers {
 
 		context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
 	}
+	void tr_crisis_attacker_scope(token_generator& gen, error_handler& err, trigger_building_context& context) {
+		context.compiled_trigger.push_back(uint16_t(trigger::crisis_attacker_scope));
+		context.compiled_trigger.push_back(uint16_t(1));
+		auto payload_size_offset = context.compiled_trigger.size() - 1;
+
+		auto old_main = context.main_slot;
+		context.main_slot = trigger::slot_contents::state;
+		parse_trigger_body(gen, err, context);
+		context.main_slot = old_main;
+		context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
+	}
+	void tr_crisis_defender_scope(token_generator& gen, error_handler& err, trigger_building_context& context) {
+		context.compiled_trigger.push_back(uint16_t(trigger::crisis_defender_scope));
+		context.compiled_trigger.push_back(uint16_t(1));
+		auto payload_size_offset = context.compiled_trigger.size() - 1;
+
+		auto old_main = context.main_slot;
+		context.main_slot = trigger::slot_contents::state;
+		parse_trigger_body(gen, err, context);
+		context.main_slot = old_main;
+		context.compiled_trigger[payload_size_offset] = uint16_t(context.compiled_trigger.size() - payload_size_offset);
+	}
 	void tr_state_scope(token_generator& gen, error_handler& err, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::state) {
 			context.compiled_trigger.push_back(uint16_t(trigger::generic_scope));
