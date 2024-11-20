@@ -405,3 +405,30 @@ action = {
 		
 	}
 }
+
+action = {
+	type = "crisis_can_be_interested"
+	limit = {
+		capital_scope = {
+			OR = {
+				continent = europe
+				crisis_state = { continent = THIS }
+				crisis_defender = { capital_scope = { continent = THIS } }
+				AND = {
+					continent = north_america
+					OR = {
+						crisis_state = { continent = south_america }
+						crisis_defender = { continent = south_america }
+					}
+				}
+				AND = {
+					continent = south_america
+					OR = {
+						crisis_state = { continent = north_america }
+						crisis_defender = { continent = north_america }
+					}
+				}
+			}
+		}
+	}
+}
