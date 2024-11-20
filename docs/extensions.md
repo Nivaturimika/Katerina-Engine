@@ -1040,3 +1040,15 @@ input_bonus = {
 	trigger = { port = 1 }
 }
 ```
+
+## Custom event windows
+
+Simple, just go to your event and define the window (needs to be defined in a .gui file):
+
+```
+country_event = {
+	window_type = "event_election_window"
+}
+```
+
+If none is specified, for compatibility - the default windows will be choosen (according to if it's an election, province or country/major event).

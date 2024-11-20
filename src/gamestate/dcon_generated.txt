@@ -4734,6 +4734,11 @@ object {
 		type{ dcon::gfx_object_id }
 		tag{ scenario }
 	}
+	property{
+		name{ window_type }
+		type{ text_key }
+		tag{ scenario }
+	}
 }
 
 object {
@@ -4801,6 +4806,11 @@ object {
 	property{
 		name{ news_picture }
 		type{ dcon::gfx_object_id }
+		tag{ scenario }
+	}
+	property{
+		name{ window_type }
+		type{ text_key }
 		tag{ scenario }
 	}
 }
@@ -4898,6 +4908,11 @@ object {
 		type{ dcon::gfx_object_id }
 		tag{ scenario }
 	}
+	property{
+		name{ window_type }
+		type{ text_key }
+		tag{ scenario }
+	}
 }
 
 object {
@@ -4981,6 +4996,11 @@ object {
 	property{
 		name{ news_picture }
 		type{ dcon::gfx_object_id }
+		tag{ scenario }
+	}
+	property{
+		name{ window_type }
+		type{ text_key }
 		tag{ scenario }
 	}
 }

@@ -167,8 +167,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override;
 	};
 	class national_election_event_window : public base_event_window {
-		public:
-		static constexpr std::string_view window_element_name = "event_election_window";
+	public:
 		std::string_view get_option_start_element_name() noexcept override {
 			return "eew_event_option_start";
 		}
@@ -177,8 +176,7 @@ namespace ui {
 		}
 	};
 	class national_event_window : public base_event_window {
-		public:
-		static constexpr std::string_view window_element_name = "event_country_window";
+	public:
 		std::string_view get_option_start_element_name() noexcept override {
 			return "event_country_option_start";
 		}
@@ -187,8 +185,7 @@ namespace ui {
 		}
 	};
 	class national_major_event_window : public base_event_window {
-		public:
-		static constexpr std::string_view window_element_name = "event_major_window";
+	public:
 		std::string_view get_option_start_element_name() noexcept override {
 			return "event_major_option_start";
 		}
@@ -197,8 +194,7 @@ namespace ui {
 		}
 	};
 	class provincial_event_window : public base_event_window {
-		public:
-		static constexpr std::string_view window_element_name = "event_province_window";
+	public:
 		std::string_view get_option_start_element_name() noexcept override {
 			return "event_province_option_start";
 		}

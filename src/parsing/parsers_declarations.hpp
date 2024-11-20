@@ -2330,6 +2330,7 @@ namespace parsers {
 		bool major = false;
 		bool fire_only_once = false;
 		bool allow_multiple_instances = false;
+		std::string window_type;
 		dcon::gfx_object_id picture_;
 		dcon::text_key title_;
 		dcon::text_key desc_;
@@ -2358,6 +2359,17 @@ namespace parsers {
 			if(!picture_) {
 				error_handler err("");
 				picture(association_type::eq, "", err, 0, context);
+			}
+			if(window_type.empty()) {
+				if(major) {
+					window_type = "event_major_window";
+				} else if(issue_group_) {
+					window_type = "event_election_window";
+				} else if(context.main_slot == trigger::slot_contents::nation) {
+					window_type = "event_country_window";
+				} else {
+					window_type = "event_province_window";
+				}
 			}
 		}
 	};

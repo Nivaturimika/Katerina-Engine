@@ -997,6 +997,7 @@ namespace parsers {
 			fid.set_trigger(event_result.trigger);
 			fid.get_options() = event_result.options;
 			fid.set_legacy_id(uint32_t(event_result.id));
+			fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 		}
 	}
 	void scan_country_event(token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -1053,6 +1054,7 @@ namespace parsers {
 			fid.set_trigger(event_result.trigger);
 			fid.get_options() = event_result.options;
 			fid.set_legacy_id(uint32_t(event_result.id));
+			fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 		}
 	}
 
@@ -1078,6 +1080,7 @@ namespace parsers {
 		fid.set_news_short_desc(event_result.news_short_desc_);
 		fid.set_is_major(event_result.major);
 		fid.get_options() = event_result.options;
+		fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 		//Effect
 		ef_country_event value;
 		value.days = 0;
@@ -1174,6 +1177,7 @@ namespace parsers {
 		fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 		fid.set_name(event_result.title_);
 		fid.get_options() = event_result.options;
+		fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 		//Effect
 		ef_province_event value;
 		value.days = 0;
@@ -1299,6 +1303,7 @@ namespace parsers {
 					fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 					fid.get_options() = event_result.options;
 					fid.set_legacy_id(uint32_t(event_result.id));
+					fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 
 					for(auto& r : context.state.national_definitions.on_yearly_pulse) {
 						if(r.id == data_copy.id) {
@@ -1420,6 +1425,7 @@ namespace parsers {
 					fid.set_name(event_result.title_);
 					fid.get_options() = event_result.options;
 					fid.set_legacy_id(uint32_t(event_result.id));
+					fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
 
 					for(auto& r : context.state.national_definitions.on_battle_won) {
 						if(r.id == data_copy.id) {

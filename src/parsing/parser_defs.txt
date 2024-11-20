@@ -1071,6 +1071,7 @@ generic_event
 	allow_multiple_instances        value      bool                              member
 	election                        value      bool                              discard
 	issue_group                     value      text                              member_fn
+	window_type						value		text							member
 
 event_file
 	country_event                   extern     scan_country_event                discard

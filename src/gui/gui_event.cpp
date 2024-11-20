@@ -1185,25 +1185,43 @@ namespace ui {
 	template<typename T>
 	void new_event_window_1(sys::state& state, event_data_wrapper& dat, event_pool_slot e_slot) {
 		auto const slot = uint8_t(e_slot);
-		if(event_pool[slot].empty()) {
-			auto new_elm = ui::make_element_by_type<T>(state, T::window_element_name);
+
+		dcon::text_key name_key;
+		if(std::holds_alternative<event::pending_human_n_event>(dat)) {
+			auto const& phe = std::get<event::pending_human_n_event>(dat);
+			name_key = state.world.national_event_get_window_type(std::get<event::pending_human_n_event>(dat).e);
+		} else if(std::holds_alternative<event::pending_human_f_n_event>(dat)) {
+			auto const& phe = std::get<event::pending_human_f_n_event>(dat);
+			name_key = state.world.free_national_event_get_window_type(std::get<event::pending_human_f_n_event>(dat).e);
+		} else if(std::holds_alternative<event::pending_human_p_event>(dat)) {
+			auto const& phe = std::get<event::pending_human_p_event>(dat);
+			name_key = state.world.provincial_event_get_window_type(std::get<event::pending_human_p_event>(dat).e);
+		} else if(std::holds_alternative<event::pending_human_f_p_event>(dat)) {
+			auto const& phe = std::get<event::pending_human_f_p_event>(dat);
+			name_key = state.world.free_provincial_event_get_window_type(std::get<event::pending_human_f_p_event>(dat).e);
+		}
+
+		// empty or not compatible window types
+		if(event_pool[slot].empty()
+		|| event_pool[slot].back()->base_data.name != name_key) {
+			auto new_elm = ui::make_element_by_type<T>(state, state.to_string_view(name_key));
 			auto ptr = new_elm.get();
 			T* actual = static_cast<T*>(ptr);
 			actual->event_data = dat;
 			actual->impl_on_update(state);
 			state.ui_state.root->add_child_to_front(std::move(new_elm));
 		} else {
-			std::unique_ptr<base_event_window> ptr = std::move(event_pool[slot].back());
-			event_pool[slot].pop_back();
-			ptr->event_data = dat;
-			if(!ptr->is_visible()) {
-				auto it = state.ui_state.defs_by_name.find(state.lookup_key(T::window_element_name));
-				if(it != state.ui_state.defs_by_name.end()) {
+			auto it = state.ui_state.defs_by_name.find(state.lookup_key(state.to_string_view(name_key)));
+			if(it != state.ui_state.defs_by_name.end()) {
+				std::unique_ptr<base_event_window> ptr = std::move(event_pool[slot].back());
+				event_pool[slot].pop_back();
+				ptr->event_data = dat;
+				if(!ptr->is_visible()) {
 					ptr->base_data.position = state.ui_defs.gui[it->second.definition].position;
 				}
+				ptr->set_visible(state, true);
+				state.ui_state.root->add_child_to_front(std::move(ptr));
 			}
-			ptr->set_visible(state, true);
-			state.ui_state.root->add_child_to_front(std::move(ptr));
 		}
 	}
 
@@ -1229,19 +1247,19 @@ namespace ui {
 			slot = event_pool_slot::province;
 		}
 		switch(slot) {
-			case event_pool_slot::country:
+		case event_pool_slot::country:
 			new_event_window_1<national_event_window>(state, dat, slot);
 			break;
-			case event_pool_slot::country_major:
+		case event_pool_slot::country_major:
 			new_event_window_1<national_major_event_window>(state, dat, slot);
 			break;
-			case event_pool_slot::country_election:
+		case event_pool_slot::country_election:
 			new_event_window_1<national_election_event_window>(state, dat, slot);
 			break;
-			case event_pool_slot::province:
+		case event_pool_slot::province:
 			new_event_window_1<provincial_event_window>(state, dat, slot);
 			break;
-			default:
+		default:
 			return;
 		}
 		++pending_events[uint8_t(slot)];
