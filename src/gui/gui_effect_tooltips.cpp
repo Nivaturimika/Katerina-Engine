@@ -1315,14 +1315,14 @@ namespace ui {
 			return display_subeffects(ws, tval, layout, trigger::to_generic(ws.world.overlord_get_ruler(olr)), this_slot, from_slot, r_hi,
 			r_lo, indentation + indentation_amount);
 		}
-		uint32_t es_sphere_owner_scope(EFFECT_DISPLAY_PARAMS) {
+		uint32_t es_ssingular_nationphere_owner_scope(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "sphere_leader_of"));
 				text::add_space_to_layout_box(ws, layout, box);
 				text::add_to_layout_box(ws, layout, box,
 				primary_slot != -1 ? text::produce_simple_string(ws, text::get_name(ws, trigger::to_nation(primary_slot)))
-													 : text::produce_simple_string(ws, "singular_nation"));
+													 : text::produce_simple_string(ws, ""));
 				text::close_layout_box(layout, box);
 			}
 			show_limit(ws, tval, layout, -1, this_slot, from_slot, indentation);
@@ -1781,11 +1781,220 @@ namespace ui {
 			}
 			return 0;
 		}
+
+		uint32_t ef_remove_core_state_tag(EFFECT_DISPLAY_PARAMS) {
+			auto tag = trigger::payload(tval[1]).tag_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::adj, ws.world.national_identity_get_adjective(tag));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_tag_state(EFFECT_DISPLAY_PARAMS) {
+			auto tag = trigger::payload(tval[1]).tag_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::adj, ws.world.national_identity_get_adjective(tag));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_int(EFFECT_DISPLAY_PARAMS) {
+			auto prov = trigger::payload(tval[1]).prov_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "remove_core_from"));
+				text::add_space_to_layout_box(ws, layout, box);
+				text::add_to_layout_box(ws, layout, box, prov);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_this_nation(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_nation(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_this_province(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_prov(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_this_state(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_state(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_this_pop(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_pop(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_from_nation(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_nation(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_from_province(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_prov(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_state_reb(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_rebel(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+
+		uint32_t ef_remove_core_nation_tag(EFFECT_DISPLAY_PARAMS) {
+			auto tag = trigger::payload(tval[1]).tag_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::adj, ws.world.national_identity_get_adjective(tag));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_tag_state(EFFECT_DISPLAY_PARAMS) {
+			auto tag = trigger::payload(tval[1]).tag_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::adj, ws.world.national_identity_get_adjective(tag));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_int(EFFECT_DISPLAY_PARAMS) {
+			auto prov = trigger::payload(tval[1]).prov_id;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "remove_core_from"));
+				text::add_space_to_layout_box(ws, layout, box);
+				text::add_to_layout_box(ws, layout, box, prov);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_this_nation(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_nation(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_this_province(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_prov(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_this_state(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_state(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_this_pop(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_this_to_map(ws, m, trigger::to_pop(this_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_from_nation(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_nation(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_from_province(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_prov(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_remove_core_nation_reb(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_adj_from_to_map(ws, m, trigger::to_rebel(from_slot));
+				text::localised_format_box(ws, layout, box, "remove_x_core", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+
 		uint32_t ef_change_region_name_state(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
+				dcon::text_key name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 				text::add_to_substitution_map(m, text::variable_type::text, name);
 				text::localised_format_box(ws, layout, box, "change_name_to", m);
 				text::close_layout_box(layout, box);
@@ -1833,6 +2042,24 @@ namespace ui {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
 				text::localised_format_box(ws, layout, box, "union_culture_accepted", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_add_accepted_culture_union_this(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, "union_culture_accepted_this", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_add_accepted_culture_union_from(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, "union_culture_accepted_from", m);
 				text::close_layout_box(layout, box);
 			}
 			return 0;
@@ -1973,6 +2200,17 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_life_rating_state(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, "life_rating", m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(trigger::payload(tval[1]).signed_value), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
 		uint32_t ef_religion(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -2001,6 +2239,16 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_is_slave_province_yes(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, "make_slave_state", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+
 		uint32_t ef_research_points(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -2724,6 +2972,19 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_infrastructure_state(EFFECT_DISPLAY_PARAMS) {
+			auto type = economy::province_building_type::railroad;
+			auto amount = trigger::payload(tval[1]).signed_value;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(amount), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
 		uint32_t ef_money(EFFECT_DISPLAY_PARAMS) {
 			auto amount = trigger::read_float_from_payload(tval + 1);
 			{
@@ -2991,6 +3252,17 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_remove_province_modifier_state(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
+			text::localised_format_box(ws, layout, box, "remove_prov_mod", m);
+			text::close_layout_box(layout, box);
+			if(ws.user_settings.spoilers) {
+				modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
+			}
+			return 0;
+		}
 		uint32_t ef_remove_country_modifier(EFFECT_DISPLAY_PARAMS) {
 			auto mod = trigger::payload(tval[1]).mod_id;
 			bool has_mod = (primary_slot == -1);
@@ -3065,21 +3337,21 @@ namespace ui {
 		}
 		uint32_t ef_release_vassal(EFFECT_DISPLAY_PARAMS) {
 			auto holder = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
-			if(!holder)
-			return 0;
-			auto hprovs = ws.world.nation_get_province_ownership(holder);
-			if(hprovs.begin() == hprovs.end()) {
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::add_to_substitution_map(m, text::variable_type::text, holder);
-				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
-				text::close_layout_box(layout, box);
-			} else {
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::add_to_substitution_map(m, text::variable_type::text, holder);
-				text::localised_format_box(ws, layout, box, "becomes_independent", m);
-				text::close_layout_box(layout, box);
+			if(holder) {
+				auto hprovs = ws.world.nation_get_province_ownership(holder);
+				if(hprovs.begin() == hprovs.end()) {
+					auto box = text::open_layout_box(layout, indentation);
+					text::substitution_map m;
+					text::add_to_substitution_map(m, text::variable_type::text, holder);
+					text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+					text::close_layout_box(layout, box);
+				} else {
+					auto box = text::open_layout_box(layout, indentation);
+					text::substitution_map m;
+					text::add_to_substitution_map(m, text::variable_type::text, holder);
+					text::localised_format_box(ws, layout, box, "becomes_independent", m);
+					text::close_layout_box(layout, box);
+				}
 			}
 			return 0;
 		}
@@ -3095,7 +3367,7 @@ namespace ui {
 			} else {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_nation(this_slot)), "this_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(this_slot)), "this_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "becomes_independent", m);
 				text::close_layout_box(layout, box);
 			}
@@ -3104,19 +3376,16 @@ namespace ui {
 		uint32_t ef_release_vassal_this_province(EFFECT_DISPLAY_PARAMS) {
 			auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot));
 			auto hprovs = ws.world.nation_get_province_ownership(holder);
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
 			if(hprovs.begin() == hprovs.end()) {
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
 				text::add_to_substitution_map(m, text::variable_type::text, holder);
 				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
-				text::close_layout_box(layout, box);
 			} else {
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_prov(this_slot)), "this_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(this_slot)), "this_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "becomes_independent", m);
-				text::close_layout_box(layout, box);
 			}
+			text::close_layout_box(layout, box);
 			return 0;
 		}
 		uint32_t ef_release_vassal_from_nation(EFFECT_DISPLAY_PARAMS) {
@@ -3131,7 +3400,7 @@ namespace ui {
 			} else {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "becomes_independent", m);
 				text::close_layout_box(layout, box);
 			}
@@ -3149,7 +3418,7 @@ namespace ui {
 			} else {
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_prov(from_slot)), "from_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(from_slot)), "from_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "becomes_independent", m);
 				text::close_layout_box(layout, box);
 			}
@@ -3158,7 +3427,7 @@ namespace ui {
 		uint32_t ef_release_vassal_reb(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
-		add_to_map(ws, m, convert_this(ws, trigger::to_rebel(from_slot)), "from_nation", [](auto x) { return x; });
+			add_to_map(ws, m, convert_this(ws, trigger::to_rebel(from_slot)), "from_nation", [](auto x) { return x; });
 			text::localised_format_box(ws, layout, box, "release_as_independent", m);
 			text::close_layout_box(layout, box);
 			return 0;
@@ -3169,6 +3438,111 @@ namespace ui {
 			text::close_layout_box(layout, box);
 			return 0;
 		}
+
+		uint32_t ef_release_vassal_province(EFFECT_DISPLAY_PARAMS) {
+			auto holder = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
+			if(holder) {
+				auto hprovs = ws.world.nation_get_province_ownership(holder);
+				if(hprovs.begin() == hprovs.end()) {
+					auto box = text::open_layout_box(layout, indentation);
+					text::substitution_map m;
+					text::add_to_substitution_map(m, text::variable_type::text, holder);
+					text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+					text::close_layout_box(layout, box);
+				} else {
+					auto box = text::open_layout_box(layout, indentation);
+					text::substitution_map m;
+					text::add_to_substitution_map(m, text::variable_type::text, holder);
+					text::localised_format_box(ws, layout, box, "becomes_independent", m);
+					text::close_layout_box(layout, box);
+				}
+			}
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_this_nation(EFFECT_DISPLAY_PARAMS) {
+			auto holder = trigger::to_nation(this_slot);
+			auto hprovs = ws.world.nation_get_province_ownership(holder);
+			if(hprovs.begin() == hprovs.end()) {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::text, holder);
+				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+				text::close_layout_box(layout, box);
+			} else {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(this_slot)), "this_nation", [](auto x) { return x; });
+				text::localised_format_box(ws, layout, box, "becomes_independent", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_this_province(EFFECT_DISPLAY_PARAMS) {
+			auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot));
+			auto hprovs = ws.world.nation_get_province_ownership(holder);
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			if(hprovs.begin() == hprovs.end()) {
+				text::add_to_substitution_map(m, text::variable_type::text, holder);
+				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+			} else {
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(this_slot)), "this_nation", [](auto x) { return x; });
+				text::localised_format_box(ws, layout, box, "becomes_independent", m);
+			}
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_from_nation(EFFECT_DISPLAY_PARAMS) {
+			auto holder = trigger::to_nation(from_slot);
+			auto hprovs = ws.world.nation_get_province_ownership(holder);
+			if(hprovs.begin() == hprovs.end()) {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::text, holder);
+				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+				text::close_layout_box(layout, box);
+			} else {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
+				text::localised_format_box(ws, layout, box, "becomes_independent", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_from_province(EFFECT_DISPLAY_PARAMS) {
+			auto holder = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(from_slot));
+			auto hprovs = ws.world.nation_get_province_ownership(holder);
+			if(hprovs.begin() == hprovs.end()) {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::text, holder);
+				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
+				text::close_layout_box(layout, box);
+			} else {
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(from_slot)), "from_nation", [](auto x) { return x; });
+				text::localised_format_box(ws, layout, box, "becomes_independent", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_reb(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			add_to_map(ws, m, convert_this(ws, trigger::to_rebel(from_slot)), "from_nation", [](auto x) { return x; });
+			text::localised_format_box(ws, layout, box, "release_as_independent", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_release_vassal_province_random(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::localised_format_box(ws, layout, box, "no_effect");
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+
 		uint32_t ef_change_province_name(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
@@ -3254,6 +3628,12 @@ namespace ui {
 		uint32_t ef_is_slave_pop_no(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::localised_format_box(ws, layout, box, "free_slave_pop");
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_is_slave_province_no(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::localised_format_box(ws, layout, box, "free_slave_state");
 			text::close_layout_box(layout, box);
 			return 0;
 		}
@@ -3346,12 +3726,39 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_reduce_pop_nation(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "pop_size", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_percentage{ trigger::read_float_from_payload(tval + 1) - 1.0f }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_reduce_pop_state(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "pop_size", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_percentage{ trigger::read_float_from_payload(tval + 1) - 1.0f }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_reduce_pop_province(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "pop_size", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_percentage{ trigger::read_float_from_payload(tval + 1) - 1.0f }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
 		uint32_t ef_reduce_pop(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
 			text::localised_format_box(ws, layout, box, "pop_size", m);
 			text::add_space_to_layout_box(ws, layout, box);
-		display_value(text::fp_percentage{ trigger::read_float_from_payload(tval + 1) - 1.0f }, true, ws, layout, box);
+			display_value(text::fp_percentage{ trigger::read_float_from_payload(tval + 1) - 1.0f }, true, ws, layout, box);
 			text::close_layout_box(layout, box);
 			return 0;
 		}
@@ -3643,6 +4050,15 @@ namespace ui {
 			text::close_layout_box(layout, box);
 			return 0;
 		}
+		uint32_t ef_flashpoint_tension_province(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "flashpoint_tension_label", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(int64_t(trigger::read_float_from_payload(tval + 1)), true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
 		uint32_t ef_add_crisis_temperature(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
@@ -3652,12 +4068,66 @@ namespace ui {
 			text::close_layout_box(layout, box);
 			return 0;
 		}
+		uint32_t ef_consciousness_nation(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "consciousness", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_consciousness_state(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "consciousness", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_consciousness_province(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "consciousness", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
 		uint32_t ef_consciousness(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
 			text::localised_format_box(ws, layout, box, "consciousness", m);
 			text::add_space_to_layout_box(ws, layout, box);
-		display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, true, ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_militancy_nation(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "militancy", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, false, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_militancy_state(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "militancy", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, false, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_militancy_province(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "militancy", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, false, ws, layout, box);
 			text::close_layout_box(layout, box);
 			return 0;
 		}
@@ -3666,7 +4136,7 @@ namespace ui {
 			text::substitution_map m;
 			text::localised_format_box(ws, layout, box, "militancy", m);
 			text::add_space_to_layout_box(ws, layout, box);
-		display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, false, ws, layout, box);
+			display_value(text::fp_one_place{ trigger::read_float_from_payload(tval + 1) }, false, ws, layout, box);
 			text::close_layout_box(layout, box);
 			return 0;
 		}
@@ -3677,6 +4147,19 @@ namespace ui {
 			text::add_space_to_layout_box(ws, layout, box);
 			display_value(int64_t(trigger::payload(tval[1]).signed_value), false, ws, layout, box);
 			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_fort_state(EFFECT_DISPLAY_PARAMS) {
+			auto type = economy::province_building_type::fort;
+			auto amount = trigger::payload(tval[1]).signed_value;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(amount), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
 			return 0;
 		}
 		uint32_t ef_fort(EFFECT_DISPLAY_PARAMS) {
@@ -3693,6 +4176,19 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_naval_base(EFFECT_DISPLAY_PARAMS) {
+			auto type = economy::province_building_type::naval_base;
+			auto amount = trigger::payload(tval[1]).signed_value;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(amount), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_naval_base_state(EFFECT_DISPLAY_PARAMS) {
 			auto type = economy::province_building_type::naval_base;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
@@ -3880,7 +4376,26 @@ namespace ui {
 			modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
 			return 0;
 		}
+		uint32_t ef_add_province_modifier_state(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
+			text::add_to_substitution_map(m, text::variable_type::date, ws.current_date + trigger::payload(tval[2]).signed_value);
+			text::localised_format_box(ws, layout, box, "add_modifier_until", m);
+			text::close_layout_box(layout, box);
+			modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
+			return 0;
+		}
 		uint32_t ef_add_province_modifier_no_duration(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
+			text::localised_format_box(ws, layout, box, "add_modifier", m);
+			text::close_layout_box(layout, box);
+			modifier_description(ws, layout, trigger::payload(tval[1]).mod_id, indentation + indentation_amount);
+			return 0;
+		}
+		uint32_t ef_add_province_modifier_state_no_duration(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;
 			text::add_to_substitution_map(m, text::variable_type::text, ws.world.modifier_get_name(trigger::payload(tval[1]).mod_id));
@@ -6302,6 +6817,17 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_set_country_flag_pop(EFFECT_DISPLAY_PARAMS) {
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::add_to_substitution_map(m, text::variable_type::text,
+				ws.national_definitions.flag_variable_names[trigger::payload(tval[1]).natf_id]);
+				text::localised_format_box(ws, layout, box, "o_set_national_flag", m);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
 		uint32_t ef_set_province_flag(EFFECT_DISPLAY_PARAMS) {
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -6610,7 +7136,7 @@ namespace ui {
 			return 0;
 		}
 
-		uint32_t ef_bank(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_bank_state(EFFECT_DISPLAY_PARAMS) {
 			auto type = economy::province_building_type::bank;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
@@ -6623,7 +7149,33 @@ namespace ui {
 			}
 			return 0;
 		}
-		uint32_t ef_university(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_bank_province(EFFECT_DISPLAY_PARAMS) {
+			auto type = economy::province_building_type::bank;
+			auto amount = trigger::payload(tval[1]).signed_value;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(amount), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_university_state(EFFECT_DISPLAY_PARAMS) {
+			auto type = economy::province_building_type::university;
+			auto amount = trigger::payload(tval[1]).signed_value;
+			{
+				auto box = text::open_layout_box(layout, indentation);
+				text::substitution_map m;
+				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::add_space_to_layout_box(ws, layout, box);
+				display_value(int64_t(amount), true, ws, layout, box);
+				text::close_layout_box(layout, box);
+			}
+			return 0;
+		}
+		uint32_t ef_university_province(EFFECT_DISPLAY_PARAMS) {
 			auto type = economy::province_building_type::university;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
@@ -6637,7 +7189,11 @@ namespace ui {
 			return 0;
 		}
 
-		uint32_t ef_annex_to_null(EFFECT_DISPLAY_PARAMS) {
+		uint32_t ef_annex_to_null_nation(EFFECT_DISPLAY_PARAMS) {
+			text::add_line(ws, layout, text::produce_simple_string(ws, "e_annex_null"));
+			return 0;
+		}
+		uint32_t ef_annex_to_null_province(EFFECT_DISPLAY_PARAMS) {
 			text::add_line(ws, layout, text::produce_simple_string(ws, "e_annex_null"));
 			return 0;
 		}

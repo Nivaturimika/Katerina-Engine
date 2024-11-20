@@ -106,3 +106,6 @@ set_crisis_colony;Set crisis colony to $x$
 set_crisis_liberation_tag;Set crisis liberation tag to $x$
 primary_crisis_attacker;Primary crisis attacker
 primary_crisis_defender;Primary crisis defender
+union_culture_accepted;Accept all of the nation primary culture group
+union_culture_accepted_this;Accept all of this nation primary culture group
+union_culture_accepted_from;Accept all from nation primary culture group

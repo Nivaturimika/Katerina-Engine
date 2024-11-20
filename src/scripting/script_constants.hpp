@@ -107,7 +107,7 @@ namespace trigger {
 #undef TRIGGER_BYTECODE_ELEMENT
 	constexpr inline uint16_t first_scope_code = 0x02F6;
 
-#define TRIGGER_SCOPE_BYTECODE_ELEMENT(code, name) constexpr inline uint16_t name = first_scope_code + code;
+#define TRIGGER_SCOPE_BYTECODE_ELEMENT(name, code) constexpr inline uint16_t name = first_scope_code + code;
 	TRIGGER_SCOPE_BYTECODE_LIST
 #undef TRIGGER_SCOPE_BYTECODE_ELEMENT
 	constexpr inline uint16_t first_invalid_code = first_scope_code + 0x0036;
