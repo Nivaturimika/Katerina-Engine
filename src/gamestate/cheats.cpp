@@ -1,9 +1,19 @@
 #include <algorithm>
 
-#include "commands.hpp"
 #include "system_state.hpp"
+#include "commands.hpp"
+#include "demographics.hpp"
+#include "economy_factory_templates.hpp"
+#include "effects.hpp"
+#include "serialization.hpp"
 #include "nations.hpp"
+#include "nations_templates.hpp"
+#include "politics.hpp"
+#include "province_templates.hpp"
+#include "rebels.hpp"
+#include "triggers.hpp"
 #include "ai.hpp"
+#include "cheats.hpp"
 
 namespace command {
 

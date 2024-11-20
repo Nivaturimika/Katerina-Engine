@@ -49,7 +49,6 @@
 #include "gui_military_window.hpp"
 
 namespace ui {
-
 	void create_in_game_windows(sys::state& state) {
 		state.ui_state.lazy_load_in_game = true;
 		//

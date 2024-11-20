@@ -10,7 +10,8 @@
 #include "province_templates.hpp"
 #include "rebels.hpp"
 #include "triggers.hpp"
-#include "cheats.cpp"
+#include "cheats.hpp"
+#include "ai.hpp"
 
 #include "gui_event.hpp"
 #include "gui_error_window.hpp"

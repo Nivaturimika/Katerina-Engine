@@ -38,10 +38,6 @@ jobs:
       run: |
         cmake --build build --parallel --target KatEngine
 
-    - name: Build Katerina Engine Incremental
-      run: |
-        cmake --build build --parallel --target KatEngineIncremental
-
   windows-build:
     strategy:
       matrix:
@@ -60,10 +56,6 @@ jobs:
     - name: Build Katerina Engine
       run: |
         cmake --build build --parallel --target KatEngine
-
-    - name: Build Katerina Engine Incremental
-      run: |
-        cmake --build build --parallel --target KatEngineIncremental
 
   build-check:
     needs: [windows-build, linux-build]

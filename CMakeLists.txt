@@ -28,17 +28,8 @@ endif()
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 list(APPEND ALICE_CORE_SOURCES_LIST
-	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
-	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
-	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
-	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
-	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
-	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
-)
-
-list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
-	${ALICE_CORE_SOURCES_LIST}
 	"${PROJECT_SOURCE_DIR}/src/ai/ai.cpp"
+	"${PROJECT_SOURCE_DIR}/src/common_types/common_types.cpp"
 	"${PROJECT_SOURCE_DIR}/src/common_types/blake2.cpp"
 	"${PROJECT_SOURCE_DIR}/src/common_types/date_interface.cpp"
 	"${PROJECT_SOURCE_DIR}/src/common_types/prng.cpp"
@@ -51,14 +42,24 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/economy/economy_estimations.cpp"
  	"${PROJECT_SOURCE_DIR}/src/economy/economy_factory.cpp"
 	"${PROJECT_SOURCE_DIR}/src/economy/economy_rgo.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/cheats.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/commands.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/diplomatic_messages.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/modifiers.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/notifications.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/serialization.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gamestate/system_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/opengl_wrapper.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/texture.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/stb_image.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_common_elements.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_element_types.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_main_menu.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_console.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_event.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_message_settings_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_effect_tooltips.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_graphics.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_leader_select.cpp"
@@ -74,6 +75,10 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_budget_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/unit_tooltip.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_modes.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
+	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
 	"${PROJECT_SOURCE_DIR}/src/military/military.cpp"
 	"${PROJECT_SOURCE_DIR}/src/military/military_cb.cpp"
 	"${PROJECT_SOURCE_DIR}/src/military/military_units.cpp"
@@ -97,27 +102,15 @@ list(APPEND ALICE_INCREMENTAL_SOURCES_LIST
 )
 
 if(WIN32)
-add_executable(KatEngine WIN32
-	"${PROJECT_SOURCE_DIR}/src/main.cpp"
-	${ALICE_CORE_SOURCES_LIST}
-	"${PROJECT_SOURCE_DIR}/src/alice.rc"
-	${ASSET_FILES})
-add_executable(KatEngineIncremental WIN32
-	${ALICE_INCREMENTAL_SOURCES_LIST}
-	"${PROJECT_SOURCE_DIR}/src/alice.rc"
-	${ASSET_FILES})
+	add_executable(KatEngine WIN32
+		${ALICE_CORE_SOURCES_LIST}
+		"${PROJECT_SOURCE_DIR}/src/alice.rc"
+		${ASSET_FILES})
 else()
-add_executable(KatEngine WIN32
-	"${PROJECT_SOURCE_DIR}/src/main.cpp"
-	${ALICE_CORE_SOURCES_LIST}
-	${ASSET_FILES})
-add_executable(KatEngineIncremental WIN32
-	"${PROJECT_SOURCE_DIR}/src/main.cpp"
-	${ALICE_INCREMENTAL_SOURCES_LIST}
-	${ASSET_FILES})
+	add_executable(KatEngine WIN32
+		${ALICE_CORE_SOURCES_LIST}
+		${ASSET_FILES})
 endif()
-
-target_compile_definitions(KatEngineIncremental PRIVATE INCREMENTAL=1)
 
 # Include sub-projects.
 add_subdirectory(dependencies)
@@ -253,20 +246,9 @@ target_include_directories(KatEngineCommon INTERFACE
 	"ankerl")
 
 target_link_libraries(KatEngine PRIVATE KatEngineCommon)
-target_link_libraries(KatEngineIncremental PRIVATE KatEngineCommon)
 
 # System headers
 target_precompile_headers(KatEngine
-	PRIVATE <stddef.h>
-	PRIVATE <stdint.h>
-	PRIVATE <assert.h>
-	PRIVATE <stdarg.h>
-	PRIVATE <stdlib.h>
-	PRIVATE <math.h>
-	PRIVATE <signal.h>
-	PRIVATE <ctype.h>
-)
-target_precompile_headers(KatEngineIncremental
 	PRIVATE <stddef.h>
 	PRIVATE <stdint.h>
 	PRIVATE <assert.h>
@@ -297,36 +279,8 @@ target_precompile_headers(KatEngine
 	PRIVATE <limits>
 	PRIVATE <iterator>
 )
-target_precompile_headers(KatEngineIncremental
-	PRIVATE <vector>
-	PRIVATE <array>
-	PRIVATE <optional>
-	PRIVATE <memory>
-	PRIVATE <variant>
-	PRIVATE <string>
-	PRIVATE <string_view>
-	PRIVATE <charconv>
-	PRIVATE <algorithm>
-	PRIVATE <iterator>
-	PRIVATE <functional>
-	PRIVATE <atomic>
-	PRIVATE <chrono>
-	PRIVATE <tuple>
-	PRIVATE <type_traits>
-	PRIVATE <new>
-	PRIVATE <limits>
-	PRIVATE <iterator>
-)
 # Aliases for C library
 target_precompile_headers(KatEngine
-	PRIVATE <cstdlib>
-	PRIVATE <cstddef>
-	PRIVATE <cstdint>
-	PRIVATE <cassert>
-	PRIVATE <cstdarg>
-	PRIVATE <cmath>
-)
-target_precompile_headers(KatEngineIncremental
 	PRIVATE <cstdlib>
 	PRIVATE <cstddef>
 	PRIVATE <cstdint>
@@ -346,28 +300,15 @@ target_precompile_headers(KatEngine
 	PRIVATE [["date_interface.hpp"]]
 	PRIVATE [["stb_image.h"]]
 )
-target_precompile_headers(KatEngineIncremental
-	PRIVATE [["simple_fs.hpp"]]
-	PRIVATE [["constants.hpp"]]
-	PRIVATE [["unordered_dense.h"]]
-	PRIVATE [["dcon_generated.hpp"]]
-	PRIVATE [["container_types.hpp"]]
-	PRIVATE [["parsers_declarations.hpp"]]
-	PRIVATE [["cyto_any.hpp"]]
-	PRIVATE [["date_interface.hpp"]]
-	PRIVATE [["stb_image.h"]]
-)
-
-target_precompile_headers(KatEngineIncremental
+target_precompile_headers(KatEngine
 	PRIVATE [["system_state.hpp"]]
-	)
+)
 
 if(WIN32)
 else()
 	target_precompile_headers(KatEngine
-		PRIVATE [["miniaudio.h"]])
-	target_precompile_headers(KatEngineIncremental
-		PRIVATE [["miniaudio.h"]])
+		PRIVATE [["miniaudio.h"]]
+	)
 endif()
 
 # GENERATE CONTAINER
@@ -384,7 +325,6 @@ if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 	# Sets a dependency on the generated file
 	add_custom_target(GENERATE_CONTAINER DEPENDS ${CONTAINER_PATH}.hpp)
 	add_dependencies(KatEngine GENERATE_CONTAINER ParserGenerator)
-	add_dependencies(KatEngineIncremental GENERATE_CONTAINER ParserGenerator)
 endif()
 
 # The command to build the generated parsers file
@@ -461,7 +401,6 @@ add_custom_target(GENERATE_PARSERS DEPENDS
 	${PROJECT_SOURCE_DIR}/src/text/bmfont_defs_generated.hpp
 	${PROJECT_SOURCE_DIR}/src/text/font_defs_generated.hpp)
 add_dependencies(KatEngine GENERATE_PARSERS)
-add_dependencies(KatEngineIncremental GENERATE_PARSERS)
 
 if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
 	if (BUILD_TESTING)
