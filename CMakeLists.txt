@@ -15,6 +15,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CTest)
 
 option(ARCHITECTURE "Target architecture (valid values: x64, x86, aarch64, arm, riscv64)" "x64")
+if(NOT(
+	ARCHITECTURE STREQUAL "x64"
+	OR ARCHITECTURE STREQUAL "x86"
+	OR ARCHITECTURE STREQUAL "aarch64"
+	OR ARCHITECTURE STREQUAL "riscv64"
+	OR ARCHITECTURE STREQUAL "arm"
+))
+	message(FATAL_ERROR "Architecture is not valid, specify with -DARCHITECTURE=<arch>")
+endif()
 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
