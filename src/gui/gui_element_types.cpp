@@ -28,6 +28,17 @@
 #include "gui_element_templates.hpp"
 
 namespace ui {
+	state::state() {
+		units_root = std::make_unique<container_base>();
+		rgos_root = std::make_unique<container_base>();
+		colonizations_root = std::make_unique<container_base>();
+		province_details_root = std::make_unique<container_base>();
+		root = std::make_unique<container_base>();
+		tooltip = std::make_unique<tool_tip>();
+		tooltip->flags |= element_base::is_invisible_mask;
+	}
+
+	state::~state() = default;
 
 	inline message_result greater_result(message_result a, message_result b) {
 		if(a == message_result::consumed || b == message_result::consumed)
@@ -1119,18 +1130,6 @@ namespace ui {
 		return std::unique_ptr<element_base>{};
 	}
 
-	state::state() {
-		units_root = std::make_unique<container_base>();
-		rgos_root = std::make_unique<container_base>();
-		colonizations_root = std::make_unique<container_base>();
-		province_details_root = std::make_unique<container_base>();
-		root = std::make_unique<container_base>();
-		tooltip = std::make_unique<tool_tip>();
-		tooltip->flags |= element_base::is_invisible_mask;
-	}
-
-	state::~state() = default;
-
 	void window_element_base::on_create(sys::state& state) noexcept {
 		if(base_data.get_element_type() == element_type::window) {
 			auto first_child = base_data.data.window.first_child;
@@ -1898,9 +1897,9 @@ namespace ui {
 				float percentage = float(settings.lower_limit - settings.lower_value) / float(settings.upper_value - settings.lower_value);
 				auto offset = settings.buttons_size + int32_t((settings.track_size - settings.buttons_size) * percentage);
 				if(settings.vertical)
-				right_limit->base_data.position.y = int16_t(offset);
+					right_limit->base_data.position.y = int16_t(offset);
 				else
-				right_limit->base_data.position.x = int16_t(offset);
+					right_limit->base_data.position.x = int16_t(offset);
 			}
 			if(left_limit) {
 				left_limit->set_visible(state, settings.upper_value > settings.upper_limit);
@@ -1908,9 +1907,9 @@ namespace ui {
 				float percentage = float(settings.upper_limit - settings.lower_value) / float(settings.upper_value - settings.lower_value);
 				auto offset = settings.buttons_size + int32_t((settings.track_size - settings.buttons_size) * percentage);
 				if(settings.vertical)
-				left_limit->base_data.position.y = int16_t(offset + settings.buttons_size - 10);
+					left_limit->base_data.position.y = int16_t(offset + settings.buttons_size - 10);
 				else
-				left_limit->base_data.position.x = int16_t(offset + settings.buttons_size - 10);
+					left_limit->base_data.position.x = int16_t(offset + settings.buttons_size - 10);
 			}
 			if(stored_value < settings.lower_limit || stored_value > settings.upper_limit) {
 				update_raw_value(state, stored_value);
@@ -1918,9 +1917,9 @@ namespace ui {
 			}
 		} else {
 			if(right_limit)
-			right_limit->set_visible(state, false);
+				right_limit->set_visible(state, false);
 			if(left_limit)
-			left_limit->set_visible(state, false);
+				left_limit->set_visible(state, false);
 			if(stored_value < settings.lower_value || stored_value > settings.upper_value) {
 				update_raw_value(state, stored_value);
 				//on_value_change(state, stored_value);
@@ -1932,24 +1931,22 @@ namespace ui {
 		// create & position sub elements
 		// fill out settings data
 		// set initial slider pos
-
 		if(base_data.get_element_type() == element_type::scrollbar) {
 			auto step = base_data.data.scrollbar.get_step_size();
 			settings.scaling_factor = 1;
 			switch(step) {
-				case step_size::twenty_five:
+			case step_size::twenty_five:
+			case step_size::two:
+			case step_size::one:
+			default:
 				break;
-				case step_size::two:
-				break;
-				case step_size::one:
-				break;
-				case step_size::one_tenth:
+			case step_size::one_tenth:
 				settings.scaling_factor = 10;
 				break;
-				case step_size::one_hundredth:
+			case step_size::one_hundredth:
 				settings.scaling_factor = 100;
 				break;
-				case step_size::one_thousandth:
+			case step_size::one_thousandth:
 				settings.scaling_factor = 1000;
 				break;
 			}
@@ -1994,11 +1991,11 @@ namespace ui {
 
 					settings.buttons_size = settings.vertical ? left->base_data.size.y : left->base_data.size.x;
 					if(step_size::twenty_five == step)
-					left->step_size = 25;
+						left->step_size = 25;
 					else if(step_size::two == step)
-					left->step_size = 2;
+						left->step_size = 2;
 					else
-					left->step_size = 1;
+						left->step_size = 1;
 				}
 				{
 					auto child_tag = dcon::gui_def_id(dcon::gui_def_id::value_base_t(1 + first_child.index()));
@@ -2007,18 +2004,17 @@ namespace ui {
 					add_child_to_back(std::move(ch_res));
 
 					if(step_size::twenty_five == step)
-					right->step_size = 25;
+						right->step_size = 25;
 					else if(step_size::two == step)
-					right->step_size = 2;
+						right->step_size = 2;
 					else
-					right->step_size = 1;
+						right->step_size = 1;
 				}
 				{
 					auto child_tag = dcon::gui_def_id(dcon::gui_def_id::value_base_t(3 + first_child.index()));
 					auto ch_res = make_element_by_type<scrollbar_track>(state, child_tag);
 					track = ch_res.get();
-					add_child_to_back(std::move(ch_res));
-
+					add_child_to_back(std::move(ch_res));	
 					settings.track_size = settings.vertical ? track->base_data.size.y : track->base_data.size.x;
 				}
 				left->base_data.position.x = 0;
@@ -2042,9 +2038,8 @@ namespace ui {
 		}
 	}
 	void scrollbar_slider::on_drag_finish(sys::state& state) noexcept {
-		if(parent) {
+		if(parent)
 			parent->impl_on_drag_finish(state);
-		}
 	}
 	message_result scrollbar::get(sys::state& state, Cyto::Any& payload) noexcept {
 		if(payload.holds_type<scrollbar_settings>()) {
@@ -2055,15 +2050,16 @@ namespace ui {
 			auto adjustments = any_cast<value_change>(payload);
 
 			if(adjustments.is_relative)
-			stored_value += adjustments.new_value;
+				stored_value += adjustments.new_value;
 			else
-			stored_value = adjustments.new_value;
+				stored_value = adjustments.new_value;
 
 			if(adjustments.move_slider) {
 				update_raw_value(state, stored_value);
 			} else {
-				stored_value = settings.using_limits ? std::clamp(stored_value, settings.lower_limit, settings.upper_limit)
-																					 : std::clamp(stored_value, settings.lower_value, settings.upper_value);
+				stored_value = settings.using_limits
+					? std::clamp(stored_value, settings.lower_limit, settings.upper_limit)
+					: std::clamp(stored_value, settings.lower_value, settings.upper_value);
 			}
 
 			if(adjustments.move_slider == true && adjustments.is_relative == false && !state.ui_state.drag_target) { // track click
@@ -2080,234 +2076,233 @@ namespace ui {
 	void unit_frame_bg::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 		auto display_unit = retrieve< unit_var>(state, parent);
 		if(std::holds_alternative<dcon::army_id>(display_unit))
-		single_unit_tooltip(state, contents, std::get<dcon::army_id>(display_unit));
+			single_unit_tooltip(state, contents, std::get<dcon::army_id>(display_unit));
 		else if(std::holds_alternative<dcon::navy_id>(display_unit))
-		single_unit_tooltip(state, contents, std::get<dcon::navy_id>(display_unit));
+			single_unit_tooltip(state, contents, std::get<dcon::navy_id>(display_unit));
 		text::add_line(state, contents, "unit_controls_tooltip_1");
 		text::add_line(state, contents, "unit_controls_tooltip_2");
 		text::add_line(state, contents, "unit_control_group_tooltip");
 	}
 
 	void populate_shortcut_tooltip(sys::state& state, ui::element_base& elm, text::columnar_layout& contents) noexcept {
-		if(elm.base_data.get_element_type() != ui::element_type::button)
-		return;
-		if(elm.base_data.data.button.shortcut == sys::virtual_key::NONE)
-		return;
+		if(elm.base_data.get_element_type() != ui::element_type::button
+		|| elm.base_data.data.button.shortcut == sys::virtual_key::NONE)
+			return;
 		static const std::string_view key_names[] = { //enum class virtual_key : uint8_t {
-				"", //NONE = 0x00,
-				"Left-Button", //LBUTTON = 0x01,
-				"Right-Button", //RBUTTON = 0x02,
-				"Cancel", //CANCEL = 0x03,
-				"Multimedia button", //MBUTTON = 0x04,
-				"XButton1", //XBUTTON_1 = 0x05,
-				"XButton2", //XBUTTON_2 = 0x06,
-				"", //0x07
-				"Backspace", //BACK = 0x08,
-				"TAB", //TAB = 0x09,
-				"", // 0x0A
-				"", // 0x0B
-				"Clear", //CLEAR = 0x0C,
-				"Return", //RETURN = 0x0D,
-				"", // 0x0E
-				"", // 0x0F
-				"Shift", //SHIFT = 0x10,
-				"Control", //CONTROL = 0x11,
-				"Menu", //MENU = 0x12,
-				"Pause", //PAUSE = 0x13,
-				"Capital", //CAPITAL = 0x14,
-				"Kana", //KANA = 0x15,
-				"", // 0x16
-				"Junja", //JUNJA = 0x17,
-				"Final", //FINAL = 0x18,
-				"Kanji", //KANJI = 0x19,
-				"", // 0x1A
-				"Escape", //ESCAPE = 0x1B,
-				"Convert", //CONVERT = 0x1C,
-				"Nonconvert", //NONCONVERT = 0x1D,
-				"Accept", //ACCEPT = 0x1E,
-				"Modechange", //MODECHANGE = 0x1F,
-				"Spacebar", //SPACE = 0x20,
-				"Prior", //PRIOR = 0x21,
-				"Next", //NEXT = 0x22,
-				"End", //END = 0x23,
-				"Home", //HOME = 0x24,
-				"Left", //LEFT = 0x25,
-				"Up", //UP = 0x26,
-				"Right", //RIGHT = 0x27,
-				"Down", //DOWN = 0x28,
-				"Select", //SELECT = 0x29,
-				"Print", //PRINT = 0x2A,
-				"Execute", //EXECUTE = 0x2B,
-				"Snapshot", //SNAPSHOT = 0x2C,
-				"Insert", //INSERT = 0x2D,
-				"Delete", //DELETE_KEY = 0x2E,
-				"Help", //HELP = 0x2F,
-				"0", //NUM_0 = 0x30,
-				"1", //NUM_1 = 0x31,
-				"2", //NUM_2 = 0x32,
-				"3", //NUM_3 = 0x33,
-				"4", //NUM_4 = 0x34,
-				"5", //NUM_5 = 0x35,
-				"6", //NUM_6 = 0x36,
-				"7", //NUM_7 = 0x37,
-				"8", //NUM_8 = 0x38,
-				"9", //NUM_9 = 0x39,
-				"", // 0x3A
-				"", // 0x3B
-				"", // 0x3C
-				"", // 0x3D
-				"", // 0x3E
-				"", // 0x3F
-				"", // 0x40
-				"A", //A = 0x41,
-				"B", //B = 0x42,
-				"C", //C = 0x43,
-				"D", //D = 0x44,
-				"E", //E = 0x45,
-				"F", //F = 0x46,
-				"G", //G = 0x47,
-				"H", //H = 0x48,
-				"I", //I = 0x49,
-				"J", //J = 0x4A,
-				"K", //K = 0x4B,
-				"L", //L = 0x4C,
-				"M", //M = 0x4D,
-				"N", //N = 0x4E,
-				"O", //O = 0x4F,
-				"P", //P = 0x50,
-				"Q", //Q = 0x51,
-				"R", //R = 0x52,
-				"S", //S = 0x53,
-				"T", //T = 0x54,
-				"U", //U = 0x55,
-				"V", //V = 0x56,
-				"W", //W = 0x57,
-				"X", //X = 0x58,
-				"Y", //Y = 0x59,
-				"Z", //Z = 0x5A,
-				"Left Windows", //LWIN = 0x5B,
-				"Right Windows", //RWIN = 0x5C,
-				"Apps", //APPS = 0x5D,
-				"", // 0x5E
-				"Sleep", //SLEEP = 0x5F,
-				"Numpad 0", //NUMPAD0 = 0x60,
-				"Numpad 1", //NUMPAD1 = 0x61,
-				"Numpad 2", //NUMPAD2 = 0x62,
-				"Numpad 3", //NUMPAD3 = 0x63,
-				"Numpad 4", //NUMPAD4 = 0x64,
-				"Numpad 5", //NUMPAD5 = 0x65,
-				"Numpad 6", //NUMPAD6 = 0x66,
-				"Numpad 7", //NUMPAD7 = 0x67,
-				"Numpad 8", //NUMPAD8 = 0x68,
-				"Numpad 9", //NUMPAD9 = 0x69,
-				"Numpad *", //MULTIPLY = 0x6A,
-				"Numpad +", //ADD = 0x6B,
-				"Numpad .", //SEPARATOR = 0x6C,
-				"Numpad -", //SUBTRACT = 0x6D,
-				"Numpad .", //DECIMAL = 0x6E,
-				"Numpad /", //DIVIDE = 0x6F,
-				"F1", //F1 = 0x70,
-				"F2", //F2 = 0x71,
-				"F3", //F3 = 0x72,
-				"F4", //F4 = 0x73,
-				"F5", //F5 = 0x74,
-				"F6", //F6 = 0x75,
-				"F7", //F7 = 0x76,
-				"F8", //F8 = 0x77,
-				"F9", //F9 = 0x78,
-				"F10", //F10 = 0x79,
-				"F11", //F11 = 0x7A,
-				"F12", //F12 = 0x7B,
-				"F13", //F13 = 0x7C,
-				"F14", //F14 = 0x7D,
-				"F15", //F15 = 0x7E,
-				"F16", //F16 = 0x7F,
-				"F17", //F17 = 0x80,
-				"F18", //F18 = 0x81,
-				"F19", //F19 = 0x82,
-				"F20", //F20 = 0x83,
-				"F21", //F21 = 0x84,
-				"F22", //F22 = 0x85,
-				"F23", //F23 = 0x86,
-				"F24", //F24 = 0x87,
-				"Navigation View", //NAVIGATION_VIEW = 0x88,
-				"Navigation Menu", //NAVIGATION_MENU = 0x89,
-				"Navigation Up", //NAVIGATION_UP = 0x8A,
-				"Navigation Down", //NAVIGATION_DOWN = 0x8B,
-				"Navigation Left", //NAVIGATION_LEFT = 0x8C,
-				"Navigation Right", //NAVIGATION_RIGHT = 0x8D,
-				"Navigation Accept", //NAVIGATION_ACCEPT = 0x8E,
-				"Navigation Cancel", //NAVIGATION_CANCEL = 0x8F,
-				"Numlock", //NUMLOCK = 0x90,
-				"Scroll lock", //SCROLL = 0x91,
-				"=", //OEM_NEC_EQUAL = 0x92,
-				"", // 0x93
-				"", // 0x94
-				"", // 0x95
-				"", // 0x96
-				"", // 0x97
-				"", // 0x98
-				"", // 0x99
-				"", // 0x9A
-				"", // 0x9B
-				"", // 0x9C
-				"", // 0x9D
-				"", // 0x9E
-				"", // 0x9F
-				"Left Shift", //LSHIFT = 0xA0,
-				"Right Shift", //RSHIFT = 0xA1,
-				"Left Control", //LCONTROL = 0xA2,
-				"Right Control", //RCONTROL = 0xA3,
-				"Left Menu", //LMENU = 0xA4,
-				"Right Menu", //RMENU = 0xA5,
-				"", // 0xA6
-				"", // 0xA7
-				"", // 0xA8
-				"", // 0xA9
-				"", // 0xAA
-				"", // 0xAB
-				"", // 0xAC
-				"", // 0xAD
-				"", // 0xAE
-				"", // 0xAF
-				"", // 0xB0
-				"", // 0xB1
-				"", // 0xB2
-				"", // 0xB3
-				"", // 0xB4
-				"", // 0xB5
-				"", // 0xB6
-				"", // 0xB7
-				"", // 0xB8
-				"", // 0xB9
-				";", //SEMICOLON = 0xBA,
-				"+", //PLUS = 0xBB,
-				",", //COMMA = 0xBC,
-				"-", //MINUS = 0xBD,
-				".", //PERIOD = 0xBE,
-				"\\", //FORWARD_SLASH = 0xBF,
-				"~", //TILDA = 0xC0,
-				"", // 0xC1
-				"", // 0xC2
-				"", // 0xC3
-				"", // 0xC4
-				"", // 0xC5
-				"", // 0xC6
-				"", // 0xC7
-				"", // 0xC8
-				"", // 0xC9
-				"", // 0xCA
-				"", // 0xCB
-				"", // 0xCC
-				"", // 0xCD
-				"", // 0xCE
-				"", // 0xCF
-				"[", //OPEN_BRACKET = 0xDB,
-				"/", //BACK_SLASH = 0xDC,
-				"]", //CLOSED_BRACKET = 0xDD,
-				"\"", //QUOTE = 0xDE
-			};
-			text::add_line(state, contents, "shortcut_tooltip", text::variable_type::x, key_names[uint8_t(elm.base_data.data.button.shortcut)]);
-		}
+			"", //NONE = 0x00,
+			"Left-Button", //LBUTTON = 0x01,
+			"Right-Button", //RBUTTON = 0x02,
+			"Cancel", //CANCEL = 0x03,
+			"Multimedia button", //MBUTTON = 0x04,
+			"XButton1", //XBUTTON_1 = 0x05,
+			"XButton2", //XBUTTON_2 = 0x06,
+			"", //0x07
+			"Backspace", //BACK = 0x08,
+			"TAB", //TAB = 0x09,
+			"", // 0x0A
+			"", // 0x0B
+			"Clear", //CLEAR = 0x0C,
+			"Return", //RETURN = 0x0D,
+			"", // 0x0E
+			"", // 0x0F
+			"Shift", //SHIFT = 0x10,
+			"Control", //CONTROL = 0x11,
+			"Menu", //MENU = 0x12,
+			"Pause", //PAUSE = 0x13,
+			"Capital", //CAPITAL = 0x14,
+			"Kana", //KANA = 0x15,
+			"", // 0x16
+			"Junja", //JUNJA = 0x17,
+			"Final", //FINAL = 0x18,
+			"Kanji", //KANJI = 0x19,
+			"", // 0x1A
+			"Escape", //ESCAPE = 0x1B,
+			"Convert", //CONVERT = 0x1C,
+			"Nonconvert", //NONCONVERT = 0x1D,
+			"Accept", //ACCEPT = 0x1E,
+			"Modechange", //MODECHANGE = 0x1F,
+			"Spacebar", //SPACE = 0x20,
+			"Prior", //PRIOR = 0x21,
+			"Next", //NEXT = 0x22,
+			"End", //END = 0x23,
+			"Home", //HOME = 0x24,
+			"Left", //LEFT = 0x25,
+			"Up", //UP = 0x26,
+			"Right", //RIGHT = 0x27,
+			"Down", //DOWN = 0x28,
+			"Select", //SELECT = 0x29,
+			"Print", //PRINT = 0x2A,
+			"Execute", //EXECUTE = 0x2B,
+			"Snapshot", //SNAPSHOT = 0x2C,
+			"Insert", //INSERT = 0x2D,
+			"Delete", //DELETE_KEY = 0x2E,
+			"Help", //HELP = 0x2F,
+			"0", //NUM_0 = 0x30,
+			"1", //NUM_1 = 0x31,
+			"2", //NUM_2 = 0x32,
+			"3", //NUM_3 = 0x33,
+			"4", //NUM_4 = 0x34,
+			"5", //NUM_5 = 0x35,
+			"6", //NUM_6 = 0x36,
+			"7", //NUM_7 = 0x37,
+			"8", //NUM_8 = 0x38,
+			"9", //NUM_9 = 0x39,
+			"", // 0x3A
+			"", // 0x3B
+			"", // 0x3C
+			"", // 0x3D
+			"", // 0x3E
+			"", // 0x3F
+			"", // 0x40
+			"A", //A = 0x41,
+			"B", //B = 0x42,
+			"C", //C = 0x43,
+			"D", //D = 0x44,
+			"E", //E = 0x45,
+			"F", //F = 0x46,
+			"G", //G = 0x47,
+			"H", //H = 0x48,
+			"I", //I = 0x49,
+			"J", //J = 0x4A,
+			"K", //K = 0x4B,
+			"L", //L = 0x4C,
+			"M", //M = 0x4D,
+			"N", //N = 0x4E,
+			"O", //O = 0x4F,
+			"P", //P = 0x50,
+			"Q", //Q = 0x51,
+			"R", //R = 0x52,
+			"S", //S = 0x53,
+			"T", //T = 0x54,
+			"U", //U = 0x55,
+			"V", //V = 0x56,
+			"W", //W = 0x57,
+			"X", //X = 0x58,
+			"Y", //Y = 0x59,
+			"Z", //Z = 0x5A,
+			"Left Windows", //LWIN = 0x5B,
+			"Right Windows", //RWIN = 0x5C,
+			"Apps", //APPS = 0x5D,
+			"", // 0x5E
+			"Sleep", //SLEEP = 0x5F,
+			"Numpad 0", //NUMPAD0 = 0x60,
+			"Numpad 1", //NUMPAD1 = 0x61,
+			"Numpad 2", //NUMPAD2 = 0x62,
+			"Numpad 3", //NUMPAD3 = 0x63,
+			"Numpad 4", //NUMPAD4 = 0x64,
+			"Numpad 5", //NUMPAD5 = 0x65,
+			"Numpad 6", //NUMPAD6 = 0x66,
+			"Numpad 7", //NUMPAD7 = 0x67,
+			"Numpad 8", //NUMPAD8 = 0x68,
+			"Numpad 9", //NUMPAD9 = 0x69,
+			"Numpad *", //MULTIPLY = 0x6A,
+			"Numpad +", //ADD = 0x6B,
+			"Numpad .", //SEPARATOR = 0x6C,
+			"Numpad -", //SUBTRACT = 0x6D,
+			"Numpad .", //DECIMAL = 0x6E,
+			"Numpad /", //DIVIDE = 0x6F,
+			"F1", //F1 = 0x70,
+			"F2", //F2 = 0x71,
+			"F3", //F3 = 0x72,
+			"F4", //F4 = 0x73,
+			"F5", //F5 = 0x74,
+			"F6", //F6 = 0x75,
+			"F7", //F7 = 0x76,
+			"F8", //F8 = 0x77,
+			"F9", //F9 = 0x78,
+			"F10", //F10 = 0x79,
+			"F11", //F11 = 0x7A,
+			"F12", //F12 = 0x7B,
+			"F13", //F13 = 0x7C,
+			"F14", //F14 = 0x7D,
+			"F15", //F15 = 0x7E,
+			"F16", //F16 = 0x7F,
+			"F17", //F17 = 0x80,
+			"F18", //F18 = 0x81,
+			"F19", //F19 = 0x82,
+			"F20", //F20 = 0x83,
+			"F21", //F21 = 0x84,
+			"F22", //F22 = 0x85,
+			"F23", //F23 = 0x86,
+			"F24", //F24 = 0x87,
+			"Navigation View", //NAVIGATION_VIEW = 0x88,
+			"Navigation Menu", //NAVIGATION_MENU = 0x89,
+			"Navigation Up", //NAVIGATION_UP = 0x8A,
+			"Navigation Down", //NAVIGATION_DOWN = 0x8B,
+			"Navigation Left", //NAVIGATION_LEFT = 0x8C,
+			"Navigation Right", //NAVIGATION_RIGHT = 0x8D,
+			"Navigation Accept", //NAVIGATION_ACCEPT = 0x8E,
+			"Navigation Cancel", //NAVIGATION_CANCEL = 0x8F,
+			"Numlock", //NUMLOCK = 0x90,
+			"Scroll lock", //SCROLL = 0x91,
+			"=", //OEM_NEC_EQUAL = 0x92,
+			"", // 0x93
+			"", // 0x94
+			"", // 0x95
+			"", // 0x96
+			"", // 0x97
+			"", // 0x98
+			"", // 0x99
+			"", // 0x9A
+			"", // 0x9B
+			"", // 0x9C
+			"", // 0x9D
+			"", // 0x9E
+			"", // 0x9F
+			"Left Shift", //LSHIFT = 0xA0,
+			"Right Shift", //RSHIFT = 0xA1,
+			"Left Control", //LCONTROL = 0xA2,
+			"Right Control", //RCONTROL = 0xA3,
+			"Left Menu", //LMENU = 0xA4,
+			"Right Menu", //RMENU = 0xA5,
+			"", // 0xA6
+			"", // 0xA7
+			"", // 0xA8
+			"", // 0xA9
+			"", // 0xAA
+			"", // 0xAB
+			"", // 0xAC
+			"", // 0xAD
+			"", // 0xAE
+			"", // 0xAF
+			"", // 0xB0
+			"", // 0xB1
+			"", // 0xB2
+			"", // 0xB3
+			"", // 0xB4
+			"", // 0xB5
+			"", // 0xB6
+			"", // 0xB7
+			"", // 0xB8
+			"", // 0xB9
+			";", //SEMICOLON = 0xBA,
+			"+", //PLUS = 0xBB,
+			",", //COMMA = 0xBC,
+			"-", //MINUS = 0xBD,
+			".", //PERIOD = 0xBE,
+			"\\", //FORWARD_SLASH = 0xBF,
+			"~", //TILDA = 0xC0,
+			"", // 0xC1
+			"", // 0xC2
+			"", // 0xC3
+			"", // 0xC4
+			"", // 0xC5
+			"", // 0xC6
+			"", // 0xC7
+			"", // 0xC8
+			"", // 0xC9
+			"", // 0xCA
+			"", // 0xCB
+			"", // 0xCC
+			"", // 0xCD
+			"", // 0xCE
+			"", // 0xCF
+			"[", //OPEN_BRACKET = 0xDB,
+			"/", //BACK_SLASH = 0xDC,
+			"]", //CLOSED_BRACKET = 0xDD,
+			"\"", //QUOTE = 0xDE
+		};
+		text::add_line(state, contents, "shortcut_tooltip", text::variable_type::x, key_names[uint8_t(elm.base_data.data.button.shortcut)]);
+	}
 
-	} // namespace ui
+} // namespace ui

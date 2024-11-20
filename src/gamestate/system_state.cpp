@@ -29,7 +29,6 @@
 #include "reports.hpp"
 
 namespace sys {
-
 	void state::start_state_selection(state_selection_data& data) {
 		if(state_selection) {
 			state_selection->on_cancel(*this);
