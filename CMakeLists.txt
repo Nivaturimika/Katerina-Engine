@@ -55,6 +55,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/stb_image.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/stb_image_write.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_common_elements.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_element_types.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_main_menu.cpp"

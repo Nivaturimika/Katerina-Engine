@@ -11,60 +11,6 @@
 #include "text.hpp"
 #include "economy_estimations.hpp"
 
-namespace dcon {
-	class pop_satisfaction_wrapper_id {
-		public:
-		using value_base_t = uint8_t;
-		value_base_t value = 0;
-	pop_satisfaction_wrapper_id() { }
-	pop_satisfaction_wrapper_id(uint8_t v) : value(v) { }
-		value_base_t index() {
-			return value;
-		}
-	};
-	class pop_satisfaction_wrapper_fat {
-		static dcon::text_key names[5];
-
-		public:
-		uint8_t value = 0;
-		void set_name(dcon::text_key text) noexcept {
-			names[value] = text;
-		}
-		dcon::text_key get_name() noexcept {
-			switch(value) {
-				case 0: // No needs fulfilled
-				case 1: // Some life needs
-				case 2: // All life needs, some everyday
-				case 3: // All everyday, some luxury
-				case 4: // All luxury
-				return names[value];
-			}
-		return dcon::text_key{0};
-		}
-	};
-	inline pop_satisfaction_wrapper_fat fatten(data_container const& c, pop_satisfaction_wrapper_id id) noexcept {
-	return pop_satisfaction_wrapper_fat{id.value};
-	}
-} // namespace dcon
-namespace ogl {
-	template<>
-	inline uint32_t get_ui_color(sys::state& state, dcon::pop_satisfaction_wrapper_id id) {
-		switch(id.value) {
-			case 0: // red
-			return sys::pack_color(1.0f, 0.1f, 0.1f);
-			case 1: // yellow
-			return sys::pack_color(1.0f, 1.0f, 0.1f);
-			case 2: // green
-			return sys::pack_color(0.1f, 1.0f, 0.1f);
-			case 3: // blue
-			return sys::pack_color(0.1f, 0.1f, 1.0f);
-			case 4: // light blue
-			return sys::pack_color(0.1f, 1.0f, 1.0f);
-		}
-		return 0;
-	}
-} // namespace ogl
-
 namespace ui {
 
 	class nation_gold_income_text : public simple_text_element_base {
@@ -223,16 +169,16 @@ namespace ui {
 			// Fill-in static information...
 			static bool has_run = false;
 			if(!has_run) {
-			dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{0})
-					.set_name(text::find_or_add_key(state, "BUDGET_STRATA_NO_NEED", false));
-			dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{1})
-					.set_name(text::find_or_add_key(state, "BUDGET_STRATA_NEED", false));
-			dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{2})
-					.set_name(text::find_or_add_key(state, "BUDGET_STRATA_NEED", false));
-			dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{3})
-					.set_name(text::find_or_add_key(state, "BUDGET_STRATA_NEED", false));
-			dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{4})
-					.set_name(text::find_or_add_key(state, "BUDGET_STRATA_NEED", false));
+				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{0})
+					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{1})
+					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{2})
+					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{3})
+					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{4})
+					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
 				has_run = true;
 			}
 			piechart::on_create(state);
