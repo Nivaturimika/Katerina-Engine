@@ -2415,21 +2415,25 @@ namespace parsers {
 			err.accumulated_errors += "Leader of type neither land nor sea (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 		void personality(association_type, std::string_view value, error_handler& err, int32_t line, oob_file_context& context) {
-			if(auto it = context.outer_context.map_of_leader_traits.find(std::string(value));
-				it != context.outer_context.map_of_leader_traits.end()) {
+			if(auto it = context.outer_context.map_of_leader_traits.find(std::string(value)); it != context.outer_context.map_of_leader_traits.end()) {
+				if(it->second.index() >= context.outer_context.state.military_definitions.first_background_trait.index()) {
+					err.accumulated_errors += "Background trait " + std::string(value) + " used in personality (" + err.file_name + " line " + std::to_string(line) + ")\n";
+					return;
+				}
 				personality_ = it->second;
 			} else {
-				err.accumulated_errors +=
-					"Invalid leader trait " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "Invalid leader trait " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			}
 		}
 		void background(association_type, std::string_view value, error_handler& err, int32_t line, oob_file_context& context) {
-			if(auto it = context.outer_context.map_of_leader_traits.find(std::string(value));
-				it != context.outer_context.map_of_leader_traits.end()) {
+			if(auto it = context.outer_context.map_of_leader_traits.find(std::string(value)); it != context.outer_context.map_of_leader_traits.end()) {
+				if(it->second.index() < context.outer_context.state.military_definitions.first_background_trait.index()) {
+					err.accumulated_errors += "Personality trait " + std::string(value) + " used in background (" + err.file_name + " line " + std::to_string(line) + ")\n";
+					return;
+				}
 				background_ = it->second;
 			} else {
-				err.accumulated_errors +=
-					"Invalid leader trait " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "Invalid leader trait " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			}
 		}
 	};
