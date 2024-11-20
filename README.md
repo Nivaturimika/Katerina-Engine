@@ -66,7 +66,7 @@ yay cmake onetbb
 From here compiling is straightforward
 1. `cd Project-KatEngine`
 2. do something to make the debugger launch the program in your V2 directory so that it can find the game files (I don't know how this is done on linux)
-4. `cmake -B build . -DCMAKE_BUILD_TYPE=Debug`
+4. `cmake -B build . -DCMAKE_BUILD_TYPE=Debug -DARCHITECTURE=x64`
 5. `cmake --build build -j$(nproc)`
 
 #### Targetting for AArch64 and ARM
