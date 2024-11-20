@@ -1868,7 +1868,7 @@ namespace nations {
 				- Any flashpoint focus increases the tension by the amount listed in it per day.
 				*/
 				if(si.get_nation_from_flashpoint_focus()) {
-					total_increase += si.get_flashpoint_focus().get_flashpoint_amount();
+					total_increase += state.world.national_focus_get_flashpoint_amount(state.national_definitions.flashpoint_focus);
 				}
 
 				/*
