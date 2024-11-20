@@ -1510,9 +1510,8 @@ namespace parsers {
 		context.outer_context.state.national_definitions.flashpoint_focus = context.id;
 	}
 
-	void national_focus::flashpoint_tension(association_type, float value, error_handler& err, int32_t line,
-		national_focus_context& context) {
-		context.outer_context.state.national_definitions.flashpoint_amount = value;
+	void national_focus::flashpoint_tension(association_type, float value, error_handler& err, int32_t line, national_focus_context& context) {
+		context.outer_context.state.world.national_focus_set_flashpoint_amount(context.id, value);
 	}
 
 	void national_focus::ideology(association_type, std::string_view value, error_handler& err, int32_t line,

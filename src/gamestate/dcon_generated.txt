@@ -5073,6 +5073,11 @@ object {
 		type{ modifier_id }
 		tag{ scenario }
 	}
+	property{
+		name{ flashpoint_amount }
+		type{ float }
+		tag{ scenario }
+	}
 }
 
 

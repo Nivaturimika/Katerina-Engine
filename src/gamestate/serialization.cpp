@@ -349,7 +349,6 @@ namespace sys {
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.num_allocated_national_flags);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.num_allocated_global_flags);
 			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.flashpoint_focus);
-			ptr_in = memcpy_deserialize(ptr_in, state.national_definitions.flashpoint_amount);
 			ptr_in = deserialize(ptr_in, state.national_definitions.on_yearly_pulse);
 			ptr_in = deserialize(ptr_in, state.national_definitions.on_quarterly_pulse);
 			ptr_in = deserialize(ptr_in, state.national_definitions.on_battle_won);
@@ -499,7 +498,6 @@ namespace sys {
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.num_allocated_national_flags);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.num_allocated_global_flags);
 			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.flashpoint_focus);
-			ptr_in = memcpy_serialize(ptr_in, state.national_definitions.flashpoint_amount);
 			ptr_in = serialize(ptr_in, state.national_definitions.on_yearly_pulse);
 			ptr_in = serialize(ptr_in, state.national_definitions.on_quarterly_pulse);
 			ptr_in = serialize(ptr_in, state.national_definitions.on_battle_won);
@@ -643,7 +641,6 @@ namespace sys {
 			sz += sizeof(state.national_definitions.num_allocated_national_flags);
 			sz += sizeof(state.national_definitions.num_allocated_global_flags);
 			sz += sizeof(state.national_definitions.flashpoint_focus);
-			sz += sizeof(state.national_definitions.flashpoint_amount);
 			sz += serialize_size(state.national_definitions.on_yearly_pulse);
 			sz += serialize_size(state.national_definitions.on_quarterly_pulse);
 			sz += serialize_size(state.national_definitions.on_battle_won);
