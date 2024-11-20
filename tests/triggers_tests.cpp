@@ -15,15 +15,6 @@
 #include "triggers.hpp"
 #include "nations_templates.hpp"
 
-namespace parsers {
-	void ef_scope_from_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
-	void ef_scope_this_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
-	void lambda_country_event(token_generator& gen, error_handler& err, effect_building_context& context);
-	void ef_scope_random_greater_power(token_generator& gen, error_handler& err, effect_building_context& context);
-	void lambda_province_event(token_generator& gen, error_handler& err, effect_building_context& context);
-	void ef_scope_any_empty_neighbor_province(token_generator& gen, error_handler& err, effect_building_context& context);
-}
-
 TEST_CASE("trigger scope recursion", "[trigger_tests]") {
 	{
 		std::vector<uint16_t> t;

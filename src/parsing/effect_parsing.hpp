@@ -3905,6 +3905,14 @@ namespace parsers {
 	dcon::value_modifier_key read_chance_modifier(token_generator& gen, error_handler& err, effect_building_context& context);
 	int32_t add_to_random_list(std::string_view label, token_generator& gen, error_handler& err, effect_building_context& context);
 
+	// missing
+	void ef_scope_from_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_this_bounce(token_generator& gen, error_handler& err, effect_building_context& context);
+	void lambda_country_event(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_random_greater_power(token_generator& gen, error_handler& err, effect_building_context& context);
+	void lambda_province_event(token_generator& gen, error_handler& err, effect_building_context& context);
+	void ef_scope_any_empty_neighbor_province(token_generator& gen, error_handler& err, effect_building_context& context);
+
 	dcon::effect_key make_effect(token_generator& gen, error_handler& err, effect_building_context& context);
 	int32_t simplify_effect(uint16_t* source);
 
