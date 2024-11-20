@@ -178,7 +178,7 @@ namespace event {
 			}
 
 			if(total > 0.0f) {
-				auto rvalue = float(rng::get_random(state, uint32_t(e.index() ^ n.index() << 5)) & 0xFFFF) / float(0xFFFF + 1);
+				auto rvalue = rng::get_random_float(state, uint32_t(e.index() ^ n.index() << 5));
 				for(uint32_t i = 0; i < opt.size(); ++i) {
 					if(opt[i].ai_chance) {
 						rvalue -= odds[i] / total;
@@ -272,7 +272,7 @@ namespace event {
 			}
 
 			if(total > 0.0f) {
-				auto rvalue = float(rng::get_random(state, uint32_t((e.index() << 3) ^ n.index())) & 0xFFFF) / float(0xFFFF + 1);
+				auto rvalue = rng::get_random_float(state, uint32_t((e.index() << 3) ^ n.index()));
 				for(uint32_t i = 0; i < opt.size(); ++i) {
 					if(opt[i].ai_chance) {
 						rvalue -= odds[i] / total;
@@ -330,7 +330,7 @@ namespace event {
 		} else {
 			auto& opt = state.world.provincial_event_get_options(e);
 			float total = 0.0f;
-		float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+			float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for(uint32_t i = 0; i < opt.size(); ++i) {
 				if(opt[i].ai_chance) { //effect may not be present but chance may
 					odds[i] = trigger::evaluate_multiplicative_modifier(state, opt[i].ai_chance, trigger::to_generic(p), trigger::to_generic(p), from_slot);
@@ -339,7 +339,7 @@ namespace event {
 			}
 
 			if(total > 0.0f) {
-				auto rvalue = float(rng::get_random(state, uint32_t(e.index() ^ p.index() << 5)) & 0xFFFF) / float(0xFFFF + 1);
+				auto rvalue = rng::get_random_float(state, uint32_t(e.index() ^ p.index() << 5));
 				for(uint32_t i = 0; i < opt.size(); ++i) {
 					if(opt[i].ai_chance) {
 						rvalue -= odds[i] / total;
@@ -409,7 +409,7 @@ namespace event {
 			}
 
 			if(total > 0.0f) {
-				auto rvalue = float(rng::get_random(state, uint32_t(e.index() ^ p.index() << 5)) & 0xFFFF) / float(0xFFFF + 1);
+				auto rvalue = rng::get_random_float(state, uint32_t(e.index() ^ p.index() << 5));
 				for(uint32_t i = 0; i < opt.size(); ++i) {
 					if(opt[i].ai_chance) {
 						rvalue -= odds[i] / total;
@@ -556,7 +556,7 @@ namespace event {
 							[&](dcon::nation_id n, float c, bool condition) {
 								auto owned_range = state.world.nation_get_province_ownership(n);
 								if(condition && owned_range.begin() != owned_range.end()) {
-									if(float(rng::get_random(state, uint32_t((i << 1) ^ n.index())) & 0xFFFFFF) / float(0xFFFFFF + 1) >= c) {
+									if(rng::get_random_float(state, uint32_t((i << 1) ^ n.index())) >= c) {
 										events_triggered.local().push_back(event_nation_pair{n, id});
 									}
 								}
@@ -612,7 +612,7 @@ namespace event {
 							ve::apply(
 									[&](dcon::province_id p, dcon::nation_id o, float c, bool condition) {
 										if(condition) {
-											if(float(rng::get_random(state, uint32_t((i << 1) ^ p.index())) & 0xFFFFFF) / float(0xFFFFFF + 1) >= c) {
+											if(rng::get_random_float(state, uint32_t((i << 1) ^ p.index())) >= c) {
 												p_events_triggered.local().push_back(event_prov_pair{ p, id });
 											}
 										}

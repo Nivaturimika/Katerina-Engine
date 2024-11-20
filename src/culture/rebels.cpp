@@ -1325,45 +1325,32 @@ namespace rebel {
 		concurrency::parallel_for(uint32_t(0), state.world.army_rebel_control_size(), [&](uint32_t i) {
 		auto ar_reb_control = dcon::army_rebel_control_id{ dcon::army_rebel_control_id::value_base_t(i) };
 			if(!state.world.army_rebel_control_is_valid(ar_reb_control))
-			return;
+				return;
 			auto arc = dcon::fatten(state.world, ar_reb_control);
 			auto ar = arc.get_army();
-			if(!ar.get_army_rebel_control().get_controller()) /* Not a rebel army */
-			return;
-		if(ar.get_arrival_time() != sys::date{}) /* Do not interrupt travel */
-			return;
-			if(ar.get_battle_from_army_battle_participation()) /* In battle */
-			return;
-			if(ar.get_navy_from_army_transport()) /* Or in naval transport... */
-			return;
+			if(!ar.get_army_rebel_control().get_controller()
+			|| ar.get_arrival_time() != sys::date{}
+			|| ar.get_battle_from_army_battle_participation()
+			|| ar.get_navy_from_army_transport())
+				return;
 
 			auto type = arc.get_controller().get_type();
 			auto area = arc.get_controller().get_type().get_area();
 			auto location = ar.get_location_from_army_location();
 			/* If on an unsieged province, siege it! */
-			if(location.get_nation_from_province_control() && !location.get_rebel_faction_from_province_rebel_control()) {
+			if(location.get_nation_from_province_control() && !location.get_rebel_faction_from_province_rebel_control())
 				return;
-			}
 			dcon::province_fat_id best_prov = location;
 			float best_weight = 0.f;// trigger::evaluate_multiplicative_modifier(state, type.get_movement_evaluation(), trigger::to_generic(best_prov), trigger::to_generic(best_prov), 0);;
 			for(const auto adj : location.get_province_adjacency()) {
 				auto indx = adj.get_connected_provinces(0) != location.id ? 0 : 1;
 				auto prov = adj.get_connected_provinces(indx);
-				/* sea province */
-				if(prov.id.index() >= state.province_definitions.first_sea_province.index())
-				continue;
-				/* impassable */
-				if((adj.get_type() & province::border::impassible_bit) != 0)
-				continue;
+				/* sea province or impassable */
+				if(prov.id.index() >= state.province_definitions.first_sea_province.index()
+				|| (adj.get_type() & province::border::impassible_bit) != 0)
+					continue;
 				if(allow_in_area(state, prov, arc.get_controller())) {
 					float weight = trigger::evaluate_multiplicative_modifier(state, type.get_movement_evaluation(), trigger::to_generic(prov), trigger::to_generic(prov), trigger::to_generic(arc.get_controller()));
-					//float weight = float(rng::get_random(state, uint32_t(prov.id.index() * ar.id.index())) % 100);
-					//if(prov.get_army_location().begin() != prov.get_army_location().end()) {
-						//	weight *= 0.01f;
-					//}
-					//if(prov.get_rebel_faction_from_province_rebel_control()) {
-						//	weight *= 0.0001f;
-					//}
 					if(weight >= best_weight) {
 						best_weight = weight;
 						best_prov = prov;

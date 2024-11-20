@@ -17,4 +17,6 @@ namespace rng {
 	random_pair get_random_pair(sys::state const& state, uint32_t value_in_hi, uint32_t value_in_lo);
 	uint32_t reduce(uint32_t value_in, uint32_t upper_bound);
 
+	float get_random_float(sys::state const& state, uint32_t value_in);
+	float get_random_float(sys::state const& state, uint32_t value_hi, uint32_t value_lo);
 } // namespace rng

@@ -1295,7 +1295,7 @@ namespace demographics {
 					});
 
 					if(chances_total > 0.0f) {
-						auto rvalue = float(rng::get_random(state, uint32_t(p.index())) & 0xFFFF) / float(0xFFFF + 1);
+						auto rvalue = rng::get_random_float(state, uint32_t(p.index()));
 						for(uint32_t i = state.world.pop_type_size(); i-- > 0;) {
 							dcon::pop_type_id pr{dcon::pop_type_id::value_base_t(i)};
 							rvalue -= weights[pr] / chances_total;
@@ -1823,7 +1823,7 @@ namespace demographics {
 			if(total_weight <= 0.0f)
 				return dcon::province_id{};
 
-			auto rvalue = float(rng::get_random(state, (uint32_t(p.index()) << 2) | uint32_t(1)) & 0xFFFF) / float(0xFFFF + 1);
+			auto rvalue = rng::get_random_float(state, (uint32_t(p.index()) << 2) | uint32_t(1));
 			for(auto loc : state.world.nation_get_province_ownership(n)) {
 				rvalue -= weights_buffer.get(loc.get_province()) / total_weight;
 				if(rvalue < 0.0f) {
@@ -1870,7 +1870,7 @@ namespace demographics {
 			if(total_weight <= 0.0f)
 				return dcon::province_id{};
 
-			auto rvalue = float(rng::get_random(state, (uint32_t(p.index()) << 2) | uint32_t(2)) & 0xFFFF) / float(0xFFFF + 1);
+			auto rvalue = rng::get_random_float(state, (uint32_t(p.index()) << 2) | uint32_t(2));
 			for(auto loc : state.world.nation_get_province_ownership(n)) {
 				rvalue -= weights_buffer.get(loc.get_province()) / total_weight;
 				if(rvalue < 0.0f) {
@@ -1934,7 +1934,7 @@ namespace demographics {
 			if(total_weight <= 0.0f)
 				return dcon::nation_id{};
 
-			auto rvalue = float(rng::get_random(state, uint32_t(day.value), (uint32_t(p.index()) << 2) | uint32_t(3)) & 0xFFFF) / float(0xFFFF + 1);
+			auto rvalue = rng::get_random_float(state, uint32_t(day.value), (uint32_t(p.index()) << 2) | uint32_t(3));
 			for(uint32_t i = 0; i < 3; ++i) {
 				rvalue -= top_weights[i] / total_weight;
 				if(rvalue < 0.0f) {

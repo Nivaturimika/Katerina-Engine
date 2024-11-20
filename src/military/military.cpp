@@ -4401,7 +4401,7 @@ namespace military {
 					*/
 
 					float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_speed_to_distance_factor *
-						(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
+						(0.5f + 0.5f * rng::get_random_float(state, uint32_t(slots[j].ship.value)));
 					auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
 					int32_t adjust = std::clamp(int32_t(std::ceil(speed)), 0, old_distance);
 					slots[j].flags &= ~ship_in_battle::distance_mask;
@@ -4474,16 +4474,14 @@ namespace military {
 					A retreating ship will increase its distance by define:NAVAL_COMBAT_RETREAT_SPEED_MOD x
 					define:NAVAL_COMBAT_SPEED_TO_DISTANCE_FACTOR x (random value in the range \[0.0 - 0.5) + 0.5) x ship-max-speed.
 					*/
-
 					float speed = ship_stats.maximum_speed * 1000.0f * state.defines.naval_combat_retreat_speed_mod *
 						state.defines.naval_combat_speed_to_distance_factor *
-						(0.5f + float(rng::get_random(state, uint32_t(slots[j].ship.value)) & 0x7FFF) / float(0xFFFF));
+						(0.5f + 0.5f * rng::get_random_float(state, uint32_t(slots[j].ship.value)));
 
 					auto old_distance = slots[j].flags & ship_in_battle::distance_mask;
 					int32_t new_distance = std::min(int32_t(std::ceil(speed)) + old_distance, 1000);
 					slots[j].flags &= ~ship_in_battle::distance_mask;
 					slots[j].flags |= ship_in_battle::distance_mask & (new_distance);
-
 					break;
 				}
 				case ship_in_battle::mode_seeking:
