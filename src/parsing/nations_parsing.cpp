@@ -1080,7 +1080,7 @@ namespace parsers {
 		fid.set_news_short_desc(event_result.news_short_desc_);
 		fid.set_is_major(event_result.major);
 		fid.get_options() = event_result.options;
-		fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
+		fid.set_window_type(context.outer_context.state.add_key_win1252(event_result.window_type));
 		//Effect
 		ef_country_event value;
 		value.days = 0;
@@ -1177,7 +1177,7 @@ namespace parsers {
 		fid.set_allow_multiple_instances(event_result.allow_multiple_instances);
 		fid.set_name(event_result.title_);
 		fid.get_options() = event_result.options;
-		fid.set_window_type(context.state.add_key_win1252(event_result.window_type));
+		fid.set_window_type(context.outer_context.state.add_key_win1252(event_result.window_type));
 		//Effect
 		ef_province_event value;
 		value.days = 0;
