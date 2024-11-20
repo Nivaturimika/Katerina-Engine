@@ -5,9 +5,7 @@
 #include "gui_console.hpp"
 #include "gui_fps_counter.hpp"
 #include "nations.hpp"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION 1
-#define STBI_WRITE_NO_STDIO 1
+#include "serialization.hpp"
 #include "stb_image_write.h"
 
 struct command_info {

@@ -487,7 +487,7 @@ set to one or more of the following values.	*/
 					asset_texture.size_x = int32_t(w);
 					asset_texture.size_y = int32_t(h);
 					if(keep_data) {
-						asset_texture.data = static_cast<uint8_t*>(STBI_MALLOC(4 * w * h));
+						asset_texture.data = static_cast<uint8_t*>(malloc(4 * w * h));
 						glGetTexImage(asset_texture.texture_handle, 0, GL_RGBA, GL_UNSIGNED_BYTE, asset_texture.data);
 					}
 					asset_texture.loaded = true;

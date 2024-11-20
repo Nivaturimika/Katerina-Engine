@@ -13,6 +13,7 @@
 #include "demographics.hpp"
 #include "gui_element_base.hpp"
 #include "gui_element_types.hpp"
+#include "gui_unit_grid_box.hpp"
 #include "fonts.hpp"
 #include "gui_graphics.hpp"
 #include "nations.hpp"
@@ -22,6 +23,7 @@
 #include "unit_tooltip.hpp"
 #include "triggers.hpp"
 #include "effects.hpp"
+#include "rebels.hpp"
 #include "pdqsort.h"
 
 namespace ui {
