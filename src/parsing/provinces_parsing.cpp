@@ -237,16 +237,10 @@ namespace parsers {
 		 interested in a crisis that references the existing continents" [...] */
 		if(is_fixed_token_ci(name.data(), name.data() + name.length(), "europe")) {
 			context.state.province_definitions.europe = new_modifier;
-		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "asia")) {
-			context.state.province_definitions.asia = new_modifier;
-		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "africa")) {
-			context.state.province_definitions.africa = new_modifier;
 		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "north_america")) {
 			context.state.province_definitions.north_america = new_modifier;
 		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "south_america")) {
 			context.state.province_definitions.south_america = new_modifier;
-		} else if(is_fixed_token_ci(name.data(), name.data() + name.length(), "oceania")) {
-			context.state.province_definitions.oceania = new_modifier;
 		}
 	}
 

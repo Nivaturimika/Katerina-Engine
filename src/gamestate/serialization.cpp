@@ -377,11 +377,8 @@ namespace sys {
 			ptr_in = deserialize(ptr_in, state.province_definitions.map_of_gfx_terrain_object_names);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.first_sea_province);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.europe);
-			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.asia);
-			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.africa);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.north_america);
 			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.south_america);
-			ptr_in = memcpy_deserialize(ptr_in, state.province_definitions.oceania);
 		}
 		ptr_in = memcpy_deserialize(ptr_in, state.start_date);
 		ptr_in = memcpy_deserialize(ptr_in, state.end_date);
@@ -526,11 +523,8 @@ namespace sys {
 			ptr_in = serialize(ptr_in, state.province_definitions.map_of_gfx_terrain_object_names);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.first_sea_province);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.europe);
-			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.asia);
-			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.africa);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.north_america);
 			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.south_america);
-			ptr_in = memcpy_serialize(ptr_in, state.province_definitions.oceania);
 		}
 		ptr_in = memcpy_serialize(ptr_in, state.start_date);
 		ptr_in = memcpy_serialize(ptr_in, state.end_date);
@@ -669,11 +663,8 @@ namespace sys {
 			sz += serialize_size(state.province_definitions.map_of_gfx_terrain_object_names);
 			sz += sizeof(state.province_definitions.first_sea_province);
 			sz += sizeof(state.province_definitions.europe);
-			sz += sizeof(state.province_definitions.asia);
-			sz += sizeof(state.province_definitions.africa);
 			sz += sizeof(state.province_definitions.north_america);
 			sz += sizeof(state.province_definitions.south_america);
-			sz += sizeof(state.province_definitions.oceania);
 		}
 		sz += sizeof(state.start_date);
 		sz += sizeof(state.end_date);
