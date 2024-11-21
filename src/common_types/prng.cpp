@@ -55,7 +55,7 @@ namespace rng {
 		r123::Philox4x32::key_type k = {state.game_seed, 0x3918CA23};
 		r123::Philox4x32::ctr_type r = rng(c, k);
 		uint32_t f = ((uint32_t)(r[1] << 8) | (0x3f << 24));
-		return *((float*)&f) - 1.f;
+		return *((float*)&f) * 0.5f;
 	}
 
 } // namespace rng
