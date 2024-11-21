@@ -1,3 +1,4 @@
+#include "prng.hpp"
 #include "gui_politics_window.hpp"
 
 namespace ui {

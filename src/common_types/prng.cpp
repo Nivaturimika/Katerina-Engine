@@ -56,6 +56,8 @@ namespace rng {
 		r123::Philox4x32::ctr_type r = rng(c, k);
 		auto f = float(((uint64_t(r[0]) << 32) | uint64_t(r[1])) & 0xFFFF);
 		return f / float(0xFFFF + 1);
+		//uint32_t f = ((uint32_t)(r[1] << 8) | (0x3f << 24)) - 1;
+		//return *((float*)&f);
 	}
 
 } // namespace rng
