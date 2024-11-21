@@ -1,5 +1,6 @@
 #include "gui_message_settings_window.hpp"
 #include "gui_element_types.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 	void message_log_text::on_update(sys::state& state) noexcept {

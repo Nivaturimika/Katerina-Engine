@@ -71,6 +71,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_trigger_tooltips.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_error_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/map_tooltip.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_politics_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_population_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_production_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_technology_window.cpp"
