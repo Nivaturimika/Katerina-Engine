@@ -10,6 +10,7 @@
 #include "system_state.hpp"
 #include "text.hpp"
 #include "texture.hpp"
+#include "demographics.hpp"
 #include "color.hpp"
 
 namespace dcon {
