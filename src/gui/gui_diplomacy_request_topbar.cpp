@@ -1,3 +1,6 @@
+#include "demographics.hpp"
+#include "gui_element_types.hpp"
+#include "gui_element_templates.hpp"
 #include "gui_diplomacy_request_topbar.hpp"
 
 namespace ui {

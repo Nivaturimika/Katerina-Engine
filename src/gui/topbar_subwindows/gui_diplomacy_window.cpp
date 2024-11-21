@@ -1,3 +1,8 @@
+#include "demographics.hpp"
+#include "gui_element_types.hpp"
+#include "gui_element_templates.hpp"
+#include "gui_diplomacy_window.hpp"
+
 namespace ui {
 	void explain_influence(sys::state& state, dcon::nation_id target, text::columnar_layout& contents) {
 		int32_t total_influence_shares = 0;
