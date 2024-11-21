@@ -187,30 +187,28 @@ namespace economy_estimations {
 	}
 
 	float estimate_land_spending(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
+		float total = 0.f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_army_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_army_demand(n, cid) * state.world.commodity_get_current_price(cid);
 		}
 		return total;
 	}
 
 	float estimate_naval_spending(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
+		float total = 0.f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_navy_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_navy_demand(n, cid) * state.world.commodity_get_current_price(cid);
 		}
 		return total;
 	}
 
 	float estimate_construction_spending(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
-		float admin_eff = state.world.nation_get_administrative_efficiency(n);
-		float admin_cost_factor = 2.0f - admin_eff;
+		float total = 0.f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_construction_demand(n, cid) * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
+			total += state.world.nation_get_construction_demand(n, cid) * state.world.commodity_get_current_price(cid);
 		}
 		return total * economy::true_construction_demand;
 	}
