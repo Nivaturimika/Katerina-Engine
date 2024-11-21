@@ -208,7 +208,7 @@ int process_command_line(std::vector<native_string>& argv) {
 		} else if(native_string(argv[i]) == NATIVE("-name")) {
 			if(i + 1 < argv.size()) {
 				std::string nickname = text::native_to_utf8(native_string(argv[i + 1]));
-				memcpy(game_state.network_state.nickname.data, nickname.data(), std::min<size_t>(nickname.length(), 8));
+				std::memcpy(game_state.network_state.nickname.data, nickname.c_str(), std::min<size_t>(nickname.length(), 8));
 				i++;
 			}
 		} else if(native_string(argv[i]) == NATIVE("-password")) {

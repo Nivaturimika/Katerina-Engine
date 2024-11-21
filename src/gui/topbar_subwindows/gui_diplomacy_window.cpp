@@ -1,6 +1,17 @@
+#include "system_state.hpp"
+#include "dcon_generated.hpp"
 #include "demographics.hpp"
 #include "gui_element_types.hpp"
 #include "gui_element_templates.hpp"
+#include "gui_graphics.hpp"
+#include "text.hpp"
+#include "parsers.hpp"
+
+#include "gui_common_elements.hpp"
+#include "gui_diplomacy_actions_window.hpp"
+#include "gui_pick_wargoal_window.hpp"
+#include "gui_peace_window.hpp"
+#include "gui_crisis_window.hpp"
 #include "gui_diplomacy_window.hpp"
 
 namespace ui {
