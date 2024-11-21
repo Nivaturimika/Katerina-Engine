@@ -360,7 +360,7 @@ basic_builder& make_pop_back(basic_builder& o, relationship_object_def const& co
 	o + heading{ "container pop_back for @obj@" };
 
 	o + "void pop_back_@obj@()" + block{
-		o + "if(@pk_obj@.size_used == 0) return;";
+		o + "if(UNLIKELY(@pk_obj@.size_used == 0)) return;";
 		o + "@obj@_id id_removed(@obj@_id::value_base_t(@pk_obj@.size_used - 1));";
 
 		if(cob.hook_delete)
@@ -567,7 +567,7 @@ basic_builder& make_object_resize(basic_builder& o, relationship_object_def cons
 
 	o + "void @obj@_resize(uint32_t new_size)" + block{
 		if(!cob.is_expandable) {
-			o + "if(new_size > @obj_sz@) DCON_OUT_OF_SPACE(@obj@);";
+			o + "if(UNLIKELY(new_size > @obj_sz@)) DCON_OUT_OF_SPACE(@obj@);";
 		}
 		o + "const uint32_t old_size = @pk_obj@.size_used;";
 		o + "if(new_size < old_size)" + block{ // contracting
@@ -1228,7 +1228,7 @@ basic_builder& make_non_erasable_create(basic_builder& o, relationship_object_de
 		if(cob.is_expandable) {
 			expandable_push_back(o, cob);
 		} else {
-			o + "if(@pk_obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@pk_obj@);";
+			o + "if(UNLIKELY(@pk_obj@.size_used >= @size@)) DCON_OUT_OF_SPACE(@pk_obj@);";
 			increase_size(o, cob);
 		}
 		if(cob.hook_create)
@@ -1375,7 +1375,7 @@ basic_builder& erasable_set_new_id(basic_builder& o, relationship_object_def con
 	o + substitute{ "t_obj", cob.name };
 	if(!cob.is_expandable) {
 		if (!cob.primary_key.points_to) {
-			o + "if(!bool(@t_obj@.first_free)) DCON_OUT_OF_SPACE(@t_obj@);";
+			o + "if(UNLIKELY(!bool(@t_obj@.first_free))) DCON_OUT_OF_SPACE(@t_obj@);";
 			o + "@t_obj@_id new_id = @t_obj@.first_free;";
 			o + "@t_obj@.first_free = @t_obj@.m__index.vptr()[@t_obj@.first_free.index()];";
 			o + "@t_obj@.m__index.vptr()[new_id.index()] = new_id;";
@@ -1621,28 +1621,28 @@ basic_builder& make_relation_try_create(basic_builder& o, relationship_object_de
 			o + substitute{ "prop", iob.property_name };
 			if(iob.multiplicity == 1) {
 				if(!iob.is_optional) {
-					o + "if(!bool(@prop@_p)) return @obj@_id();";
+					o + "if(UNLIKELY(!bool(@prop@_p))) return @obj@_id();";
 				}
 				if(cob.primary_key != iob) {
 					if(iob.index == index_type::at_most_one) {
-						o + "if(bool(@prop@_p) && bool(@obj@.m_link_back_@prop@.vptr()[@prop@_p.index()])) return @obj@_id();";
+						o + "if(UNLIKELY(bool(@prop@_p) && bool(@obj@.m_link_back_@prop@.vptr()[@prop@_p.index()]))) return @obj@_id();";
 					}
 				} else {
-					o + "if(@obj@_is_valid(@obj@_id(@obj@_id::value_base_t(@prop@_p.index())))) return @obj@_id();";
+					o + "if(UNLIKELY(@obj@_is_valid(@obj@_id(@obj@_id::value_base_t(@prop@_p.index()))))) return @obj@_id();";
 				}
 			} else {
 				for(int32_t i = 0; i < iob.multiplicity; ++i) {
 					o + substitute{ "i", std::to_string(i) };
 					if(!iob.is_optional) {
-						o + "if(!bool(@prop@_p@i@)) return @obj@_id();";
+						o + "if(UNLIKELY(!bool(@prop@_p@i@))) return @obj@_id();";
 					}
 					if(iob.index == index_type::at_most_one) {
-						o + "if(bool(@prop@_p@i@) && bool(@obj@.m_link_back_@prop@.vptr()[@prop@_p@i@.index()])) return @obj@_id();";
+						o + "if(UNLIKELY(bool(@prop@_p@i@) && bool(@obj@.m_link_back_@prop@.vptr()[@prop@_p@i@.index()]))) return @obj@_id();";
 					}
 					if(iob.is_distinct) {
 						for(int32_t j = i + 1; j < iob.multiplicity; ++j) {
 							o + substitute{ "j", std::to_string(j) };
-							o + "if(bool(@prop@_p@i@) && @prop@_p@i@ == @prop@_p@j@) return @obj@_id();";
+							o + "if(UNLIKELY(bool(@prop@_p@i@)) && @prop@_p@i@ == @prop@_p@j@) return @obj@_id();";
 						}
 					}
 				}
@@ -1673,7 +1673,7 @@ basic_builder& make_relation_try_create(basic_builder& o, relationship_object_de
 					params += idx.property_name + "_p";
 				}
 				o + substitute{ "params", params } +substitute{ "ckname", ck.name };
-				o + "if(@obj@.hashm_@ckname@.contains(@obj@.to_@ckname@_keydata(@params@))) return @obj@_id();";
+				o + "if(LIKELY(@obj@.hashm_@ckname@.contains(@obj@.to_@ckname@_keydata(@params@)))) return @obj@_id();";
 			}
 		}
 
@@ -1690,7 +1690,7 @@ basic_builder& make_relation_try_create(basic_builder& o, relationship_object_de
 			o + "@obj@_id new_id = @obj@_id(@obj@_id::value_base_t(@obj@.size_used));";
 
 			if(!cob.is_expandable) {
-				o + "if(@obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@obj@);";
+				o + "if(UNLIKELY(@obj@.size_used >= @size@)) DCON_OUT_OF_SPACE(@obj@);";
 				increase_size(o, cob);
 			} else {
 				expandable_push_back(o, cob);
@@ -1792,7 +1792,7 @@ basic_builder& make_relation_force_create(basic_builder& o, relationship_object_
 			o + "@obj@_id new_id = @obj@_id(@obj@_id::value_base_t(@obj@.size_used));";
 
 			if(!cob.is_expandable) {
-				o + "if(@obj@.size_used >= @size@) DCON_OUT_OF_SPACE(@obj@);";
+				o + "if(UNLIKELY(@obj@.size_used >= @size@)) DCON_OUT_OF_SPACE(@obj@);";
 				increase_size(o, cob);
 			} else {
 				expandable_push_back(o, cob);
