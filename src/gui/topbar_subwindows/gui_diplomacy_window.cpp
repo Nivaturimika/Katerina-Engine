@@ -130,4 +130,20 @@ namespace ui {
 			}
 		}
 	}
+
+	void diplomacy_priority_button::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+		auto nation_id = retrieve<dcon::nation_id>(state, parent);
+		if(!nations::is_great_power(state, state.local_player_nation)) {
+			text::add_line(state, contents, "diplomacy_cannot_set_prio");
+		} else if(nations::is_great_power(state, nation_id)) {
+			text::add_line(state, contents, "diplomacy_cannot_set_prio_gp");
+		} else {
+			explain_influence(state, nation_id, contents);
+		}
+		auto box = text::open_layout_box(contents, 0);
+		text::add_divider_to_layout_box(state, contents, box);
+		text::localised_format_box(state, contents, box, std::string_view("diplomacy_set_prio_desc"));
+		text::close_layout_box(contents, box);
+		active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::influence, false);
+	}
 }
