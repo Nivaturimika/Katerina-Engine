@@ -6,8 +6,8 @@
 #define DCON_TRAP_INVALID_STORE 1
 #endif
 
-#define ALICE_NO_ENTRY_POINT 1
-#include "common_types.cpp"
+#include "system_state.hpp"
+#include "serialization.hpp"
 
 std::unique_ptr<sys::state> load_testing_scenario_file() {
 	std::unique_ptr<sys::state> game_state = std::make_unique<sys::state>(); // too big for the stack
