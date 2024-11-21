@@ -15,6 +15,75 @@
 #include "gui_diplomacy_window.hpp"
 
 namespace ui {
+	int32_t calculate_partial_score(sys::state& state, dcon::nation_id target, dcon::cb_type_id id, dcon::state_definition_id state_def, dcon::national_identity_id second_nation) {
+		int32_t cost = -1;
+
+		auto war = military::find_war_between(state, state.local_player_nation, target);
+		if(!military::cb_requires_selection_of_a_state(state, id) && !military::cb_requires_selection_of_a_liberatable_tag(state, id) && !military::cb_requires_selection_of_a_valid_nation(state, id)) {
+
+		cost = military::peace_cost(state, military::find_war_between(state, state.local_player_nation, target), id, state.local_player_nation, target, dcon::nation_id{}, dcon::state_definition_id{}, dcon::national_identity_id{});
+		} else if(military::cb_requires_selection_of_a_state(state, id)) {
+
+			if(state_def) {
+				if(military::cb_requires_selection_of_a_liberatable_tag(state, id)) {
+					if(!second_nation) {
+						return -1;
+					}
+				} else if(military::cb_requires_selection_of_a_valid_nation(state, id)) {
+					if(!second_nation) {
+						return -1;
+					}
+				}
+
+				cost = 0;
+
+				// for each state ...
+				if(war) {
+					auto is_attacker = military::is_attacker(state, war, state.local_player_nation);
+					for(auto si : state.world.in_state_instance) {
+						if(si.get_definition() == state_def) {
+							auto wr = military::get_role(state, war, si.get_nation_from_state_ownership());
+							if((is_attacker && wr == military::war_role::defender) || (!is_attacker && wr == military::war_role::attacker)) {
+								if(military::cb_requires_selection_of_a_liberatable_tag(state, id)) {
+								cost += military::peace_cost(state, war, id, state.local_player_nation, si.get_nation_from_state_ownership(), dcon::nation_id{}, state_def, second_nation);
+								} else if(military::cb_requires_selection_of_a_valid_nation(state, id)) {
+								cost += military::peace_cost(state, war, id, state.local_player_nation, si.get_nation_from_state_ownership(), state.world.national_identity_get_nation_from_identity_holder(second_nation), state_def, dcon::national_identity_id{});
+								} else {
+								cost += military::peace_cost(state, war, id, state.local_player_nation, si.get_nation_from_state_ownership(), dcon::nation_id{}, state_def, dcon::national_identity_id{});
+								}
+							}
+						}
+					}
+				} else {
+					for(auto si : state.world.in_state_instance) {
+						if(si.get_definition() == state_def) {
+							auto n = si.get_nation_from_state_ownership();
+							auto no = n.get_overlord_as_subject().get_ruler();
+							if(n == target || no == target) {
+								if(military::cb_requires_selection_of_a_liberatable_tag(state, id)) {
+								cost += military::peace_cost(state, dcon::war_id{}, id, state.local_player_nation, si.get_nation_from_state_ownership(), dcon::nation_id{}, state_def, second_nation);
+								} else if(military::cb_requires_selection_of_a_valid_nation(state, id)) {
+								cost += military::peace_cost(state, dcon::war_id{}, id, state.local_player_nation, si.get_nation_from_state_ownership(), state.world.national_identity_get_nation_from_identity_holder(second_nation), state_def, dcon::national_identity_id{});
+								} else {
+								cost += military::peace_cost(state, dcon::war_id{}, id, state.local_player_nation, si.get_nation_from_state_ownership(), dcon::nation_id{}, state_def, dcon::national_identity_id{});
+								}
+							}
+						}
+					}
+				}
+			}
+		} else if(military::cb_requires_selection_of_a_liberatable_tag(state, id)) {
+			if(second_nation) {
+			cost = military::peace_cost(state, military::find_war_between(state, state.local_player_nation, target), id, state.local_player_nation, target, dcon::nation_id{}, dcon::state_definition_id{}, second_nation);
+			}
+		} else if(military::cb_requires_selection_of_a_valid_nation(state, id)) {
+			if(second_nation) {
+			cost = military::peace_cost(state, military::find_war_between(state, state.local_player_nation, target), id, state.local_player_nation, target, state.world.national_identity_get_nation_from_identity_holder(second_nation), dcon::state_definition_id{}, dcon::national_identity_id{});
+			}
+		}
+		return cost;
+	}
+
 	void explain_influence(sys::state& state, dcon::nation_id target, text::columnar_layout& contents) {
 		int32_t total_influence_shares = 0;
 		auto n = fatten(state.world, state.local_player_nation);
