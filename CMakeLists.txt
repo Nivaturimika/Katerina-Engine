@@ -27,8 +27,8 @@ endif()
 
 if(NOT(
 	CMAKE_BUILD_TYPE STREQUAL "Debug"
-	CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"
-	CMAKE_BUILD_TYPE STREQUAL "Release"
+	OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"
+	OR CMAKE_BUILD_TYPE STREQUAL "Release"
 ))
 	message(FATAL_ERROR "Build type is not valid, specify with -DCMAKE_BUILD_TYPE=<Debug, Release or RelWithDebInfo>")
 endif()
