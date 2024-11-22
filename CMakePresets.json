@@ -133,10 +133,6 @@
 				"ARCHITECTURE": "x64",
 				"CMAKE_BUILD_TYPE": "Debug"
 			},
-			"architecture": {
-				"value": "x64",
-				"strategy": "external"
-			},
 			"condition": {
 				"type": "equals",
 				"lhs": "${hostSystemName}",
@@ -153,10 +149,6 @@
 				"CMAKE_CXX_COMPILER": "clang++",
 				"ARCHITECTURE": "x64",
 				"CMAKE_BUILD_TYPE": "Release"
-			},
-			"architecture": {
-				"value": "x64",
-				"strategy": "external"
 			},
 			"condition": {
 				"type": "equals",
