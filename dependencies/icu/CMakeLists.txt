@@ -2,7 +2,7 @@ message(STATUS "Fetching icu...")
 
 set(BUILD_ICU ON)
 set(ICU_BUILD_VERSION "70.1")
-if(NOT(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86"))
+if(CROSS_COMPILE)
 	message(STATUS "Using icu-cmake for cross compiled ICU")
 	set(ICU_CROSS_ARCH "aarch64-linux-gnu")
 	set(CMAKE_C_FLAGS "-lstdc++")
