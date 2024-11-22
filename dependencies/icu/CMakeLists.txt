@@ -8,6 +8,8 @@ if(CROSS_COMPILE)
 	set(CMAKE_C_FLAGS "-lstdc++")
 	set(CMAKE_CXX_FLAGS "-lstdc++")
 	#set(CMAKE_CXX_FLAGS "-lstdc++")
+elseif(APPLE)
+	set(SYSTEM_ICU ON)
 endif()
 
 FetchContent_Declare(icu
