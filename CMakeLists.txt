@@ -25,6 +25,14 @@ if(NOT(
 	message(FATAL_ERROR "Architecture is not valid, specify with -DARCHITECTURE=<arch>")
 endif()
 
+if(NOT(
+	CMAKE_BUILD_TYPE STREQUAL "Debug"
+	CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"
+	CMAKE_BUILD_TYPE STREQUAL "Release"
+))
+	message(FATAL_ERROR "Build type is not valid, specify with -DCMAKE_BUILD_TYPE=<Debug, Release or RelWithDebInfo>")
+endif()
+
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 list(APPEND ALICE_CORE_SOURCES_LIST
@@ -326,7 +334,7 @@ add_custom_command(
 	DEPENDS ${CONTAINER_PATH}.txt
 	VERBATIM)
 
-if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
+if(NOT(CROSS_COMPILE))
 	# Sets a dependency on the generated file
 	add_custom_target(GENERATE_CONTAINER DEPENDS ${CONTAINER_PATH}.hpp)
 	add_dependencies(KatEngine GENERATE_CONTAINER ParserGenerator)
