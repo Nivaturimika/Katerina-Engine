@@ -20,36 +20,6 @@
 			}
 		},
 		{
-			"name": "macos-base-x64",
-			"inherits": "base-x64",
-			"hidden": true,
-			"cacheVariables": {
-				"CMAKE_C_COMPILER": "clang",
-				"CMAKE_CXX_COMPILER": "clang++"
-			},
-			"condition": {
-				"type": "equals",
-				"lhs": "${hostSystemName}",
-				"rhs": "MacOS"
-			}
-		},
-		{
-			"name": "x64-debug-macos",
-			"displayName": "x64 Debug",
-			"inherits": "macos-base-x64",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug"
-			}
-		},
-		{
-			"name": "x64-release-macos",
-			"displayName": "x64 Release",
-			"inherits": "macos-base-x64",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release"
-			}
-		},
-		{
 			"name": "windows-base-x64",
 			"inherits": "base-x64",
 			"hidden": true,
@@ -150,6 +120,48 @@
 			"inherits": "linux-base-x64",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "x64-debug-macos",
+			"displayName": "x64 Debug",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"ARCHITECTURE": "x64",
+				"CMAKE_BUILD_TYPE": "Debug"
+			},
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "MacOS"
+			}
+		},
+		{
+			"name": "x64-release-macos",
+			"displayName": "x64 Release",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"ARCHITECTURE": "x64",
+				"CMAKE_BUILD_TYPE": "Release"
+			},
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "MacOS"
 			}
 		}
 	]
