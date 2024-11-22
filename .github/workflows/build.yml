@@ -69,7 +69,7 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake -DARCHITECTURE=x64 --preset=x64-${{ matrix.config }} -B build
+        cmake -DARCHITECTURE=x64 --preset=${{ matrix.config }} -B build
 
     - name: Build Katerina Engine
       run: |
