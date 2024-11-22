@@ -57,6 +57,25 @@ jobs:
       run: |
         cmake --build build --parallel --target KatEngine
 
+  macos-build:
+    strategy:
+      matrix:
+        config: [debug-macos]
+    runs-on: [macos-latest]
+    name: MacOS (${{ matrix.config }})
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Configure Build Files
+      run: |
+        cmake -DARCHITECTURE=x64 --preset=x64-${{ matrix.config }} -B build
+
+    - name: Build Katerina Engine
+      run: |
+        cmake --build build --parallel --target KatEngine
+
   build-check:
     needs: [windows-build, linux-build]
     runs-on: ubuntu-latest
