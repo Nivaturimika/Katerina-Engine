@@ -1,160 +1,160 @@
 {
-"version": 3,
-"cmakeMinimumRequired": {
-	"major": 3,
-	"minor": 15,
-	"patch": 0
-},
-"configurePresets": [
-	{
-	"name": "base-x64",
-	"hidden": true,
-	"binaryDir": "${sourceDir}/out/build/${presetName}",
-	"installDir": "${sourceDir}/out/install/${presetName}",
-	"cacheVariables": {
-		"ARCHITECTURE": "x64"
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 15,
+		"patch": 0
 	},
-	"architecture": {
-		"value": "x64",
-		"strategy": "external"
-	}
-	},
-	{
-	"name": "windows-base-x64",
-	"inherits": "base-x64",
-	"hidden": true,
-	"cacheVariables": {
-		"CMAKE_C_COMPILER": "cl.exe",
-		"CMAKE_CXX_COMPILER": "cl.exe",
-		"ARCHITECTURE": "x64"
-	},
-	"condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Windows"
-	}
-	},
-	{
-	"name": "x64-debug-windows",
-	"displayName": "x64 Debug",
-	"inherits": "windows-base-x64",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Debug"
-	}
-	},
-	{
-	"name": "x64-release-windows",
-	"displayName": "x64 Release",
-	"inherits": "windows-base-x64",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release"
-	}
-	},
-	{
-	"name": "base-x86",
-	"hidden": true,
-	"binaryDir": "${sourceDir}/out/build/${presetName}",
-	"installDir": "${sourceDir}/out/install/${presetName}",
-	"cacheVariables": {
-		"ARCHITECTURE": "x86"
-	},
-	"architecture": {
-		"value": "x86",
-		"strategy": "external"
-	}
-	},
-	{
-	"name": "windows-base-x86",
-	"inherits": "base-x86",
-	"hidden": true,
-	"cacheVariables": {
-		"CMAKE_C_COMPILER": "cl.exe",
-		"CMAKE_CXX_COMPILER": "cl.exe",
-		"ARCHITECTURE": "x86"
-	},
-	"condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Windows"
-	}
-	},
-	{
-	"name": "x86-debug-windows",
-	"displayName": "x86 Debug",
-	"inherits": "windows-base-x86",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Debug"
-	}
-	},
-	{
-	"name": "x86-release-windows",
-	"displayName": "x86 Release",
-	"inherits": "windows-base-x86",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release"
-	}
-	},
-	{
-	"name": "linux-base-x64",
-	"inherits": "base-x64",
-	"hidden": true,
-	"cacheVariables": {
-		"CMAKE_C_COMPILER": "clang",
-		"CMAKE_CXX_COMPILER": "clang++",
-		"ARCHITECTURE": "x64"
-	},
-	"condition": {
-		"type": "equals",
-		"lhs": "${hostSystemName}",
-		"rhs": "Linux"
-	}
-	},
-	{
-	"name": "x64-debug-linux-clang",
-	"displayName": "x64 Debug",
-	"inherits": "linux-base-x64",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Debug"
-	}
-	},
-	{
-	"name": "x64-release-linux-clang",
-	"displayName": "x64 Release",
-	"inherits": "linux-base-x64",
-	"cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release"
-	}
-	},
-	{
-		"name": "macos-base-x64",
-		"inherits": "base-x64",
-		"hidden": true,
-		"cacheVariables": {
-			"CMAKE_C_COMPILER": "clang",
-			"CMAKE_CXX_COMPILER": "clang++",
-			"ARCHITECTURE": "x64"
+	"configurePresets": [
+		{
+			"name": "base-x64",
+			"hidden": true,
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}",
+			"cacheVariables": {
+				"ARCHITECTURE": "x64"
+			},
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			}
 		},
-		"condition": {
-			"type": "equals",
-			"lhs": "${hostSystemName}",
-			"rhs": "MacOS"
+		{
+			"name": "windows-base-x64",
+			"inherits": "base-x64",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "cl.exe",
+				"CMAKE_CXX_COMPILER": "cl.exe",
+				"ARCHITECTURE": "x64"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			}
+		},
+		{
+			"name": "x64-debug-windows",
+			"displayName": "x64 Debug",
+			"inherits": "windows-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "x64-release-windows",
+			"displayName": "x64 Release",
+			"inherits": "windows-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "base-x86",
+			"hidden": true,
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}",
+			"cacheVariables": {
+				"ARCHITECTURE": "x86"
+			},
+			"architecture": {
+				"value": "x86",
+				"strategy": "external"
+			}
+		},
+		{
+			"name": "windows-base-x86",
+			"inherits": "base-x86",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "cl.exe",
+				"CMAKE_CXX_COMPILER": "cl.exe",
+				"ARCHITECTURE": "x86"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			}
+		},
+		{
+			"name": "x86-debug-windows",
+			"displayName": "x86 Debug",
+			"inherits": "windows-base-x86",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "x86-release-windows",
+			"displayName": "x86 Release",
+			"inherits": "windows-base-x86",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "linux-base-x64",
+			"inherits": "base-x64",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"ARCHITECTURE": "x64"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Linux"
+			}
+		},
+		{
+			"name": "x64-debug-linux-clang",
+			"displayName": "x64 Debug",
+			"inherits": "linux-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "x64-release-linux-clang",
+			"displayName": "x64 Release",
+			"inherits": "linux-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "macos-base-x64",
+			"inherits": "base-x64",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"ARCHITECTURE": "x64"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "MacOS"
+			}
+		},
+		{
+			"name": "x64-debug-macos",
+			"displayName": "x64 Debug",
+			"inherits": "macos-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "x64-release-macos",
+			"displayName": "x64 Release",
+			"inherits": "macos-base-x64",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
 		}
-	},
-	{
-		"name": "x64-debug-macos",
-		"displayName": "x64 Debug",
-		"inherits": "macos-base-x64",
-		"cacheVariables": {
-			"CMAKE_BUILD_TYPE": "Debug"
-		}
-	},
-	{
-		"name": "x64-release-macos",
-		"displayName": "x64 Release",
-		"inherits": "macos-base-x64",
-		"cacheVariables": {
-			"CMAKE_BUILD_TYPE": "Release"
-		}
-	}
-]
+	]
 }
