@@ -82,6 +82,10 @@ cmake -DARCHITECTURE=aarch64 -DIMPORT_PATH=${PWD}/../build -DCMAKE_CXX_COMPILER=
 cmake --build .
 ```
 
+#### MacOS
+
+If you manage to build this shit in MacOS, tell me how you had such patience and sanity to do so.
+
 #### Final touches
 
 Because the project in its current state needs to use the existing game files (as a source of graphics, for starters), everyone needs to tell the compiler where their copy of the game is installed and to put the new files in that directory as well.
