@@ -48,6 +48,14 @@ jobs:
       with:
         fetch-depth: 0
 
+    - uses: johnwason/vcpkg-action@v6
+      with:
+        pkgs: 'icu'
+        triplet: 'x64-windows-debug'
+        cache-key: ${{ matrix.config }}
+        token: ${{ github.token }}
+        github-binarycache: true
+
     - name: Configure Build Files
       run: |
         cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
