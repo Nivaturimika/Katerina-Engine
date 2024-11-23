@@ -811,10 +811,10 @@ namespace ve {
 			float lane[4];
 		} u;
 		_mm_store_ps(&u.lane[0], a);
-		u.lane[0] = std::floorf(u.lane[0]);
-		u.lane[1] = std::floorf(u.lane[1]);
-		u.lane[2] = std::floorf(u.lane[2]);
-		u.lane[3] = std::floorf(u.lane[3]);
+		u.lane[0] = ::floorf(u.lane[0]);
+		u.lane[1] = ::floorf(u.lane[1]);
+		u.lane[2] = ::floorf(u.lane[2]);
+		u.lane[3] = ::floorf(u.lane[3]);
 		return u.tmp;
 	}
 	RELEASE_INLINE fp_vector ceil(fp_vector a) {
@@ -823,10 +823,10 @@ namespace ve {
 			float lane[4];
 		} u;
 		_mm_store_ps(&u.lane[0], a);
-		u.lane[0] = std::ceilf(u.lane[0]);
-		u.lane[1] = std::ceilf(u.lane[1]);
-		u.lane[2] = std::ceilf(u.lane[2]);
-		u.lane[3] = std::ceilf(u.lane[3]);
+		u.lane[0] = ::ceilf(u.lane[0]);
+		u.lane[1] = ::ceilf(u.lane[1]);
+		u.lane[2] = ::ceilf(u.lane[2]);
+		u.lane[3] = ::ceilf(u.lane[3]);
 		return u.tmp;
 	}
 	//new funcs
