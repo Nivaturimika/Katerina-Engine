@@ -2022,8 +2022,7 @@ namespace ui {
 			set_text(state, text::date_to_string(state, state.news_definitions.last_print));
 		}
 	};
-
-	template<uint8_t size, uint8_t index>
+	template<size_t size, size_t index>
 	class news_article_picture : public image_element_base {
 		dcon::gfx_object_id no_news_image;
 	public:
@@ -2043,7 +2042,7 @@ namespace ui {
 				base_data.data.image.gfx_object = state.news_definitions.small_articles[index].picture;
 			}
 		}
-		void render(sys::state& state, int32_t x, int32_t y) noexcept {
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(auto gid = base_data.data.image.gfx_object; gid) {
 				auto& gfx_def = state.ui_defs.gfx[gid];
 				auto tid = ogl::get_texture_handle(state, gfx_def.primary_texture_handle, gfx_def.is_partially_transparent());
@@ -2061,7 +2060,7 @@ namespace ui {
 			}
 		}
 	};
-	template<uint8_t size, uint8_t index>
+	template<size_t size, size_t index>
 	class news_article_title : public multiline_text_element_base {
 	public:
 		void on_update(sys::state& state) noexcept override {
@@ -2106,7 +2105,7 @@ namespace ui {
 			text::close_layout_box(contents, box);
 		}
 	};
-	template<uint8_t size, uint8_t index>
+	template<size_t size, size_t index>
 	class news_article_desc : public scrollable_text {
 	public:
 		void on_update(sys::state& state) noexcept override {
@@ -2151,7 +2150,7 @@ namespace ui {
 			text::close_layout_box(contents, box);
 		}
 	};
-	template<uint8_t size, uint8_t index>
+	template<size_t size, size_t index>
 	class news_article_window : public window_element_base {
 	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {

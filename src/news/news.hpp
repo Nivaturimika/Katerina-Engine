@@ -40,7 +40,7 @@ namespace news {
 	constexpr inline uint8_t news_size_mask = 0x80 | 0xC0;
 
 	struct news_scope {
-		dcon::text_key strings[4][4]; //4*4*4
+		dcon::text_key strings[4][6]; //4*6*4
 		int32_t values[4][4]; //4*4*4
 		dcon::text_key title; //4
 		dcon::text_key desc; //4

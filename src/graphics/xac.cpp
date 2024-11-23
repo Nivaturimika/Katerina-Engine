@@ -866,7 +866,7 @@ namespace emfx {
 			for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
 				auto kf = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 				auto time = parse_xac_any_binary<float>(&ptr, end, err);
-				anim.scale_rotation_keys.push_back(xsm_animation_key{ kf, time });
+				anim.scale_rotation_keys.push_back(xsm_animation_key<xac_vector4f>{ kf, time });
 			}
 		}
 		return ptr;
@@ -1027,16 +1027,16 @@ namespace emfx {
 			}
 			//
 			if(anim.position_keys.empty()) {
-				anim.position_keys.emplace_back(anim.pose_position, 0.f);
+				anim.position_keys.emplace_back(xsm_animation_key<xac_vector3f>{ anim.pose_position, 0.f });
 			}
 			if(anim.rotation_keys.empty()) {
-				anim.rotation_keys.emplace_back(anim.pose_rotation, 0.f);
+				anim.rotation_keys.emplace_back(xsm_animation_key<xac_vector4f>{ anim.pose_rotation, 0.f });
 			}
 			if(anim.scale_keys.empty()) {
-				anim.scale_keys.emplace_back(anim.pose_scale, 0.f);
+				anim.scale_keys.emplace_back(xsm_animation_key<xac_vector3f>{ anim.pose_scale, 0.f });
 			}
 			if(anim.scale_rotation_keys.empty()) {
-				anim.scale_rotation_keys.emplace_back(anim.pose_scale_rotation, 0.f);
+				anim.scale_rotation_keys.emplace_back(xsm_animation_key<xac_vector4f>{ anim.pose_scale_rotation, 0.f });
 			}
 		}
 	}
