@@ -35,7 +35,7 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --parallel --target KatEngine
+        cmake --build build --target KatEngine
 
   windows-build:
     strategy:
@@ -68,11 +68,11 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
+        cmake -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake" -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --parallel --target KatEngine
+        cmake --build build --target KatEngine
 
   macos-build:
     strategy:
@@ -95,7 +95,7 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --parallel --target KatEngine
+        cmake --build build --target KatEngine
 
   build-check:
     needs: [windows-build, linux-build, macos-build]
