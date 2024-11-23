@@ -5511,10 +5511,9 @@ namespace ai {
 			};
 			for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
 			dcon::unit_type_id utid{ dcon::unit_type_id::value_base_t(i) };
-				if(!state.military_definitions.unit_base_definitions[utid].is_land)
-				continue;
-				if(!n.get_active_unit(utid) && !state.military_definitions.unit_base_definitions[utid].active)
-				continue;
+				if(!state.military_definitions.unit_base_definitions[utid].is_land
+				|| !n.get_active_unit(utid) && !state.military_definitions.unit_base_definitions[utid].active)
+					continue;
 				float s2 = estimate_unit_type_value(state, n, utid);
 				if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::infantry) {
 					for(uint32_t j = 0; j < 4; j++) {
@@ -5523,7 +5522,7 @@ namespace ai {
 							bool b_ov = (j & 1) == 0 || state.military_definitions.unit_base_definitions[utid].can_build_overseas;
 							bool b_pc = (j & 2) == 0 || !state.military_definitions.unit_base_definitions[utid].primary_culture;
 							if(b_ov && b_pc)
-							best_inf[j] = utid;
+								best_inf[j] = utid;
 						}
 					}
 				} else if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::cavalry) {
@@ -5533,7 +5532,7 @@ namespace ai {
 							bool b_ov = (j & 1) == 0 || state.military_definitions.unit_base_definitions[utid].can_build_overseas;
 							bool b_pc = (j & 2) == 0 || !state.military_definitions.unit_base_definitions[utid].primary_culture;
 							if(b_ov && b_pc)
-							best_cav[j] = utid;
+								best_cav[j] = utid;
 						}
 					}
 				} else if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::support
@@ -5544,7 +5543,7 @@ namespace ai {
 							bool b_ov = (j & 1) == 0 || state.military_definitions.unit_base_definitions[utid].can_build_overseas;
 							bool b_pc = (j & 2) == 0 || !state.military_definitions.unit_base_definitions[utid].primary_culture;
 							if(b_ov && b_pc)
-							best_art[j] = utid;
+								best_art[j] = utid;
 						}
 					}
 				}
@@ -5555,11 +5554,10 @@ namespace ai {
 					auto type = r.get_regiment().get_type();
 					assert(type);
 					if(!type)
-					continue;
+						continue;
 					auto etype = state.military_definitions.unit_base_definitions[type].type;
 					bool overseas = r.get_regiment().get_pop_from_regiment_source().get_province_from_pop_location().get_is_colonial();
 					bool is_pc = nations::nation_accepts_culture(state, n, r.get_regiment().get_pop_from_regiment_source().get_culture());
-					uint32_t index = (overseas ? 1 : 0) + (is_pc ? 2 : 0);
 					if(etype == military::unit_type::support
 					|| etype == military::unit_type::special) {
 						++num_support;
@@ -5575,15 +5573,15 @@ namespace ai {
 				bool is_pc = nations::nation_accepts_culture(state, n, state.world.pop_get_culture(pop));
 				uint32_t index = (overseas ? 1 : 0) + (!is_pc ? 2 : 0);
 				if(num_frontline > num_support && best_art[index])
-				return best_art[index];
+					return best_art[index];
 				if(num_frontline > (num_cavalry / 5) && best_cav[index])
-				return best_cav[index];
+					return best_cav[index];
 				return best_inf[index];
 			};
 
 			for(auto p : state.world.nation_get_province_ownership(n)) {
 				if(p.get_province().get_nation_from_province_control() != n)
-				continue;
+					continue;
 
 				bool overseas = province::is_overseas(state, p.get_province());
 				if(p.get_province().get_is_colonial()) {

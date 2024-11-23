@@ -40,8 +40,7 @@ native_string make_scenario(simple_fs::file_system& fs_root, parsers::error_hand
 		if(date_index == 0) {
 			auto sdir = simple_fs::get_or_create_scenario_directory();
 			native_string base_name;
-			for(uint32_t i = 0; i < path.size(); i++) {
-				auto c = path[i];
+			for(auto const c : path) {
 				if(c == NATIVE('?')) {
 					break;
 				} else if(!(c == NATIVE(';') || c == NATIVE('.') || c == NATIVE('/') || c == NATIVE('\\'))) {
