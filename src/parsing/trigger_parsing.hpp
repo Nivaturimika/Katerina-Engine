@@ -6033,6 +6033,8 @@ namespace parsers {
 	void tr_scope_independence(token_generator& gen, error_handler& err, trigger_building_context& context);
 	void tr_flashpoint_tag_scope(token_generator& gen, error_handler& err, trigger_building_context& context);
 	void tr_crisis_state_scope(token_generator& gen, error_handler& err, trigger_building_context& context);
+	void tr_crisis_attacker_scope(token_generator& gen, error_handler& err, trigger_building_context& context);
+	void tr_crisis_defender_scope(token_generator& gen, error_handler& err, trigger_building_context& context); 
 	void tr_state_scope(token_generator& gen, error_handler& err, trigger_building_context& context);
 	void tr_scope_variable(std::string_view name, token_generator& gen, error_handler& err, trigger_building_context& context);
 	//extensions
