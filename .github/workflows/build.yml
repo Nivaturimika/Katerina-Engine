@@ -51,7 +51,7 @@ jobs:
     - uses: johnwason/vcpkg-action@v6
       with:
         pkgs: 'icu'
-        triplet: 'x64-windows-debug'
+        triplet: 'x64-windows'
         cache-key: ${{ matrix.config }}
         token: ${{ github.token }}
         github-binarycache: true
