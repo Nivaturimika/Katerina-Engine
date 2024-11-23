@@ -3,9 +3,13 @@
 #include <locale>
 #include <codecvt>
 
-#include "unicode/ubrk.h"
-#include "unicode/utypes.h"
-#include "unicode/ubidi.h"
+#ifdef _WIN32
+#include <icu.h>
+#else
+#include <unicode/ubrk.h>
+#include <unicode/utypes.h>
+#include <unicode/ubidi.h>
+#endif
 
 #include "system_state.hpp"
 #include "nations.hpp"
