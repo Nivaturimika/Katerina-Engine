@@ -104,7 +104,7 @@ mapmode_tooltip_40;Life rating: $x$
 mapmode_tooltip_41;Crime: $x$
 mapmode_tooltip_42_1;Land rally point
 mapmode_tooltip_42_2;Naval rally point
-mapmode_tooltip_43;Workforce distrobution:
+mapmode_tooltip_43;Workforce distribution:
 mapmode_tooltip_44;Mobilized regiments from this province: $x$ (out of $y$ possible)
 mapmode_tooltip_44_2;No possible regiments
 mapmode_tooltip_name;$state$ ($name$ - )
