@@ -94,7 +94,7 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/usr/local/opt/icu4c -DCMAKE_BUILD_TYPE=Debug -B build
+        cmake -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -DCMAKE_BUILD_TYPE=Debug -B build
 
     - name: Build Katerina Engine
       run: |

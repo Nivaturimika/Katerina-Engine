@@ -17,10 +17,6 @@
 #pragma comment(lib, "Ole32.lib")
 #pragma comment(lib, "Shell32.lib")
 
-#pragma comment(lib, "icudt.lib")
-#pragma comment(lib, "icuin.lib")
-#pragma comment(lib, "icuuc.lib")
-
 #include "entry_point.cpp"
 
 static CRITICAL_SECTION guard_abort_handler;
