@@ -3030,6 +3030,7 @@ namespace sys {
 		demographics::regenerate_from_pop_data_full(*this);
 
 		military::reinforce_regiments(*this);
+		military::repair_ships(*this);
 
 		nations::update_administrative_efficiency(*this);
 		military::regenerate_land_unit_average(*this);
