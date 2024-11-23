@@ -56,6 +56,7 @@ jobs:
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     - name: Install ICU
+      id: install-icu
       uses: johnwason/vcpkg-action@v6
       with:
         pkgs: 'icu'
@@ -67,8 +68,10 @@ jobs:
         VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
     - name: Configure Build Files
+      env:
+        vcpkg-cmake-config: ${{ steps.install-icu.outputs.vcpkg-cmake-config }}
       run: |
-        cmake -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_INSTALLATION_ROOT }}\scripts\buildsystems\vcpkg.cmake" -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
+        cmake ${{ env.vcpkg-cmake-config }} -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
