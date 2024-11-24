@@ -229,7 +229,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -300,7 +300,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -379,7 +379,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -440,7 +440,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -487,7 +487,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -534,7 +534,7 @@ namespace ui {
 			default:
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -622,7 +622,7 @@ namespace ui {
 				}
 			}
 			if(producers.size() > 0) {
-				pdqsort(producers.begin(), producers.end(), [](auto const& a, auto const& b) {
+				sys::merge_sort(producers.begin(), producers.end(), [](auto const& a, auto const& b) {
 					return a.v > b.v;
 				});
 				{

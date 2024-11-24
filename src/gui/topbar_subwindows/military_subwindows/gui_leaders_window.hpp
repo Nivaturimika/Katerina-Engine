@@ -209,7 +209,7 @@ namespace ui {
 			}
 			switch(sort) {
 			case leader_sort::name:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto in_a = state.to_string_view(state.world.leader_get_name(a));
 					auto in_b = state.to_string_view(state.world.leader_get_name(b));
 					if(in_a != in_b)
@@ -218,7 +218,7 @@ namespace ui {
 				});
 				break;
 			case leader_sort::prestige:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto in_a = state.world.leader_get_prestige(a);
 					auto in_b = state.world.leader_get_prestige(b);
 					if(in_a != in_b)
@@ -227,7 +227,7 @@ namespace ui {
 				});
 				break;
 			case leader_sort::type:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto in_a = state.world.leader_get_is_admiral(a);
 					auto in_b = state.world.leader_get_is_admiral(b);
 					if(in_a != in_b)
@@ -236,7 +236,7 @@ namespace ui {
 				});
 				break;
 			case leader_sort::army:
-				pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
+				sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::leader_id a, dcon::leader_id b) {
 					auto ar_a = state.world.leader_get_army_from_army_leadership(a);
 					auto ar_b = state.world.leader_get_army_from_army_leadership(b);
 					auto in_a = state.to_string_view(state.world.army_get_name(ar_a));

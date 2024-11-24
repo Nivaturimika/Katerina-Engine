@@ -1249,7 +1249,7 @@ namespace ui {
 						sorted_distrib.emplace_back(T(e.first), e.second);
 					}
 				}
-				pdqsort(sorted_distrib.begin(), sorted_distrib.end(), [&](std::pair<T, float> a, std::pair<T, float> b) {
+				sys::merge_sort(sorted_distrib.begin(), sorted_distrib.end(), [&](std::pair<T, float> a, std::pair<T, float> b) {
 					if(a.second != b.second) {
 						return a.second > b.second;
 					}
@@ -1411,7 +1411,7 @@ namespace ui {
 					}
 				}
 
-				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
+				sys::merge_sort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
 					auto av = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a));
 					auto bv = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
 					if(av != bv) {
@@ -1568,7 +1568,7 @@ namespace ui {
 					}
 				}
 
-				pdqsort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
+				sys::merge_sort(distrib.begin(), distrib.end(), [&](auto a, auto b) {
 					auto av = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, a));
 					auto bv = state.world.pop_get_demographics(pop, pop_demographics::to_key(state, b));
 					if(av != bv) {
@@ -2609,7 +2609,7 @@ namespace ui {
 				return a.index() == b.index();
 			});
 			country_pop_listbox->row_contents.erase(it, country_pop_listbox->row_contents.end());
-			pdqsort(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end(), fn);
+			sys::merge_sort(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end(), fn);
 			if(!sort_ascend) {
 				std::reverse(country_pop_listbox->row_contents.begin(), country_pop_listbox->row_contents.end());
 			}
@@ -2626,7 +2626,7 @@ namespace ui {
 			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
 				state_list.push_back(si.get_state().id);
 			}
-			pdqsort(state_list.begin(), state_list.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			sys::merge_sort(state_list.begin(), state_list.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
 				// Colonial states go last
 				auto ac = state.world.province_get_is_colonial(state.world.state_instance_get_capital(a));
 				auto bc = state.world.province_get_is_colonial(state.world.state_instance_get_capital(b));
@@ -2645,7 +2645,7 @@ namespace ui {
 				province::for_each_province_in_state_instance(state, state_id, [&](dcon::province_id id) {
 					province_list.push_back(id);
 				});
-				pdqsort(province_list.begin(), province_list.end(), [&](dcon::province_id a, dcon::province_id b) {
+				sys::merge_sort(province_list.begin(), province_list.end(), [&](dcon::province_id a, dcon::province_id b) {
 					auto av = state.world.province_get_demographics(a, demographics::total);
 					auto bv = state.world.province_get_demographics(b, demographics::total);
 					if(av != bv)

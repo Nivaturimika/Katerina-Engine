@@ -1779,7 +1779,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.for_each_war([&](dcon::war_id id) { row_contents.push_back(id); });
-			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::war_id a, dcon::war_id b) {
+			sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::war_id a, dcon::war_id b) {
 				auto in_a = military::get_role(state, a, state.local_player_nation) != military::war_role::none
 					|| state.world.war_get_is_crisis_war(a) || state.world.war_get_is_great(a);
 				auto in_b = military::get_role(state, b, state.local_player_nation) != military::war_role::none

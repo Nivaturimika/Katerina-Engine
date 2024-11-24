@@ -1355,7 +1355,7 @@ namespace ui {
 			}
 			if(!data.empty()) {
 				text::add_line(state, contents, "remove_countryalert_hasunemployedworkers");
-				pdqsort(data.begin(), data.end(), [&](auto const& a, auto const& b) {
+				sys::merge_sort(data.begin(), data.end(), [&](auto const& a, auto const& b) {
 					if(a.amount != b.amount)
 						return a.amount < b.amount;
 					if(a.sid.index() != b.sid.index())

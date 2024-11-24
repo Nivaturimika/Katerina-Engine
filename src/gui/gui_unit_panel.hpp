@@ -800,7 +800,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				return a.index() == b.index();
 			});
 			row_contents.erase(it, row_contents.end());
-			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
+			sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::regiment_id a, dcon::regiment_id b) {
 				auto au = state.world.regiment_get_type(a);
 				auto bu = state.world.regiment_get_type(b);
 				auto av = uint8_t(state.military_definitions.unit_base_definitions[au].type);
@@ -837,7 +837,7 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				return a.index() == b.index();
 			});
 			row_contents.erase(it, row_contents.end());
-			pdqsort(row_contents.begin(), row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
+			sys::merge_sort(row_contents.begin(), row_contents.end(), [&](dcon::ship_id a, dcon::ship_id b) {
 				auto au = state.world.ship_get_type(a);
 				auto bu = state.world.ship_get_type(b);
 				auto av = uint8_t(state.military_definitions.unit_base_definitions[au].type);

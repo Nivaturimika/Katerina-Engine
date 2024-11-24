@@ -108,25 +108,25 @@ namespace ui {
 
 		switch(sort_order) {
 		case production_sort_order::name:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_name);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_name);
 			break;
 		case production_sort_order::factories:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_factories);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_factories);
 			break;
 		case production_sort_order::primary_workers:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_primary_workers);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_primary_workers);
 			break;
 		case production_sort_order::secondary_workers:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_secondary_workers);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_secondary_workers);
 			break;
 		case production_sort_order::owners:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_owners);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_owners);
 			break;
 		case production_sort_order::infrastructure:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_infrastructure);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_infrastructure);
 			break;
 		case production_sort_order::focus:
-			pdqsort(row_contents.begin(), row_contents.end(), sort_by_focus);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), sort_by_focus);
 			break;
 		}
 	}

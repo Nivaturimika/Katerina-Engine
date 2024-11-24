@@ -83,7 +83,7 @@ namespace ui {
 
 	template<class T>
 	void piechart<T>::update_chart(sys::state& state) {
-		pdqsort(distribution.begin(), distribution.end(), [](auto const& a, auto const& b) {
+		sys::merge_sort(distribution.begin(), distribution.end(), [](auto const& a, auto const& b) {
 			return a.value > b.value;
 		});
 

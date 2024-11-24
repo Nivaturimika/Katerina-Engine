@@ -555,7 +555,7 @@ std::vector<party_info> get_sorted_parties_info(sys::state& state, dcon::provinc
 			result.push_back({ ideology, loyalty, state.world.ideology_get_color(ideology) });
 		}
 	});
-	pdqsort(result.begin(), result.end(), [&](party_info a, party_info b) {
+	sys::merge_sort(result.begin(), result.end(), [&](party_info a, party_info b) {
 		if(a.loyalty != b.loyalty) {
 			return a.loyalty > b.loyalty;
 		}

@@ -437,7 +437,7 @@ namespace ui {
 			return a.index() == b.index();
 		});
 		list.erase(it, list.end());
-		pdqsort(list.begin(), list.end(), fn);
+		sys::merge_sort(list.begin(), list.end(), fn);
 		if(!sort_ascend) {
 			std::reverse(list.begin(), list.end());
 		}

@@ -383,7 +383,7 @@ namespace ui {
 					cultures.push_back(pop.get_pop().get_culture());
 				}
 			}
-			pdqsort(cultures.begin(), cultures.end(), [&](auto a, auto b) {
+			sys::merge_sort(cultures.begin(), cultures.end(), [&](auto a, auto b) {
 				auto av = fat.get_demographics(demographics::to_key(state, a.id));
 				auto bv = fat.get_demographics(demographics::to_key(state, b.id));
 				if(av != bv)
@@ -616,7 +616,7 @@ namespace ui {
 						migration_values.push_back(nation_and_value{ v, in });
 					}
 				}
-				pdqsort(migration_values.begin(), migration_values.end(), [](nation_and_value const& a, nation_and_value const& b) {
+				sys::merge_sort(migration_values.begin(), migration_values.end(), [](nation_and_value const& a, nation_and_value const& b) {
 					if(a.v < 0.f && b.v < 0.f)
 						return std::abs(a.v) > std::abs(b.v);
 					return a.v > b.v;
@@ -862,7 +862,7 @@ namespace ui {
 					religions.push_back(pop.get_pop().get_religion());
 				}
 			}
-			pdqsort(religions.begin(), religions.end(), [&](auto a, auto b) {
+			sys::merge_sort(religions.begin(), religions.end(), [&](auto a, auto b) {
 				return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
 			});
 			//for(size_t i = religions.size(); i > 0; i--) {
@@ -895,7 +895,7 @@ namespace ui {
 					issues.push_back(dcon::fatten(state.world, id));
 				}
 			});
-			pdqsort(issues.begin(), issues.end(), [&](auto a, auto b) {
+			sys::merge_sort(issues.begin(), issues.end(), [&](auto a, auto b) {
 				return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b));
 			});
 			for(size_t i = 0; i < std::min(static_cast<size_t>(5), issues.size()); i++) {
@@ -944,7 +944,7 @@ namespace ui {
 					ideologies.push_back(dcon::fatten(state.world, id));
 				}
 			});
-			pdqsort(ideologies.begin(), ideologies.end(), [&](auto a, auto b) {
+			sys::merge_sort(ideologies.begin(), ideologies.end(), [&](auto a, auto b) {
 				return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
 			});
 			for(size_t i = 0; i < ideologies.size(); i++) {
@@ -1041,7 +1041,7 @@ namespace ui {
 					}
 				}
 			}
-			pdqsort(factories.begin(), factories.end(), [&](auto a, auto b) {
+			sys::merge_sort(factories.begin(), factories.end(), [&](auto a, auto b) {
 				auto av = a.get_level();
 				auto bv = b.get_level();
 				if(av != bv)
@@ -1125,7 +1125,7 @@ namespace ui {
 					total_rebels += pop.get_pop().get_size();
 				}
 			}
-			pdqsort(rebel_factions.begin(), rebel_factions.end(), [&](auto a, auto b) {return a.second > b.second; });
+			sys::merge_sort(rebel_factions.begin(), rebel_factions.end(), [&](auto a, auto b) {return a.second > b.second; });
 
 			auto box = text::open_layout_box(contents);
 

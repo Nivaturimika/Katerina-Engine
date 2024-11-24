@@ -326,7 +326,7 @@ namespace ui {
 				});
 				break;
 			}
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(lsort.reversed) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}
@@ -1427,7 +1427,7 @@ namespace ui {
 				return a.index() == b.index();
 			});
 			row_contents.erase(it, row_contents.end());
-			pdqsort(row_contents.begin(), row_contents.end(), fn);
+			sys::merge_sort(row_contents.begin(), row_contents.end(), fn);
 			if(lsort.reversed) {
 				std::reverse(row_contents.begin(), row_contents.end());
 			}

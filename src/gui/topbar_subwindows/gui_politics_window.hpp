@@ -765,7 +765,7 @@ namespace ui {
 					auto enum_val = any_cast<politics_issue_sort_order>(payload);
 					switch(enum_val) {
 					case politics_issue_sort_order::name:
-						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						sys::merge_sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_name = text::get_name_as_string(state, dcon::fatten(state.world, a));
 							auto b_name = text::get_name_as_string(state, dcon::fatten(state.world, b));
@@ -776,7 +776,7 @@ namespace ui {
 						issues_listbox->update(state);
 						break;
 					case politics_issue_sort_order::popular_support:
-						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						sys::merge_sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_support = politics::get_popular_support(state, state.local_player_nation, a);
 							auto b_support = politics::get_popular_support(state, state.local_player_nation, b);
@@ -787,7 +787,7 @@ namespace ui {
 						issues_listbox->update(state);
 						break;
 					case politics_issue_sort_order::voter_support:
-						pdqsort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
+						sys::merge_sort(issues_listbox->row_contents.begin(), issues_listbox->row_contents.end(),
 						[&](dcon::issue_option_id a, dcon::issue_option_id b) {
 							auto a_support = politics::get_voter_support(state, state.local_player_nation, a);
 							auto b_support = politics::get_voter_support(state, state.local_player_nation, b);
