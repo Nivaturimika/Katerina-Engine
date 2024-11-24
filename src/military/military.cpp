@@ -1452,7 +1452,7 @@ namespace military {
 			if(state.defines.disarmament_army_hit > 0.f) {
 				auto ar = state.world.nation_get_army_control(target);
 				auto total = int32_t(ar.end() - ar.begin());
-				auto rem = int32_t(total / state.defines.disarmament_army_hit);
+				auto rem = int32_t(float(total) * state.defines.disarmament_army_hit);
 				while(rem-- > 0) {
 					auto it = ar.begin();
 					military::cleanup_army(state, (*it).get_army());
