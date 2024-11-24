@@ -1430,9 +1430,30 @@ namespace military {
 		// constructions are canceled. The nation is disarmed. Disarmament lasts until define:REPARATIONS_YEARS or the nation is at
 		// war again.
 		if((bits & cb_flag::po_disarmament) != 0) {
-			// TODO: destroy units
-			if(state.world.nation_get_owned_province_count(target) > 0)
-			state.world.nation_set_disarmed_until(target, state.current_date + int32_t(state.defines.reparations_years) * 365);
+			if(state.world.nation_get_owned_province_count(target) > 0) {
+				state.world.nation_set_disarmed_until(target, state.current_date + int32_t(state.defines.reparations_years) * 365);
+			}
+			// Cancel all constructions
+			for(const auto po : state.world.nation_get_province_ownership(target)) {
+				auto lc = po.get_province().get_province_building_construction();
+				while(lc.begin() != lc.end()) {
+					state.world.delete_province_building_construction(*(lc.begin()));
+				}
+				auto nc = po.get_province().get_province_naval_construction();
+				while(nc.begin() != nc.end()) {
+					state.world.delete_province_naval_construction(*(nc.begin()));
+				}
+			}
+			// Destroy units (fraction is disarmament hit)
+			if(state.defines.disarmament_army_hit > 0.f) {
+				auto ar = state.world.nation_get_army_control(target);
+				auto total = int32_t(ar.end() - ar.begin());
+				auto rem = int32_t(total / state.defines.disarmament_army_hit);
+				while(rem-- > 0) {
+					auto it = ar.begin();
+					military::cleanup_army(state, (*it).get_army());
+				}
+			}
 		}
 
 		// po_reparations: the nation is set to pay reparations for define:REPARATIONS_YEARS
