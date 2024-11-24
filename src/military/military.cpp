@@ -1439,6 +1439,12 @@ namespace military {
 				while(lc.begin() != lc.end()) {
 					state.world.delete_province_building_construction(*(lc.begin()));
 				}
+				for(auto pop : po.get_province().get_pop_location_as_province()) {
+					auto uc = pop.get_pop().get_province_land_construction();
+					while(uc.begin() != uc.end()) {
+						state.world.delete_province_land_construction(*(uc.begin()));
+					}
+				}
 				auto nc = po.get_province().get_province_naval_construction();
 				while(nc.begin() != nc.end()) {
 					state.world.delete_province_naval_construction(*(nc.begin()));
