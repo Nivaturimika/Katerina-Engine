@@ -1122,16 +1122,38 @@ namespace ui {
 	};
 
 	class nation_military_reform_multiplier_icon : public standard_nation_icon {
-		public:
+	public:
 		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			return int32_t(politics::get_military_reform_multiplier(state, nation_id) <= 0.f);
+			return int32_t(politics::get_military_reform_multiplier(state, nation_id) >= 0.f);
+		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto nation_id = retrieve<dcon::nation_id>(state, parent);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::x, text::fp_percentage_one_place{ politics::get_military_reform_multiplier(state, nation_id) });
+			auto box = text::open_layout_box(contents);
+			text::localised_format_box(state, contents, box, "reform_cost_multiplier", m);
+			text::close_layout_box(contents, box);
 		}
 	};
 
 	class nation_economic_reform_multiplier_icon : public standard_nation_icon {
-		public:
+	public:
 		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			return int32_t(politics::get_economic_reform_multiplier(state, nation_id) <= 0.f);
+			return int32_t(politics::get_economic_reform_multiplier(state, nation_id) >= 0.f);
+		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::variable_tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto nation_id = retrieve<dcon::nation_id>(state, parent);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::x, text::fp_percentage_one_place{ politics::get_economic_reform_multiplier(state, nation_id) });
+			auto box = text::open_layout_box(contents);
+			text::localised_format_box(state, contents, box, "reform_cost_multiplier", m);
+			text::close_layout_box(contents, box);
 		}
 	};
 

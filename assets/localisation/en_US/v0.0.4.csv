@@ -109,3 +109,4 @@ primary_crisis_defender;Primary crisis defender
 union_culture_accepted;Accept all of the nation primary culture group
 union_culture_accepted_this;Accept all of this nation primary culture group
 union_culture_accepted_from;Accept all from nation primary culture group
+reform_cost_multiplier;Cost multiplier $x$
