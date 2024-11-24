@@ -1,3 +1,4 @@
+#include "dcon_generated.hpp"
 #include "system_state.hpp"
 #include "ai.hpp"
 #include "demographics.hpp"
@@ -966,6 +967,14 @@ namespace ai {
 		}
 	}
 
+	bool has_province_construction(sys::state& state, dcon::state_instance_id si, dcon::factory_type_id ft) {
+		for(auto p : state.world.state_instance_get_state_building_construction(si)) {
+			if(p.get_type() == ft)
+				return true;
+		}
+		return false;
+	}
+
 	void update_ai_econ_construction(sys::state& state) {
 		for(auto n : state.world.in_nation) {
 			// skip over: non ais, dead nations, and nations that aren't making money
@@ -1079,59 +1088,40 @@ namespace ai {
 							auto type_selection = desired_types[rng::get_random(state, uint32_t(n.id.index() + max_projects)) % desired_types.size()];
 							assert(type_selection);
 
-							if(state.world.factory_type_get_is_coastal(type_selection) && !province::state_is_coastal(state, si))
+							if((state.world.factory_type_get_is_coastal(type_selection)
+							&& !province::state_is_coastal(state, si))
+					`		|| has_province_construction(state, si, type_selection))
 								continue;
 
-							bool already_in_progress = [&]() {
-								for(auto p : state.world.state_instance_get_state_building_construction(si)) {
-									if(p.get_type() == type_selection)
-										return true;
-								}
-								return false;
-								}();
-
-								if(already_in_progress)
-									continue;
-
-								// check: if present, try to upgrade
-								bool present_in_location = false;
-								bool under_cap = false;
-
-								province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-									for(auto fac : state.world.province_get_factory_location(p)) {
-										auto type = fac.get_factory().get_building_type();
-										if(type_selection == type) {
-											under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
-											present_in_location = true;
-											return;
+							// check: if present, try to upgrade
+							bool is_present = false;
+							province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
+								for(auto fac : state.world.province_get_factory_location(p)) {
+									auto type = fac.get_factory().get_building_type();
+									if(type_selection == type) {
+										bool under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
+										if(!under_cap && (rules & issue_rule::expand_factory) != 0) {
+											auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+											new_up.set_is_pop_project(false);
+											new_up.set_is_upgrade(true);
+											new_up.set_type(type_selection);
+											--max_projects;
 										}
+										is_present = true;
+										return;
 									}
-								});
-								if(under_cap) {
-									continue; // factory doesn't need to get larger
 								}
-								if(present_in_location) {
-									if((rules & issue_rule::expand_factory) != 0) {
-										auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-										new_up.set_is_pop_project(false);
-										new_up.set_is_upgrade(true);
-										new_up.set_type(type_selection);
-										--max_projects;
-									}
-									continue;
-								}
-
-								// else -- try to build -- must have room
-								if(economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
-									auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-									new_up.set_is_pop_project(false);
-									new_up.set_is_upgrade(false);
-									new_up.set_type(type_selection);
-									--max_projects;
-									continue;
-								} else {
-									// TODO: try to delete a factory here
-								}
+							});
+							// else -- try to build -- must have room
+							if(!is_present
+							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
+								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+								new_up.set_is_pop_project(false);
+								new_up.set_is_upgrade(false);
+								new_up.set_type(type_selection);
+								--max_projects;
+								continue;
+							}
 						} // END for(auto si : ordered_states) {
 					} // END if((rules & issue_rule::build_factory) == 0)
 				} // END if(!desired_types.empty()) {
