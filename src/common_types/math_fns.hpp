@@ -68,7 +68,7 @@ namespace math {
 	inline float sqrt(float x) noexcept {
 		union {
 			float f;
-			int i;
+			int32_t i;
 		} u = { x };
 		u.i = 0x5f375a86 - (u.i >> 1);
 		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
