@@ -18,3 +18,20 @@ Now for the part that matters,
 #### Issues
 - The website doesn't work on mobile devices
 - We currently can't handle the pngs having the same name even if they are in different folders, this will be fixed if it ever becomes a problem
+
+#### Guidelines for contributors
+
+- Do not use `clang-format` (we already had our disasters with it)
+- Try to keep ident the same as the rest of the project
+- Use `pdqsort` for simulation/game code, use `sys::merge_sort` for UI code (or code where sorting may be unstable)
+- Keep the simulation and game code deterministic, otherwise you will face consequences (such as OOS)
+- UI code can be non deterministic, be aware that the simulation runs parallel to the UI code, so values can change in-between reads
+- Try to minimize the number of memory reads, and maximize the number of "local" registers used
+- Minimize the amount of register pressure (you have to guess how many "pressure" you're applying)
+- Try to keep your data aligned to a cache line, or even better, make it exactly fit a cache line, or half a cache line
+- Or otherwise, keep your data in segments that wouldn't cause "extra" cache lines to be prefetched for no reason
+- Keep cache locality at it's maximum, i.e prefetch elements 1, 2, 3... instead of 1, 8, 16, 24...
+- Do not use intrinsics, instead use the ve library (it has NEON and RISC-V vector intrinsics, and cross-platform)
+- Try to use ternaries, if/else is okay too, but understand that if the compiler can synthetize your expression from `1 < x ? 3 : 6` to `int arr[2] = { 6, 3 }; arr[1 < x]` then you are good.
+- Keep cache locality!
+- Remember DCON is a giant database, treat it as such, every query you do incurs an associated cost (for memory prefetch). So if you have to absolutely read something, try to read it in a way that minimizes reads: for example, "eveyr army of a nation" can be done by querying `nation -> army_control -> army` (3 reads), instead of `all armies -> if army -> army_control -> controller == nation` (5 reads)
