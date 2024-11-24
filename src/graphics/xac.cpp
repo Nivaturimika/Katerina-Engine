@@ -857,7 +857,7 @@ namespace emfx {
 			for(uint32_t j = 0; j < num_rot_keys; j++) {
 				auto kf = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 				auto time = parse_xac_any_binary<float>(&ptr, end, err);
-				anim.rotation_keys.push_back(xsm_animation_key{ kf, time });
+				anim.rotation_keys.push_back(xsm_animation_key<emfx::xac_vector4f>{ kf, time });
 			}
 			for(uint32_t j = 0; j < num_scale_keys; j++) {
 				auto kf = parse_xac_any_binary<xsm_animation_key<emfx::xac_vector3f>>(&ptr, end, err);
@@ -866,7 +866,7 @@ namespace emfx {
 			for(uint32_t j = 0; j < num_scale_rot_keys; j++) {
 				auto kf = parse_quat_16b(&ptr, end, err, context.use_quat_16);
 				auto time = parse_xac_any_binary<float>(&ptr, end, err);
-				anim.scale_rotation_keys.push_back(xsm_animation_key<xac_vector4f>{ kf, time });
+				anim.scale_rotation_keys.push_back(xsm_animation_key<emfx::xac_vector4f>{ kf, time });
 			}
 		}
 		return ptr;
