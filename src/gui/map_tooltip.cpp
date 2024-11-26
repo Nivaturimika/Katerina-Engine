@@ -377,36 +377,37 @@ namespace ui {
 
 			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_culture_majorities"), text::variable_type::prov, prov);
 
-			std::vector<dcon::culture_fat_id> cultures;
+			std::vector<dcon::culture_id> cultures;
 			for(auto pop : fat.get_pop_location()) {
 				if(std::find(cultures.begin(), cultures.end(), pop.get_pop().get_culture()) == cultures.end()) {
 					cultures.push_back(pop.get_pop().get_culture());
 				}
 			}
 			sys::merge_sort(cultures.begin(), cultures.end(), [&](auto a, auto b) {
-				auto av = fat.get_demographics(demographics::to_key(state, a.id));
-				auto bv = fat.get_demographics(demographics::to_key(state, b.id));
+				auto av = fat.get_demographics(demographics::to_key(state, a));
+				auto bv = fat.get_demographics(demographics::to_key(state, b));
 				if(av != bv)
 					return av < bv;
-				return a.id.index() < b.id.index();
+				return a.index() < b.index();
 			});
 
 			float p_total = fat.get_demographics(demographics::total);
 			uint32_t i = 0;
 			for(i = 0; i < cultures.size() && i < 10; i++) {
+				auto fat_id = dcon::fatten(state.world, cultures[i]);
 				text::add_line_break_to_layout_box(state, contents, box);
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, cultures[i].get_name(), text::text_color::yellow);
+				text::add_to_layout_box(state, contents, box, fat_id.get_name(), text::text_color::yellow);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				float c_total = fat.get_demographics(demographics::to_key(state, cultures[i].id));
-				bool is_accepted = nations::nation_accepts_culture(state, fat.get_nation_from_province_ownership().id, cultures[i].id);
+				float c_total = fat.get_demographics(demographics::to_key(state, cultures[i]));
+				bool is_accepted = nations::nation_accepts_culture(state, fat.get_nation_from_province_ownership().id, cultures[i]);
 				text::add_to_layout_box(state, contents, box, text::format_percentage(c_total / p_total), is_accepted ? text::text_color::green : text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 			}
 			float m_total = 0.f;
 			for(; i < cultures.size(); i++) {
-				m_total += fat.get_demographics(demographics::to_key(state, cultures[i].id));
+				m_total += fat.get_demographics(demographics::to_key(state, cultures[i]));
 			}
 			if(m_total > 1.f) {
 				text::add_line_break_to_layout_box(state, contents, box);
@@ -856,23 +857,23 @@ namespace ui {
 
 			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_religion_majorities"), text::variable_type::prov, prov);
 
-			std::vector<dcon::religion_fat_id> religions;
+			std::vector<dcon::religion_id> religions;
 			for(auto pop : fat.get_pop_location()) {
 				if(std::find(religions.begin(), religions.end(), pop.get_pop().get_religion()) == religions.end()) {
 					religions.push_back(pop.get_pop().get_religion());
 				}
 			}
 			sys::merge_sort(religions.begin(), religions.end(), [&](auto a, auto b) {
-				return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
+				return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b));
 			});
-			//for(size_t i = religions.size(); i > 0; i--) {
 			for(size_t i = 0; i < religions.size(); i++) {
+				auto fat_id = dcon::fatten(state.world, religions[i]);
 				text::add_line_break_to_layout_box(state, contents, box);
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, religions[i].get_name(), text::text_color::yellow);
+				text::add_to_layout_box(state, contents, box, fat_id.get_name(), text::text_color::yellow);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, religions[i].id)) / fat.get_demographics(demographics::total)), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, religions[i])) / fat.get_demographics(demographics::total)), text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 			}
 
@@ -889,7 +890,7 @@ namespace ui {
 
 			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_dominant_issues"), text::variable_type::prov, prov);
 
-			std::vector<dcon::issue_option_fat_id> issues;
+			std::vector<dcon::issue_option_id> issues;
 			state.world.for_each_issue_option([&](dcon::issue_option_id id) {
 				if(fat.get_demographics(demographics::to_key(state, id)) > 0) {
 					issues.push_back(dcon::fatten(state.world, id));
@@ -899,12 +900,13 @@ namespace ui {
 				return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b));
 			});
 			for(size_t i = 0; i < std::min(static_cast<size_t>(5), issues.size()); i++) {
+				auto fat_id = dcon::fatten(state.world, issues[i]);
 				text::add_line_break_to_layout_box(state, contents, box);
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, issues[i].get_name(), text::text_color::yellow);
+				text::add_to_layout_box(state, contents, box, fat_id.get_name(), text::text_color::yellow);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, issues[i].id)) / fat.get_demographics(demographics::total)), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, issues[i])) / fat.get_demographics(demographics::total)), text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 			}
 
@@ -937,7 +939,7 @@ namespace ui {
 
 			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_dominant_ideology"), text::variable_type::prov, prov);
 
-			std::vector<dcon::ideology_fat_id> ideologies;
+			std::vector<dcon::ideology_id> ideologies;
 			float total_pops = state.world.province_get_demographics(prov, demographics::total);
 			state.world.for_each_ideology([&](dcon::ideology_id id) {
 				if(fat.get_demographics(demographics::to_key(state, id)) > 0) {
@@ -945,15 +947,16 @@ namespace ui {
 				}
 			});
 			sys::merge_sort(ideologies.begin(), ideologies.end(), [&](auto a, auto b) {
-				return fat.get_demographics(demographics::to_key(state, a.id)) > fat.get_demographics(demographics::to_key(state, b.id));
+				return fat.get_demographics(demographics::to_key(state, a)) > fat.get_demographics(demographics::to_key(state, b));
 			});
 			for(size_t i = 0; i < ideologies.size(); i++) {
+				auto fat_id = dcon::fatten(state.world, ideologies[i]);
 				text::add_line_break_to_layout_box(state, contents, box);
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, ideologies[i].get_name(), text::text_color::yellow);
+				text::add_to_layout_box(state, contents, box, fat_id.get_name(), text::text_color::yellow);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, ideologies[i].id)) / fat.get_demographics(demographics::total)), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, text::format_percentage(fat.get_demographics(demographics::to_key(state, ideologies[i])) / fat.get_demographics(demographics::total)), text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 			}
 
@@ -1032,7 +1035,7 @@ namespace ui {
 
 			text::localised_single_sub_box(state, contents, box, std::string_view("mapmode_tooltip_factory_count"), text::variable_type::state, text::get_province_state_name(state, prov));
 
-			std::vector<dcon::factory_fat_id> factories;
+			std::vector<dcon::factory_id> factories;
 			for(auto m : fat.get_state_from_abstract_state_membership().get_abstract_state_membership()) {
 				auto p = m.get_province();
 				if(p.get_nation_from_province_ownership() == fat.get_nation_from_province_ownership()) {
@@ -1042,21 +1045,22 @@ namespace ui {
 				}
 			}
 			sys::merge_sort(factories.begin(), factories.end(), [&](auto a, auto b) {
-				auto av = a.get_level();
-				auto bv = b.get_level();
+				auto av = state.world.factory_get_level(a);
+				auto bv = state.world.factory_get_level(b);
 				if(av != bv)
 					return av > bv;
-				return a.id.index() < b.id.index();
+				return a.index() < b.index();
 			});
 
 			text::add_to_layout_box(state, contents, box, text::prettify(int64_t(factories.size())), text::text_color::yellow);
 			for(size_t i = 0; i < factories.size(); i++) {
+				auto fat_id = dcon::fatten(state.world, factories[i]);
 				text::add_line_break_to_layout_box(state, contents, box);
 				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, factories[i].get_building_type().get_name(), text::text_color::yellow);
+				text::add_to_layout_box(state, contents, box, fat_id.get_building_type().get_name(), text::text_color::yellow);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, std::string_view("("), text::text_color::white);
-				text::add_to_layout_box(state, contents, box, factories[i].get_level(),text::text_color::white);
+				text::add_to_layout_box(state, contents, box, fat_id.get_level(),text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view(")"), text::text_color::white);
 			}
 
