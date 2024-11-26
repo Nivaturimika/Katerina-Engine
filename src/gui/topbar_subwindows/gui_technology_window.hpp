@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dcon_generated.hpp"
 #include "gui_common_elements.hpp"
 #include "gui_element_types.hpp"
 #include "triggers.hpp"
@@ -211,6 +212,11 @@ namespace ui {
 				if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
 					it == state.ui_state.tech_queue.end()) {
 					if(content != state.world.nation_get_current_research(state.local_player_nation) && !state.world.nation_get_active_technologies(state.local_player_nation, content)) { // don't add already researched or researching
+						dcon::technology_id prev_tech = culture::previous_folder_technology(state, content);
+						while(prev_tech) {
+							state.ui_state.tech_queue.push_back(prev_tech);
+							prev_tech = culture::previous_folder_technology(state, prev_tech);
+						}
 						state.ui_state.tech_queue.push_back(content);
 						state.update_text_queue();
 						//

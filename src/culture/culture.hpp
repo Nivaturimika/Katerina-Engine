@@ -224,6 +224,9 @@ enum class rebel_independence : uint8_t { none = 0, culture, culture_group, reli
 	void restore_unsaved_values(sys::state& state);
 
 	float effective_technology_cost(sys::state& state, uint32_t current_year, dcon::nation_id target_nation, dcon::technology_id tech_id);
+	
+	dcon::technology_id previous_folder_technology(sys::state& state, dcon::technology_id tid);
+	
 	void update_research(sys::state& state, uint32_t current_year);
 	void discover_inventions(sys::state& state);
 	void fix_slaves_in_province(sys::state& state, dcon::nation_id owner, dcon::province_id p);

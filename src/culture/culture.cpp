@@ -894,6 +894,17 @@ namespace culture {
 				 (1.0f - std::max(0.0f, float(int32_t(current_year) - availability_year) / state.defines.tech_year_span));
 	}
 
+	dcon::technology_id previous_folder_technology(sys::state& state, dcon::technology_id tid) {
+		// Find previous technology before this one
+		dcon::technology_id prev_tech = dcon::technology_id(dcon::technology_id::value_base_t(tid.index() - 1));
+		// Previous technology is from the same folder so we have to check that we have researched it beforehand
+		if(tid.index() != 0
+		&& state.world.technology_get_folder_index(prev_tech) == state.world.technology_get_folder_index(tid)) {
+			return prev_tech;
+		}
+		return dcon::technology_id{}; // First technology on folder can always be researched
+	}
+
 	void update_research(sys::state& state, uint32_t current_year) {
 		for(auto n : state.world.in_nation) {
 			if(n.get_owned_province_count() != 0 && n.get_current_research()) {

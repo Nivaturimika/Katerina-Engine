@@ -292,13 +292,13 @@ namespace command {
 			activation date is past by, and all the previous techs (if any) of the same folder index
 			are already researched fully. And they are not already researched. */
 		if(!tech)
-		return false;
+			return false;
 		if(state.world.nation_get_active_technologies(source, tech))
-		return false; // Already researched
+			return false; // Already researched
 		if(nations::current_research(state, source) == tech)
-		return false; // Already being researched
+			return false; // Already being researched
 		if(!state.world.nation_get_is_civilized(source))
-		return false; // Must be civilized
+			return false; // Must be civilized
 		if(state.current_date.to_ymd(state.start_date).year >= state.world.technology_get_year(tech)) {
 			// Find previous technology before this one
 			dcon::technology_id prev_tech = dcon::technology_id(dcon::technology_id::value_base_t(tech.index() - 1));
