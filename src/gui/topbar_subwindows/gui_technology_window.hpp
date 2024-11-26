@@ -188,39 +188,41 @@ namespace ui {
 		dcon::technology_id tech_id;
 	};
 	class technology_item_button : public button_element_base {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::technology_id>(state, parent);
 			if(state.ui_state.technology_subwindow) {
-			Cyto::Any sl_payload = technology_select_tech{content};
+				Cyto::Any sl_payload = technology_select_tech{content};
 				state.ui_state.technology_subwindow->impl_set(state, sl_payload);
 			}
 		}
 
 		void button_right_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::technology_id>(state, parent);
-			auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
-			if(it != state.ui_state.tech_queue.end()) {
+			if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
+				it != state.ui_state.tech_queue.end()) {
 				state.ui_state.tech_queue.erase(it);
-				state.game_state_updated.store(true, std::memory_order::release);
+				state.update_text_queue(); //state.game_state_updated.store(true, std::memory_order::release);
 			}
 		}
 
 		void button_shift_action(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::technology_id>(state, parent);
-			if(!content)
-			return;
-
-			auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
-			if(it == state.ui_state.tech_queue.end()) {
-				if(content != state.world.nation_get_current_research(state.local_player_nation) && !state.world.nation_get_active_technologies(state.local_player_nation, content)) { // don't add already researched or researching
+			if(auto content = retrieve<dcon::technology_id>(state, parent); content) {
+				if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
+					it == state.ui_state.tech_queue.end()) {
+					if(content != state.world.nation_get_current_research(state.local_player_nation) && !state.world.nation_get_active_technologies(state.local_player_nation, content)) { // don't add already researched or researching
+						state.ui_state.tech_queue.push_back(content);
+						state.update_text_queue();
+						//
+						parent->impl_on_update(state);
+					}
+				} else {
+					state.ui_state.tech_queue.erase(it);
 					state.ui_state.tech_queue.push_back(content);
+					state.update_text_queue();
+					//
 					parent->impl_on_update(state);
 				}
-			} else {
-				state.ui_state.tech_queue.erase(it);
-				state.ui_state.tech_queue.push_back(content);
-				parent->impl_on_update(state);
 			}
 		}
 

@@ -232,6 +232,25 @@ namespace sys {
 
 	inline constexpr int32_t tooltip_width = 400;
 
+	void state::update_text_queue() {
+		if(!ui_state.tech_queue.empty()) {
+			if(!world.nation_get_current_research(local_player_nation)) {
+				for(auto it = ui_state.tech_queue.begin(); it != ui_state.tech_queue.end(); it++) {
+					if(world.nation_get_active_technologies(local_player_nation, *it)) {
+						ui_state.tech_queue.erase(it);
+						break;
+					}
+					if(command::can_start_research(*this, local_player_nation, *it)) {
+						// can research, so research it
+						command::start_research(*this, local_player_nation, *it);
+						ui_state.tech_queue.erase(it);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	void state::update_render() {
 		auto game_state_was_updated = game_state_updated.exchange(false, std::memory_order::acq_rel);
 		if(game_state_was_updated && !current_scene.starting_scene && !ui_state.lazy_load_in_game) {
@@ -257,22 +276,7 @@ namespace sys {
 		}
 
 		if(game_state_was_updated) {
-			if(!ui_state.tech_queue.empty()) {
-				if(!world.nation_get_current_research(local_player_nation)) {
-					for(auto it = ui_state.tech_queue.begin(); it != ui_state.tech_queue.end(); it++) {
-						if(world.nation_get_active_technologies(local_player_nation, *it)) {
-							ui_state.tech_queue.erase(it);
-							break;
-						}
-						if(command::can_start_research(*this, local_player_nation, *it)) {
-							// can research, so research it
-							command::start_research(*this, local_player_nation, *it);
-							ui_state.tech_queue.erase(it);
-							break;
-						}
-					}
-				}
-			}
+			state::update_tech_queue();
 
 			current_scene.on_game_state_update(*this);
 

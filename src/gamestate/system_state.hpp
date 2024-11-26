@@ -668,8 +668,8 @@ namespace sys {
 		void on_text(char32_t c); // c is a win1250 codepage value
 		void render(); // called to render the frame may (and should) delay returning until the frame is rendered, including waiting
 		               // for vsync
-
 		void update_render(); // called by render to update UI and Map to game state
+		void update_text_queue();
 
 		void single_game_tick();
 		// this function runs the internal logic of the game. It will return *only* after a quit notification is sent to it
