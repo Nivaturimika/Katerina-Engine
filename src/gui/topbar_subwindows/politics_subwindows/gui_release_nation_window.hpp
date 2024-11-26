@@ -17,30 +17,62 @@ namespace ui {
 	};
 
 	class release_play_as_button : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			const dcon::national_identity_id niid = retrieve<dcon::national_identity_id>(state, parent);
 			disabled = !command::can_release_and_play_as(state, state.local_player_nation, niid);
 		}
-
 		void button_action(sys::state& state) noexcept override {
 			const dcon::national_identity_id niid = retrieve<dcon::national_identity_id>(state, parent);
 			command::release_and_play_as(state, state.local_player_nation, niid);
 			parent->set_visible(state, false);
 		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto source = state.local_player_nation;
+			auto target = state.world.national_identity_get_nation_from_identity_holder(retrieve<dcon::national_identity_id>(state, parent));
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::land_rally_point)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::land_rally_point)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
+		}
 	};
 
 	class release_agree_button : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			const dcon::national_identity_id niid = retrieve<dcon::national_identity_id>(state, parent);
 			disabled = !command::can_make_vassal(state, state.local_player_nation, niid);
 		}
-
 		void button_action(sys::state& state) noexcept override {
 			const dcon::national_identity_id niid = retrieve<dcon::national_identity_id>(state, parent);
 			command::make_vassal(state, state.local_player_nation, niid);
 			parent->set_visible(state, false); // Close parent window automatically
+		}
+		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
+			return tooltip_behavior::tooltip;
+		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+			auto source = state.local_player_nation;
+			auto target = state.world.national_identity_get_nation_from_identity_holder(retrieve<dcon::national_identity_id>(state, parent));
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_and_make_vassal)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::release_and_make_vassal)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -207,19 +239,19 @@ namespace ui {
 				ptr->base_data.size = base_data.size; // Nudge
 				return ptr;
 			} else if(name == "default_popup_banner")
-			return make_element_by_type<image_element_base>(state, id); // Not used in Vic2?
+				return make_element_by_type<image_element_base>(state, id); // Not used in Vic2?
 			else if(name == "title")
-			return make_element_by_type<politics_release_nation_window_title>(state, id);
+				return make_element_by_type<politics_release_nation_window_title>(state, id);
 			else if(name == "description")
-			return make_element_by_type<release_nation_window_description_text>(state, id);
+				return make_element_by_type<release_nation_window_description_text>(state, id);
 			else if(name == "agreebutton")
-			return make_element_by_type<release_agree_button>(state, id);
+				return make_element_by_type<release_agree_button>(state, id);
 			else if(name == "declinebutton")
-			return make_element_by_type<generic_close_button>(state, id);
+				return make_element_by_type<generic_close_button>(state, id);
 			else if(name == "playasbutton")
-			return make_element_by_type<release_play_as_button>(state, id);
+				return make_element_by_type<release_play_as_button>(state, id);
 			else
-			return nullptr;
+				return nullptr;
 		}
 
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {

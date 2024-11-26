@@ -404,6 +404,39 @@ action = {
 	}
 }
 
+action = {
+	type = "release_and_play_as"
+	#THIS/main = nation source
+	#FROM = nation to play as
+	limit = {
+		tag != FROM
+		FROM = {
+			is_releasable_vassal = no
+			exists = no
+			any_core = { owned_by = THIS is_capital = no }
+		}
+		war = no
+	}
+	effect = {
+	}
+}
+action = {
+	type = "release_and_make_vassal"
+	#THIS/main = nation source
+	#FROM = nation to play as
+	limit = {
+		tag != FROM
+		FROM = {
+			is_releasable_vassal = no
+			exists = no
+			any_core = { owned_by = THIS is_capital = no }
+		}
+		war = no
+	}
+	effect = {
+	}
+}
+
 #
 # AI rulesets
 #

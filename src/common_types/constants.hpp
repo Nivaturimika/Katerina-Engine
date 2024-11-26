@@ -307,6 +307,8 @@ namespace sys {
 		declare_war,
 		land_rally_point,
 		naval_rally_point,
+		release_and_play_as,
+		release_and_make_vassal,
 		count,
 	};
 };

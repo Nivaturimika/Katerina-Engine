@@ -40,6 +40,8 @@ namespace parsers {
 		CT_STRING_ENUM(declare_war)
 		CT_STRING_ENUM(land_rally_point)
 		CT_STRING_ENUM(naval_rally_point)
+		CT_STRING_ENUM(release_and_play_as)
+		CT_STRING_ENUM(release_and_make_vassal)
 #undef CT_STRING_ENUM
 	}
 
