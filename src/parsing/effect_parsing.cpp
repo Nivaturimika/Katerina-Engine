@@ -1847,11 +1847,10 @@ namespace parsers {
 		} else if(auto itb = context.outer_context.map_of_technologies.find(str_label); itb != context.outer_context.map_of_technologies.end()) {
 			if(context.main_slot == trigger::slot_contents::nation) {
 				if(parse_bool(value, line, err))
-				context.compiled_effect.push_back(effect::variable_tech_name_yes);
+					context.compiled_effect.push_back(effect::variable_tech_name_yes);
 				else
-				context.compiled_effect.push_back(effect::variable_tech_name_no);
+					context.compiled_effect.push_back(effect::variable_tech_name_no);
 				context.compiled_effect.push_back(trigger::payload(itb->second.id).value);
-				context.add_float_to_payload(parse_float(value, line, err));
 			} else {
 				err.accumulated_errors += "variable technology name effect used in an incorrect scope type (" + err.file_name +
 				", line " + std::to_string(line) + ")\n";
@@ -1860,11 +1859,10 @@ namespace parsers {
 		} else if(auto itc = context.outer_context.map_of_inventions.find(str_label); itc != context.outer_context.map_of_inventions.end()) {
 			if(context.main_slot == trigger::slot_contents::nation) {
 				if(parse_bool(value, line, err))
-				context.compiled_effect.push_back(effect::variable_invention_name_yes);
+					context.compiled_effect.push_back(effect::variable_invention_name_yes);
 				else
-				context.compiled_effect.push_back(effect::variable_invention_name_no);
+					context.compiled_effect.push_back(effect::variable_invention_name_no);
 				context.compiled_effect.push_back(trigger::payload(itc->second.id).value);
-				context.add_float_to_payload(parse_float(value, line, err));
 			} else {
 				err.accumulated_errors += "variable invention name effect used in an incorrect scope type (" + err.file_name + ", line " +
 				std::to_string(line) + ")\n";

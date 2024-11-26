@@ -1228,8 +1228,8 @@ namespace parsers {
 				context.compiled_trigger.push_back(uint16_t(trigger::consciousness_pop | association_to_trigger_code(a)));
 			} else {
 				err.accumulated_errors += "consciousness trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+					std::to_string(line) + ")\n";
 				return;
 			}
 			context.add_float_to_payload(value);
@@ -1245,7 +1245,7 @@ namespace parsers {
 				context.compiled_trigger.push_back(uint16_t(trigger::literacy_pop | association_to_trigger_code(a)));
 			} else {
 				err.accumulated_errors += "literacy trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) +
-																"(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					"(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			context.add_float_to_payload(value);
@@ -5421,17 +5421,17 @@ namespace parsers {
 					it != context.outer_context.map_of_ident_names.end()) {
 					if(context.main_slot == trigger::slot_contents::nation) {
 						context.compiled_trigger.push_back(uint16_t(trigger::is_possible_vassal | association_to_bool_code(a)));
+						context.compiled_trigger.push_back(trigger::payload(it->second).value);
 					} else {
 						err.accumulated_errors += "is_possible_vassal trigger used in an incorrect scope type " +
-																		slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																		std::to_string(line) + ")\n";
+							slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
+							std::to_string(line) + ")\n";
 						return;
 					}
-					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
 					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 					err.accumulated_errors += "is_possible_vassal trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+						std::to_string(line) + ")\n";
 				}
 			} else {
 				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));

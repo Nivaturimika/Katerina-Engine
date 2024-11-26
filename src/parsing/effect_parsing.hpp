@@ -2494,8 +2494,7 @@ namespace parsers {
 					context.compiled_effect.push_back(uint16_t(effect::activate_technology));
 					context.compiled_effect.push_back(trigger::payload(it->second.id).value);
 				} else {
-					err.accumulated_errors += "activate_technology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					err.accumulated_errors += "activate_technology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(auto itb = context.outer_context.map_of_inventions.find(std::string(value));
@@ -2504,13 +2503,11 @@ namespace parsers {
 					context.compiled_effect.push_back(uint16_t(effect::activate_invention));
 					context.compiled_effect.push_back(trigger::payload(itb->second.id).value);
 				} else {
-					err.accumulated_errors += "activate_technology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					err.accumulated_errors += "activate_technology effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else {
-				err.accumulated_errors += "activate_technology effect supplied with invalid technology/invention name " +
-																std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "activate_technology effect supplied with invalid technology/invention name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		}
