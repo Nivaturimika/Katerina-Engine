@@ -390,6 +390,9 @@ namespace parsers {
 			context.outer_context.state.world.factory_set_building_type(new_fac, value.id);
 			context.outer_context.state.world.factory_set_level(new_fac, uint8_t(value.level));
 			context.outer_context.state.world.force_create_factory_location(new_fac, context.id);
+		} else {
+			err.accumulated_errors += "Factory has invalid type (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			return;
 		}
 	}
 

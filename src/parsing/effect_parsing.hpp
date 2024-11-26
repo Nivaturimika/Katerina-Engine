@@ -2477,12 +2477,12 @@ namespace parsers {
 					context.compiled_effect.push_back(trigger::payload(it->second).value);
 				} else {
 					err.accumulated_errors += "build_factory_in_capital_state effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name +
-																	", line " + std::to_string(line) + ")\n";
+						", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else {
 				err.accumulated_errors += "build_factory_in_capital_state effect supplied with invalid factory name " + std::string(value) +
-																" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		}

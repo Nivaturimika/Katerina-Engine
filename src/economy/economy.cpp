@@ -2082,22 +2082,22 @@ namespace economy {
 											return true;
 									}
 									return false;
-									}();
-									if(already_in_progress)
-										continue;
-									bool present_in_location = false;
-									province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
-										for(auto fac : state.world.province_get_factory_location(p)) {
-											auto type = fac.get_factory().get_building_type();
-											if(ft == type) {
-												present_in_location = true;
-												return;
-											}
+								}();
+								if(already_in_progress)
+									continue;
+								bool present_in_location = false;
+								province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
+									for(auto fac : state.world.province_get_factory_location(p)) {
+										auto type = fac.get_factory().get_building_type();
+										if(ft == type) {
+											present_in_location = true;
+											return;
 										}
-									});
-									if(present_in_location)
-										continue;
-									valid_desired_types.push_back(ft);
+									}
+								});
+								if(present_in_location)
+									continue;
+								valid_desired_types.push_back(ft);
 							}
 
 							pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
