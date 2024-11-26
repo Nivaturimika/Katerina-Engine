@@ -123,7 +123,7 @@ namespace ui {
 
 		void button_action(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::factory_type_id>(state, parent);
-		send(state, parent, element_selection_wrapper<dcon::factory_type_id>{content});
+			send(state, parent, element_selection_wrapper<dcon::factory_type_id>{content});
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {

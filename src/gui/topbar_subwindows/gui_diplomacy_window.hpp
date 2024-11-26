@@ -591,7 +591,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::nation_id>(state, parent);
 			if(!content)
-			return;
+				return;
 
 			disabled = true;
 			if(state.cheat_data.always_allow_wargoals) {
@@ -614,7 +614,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 
 			bool is_attacker = military::is_attacker(state, w, state.local_player_nation);
 			if(!is_attacker && military::defenders_have_status_quo_wargoal(state, w))
-			return;
+				return;
 
 			for(auto cb_type : state.world.in_cb_type) {
 				if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::always) == 0 && military::cb_conditions_satisfied(state, state.local_player_nation, content, cb_type)) {
@@ -627,7 +627,7 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 					}
 					if(!cb_fabbed) {
 						if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::is_not_constructing_cb) != 0)
-						continue; // can only add a constructable cb this way
+							continue; // can only add a constructable cb this way
 
 						auto totalpop = state.world.nation_get_demographics(state.local_player_nation, demographics::total);
 						auto jingoism_perc = totalpop > 0 ? state.world.nation_get_demographics(state.local_player_nation, demographics::to_key(state, state.culture_definitions.jingoism)) / totalpop : 0.0f;

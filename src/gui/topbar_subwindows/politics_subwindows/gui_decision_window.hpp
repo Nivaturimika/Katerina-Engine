@@ -175,12 +175,12 @@ namespace ui {
 			produce_decision_substitutions(state, m, state.local_player_nation);
 			text::add_to_layout_box(state, contents, box, fat_id.get_name(), m);
 			text::close_layout_box(contents, box);
-
-			auto ef = fat_id.get_effect();
-			if(bool(ef))
-			effect_description(state, contents, ef, trigger::to_generic(state.local_player_nation),
-				trigger::to_generic(state.local_player_nation), -1, uint32_t(state.current_date.value),
-				uint32_t(state.local_player_nation.index() << 4 ^ id.index()));
+			
+			if(auto ef = fat_id.get_effect(); ef) {
+				effect_description(state, contents, ef, trigger::to_generic(state.local_player_nation),
+					trigger::to_generic(state.local_player_nation), -1, uint32_t(state.current_date.value),
+					uint32_t(state.local_player_nation.index() << 4 ^ id.index()));
+			}
 		}
 
 	};

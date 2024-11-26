@@ -4,40 +4,27 @@
 #include "gui_foreign_investment_window.hpp"
 
 namespace ui {
-
 	class production_investment_country_select : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
-			auto for_nation = retrieve<dcon::nation_id>(state, parent);
-
-			auto for_rules = state.world.nation_get_combined_issue_rules(for_nation);
-
-			if(!nations::is_great_power(state, state.local_player_nation)) {
-				disabled = true;
-				return;
-			}
-			if(nations::is_great_power(state, for_nation) || !state.world.nation_get_is_civilized(for_nation)) {
-				disabled = true;
-				return;
-			}
-			if((for_rules & issue_rule::allow_foreign_investment) == 0) {
-				disabled = true;
-				return;
-			}
-			disabled = false;
+			auto source = state.local_player_nation;
+			auto target = retrieve<dcon::nation_id>(state, parent);
+			auto for_rules = state.world.nation_get_combined_issue_rules(target);
+			disabled = (!nations::is_great_power(state, source)
+				|| nations::is_great_power(state, target) || !state.world.nation_get_is_civilized(target)
+				|| (for_rules & issue_rule::allow_foreign_investment) == 0);
 		}
-
 		void button_action(sys::state& state) noexcept override {
-			auto for_nation = retrieve<dcon::nation_id>(state, parent);
-			open_foreign_investment(state, for_nation);
+			auto source = state.local_player_nation;
+			auto target = retrieve<dcon::nation_id>(state, parent);
+			open_foreign_investment(state, target);
 		}
 	};
 
 	class production_investment_country_info : public listbox_row_element_base<dcon::nation_id> {
-		private:
+	private:
 		flag_button* country_flag = nullptr;
-
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "country_select") {
 				return make_element_by_type<production_investment_country_select>(state, id);
@@ -118,27 +105,27 @@ namespace ui {
 	};
 
 	class production_sort_nation_gp_flag : public nation_gp_flag {
-		public:
+	public:
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::gp_investment) | rank)});
+			send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::gp_investment) | rank)});
 		}
 	};
 
 	class production_sort_my_nation_flag : public flag_button {
-		public:
+	public:
 		dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 			return state.world.nation_get_identity_from_identity_holder(state.local_player_nation);
 		}
 		void button_action(sys::state& state) noexcept override {
-		send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::player_investment))});
+			send(state, parent, element_selection_wrapper<country_list_sort>{country_list_sort(uint8_t(country_list_sort::player_investment))});
 		}
 	};
 
 	class invest_brow_window : public window_element_base {
 		production_country_listbox* country_listbox = nullptr;
-	country_filter_setting filter = country_filter_setting{};
-	country_sort_setting sort = country_sort_setting{};
-		public:
+		country_filter_setting filter = country_filter_setting{};
+		country_sort_setting sort = country_sort_setting{};
+	public:
 		void on_create(sys::state& state) noexcept override {
 			window_element_base::on_create(state);
 			set_visible(state, false);
@@ -215,12 +202,12 @@ namespace ui {
 				return ptr;
 			} else if(name.substr(0, 14) == "sort_by_gpflag") {
 				auto ptr = make_element_by_type<production_sort_nation_gp_flag>(state, id);
-			ptr->rank = uint16_t(std::stoi(std::string{ name.substr(14) }));
+				ptr->rank = uint16_t(std::stoi(std::string{ name.substr(14) }));
 				ptr->base_data.position.y -= 2; // Nudge
 				return ptr;
 			} else if(name.substr(0, 10) == "sort_by_gp") {
 				auto ptr = make_element_by_type<country_sort_button<country_list_sort::gp_investment>>(state, id);
-			ptr->offset = uint8_t(std::stoi(std::string{ name.substr(10) }));
+				ptr->offset = uint8_t(std::stoi(std::string{ name.substr(10) }));
 				return ptr;
 			} else if(name == "sort_by_my_invest") {
 				return make_element_by_type<country_sort_button<country_list_sort::player_investment>>(state, id);

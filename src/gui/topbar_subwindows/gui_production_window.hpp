@@ -1,5 +1,6 @@
 #pragma once
 
+#include "economy_factory.hpp"
 #include "gui_element_types.hpp"
 #include "gui_factory_buttons_window.hpp"
 #include "gui_invest_brow_window.hpp"
@@ -122,7 +123,6 @@ namespace ui {
 
 			disabled = !command::can_begin_factory_building_construction(state, state.local_player_nation, sid,
 			fat.get_building_type().id, true);
-
 		}
 
 		void button_right_action(sys::state& state) noexcept override {
@@ -230,15 +230,8 @@ namespace ui {
 			auto fid = retrieve<dcon::factory_id>(state, parent);
 			auto sid = retrieve<dcon::state_instance_id>(state, parent);
 			auto type = state.world.factory_get_building_type(fid);
-
-
-			// no double upgrade
-			bool is_not_upgrading = true;
-			for(auto p : state.world.state_instance_get_state_building_construction(sid)) {
-				if(p.get_type() == type)
-				is_not_upgrading = false;
-			}
-			if(is_not_upgrading) {
+			//no double
+			if(!economy_factory::state_instance_has_factory_being_built(state, sid, type)) {
 				button_element_base::render(state, x, y);
 			}
 		}
@@ -252,49 +245,35 @@ namespace ui {
 			auto fat = dcon::fatten(state.world, fid);
 			const dcon::state_instance_id sid = retrieve<dcon::state_instance_id>(state, parent);
 			const dcon::nation_id n = retrieve<dcon::nation_id>(state, parent);
-
 			auto type = state.world.factory_get_building_type(fid);
-
 			// no double upgrade
-			bool is_not_upgrading = true;
-			for(auto p : state.world.state_instance_get_state_building_construction(sid)) {
-				if(p.get_type() == type)
-				is_not_upgrading = false;
-			}
-			if(!is_not_upgrading) {
+			if(economy_factory::state_instance_has_factory_being_built(state, sid, type)) {
 				return;
 			}
 
 			text::add_line(state, contents, "production_expand_factory_tooltip");
-
 			text::add_line_break_to_layout(state, contents);
-
 			bool is_civ = state.world.nation_get_is_civilized(state.local_player_nation);
 			text::add_line_with_condition(state, contents, "factory_upgrade_condition_1", is_civ);
-
 			bool state_is_not_colonial = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(sid));
 			text::add_line_with_condition(state, contents, "factory_upgrade_condition_2", state_is_not_colonial);
-
 			bool is_activated = state.world.nation_get_active_building(n, type) == true || state.world.factory_type_get_is_available_from_start(type);
 			text::add_line_with_condition(state, contents, "factory_upgrade_condition_3", is_activated);
 			if(n != state.local_player_nation) {
 				bool gp_condition = (state.world.nation_get_is_great_power(state.local_player_nation) == true &&
 					state.world.nation_get_is_great_power(n) == false);
 				text::add_line_with_condition(state, contents, "factory_upgrade_condition_4", gp_condition);
-
 				text::add_line_with_condition(state, contents, "factory_upgrade_condition_5", state.world.nation_get_is_civilized(n));
-
 				auto rules = state.world.nation_get_combined_issue_rules(n);
 				text::add_line_with_condition(state, contents, "factory_upgrade_condition_6",
 				(rules & issue_rule::allow_foreign_investment) != 0);
-
 				text::add_line_with_condition(state, contents, "factory_upgrade_condition_7",
 				!military::are_at_war(state, state.local_player_nation, n));
 			} else {
 				auto rules = state.world.nation_get_combined_issue_rules(state.local_player_nation);
 				text::add_line_with_condition(state, contents, "factory_upgrade_condition_8", (rules & issue_rule::expand_factory) != 0);
 			}
-			text::add_line_with_condition(state, contents, "factory_upgrade_condition_9", is_not_upgrading);
+			text::add_line_with_condition(state, contents, "factory_upgrade_condition_9", true);
 			text::add_line_with_condition(state, contents, "factory_upgrade_condition_10", fat.get_level() < 255);
 			text::add_line_break_to_layout(state, contents);
 
@@ -325,12 +304,10 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			const dcon::factory_id fid = retrieve<dcon::factory_id>(state, parent);
 			const dcon::nation_id n = retrieve<dcon::nation_id>(state, parent);
-			if(n == state.local_player_nation) {
-				text::add_line(state, contents, "open_and_sub");
-				if(disabled) {
-					text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
-					text::add_line(state, contents, "cant_subsidize_explanation");
-				}
+			text::add_line(state, contents, "open_and_sub");
+			if(disabled) {
+				text::add_line(state, contents, "production_not_allowed_to_subsidise_tooltip");
+				text::add_line(state, contents, "cant_subsidize_explanation");
 			}
 		}
 	};

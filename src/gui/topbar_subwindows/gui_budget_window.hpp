@@ -1502,10 +1502,12 @@ namespace ui {
 			disabled = false;
 
 			auto last_br = state.world.nation_get_bankrupt_until(state.local_player_nation);
-			if(last_br && state.current_date < last_br)
-			disabled = true;
-			if(economy::max_loan(state, state.local_player_nation) <= 0.0f)
-			disabled = true;
+			if(last_br && state.current_date < last_br) {
+				disabled = true;
+			}
+			if(economy::max_loan(state, state.local_player_nation) <= 0.0f) {
+				disabled = true;
+			}
 		}
 		void button_action(sys::state& state) noexcept override {
 			command::enable_debt(state, state.local_player_nation);

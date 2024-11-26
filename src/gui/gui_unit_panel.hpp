@@ -1921,9 +1921,9 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto foru = retrieve<unit_var>(state, parent);
 			dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
 			if(std::holds_alternative<dcon::army_id>(foru)) {
-			disabled = !command::can_change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
+				disabled = !command::can_change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
 			} else if(std::holds_alternative<dcon::navy_id>(foru)) {
-			disabled = !command::can_change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
+				disabled = !command::can_change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
 			}
 
 			auto pculture = state.world.nation_get_primary_culture(state.local_player_nation);
