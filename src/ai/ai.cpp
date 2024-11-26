@@ -1005,7 +1005,9 @@ namespace ai {
 								auto unprofitable = fac.get_factory().get_unprofitable();
 								auto factory_level = fac.get_factory().get_level();
 								auto primary_employment = fac.get_factory().get_primary_employment();
-								if(!unprofitable && factory_level < uint8_t(255) && primary_employment >= 0.9f) {
+								if(!unprofitable
+								&& primary_employment >= 0.9f
+								&& factory_level < uint8_t(255)) {
 									// test if factory is already upgrading
 									auto ug_in_progress = false;
 									for(auto c : state.world.state_instance_get_state_building_construction(si)) {
@@ -1067,7 +1069,8 @@ namespace ai {
 							province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 								for(auto fac : state.world.province_get_factory_location(p)) {
 									auto type = fac.get_factory().get_building_type();
-									if(top_desired_type == type) {
+									if(top_desired_type == type
+									&& fac.get_factory().get_level() < uint8_t(255)) {
 										bool under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
 										if(!under_cap && (rules & issue_rule::expand_factory) != 0) {
 											auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
