@@ -1969,6 +1969,14 @@ basic_builder& relation_iterator_foreach_as_declaration(basic_builder& o, relati
 			o + "DCON_RELEASE_INLINE @rel@_fat_id operator[](ptrdiff_t n) const noexcept" + block{
 				o + "return @rel@_fat_id(container, *(ptr + n));";
 			};
+			o + "DCON_RELEASE_INLINE @it_name@& operator=(@it_name@& o) noexcept" + block{
+				o + "ptr = o.ptr;";
+				o + "return *this;";
+			};
+			o + "DCON_RELEASE_INLINE @it_name@& operator=(@it_name@ const& o) noexcept" + block{
+				o + "ptr = o.ptr;";
+				o + "return *this;";
+			};
 		}
 	};
 
@@ -2045,6 +2053,14 @@ basic_builder& relation_iterator_foreach_as_declaration(basic_builder& o, relati
 			};
 			o + "DCON_RELEASE_INLINE @rel@_const_fat_id operator[](ptrdiff_t n) const noexcept" + block{
 				o + "return @rel@_const_fat_id(container, *(ptr + n));";
+			};
+			o + "DCON_RELEASE_INLINE @it_name@& operator=(@it_name@& o) noexcept" + block{
+				o + "ptr = o.ptr;";
+				o + "return *this;";
+			};
+			o + "DCON_RELEASE_INLINE @it_name@& operator=(@it_name@ const& o) noexcept" + block{
+				o + "ptr = o.ptr;";
+				o + "return *this;";
 			};
 		}
 	};
