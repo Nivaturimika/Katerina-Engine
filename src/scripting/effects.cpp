@@ -2654,7 +2654,7 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_add_crime_none(EFFECT_PARAMTERS) {
-	ws.world.province_set_crime(trigger::to_prov(primary_slot), dcon::crime_id{});
+		ws.world.province_set_crime(trigger::to_prov(primary_slot), dcon::crime_id{});
 		return 0;
 	}
 	uint32_t ef_nationalize(EFFECT_PARAMTERS) {
@@ -4082,7 +4082,7 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_kill_leader(EFFECT_PARAMTERS) {
-	dcon::unit_name_id ename{ dcon::unit_name_id::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
+		dcon::unit_name_id ename{ dcon::unit_name_id::value_base_t(trigger::read_int32_t_from_payload(tval + 1)) };
 		auto esv = ws.to_string_view(ename);
 		for(auto l : ws.world.nation_get_leader_loyalty(trigger::to_nation(primary_slot))) {
 			auto n = l.get_leader().get_name();

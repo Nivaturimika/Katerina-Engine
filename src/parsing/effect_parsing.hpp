@@ -2513,15 +2513,15 @@ namespace parsers {
 		}
 		void great_wars_enabled(association_type t, bool value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(value)
-			context.compiled_effect.push_back(uint16_t(effect::great_wars_enabled_yes | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::great_wars_enabled_yes | effect::no_payload));
 			else
-			context.compiled_effect.push_back(uint16_t(effect::great_wars_enabled_no | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::great_wars_enabled_no | effect::no_payload));
 		}
 		void world_wars_enabled(association_type t, bool value, error_handler& err, int32_t line, effect_building_context& context) {
 			if(value)
-			context.compiled_effect.push_back(uint16_t(effect::world_wars_enabled_yes | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::world_wars_enabled_yes | effect::no_payload));
 			else
-			context.compiled_effect.push_back(uint16_t(effect::world_wars_enabled_no | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::world_wars_enabled_no | effect::no_payload));
 		}
 		void assimilate(association_type t, std::string_view value, error_handler& err, int32_t line,
 			effect_building_context& context) {

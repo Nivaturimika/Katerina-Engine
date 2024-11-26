@@ -2288,16 +2288,16 @@ struct national_focus_overwrite_close { };
 			auto filter_settings = retrieve<country_filter_setting>(state, parent);
 			auto t_category = filter_settings.general_category;
 			switch(t_category) {
-				case country_list_filter::influenced:
+			case country_list_filter::influenced:
 				t_category = country_list_filter::sphere;
 				break;
-				case country_list_filter::find_allies:
+			case country_list_filter::find_allies:
 				t_category = country_list_filter::allies;
 				break;
-				case country_list_filter::neighbors_no_vassals:
+			case country_list_filter::neighbors_no_vassals:
 				t_category = country_list_filter::neighbors;
 				break;
-				default:
+			default:
 				break;
 			}
 			disabled = t_category != category;

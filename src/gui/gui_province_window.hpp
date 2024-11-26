@@ -16,8 +16,6 @@
 #include "nations_templates.hpp"
 
 namespace ui {
-
-
 	class land_rally_point : public button_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
