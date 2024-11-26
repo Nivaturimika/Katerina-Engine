@@ -52,6 +52,13 @@ namespace economy_factory {
 		return false;
 	}
 
+	bool state_instance_has_factory_being_built(sys::state const& state, dcon::state_instance_id sid, dcon::factory_type_id ft) {
+		for(auto p : state.world.state_instance_get_state_building_construction(sid)) {
+			if(p.get_type() == ft)
+				return true;
+		}
+		return false;
+	}
 
 	bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id sid, dcon::factory_type_id f) {
 		auto sdef = state.world.state_instance_get_definition(sid);

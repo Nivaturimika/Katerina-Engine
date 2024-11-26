@@ -1989,7 +1989,11 @@ namespace economy {
 				states_in_order.clear();
 				for(auto si : n.get_state_ownership()) {
 					if(si.get_state().get_capital().get_is_colonial() == false) {
-						states_in_order.push_back(si.get_state().id);
+						// Do not spam factories in states (let the ones being built finish first)
+						auto sc = si.get_state().get_state_building_construction();
+						if(sc.begin() == sc.end()) {
+							states_in_order.push_back(si.get_state().id);
+						}
 					}
 				}
 				pdqsort(states_in_order.begin(), states_in_order.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
@@ -2038,11 +2042,9 @@ namespace economy {
 											break;
 										}
 									}
-
 									if(ug_in_progress) {
 										continue;
 									}
-
 									if(auto new_p = f.get_factory().get_full_profit() / f.get_factory().get_level(); new_p > profit) {
 										profit = new_p;
 										selected_factory = f.get_factory();
@@ -2076,14 +2078,7 @@ namespace economy {
 							for(const auto ft : desired_types) {
 								if(state.world.factory_type_get_is_coastal(ft) && !province::state_is_coastal(state, s))
 									continue;
-								bool already_in_progress = [&]() {
-									for(auto p : state.world.state_instance_get_state_building_construction(s)) {
-										if(p.get_type() == ft)
-											return true;
-									}
-									return false;
-								}();
-								if(already_in_progress)
+								if(economy_factory::state_instance_has_factory_being_built(state, s, ft))
 									continue;
 								bool present_in_location = false;
 								province::for_each_province_in_state_instance(state, s, [&](dcon::province_id p) {
@@ -2099,17 +2094,13 @@ namespace economy {
 									continue;
 								valid_desired_types.push_back(ft);
 							}
-
 							pdqsort(valid_desired_types.begin(), valid_desired_types.end(), [&](dcon::factory_type_id a, dcon::factory_type_id b) {
-								auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s)
-									+ economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
-								auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s)
-									+ economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
+								auto a_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, a, s) + economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
+								auto b_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, b, s) + economy_factory::sum_of_factory_triggered_input_modifiers(state, a, s);
 								if(a_bonus != b_bonus)
 									return a_bonus > b_bonus;
 								return a.index() < b.index(); // force total ordering
 							});
-
 							if(!valid_desired_types.empty()) {
 								auto selected = valid_desired_types[0];
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));

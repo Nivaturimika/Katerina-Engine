@@ -42,6 +42,8 @@ namespace economy_factory {
 	bool nation_is_constructing_factories(sys::state& state, dcon::nation_id n);
 	bool nation_has_closed_factories(sys::state& state, dcon::nation_id n);
 
+	bool state_instance_has_factory_being_built(sys::state const& state, dcon::state_instance_id sid, dcon::factory_type_id ft);
+
 	bool state_contains_constructed_factory(sys::state& state, dcon::state_instance_id sid, dcon::factory_type_id ft);
 	bool state_contains_factory(sys::state& state, dcon::state_instance_id sid, dcon::factory_type_id ft);
 
