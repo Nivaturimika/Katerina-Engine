@@ -2520,7 +2520,7 @@ namespace economy {
 			auto& current_purchased = state.world.state_building_construction_get_purchased_goods(c);
 			float cost_mod = economy_factory::factory_build_cost_modifier(state, n, state.world.state_building_construction_get_is_pop_project(c));
 			bool all_finished = true;
-			if(!(n == state.local_player_nation && state.cheat_data.instant_industry)) {
+			if(!(state.world.nation_get_is_player_controlled(n) && state.cheat_data.instant_industry)) {
 				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
 					if(base_cost.commodity_type[j]) {
 						if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * cost_mod) {

@@ -399,7 +399,7 @@ namespace military {
 								text::add_line(state, contents, "msg_fab_finished_1", text::variable_type::x, state.world.cb_type_get_name(c), text::variable_type::y, t);
 							},
 							"msg_fab_finished_title",
-						n, dcon::nation_id{}, dcon::nation_id{},
+							n, dcon::nation_id{}, dcon::nation_id{},
 							sys::message_base_type::cb_fab_finished
 						});
 					}

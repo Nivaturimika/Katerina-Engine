@@ -162,14 +162,14 @@ namespace event {
 			effect::execute(state, immediate, primary_slot, trigger::to_generic(n), from_slot, r_lo, r_hi);
 		}
 		if(state.world.nation_get_is_player_controlled(n)) {
-		pending_human_n_event new_event{r_lo, r_hi + 1, primary_slot, from_slot, state.current_date, e, n, pt, ft};
+			pending_human_n_event new_event{r_lo, r_hi + 1, primary_slot, from_slot, state.current_date, e, n, pt, ft};
 			state.pending_n_event.push_back(new_event);
 			if(n == state.local_player_nation)
-			state.new_n_event.push(new_event);
+				state.new_n_event.push(new_event);
 		} else {
 			auto& opt = state.world.national_event_get_options(e);
 			float total = 0.0f;
-		float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f };
+			float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f };
 			for(uint32_t i = 0; i < opt.size(); ++i) {
 				if(opt[i].ai_chance) { //opt[i].effect may not be defined, but it may still be present
 					odds[i] = trigger::evaluate_multiplicative_modifier(state, opt[i].ai_chance, primary_slot, trigger::to_generic(n), from_slot);
@@ -256,14 +256,14 @@ namespace event {
 			effect::execute(state, immediate, trigger::to_generic(n), trigger::to_generic(n), 0, r_lo, r_hi);
 		}
 		if(state.world.nation_get_is_player_controlled(n)) {
-		pending_human_f_n_event new_event{r_lo, r_hi + 1, state.current_date, e, n};
+			pending_human_f_n_event new_event{r_lo, r_hi + 1, state.current_date, e, n};
 			state.pending_f_n_event.push_back(new_event);
 			if(n == state.local_player_nation)
-			state.new_f_n_event.push(new_event);
+				state.new_f_n_event.push(new_event);
 		} else {
 			auto& opt = state.world.free_national_event_get_options(e);
 			float total = 0.0f;
-		float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+			float odds[sys::max_event_options] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for(uint32_t i = 0; i < opt.size(); ++i) {
 				if(opt[i].ai_chance) { //effect may not be present but chance may
 					odds[i] = trigger::evaluate_multiplicative_modifier(state, opt[i].ai_chance, trigger::to_generic(n), trigger::to_generic(n), 0);
