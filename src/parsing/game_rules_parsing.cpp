@@ -38,6 +38,8 @@ namespace parsers {
 		CT_STRING_ENUM(release_subject)
 		CT_STRING_ENUM(add_war_goal)
 		CT_STRING_ENUM(declare_war)
+		CT_STRING_ENUM(land_rally_point)
+		CT_STRING_ENUM(naval_rally_point)
 #undef CT_STRING_ENUM
 	}
 
@@ -61,7 +63,9 @@ namespace parsers {
 			t_context.this_slot = trigger::slot_contents::nation;
 			t_context.from_slot = trigger::slot_contents::nation;
 		} else if(context.action_type == sys::static_game_rule::factory_construction
-			|| context.action_type == sys::static_game_rule::unit_construction) {
+			|| context.action_type == sys::static_game_rule::unit_construction
+			|| context.action_type == sys::static_game_rule::land_rally_point
+			|| context.action_type == sys::static_game_rule::naval_rally_point) {
 			t_context.main_slot = trigger::slot_contents::nation;
 			t_context.this_slot = trigger::slot_contents::nation;
 			t_context.from_slot = trigger::slot_contents::province;

@@ -383,6 +383,27 @@ action = {
 	}
 }
 
+action = {
+	type = "land_rally_point"
+	#THIS/main = nation source
+	#FROM = province
+	limit = {
+		FROM = { owned_by = THIS }
+	}
+	effect = {
+	}
+}
+action = {
+	type = "naval_rally_point"
+	#THIS/main = nation source
+	#FROM = province
+	limit = {
+		owned_by = THIS
+	}
+	effect = {
+	}
+}
+
 #
 # AI rulesets
 #

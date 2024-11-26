@@ -31,8 +31,18 @@ namespace ui {
 			return tooltip_behavior::tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			text::add_line(state, contents, "rally_point_enable_info");
-			text::add_line(state, contents, "alice_merge_rally_point_why");
+			auto source = state.local_player_nation;
+			auto target = retrieve<dcon::province_id>(state, parent);
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::land_rally_point)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::land_rally_point)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -51,8 +61,18 @@ namespace ui {
 			return tooltip_behavior::tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			text::add_line(state, contents, "rally_point_enable_info");
-			text::add_line(state, contents, "alice_merge_rally_point_why");
+			auto source = state.local_player_nation;
+			auto target = retrieve<dcon::province_id>(state, parent);
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::naval_rally_point)].limit; k) {
+				text::add_line_break_to_layout(state, contents);
+				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target));
+			}
+			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::naval_rally_point)].effect; k) {
+				auto const r_lo = uint32_t(source.value);
+				auto const r_hi = uint32_t(source.index() ^ (target.index() << 4));
+				text::add_line_break_to_layout(state, contents);
+				ui::effect_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), trigger::to_generic(target), r_lo, r_hi);
+			}
 		}
 	};
 
@@ -240,7 +260,7 @@ namespace ui {
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 

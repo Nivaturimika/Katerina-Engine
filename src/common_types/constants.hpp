@@ -305,6 +305,8 @@ namespace sys {
 		release_subject,
 		add_war_goal,
 		declare_war,
+		land_rally_point,
+		naval_rally_point,
 		count,
 	};
 };
