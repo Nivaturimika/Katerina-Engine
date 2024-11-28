@@ -88,7 +88,7 @@ namespace simple_fs {
 				posix_fadvise(file_descriptor, 0, static_cast<off_t>(content.file_size), POSIX_FADV_WILLNEED);
 #endif
 #if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
-				mapping_handle = mmap(0, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
+				mapping_handle = mmap(NULL, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
 				if(mapping_handle == MAP_FAILED) {
 					// error
 				}
@@ -107,7 +107,7 @@ namespace simple_fs {
 		if(fstat(file_descriptor, &sb) != -1) {
 			content.file_size = sb.st_size;
 #if defined(_GNU_SOURCE) || defined(_DEFAULT_SOURCE) || defined(_BSD_SOURCE) || defined(_SVID_SOURCE)
-			mapping_handle = mmap(0, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
+			mapping_handle = mmap(NULL, content.file_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
 			if(mapping_handle == MAP_FAILED) {
 				// error
 			}
