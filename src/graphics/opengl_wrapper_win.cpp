@@ -94,6 +94,12 @@ namespace ogl {
 
 	void shutdown_opengl(sys::state& state) {
 		assert(state.win_ptr && state.win_ptr->hwnd && state.open_gl.context);
+
+		state.map_state.map_data.clear_opengl_objects();
+		for(auto const& f : state.font_collection.bitmap_fonts) {
+			f.second.clear_opengl_objects();
+		}
+
 		auto gl_lib = LoadLibraryW(L"opengl32.dll");
 		if(gl_lib) {
 			((decltype(&wglMakeCurrent))GetProcAddress(gl_lib, "wglMakeCurrent"))(state.win_ptr->opengl_window_dc, NULL);

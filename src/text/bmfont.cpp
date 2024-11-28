@@ -188,6 +188,10 @@ namespace text {
 	}
 
 	bm_font::~bm_font() {
+		
+	}
+
+	void bm_font::clear_opengl_objects() {
 		if(ftexid) {
 			glDeleteTextures(1, &ftexid);
 		}

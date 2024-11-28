@@ -1062,15 +1062,21 @@ namespace ogl {
 	}
 
 	GLuint make_gl_texture(uint8_t* data, uint32_t size_x, uint32_t size_y, uint32_t channels) {
-		GLuint texture_handle;
-		glGenTextures(1, &texture_handle);
-		const GLuint internalformats[] = { GL_R8, GL_RG8, GL_RGB8, GL_RGBA8 };
-		const GLuint formats[] = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
-		if(texture_handle) {
-			glBindTexture(GL_TEXTURE_2D, texture_handle);
+		assert(channels > 0 && channels <= 4);
+		static const GLuint internalformats[] = {
+			GL_R8, GL_RG8, GL_RGB8, GL_RGBA8
+		};
+		static const GLuint formats[] = {
+			GL_RED, GL_RG, GL_RGB, GL_RGBA
+		};
+		//
+		GLuint texid;
+		glGenTextures(1, &texid);
+		if(texid) {
+			glBindTexture(GL_TEXTURE_2D, texid);
 			glTexImage2D(GL_TEXTURE_2D, 0, internalformats[channels - 1], size_x, size_y, 0, formats[channels - 1], GL_UNSIGNED_BYTE, data);
 		}
-		return texture_handle;
+		return texid;
 	}
 
 	GLuint make_gl_texture(simple_fs::directory const& dir, native_string_view file_name) {

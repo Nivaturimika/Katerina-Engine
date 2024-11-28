@@ -385,16 +385,14 @@ namespace map {
 	}
 
 	display_data::~display_data() {
-		if(loaded_map) { //only clear when map is loaded
-			clear_opengl_objects();
-		}
 	}
 
 	std::optional<simple_fs::file> try_load_shader(simple_fs::directory& root, native_string_view name) {
-		auto shader = simple_fs::open_file(root, name);
-		if(!bool(shader))
+		if(auto shader = simple_fs::open_file(root, name); shader) {
+			return shader;
+		}
 		ogl::notify_user_of_fatal_opengl_error("Unable to open a necessary shader file");
-		return shader;
+		return std::optional<simple_fs::file>{};
 	}
 
 	GLuint create_program(simple_fs::file& vshader_file, simple_fs::file& fshader_file, uint32_t flags, std::string_view sv = "") {
@@ -1648,18 +1646,6 @@ namespace map {
 		}
 	}
 
-	GLuint load_province_map(std::vector<uint16_t>& province_index, uint32_t size_x, uint32_t size_y) {
-		GLuint texture_handle;
-		glGenTextures(1, &texture_handle);
-		if(texture_handle) {
-			glBindTexture(GL_TEXTURE_2D, texture_handle);
-			// Create a texture with only one byte color
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size_x, size_y, 0, GL_RG, GL_UNSIGNED_BYTE, &province_index[0]);
-			ogl::set_gltex_parameters(texture_handle, GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
-		}
-		return texture_handle;
-	}
-
 	void display_data::gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers) {
 		if(layers == 1) {
 			glBindTexture(GL_TEXTURE_2D, texture_handle);
@@ -2604,8 +2590,9 @@ namespace map {
 	GLuint load_dds_texture(simple_fs::directory const& dir, native_string_view file_name, int soil_flags = ogl::SOIL_FLAG_TEXTURE_REPEATS) {
 		if(auto file = simple_fs::open_file(dir, file_name); file) {
 			auto content = simple_fs::view_contents(*file);
-			uint32_t size_x, size_y;
-			uint8_t const* data = (uint8_t const*)(content.data);
+			uint32_t size_x = 0;
+			uint32_t size_y = 0;
+			auto const* data = reinterpret_cast<uint8_t const*>(content.data);
 			reports::write_debug("Loading [map] DDS file " + text::native_to_utf8(file_name) + "\n");
 			return ogl::SOIL_direct_load_DDS_from_memory(data, content.file_size, size_x, size_y, soil_flags);
 		}
@@ -3097,14 +3084,19 @@ namespace map {
 		auto test_dir = simple_fs::open_directory(gfx_dir, NATIVE("test"));
 
 		glGenTextures(1, &textures[texture_diag_border_identifier]);
-		glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, size_x, size_y, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
-		ogl::set_gltex_parameters(textures[texture_diag_border_identifier], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
+		if(textures[texture_diag_border_identifier]) {
+			glBindTexture(GL_TEXTURE_2D, textures[texture_diag_border_identifier]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, size_x, size_y, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, diagonal_borders.data());
+			ogl::set_gltex_parameters(textures[texture_diag_border_identifier], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
+		}
 
-		textures[texture_terrain] = ogl::make_gl_texture(&terrain_id_map[0], size_x, size_y, 1);
+		textures[texture_terrain] = ogl::make_gl_texture(terrain_id_map.data(), size_x, size_y, 1);
 		ogl::set_gltex_parameters(textures[texture_terrain], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
-		textures[texture_provinces] = load_province_map(province_id_map, size_x, size_y);
+		assert(province_id_map.size() == size_x * size_y);
+		textures[texture_provinces] = ogl::make_gl_texture(reinterpret_cast<uint8_t*>(province_id_map.data()), size_x, size_y, 2);
+		ogl::set_gltex_parameters(textures[texture_provinces], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
+		
 		auto texturesheet = open_file(map_terrain_dir, NATIVE("texturesheet.tga"));
 		if(!texturesheet) {
 			texturesheet = open_file(map_terrain_dir, NATIVE("texturesheet.dds"));

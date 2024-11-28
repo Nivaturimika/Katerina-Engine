@@ -76,6 +76,6 @@ namespace text {
 		int get_kerning_pair(char, char) const;
 	};
 
+	void clear_opengl_objects();
 	bm_font const& get_bm_font(sys::state& state, uint16_t font_handle);
-
 } // namespace text
