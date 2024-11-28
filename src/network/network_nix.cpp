@@ -1,3 +1,4 @@
+#include <cerrno>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -51,6 +52,9 @@ namespace network {
 			if(r > 0) {
 				*m += static_cast<size_t>(r);
 			} else if(r < 0) { // error
+				if(errno == EWOULDBLOCK) { // no data
+					break;
+				}
 				return r;
 			} else if(r == 0) {
 				break;
@@ -84,7 +88,7 @@ namespace network {
 		if(socket_fd < 0) {
 			std::abort();
 		}
-		struct timeval timeout;
+		struct timeval timeout{};
 		timeout.tv_sec = 60;
 		timeout.tv_usec = 0;
 		int opt = 1;
@@ -120,8 +124,7 @@ namespace network {
 	}
 
 	socket_t socket_init_client(bool& as_v6, struct sockaddr_storage& client_address, const char* ip_address) {
-		struct addrinfo hints;
-		std::memset(&hints, 0, sizeof(hints));
+		struct addrinfo hints{};
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
