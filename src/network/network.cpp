@@ -67,8 +67,7 @@ namespace network {
 			state.local_player_nation = get_temp_nation(state);
 			assert(bool(state.local_player_nation));
 			/* Materialize it into a command we send to new clients who connect and have to replay everything... */
-			command::payload c;
-			memset(&c, 0, sizeof(c));
+			command::payload c{};
 			c.type = command::command_type::notify_player_joins;
 			c.source = state.local_player_nation;
 			c.data.player_name = state.network_state.nickname;
@@ -133,16 +132,14 @@ namespace network {
 		if(state.current_scene.starting_scene) {
 			/* Send the savefile to the newly connected client (if not a new game) */
 			if(!state.network_state.is_new_game) {
-				command::payload c;
-				memset(&c, 0, sizeof(command::payload));
+				command::payload c{};
 				c.type = command::command_type::notify_save_loaded;
 				c.source = state.local_player_nation;
 				c.data.notify_save_loaded.target = client.playing_as;
 				network::broadcast_save_to_clients(state, c, state.network_state.current_save_buffer.get(), state.network_state.current_save_length, state.network_state.current_save_checksum);
 			}
 			{ /* Tell this client about every other client */
-				command::payload c;
-				memset(&c, 0, sizeof(c));
+				command::payload c{};
 				c.type = command::command_type::notify_player_joins;
 				//send join for our own nation
 				c.source = state.local_player_nation;
@@ -165,8 +162,7 @@ namespace network {
 			}
 		} else if(state.current_scene.game_in_progress) { //hotjoin
 			{ /* Tell this client about every other client */
-				command::payload c;
-				memset(&c, 0, sizeof(c));
+				command::payload c{};
 				c.type = command::command_type::notify_player_joins;
 				//send join for our own nation
 				c.source = state.local_player_nation;
@@ -192,8 +188,7 @@ namespace network {
 				}
 			}
 			{ /* "Start" the game - for this client */
-				command::payload c;
-				memset(&c, 0, sizeof(command::payload));
+				command::payload c{};
 				c.type = command::command_type::notify_start_game;
 				c.source = state.local_player_nation;
 				broadcast_to_clients(state, c);
@@ -222,8 +217,7 @@ namespace network {
 			assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 			#if 0
 			{ /* Reload all the other clients except the newly connected one */
-				command::payload c;
-				memset(&c, 0, sizeof(command::payload));
+				command::payload c{};
 				c.type = command::command_type::notify_reload;
 				c.source = state.local_player_nation;
 				c.data.notify_reload.checksum = state.get_save_checksum();
@@ -235,8 +229,7 @@ namespace network {
 			}
 			#endif
 			{ /* Send the savefile to the newly connected client (if not a new game) */
-				command::payload c;
-				memset(&c, 0, sizeof(command::payload));
+				command::payload c{};
 				c.type = command::command_type::notify_save_loaded;
 				c.source = state.local_player_nation;
 				//c.data.notify_save_loaded.target = client.playing_as;

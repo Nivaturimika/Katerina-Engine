@@ -52,8 +52,8 @@ namespace text {
 	};
 
 	class bm_font {
-		public:
-	bm_font() { }
+	public:
+		bm_font() { }
 		bm_font(sys::state& state, simple_fs::file& font_metrics, simple_fs::file& font_image);
 		bm_font(bm_font&& src) noexcept;
 		bm_font& operator=(bm_font&& src) noexcept;
@@ -70,12 +70,12 @@ namespace text {
 		int32_t scale_h = 0;
 		GLuint ftexid = 0;
 
-	float get_height() const { return float(line_height); }
+		float get_height() const { return float(line_height); }
 		float get_string_width(sys::state& state, char const*, uint32_t) const;
 		bool parse_font(sys::state& state, simple_fs::file& f);
 		int get_kerning_pair(char, char) const;
+		void clear_opengl_objects();
 	};
 
-	void clear_opengl_objects();
 	bm_font const& get_bm_font(sys::state& state, uint16_t font_handle);
 } // namespace text
