@@ -244,11 +244,11 @@ namespace simple_fs {
 				case NATIVE('2'): return 125;
 				case NATIVE('3'): return 126;
 				case NATIVE('4'): return 127;
-				case NATIVE('5'): return 128;
-				case NATIVE('6'): return 129;
-				case NATIVE('7'): return 130;
-				case NATIVE('8'): return 131;
-				case NATIVE('9'): return 132;
+				case NATIVE('5'): return native_char(128);
+				case NATIVE('6'): return native_char(129);
+				case NATIVE('7'): return native_char(130);
+				case NATIVE('8'): return native_char(131);
+				case NATIVE('9'): return native_char(132);
 				case 123: return '0';
 				case 124: return '1';
 				case 125: return '2';
