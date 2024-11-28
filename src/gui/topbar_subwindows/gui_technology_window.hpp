@@ -203,7 +203,7 @@ namespace ui {
 			if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
 				it != state.ui_state.tech_queue.end()) {
 				state.ui_state.tech_queue.erase(it);
-				state.update_text_queue(); //state.game_state_updated.store(true, std::memory_order::release);
+				state.update_tech_queue(); //state.game_state_updated.store(true, std::memory_order::release);
 			}
 		}
 
@@ -218,14 +218,14 @@ namespace ui {
 							prev_tech = culture::previous_folder_technology(state, prev_tech);
 						}
 						state.ui_state.tech_queue.push_back(content);
-						state.update_text_queue();
+						state.update_tech_queue();
 						//
 						parent->impl_on_update(state);
 					}
 				} else {
 					state.ui_state.tech_queue.erase(it);
 					state.ui_state.tech_queue.push_back(content);
-					state.update_text_queue();
+					state.update_tech_queue();
 					//
 					parent->impl_on_update(state);
 				}

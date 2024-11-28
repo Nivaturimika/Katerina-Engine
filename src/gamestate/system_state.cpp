@@ -232,7 +232,7 @@ namespace sys {
 
 	inline constexpr int32_t tooltip_width = 400;
 
-	void state::update_text_queue() {
+	void state::update_tech_queue() {
 		if(!ui_state.tech_queue.empty()) {
 			if(!world.nation_get_current_research(local_player_nation)) {
 				for(auto it = ui_state.tech_queue.begin(); it != ui_state.tech_queue.end(); it++) {
@@ -276,7 +276,7 @@ namespace sys {
 		}
 
 		if(game_state_was_updated) {
-			state::update_tech_queue();
+			update_tech_queue();
 
 			current_scene.on_game_state_update(*this);
 

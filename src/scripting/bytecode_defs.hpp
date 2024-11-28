@@ -484,7 +484,7 @@
 	EFFECT_BYTECODE_ELEMENT(0x01C3, set_crisis_colony_from, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x01C4, set_crisis_liberation_tag, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x01C5, set_crisis_liberation_tag_this, 0) \
-	EFFECT_BYTECODE_ELEMENT(0x01C6, set_crisis_liberation_tag_from, 0)
+	EFFECT_BYTECODE_ELEMENT(0x01C6, set_crisis_liberation_tag_from, 0) \
 
 #define EFFECT_SCOPE_BYTECODE_LIST \
 	EFFECT_SCOPE_BYTECODE_ELEMENT(generic_scope, 0x0000) \
