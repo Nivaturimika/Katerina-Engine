@@ -113,15 +113,32 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/network/pcp.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gamestate/game_scene.cpp"
 )
+if(WIN32)
+	list(APPEND ALICE_CORE_SOURCES_LIST
+		"${PROJECT_SOURCE_DIR}/src/filesystem/simple_fs_win.cpp"
+		"${PROJECT_SOURCE_DIR}/src/window/window_win.cpp"
+		"${PROJECT_SOURCE_DIR}/src/sound/sound_win.cpp"
+		"${PROJECT_SOURCE_DIR}/src/graphics/opengl_wrapper_win.cpp"
+	)
+else()
+	list(APPEND ALICE_CORE_SOURCES_LIST
+		"${PROJECT_SOURCE_DIR}/src/filesystem/simple_fs_nix.cpp"
+		"${PROJECT_SOURCE_DIR}/src/window/window_nix.cpp"
+		"${PROJECT_SOURCE_DIR}/src/sound/sound_nix.cpp"
+		"${PROJECT_SOURCE_DIR}/src/graphics/opengl_wrapper_nix.cpp"
+	)
+endif()
 
 if(WIN32)
 	add_executable(KatEngine WIN32
 		${ALICE_CORE_SOURCES_LIST}
+		"${PROJECT_SOURCE_DIR}/src/entry_point_win.cpp"
 		"${PROJECT_SOURCE_DIR}/src/alice.rc"
 		${ASSET_FILES})
 else()
 	add_executable(KatEngine WIN32
 		${ALICE_CORE_SOURCES_LIST}
+		"${PROJECT_SOURCE_DIR}/src/entry_point_nix.cpp"
 		${ASSET_FILES})
 endif()
 
