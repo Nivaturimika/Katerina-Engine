@@ -1,8 +1,10 @@
 #include "glad.h"
+#include "opengl_wrapper.hpp"
+
+#include <GLFW/glfw3.h>
 #include <string>
 
 namespace ogl {
-
 	void create_opengl_context(sys::state& state) {
 		assert(state.win_ptr && state.win_ptr->window);
 		glfwMakeContextCurrent(state.win_ptr->window);
