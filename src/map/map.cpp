@@ -340,15 +340,39 @@ namespace map {
 		assert(loaded_map);
 		loaded_map = false;
 		/* Still don't need ot check for zero (i need to double check) :3 */
-		glDeleteTextures(texture_count, textures);
-		glDeleteTextures(texture_array_count, texture_arrays);
-		glDeleteTextures(max_static_meshes * max_static_submeshes, &static_mesh_textures[0][0]);
-		glDeleteVertexArrays(vo_count, vao_array);
-		glDeleteBuffers(vo_count, vbo_array);
+		for(uint32_t i = 0; i < texture_count; ++i) {
+			if(textures[i]) {
+				glDeleteTextures(1, &textures[i]);
+			}
+		}
+		for(uint32_t i = 0; i < texture_array_count; ++i) {
+			if(texture_arrays[i]) {
+				glDeleteTextures(1, &texture_arrays[i]);
+			}
+		}
+		for(uint32_t i = 0; i < max_static_meshes; ++i) {
+			for(uint32_t j = 0; j < max_static_submeshes; ++j) {
+				if(static_mesh_textures[i][j]) {
+					glDeleteTextures(1, &static_mesh_textures[i][j]);
+				}
+			}
+		}
+		for(uint32_t i = 0; i < vo_count; ++i) {
+			if(vao_array[i]) {
+				glDeleteVertexArrays(1, &vao_array[i]);
+			}
+		}
+		for(uint32_t i = 0; i < vo_count; ++i) {
+			if(vbo_array[i]) {
+				glDeleteBuffers(1, &vbo_array[i]);
+			}
+		}
 		/* Flags shader for deletion, but doesn't delete them until they're no longer in the rendering context */
 		for(const auto& v1 : shaders) { // 3 dimensional array
-			for(const auto& v2 : v1) {
-				glDeleteProgram(v2);
+			for(const auto program : v1) {
+				if(program) {
+					glDeleteProgram(program);
+				}
 			}
 		}
 		//Some graphics drivers will crash if we dont memset to 0
