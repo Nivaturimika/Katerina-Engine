@@ -258,6 +258,7 @@ namespace network {
 			if(client.handshake) {
 				r = socket_recv(client.socket_fd, &client.hshake_buffer, sizeof(client.hshake_buffer), &client.recv_count, [&]() {
 					if(std::memcmp(client.hshake_buffer.password, state.network_state.password, sizeof(state.network_state.password)) != 0) {
+						reports::write_debug("host:disconnect: incorrect password\n");
 						disconnect_client(state, client, false);
 						return;
 					}
@@ -380,14 +381,16 @@ namespace network {
 		// Find available slot for client
 		for(auto& client : state.network_state.clients) {
 			if(client.is_active())
-			continue;
+				continue;
 			socklen_t addr_len = state.network_state.as_v6 ? sizeof(sockaddr_in6) : sizeof(sockaddr_in);
 			client.socket_fd = accept(state.network_state.socket_fd, (struct sockaddr*)&client.address, &addr_len);
 			if(client.is_banned(state)) {
+				reports::write_debug("host:reject: Banned client attempted connection\n");
 				disconnect_client(state, client, false);
 				break;
 			}
 			if(state.current_scene.final_scene) {
+				reports::write_debug("host:reject: game ended, client wanted to connect\n");
 				disconnect_client(state, client, false);
 				break;
 			}
@@ -440,34 +443,34 @@ namespace network {
 			//otherwise someone joining fast enough will have the same nation!
 			accept_new_clients(state); // accept new connections
 			for(auto& client : state.network_state.clients) {
-				if(!client.is_active())
-				continue;
-				if(client.handshake) {
-					if(client.early_send_buffer.size() > 0) {
-						size_t old_size = client.early_send_buffer.size();
-						int r = socket_send(client.socket_fd, client.early_send_buffer);
-						if(r != 0) { // error
-							reports::write_debug("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
-							disconnect_client(state, client, false);
-							continue;
+				if(client.is_active()) {
+					if(client.handshake) {
+						if(client.early_send_buffer.size() > 0) {
+							size_t old_size = client.early_send_buffer.size();
+							int r = socket_send(client.socket_fd, client.early_send_buffer);
+							if(r != 0) { // error
+								reports::write_debug("host:disconnect: in-send-EARLY err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
+								disconnect_client(state, client, false);
+								continue;
+							}
+							client.total_sent_bytes += old_size - client.early_send_buffer.size();
+							if(old_size != client.early_send_buffer.size()) {
+								reports::write_debug("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
+							}
 						}
-						client.total_sent_bytes += old_size - client.early_send_buffer.size();
-						if(old_size != client.early_send_buffer.size()) {
-							reports::write_debug("host:send:stats: [EARLY] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
-						}
-					}
-				} else {
-					if(client.send_buffer.size() > 0) {
-						size_t old_size = client.send_buffer.size();
-						int r = socket_send(client.socket_fd, client.send_buffer);
-						if(r != 0) { // error
-							reports::write_debug("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
-							disconnect_client(state, client, false);
-							continue;
-						}
-						client.total_sent_bytes += old_size - client.send_buffer.size();
-						if(old_size != client.send_buffer.size()) {
-							reports::write_debug("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
+					} else {
+						if(client.send_buffer.size() > 0) {
+							size_t old_size = client.send_buffer.size();
+							int r = socket_send(client.socket_fd, client.send_buffer);
+							if(r != 0) { // error
+								reports::write_debug("host:disconnect: in-send-INGAME err=" + std::to_string(int32_t(r)) + "::" + get_last_error_msg() + "\n");
+								disconnect_client(state, client, false);
+								continue;
+							}
+							client.total_sent_bytes += old_size - client.send_buffer.size();
+							if(old_size != client.send_buffer.size()) {
+								reports::write_debug("host:send:stats: [SEND] " + std::to_string(uint32_t(client.total_sent_bytes)) + " bytes\n");
+							}
 						}
 					}
 				}
@@ -669,8 +672,7 @@ namespace network {
 						c = state.network_state.outgoing_commands.front();
 					}
 				}
-				command::payload c;
-				memset(&c, 0, sizeof(c));
+				command::payload c{};
 				c.type = command::command_type::notify_player_leaves;
 				c.source = state.local_player_nation;
 				c.data.notify_leave.make_ai = true;

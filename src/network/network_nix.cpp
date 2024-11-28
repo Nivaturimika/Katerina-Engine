@@ -26,7 +26,7 @@ namespace network {
 	}
 
 	std::string get_last_error_msg() {
-		return std::string("Dummy");
+		return std::string(strerror(errno));
 	}
 
 	void socket_shutdown(socket_t socket_fd) {
