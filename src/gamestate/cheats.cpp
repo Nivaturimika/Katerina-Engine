@@ -20,8 +20,7 @@ namespace command {
 	void add_to_command_queue(sys::state& state, payload& p);
 
 	void c_switch_nation(sys::state& state, dcon::nation_id source, dcon::national_identity_id t) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_switch_nation;
 		p.source = source;
 		p.data.tag_target.ident = t;
@@ -49,8 +48,7 @@ namespace command {
 	}
 
 	void c_change_diplo_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_diplo_points;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -61,8 +59,7 @@ namespace command {
 		state.world.nation_get_diplomatic_points(n ? n : source) += value;
 	}
 	void c_change_money(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_money;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -73,8 +70,7 @@ namespace command {
 		state.world.nation_get_stockpiles(n ? n : source, economy::money) += value;
 	}
 	void c_westernize(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_westernize;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -83,8 +79,7 @@ namespace command {
 		state.world.nation_set_is_civilized(source, true);
 	}
 	void c_unwesternize(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_unwesternize;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -93,8 +88,7 @@ namespace command {
 		state.world.nation_set_is_civilized(source, false);
 	}
 	void c_change_research_points(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_research_points;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -105,8 +99,7 @@ namespace command {
 		state.world.nation_get_research_points(n ? n : source) += value;
 	}
 	void c_change_cb_progress(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_cb_progress;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -117,8 +110,7 @@ namespace command {
 		state.world.nation_get_constructing_cb_progress(n ? n : source) += value;
 	}
 	void c_change_infamy(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_infamy;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -129,8 +121,7 @@ namespace command {
 		state.world.nation_get_infamy(n ? n : source) += value;
 	}
 	void c_end_game(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_end_game;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -140,8 +131,7 @@ namespace command {
 	}
 
 	void c_complete_constructions(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_complete_constructions;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -163,8 +153,7 @@ namespace command {
 	}
 
 	void c_event(sys::state& state, dcon::nation_id source, int32_t id) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_event;
 		p.source = source;
 		p.data.cheat_int.value = id;
@@ -197,8 +186,7 @@ namespace command {
 		}*/
 	}
 	void c_event_as(sys::state& state, dcon::nation_id source, dcon::nation_id as, int32_t id) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_event_as;
 		p.source = source;
 		p.data.cheat_event.as = as;
@@ -235,8 +223,7 @@ namespace command {
 		}*/
 	}
 	void c_force_crisis(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_force_crisis;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -269,8 +256,7 @@ namespace command {
 	}
 
 	void c_change_national_militancy(sys::state& state, dcon::nation_id source, float value) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_national_militancy;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -283,8 +269,7 @@ namespace command {
 	}
 
 	void c_force_ally(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_force_ally;
 		p.source = source;
 		p.data.nation_pick.target = target;
@@ -295,8 +280,7 @@ namespace command {
 	}
 
 	void c_change_prestige(sys::state& state, dcon::nation_id source, float value, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_prestige;
 		p.source = source;
 		p.data.cheat.value = value;
@@ -308,8 +292,7 @@ namespace command {
 	}
 
 	void c_toggle_ai(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_toggle_ai;
 		p.source = source;
 		p.data.nation_pick.target = target;
@@ -320,8 +303,7 @@ namespace command {
 	}
 
 	void c_change_owner(sys::state& state, dcon::nation_id source, dcon::province_id pr, dcon::nation_id new_owner) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_owner;
 		p.source = source;
 		p.data.cheat_location.prov = pr;
@@ -333,8 +315,7 @@ namespace command {
 	}
 
 	void c_change_controller(sys::state& state, dcon::nation_id source, dcon::province_id pr, dcon::nation_id new_controller) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_change_controller;
 		p.source = source;
 		p.data.cheat_location.prov = pr;
@@ -347,8 +328,7 @@ namespace command {
 	}
 
 	void c_instant_research(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_instant_research;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -367,8 +347,7 @@ namespace command {
 	}
 
 	void c_add_population(sys::state& state, dcon::nation_id source, int32_t ammount) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_add_population;
 		p.source = source;
 		p.data.cheat_int.value = ammount;
@@ -386,8 +365,7 @@ namespace command {
 	}
 
 	void c_instant_army(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_instant_army;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -397,8 +375,7 @@ namespace command {
 	}
 
 	void c_instant_navy(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_instant_navy;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -408,8 +385,7 @@ namespace command {
 	}
 
 	void c_instant_industry(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_instant_industry;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -420,8 +396,7 @@ namespace command {
 	}
 
 	void c_innovate(sys::state& state, dcon::nation_id source, dcon::invention_id invention) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_innovate;
 		p.source = source;
 		p.data.cheat_invention_data.invention = invention;
@@ -433,8 +408,7 @@ namespace command {
 	}
 
 	void c_toggle_core(sys::state& state, dcon::nation_id source, dcon::province_id pr, dcon::nation_id n) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_toggle_core;
 		p.source = source;
 		p.data.cheat_location.prov = pr;
@@ -452,8 +426,7 @@ namespace command {
 		province::add_core(state, p, nid);
 	}
 	void c_always_allow_wargoals(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_always_allow_wargoals;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -462,8 +435,7 @@ namespace command {
 		state.cheat_data.always_allow_wargoals = !state.cheat_data.always_allow_wargoals;
 	}
 	void c_always_allow_reforms(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_always_allow_reforms;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -472,8 +444,7 @@ namespace command {
 		state.cheat_data.always_allow_reforms = !state.cheat_data.always_allow_reforms;
 	}
 	void c_always_accept_deals(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_always_accept_deals;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -483,8 +454,7 @@ namespace command {
 	}
 
 	void c_set_auto_choice_all(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_set_auto_choice_all;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -504,8 +474,7 @@ namespace command {
 		}
 	}
 	void c_clear_auto_choice_all(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_clear_auto_choice_all;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -526,8 +495,7 @@ namespace command {
 	}
 
 	void c_always_allow_decisions(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_always_allow_decisions;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -537,8 +505,7 @@ namespace command {
 	}
 
 	void c_always_potential_decisions(sys::state& state, dcon::nation_id source) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_always_potential_decisions;
 		p.source = source;
 		add_to_command_queue(state, p);
@@ -548,8 +515,7 @@ namespace command {
 	}
 
 	void c_add_year(sys::state& state, dcon::nation_id source, int32_t amount) {
-		payload p;
-		memset(&p, 0, sizeof(payload));
+		payload p{};
 		p.type = command_type::c_add_year;
 		p.source = source;
 		p.data.cheat_int.value = amount;

@@ -1990,8 +1990,7 @@ namespace nations {
 		if(state.world.nation_get_is_at_war(n)) { // ineligible
 			reject_crisis_participation(state);
 		} else {
-			diplomatic_message::message m;
-			memset(&m, 0, sizeof(diplomatic_message::message));
+			diplomatic_message::message m{};
 			m.type = diplomatic_message::type::be_crisis_primary_defender;
 			m.to = n;
 			if(state.crisis_state) {
@@ -2005,8 +2004,7 @@ namespace nations {
 		if(state.world.nation_get_is_at_war(n)) { // ineligible
 			reject_crisis_participation(state);
 		} else {
-			diplomatic_message::message m;
-			memset(&m, 0, sizeof(diplomatic_message::message));
+			diplomatic_message::message m{};
 			m.type = diplomatic_message::type::be_crisis_primary_attacker;
 			m.to = n;
 			if(state.crisis_liberation_tag) {
@@ -2026,7 +2024,6 @@ namespace nations {
 		if(state.current_crisis_mode == sys::crisis_mode::finding_attacker) {
 			if(state.crisis_last_checked_gp >= state.great_nations.size()) {
 				// no attacker -- fizzle
-
 				notification::post(state, notification::message{
 					[](sys::state& state, text::layout_base& contents) {
 						text::add_line(state, contents, "msg_crisis_fizzle_1");
@@ -2035,7 +2032,6 @@ namespace nations {
 				state.local_player_nation,dcon::nation_id{}, dcon::nation_id{},
 					sys::message_base_type::crisis_fizzle
 				});
-
 				cleanup_crisis(state);
 			} else {
 				ask_to_attack_in_crisis(state, state.great_nations[state.crisis_last_checked_gp].nation);
@@ -2044,7 +2040,6 @@ namespace nations {
 			if(state.crisis_last_checked_gp >= state.great_nations.size()) {
 				// no defender -- attacker wins
 				// TODO: notify resolution
-
 				notification::post(state, notification::message{
 					[](sys::state& state, text::layout_base& contents) {
 						text::add_line(state, contents, "msg_crisis_fizzle_2");
@@ -2053,7 +2048,6 @@ namespace nations {
 				state.local_player_nation, dcon::nation_id{}, dcon::nation_id{},
 					sys::message_base_type::crisis_fizzle
 				});
-
 				if(state.current_crisis == sys::crisis_type::liberation) {
 				military::implement_war_goal(state, dcon::war_id{}, state.military_definitions.crisis_liberate,
 						state.primary_crisis_attacker, state.world.state_instance_get_nation_from_state_ownership(state.crisis_state),

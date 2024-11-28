@@ -1736,9 +1736,7 @@ namespace ai {
 									state_target_list(potential_states, state, par.id, target);
 									for(auto s : potential_states) {
 										if(military::cb_instance_conditions_satisfied(state, par.id, target, offer_cb, state.world.state_instance_get_definition(s), dcon::national_identity_id{}, dcon::nation_id{})) {
-
-											diplomatic_message::message m;
-											memset(&m, 0, sizeof(diplomatic_message::message));
+											diplomatic_message::message m{};
 											m.to = par.id;
 											m.from = state.primary_crisis_attacker;
 											m.data.crisis_offer.target = target;
@@ -1753,8 +1751,7 @@ namespace ai {
 										}
 									}
 								} else {
-									diplomatic_message::message m;
-									memset(&m, 0, sizeof(diplomatic_message::message));
+									diplomatic_message::message m{};
 									m.to = par.id;
 									m.from = state.primary_crisis_attacker;
 									m.data.crisis_offer.target = target;
@@ -1808,9 +1805,7 @@ namespace ai {
 									state_target_list(potential_states, state, par.id, target);
 									for(auto s : potential_states) {
 										if(military::cb_instance_conditions_satisfied(state, par.id, target, offer_cb, state.world.state_instance_get_definition(s), dcon::national_identity_id{}, dcon::nation_id{})) {
-
-											diplomatic_message::message m;
-											memset(&m, 0, sizeof(diplomatic_message::message));
+											diplomatic_message::message m{};
 											m.to = par.id;
 											m.from = state.primary_crisis_defender;
 											m.data.crisis_offer.target = target;
@@ -1820,13 +1815,11 @@ namespace ai {
 											m.data.crisis_offer.wargoal_type = offer_cb;
 											m.type = diplomatic_message::type::take_crisis_side_offer;
 											diplomatic_message::post(state, m);
-
 											break;
 										}
 									}
 								} else {
-									diplomatic_message::message m;
-									memset(&m, 0, sizeof(diplomatic_message::message));
+									diplomatic_message::message m{};
 									m.to = par.id;
 									m.from = state.primary_crisis_defender;
 									m.data.crisis_offer.target = target;
