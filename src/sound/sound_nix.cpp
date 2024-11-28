@@ -12,6 +12,9 @@
 #define MA_NO_WASAPI 1
 #define MA_NO_WINMM 1
 #define MA_NO_COREAUDIO 1
+#define MA_NO_GENERATION 1
+#define MA_NO_DSOUND 1
+#define MA_NO_AAUDIO 1
 #include "miniaudio.h"
 
 namespace sound {
