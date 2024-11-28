@@ -416,11 +416,11 @@ add_custom_target(GENERATE_PARSERS DEPENDS
 add_dependencies(KatEngine GENERATE_PARSERS)
 
 if(ARCHITECTURE STREQUAL "x64" OR ARCHITECTURE STREQUAL "x86")
-	if (BUILD_TESTING)
+	add_subdirectory(SaveEditor)
+	if(BUILD_TESTING)
 		enable_testing()
 		add_subdirectory(tests)
 	endif()
-	add_subdirectory(SaveEditor)
 	if(WIN32)
 		add_subdirectory(DbgKatEngine)
 		add_subdirectory(Launcher)
