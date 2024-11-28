@@ -165,15 +165,6 @@ namespace command {
 		dcon::leader_id l;
 	};
 
-	struct pbutton_data {
-		dcon::gui_def_id button;
-		dcon::province_id id;
-	};
-	struct nbutton_data {
-		dcon::gui_def_id button;
-		dcon::nation_id id;
-	};
-
 	struct national_focus_data {
 		dcon::state_instance_id target_state;
 		dcon::national_focus_id focus;
@@ -248,11 +239,6 @@ namespace command {
 
 	struct generic_location_data {
 		dcon::province_id prov;
-	};
-
-	struct cheat_location_data {
-		dcon::province_id prov;
-		dcon::nation_id n;
 	};
 
 	struct movement_data {
@@ -464,10 +450,6 @@ namespace command {
 		dcon::nation_id as;
 	};
 
-	struct cheat_invention_data_t {
-		dcon::invention_id invention;
-	};
-
 	struct chat_message_data {
 		char body[ui::max_chat_message_len];
 		dcon::nation_id target;
@@ -486,12 +468,6 @@ namespace command {
 		sys::checksum_key checksum;
 		uint32_t length;
 		dcon::nation_id target;
-	};
-	struct notify_reload_data {
-		sys::checksum_key checksum;
-	};
-	struct notify_leaves_data {
-		bool make_ai;
 	};
 
 	struct payload {
@@ -554,17 +530,33 @@ namespace command {
 			advance_tick_data advance_tick;
 			save_game_data save_game;
 			notify_save_loaded_data notify_save_loaded;
-			notify_reload_data notify_reload;
+			struct notify_reload_data {
+				sys::checksum_key checksum;
+			} notify_reload;
+			struct cheat_location_data {
+				dcon::province_id prov;
+				dcon::nation_id n;
+			} cheat_location;
+			struct notify_leaves_data {
+				bool make_ai;
+			} notify_leave;
+			struct pbutton_data {
+				dcon::gui_def_id button;
+				dcon::province_id id;
+			} pbutton;
+			struct nbutton_data {
+				dcon::gui_def_id button;
+				dcon::nation_id id;
+			} nbutton;
+			struct cheat_invention_data {
+				dcon::invention_id invention;
+			} cheat_invention_data;
+			//
 			sys::player_name player_name;
-			cheat_location_data cheat_location;
-			notify_leaves_data notify_leave;
-			nbutton_data nbutton;
-			pbutton_data pbutton;
-			cheat_invention_data_t cheat_invention_data;
 			uint8_t no_data = 0;
-		dtype() { }
+			dtype() { }
 		} data;
-	payload() { }
+		payload() { }
 	};
 	static_assert(sizeof(payload) ==
 	sizeof(payload::type)

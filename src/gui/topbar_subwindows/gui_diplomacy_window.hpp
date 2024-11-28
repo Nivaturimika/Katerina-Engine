@@ -1271,9 +1271,8 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			dcon::nation_id nation_id = retrieve<dcon::nation_id>(state, parent);
+			auto source = state.local_player_nation;
 			dcon::war_id w = retrieve<dcon::war_id>(state, parent);
-
 			if(!state.world.war_get_is_great(w)) {
 				text::add_line(state, contents, "intervene_1");
 			} else {
@@ -1283,13 +1282,13 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 			if(state.defines.min_months_to_intervene > 0) {
 				text::add_line_with_condition(state, contents, "intervene_5", state.current_date >= state.world.war_get_start_date(w) + int32_t(30.0f * state.defines.min_months_to_intervene), text::variable_type::x, int64_t(state.defines.min_months_to_intervene));
 			}
-			text::add_line_with_condition(state, contents, "intervene_6", military::joining_war_does_not_violate_constraints(state, state.local_player_nation, w, B));
+			text::add_line_with_condition(state, contents, "intervene_6", military::joining_war_does_not_violate_constraints(state, source, w, B));
 			if constexpr(!B) {
-				text::add_line_with_condition(state, contents, "intervene_8", !military::has_truce_with(state, state.local_player_nation, state.world.war_get_primary_attacker(w)));
+				text::add_line_with_condition(state, contents, "intervene_8", !military::has_truce_with(state, source, state.world.war_get_primary_attacker(w)));
 			}
 			if(!state.world.war_get_is_great(w)) {
 				auto defender = state.world.war_get_primary_defender(w);
-				auto rel_w_defender = state.world.get_gp_relationship_by_gp_influence_pair(defender, state.local_player_nation);
+				auto rel_w_defender = state.world.get_gp_relationship_by_gp_influence_pair(defender, source);
 				auto inf = state.world.gp_relationship_get_status(rel_w_defender) & nations::influence::level_mask;
 
 				text::add_line_with_condition(state, contents, "intervene_17", inf == nations::influence::level_friendly);
@@ -1301,28 +1300,27 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 
 			} else {
 				if constexpr(B) {
-					text::add_line_with_condition(state, contents, "intervene_8", !military::joining_as_attacker_would_break_truce(state, state.local_player_nation, w));
+					text::add_line_with_condition(state, contents, "intervene_8", !military::joining_as_attacker_would_break_truce(state, source, w));
 				}
-				text::add_line_with_condition(state, contents, "intervene_12", state.world.nation_get_war_exhaustion(state.local_player_nation) < state.defines.gw_intervene_max_exhaustion, text::variable_type::x, int64_t(state.defines.gw_intervene_max_exhaustion));
+				text::add_line_with_condition(state, contents, "intervene_12", state.world.nation_get_war_exhaustion(source) < state.defines.gw_intervene_max_exhaustion, text::variable_type::x, int64_t(state.defines.gw_intervene_max_exhaustion));
 				auto primary_on_side = B ? state.world.war_get_primary_attacker(w) : state.world.war_get_primary_defender(w);
-				auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(primary_on_side, state.local_player_nation);
+				auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(primary_on_side, source);
 				text::add_line_with_condition(state, contents, "intervene_13", state.world.diplomatic_relation_get_value(rel) >= state.defines.gw_intervene_min_relations, text::variable_type::x, int64_t(state.defines.gw_intervene_min_relations));
 				bool any_in_sphere = false;
 				bool any_allied = false;
 				bool any_armies = false;
 				for(auto p : state.world.war_get_war_participant(w)) {
 					if(p.get_is_attacker() != B) { // scan nations on other side
-						if(p.get_nation().get_in_sphere_of() == state.local_player_nation) {
+						if(p.get_nation().get_in_sphere_of() == source) {
 							any_in_sphere = true;
 						}
-						auto irel = state.world.get_diplomatic_relation_by_diplomatic_pair(p.get_nation(), state.local_player_nation);
+						auto irel = state.world.get_diplomatic_relation_by_diplomatic_pair(p.get_nation(), source);
 						if(state.world.diplomatic_relation_get_are_allied(irel)) {
 							any_allied = true;
 						}
 						for(auto prov : p.get_nation().get_province_ownership()) {
 							for(auto arm : prov.get_province().get_army_location()) {
-								if(arm.get_army().get_controller_from_army_control() == state.local_player_nation)
-									any_armies = true;
+								any_armies |= (arm.get_army().get_controller_from_army_control() == source);
 							}
 						}
 					}
@@ -1331,8 +1329,6 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 				text::add_line_with_condition(state, contents, "intervene_15", !any_allied);
 				text::add_line_with_condition(state, contents, "intervene_16", !any_armies);
 			}
-
-			auto source = state.local_player_nation;
 			if(auto k = state.national_definitions.static_game_rules[uint8_t(sys::static_game_rule::intervene_in_war)].limit; k) {
 				text::add_line_break_to_layout(state, contents);
 				ui::trigger_description(state, contents, k, trigger::to_generic(source), trigger::to_generic(source), -1);

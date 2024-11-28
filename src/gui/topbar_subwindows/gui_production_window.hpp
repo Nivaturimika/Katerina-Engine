@@ -132,31 +132,31 @@ namespace ui {
 		void button_shift_action(sys::state& state) noexcept override {
 			const dcon::nation_id n = retrieve<dcon::nation_id>(state, parent);
 			auto sid = retrieve<dcon::state_instance_id>(state, parent);
-			for(auto p : state.world.state_definition_get_abstract_state_membership_as_state(state.world.state_instance_get_definition(sid))) {
-				for(auto fac : p.get_province().get_factory_location()) {
+			province::for_each_province_in_state_instance(state, sid, [&](dcon::province_id p) {
+				for(auto fac : state.world.province_get_factory_location(p)) {
 					if(command::can_begin_factory_building_construction(state, state.local_player_nation,
-					p.get_province().get_state_membership(), fac.get_factory().get_building_type(), true)) {
+					state.world.province_get_state_membership(p), fac.get_factory().get_building_type(), true)) {
 						command::begin_factory_building_construction(state, state.local_player_nation,
-						p.get_province().get_state_membership(), fac.get_factory().get_building_type(), true);
+						state.world.province_get_state_membership(p), fac.get_factory().get_building_type(), true);
 					}
 				}
-			}
+			});
 		}
 
 		void button_shift_right_action(sys::state& state) noexcept override {
 			const dcon::nation_id n = retrieve<dcon::nation_id>(state, parent);
 			auto sid = retrieve<dcon::state_instance_id>(state, parent);
-			for(auto p : state.world.state_definition_get_abstract_state_membership_as_state(state.world.state_instance_get_definition(sid))) {
-				for(auto fac : p.get_province().get_factory_location()) {
+			province::for_each_province_in_state_instance(state, sid, [&](dcon::province_id p) {
+				for(auto fac : state.world.province_get_factory_location(p)) {
 					if(fac.get_factory().get_primary_employment() >= 0.95f && fac.get_factory().get_production_scale() > 0.8f) {
 						if(command::can_begin_factory_building_construction(state, state.local_player_nation,
-						p.get_province().get_state_membership(), fac.get_factory().get_building_type(), true)) {
+						state.world.province_get_state_membership(p), fac.get_factory().get_building_type(), true)) {
 							command::begin_factory_building_construction(state, state.local_player_nation,
-							p.get_province().get_state_membership(), fac.get_factory().get_building_type(), true);
+							state.world.province_get_state_membership(p),fac.get_factory().get_building_type(), true);
 						}
 					}
 				}
-			}
+			});
 		}
 
 		void button_ctrl_action(sys::state& state) noexcept override {
