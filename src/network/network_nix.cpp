@@ -98,13 +98,13 @@ namespace network {
 			window::emit_error_message("Network setsockopt [sndtimeo] error: " + get_last_error_msg(), true);
 		}
 		if(as_v6) {
-			struct sockaddr_in6 v6_server_address;
+			struct sockaddr_in6 v6_server_address{};
 			v6_server_address.sin6_addr = IN6ADDR_ANY_INIT;
 			v6_server_address.sin6_family = AF_INET6;
 			v6_server_address.sin6_port = htons(default_server_port);
 			std::memcpy(&server_address, &v6_server_address, sizeof(v6_server_address));
 		} else {
-			struct sockaddr_in v4_server_address;
+			struct sockaddr_in v4_server_address{};
 			v4_server_address.sin_addr.s_addr = INADDR_ANY;
 			v4_server_address.sin_family = AF_INET;
 			v4_server_address.sin_port = htons(default_server_port);
