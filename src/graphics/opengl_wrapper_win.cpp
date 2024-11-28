@@ -96,7 +96,7 @@ namespace ogl {
 		assert(state.win_ptr && state.win_ptr->hwnd && state.open_gl.context);
 
 		state.map_state.map_data.clear_opengl_objects();
-		for(auto const& f : state.font_collection.bitmap_fonts) {
+		for(auto& f : state.font_collection.bitmap_fonts) {
 			f.second.clear_opengl_objects();
 		}
 

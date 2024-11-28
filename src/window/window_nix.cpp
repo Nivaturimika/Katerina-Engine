@@ -1,3 +1,4 @@
+#include "opengl_wrapper.hpp"
 #include "system_state.hpp"
 #include "window.hpp"
 #include "map.hpp"
@@ -322,6 +323,8 @@ namespace window {
 
 			sound::update_music_track(state);
 		}
+
+		ogl::shutdown_opengl(state);
 
 		glfwDestroyWindow(state.win_ptr->window);
 		glfwTerminate();

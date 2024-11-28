@@ -15,7 +15,7 @@ list(APPEND TESTS_CORE_SOURCES_LIST
 if(WIN32)
 add_executable(tests_project
 	${TESTS_CORE_SOURCES_LIST}
-	${ALICE_INCREMENTAL_SOURCES_LIST}
+	${ALICE_CORE_SOURCES_LIST}
 	
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"
@@ -26,7 +26,7 @@ add_executable(tests_project
 else()
 add_executable(tests_project
 	${TESTS_CORE_SOURCES_LIST}
-	${ALICE_INCREMENTAL_SOURCES_LIST}
+	${ALICE_CORE_SOURCES_LIST}
 
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_data_loading.cpp"

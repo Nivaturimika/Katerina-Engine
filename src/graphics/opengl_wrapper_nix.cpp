@@ -14,7 +14,7 @@ namespace ogl {
 
 	void shutdown_opengl(sys::state& state) {
 		state.map_state.map_data.clear_opengl_objects();
-		for(auto const& f : state.font_collection.bitmap_fonts) {
+		for(auto& f : state.font_collection.bitmap_fonts) {
 			f.second.clear_opengl_objects();
 		}
 	}
