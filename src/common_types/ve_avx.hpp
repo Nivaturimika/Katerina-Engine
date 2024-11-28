@@ -802,6 +802,12 @@ namespace ve {
 	RELEASE_INLINE int_vector operator~(int_vector a) {
 		return int_vector() ^ a;
 	}
+	RELEASE_INLINE int_vector operator<<(int_vector a, int_vector b) {
+		return int_vector(_mm_sll_epi32(a.value_low, b.value_low), _mm_sll_epi32(a.value_high, b.value_high));
+	}
+	RELEASE_INLINE int_vector operator>>(int_vector a, int_vector b) {
+		return int_vector(_mm_srl_epi32(a.value_low, b.value_low), _mm_srl_epi32(a.value_high, b.value_high));
+	}
 
 	RELEASE_INLINE mask_vector operator&(mask_vector a, mask_vector b) {
 		return _mm256_and_ps(a, b);
