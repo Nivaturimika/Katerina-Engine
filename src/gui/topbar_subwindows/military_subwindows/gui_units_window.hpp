@@ -169,7 +169,7 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 
 		void on_update(sys::state& state) noexcept override {
 			if(!default_img)
-			default_img = base_data.data.image.gfx_object;
+				default_img = base_data.data.image.gfx_object;
 
 			auto container = retrieve<military_unit_info<T>>(state, parent);
 			if(!std::holds_alternative<T>(container)) {
@@ -213,7 +213,7 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(visible)
-			image_element_base::render(state, x, y);
+				image_element_base::render(state, x, y);
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -234,12 +234,12 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 				lid = state.world.navy_get_admiral_from_navy_leadership(unit);
 			}
 			if(lid)
-			display_leader_full(state, lid, contents, 0);
+				display_leader_full(state, lid, contents, 0);
 		}
 	};
 
 	template<typename T>
-class cancel_unit_construction_button { };
+	class cancel_unit_construction_button { };
 
 	template<>
 	class cancel_unit_construction_button<dcon::army_id> : public button_element_base {

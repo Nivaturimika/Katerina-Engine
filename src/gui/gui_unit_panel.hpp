@@ -174,11 +174,11 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto unit = retrieve<T>(state, parent);
 			auto location = get_absolute_non_mirror_location(state, *this);
 			if constexpr(std::is_same_v<T, dcon::army_id>) {
-			if(command::can_change_general(state, state.local_player_nation, unit, dcon::leader_id{}))
-				open_leader_selection(state, unit, dcon::navy_id{}, location.x, location.y);
+				if(command::can_change_general(state, state.local_player_nation, unit, dcon::leader_id{}))
+					open_leader_selection(state, unit, dcon::navy_id{}, location.x, location.y);
 			} else {
-			if(command::can_change_admiral(state, state.local_player_nation, unit, dcon::leader_id{}))
-				open_leader_selection(state, dcon::army_id{}, unit, location.x, location.y);
+				if(command::can_change_admiral(state, state.local_player_nation, unit, dcon::leader_id{}))
+					open_leader_selection(state, dcon::army_id{}, unit, location.x, location.y);
 			}
 		}
 	};
@@ -261,9 +261,9 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto unit = retrieve<T>(state, parent);
 			auto location = get_absolute_non_mirror_location(state, *this);
 			if constexpr(std::is_same_v<T, dcon::army_id>) {
-			open_leader_selection(state, unit, dcon::navy_id{}, location.x + base_data.size.x, location.y);
+				open_leader_selection(state, unit, dcon::navy_id{}, location.x + base_data.size.x, location.y);
 			} else {
-			open_leader_selection(state, dcon::army_id{}, unit, location.x + base_data.size.x, location.y);
+				open_leader_selection(state, dcon::army_id{}, unit, location.x + base_data.size.x, location.y);
 			}
 		}
 	};
@@ -1913,9 +1913,9 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 		void on_update(sys::state& state) noexcept override {
 			if(!default_img) {
 				if(base_data.get_element_type() == ui::element_type::image)
-				default_img = base_data.data.image.gfx_object;
+					default_img = base_data.data.image.gfx_object;
 				else if(base_data.get_element_type() == ui::element_type::button)
-				default_img = base_data.data.button.button_image;
+					default_img = base_data.data.button.button_image;
 			}
 
 			auto foru = retrieve<unit_var>(state, parent);
@@ -1938,9 +1938,9 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 						auto in_range = rng::reduce(uint32_t(rval), arange.size());
 
 						if(base_data.get_element_type() == ui::element_type::image)
-						base_data.data.image.gfx_object = arange[in_range];
+							base_data.data.image.gfx_object = arange[in_range];
 						else if(base_data.get_element_type() == ui::element_type::button)
-						base_data.data.button.button_image = arange[in_range];
+							base_data.data.button.button_image = arange[in_range];
 					}
 				} else {
 					auto grange = ltype.get_generals();
@@ -1949,16 +1949,16 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 						auto in_range = rng::reduce(uint32_t(rval), grange.size());
 
 						if(base_data.get_element_type() == ui::element_type::image)
-						base_data.data.image.gfx_object = grange[in_range];
+							base_data.data.image.gfx_object = grange[in_range];
 						else if(base_data.get_element_type() == ui::element_type::button)
-						base_data.data.button.button_image = grange[in_range];
+							base_data.data.button.button_image = grange[in_range];
 					}
 				}
 			} else {
 				if(base_data.get_element_type() == ui::element_type::image)
-				base_data.data.image.gfx_object = default_img;
+					base_data.data.image.gfx_object = default_img;
 				else if(base_data.get_element_type() == ui::element_type::button)
-				base_data.data.button.button_image = default_img;
+					base_data.data.button.button_image = default_img;
 			}
 		}
 
@@ -1970,16 +1970,24 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto foru = retrieve<unit_var>(state, parent);
 			dcon::leader_id lid = retrieve<dcon::leader_id>(state, parent);
 			if(lid)
-			display_leader_full(state, lid, contents, 0);
+				display_leader_full(state, lid, contents, 0);
 		}
 
 		void button_action(sys::state& state) noexcept override {
 			auto foru = retrieve<unit_var>(state, parent);
 			auto location = get_absolute_non_mirror_location(state, *this);
 			if(std::holds_alternative<dcon::army_id>(foru)) {
-			open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
+				open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
 			} else {
-			open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
+				open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
+			}
+		}
+		void button_right_action(sys::state& state) noexcept override {
+			auto foru = retrieve<unit_var>(state, parent);
+			if(std::holds_alternative<dcon::army_id>(foru)) {
+				command::change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
+			} else {
+				command::change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
 			}
 		}
 	};
@@ -2010,9 +2018,9 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 			auto foru = retrieve<unit_var>(state, parent);
 			auto location = get_absolute_non_mirror_location(state, *this);
 			if(std::holds_alternative<dcon::army_id>(foru)) {
-			open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
+				open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
 			} else {
-			open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
+				open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
 			}
 		}
 	};

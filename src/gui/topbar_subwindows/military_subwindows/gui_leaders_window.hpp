@@ -3,6 +3,7 @@
 #include "gui_element_types.hpp"
 #include "prng.hpp"
 #include "gui_leader_tooltip.hpp"
+#include "gui_leader_select.hpp"
 #include "pdqsort.h"
 
 namespace ui {
@@ -38,12 +39,31 @@ namespace ui {
 			auto admiral = state.world.leader_get_is_admiral(lid);
 			if(admiral) {
 				auto a = state.world.leader_get_navy_from_navy_leadership(lid);
-			if(command::can_change_admiral(state, state.local_player_nation, a, dcon::leader_id{}))
-				open_leader_selection(state, dcon::army_id{}, a, location.x, location.y);
+				if(command::can_change_admiral(state, state.local_player_nation, a, dcon::leader_id{})) {
+					ui::open_leader_selection(state, dcon::army_id{}, a, location.x, location.y);
+				}
 			} else {
 				auto a = state.world.leader_get_army_from_army_leadership(lid);
-			if(command::can_change_general(state, state.local_player_nation, a, dcon::leader_id{}))
-				open_leader_selection(state, a, dcon::navy_id{}, location.x, location.y);
+				if(command::can_change_general(state, state.local_player_nation, a, dcon::leader_id{})) {
+					ui::open_leader_selection(state, a, dcon::navy_id{}, location.x, location.y);
+				}
+			}
+		}
+
+		void button_right_action(sys::state& state) noexcept override {
+			auto location = get_absolute_non_mirror_location(state, *this);
+			auto lid = retrieve<dcon::leader_id>(state, parent);
+			auto admiral = state.world.leader_get_is_admiral(lid);
+			if(admiral) {
+				auto a = state.world.leader_get_navy_from_navy_leadership(lid);
+				if(command::can_change_admiral(state, state.local_player_nation, a, dcon::leader_id{})) {
+					ommand::change_admiral(state, state.local_player_nation, a, dcon::leader_id{});
+				}
+			} else {
+				auto a = state.world.leader_get_army_from_army_leadership(lid);
+				if(command::can_change_general(state, state.local_player_nation, a, dcon::leader_id{})) {
+					command::change_general(state, state.local_player_nation, a, dcon::leader_id{});
+				}
 			}
 		}
 
