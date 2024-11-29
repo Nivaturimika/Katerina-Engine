@@ -10,6 +10,8 @@
 #include "demographics.hpp"
 #include "blake2.h"
 #include "reports.hpp"
+#include "parsers.hpp"
+#include "parsers_declarations.hpp"
 
 #include "gui_element_base.hpp"
 #include "gui_element_templates.hpp"

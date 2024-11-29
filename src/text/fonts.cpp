@@ -181,8 +181,8 @@ namespace text {
 	constexpr float rt_2 = 1.41421356237309504f;
 
 	void init_in_map(bool in_map[dr_size * dr_size], uint8_t const* bmp_data, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
-		for(int32_t j = 0; j < dr_size; ++j) {
-			for(int32_t i = 0; i < dr_size; ++i) {
+		for(uint32_t j = 0; j < dr_size; ++j) {
+			for(uint32_t i = 0; i < dr_size; ++i) {
 				auto const boff = transform_offset_b(i, j, btmap_x_off, btmap_y_off, width, height, pitch);
 				in_map[i + dr_size * j] = (boff != -1) ? (bmp_data[boff] > 127) : false;
 			}
@@ -215,25 +215,56 @@ namespace text {
 		}
 		for(uint32_t j = 1; j < dr_size - 1; ++j) {
 			for(uint32_t i = 1; i < dr_size - 1; ++i) {
-				if(distance_map[(i - 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
-					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j - 1)];
-					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
-				}
-				if(distance_map[(i) + dr_size * (j - 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
-					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j - 1)];
-					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
-				}
-				if(distance_map[(i + 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
-					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j - 1)];
-					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
-				}
-				if(distance_map[(i - 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
-					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j)];
-					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+				const int16_t yvalues[4] = {
+					yborder[(i - 1) + dr_size * (j - 1)],
+					yborder[(i + 0) + dr_size * (j - 1)],
+					yborder[(i + 1) + dr_size * (j - 1)],
+					yborder[(i - 1) + dr_size * (j + 0)]
+				};
+				const int16_t xvalues[4] = {
+					xborder[(i - 1) + dr_size * (j - 1)],
+					xborder[(i + 0) + dr_size * (j - 1)],
+					xborder[(i + 1) + dr_size * (j - 1)],
+					xborder[(i - 1) + dr_size * (j + 0)]
+				};
+				const bool masks[4] = {
+					distance_map[(i - 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)],
+					distance_map[(i) + dr_size * (j - 1)] + 1.0f < distance_map[(i) + dr_size * (j)],
+					distance_map[(i + 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)],
+					distance_map[(i - 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]
+				};
+				if(masks[0]) {
+					// inherit from previous (i - 1, j - 1)
+					yborder[i + dr_size * j] = yvalues[0];
+					xborder[i + dr_size * j] = xvalues[0];
+					distance_map[i + dr_size * j] = math::sqrti(
+						(i - xvalues[0]) * (i - xvalues[0])
+						+ (j - yvalues[0]) * (j - yvalues[0])
+					);
+				} else if(masks[1]) {
+					// inherit from previous (i, j - 1)
+					yborder[i + dr_size * j] = yvalues[1];
+					xborder[i + dr_size * j] = xvalues[1];
+					distance_map[i + dr_size * j] = math::sqrti(
+						(i - xvalues[1]) * (i - xvalues[1])
+						+ (j - yvalues[1]) * (j - yvalues[1])
+					);
+				} else if(masks[2]) {
+					// inherit from previous (i + 1, j - 1)
+					yborder[i + dr_size * j] = yvalues[2];
+					xborder[i + dr_size * j] = xvalues[2];
+					distance_map[i + dr_size * j] = math::sqrti(
+						(i - xvalues[2]) * (i - xvalues[2])
+						+ (j - yvalues[2]) * (j - yvalues[2])
+					);
+				} else if(masks[3]) {
+					// inherit from previous (i - 1, j)
+					yborder[i + dr_size * j] = yvalues[3];
+					xborder[i + dr_size * j] = xvalues[3];
+					distance_map[i + dr_size * j] = math::sqrti(
+						(i - xvalues[3]) * (i - xvalues[3])
+						+ (j - yvalues[3]) * (j - yvalues[3])
+					);
 				}
 			}
 		}

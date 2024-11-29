@@ -1,3 +1,7 @@
+#include "system_state.hpp"
+#include "dcon_generated.hpp"
+#include "nations.hpp"
+#include "common_types.hpp"
 #include "prng.hpp"
 #include "gui_politics_window.hpp"
 

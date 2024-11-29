@@ -1361,8 +1361,7 @@ namespace text {
 
 		ubrk_first(lb_it);
 
-	text::stored_glyphs all_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data(), temp_text.size()), text::stored_glyphs::no_bidi{});
-
+		text::stored_glyphs all_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data(), temp_text.size()), text::stored_glyphs::no_bidi{});
 		if(dest.native_rtl == layout_base::rtl_status::rtl) {
 			int32_t glyph_position = 0;
 			int32_t glyph_start_position = 0;
@@ -1371,7 +1370,7 @@ namespace text {
 
 			while(cluster_start_position < int32_t(temp_text.size())) {
 				if(dest.fixed_parameters.single_line && box.x_position <= dest.fixed_parameters.left)
-				break;
+					break;
 
 				auto next_cluster_position = ubrk_next(lb_it);
 				int32_t next_glyph_position = 0;
@@ -1495,7 +1494,7 @@ namespace text {
 
 			while(cluster_start_position < int32_t(temp_text.size())) {
 				if(dest.fixed_parameters.single_line && box.x_position >= dest.fixed_parameters.right)
-				break;
+					break;
 
 				auto next_cluster_position = ubrk_next(lb_it);
 				int32_t next_glyph_position = 0;
@@ -1523,7 +1522,7 @@ namespace text {
 					box.x_size = std::max(box.x_size, int32_t(box.x_position));
 
 					if(box.x_position + extent >= dest.fixed_parameters.right)
-					impl::lb_finish_line(dest, box, line_height);
+						impl::lb_finish_line(dest, box, line_height);
 
 					glyph_start_position = next_glyph_position;
 					glyph_position = next_glyph_position;
@@ -1564,7 +1563,7 @@ namespace text {
 					int32_t m = glyph_start_position;
 					while(m < next_glyph_position) {
 						if(box.x_position + state.font_collection.text_extent(state, all_glyphs, glyph_start_position, uint32_t(m), dest.fixed_parameters.font_id) + width_of_ellipsis > dest.fixed_parameters.right)
-						break;
+							break;
 						++m;
 					}
 					if(m >= next_glyph_position) m = next_glyph_position - 1;
@@ -1586,15 +1585,14 @@ namespace text {
 					box.x_size = std::max(box.x_size, int32_t(box.x_position));
 				} else if(next_cluster_position >= int32_t(temp_text.size())) {
 					// no remaining text
-
-				dest.base_layout.contents.push_back(text_chunk{ text::stored_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data() + cluster_start_position, next_cluster_position - cluster_start_position)), box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
+					dest.base_layout.contents.push_back(text_chunk{ text::stored_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data() + cluster_start_position, next_cluster_position - cluster_start_position)), box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
 
 					box.x_position += extent;
 					box.y_size = std::max(box.y_size, box.y_position + line_height);
 					box.x_size = std::max(box.x_size, int32_t(box.x_position));
 
 					if(!dest.fixed_parameters.single_line && box.x_position >= dest.fixed_parameters.right)
-					impl::lb_finish_line(dest, box, line_height);
+						impl::lb_finish_line(dest, box, line_height);
 
 					glyph_start_position = next_glyph_position;
 					glyph_position = next_glyph_position;
@@ -1607,7 +1605,6 @@ namespace text {
 				}
 			}
 		}
-
 		ubrk_close(lb_it);
 	}
 

@@ -11,6 +11,7 @@
 #include "cyto_any.hpp"
 #include "dcon_generated.hpp"
 #include "demographics.hpp"
+#include "parsers_declarations.hpp"
 #include "gui_element_base.hpp"
 #include "gui_element_types.hpp"
 #include "gui_unit_grid_box.hpp"
