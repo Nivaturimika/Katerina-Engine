@@ -664,6 +664,7 @@ namespace text {
 
 					// shape run with harfbuzz
 					hb_buffer_clear_contents(hb_buf);
+					hb_buffer_pre_allocate(hb_buf, source.size());
 					hb_buffer_add_utf16(hb_buf, source.data(), int32_t(source.size()), logical_start, length);
 
 					hb_buffer_set_direction(hb_buf, direction == UBIDI_RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
@@ -727,6 +728,7 @@ namespace text {
 
 		// shape run with harfbuzz
 		hb_buffer_clear_contents(hb_buf);
+		hb_buffer_pre_allocate(hb_buf, source.size());
 		hb_buffer_add_utf16(hb_buf, source.data(), int32_t(source.size()), 0, int32_t(source.size()));
 
 		hb_buffer_set_direction(hb_buf, state.world.locale_get_native_rtl(locale) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
@@ -766,9 +768,10 @@ namespace text {
 		}
 
 		if(!hb_buf)
-		return; //dummy font, only classic will work
+			return; //dummy font, only classic will work
 
 		hb_buffer_clear_contents(hb_buf);
+		hb_buffer_pre_allocate(hb_buf, s.size());
 		hb_buffer_add_utf8(hb_buf, s.c_str(), int(s.length()), 0, int(s.length()));
 
 		hb_buffer_set_direction(hb_buf, HB_DIRECTION_LTR);
@@ -809,6 +812,7 @@ namespace text {
 		auto locale = state.font_collection.get_current_locale();
 		if(state.world.locale_get_native_rtl(locale) == false) {
 			hb_buffer_clear_contents(hb_buf);
+			hb_buffer_pre_allocate(hb_buf, s.size());
 			hb_buffer_add_utf8(hb_buf, s.c_str(), int(s.length()), 0, int(s.length()));
 
 			hb_buffer_set_direction(hb_buf, HB_DIRECTION_LTR);
@@ -889,6 +893,7 @@ namespace text {
 
 						// shape run with harfbuzz
 						hb_buffer_clear_contents(hb_buf);
+						hb_buffer_pre_allocate(hb_buf, temp_text.size());
 						hb_buffer_add_utf16(hb_buf, temp_text.data(), int32_t(temp_text.size()), logical_start, length);
 
 						hb_buffer_set_direction(hb_buf, direction == UBIDI_RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
