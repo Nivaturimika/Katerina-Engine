@@ -3116,7 +3116,7 @@ guiTypes = {
 	}
 	OverlappingElementsBoxType = {
 		name = "alice_diplomessageicons_window"
-		position = { 458 90 }
+		position = { 470 90 }
 		size = { 576 48 }
 		Orientation = "UPPER_LEFT"
 		format = centre
