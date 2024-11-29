@@ -2650,10 +2650,18 @@ namespace map {
 				anim.bone_node_matrix = glm::mat4x4(1.f);
 				anim.bone_pose_matrix = glm::inverse(glm::mat4x4(1.f));
 				anim.bone_bind_pose_matrix = glm::mat4x4(1.f);
-				anim.position_keys.emplace_back(emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f);
-				anim.rotation_keys.emplace_back(emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f);
-				anim.scale_keys.emplace_back(emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f);
-				anim.scale_rotation_keys.emplace_back(emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f);
+				anim.position_keys.push_back(emfx::xsm_animation_key<emfx::xac_vector3f>{
+					emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f
+				});
+				anim.rotation_keys.push_back(emfx::xsm_animation_key<emfx::xac_vector4f>{
+					emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f
+				});
+				anim.scale_keys.push_back(emfx::xsm_animation_key<emfx::xac_vector3f>{
+					emfx::xac_vector3f{ 0.f, 0.f, 0.f }, 0.f
+				});
+				anim.scale_rotation_keys.push_back(emfx::xsm_animation_key<emfx::xac_vector4f>{
+					emfx::xac_vector4f{ 0.f, 0.f, 0.f, 0.f }, 0.f
+				});
 				state.map_state.map_data.animations.push_back(anim);
 			}
 		}
