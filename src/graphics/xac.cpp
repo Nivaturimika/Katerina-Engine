@@ -1027,16 +1027,16 @@ namespace emfx {
 			}
 			//
 			if(anim.position_keys.empty()) {
-				anim.position_keys.emplace_back(xsm_animation_key<xac_vector3f>{ anim.pose_position, 0.f });
+				anim.position_keys.push_back(xsm_animation_key<xac_vector3f>{ anim.pose_position, 0.f });
 			}
 			if(anim.rotation_keys.empty()) {
-				anim.rotation_keys.emplace_back(xsm_animation_key<xac_vector4f>{ anim.pose_rotation, 0.f });
+				anim.rotation_keys.push_back(xsm_animation_key<xac_vector4f>{ anim.pose_rotation, 0.f });
 			}
 			if(anim.scale_keys.empty()) {
-				anim.scale_keys.emplace_back(xsm_animation_key<xac_vector3f>{ anim.pose_scale, 0.f });
+				anim.scale_keys.push_back(xsm_animation_key<xac_vector3f>{ anim.pose_scale, 0.f });
 			}
 			if(anim.scale_rotation_keys.empty()) {
-				anim.scale_rotation_keys.emplace_back(xsm_animation_key<xac_vector4f>{ anim.pose_scale_rotation, 0.f });
+				anim.scale_rotation_keys.push_back(xsm_animation_key<xac_vector4f>{ anim.pose_scale_rotation, 0.f });
 			}
 		}
 	}
