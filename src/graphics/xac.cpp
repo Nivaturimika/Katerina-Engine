@@ -3,7 +3,6 @@
 #include <glm/common.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
-#include <glm/gtx/quaternion.hpp>
 
 #include "xac.hpp"
 #include "parsers.hpp"

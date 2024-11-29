@@ -1,8 +1,10 @@
 #include <cmath>
 #include <numbers>
+#include <unordered_map>
+
+#define GLM_ENABLE_EXPERIMENTAL 1
 #include <glm/glm.hpp>
 #include <glm/mat3x3.hpp>
-#include <unordered_map>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/polar_coordinates.hpp>
