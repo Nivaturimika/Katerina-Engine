@@ -9,7 +9,7 @@ FetchContent_Declare(
 	freetype
 	GIT_REPOSITORY https://github.com/freetype/freetype.git
 	GIT_TAG 3f3e3de34ee3613d621b643c58a40b93148e0932
-	GIT_SHALLOW 1
+	GIT_SHALLOW VER-2-13-3
 	GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(freetype)
@@ -43,7 +43,7 @@ set(HB_HAVE_FREETYPE ON)
 FetchContent_Declare(
 	harfbuzz
 	GIT_REPOSITORY https://github.com/harfbuzz/harfbuzz
-	GIT_TAG 10.0.1
+	GIT_TAG 10.1.0
 	GIT_SHALLOW 1
 	GIT_PROGRESS TRUE
 )
