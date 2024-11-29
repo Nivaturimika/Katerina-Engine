@@ -15,9 +15,8 @@ namespace sys {
 
 	class absolute_time_point {
 		int64_t days = 0;
-	absolute_time_point(int64_t days) : days(days) { }
-
-		public:
+		absolute_time_point(int64_t days) : days(days) { }
+	public:
 		absolute_time_point() noexcept = default;
 		absolute_time_point(year_month_day const& date);
 		absolute_time_point(absolute_time_point const&) noexcept = default;
@@ -27,7 +26,6 @@ namespace sys {
 		constexpr int64_t to_days() const noexcept {
 			return days;
 		}
-
 		constexpr bool operator==(absolute_time_point v) const noexcept {
 			return days == v.days;
 		}
@@ -56,14 +54,14 @@ namespace sys {
 	};
 
 	class date {
-		public:
+	public:
 		using value_base_t = uint32_t;
 		using zero_is_null_t = std::true_type;
 
 		value_base_t value = 0;
 
 		constexpr date() noexcept = default;
-	explicit constexpr date(value_base_t v) noexcept : value(v + 1) { }
+		explicit constexpr date(value_base_t v) noexcept : value(v + 1) { }
 		constexpr date(date const& v) noexcept = default;
 		constexpr date(date&& v) noexcept = default;
 		date(year_month_day const& v, absolute_time_point base) noexcept;
@@ -93,16 +91,15 @@ namespace sys {
 		}
 
 		date operator+(int32_t v) const noexcept {
-		return date{ value_base_t(value + v - 1)};
+			return date{ value_base_t(value + v - 1)};
 		}
 		date operator-(int32_t v) const noexcept {
-		return date{ value_base_t((value - v) - 1)};
+			return date{ value_base_t((value - v) - 1)};
 		}
 		date& operator+=(int32_t v) noexcept {
 			value = value_base_t(value + v);
 			return *this;
 		}
-
 		constexpr int32_t to_raw_value() const noexcept {
 			return int32_t(value);
 		}

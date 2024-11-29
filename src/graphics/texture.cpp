@@ -129,9 +129,9 @@ set to one or more of the following values.	*/
 		}
 		/*	make sure it is a type we can upload	*/
 		if((header->sPixelFormat.dwFlags & DDPF_FOURCC) &&
-		!((header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24))) ||
-			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24))) ||
-			(header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
+		!((header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24)))
+		|| (header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24)))
+		|| (header->sPixelFormat.dwFourCC == (('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24))))) {
 			reports::write_debug("Invalid DDS flag saying DXT but with no DXT CC\n");
 			return 0;
 		}

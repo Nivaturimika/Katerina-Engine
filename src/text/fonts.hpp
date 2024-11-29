@@ -172,17 +172,16 @@ namespace text {
 	};
 
 	class font_manager {
-		public:
+	private:
+		std::vector<font> font_array;
+		dcon::locale_id current_locale;
+	public:
 		font_manager();
 		~font_manager();
 
 		ankerl::unordered_dense::map<uint16_t, dcon::text_key> font_names;
 		ankerl::unordered_dense::map<uint16_t, bm_font> bitmap_fonts;
 		FT_Library ft_library;
-		private:
-		std::vector<font> font_array;
-		dcon::locale_id current_locale;
-		public:
 		std::vector<uint8_t> compiled_ubrk_rules;
 		bool map_font_is_black = false;
 

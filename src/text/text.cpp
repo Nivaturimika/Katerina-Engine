@@ -1400,7 +1400,7 @@ namespace text {
 					box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
 
 					if(box.x_position - extent <= dest.fixed_parameters.left)
-					impl::lb_finish_line(dest, box, line_height);
+						impl::lb_finish_line(dest, box, line_height);
 
 					glyph_start_position = next_glyph_position;
 					glyph_position = next_glyph_position;
@@ -1441,7 +1441,7 @@ namespace text {
 					int32_t m = glyph_start_position;
 					while(m < next_glyph_position) {
 						if(box.x_position - state.font_collection.text_extent(state, all_glyphs, glyph_start_position, uint32_t(m), dest.fixed_parameters.font_id) - width_of_ellipsis < dest.fixed_parameters.left)
-						break;
+							break;
 						++m;
 					}
 					if(m >= next_glyph_position) m = next_glyph_position - 1;
@@ -1473,7 +1473,7 @@ namespace text {
 					box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
 
 					if(!dest.fixed_parameters.single_line && box.x_position <= dest.fixed_parameters.left)
-					impl::lb_finish_line(dest, box, line_height);
+						impl::lb_finish_line(dest, box, line_height);
 
 					glyph_start_position = next_glyph_position;
 					glyph_position = next_glyph_position;
@@ -1485,7 +1485,6 @@ namespace text {
 					first_in_line = false;
 				}
 			}
-
 		} else {
 			int32_t glyph_position = 0;
 			int32_t glyph_start_position = 0;
@@ -1514,8 +1513,7 @@ namespace text {
 
 				if(!dest.fixed_parameters.single_line && first_in_line && int32_t(box.x_offset + dest.fixed_parameters.left) == box.x_position && box.x_position + extent >= dest.fixed_parameters.right) {
 					// too long, but no line breaking opportunities earlier in the line
-
-				dest.base_layout.contents.push_back(text_chunk{ text::stored_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data() + cluster_start_position, next_cluster_position - cluster_start_position)), box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
+					dest.base_layout.contents.push_back(text_chunk{ text::stored_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data() + cluster_start_position, next_cluster_position - cluster_start_position)), box.x_position, (!dest.fixed_parameters.suppress_hyperlinks) ? source : std::monostate{}, int16_t(box.y_position), int16_t(extent), int16_t(text_height), tmp_color });
 
 					box.x_position += extent;
 					box.y_size = std::max(box.y_size, box.y_position + line_height);
@@ -1529,7 +1527,6 @@ namespace text {
 					cluster_position = next_cluster_position;
 					cluster_start_position = next_cluster_position;
 				} else if(!dest.fixed_parameters.single_line && box.x_position + extent >= dest.fixed_parameters.right) {
-
 					extent = state.font_collection.text_extent(state, all_glyphs, glyph_start_position, glyph_position - glyph_start_position, dest.fixed_parameters.font_id);
 					dest.base_layout.contents.push_back(
 					text_chunk{ text::stored_glyphs(state, text::font_index_from_font_id(state, dest.fixed_parameters.font_id), std::span<uint16_t>(temp_text.data() + cluster_start_position, cluster_position - cluster_start_position)),
@@ -1566,11 +1563,10 @@ namespace text {
 							break;
 						++m;
 					}
-					if(m >= next_glyph_position) m = next_glyph_position - 1;
+					m = std::min(m, next_glyph_position - 1);
 				
 					auto cluster_end = all_glyphs.glyph_info[m].cluster;
-				std::vector<uint16_t> tempv{temp_text.data() + cluster_start_position, temp_text.data() + cluster_end };
-
+					std::vector<uint16_t> tempv{temp_text.data() + cluster_start_position, temp_text.data() + cluster_end };
 					if(ellipsis_valid) {
 						tempv.push_back(0x2026);
 					} else {
