@@ -59,7 +59,7 @@ namespace ui {
 				return make_element_by_type<nation_player_relations_text>(state, id);
 			} else if(name.substr(0, 10) == "country_gp") {
 				auto ptr = make_element_by_type<nation_gp_investment_text>(state, id);
-			ptr->rank = uint16_t(std::stoi(std::string{name.substr(10)}));
+				ptr->rank = uint16_t(std::stoi(std::string{name.substr(10)}));
 				ptr->base_data.position.x -= 4;
 				return ptr;
 			} else {
@@ -94,9 +94,9 @@ namespace ui {
 				if(state.world.nation_get_owned_province_count(id) != 0) {
 					bool passes_filter = country_category_filter_check(state, current_filter.general_category, state.local_player_nation, id);
 					bool right_continent = !current_filter.continent || state.world.nation_get_capital(id).get_continent() == current_filter.continent;
-
-					if(passes_filter && right_continent)
-					row_contents.push_back(id);
+					if(passes_filter && right_continent) {
+						row_contents.push_back(id);
+					}
 				}
 			});
 			sort_countries(state, row_contents, current_sort.sort, current_sort.sort_ascend);

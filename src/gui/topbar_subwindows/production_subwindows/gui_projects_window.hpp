@@ -124,8 +124,8 @@ namespace ui {
 		}
 
 		void on_update(sys::state& state) noexcept override {
-		economy::commodity_set satisfied_commodities{};
-		economy::commodity_set needed_commodities{};
+			economy::commodity_set satisfied_commodities{};
+			economy::commodity_set needed_commodities{};
 			if(std::holds_alternative<dcon::province_building_construction_id>(content)) {
 				factory_icon->set_visible(state, false);
 				building_icon->set_visible(state, true);
@@ -157,21 +157,28 @@ namespace ui {
 
 			if(input_listbox) {
 				input_listbox->row_contents.clear();
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i)
-				if(bool(needed_commodities.commodity_type[i]))
-					input_listbox->row_contents.push_back(production_project_input_data{
-							needed_commodities.commodity_type[i],				// cid
-							satisfied_commodities.commodity_amounts[i], // satisfied
-							needed_commodities.commodity_amounts[i]			// needed
-					});
+				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
+					if(needed_commodities.commodity_type[i]) {
+						input_listbox->row_contents.push_back(production_project_input_data{
+								needed_commodities.commodity_type[i],				// cid
+								satisfied_commodities.commodity_amounts[i], // satisfied
+								needed_commodities.commodity_amounts[i]			// needed
+						});
+					} else {
+						break;
+					}
+				}
 				input_listbox->update(state);
 			}
 
 			float purchased_cost = 0.0f;
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				dcon::commodity_id cid = needed_commodities.commodity_type[i];
-				if(bool(cid))
-				purchased_cost += state.world.commodity_get_current_price(cid) * satisfied_commodities.commodity_amounts[i];
+				if(cid) {
+					purchased_cost += state.world.commodity_get_current_price(cid) * satisfied_commodities.commodity_amounts[i];
+				} else {
+					break;
+				}
 			}
 			float total_cost = get_cost(state, needed_commodities);
 			cost_text->set_text(state, text::format_money(purchased_cost) + "/" + text::format_money(total_cost));

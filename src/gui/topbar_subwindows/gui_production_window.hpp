@@ -459,23 +459,44 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto nf = retrieve<economy_factory::new_factory>(state, parent);
 			auto si = retrieve<dcon::state_instance_id>(state, parent);
-			if(!nf.type)
-			return;
+			if(!nf.type) {
+				return;
+			}
 			for(auto p : state.world.state_instance_get_state_building_construction(si)) {
 				if(p.get_type() == nf.type) {
 					float cost_mod = economy_factory::factory_build_cost_modifier(state, p.get_nation(), p.get_is_pop_project());
 					auto& goods = state.world.factory_type_get_construction_costs(nf.type);
 					auto& cgoods = p.get_purchased_goods();
+					//
+					float construction_time = float(p.get_type().get_construction_time());
+					float total_inputs = 0.f;
+					float used_inputs = 0.f;
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(goods.commodity_type[i]) {
 							auto box = text::open_layout_box(contents, 0);
 							text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
-						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp(cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * cost_mod) });
-						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
+							text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
+							text::add_to_layout_box(state, contents, box, text::fp_one_place{ cgoods.commodity_amounts[i] });
+							text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+							text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
 							text::close_layout_box(contents, box);
+							//
+							total_inputs += goods.commodity_amounts[i] * cost_mod;
+							used_inputs += cgoods.commodity_amounts[i];
+						} else {
+							break;
 						}
+					}
+					//
+					ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_cost, true);
+					if(p.get_is_pop_project()) {
+						ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_owner_cost, true);
+					}
+					text::add_line(state, contents, "cost_multiplied_by", text::variable_type::x, text::fp_percentage_one_place{ cost_mod });
+					if(total_inputs > 0.f) {
+						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
+						float rem_construction_time = rem_inputs_percent * construction_time;
+						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::fp_percentage_one_place{ rem_construction_time });
 					}
 					return;
 				}
@@ -484,7 +505,7 @@ namespace ui {
 	};
 
 	class factory_upgrade_progress_bar : public progress_bar {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			progress = retrieve<economy_factory::upgraded_factory>(state, parent).progress;
 		}
@@ -495,28 +516,44 @@ namespace ui {
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			auto nf = retrieve<economy_factory::upgraded_factory>(state, parent);
 			auto si = retrieve<dcon::state_instance_id>(state, parent);
-			if(!nf.type)
-			return;
+			if(!nf.type) {
+				return;
+			}
 			for(auto p : state.world.state_instance_get_state_building_construction(si)) {
 				if(p.get_type() == nf.type) {
-					float admin_eff = state.world.nation_get_administrative_efficiency(p.get_nation());
-					float factory_mod = state.world.nation_get_modifier_values(p.get_nation(), sys::national_mod_offsets::factory_cost) + 1.0f;
-					float pop_factory_mod = std::max(0.1f, state.world.nation_get_modifier_values(p.get_nation(), sys::national_mod_offsets::factory_owner_cost));
-					float admin_cost_factor = (p.get_is_pop_project() ? pop_factory_mod : (2.0f - admin_eff)) * factory_mod;
-
+					float cost_mod = economy_factory::factory_build_cost_modifier(state, p.get_nation(), p.get_is_pop_project());
 					auto& goods = state.world.factory_type_get_construction_costs(nf.type);
 					auto& cgoods = p.get_purchased_goods();
-
+					//
+					float construction_time = float(p.get_type().get_construction_time());
+					float total_inputs = 0.f;
+					float used_inputs = 0.f;
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(goods.commodity_type[i]) {
 							auto box = text::open_layout_box(contents, 0);
 							text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
-						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ cgoods.commodity_amounts[i] });
-						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
+							text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
+							text::add_to_layout_box(state, contents, box, text::fp_one_place{ cgoods.commodity_amounts[i] });
+							text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+							text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
 							text::close_layout_box(contents, box);
+							//
+							total_inputs += goods.commodity_amounts[i] * cost_mod;
+							used_inputs += cgoods.commodity_amounts[i];
+						} else {
+							break;
 						}
+					}
+					//
+					ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_cost, true);
+					if(p.get_is_pop_project()) {
+						ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_owner_cost, true);
+					}
+					text::add_line(state, contents, "cost_multiplied_by", text::variable_type::x, text::fp_percentage_one_place{ cost_mod });
+					if(total_inputs > 0.f) {
+						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
+						float rem_construction_time = rem_inputs_percent * construction_time;
+						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::fp_percentage_one_place{ rem_construction_time });
 					}
 					return;
 				}

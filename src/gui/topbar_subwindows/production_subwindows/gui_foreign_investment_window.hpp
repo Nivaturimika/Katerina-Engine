@@ -9,7 +9,6 @@ namespace ui {
 	class player_investement_text : public multiline_text_element_base {
 		void on_update(sys::state& state) noexcept override {
 			auto to_nation = retrieve<dcon::nation_id>(state, parent);
-
 			auto ul = state.world.get_unilateral_relationship_by_unilateral_pair(to_nation, state.local_player_nation);
 			auto player_investment = state.world.unilateral_relationship_get_foreign_investment(ul);
 			float total_investment = nations::get_foreign_investment(state, to_nation);
@@ -17,7 +16,7 @@ namespace ui {
 				text::layout_parameters{0, 0, multiline_text_element_base::base_data.size.x,
 						multiline_text_element_base::base_data.size.y, multiline_text_element_base::base_data.data.text.font_handle, 0,
 						text::alignment::left, black_text ? text::text_color::black : text::text_color::white, true});
-		text::add_line(state, container, "production_our_invest", text::variable_type::amount, text::pretty_integer{int64_t(player_investment)}, text::variable_type::percentage, text::fp_one_place{total_investment > 0.f ? 100.0f * player_investment / total_investment : 0.0f});
+			text::add_line(state, container, "production_our_invest", text::variable_type::amount, text::pretty_integer{int64_t(player_investment)}, text::variable_type::percentage, text::fp_one_place{total_investment > 0.f ? 100.0f * player_investment / total_investment : 0.0f});
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
@@ -81,10 +80,9 @@ namespace ui {
 
 
 	class production_foreign_investment_window : public window_element_base {
-		public:
-	dcon::nation_id curr_nation{};
-
-		public:
+	public:
+		dcon::nation_id curr_nation{};
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "prod_investment_bg") {
 				return make_element_by_type<image_element_base>(state, id);
