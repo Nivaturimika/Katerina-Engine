@@ -195,67 +195,69 @@ namespace text {
 	//
 
 	void dead_reckoning(float distance_map[dr_size * dr_size], bool const in_map[dr_size * dr_size]) {
-		int16_t yborder[dr_size * dr_size] = { 0 };
-		int16_t xborder[dr_size * dr_size] = { 0 };
 		for(uint32_t i = 0; i < dr_size * dr_size; ++i) {
 			distance_map[i] = std::numeric_limits<float>::infinity();
 		}
-		for(int32_t j = 1; j < dr_size - 1; ++j) {
-			for(int32_t i = 1; i < dr_size - 1; ++i) {
-				if(in_map[i - 1 + dr_size * j] != in_map[i + dr_size * j] || in_map[i + 1 + dr_size * j] != in_map[i + dr_size * j] ||
-					in_map[i + dr_size * (j + 1)] != in_map[i + dr_size * j] || in_map[i + dr_size * (j - 1)] != in_map[i + dr_size * j]) {
+
+		alignas(64) int16_t yborder[dr_size * dr_size] = { 0 };
+		alignas(64) int16_t xborder[dr_size * dr_size] = { 0 };
+		for(uint32_t j = 1; j < dr_size - 1; ++j) {
+			for(uint32_t i = 1; i < dr_size - 1; ++i) {
+				if(in_map[i - 1 + dr_size * j] != in_map[i + dr_size * j]
+				|| in_map[i + 1 + dr_size * j] != in_map[i + dr_size * j]
+				|| in_map[i + dr_size * (j + 1)] != in_map[i + dr_size * j]
+				|| in_map[i + dr_size * (j - 1)] != in_map[i + dr_size * j]) {
 					distance_map[i + dr_size * j] = 0.0f;
 					yborder[i + dr_size * j] = int16_t(j);
 					xborder[i + dr_size * j] = int16_t(i);
 				}
 			}
 		}
-		// TODO: add math::sqrti
-		for(int32_t j = 1; j < dr_size - 1; ++j) {
-			for(int32_t i = 1; i < dr_size - 1; ++i) {
+		for(uint32_t j = 1; j < dr_size - 1; ++j) {
+			for(uint32_t i = 1; i < dr_size - 1; ++i) {
 				if(distance_map[(i - 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i) + dr_size * (j - 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i + 1) + dr_size * (j - 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j - 1)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j - 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i - 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 			}
 		}
-		for(int32_t j = dr_size - 2; j > 0; --j) {
-			for(int32_t i = dr_size - 2; i > 0; --i) {
+		for(uint32_t j = dr_size - 2; j > 0; --j) {
+			for(uint32_t i = dr_size - 2; i > 0; --i) {
 				if(distance_map[(i + 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i - 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i) + dr_size * (j + 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i + 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrt(float((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j])));
+					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 			}
 		}
@@ -512,8 +514,8 @@ namespace text {
 			gso.y = (-hb_y - float(btmap_y_off)) * 1.0f / float(magnification_factor);
 			gso.x_advance = float(font_face->glyph->metrics.horiAdvance) / float((1 << 6) * magnification_factor);
 
-			bool in_map[dr_size * dr_size] = {false};
-			float distance_map[dr_size * dr_size] = {0.0f};
+			alignas(64) bool in_map[dr_size * dr_size] = {false};
+			alignas(64) float distance_map[dr_size * dr_size] = {0.0f};
 			init_in_map(in_map, bitmap.buffer, btmap_x_off, btmap_y_off, bitmap.width, bitmap.rows, uint32_t(bitmap.pitch));
 			dead_reckoning(distance_map, in_map);
 			for(uint32_t y = 0; y < 64; ++y) {

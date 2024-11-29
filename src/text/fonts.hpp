@@ -14,8 +14,8 @@ namespace sys {
 namespace text {
 
 	inline constexpr uint32_t max_texture_layers = 256;
-	inline constexpr int magnification_factor = 4;
-	inline constexpr int dr_size = 64 * magnification_factor;
+	inline constexpr uint32_t magnification_factor = 4;
+	inline constexpr uint32_t dr_size = 64 * magnification_factor;
 
 	enum class font_selection {
 		body_font,

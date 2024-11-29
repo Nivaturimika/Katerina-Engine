@@ -1,4 +1,5 @@
 #pragma once
+#include "ve.hpp"
 #include <cmath>
 
 namespace math {
@@ -69,7 +70,18 @@ namespace math {
 		union {
 			float f;
 			int32_t i;
-		} u = { x };
+		} u = { .f = x }; //active member -> float
+		u.i = 0x5f375a86 - (u.i >> 1);
+		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
+		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
+		return u.f * x;
+	}
+
+	inline float sqrti(int32_t x) noexcept {
+		union {
+			float f;
+			int32_t i;
+		} u = { .f = float(x) }; //active member -> int32_t
 		u.i = 0x5f375a86 - (u.i >> 1);
 		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
 		u.f = u.f * (1.5f - (0.5f * x) * u.f * u.f);
