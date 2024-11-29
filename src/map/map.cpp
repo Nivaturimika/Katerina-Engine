@@ -940,11 +940,9 @@ namespace map {
 				dcon::emfx_object_id unit_model;
 				dcon::unit_type_id unit_type;
 				dcon::nation_id n;
-				bool is_move = false;
 				for(const auto unit : units) {
 					if(auto path = unit.get_navy().get_path(); path.size() > 0) {
 						p2 = state.world.province_get_mid_point(path[path.size() - 1]);
-						is_move = true;
 					}
 					auto gc = unit.get_navy().get_controller_from_navy_control().get_identity_from_identity_holder().get_graphical_culture();
 					for(const auto sm : unit.get_navy().get_navy_membership()) {
