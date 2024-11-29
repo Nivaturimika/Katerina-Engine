@@ -110,3 +110,5 @@ union_culture_accepted;Accept all of the nation primary culture group
 union_culture_accepted_this;Accept all of this nation primary culture group
 union_culture_accepted_from;Accept all from nation primary culture group
 reform_cost_multiplier;Cost multiplier $x$
+estimated_time_to_finish;Estimated time to finish: ?Y$x$ day(s)?!
+cost_multiplied_by;Cost is multiplied by: ?Y$x$?!
