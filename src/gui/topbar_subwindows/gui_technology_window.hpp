@@ -214,6 +214,9 @@ namespace ui {
 					if(content != state.world.nation_get_current_research(state.local_player_nation) && !state.world.nation_get_active_technologies(state.local_player_nation, content)) { // don't add already researched or researching
 						dcon::technology_id prev_tech = culture::previous_folder_technology(state, content);
 						while(prev_tech) {
+							if(state.world.nation_get_active_technologies(state.local_player_nation, content)) {
+								break;
+							}
 							state.ui_state.tech_queue.push_back(prev_tech);
 							prev_tech = culture::previous_folder_technology(state, prev_tech);
 						}
