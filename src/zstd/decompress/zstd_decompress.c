@@ -811,7 +811,7 @@ size_t ZSTD_findFrameCompressedSize(const void *src, size_t srcSize)
 
 /** ZSTD_decompressBound() :
  *  compatible with legacy mode
- *  `src` must point to the start of a ZSTD frame or a skippeable frame
+ *  `src` must point to the start of a ZSTD frame or a skippable frame
  *  `srcSize` must be at least as large as the frame contained
  *  @return : the maximum decompressed size of the compressed source
  */
@@ -1057,7 +1057,7 @@ static size_t ZSTD_decompressFrame(ZSTD_DCtx* dctx,
     }
     ZSTD_DCtx_trace_end(dctx, (U64)(op-ostart), (U64)(ip-istart), /* streaming */ 0);
     /* Allow caller to get size read */
-    DEBUGLOG(4, "ZSTD_decompressFrame: decompressed frame of size %zi, consuming %zi bytes of input", op-ostart, ip - (const BYTE*)*srcPtr);
+    DEBUGLOG(4, "ZSTD_decompressFrame: decompressed frame of size %i, consuming %i bytes of input", (int)(op-ostart), (int)(ip - (const BYTE*)*srcPtr));
     *srcPtr = ip;
     *srcSizePtr = remainingSrcSize;
     return (size_t)(op-ostart);
