@@ -528,11 +528,10 @@ TEST_CASE("effect op fusion", "[effect_tests]") {
 		t.push_back(uint16_t(effect::clr_global_flag));
 		t.push_back(uint16_t(7));
 		const auto new_size = parsers::simplify_effect(t.data());
-		REQUIRE(5 == new_size);
+		REQUIRE(3 == new_size);
+		REQUIRE(t[0] == uint16_t(effect::fop_clr_global_flag_2));
 		REQUIRE(t[1] == uint16_t(4));
-		REQUIRE(t[2] == uint16_t(effect::fop_clr_global_flag_2));
-		REQUIRE(t[3] == uint16_t(4));
-		REQUIRE(t[4] == uint16_t(7));
+		REQUIRE(t[2] == uint16_t(7));
 	}
 	{
 		std::vector<uint16_t> t;
@@ -702,14 +701,14 @@ TEST_CASE("effect with limit", "[effect_tests]") {
 	std::unique_ptr<sys::state> state = std::make_unique<sys::state>();
 	parsers::scenario_building_context context(*state);
 	parsers::effect_building_context tc(context, trigger::slot_contents::province, trigger::slot_contents::province, trigger::slot_contents::empty);
-
+	tc.effect_is_for_event = false; //generate decision any_country
 	parsers::parse_effect_body(gen, err, tc);
 
 	const auto new_size = parsers::simplify_effect(tc.compiled_effect.data());
 	tc.compiled_effect.resize(static_cast<size_t>(new_size));
 
 	REQUIRE(size_t(6) == tc.compiled_effect.size());
-	REQUIRE(tc.compiled_effect[0] == uint16_t(effect::x_country_scope | effect::scope_has_limit));
+	REQUIRE(tc.compiled_effect[0] == uint16_t(effect::x_decision_country_scope_nation | effect::scope_has_limit));
 	REQUIRE(tc.compiled_effect[1] == uint16_t(5));
 	REQUIRE(trigger::payload(tc.compiled_effect[2]).tr_id == dcon::trigger_key(0));
 	REQUIRE(tc.compiled_effect[3] == uint16_t(effect::treasury));
@@ -747,7 +746,7 @@ TEST_CASE("scope trigger", "[trigger_tests]") {
 	parsers::parse_trigger_body(gen, err, tc);
 
 	REQUIRE(size_t(8) == tc.compiled_trigger.size());
-	REQUIRE(tc.compiled_trigger[0] == uint16_t(trigger::this_scope_state));
+	REQUIRE(tc.compiled_trigger[0] == uint16_t(trigger::this_scope_province));
 	REQUIRE(tc.compiled_trigger[1] == uint16_t(7));
 	REQUIRE(tc.compiled_trigger[2] == uint16_t(trigger::association_ge | trigger::average_consciousness_province));
 	REQUIRE(tc.compiled_trigger[5] == uint16_t(trigger::association_ne | trigger::average_militancy_province));
