@@ -1010,7 +1010,9 @@ namespace ui {
 
 		void on_update(sys::state& state) noexcept override {
 			disabled = state.internally_paused || state.ui_pause.load(std::memory_order::acquire);
-			disabled = disabled || ui::events_pause_test(state);
+			if(state.network_mode == sys::network_mode_type::single_player) {
+				disabled = disabled || ui::events_pause_test(state);
+			}
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
