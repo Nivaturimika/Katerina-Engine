@@ -837,7 +837,7 @@ namespace ui {
 					}
 					if(!c.get_is_upgrade()) {
 						auto rules = state.world.nation_get_combined_issue_rules(state.local_player_nation);
-						text::add_line_with_condition(state, contents, "rules_destroy_factory", (rules & issue_rule::destroy_factory) != 0);
+						text::add_line_with_condition(state, contents, "rule_destroy_factory", (rules & issue_rule::destroy_factory) != 0);
 					}
 					break;
 				}
