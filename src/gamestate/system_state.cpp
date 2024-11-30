@@ -872,14 +872,21 @@ namespace sys {
 				"factory_info",
 				"new_factory_option",
 				"ledger_legend_entry",
-				"project_info",
-				"country_modifier_overlappingbox" //upper-right property gets overriden
+				"project_info"
 			};
 			for(const auto& elem_name : elem_names) {
 				auto it = ui_state.defs_by_name.find(lookup_key(elem_name));
 				if(it != ui_state.defs_by_name.end()) {
 					auto& gfx_def = ui_defs.gui[it->second.definition];
 					gfx_def.flags &= ~ui::element_data::orientation_mask;
+				}
+			}
+			// fix for CWE-fan-fork
+			// we have to override the upper-right property to upper left, always
+			for(auto& gfx_def : ui_defs.gui) {
+				if(to_string_view(gfx_def.name) == "country_modifier_overlappingbox") {
+					gfx_def.flags &= ~ui::element_data::orientation_mask;
+					break;
 				}
 			}
 		}
