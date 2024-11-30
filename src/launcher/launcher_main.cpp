@@ -1412,7 +1412,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 
 		void internal_text_render(std::string_view str, float baseline_x, float baseline_y, float size, ::text::font& f) {
 			hb_buffer_clear_contents(f.hb_buf);
-			hb_buffer_pre_allocate(f.hb_buf, str.size());
+			hb_buffer_pre_allocate(f.hb_buf, static_cast<unsigned int>(str.size()));
 			hb_buffer_add_utf8(f.hb_buf, str.data(), int(str.size()), 0, int(str.size()));
 			hb_buffer_guess_segment_properties(f.hb_buf);
 			hb_shape(f.hb_font_face, f.hb_buf, NULL, 0);
@@ -1471,7 +1471,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 
 	float base_text_extent(char const* codepoints, uint32_t count, int32_t size, text::font& f) {
 		hb_buffer_clear_contents(f.hb_buf);
-		hb_buffer_pre_allocate(f.hb_buf, count);
+		hb_buffer_pre_allocate(f.hb_buf, static_cast<unsigned int>(count));
 		hb_buffer_add_utf8(f.hb_buf, codepoints, int(count), 0, int(count));
 		hb_buffer_guess_segment_properties(f.hb_buf);
 		hb_shape(f.hb_font_face, f.hb_buf, NULL, 0);
