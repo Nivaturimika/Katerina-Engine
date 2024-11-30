@@ -1760,6 +1760,68 @@ namespace parsers {
 		}
 	}
 
+	void effect_body::country_event(ef_country_event const& value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(context.main_slot == trigger::slot_contents::nation) {
+			if(context.this_slot == trigger::slot_contents::nation)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_this_nation));
+			else if(context.this_slot == trigger::slot_contents::province)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_this_province));
+			else if(context.this_slot == trigger::slot_contents::state)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_this_state));
+			else if(context.this_slot == trigger::slot_contents::pop)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_this_pop));
+			else {
+				err.accumulated_errors +=
+					"country_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				return;
+			}
+			context.compiled_effect.push_back(trigger::payload(value.id_).value);
+			context.compiled_effect.push_back(uint16_t(value.days));
+		} else if(context.main_slot == trigger::slot_contents::province) {
+			if(context.this_slot == trigger::slot_contents::nation)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_province_this_nation));
+			else if(context.this_slot == trigger::slot_contents::province)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_province_this_province));
+			else if(context.this_slot == trigger::slot_contents::state)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_province_this_state));
+			else if(context.this_slot == trigger::slot_contents::pop)
+				context.compiled_effect.push_back(uint16_t(effect::country_event_province_this_pop));
+			else {
+				err.accumulated_errors += "country_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				return;
+			}
+			context.compiled_effect.push_back(trigger::payload(value.id_).value);
+			context.compiled_effect.push_back(uint16_t(value.days));
+		} else {
+			err.accumulated_errors += "country_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+	void effect_body::province_event(ef_province_event const& value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions && value.days > 1) {
+			err.accumulated_warnings += "province_event with more than 1 day could cause crashes (" + err.file_name + ")\n";
+		}
+		if(context.main_slot == trigger::slot_contents::province) {
+			if(context.this_slot == trigger::slot_contents::nation)
+				context.compiled_effect.push_back(uint16_t(effect::province_event_this_nation));
+			else if(context.this_slot == trigger::slot_contents::province)
+				context.compiled_effect.push_back(uint16_t(effect::province_event_this_province));
+			else if(context.this_slot == trigger::slot_contents::state)
+				context.compiled_effect.push_back(uint16_t(effect::province_event_this_state));
+			else if(context.this_slot == trigger::slot_contents::pop)
+				context.compiled_effect.push_back(uint16_t(effect::province_event_this_pop));
+			else {
+				err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				return;
+			}
+			context.compiled_effect.push_back(trigger::payload(value.id_).value);
+			context.compiled_effect.push_back(uint16_t(value.days));
+		} else {
+			err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+
 	void effect_body::define_general(ef_define_general const& value, error_handler& err, int32_t line,
 		effect_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::nation) {

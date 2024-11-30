@@ -3515,108 +3515,109 @@ namespace effect {
 	}
 	uint32_t ef_country_event_this_nation(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), future_date))
 			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, future_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::nation});
 		return 0;
 	}
 	uint32_t ef_country_event_immediate_this_nation(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
-			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::nation});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
+		//	ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::nation});
+		event::trigger_national_event(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), r_hi, r_lo + 1, this_slot, event::slot_type::nation, from_slot, event::slot_type::nation);
 		return 0;
 	}
 	uint32_t ef_province_event_this_nation(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), future_date))
 			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, future_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::nation});
 		return 0;
 	}
 	uint32_t ef_province_event_immediate_this_nation(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
-			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::nation});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
+		//	ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::nation});
+		event::trigger_provincial_event(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), r_hi, r_lo + 1, from_slot, event::slot_type::nation);
 		return 0;
 	}
 	uint32_t ef_country_event_this_state(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), future_date))
 			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, future_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::state});
 		return 0;
 	}
 	uint32_t ef_country_event_immediate_this_state(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
-			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::state});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
+		//	ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::state});
+		event::trigger_national_event(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), r_hi, r_lo + 1, this_slot, event::slot_type::state, from_slot, event::slot_type::nation);
 		return 0;
 	}
 	uint32_t ef_province_event_this_state(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), future_date))
 			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, future_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::state});
 		return 0;
 	}
 	uint32_t ef_province_event_immediate_this_state(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
-			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::state});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
+		//	ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::state});
+		event::trigger_provincial_event(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), r_hi, r_lo + 1, from_slot, event::slot_type::state);
 		return 0;
 	}
 	uint32_t ef_country_event_this_province(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), future_date))
 			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, future_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::province});
 		return 0;
 	}
 	uint32_t ef_country_event_immediate_this_province(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
-		ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::province});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
+		//	ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::province});
+		event::trigger_national_event(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), r_hi, r_lo + 1, this_slot, event::slot_type::province, from_slot, event::slot_type::nation);
 		return 0;
 	}
 	uint32_t ef_province_event_this_province(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), future_date))
 			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, future_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::province});
 		return 0;
 	}
 	uint32_t ef_province_event_immediate_this_province(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
-			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::province});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
+		//	ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::province});
+		event::trigger_provincial_event(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), r_hi, r_lo + 1, from_slot, event::slot_type::province);
 		return 0;
 	}
 	uint32_t ef_country_event_this_pop(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), future_date))
-		ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, future_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::pop});
+			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, future_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::pop});
 		return 0;
 	}
 	uint32_t ef_country_event_immediate_this_pop(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
-			ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::pop});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), ws.current_date))
+		//	ws.future_n_event.push_back(event::pending_human_n_event {r_lo + 1, r_hi, primary_slot, this_slot, ws.current_date, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), event::slot_type::nation, event::slot_type::pop});
+		event::trigger_national_event(ws, trigger::payload(tval[1]).nev_id, trigger::to_nation(primary_slot), r_hi, r_lo + 1, this_slot, event::slot_type::pop, from_slot, event::slot_type::nation);
 		return 0;
 	}
 	uint32_t ef_province_event_this_pop(EFFECT_PARAMTERS) {
 		auto postpone = int32_t(tval[2]);
-		assert(postpone > 0);
 		auto future_date = ws.current_date + postpone;
 		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), future_date))
 			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, future_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::pop});
 		return 0;
 	}
 	uint32_t ef_province_event_immediate_this_pop(EFFECT_PARAMTERS) {
-		if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
-			ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::pop});
+		//if(!event::would_be_duplicate_instance(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), ws.current_date))
+		//	ws.future_p_event.push_back(event::pending_human_p_event {r_lo + 1, r_hi, this_slot, ws.current_date, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), event::slot_type::pop});
+		event::trigger_provincial_event(ws, trigger::payload(tval[1]).pev_id, trigger::to_prov(primary_slot), r_hi, r_lo + 1, from_slot, event::slot_type::pop);
 		return 0;
 	}
+	// duplicates -- self referential
 	uint32_t ef_country_event_province_this_nation(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
 			return ef_country_event_this_nation(tval, ws, trigger::to_generic(owner), this_slot, 0, r_lo, r_hi, els);

@@ -1052,3 +1052,17 @@ country_event = {
 ```
 
 If none is specified, for compatibility - the default windows will be choosen (according to if it's an election, province or country/major event).
+
+## Delayed versus immediate events
+
+Immediate events are of the form:
+`country_event = XXX`
+
+Whereas delayed events are of the form:
+`country_event = { id = XXX days = NNN }`
+
+Note that `days` can be anything from `0`, to negative numbers or even positive ones, but negative/zero numbers get treated as what's known an immediate-delayed event. The event isn't executed until the entire effect block has been executed first.
+
+Knowing if an event will loop back into itself would require solving the halting problem, or doing some smart static analysis. Hence, the only protection against an event causing a crash is `alice_max_event_iterations`, defining how much "depth" an event will be evaluated for.
+
+Immediate events get evaluated on the immediate context. This can lead to crashes (on both the original and here) if not used carefully.
