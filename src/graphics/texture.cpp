@@ -739,7 +739,7 @@ set to one or more of the following values.	*/
 				size_t p_dy = height / tiles_y; // Pixels of each tile in y
 				for(uint32_t x = 0; x < tiles_x; x++) {
 					for(uint32_t y = 0; y < tiles_y; y++) {
-						uint32_t offset = x * p_dy * width + y * p_dx * (keep_rgba ? 4 : 3);
+						uint32_t offset = uint32_t(x * p_dy * width + y * p_dx * (keep_rgba ? 4 : 3));
 						glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, GLint(x * tiles_x + y), GLsizei(p_dx), GLsizei(p_dy), 1, s3tc_format, s3tc_type, dds_dest_data.get() + offset);
 					}
 				}
@@ -761,7 +761,7 @@ set to one or more of the following values.	*/
 				reports::write_debug("Experimental DDS texturesheet (compressed)\n");
 				size_t p_dx = width / tiles_x; // Pixels of each tile in x
 				size_t p_dy = height / tiles_y; // Pixels of each tile in y
-				glCompressedTexImage3D(GL_TEXTURE_2D_ARRAY, 0, s3tc_format, p_dx, p_dy, tiles_x * tiles_y, 0, dds_main_size, buffer);
+				glCompressedTexImage3D(GL_TEXTURE_2D_ARRAY, 0, s3tc_format, GLsizei(p_dx), GLsizei(p_dy), GLsizei(tiles_x * tiles_y), 0, GLsizei(dds_main_size), buffer);
 				//glCompressedTexImage2D(GL_TEXTURE_2D_ARRAY, 0, s3tc_format, width, height, 0, dds_main_size, buffer + buffer_index);
 				buffer_index += dds_main_size;
 				/*	upload the mipmaps, if we have them	*/
