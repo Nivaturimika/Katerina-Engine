@@ -72,7 +72,7 @@ native_string find_matching_scenario(native_string_view path) {
 		if(auto of = simple_fs::open_file(f); of) {
 			auto content = view_contents(*of);
 			auto desc = sys::extract_mod_information(reinterpret_cast<uint8_t const*>(content.data), content.file_size);
-			reports::write_debug("Scenario: '" + text::native_to_utf8(desc.mod_path) + "',count=" + std::to_string(desc.count));
+			reports::write_debug("Scenario: '" + text::native_to_utf8(desc.mod_path) + "',count=" + std::to_string(desc.count) + "\n");
 			if(desc.mod_path == path && desc.count >= max_scenario_count) {
 				selected_scenario_file = simple_fs::get_file_name(f);
 				max_scenario_count = desc.count;

@@ -17,6 +17,7 @@ namespace ogl {
 	};
 
 	GLuint SOIL_direct_load_DDS_from_memory(unsigned char const* const buffer, uint32_t buffer_length, uint32_t& width, uint32_t& height, int soil_flags);
+	GLuint SOIL_direct_load_DDS_array_from_memory(unsigned char const* const buffer, uint32_t buffer_length, uint32_t& width, uint32_t& height, int soil_flags, uint32_t tiles_x, uint32_t tiles_y);
 
 	class texture {
 		GLuint texture_handle = 0;
