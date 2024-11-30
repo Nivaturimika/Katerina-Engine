@@ -1091,7 +1091,7 @@ namespace map {
 			glUniform1f(shader_uniforms[uint8_t(map_view_mode)][program][uniform_gamma], state.user_settings.gamma);
 		};
 
-		if(shaders[uint8_t(map_view_mode)][shader_close_terrain] && active_map_mode == map_mode::mode::terrain || zoom > map::zoom_close) {
+		if(shaders[uint8_t(map_view_mode)][shader_close_terrain] && (active_map_mode == map_mode::mode::terrain || zoom > map::zoom_close)) {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[texture_provinces]);
 			glActiveTexture(GL_TEXTURE1);
