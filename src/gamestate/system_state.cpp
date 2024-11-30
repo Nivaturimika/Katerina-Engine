@@ -873,6 +873,7 @@ namespace sys {
 				"new_factory_option",
 				"ledger_legend_entry",
 				"project_info",
+				"country_modifier_overlappingbox" //upper-right property gets overriden
 			};
 			for(const auto& elem_name : elem_names) {
 				auto it = ui_state.defs_by_name.find(lookup_key(elem_name));
