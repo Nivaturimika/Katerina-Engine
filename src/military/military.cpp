@@ -15,7 +15,6 @@
 #include "military.hpp"
 
 namespace military {
-
 	constexpr inline float str_dam_mul = 0.05f;
 
 	template auto province_is_blockaded<ve::tagged_vector<dcon::province_id>>(sys::state const&, ve::tagged_vector<dcon::province_id>);
@@ -1185,7 +1184,7 @@ namespace military {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
 			if(wg.get_wargoal().get_added_by() == n) {
 				float prestige_loss = std::min(state.defines.war_failed_goal_prestige_base, state.defines.war_failed_goal_prestige * nations::prestige_score(state, n)) * wg.get_wargoal().get_type().get_penalty_factor();
-				nations::adjust_prestige(state, n, prestige_loss);
+				nations::adjust_prestige_no_modifier(state, n, prestige_loss);
 
 				pop_militancy += state.defines.war_failed_goal_militancy * wg.get_wargoal().get_type().get_penalty_factor();
 			}
@@ -1482,7 +1481,7 @@ namespace military {
 		// prestige
 		if((bits & cb_flag::po_remove_prestige) != 0) {
 			if(state.world.nation_get_owned_province_count(target) > 0) {
-				nations::adjust_prestige(state, target,
+				nations::adjust_prestige_no_modifier(state, target,
 				-(state.defines.prestige_reduction * nations::prestige_score(state, target) + state.defines.prestige_reduction_base));
 			}
 		}
@@ -1672,6 +1671,15 @@ namespace military {
 			}
 		}
 
+		// The nation that added the war goal gains prestige. This is done, by calculating the sum ,over all the po tags, of
+		// base-prestige-for-that-tag v (nations-current-prestige x prestige-for-that-tag) and then multiplying the result by the CB's
+		// prestige factor. The nation that was targeted by the war goal also loses that much prestige.
+		float prestige_gain = successful_cb_prestige(state, wargoal, from) * (war ? 1.0f : state.defines.crisis_wargoal_prestige_mult);
+		if(state.world.nation_get_owned_province_count(from) > 0)
+			nations::adjust_prestige_no_modifier(state, from, prestige_gain);
+		if(state.world.nation_get_owned_province_count(target) > 0)
+			nations::adjust_prestige_no_modifier(state, target, -prestige_gain);
+
 		// other/in general: the `on_po_accepted` member of the CB is run. Primary slot: target of the war goal. This slot: nation
 		// that added the war goal.
 		auto accepted_effect = state.world.cb_type_get_on_po_accepted(wargoal);
@@ -1679,15 +1687,6 @@ namespace military {
 			effect::execute(state, accepted_effect, trigger::to_generic(target), trigger::to_generic(from), trigger::to_generic(from),
 				uint32_t((state.current_date.value << 8) ^ target.index()), uint32_t(from.index() ^ (wargoal.index() << 3)));
 		}
-
-		// The nation that added the war goal gains prestige. This is done, by calculating the sum ,over all the po tags, of
-		// base-prestige-for-that-tag v (nations-current-prestige x prestige-for-that-tag) and then multiplying the result by the CB's
-		// prestige factor. The nation that was targeted by the war goal also loses that much prestige.
-		float prestige_gain = successful_cb_prestige(state, wargoal, from) * (war ? 1.0f : state.defines.crisis_wargoal_prestige_mult);
-		if(state.world.nation_get_owned_province_count(from) > 0)
-		nations::adjust_prestige(state, from, prestige_gain);
-		if(state.world.nation_get_owned_province_count(target) > 0)
-		nations::adjust_prestige(state, target, -prestige_gain);
 	}
 
 	void run_gc(sys::state& state) {
@@ -2020,7 +2019,7 @@ namespace military {
 																			state.defines.war_failed_goal_prestige * state.defines.crisis_wargoal_prestige_mult *
 																					nations::prestige_score(state, par.id)) *
 																	state.world.cb_type_get_penalty_factor(par.joined_with_offer.wargoal_type);
-							nations::adjust_prestige(state, par.id, prestige_loss);
+							nations::adjust_prestige_no_modifier(state, par.id, prestige_loss);
 
 							auto pop_militancy = state.defines.war_failed_goal_militancy * state.defines.crisis_wargoal_militancy_mult *
 																 state.world.cb_type_get_penalty_factor(par.joined_with_offer.wargoal_type);
@@ -2076,9 +2075,9 @@ namespace military {
 				float p_factor = 0.05f * (state.defines.crisis_winner_prestige_factor_base +
 											 state.defines.crisis_winner_prestige_factor_year * float(state.current_date.value) / float(365));
 
-				nations::adjust_prestige(state, state.primary_crisis_defender,
+				nations::adjust_prestige_no_modifier(state, state.primary_crisis_defender,
 					-p_factor * nations::prestige_score(state, state.primary_crisis_attacker));
-				nations::adjust_prestige(state, state.primary_crisis_attacker,
+				nations::adjust_prestige_no_modifier(state, state.primary_crisis_attacker,
 					p_factor * nations::prestige_score(state, state.primary_crisis_attacker));
 
 				auto rp_ideology = state.world.nation_get_ruling_party(state.primary_crisis_defender).get_ideology();
@@ -2088,13 +2087,11 @@ namespace military {
 					}
 				}
 			} else {
-
 				float p_factor = 0.05f * (state.defines.crisis_winner_prestige_factor_base +
 											 state.defines.crisis_winner_prestige_factor_year * float(state.current_date.value) / float(365));
-
-				nations::adjust_prestige(state, state.primary_crisis_attacker,
+				nations::adjust_prestige_no_modifier(state, state.primary_crisis_attacker,
 					-p_factor * nations::prestige_score(state, state.primary_crisis_attacker));
-				nations::adjust_prestige(state, state.primary_crisis_defender,
+				nations::adjust_prestige_no_modifier(state, state.primary_crisis_defender,
 					p_factor * nations::prestige_score(state, state.primary_crisis_attacker));
 
 				auto rp_ideology = state.world.nation_get_ruling_party(state.primary_crisis_attacker).get_ideology();

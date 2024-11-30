@@ -349,6 +349,8 @@ enum class status : uint8_t { great_power, secondary_power, civilized, westerniz
 	void cleanup_nation(sys::state& state, dcon::nation_id n);
 
 	void adjust_prestige(sys::state& state, dcon::nation_id n, float delta);
+	void adjust_prestige_no_modifier(sys::state& state, dcon::nation_id n, float delta);
+
 	void destroy_diplomatic_relationships(sys::state& state, dcon::nation_id n);
 	void release_vassal(sys::state& state, dcon::overlord_id rel);
 	void make_vassal(sys::state& state, dcon::nation_id subject, dcon::nation_id overlord);

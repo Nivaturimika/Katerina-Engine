@@ -1387,9 +1387,17 @@ namespace nations {
 		}
 	}
 
+	/** Adjusts prestige of a nation, scaling it by the modifier for prestige gain */
 	void adjust_prestige(sys::state& state, dcon::nation_id n, float delta) {
 		float prestige_multiplier = 1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::prestige);
 		float v = state.world.nation_get_prestige(n) + (delta > 0 ? (delta * prestige_multiplier) : delta);
+		float new_prestige = std::clamp(v, 0.f, max_prestige);
+		state.world.nation_set_prestige(n, new_prestige);
+	}
+
+	/** Adjusts prestige of a nation without modifier scale (used for CB prestige rewards) */
+	void adjust_prestige_no_modifier(sys::state& state, dcon::nation_id n, float delta) {
+		float v = state.world.nation_get_prestige(n) + delta;
 		float new_prestige = std::clamp(v, 0.f, max_prestige);
 		state.world.nation_set_prestige(n, new_prestige);
 	}
