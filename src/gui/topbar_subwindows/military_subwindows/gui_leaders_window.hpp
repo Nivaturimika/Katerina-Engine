@@ -57,7 +57,7 @@ namespace ui {
 			if(admiral) {
 				auto a = state.world.leader_get_navy_from_navy_leadership(lid);
 				if(command::can_change_admiral(state, state.local_player_nation, a, dcon::leader_id{})) {
-					ommand::change_admiral(state, state.local_player_nation, a, dcon::leader_id{});
+					command::change_admiral(state, state.local_player_nation, a, dcon::leader_id{});
 				}
 			} else {
 				auto a = state.world.leader_get_army_from_army_leadership(lid);
