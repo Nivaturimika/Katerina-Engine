@@ -27,18 +27,18 @@ if(WIN32)
 		# icudt
 		add_library(icudt SHARED IMPORTED)
 		set_target_properties(icudt PROPERTIES
-			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icudt75.dll"
-			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icudt.lib")
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin/cudt75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib/cudt.lib")
 		# icuuc
 		add_library(icuuc SHARED IMPORTED)
 		set_target_properties(icuuc PROPERTIES
-			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icuuc75.dll"
-			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icuuc.lib")
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin/cuuc75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib/cuuc.lib")
 		# icuin
 		add_library(icuin SHARED IMPORTED)
 		set_target_properties(icuin PROPERTIES
-			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icuin75.dll"
-			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icuin.lib")
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin/cuin75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib/cuin.lib")
 	endif()
 	#
 	# interface target
