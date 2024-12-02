@@ -3,7 +3,7 @@ message(STATUS "Finding icu...")
 if(WIN32)
 	FetchContent_Declare(icu URL "https://github.com/unicode-org/icu/releases/download/release-76-1/icu4c-76_1-Win64-MSVC2022.zip")
 	FetchContent_MakeAvailable(icu)
-	add_library(dependency_icu INTERFACE)
+	add_library(dependency_icu SHARED IMPORTED)
 	set_target_properties(dependency_icu PROPERTIES
 		IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64"
 		IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64")
