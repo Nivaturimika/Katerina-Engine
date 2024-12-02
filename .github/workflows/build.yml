@@ -35,7 +35,13 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --target KatEngine
+        cmake --build build -t KatEngine
+
+    - name: Archive results
+      uses: actions/upload-artifact@v4
+      with:
+        name: katerina-engine-ubuntu-x86_64
+        path: build/KatEngine
 
   windows-build:
     strategy:
@@ -75,7 +81,13 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --target KatEngine
+        cmake --build build -t KatEngine
+
+    - name: Archive results
+      uses: actions/upload-artifact@v4
+      with:
+        name: katerina-engine-windows-x86_64
+        path: build/KatEngine
 
   macos-build:
     strategy:
@@ -98,7 +110,13 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build --target KatEngine
+        cmake --build build -t KatEngine
+
+    - name: Archive results
+      uses: actions/upload-artifact@v4
+      with:
+        name: katerina-engine-macos-aarch64
+        path: build/KatEngine
 
   build-check:
     needs: [windows-build, linux-build, macos-build]
