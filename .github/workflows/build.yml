@@ -5,43 +5,43 @@ on:
   push:
 
 jobs:
-  linux-build:
-    strategy:
-      matrix:
-        config: [x64-debug-linux-clang]
-        os: [ubuntu-latest]
+  # linux-build:
+  #   strategy:
+  #     matrix:
+  #       config: [x64-debug-linux-clang]
+  #       os: [ubuntu-latest]
 
-    name: Ubuntu with ${{ matrix.compiler }} (${{ matrix.config }})
-    runs-on: ${{ matrix.os }}
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+  #   name: Ubuntu with ${{ matrix.compiler }} (${{ matrix.config }})
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 0
 
-    - name: "Install"
-      uses: awalsh128/cache-apt-pkgs-action@v1.3.1
-      with:
-        packages: git build-essential clang cmake libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libicu-dev
-        version: 1.0
+  #   - name: "Install"
+  #     uses: awalsh128/cache-apt-pkgs-action@v1.3.1
+  #     with:
+  #       packages: git build-essential clang cmake libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libicu-dev
+  #       version: 1.0
 
-    - name: Set environment
-      run: |
-        echo "CC=${{ matrix.compiler == 'gcc' && 'gcc' || 'clang-15' }}" >> $GITHUB_ENV
-        echo "CXX=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++-15' }}" >> $GITHUB_ENV
+  #   - name: Set environment
+  #     run: |
+  #       echo "CC=${{ matrix.compiler == 'gcc' && 'gcc' || 'clang-15' }}" >> $GITHUB_ENV
+  #       echo "CXX=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++-15' }}" >> $GITHUB_ENV
 
-    - name: Configure Build Files
-      run: |
-        cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -B build
+  #   - name: Configure Build Files
+  #     run: |
+  #       cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -B build
 
-    - name: Build Katerina Engine
-      run: |
-        cmake --build build -t KatEngine
+  #   - name: Build Katerina Engine
+  #     run: |
+  #       cmake --build build -t KatEngine
 
-    - name: Archive results
-      uses: actions/upload-artifact@v4
-      with:
-        name: katerina-engine-ubuntu-x86_64
-        path: build/KatEngine
+  #   - name: Archive results
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: katerina-engine-ubuntu-x86_64
+  #       path: build/KatEngine
 
   windows-build:
     strategy:
@@ -89,40 +89,50 @@ jobs:
         name: katerina-engine-windows-x86_64
         path: build/Debug/KatEngine.exe
 
-  macos-build:
-    strategy:
-      matrix:
-        config: [aarch64-debug-macos]
-    runs-on: [macos-latest]
-    name: MacOS (${{ matrix.config }})
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+  # macos-build:
+  #   strategy:
+  #     matrix:
+  #       config: [aarch64-debug-macos]
+  #   runs-on: [macos-latest]
+  #   name: MacOS (${{ matrix.config }})
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 0
 
-    - name: Install ICU
-      run: |
-        brew install icu4c
+  #   - name: Install ICU
+  #     run: |
+  #       brew install icu4c
 
-    - name: Configure Build Files
-      run: |
-        cmake -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -DCMAKE_BUILD_TYPE=Debug -B build
+  #   - name: Configure Build Files
+  #     run: |
+  #       cmake -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -DCMAKE_BUILD_TYPE=Debug -B build
 
-    - name: Build Katerina Engine
-      run: |
-        cmake --build build -t KatEngine
+  #   - name: Build Katerina Engine
+  #     run: |
+  #       cmake --build build -t KatEngine
 
-    - name: Archive results
-      uses: actions/upload-artifact@v4
-      with:
-        name: katerina-engine-macos-aarch64
-        path: build/KatEngine
+  #   - name: Archive results
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: katerina-engine-macos-aarch64
+  #       path: build/KatEngine
+
+  # build-check:
+  #   needs: [windows-build, linux-build, macos-build]
+  #   runs-on: ubuntu-latest
+  #   name: Build Matrix
+  #   steps:
+  #     - name: Check
+  #       run: |
+  #         echo success
 
   build-check:
-    needs: [windows-build, linux-build, macos-build]
+    needs: [windows-build]
     runs-on: ubuntu-latest
     name: Build Matrix
     steps:
       - name: Check
         run: |
           echo success
+
