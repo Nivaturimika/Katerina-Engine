@@ -87,7 +87,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: katerina-engine-windows-x86_64
-        path: build/KatEngine
+        path: build/Debug/KatEngine.exe
 
   macos-build:
     strategy:
