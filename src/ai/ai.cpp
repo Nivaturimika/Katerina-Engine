@@ -1109,8 +1109,7 @@ namespace ai {
 			if(max_projects > 0) {
 				project_provs.clear();
 				for(auto o : n.get_province_ownership()) {
-					if(n == o.get_province().get_nation_from_province_control()
-					&& province::can_build_naval_base(state, o.get_province())) {
+					if(province::can_build_naval_base(state, o.get_province(), n)) {
 						project_provs.push_back(o.get_province().id);
 					}
 				}
@@ -3780,7 +3779,7 @@ namespace ai {
 							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
-								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[t].build_time);
+								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_transport].build_time);
 								c.set_type(best_transport);
 								constructing_fleet_cap += supply_pts;
 							}
@@ -3795,7 +3794,7 @@ namespace ai {
 							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
-								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[t].build_time);
+								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_transport].build_time);
 								c.set_type(best_transport);
 								++num_transports;
 								constructing_fleet_cap += supply_pts;
@@ -3822,7 +3821,7 @@ namespace ai {
 						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_light));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
-							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[t].build_time);
+							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_light].build_time);
 							c.set_type(best_light);
 							free_small_points -= supply_pts;
 						}
@@ -3838,7 +3837,7 @@ namespace ai {
 						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_big));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
-							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[t].build_time);
+							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_big].build_time);
 							c.set_type(best_big);
 							free_big_points -= supply_pts;
 						}
