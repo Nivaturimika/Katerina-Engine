@@ -5,26 +5,41 @@ if(WIN32)
 		FetchContent_Declare(icu
 			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win64-MSVC2022.zip")
 		FetchContent_MakeAvailable(icu)
+		# icudt
+		add_library(icudt SHARED IMPORTED)
+		set_target_properties(icudt PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icudt75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icudt.lib")
+		# icuuc
+		add_library(icuuc SHARED IMPORTED)
+		set_target_properties(icuuc PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icuuc75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icuuc.lib")
+		# icuin
+		add_library(icuin SHARED IMPORTED)
+		set_target_properties(icuin PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icuin75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icuin.lib")
 	else()
 		FetchContent_Declare(icu
 			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win32-MSVC2022.zip")
 		FetchContent_MakeAvailable(icu)
+		# icudt
+		add_library(icudt SHARED IMPORTED)
+		set_target_properties(icudt PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icudt75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icudt.lib")
+		# icuuc
+		add_library(icuuc SHARED IMPORTED)
+		set_target_properties(icuuc PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icuuc75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icuuc.lib")
+		# icuin
+		add_library(icuin SHARED IMPORTED)
+		set_target_properties(icuin PROPERTIES
+			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin32/icuin75.dll"
+			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib32/icuin.lib")
 	endif()
-	# icudt
-	add_library(icudt SHARED IMPORTED)
-	set_target_properties(icudt PROPERTIES
-		IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icudt75.dll"
-		IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icudt.lib")
-	# icuuc
-	add_library(icuuc SHARED IMPORTED)
-	set_target_properties(icuuc PROPERTIES
-		IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icuuc75.dll"
-		IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icuuc.lib")
-	# icuin
-	add_library(icuin SHARED IMPORTED)
-	set_target_properties(icuin PROPERTIES
-		IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icuin75.dll"
-		IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icuin.lib")
 	#
 	# interface target
 	add_library(dependency_icu INTERFACE)
