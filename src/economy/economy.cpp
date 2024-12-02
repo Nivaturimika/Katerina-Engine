@@ -246,7 +246,7 @@ namespace economy {
 		float mult = get_artisans_multiplier(state, n);
 
 		for(uint32_t i = 1; i < csize; ++i) {
-		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			if(valid_artisan_good(state, n, cid)) {
 				auto profit = base_artisan_profit(state, n, cid);
 				//if(profit < 0.f) {
@@ -958,7 +958,7 @@ namespace economy {
 		};
 
 		for(uint32_t i = 1; i < total_commodities; ++i) {
-		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto kf = state.world.commodity_get_key_factory(cid);
 			if(state.world.commodity_get_is_available_from_start(cid)
 			|| (kf && state.world.nation_get_active_building(n, kf))) {
@@ -980,38 +980,69 @@ namespace economy {
 			}
 		}
 	}
-	void limit_pop_demand_to_production(sys::state& state) {
-		uint32_t total_commodities = state.world.commodity_size();
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto is_pop_need = state.world.commodity_get_is_life_need(cid) ||
-				state.world.commodity_get_is_everyday_need(cid) ||
-				state.world.commodity_get_is_luxury_need(cid);
-			if(is_pop_need) {
-				float base_life = 0.0f;
-				float base_everyday = 0.0f;
-				float base_luxury = 0.0f;
-				for(const auto t : state.world.in_pop_type) {
-					auto strata = state.world.pop_type_get_strata(t);
-					base_life += state.world.pop_type_get_life_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
-					base_everyday += state.world.pop_type_get_everyday_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
-					base_luxury += state.world.pop_type_get_luxury_needs(t, cid) > 0.0f ? 1.0f : 0.0f;
-				}
-				float total_r_demand = state.world.commodity_get_total_real_demand(cid);
-				float last_t_production = state.world.commodity_get_last_total_production(cid);
-				float which_type = (base_life + base_everyday * 2.0f + base_luxury * 4.5f) / (base_life + base_everyday + base_luxury);
-				float average = last_t_production * std::max((1.0f - (which_type < 2.0f ? which_type * 0.125f : which_type * 0.4f)), 0.0f)
-					+ total_r_demand * std::max(((5.5f - which_type) * 1.5f), 0.0f) * (which_type >= 2.5f ? 1.0f : 0.0f);
-				float limitation = std::min(std::max(average, 1.f) / std::max(total_r_demand, 1.f), 1.0f);
 
-				state.world.commodity_get_total_real_demand(cid) *= limitation;
-				state.world.for_each_nation([&](dcon::nation_id n) {
-					state.world.nation_get_real_demand(n, cid) *= limitation;
-				}); 
-			}
-		}
-		
+	void limit_pop_demand_to_production(sys::state& state) {
+		// Not a long operation -- doesn't warrant parallel (or thread dispatch)
+		state.world.execute_serial_over_commodity([&](auto ids) {
+			// Properties like "is_life_needs, is_everyday_needs, etc" from commodity
+			// are already implicitly present, by the mere fact that pop types
+			// would accumulate to >0 when queried for base_life/ev/lux, etc.
+			// No need for filtering here.
+			//
+			// Accumulators:
+			// a += f(x) > 0 ? 1 : 0
+			// a += ceil(f(x)), ceil(x) > 0 ? 1 : 0
+			// TODO: add operator+= for vector_fp
+			ve::fp_vector base_life{};
+			ve::fp_vector base_everyday{};
+			ve::fp_vector base_luxury{};
+			ve::apply([&](dcon::commodity_id c) {
+				state.world.execute_serial_over_pop_type([&](auto pids) {
+					base_life = base_life
+						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_life_needs(pids, c)));
+					base_everyday = base_everyday
+						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_everyday_needs(pids, c)));
+					base_luxury = base_luxury
+						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_luxury_needs(pids, c)));
+				});
+			}, ids);
+			//
+			const ve::fp_vector lf_factor(1.0f);
+			const ve::fp_vector ev_factor(2.0f);
+			const ve::fp_vector lx_factor(4.5f);
+			//
+			// Ratio of "weighted" needs versus base weights (without weights)
+			auto ratio =
+				(base_life * lf_factor + base_everyday * ev_factor + base_luxury * lx_factor)
+				/ ve::max(base_life + base_everyday + base_luxury, 1.0f);
+			//
+			// Conditionally selected values for choosing limits (of supply and demand, respectively)
+			ve::fp_vector sel_a = ratio * ve::select(ratio < 2.0f, ve::fp_vector(0.125f), 0.4f);
+			ve::fp_vector sel_b = ve::select(ratio >= 2.5f, ve::fp_vector(1.0f), 0.0f);
+			//
+			auto total_r_demand = state.world.commodity_get_total_real_demand(ids);
+			auto last_t_production = state.world.commodity_get_last_total_production(ids);
+			//
+			auto avg_sup = last_t_production * ve::max(1.0f - sel_a, 0.0f);
+			auto avg_dem = total_r_demand * ve::max(((5.5f - ratio) * 1.5f), 0.0f) * sel_b;
+			auto new_limit = ve::min(ve::max(avg_sup + avg_dem, 1.f) / ve::max(total_r_demand, 1.f), 1.f);
+			// Only write if filter was passed
+			ve::mask_vector is_pop_need = state.world.commodity_get_is_life_need(ids)
+				|| state.world.commodity_get_is_everyday_need(ids)
+				|| state.world.commodity_get_is_luxury_need(ids);
+			ve::apply([&](dcon::commodity_id c, bool passed_filter, float l) {
+				if(passed_filter) {
+					state.world.commodity_get_total_real_demand(c) *= l;
+					ve::fp_vector local_l(l);
+					state.world.execute_serial_over_nation([&](auto nids) {
+						state.world.nation_get_real_demand(nids, c) =
+							state.world.nation_get_real_demand(nids, c) * local_l;
+					});
+				}
+			}, ids, is_pop_need, new_limit);
+		});
 	}
+
 	/*	- Each pop strata and needs type has its own demand modifier, calculated as follows:
 		- (national-modifier-to-goods-demand + define:BASE_GOODS_DEMAND) x (national-modifier-to-specific-strata-and-needs-type + 1) x
 		(define:INVENTION_IMPACT_ON_DEMAND x number-of-unlocked-inventions + 1, but for non-life-needs only)
