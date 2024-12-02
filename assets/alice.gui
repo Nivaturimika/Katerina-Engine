@@ -1530,7 +1530,7 @@ guiTypes = {
 	}
 
 	windowType = {
-		name = "alice_combat_modifier"
+		name = "combat_modifier_element"
 		position = { 0 0 }
 		size = { 32 58 }
 		moveable = 0
@@ -1551,6 +1551,14 @@ guiTypes = {
 			maxsize = { 34 32 }
 			format = centre
 		}
+	}
+	OverlappingElementsBoxType = {
+		name = "combat_modifiers_overlapping"
+		position = { 78 39 }
+		size = { 185 60 }
+		Orientation = "UPPER_LEFT"
+		format = left
+		spacing = 1.0
 	}
 
 	windowType = {
