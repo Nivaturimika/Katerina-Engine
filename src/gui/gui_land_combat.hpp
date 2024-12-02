@@ -530,7 +530,7 @@ namespace ui {
 
 	class defender_combat_modifiers : public overlapping_listbox_element_base<lc_modifier, lc_modifier_data> {
 		std::string_view get_row_element_name() override {
-			return "alice_combat_modifier";
+			return "combat_modifier_element";
 		}
 		void update_subwindow(sys::state& state, lc_modifier& subwindow, lc_modifier_data content) override {
 			subwindow.data = content;
@@ -562,22 +562,21 @@ namespace ui {
 			auto defence_bonus =
 			int32_t(state.world.leader_trait_get_defense(defender_per) + state.world.leader_trait_get_defense(defender_bg));
 
-		row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, defender_dice });
+			row_contents.push_back(lc_modifier_data{ lc_mod_type::dice, defender_dice });
 			if(dig_in_value != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::digin, dig_in_value });
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::digin, dig_in_value });
 			if(terrain_bonus != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::terrain, int32_t(terrain_bonus) });
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::terrain, int32_t(terrain_bonus) });
 			if(defence_bonus != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, defence_bonus });
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, defence_bonus });
 			if(defender_gas)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::gas, int32_t(state.defines.gas_attack_modifier) });
-
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::gas, int32_t(state.defines.gas_attack_modifier) });
 			update(state);
 		}
 	};
 	class attacker_combat_modifiers : public overlapping_listbox_element_base<lc_modifier, lc_modifier_data> {
 		std::string_view get_row_element_name() override {
-			return "alice_combat_modifier";
+			return "combat_modifier_element";
 		}
 		void update_subwindow(sys::state& state, lc_modifier& subwindow, lc_modifier_data content) override {
 			subwindow.data = content;
@@ -610,20 +609,24 @@ namespace ui {
 
 			auto attack_bonus = int32_t(state.world.leader_trait_get_attack(attacker_per) + state.world.leader_trait_get_attack(attacker_bg));
 
-		row_contents.push_back(lc_modifier_data{lc_mod_type::dice, attacker_dice });
+			row_contents.push_back(lc_modifier_data{lc_mod_type::dice, attacker_dice });
 			if(crossing_adjustment != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::river, crossing_adjustment });
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::river, crossing_adjustment });
 			if(attack_bonus != 0)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, attack_bonus });
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::leader, attack_bonus });
 			if(attacker_gas)
-			row_contents.push_back(lc_modifier_data{ lc_mod_type::gas, int32_t(state.defines.gas_attack_modifier) });
-
+				row_contents.push_back(lc_modifier_data{ lc_mod_type::gas, int32_t(state.defines.gas_attack_modifier) });
 			update(state);
 		}
 	};
 
 	class land_combat_defender_window : public window_element_base {
-		public:
+	public:
+		void on_create(sys::state& state) noexcept override {
+			window_element_base::on_create(state);
+			auto mod_win = make_element_by_type<ui::defender_combat_modifiers>(state, "combat_modifiers_overlapping");
+			add_child_to_front(std::move(mod_win));
+		}
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "shield") {
 				return make_element_by_type<lc_defender_flag>(state, id);
@@ -655,8 +658,6 @@ namespace ui {
 				return make_element_by_type<lc_unit_strength_txt<false, military::unit_type::cavalry>>(state, id);
 			} else if(name == "unit_type_3_value") {
 				return make_element_by_type<lc_unit_strength_txt<false, military::unit_type::support>>(state, id);
-			} else if(name == "modifiers") {
-				return make_element_by_type<defender_combat_modifiers>(state, id);
 			} else {
 				return nullptr;
 			}
@@ -664,7 +665,12 @@ namespace ui {
 	};
 
 	class land_combat_attacker_window : public window_element_base {
-		public:
+	public:
+		void on_create(sys::state& state) noexcept override {
+			window_element_base::on_create(state);
+			auto mod_win = make_element_by_type<ui::attacker_combat_modifiers>(state, "combat_modifiers_overlapping");
+			add_child_to_front(std::move(mod_win));
+		}
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "shield") {
 				return make_element_by_type<lc_attacker_flag>(state, id);
@@ -696,8 +702,6 @@ namespace ui {
 				return make_element_by_type<lc_unit_strength_txt<true, military::unit_type::cavalry>>(state, id);
 			} else if(name == "unit_type_3_value") {
 				return make_element_by_type<lc_unit_strength_txt<true, military::unit_type::support>>(state, id);
-			} else if(name == "modifiers") {
-				return make_element_by_type<attacker_combat_modifiers>(state, id);
 			} else {
 				return nullptr;
 			}

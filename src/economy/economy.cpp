@@ -2284,7 +2284,7 @@ namespace economy {
 	construction_status province_building_construction(sys::state& state, dcon::province_id p, province_building_type t) {
 		for(auto c : state.world.province_get_province_building_construction(p)) {
 			if(c.get_type() == uint8_t(t)) {
-				float total = state.economy_definitions[uint8_t(t)].time;
+				float total = state.economy_definitions.building_definitions[uint8_t(t)].time;
 				float value = c.get_remaining_construction_time();
 				return construction_status{ total > 0.f ? 1.f - (value / total) : 0.f, true };
 			}
