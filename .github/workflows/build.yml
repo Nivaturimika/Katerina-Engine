@@ -43,7 +43,7 @@ jobs:
   #       name: katerina-engine-ubuntu-x86_64
   #       path: build/KatEngine
 
-  windows-build:
+  windows-x64-build:
     strategy:
       matrix:
         config: [x64-debug-windows]
@@ -77,7 +77,7 @@ jobs:
         name: katerina-engine-windows-x86_64
         path: build/Debug/KatEngine.exe
 
-  windows-build:
+  windows-x86-build:
     strategy:
       matrix:
         config: [x86-debug-windows]
@@ -150,7 +150,7 @@ jobs:
   #         echo success
 
   build-check:
-    needs: [windows-build, windows32-build]
+    needs: [windows-x64-build, windows-x86-build]
     runs-on: ubuntu-latest
     name: Build Matrix
     steps:
