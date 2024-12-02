@@ -209,12 +209,13 @@ namespace ui {
 
 		void button_shift_action(sys::state& state) noexcept override {
 			if(auto content = retrieve<dcon::technology_id>(state, parent); content) {
-				if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content);
-					it == state.ui_state.tech_queue.end()) {
-					if(content != state.world.nation_get_current_research(state.local_player_nation) && !state.world.nation_get_active_technologies(state.local_player_nation, content)) { // don't add already researched or researching
+				if(auto it = std::find(state.ui_state.tech_queue.begin(), state.ui_state.tech_queue.end(), content); it == state.ui_state.tech_queue.end()) {
+					// don't add already researched or researching
+					if(content != state.world.nation_get_current_research(state.local_player_nation)
+					&& !state.world.nation_get_active_technologies(state.local_player_nation, content)) {
 						dcon::technology_id prev_tech = culture::previous_folder_technology(state, content);
 						while(prev_tech) {
-							if(state.world.nation_get_active_technologies(state.local_player_nation, content)) {
+							if(state.world.nation_get_active_technologies(state.local_player_nation, prev_tech)) {
 								break;
 							}
 							state.ui_state.tech_queue.push_back(prev_tech);
