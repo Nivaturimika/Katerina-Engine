@@ -2070,10 +2070,12 @@ namespace economy {
 						}
 					}
 					if(selected_factory && profit > 1.f) {
+						auto type = state.world.factory_get_building_type(selected_factory);
 						auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
+						new_up.set_remaining_time(state.world.factory_type_get_construction_time(type));
 						new_up.set_is_pop_project(true);
 						new_up.set_is_upgrade(true);
-						new_up.set_type(state.world.factory_get_building_type(selected_factory));
+						new_up.set_type(type);
 					}
 
 					//try to invest into something new...
@@ -2118,11 +2120,12 @@ namespace economy {
 								return a.index() < b.index(); // force total ordering
 							});
 							if(!valid_desired_types.empty()) {
-								auto selected = valid_desired_types[0];
+								auto type = valid_desired_types[0];
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(s, n));
+								new_up.set_remaining_time(state.world.factory_type_get_construction_time(type));
 								new_up.set_is_pop_project(true);
 								new_up.set_is_upgrade(false);
-								new_up.set_type(selected);
+								new_up.set_type(type);
 								auto costs = new_up.get_type().get_construction_costs();
 								for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 									if(costs.commodity_type[i]) {
@@ -2167,6 +2170,7 @@ namespace economy {
 								best_p = e;
 
 						auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_p.first, n));
+						new_rr.set_remaining_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::railroad)].time);
 						new_rr.set_is_pop_project(true);
 						new_rr.set_type(uint8_t(province_building_type::railroad));
 						//found_investment = true;

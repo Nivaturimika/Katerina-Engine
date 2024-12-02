@@ -1018,6 +1018,7 @@ namespace ai {
 									}
 									if(!ug_in_progress) {
 										auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+										new_up.set_remaining_time(type.get_construction_time());
 										new_up.set_is_pop_project(false);
 										new_up.set_is_upgrade(true);
 										new_up.set_type(type);
@@ -1074,9 +1075,10 @@ namespace ai {
 										bool under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
 										if(!under_cap && (rules & issue_rule::expand_factory) != 0) {
 											auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+											new_up.set_remaining_time(type.get_construction_time());
 											new_up.set_is_pop_project(false);
 											new_up.set_is_upgrade(true);
-											new_up.set_type(top_desired_type);
+											new_up.set_type(type);
 											--max_projects;
 										}
 										is_present = true;
@@ -1088,6 +1090,7 @@ namespace ai {
 							if(!is_present
 							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+								new_up.set_remaining_time(state.world.factory_type_get_construction_time(top_desired_type));
 								new_up.set_is_pop_project(false);
 								new_up.set_is_upgrade(false);
 								new_up.set_type(top_desired_type);
@@ -1125,7 +1128,7 @@ namespace ai {
 					if(max_local_lvl - current_lvl - min_build <= 0)
 						continue;
 
-					if(!province::has_naval_base_being_built(state, o.get_province()))
+					if(!province::can_build_naval_base(state, o.get_province()))
 						project_provs.push_back(o.get_province().id);
 				}
 
@@ -1139,9 +1142,11 @@ namespace ai {
 				});
 				if(!project_provs.empty()) {
 					auto si = state.world.province_get_state_membership(project_provs[0]);
-					if(si)
+					if(si) {
 						si.set_naval_base_is_taken(true);
+					}
 					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[0], n));
+					new_rr.set_remaining_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::naval_base)].time);
 					new_rr.set_is_pop_project(false);
 					new_rr.set_type(uint8_t(economy::province_building_type::naval_base));
 					max_projects -= 4;
@@ -1185,6 +1190,7 @@ namespace ai {
 					});
 					for(uint32_t j = 0; j < project_provs.size() && max_projects > 0; ++j) {
 						auto new_proj = fatten(state.world, state.world.force_create_province_building_construction(project_provs[j], n));
+						new_proj.set_remaining_time(state.economy_definitions.building_definitions[uint8_t(econ_buildable[i].type)].time);
 						new_proj.set_is_pop_project(false);
 						new_proj.set_type(uint8_t(econ_buildable[i].type));
 						--max_projects;
@@ -1231,6 +1237,7 @@ namespace ai {
 
 				for(uint32_t i = 0; i < project_provs.size() && max_projects > 0; ++i) {
 					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[i], n));
+					new_rr.set_remaining_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::fort)].time);
 					new_rr.set_is_pop_project(false);
 					new_rr.set_type(uint8_t(economy::province_building_type::fort));
 					max_projects -= 2;
@@ -3790,6 +3797,7 @@ namespace ai {
 							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
+								c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 								c.set_type(best_transport);
 								constructing_fleet_cap += supply_pts;
 							}
@@ -3804,6 +3812,7 @@ namespace ai {
 							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
+								c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 								c.set_type(best_transport);
 								++num_transports;
 								constructing_fleet_cap += supply_pts;
@@ -3830,6 +3839,7 @@ namespace ai {
 						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_light));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
+							c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 							c.set_type(best_light);
 							free_small_points -= supply_pts;
 						}
@@ -3845,6 +3855,7 @@ namespace ai {
 						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_big));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
+							c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 							c.set_type(best_big);
 							free_big_points -= supply_pts;
 						}
@@ -5547,6 +5558,7 @@ namespace ai {
 								while(num_to_make > 0) {
 									assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 									auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
+									c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 									c.set_type(t);
 									update_frontline_counters(state, t, num_frontline, num_support, num_cavalry);
 									--num_to_make;
@@ -5569,6 +5581,7 @@ namespace ai {
 								while(num_to_make > 0) {
 									assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 									auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
+									c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 									c.set_type(t);
 									update_frontline_counters(state, t, num_frontline, num_support, num_cavalry);
 									--num_to_make;
@@ -5591,6 +5604,7 @@ namespace ai {
 								while(num_to_make > 0) {
 									assert(command::can_start_land_unit_construction(state, n, pop.get_province(), pop.get_pop().get_culture(), t));
 									auto c = fatten(state.world, state.world.try_create_province_land_construction(pop.get_pop().id, n));
+									c.set_remaining_time(state.military_definitions.unit_base_definitions[t].build_time);
 									c.set_type(t);
 									update_frontline_counters(state, t, num_frontline, num_support, num_cavalry);
 									--num_to_make;

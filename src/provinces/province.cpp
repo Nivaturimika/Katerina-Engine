@@ -376,19 +376,19 @@ namespace province {
 	bool has_naval_base_being_built(sys::state& state, dcon::province_id id) {
 		for(auto pb : state.world.province_get_province_building_construction(id)) {
 			if(economy::province_building_type(pb.get_type()) == economy::province_building_type::naval_base)
-			return true;
+				return true;
 		}
 		return false;
 	}
 	bool can_build_naval_base(sys::state& state, dcon::province_id id, dcon::nation_id n) {
 		if(state.world.province_get_nation_from_province_ownership(id) != n)
-		return false;
+			return false;
 		if(state.world.province_get_is_coast(id) == false)
-		return false;
+			return false;
 		if(state.world.province_get_nation_from_province_ownership(id) != state.world.province_get_nation_from_province_control(id))
-		return false;
+			return false;
 		if(military::province_is_under_siege(state, id))
-		return false;
+			return false;
 
 		auto si = state.world.province_get_state_membership(id);
 
