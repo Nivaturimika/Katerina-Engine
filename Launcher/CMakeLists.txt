@@ -7,4 +7,4 @@ target_compile_definitions(KatEngine_Launcher PUBLIC ALICE_NO_ENTRY_POINT)
 
 target_link_libraries(KatEngine_Launcher PRIVATE KatEngineCommon)
 target_link_libraries(KatEngine_Launcher PRIVATE dbghelp)
-#target_precompile_headers(KatEngine_Launcher REUSE_FROM KatEngine)
+target_precompile_headers(KatEngine_Launcher REUSE_FROM KatEngine)
