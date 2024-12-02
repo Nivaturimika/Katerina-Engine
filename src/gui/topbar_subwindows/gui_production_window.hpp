@@ -496,7 +496,7 @@ namespace ui {
 					if(total_inputs > 0.f) {
 						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
 						float rem_construction_time = rem_inputs_percent * construction_time;
-						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::fp_percentage_one_place{ rem_construction_time });
+						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(rem_construction_time) });
 					}
 					return;
 				}
@@ -553,7 +553,7 @@ namespace ui {
 					if(total_inputs > 0.f) {
 						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
 						float rem_construction_time = rem_inputs_percent * construction_time;
-						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::fp_percentage_one_place{ rem_construction_time });
+						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(rem_construction_time) });
 					}
 					return;
 				}
