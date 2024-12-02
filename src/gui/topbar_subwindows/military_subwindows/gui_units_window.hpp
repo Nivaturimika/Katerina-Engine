@@ -3,9 +3,8 @@
 #include "gui_element_types.hpp"
 
 namespace ui {
-
 	template<typename T>
-struct military_unit_info : public std::variant<T, dcon::province_land_construction_id, dcon::province_naval_construction_id> { };
+	struct military_unit_info : public std::variant<T, dcon::province_land_construction_id, dcon::province_naval_construction_id> { };
 
 	template<typename T>
 	class military_unit_name_text : public simple_text_element_base {
@@ -16,20 +15,20 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 				auto c = std::get<dcon::province_land_construction_id>(content);
 				auto utid = state.world.province_land_construction_get_type(c);
 				if(utid) {
-				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+					auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
 					set_text(state, text::produce_simple_string(state, unitname));
 				}
 			} else if(std::holds_alternative<dcon::province_naval_construction_id>(content)) {
 				auto c = std::get<dcon::province_naval_construction_id>(content);
 				auto utid = state.world.province_naval_construction_get_type(c);
 				if(utid) {
-				auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
+					auto unitname = utid ? state.military_definitions.unit_base_definitions[utid].name : dcon::text_key{};
 					set_text(state, text::produce_simple_string(state, unitname));
 				}
 			} else if(std::holds_alternative<T>(content)) {
 				auto fat_id = dcon::fatten(state.world, std::get<T>(content));
-			auto unit_name = std::string{ state.to_string_view(fat_id.get_name()) };
-			set_text(state, std::string{ state.to_string_view(fat_id.get_name()) });
+				auto unit_name = std::string{ state.to_string_view(fat_id.get_name()) };
+				set_text(state, std::string{ state.to_string_view(fat_id.get_name()) });
 			}
 		}
 	};
@@ -59,13 +58,15 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 					if(goods.commodity_type[i]) {
 						auto box = text::open_layout_box(contents, 0);
 						text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
-					text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-					text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp( cgoods.commodity_amounts[i],0.0f,goods.commodity_amounts[i] * admin_cost_factor) });
-					text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-					text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
+						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp( cgoods.commodity_amounts[i],0.0f,goods.commodity_amounts[i] * admin_cost_factor) });
+						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
 						text::close_layout_box(contents, box);
 					}
 				}
+				auto rem_time = int32_t(state.world.province_land_construction_get_remaining_construction_time(c));
+				text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ rem_time });
 			} else if(std::holds_alternative<dcon::province_naval_construction_id>(container)) {
 				auto c = std::get<dcon::province_naval_construction_id>(container);
 
@@ -79,15 +80,16 @@ struct military_unit_info : public std::variant<T, dcon::province_land_construct
 					if(goods.commodity_type[i]) {
 						auto box = text::open_layout_box(contents, 0);
 						text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
-					text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-					text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp(cgoods.commodity_amounts[i],0.0f,goods.commodity_amounts[i] * admin_cost_factor) });
-					text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-					text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
+						text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ std::clamp(cgoods.commodity_amounts[i],0.0f,goods.commodity_amounts[i] * admin_cost_factor) });
+						text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
+						text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
 						text::close_layout_box(contents, box);
 					}
 				}
+				auto rem_time = int32_t(state.world.province_naval_construction_get_remaining_construction_time(c));
+				text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ rem_time });
 			}
-
 		}
 	};
 

@@ -468,8 +468,6 @@ namespace ui {
 					auto& goods = state.world.factory_type_get_construction_costs(nf.type);
 					auto& cgoods = p.get_purchased_goods();
 					//
-					float total_inputs = 0.f;
-					float used_inputs = 0.f;
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(goods.commodity_type[i]) {
 							auto box = text::open_layout_box(contents, 0);
@@ -479,9 +477,6 @@ namespace ui {
 							text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
 							text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
 							text::close_layout_box(contents, box);
-							//
-							total_inputs += goods.commodity_amounts[i] * cost_mod;
-							used_inputs += cgoods.commodity_amounts[i];
 						} else {
 							break;
 						}
@@ -521,8 +516,6 @@ namespace ui {
 					auto& cgoods = p.get_purchased_goods();
 					//
 					float construction_time = float(p.get_type().get_construction_time());
-					float total_inputs = 0.f;
-					float used_inputs = 0.f;
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 						if(goods.commodity_type[i]) {
 							auto box = text::open_layout_box(contents, 0);
@@ -532,9 +525,6 @@ namespace ui {
 							text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
 							text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * cost_mod });
 							text::close_layout_box(contents, box);
-							//
-							total_inputs += goods.commodity_amounts[i] * cost_mod;
-							used_inputs += cgoods.commodity_amounts[i];
 						} else {
 							break;
 						}
