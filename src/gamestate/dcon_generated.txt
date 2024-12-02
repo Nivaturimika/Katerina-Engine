@@ -4249,6 +4249,11 @@ relationship{
 	}
 
 	property{
+		name{ remaining_construction_time }
+		type{ uint16_t }
+		tag{ save }
+	}
+	property{
 		name{ purchased_goods }
 		type{ economy::commodity_set }
 		tag{ save }
@@ -4284,6 +4289,11 @@ relationship{
 		index_storage{array}
 	}
 
+	property{
+		name{ remaining_construction_time }
+		type{ uint16_t }
+		tag{ save }
+	}
 	property{
 		name{ purchased_goods }
 		type{ economy::commodity_set }
@@ -4321,6 +4331,11 @@ relationship{
 	}
 
 	property{
+		name{ remaining_construction_time }
+		type{ uint16_t }
+		tag{ save }
+	}
+	property{
 		name{ purchased_goods }
 		type{ economy::commodity_set }
 		tag{ save }
@@ -4356,6 +4371,11 @@ relationship{
 		index_storage{array}
 	}
 
+	property{
+		name{ remaining_construction_time }
+		type{ uint16_t }
+		tag{ save }
+	}
 	property{
 		name{ purchased_goods }
 		type{ economy::commodity_set }
