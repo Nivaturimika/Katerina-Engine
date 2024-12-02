@@ -520,38 +520,77 @@ namespace simple_fs {
 		}
 	}
 
+	/*	See: https://specifications.freedesktop.org/basedir-spec/latest/
+		" $XDG_DATA_HOME defines the base directory relative to which user-specific data files should be stored.
+		If $XDG_DATA_HOME is either not set or empty, a default equal to $HOME/.local/share should be used. " */
+
 	directory get_or_create_settings_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/settings/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/settings/";
 		make_directories(path);
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_save_game_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/saves/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/saves/";
 		make_directories(path);
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_templates_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/templates/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/templates/";
 		make_directories(path);
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_oos_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/oos/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/oos/";
 		make_directories(path);
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_data_dumps_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/data_dumps/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/data_dumps/";
 		make_directories(path);
-
 		return directory(nullptr, path);
 	}
 
 	directory get_or_create_scenario_directory() {
+		auto xdg_data_home = getenv("XDG_DATA_HOME");
+		if(xdg_data_home) {
+			native_string path = native_string(xdg_data_home) + "/KatEngine/scenarios/";
+			make_directories(path);
+			return directory(nullptr, path);
+		}
 		native_string path = native_string(getenv("HOME")) + "/.local/share/KatEngine/scenarios/";
 		make_directories(path);
 		return directory(nullptr, path);
