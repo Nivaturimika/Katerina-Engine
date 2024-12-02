@@ -177,7 +177,8 @@ int scenario_validate(simple_fs::file_system& fs_root, native_string path) {
 	@return The error code, EXIT_SUCCESS if no error was generated.
 */
 int process_command_line(std::vector<native_string>& argv) {
-	int headless_speed = 6;
+	int32_t headless_speed = 6;
+	int32_t headless_ticks = 0; //0 -- infinite, >1 run for n specified amount
 	bool headless_repeat = false;
 	bool headless = false;
 
@@ -259,7 +260,13 @@ int process_command_line(std::vector<native_string>& argv) {
 		} else if(native_string(argv[i]) == NATIVE("-speed")) {
 			if(i + 1 < argv.size()) {
 				auto str = text::native_to_utf8(native_string(argv[i + 1]));
-				headless_speed = std::atoi(str.c_str());
+				headless_speed = int32_t(std::atoi(str.c_str()));
+				i++;
+			}
+		} else if(native_string(argv[i]) == NATIVE("-ticks")) {
+			if(i + 1 < argv.size()) {
+				auto str = text::native_to_utf8(native_string(argv[i + 1]));
+				headless_ticks = int32_t(std::atoi(str.c_str()));
 				i++;
 			}
 		} else if(native_string(argv[i]) == NATIVE("-path")) {
@@ -279,12 +286,15 @@ int process_command_line(std::vector<native_string>& argv) {
 	// if the optional fs path is defined use that one, otherwise infer from mod list
 	auto path = opt_fs_path.empty() ? produce_mod_path(mod_list) : opt_fs_path;
 	native_string selected_scenario_file = NATIVE("");
-	window::create_window(game_state, window::creation_parameters{ 1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen });
-
 	//
 	// Validator only mode
 	if(validate_only) {
 		return scenario_validate(fs_root, path);
+	}
+	//
+	// No validator mode -- check if headless to even init the window
+	if(!headless) {
+		window::create_window(game_state, window::creation_parameters{ 1024, 780, window::window_state::maximized, game_state.user_settings.prefer_fullscreen });
 	}
 	//
 	// Normal mode (default)
@@ -343,7 +353,7 @@ int process_command_line(std::vector<native_string>& argv) {
 	ui::populate_definitions_map(game_state);
 
 	if(headless) {
-		game_state.actual_game_speed = headless_speed;
+		game_state.actual_game_speed = int32_t(headless_speed);
 		game_state.ui_pause.store(false, std::memory_order::release);
 		game_scene::switch_scene(game_state, game_scene::scene_id::in_game_basic);
 		game_state.local_player_nation = dcon::nation_id{};
@@ -367,11 +377,17 @@ int process_command_line(std::vector<native_string>& argv) {
 				//
 				network::init(game_state);
 				game_scene::switch_scene(game_state, game_scene::scene_id::in_game_basic);
-				game_state.actual_game_speed = headless_speed;
+				game_state.actual_game_speed = int32_t(headless_speed);
 			};
 			update_thread.join();
 		} else {
-			game_state.game_loop();
+			if(headless_ticks == 0) { //indefinitely
+				game_state.game_loop();
+			} else { //fixed amount, for benchmarks likely
+				for(int32_t i = 0; i < headless_ticks; ++i) {
+					game_state.single_game_tick();
+				}
+			}
 		}
 	} else {
 		std::thread update_thread([&]() { game_state.game_loop(); });

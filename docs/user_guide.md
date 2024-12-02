@@ -94,6 +94,7 @@ Other controls are described directly on the tooltip (for example, right clickin
 * `-scenario <file>`: Specify a scenario, should just be the filename, for example: `0AAB0.bin`.
 * `-autofind`: Autofind an scenario to play with before trying to create it.
 * `-speed <n>`: Set initial game speed to `n` (from 0 to 5).
+* `-ticks <n>`: Run for the specified amount of ticks (defualt is run indefinitely till end-date, `0`)
 * `-path <path>`: Set the raw mod path to `path` (separated by `?` and `;`, the former denotes a `replace_path`, the latter denotes a root).
 * `-validate`: Sets validate mode, exits upon scenario creation.
 * `-port <port>`: Use a given port to host, the default is `1984`.
