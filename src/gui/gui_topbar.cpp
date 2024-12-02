@@ -554,7 +554,7 @@ namespace ui {
 		//topbar_date_temperature;Average temperature: §Y$x$°C§! / §Y$y$°F§!
 	}
 
-	void topbar_closed_factories_icon::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+	void topbar_closed_factories_icon::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 		auto nation_id = retrieve<dcon::nation_id>(state, parent);
 		auto box = text::open_layout_box(contents, 0);
 		if(!economy_factory::nation_has_closed_factories(state, nation_id)) {
