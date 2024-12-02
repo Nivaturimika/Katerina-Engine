@@ -1,9 +1,15 @@
 message(STATUS "Finding icu...")
 
 if(WIN32)
-	FetchContent_Declare(icu
-		URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win64-MSVC2022.zip")
-	FetchContent_MakeAvailable(icu)
+	if(ARCHITECTURE STREQUAL "x64")
+		FetchContent_Declare(icu
+			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win64-MSVC2022.zip")
+		FetchContent_MakeAvailable(icu)
+	else()
+		FetchContent_Declare(icu
+			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win32-MSVC2022.zip")
+		FetchContent_MakeAvailable(icu)
+	endif()
 	# icudt
 	add_library(icudt SHARED IMPORTED)
 	set_target_properties(icudt PROPERTIES

@@ -61,18 +61,6 @@ jobs:
           core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-    - name: Install ICU
-      id: install-icu
-      uses: johnwason/vcpkg-action@v6
-      with:
-        pkgs: 'icu'
-        triplet: 'x64-windows'
-        cache-key: ${{ matrix.config }}
-        token: ${{ github.token }}
-        github-binarycache: true
-      env: 
-        VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-
     - name: Configure Build Files
       env:
         vcpkg-cmake-config: ${{ steps.install-icu.outputs.vcpkg-cmake-config }}
@@ -87,6 +75,40 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: katerina-engine-windows-x86_64
+        path: build/Debug/KatEngine.exe
+
+  windows-build:
+    strategy:
+      matrix:
+        config: [x86-debug-windows]
+    runs-on: [windows-latest]
+    name: Windows (${{ matrix.config }})
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Export GitHub Actions cache environment variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    - name: Configure Build Files
+      env:
+        vcpkg-cmake-config: ${{ steps.install-icu.outputs.vcpkg-cmake-config }}
+      run: |
+        cmake ${{ env.vcpkg-cmake-config }} -DARCHITECTURE=x86 -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022" -B build
+
+    - name: Build Katerina Engine
+      run: |
+        cmake --build build -t KatEngine
+
+    - name: Archive results
+      uses: actions/upload-artifact@v4
+      with:
+        name: katerina-engine-windows-i686
         path: build/Debug/KatEngine.exe
 
   # macos-build:
@@ -128,7 +150,7 @@ jobs:
   #         echo success
 
   build-check:
-    needs: [windows-build]
+    needs: [windows-build, windows32-build]
     runs-on: ubuntu-latest
     name: Build Matrix
     steps:
