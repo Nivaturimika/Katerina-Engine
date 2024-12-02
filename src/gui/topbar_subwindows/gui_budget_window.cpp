@@ -119,15 +119,15 @@ namespace ui {
 			static bool has_run = false;
 			if(!has_run) {
 				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{0})
-					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+					.set_name(text::find_or_add_key(state, "budget_strata_need", false));
 				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{1})
-					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+					.set_name(text::find_or_add_key(state, "budget_strata_need", false));
 				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{2})
-					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+					.set_name(text::find_or_add_key(state, "budget_strata_need", false));
 				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{3})
-					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+					.set_name(text::find_or_add_key(state, "budget_strata_need", false));
 				dcon::fatten(state.world, dcon::pop_satisfaction_wrapper_id{4})
-					.set_name(text::find_or_add_key(state, "budget_strate_need", false));
+					.set_name(text::find_or_add_key(state, "budget_strata_need", false));
 				has_run = true;
 			}
 			piechart::on_create(state);
