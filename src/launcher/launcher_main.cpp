@@ -2,6 +2,7 @@
 #define UNICODE
 #endif
 #include <Windows.h>
+#include <Windowsx.h>
 #include <shellapi.h>
 #include <shellscalingapi.h>
 #include "Objbase.h"
