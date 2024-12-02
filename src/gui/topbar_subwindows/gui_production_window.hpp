@@ -1753,6 +1753,39 @@ namespace ui {
 		}
 	};
 
+	class production_factories_tab_button : public generic_tab_button<production_window_tab> {
+		void on_create(sys::state& state) noexcept override {
+			generic_tab_button<production_window_tab>::on_create(state);
+			target = production_window_tab::factories;
+		}
+		void on_update(sys::state& state) noexcept override {
+			auto sc = state.world.nation_get_state_building_construction_as_nation(state.local_player_nation);
+			auto count = int32_t(sc.end() - sc.begin());
+			set_button_text(state, text::produce_simple_string(state, "production_factories") + " (" + std::to_string(count) + ")");
+		}
+	};
+
+	class production_projects_tab_button : public generic_tab_button<production_window_tab> {
+		void on_create(sys::state& state) noexcept override {
+			generic_tab_button<production_window_tab>::on_create(state);
+			target = production_window_tab::projects;
+		}
+		void on_update(sys::state& state) noexcept override {
+			int32_t count = 0;
+			for(auto sc : state.world.nation_get_state_building_construction_as_nation(state.local_player_nation)) {
+				if(sc.get_is_pop_project()) {
+					++count;
+				}
+			}
+			for(auto sc : state.world.nation_get_province_building_construction_as_nation(state.local_player_nation)) {
+				if(sc.get_is_pop_project()) {
+					++count;
+				}
+			}
+			set_button_text(state, text::produce_simple_string(state, "production_projects_tab") + " (" + std::to_string(count) + ")");
+		}
+	};
+
 	struct open_investment_nation {
 		dcon::nation_id id;
 	};
@@ -1768,11 +1801,11 @@ namespace ui {
 		element_base* project_window = nullptr;
 		production_foreign_investment_window* foreign_invest_win = nullptr;
 
-	sys::commodity_group curr_commodity_group{};
-	dcon::state_instance_id focus_state{};
-	dcon::nation_id foreign_nation{};
-	xy_pair base_commodity_offset{33, 50};
-	xy_pair commodity_offset{33, 50};
+		sys::commodity_group curr_commodity_group{};
+		dcon::state_instance_id focus_state{};
+		dcon::nation_id foreign_nation{};
+		xy_pair base_commodity_offset{33, 50};
+		xy_pair commodity_offset{33, 50};
 
 		std::vector<element_base*> factory_elements;
 		std::vector<element_base*> investment_brow_elements;
@@ -1893,17 +1926,13 @@ namespace ui {
 			} else if(name == "close_button") {
 				return make_element_by_type<generic_close_button>(state, id);
 			} else if(name == "tab_factories") {
-				auto ptr = make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
-				ptr->target = production_window_tab::factories;
-				return ptr;
+				return make_element_by_type<production_factories_tab_button>(state, id);
 			} else if(name == "tab_invest") {
 				auto ptr = make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
 				ptr->target = production_window_tab::investments;
 				return ptr;
 			} else if(name == "tab_popprojects") {
-				auto ptr = make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
-				ptr->target = production_window_tab::projects;
-				return ptr;
+				return make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
 			} else if(name == "tab_goodsproduction") {
 				auto ptr = make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
 				ptr->target = production_window_tab::goods;

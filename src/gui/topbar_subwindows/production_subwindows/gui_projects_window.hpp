@@ -194,26 +194,25 @@ namespace ui {
 	};
 
 	class production_project_listbox : public listbox_element_base<production_project_info, production_project_data> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "project_info";
 		}
-
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
 			state.world.nation_for_each_state_building_construction_as_nation(state.local_player_nation,
-				[&](dcon::state_building_construction_id id) {
-					auto fat_id = dcon::fatten(state.world, id);
-					if(fat_id.get_is_pop_project())
-						row_contents.push_back(production_project_data(id));
-				});
+			[&](dcon::state_building_construction_id id) {
+				auto fat_id = dcon::fatten(state.world, id);
+				if(fat_id.get_is_pop_project())
+					row_contents.push_back(production_project_data(id));
+			});
 			state.world.nation_for_each_province_building_construction_as_nation(state.local_player_nation,
-				[&](dcon::province_building_construction_id id) {
-					auto fat_id = dcon::fatten(state.world, id);
-					if(fat_id.get_is_pop_project())
-						row_contents.push_back(production_project_data(id));
-				});
+			[&](dcon::province_building_construction_id id) {
+				auto fat_id = dcon::fatten(state.world, id);
+				if(fat_id.get_is_pop_project())
+					row_contents.push_back(production_project_data(id));
+			});
 			update(state);
 		}
 	};
