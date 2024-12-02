@@ -181,6 +181,14 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 					open_leader_selection(state, dcon::army_id{}, unit, location.x, location.y);
 			}
 		}
+		void button_right_action(sys::state& state) noexcept override {
+			auto unit = retrieve<T>(state, parent);
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				command::change_general(state, state.local_player_nation, unit, dcon::leader_id{});
+			} else {
+				command::change_admiral(state, state.local_player_nation, unit, dcon::leader_id{});
+			}
+		}
 	};
 
 	template<class T>
@@ -264,6 +272,14 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				open_leader_selection(state, unit, dcon::navy_id{}, location.x + base_data.size.x, location.y);
 			} else {
 				open_leader_selection(state, dcon::army_id{}, unit, location.x + base_data.size.x, location.y);
+			}
+		}
+		void button_right_action(sys::state& state) noexcept override {
+			auto unit = retrieve<T>(state, parent);
+			if constexpr(std::is_same_v<T, dcon::army_id>) {
+				command::change_general(state, state.local_player_nation, unit, dcon::leader_id{});
+			} else {
+				command::change_admiral(state, state.local_player_nation, unit, dcon::leader_id{});
 			}
 		}
 	};
@@ -2021,6 +2037,14 @@ enum class unitpanel_action : uint8_t { close, reorg, split, disband, changelead
 				open_leader_selection(state, std::get<dcon::army_id>(foru), dcon::navy_id{}, location.x + base_data.size.x, location.y);
 			} else {
 				open_leader_selection(state, dcon::army_id{}, std::get<dcon::navy_id>(foru), location.x + base_data.size.x, location.y);
+			}
+		}
+		void button_right_action(sys::state& state) noexcept override {
+			auto foru = retrieve<unit_var>(state, parent);
+			if(std::holds_alternative<dcon::army_id>(foru)) {
+				command::change_general(state, state.local_player_nation, std::get<dcon::army_id>(foru), dcon::leader_id{});
+			} else {
+				command::change_admiral(state, state.local_player_nation, std::get<dcon::navy_id>(foru), dcon::leader_id{});
 			}
 		}
 	};
