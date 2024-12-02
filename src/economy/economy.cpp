@@ -13,6 +13,8 @@
 #include "pdqsort.h"
 #include "news.hpp"
 
+#include "economy_templates.hpp"
+
 namespace economy {
 	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
@@ -167,7 +169,7 @@ namespace economy {
 		float least = 1.0f;
 		auto const& inputs = state.world.commodity_get_artisan_inputs(c);
 		float input_total = 0.0f;
-		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
+		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(inputs.commodity_type[i]) {
 				least = std::min(least, state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]));
 			} else {
@@ -175,12 +177,6 @@ namespace economy {
 			}
 		}
 		return least;
-	}
-
-	bool valid_artisan_good(sys::state& state, dcon::nation_id n, dcon::commodity_id cid) {
-		auto kf = state.world.commodity_get_key_factory(cid);
-		return (state.world.commodity_get_artisan_output_amount(cid) > 0.0f
-		&& (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))));
 	}
 
 	//crude approximation of exp
@@ -975,7 +971,8 @@ namespace economy {
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto kf = state.world.commodity_get_key_factory(cid);
-			if(state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf))) {
+			if(state.world.commodity_get_is_available_from_start(cid)
+			|| (kf && state.world.nation_get_active_building(n, kf))) {
 				for(const auto t : state.world.in_pop_type) {
 					auto strata = state.world.pop_type_get_strata(t);
 					float base_life = state.world.pop_type_get_life_needs(t, cid);

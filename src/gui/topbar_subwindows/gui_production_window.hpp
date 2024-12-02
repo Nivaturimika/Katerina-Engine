@@ -1754,6 +1754,7 @@ namespace ui {
 	};
 
 	class production_factories_tab_button : public generic_tab_button<production_window_tab> {
+	public:
 		void on_create(sys::state& state) noexcept override {
 			generic_tab_button<production_window_tab>::on_create(state);
 			target = production_window_tab::factories;
@@ -1766,6 +1767,7 @@ namespace ui {
 	};
 
 	class production_projects_tab_button : public generic_tab_button<production_window_tab> {
+	public:
 		void on_create(sys::state& state) noexcept override {
 			generic_tab_button<production_window_tab>::on_create(state);
 			target = production_window_tab::projects;
@@ -1932,7 +1934,7 @@ namespace ui {
 				ptr->target = production_window_tab::investments;
 				return ptr;
 			} else if(name == "tab_popprojects") {
-				return make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
+				return make_element_by_type<production_projects_tab_button>(state, id);
 			} else if(name == "tab_goodsproduction") {
 				auto ptr = make_element_by_type<generic_tab_button<production_window_tab>>(state, id);
 				ptr->target = production_window_tab::goods;

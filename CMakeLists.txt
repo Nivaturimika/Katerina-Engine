@@ -78,6 +78,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_modifier_tooltips.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_province_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_trigger_tooltips.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_topbar.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_error_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/map_tooltip.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_diplomacy_window.cpp"

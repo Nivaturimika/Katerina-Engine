@@ -752,7 +752,7 @@ namespace ui {
 	};
 
 	class nation_budget_interest_text : public standard_nation_text {
-		public:
+	public:
 		std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 			auto budget = economy::interest_payment(state, nation_id);
 			return text::format_money(budget);

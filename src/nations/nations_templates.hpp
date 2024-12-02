@@ -7,14 +7,12 @@ namespace nations {
 	// returns whether a culture is on the accepted list OR is the primary culture
 	template<typename T, typename U>
 	auto nation_accepts_culture(sys::state const& state, T ids, U cul_ids) {
-		auto is_accepted = ve::apply(
-			[&state](dcon::nation_id n, dcon::culture_id c) {
-				if(n)
-					return state.world.nation_get_accepted_cultures(n, c);
-				else
-					return false;
-			},
-			ids, cul_ids);
+		auto is_accepted = ve::apply([&state](dcon::nation_id n, dcon::culture_id c) {
+			if(n)
+				return state.world.nation_get_accepted_cultures(n, c);
+			else
+				return false;
+		}, ids, cul_ids);
 		return (state.world.nation_get_primary_culture(ids) == cul_ids) || is_accepted;
 	}
 
@@ -34,7 +32,7 @@ namespace nations {
 	auto central_blockaded_fraction(sys::state const& state, T ids) {
 		auto cpc = ve::to_float(state.world.nation_get_central_ports(ids));
 		auto b_count = ve::to_float(state.world.nation_get_central_blockaded(ids));
-	auto ret = decltype(cpc){};
+		auto ret = decltype(cpc){};
 		return ve::select(cpc != 0.0f, b_count / cpc, ret);
 	}
 
