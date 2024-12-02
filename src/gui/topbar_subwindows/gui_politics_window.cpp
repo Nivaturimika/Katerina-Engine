@@ -6,6 +6,75 @@
 #include "gui_politics_window.hpp"
 
 namespace ui {
+	void produce_decision_substitutions(sys::state& state, text::substitution_map& m, dcon::nation_id n) {
+		text::add_to_substitution_map(m, text::variable_type::country_adj, text::get_adjective(state, n));
+		text::add_to_substitution_map(m, text::variable_type::country, n);
+		text::add_to_substitution_map(m, text::variable_type::countryname, n);
+		text::add_to_substitution_map(m, text::variable_type::thiscountry, n);
+		text::add_to_substitution_map(m, text::variable_type::capital, state.world.nation_get_capital(n));
+		text::add_to_substitution_map(m, text::variable_type::monarchtitle, text::get_ruler_title(state, n));
+		text::add_to_substitution_map(m, text::variable_type::continentname, state.world.nation_get_capital(n).get_continent().get_name());
+		// Date
+		text::add_to_substitution_map(m, text::variable_type::year, int32_t(state.current_date.to_ymd(state.start_date).year));
+		//text::add_to_substitution_map(m, text::variable_type::month, text::localize_month(state, state.current_date.to_ymd(state.start_date).month));
+		text::add_to_substitution_map(m, text::variable_type::day, int32_t(state.current_date.to_ymd(state.start_date).day));
+		auto sm = state.world.nation_get_in_sphere_of(n);
+		text::add_to_substitution_map(m, text::variable_type::spheremaster, sm);
+		text::add_to_substitution_map(m, text::variable_type::spheremaster_adj, text::get_adjective(state, sm));
+		auto smpc = state.world.nation_get_primary_culture(sm);
+		text::add_to_substitution_map(m, text::variable_type::spheremaster_union_adj, smpc.get_group_from_culture_group_membership().get_identity_from_cultural_union_of().get_adjective());
+
+		// Non-vanilla
+		text::add_to_substitution_map(m, text::variable_type::government, state.world.nation_get_government_type(n).get_name());
+		text::add_to_substitution_map(m, text::variable_type::ideology, state.world.nation_get_ruling_party(n).get_ideology().get_name());
+		text::add_to_substitution_map(m, text::variable_type::party, state.world.nation_get_ruling_party(n).get_name());
+		text::add_to_substitution_map(m, text::variable_type::religion, state.world.religion_get_name(state.world.nation_get_religion(n)));
+		text::add_to_substitution_map(m, text::variable_type::infamy, text::fp_two_places{ state.world.nation_get_infamy(n) });
+		text::add_to_substitution_map(m, text::variable_type::badboy, text::fp_two_places{ state.world.nation_get_infamy(n) });
+		text::add_to_substitution_map(m, text::variable_type::spheremaster, state.world.nation_get_in_sphere_of(n));
+		text::add_to_substitution_map(m, text::variable_type::overlord, state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(n)));
+		text::add_to_substitution_map(m, text::variable_type::nationalvalue, state.world.nation_get_national_value(n).get_name());
+		// Crisis stuff
+		text::add_to_substitution_map(m, text::variable_type::crisistaker, state.crisis_liberation_tag);
+		text::add_to_substitution_map(m, text::variable_type::crisistaker_adj, state.world.national_identity_get_adjective(state.crisis_liberation_tag));
+		text::add_to_substitution_map(m, text::variable_type::crisistaker_capital, state.world.national_identity_get_capital(state.crisis_liberation_tag));
+		text::add_to_substitution_map(m, text::variable_type::crisistaker_continent, state.world.national_identity_get_capital(state.crisis_liberation_tag).get_continent().get_name());
+		text::add_to_substitution_map(m, text::variable_type::crisisattacker, state.primary_crisis_attacker);
+		text::add_to_substitution_map(m, text::variable_type::crisisattacker_capital, state.world.nation_get_capital(state.primary_crisis_attacker));
+		text::add_to_substitution_map(m, text::variable_type::crisisattacker_continent, state.world.nation_get_capital(state.primary_crisis_attacker).get_continent().get_name());
+		text::add_to_substitution_map(m, text::variable_type::crisisdefender, state.primary_crisis_defender);
+		text::add_to_substitution_map(m, text::variable_type::crisisdefender_capital, state.world.nation_get_capital(state.primary_crisis_defender));
+		text::add_to_substitution_map(m, text::variable_type::crisisdefender_continent, state.world.nation_get_capital(state.primary_crisis_defender).get_continent().get_name());
+		text::add_to_substitution_map(m, text::variable_type::crisistarget, state.primary_crisis_defender);
+		text::add_to_substitution_map(m, text::variable_type::crisistarget_adj, text::get_adjective(state, state.primary_crisis_defender));
+		text::add_to_substitution_map(m, text::variable_type::crisisarea, state.crisis_state);
+		text::add_to_substitution_map(m, text::variable_type::temperature, text::fp_two_places{ state.crisis_temperature });
+		// TODO: Is this correct? I remember in vanilla it could vary
+		auto pc = state.world.nation_get_primary_culture(n);
+		text::add_to_substitution_map(m, text::variable_type::culture, state.world.culture_get_name(pc));
+		text::add_to_substitution_map(m, text::variable_type::culture_group_union, pc.get_group_from_culture_group_membership().get_identity_from_cultural_union_of().get_nation_from_identity_holder());
+		text::add_to_substitution_map(m, text::variable_type::union_adj, pc.get_group_from_culture_group_membership().get_identity_from_cultural_union_of().get_adjective());
+		text::add_to_substitution_map(m, text::variable_type::countryculture, state.world.culture_get_name(pc));
+		auto names_pair = rng::get_random_pair(state, uint32_t(n.index()) << 6, uint32_t(pc.id.index()));
+		auto first_names = state.world.culture_get_first_names(state.world.nation_get_primary_culture(n));
+		if(first_names.size() > 0) {
+			auto first_name = first_names.at(rng::reduce(uint32_t(names_pair.high), first_names.size()));
+			auto last_names = state.world.culture_get_last_names(state.world.nation_get_primary_culture(n));
+			if(last_names.size() > 0) {
+				auto last_name = last_names.at(rng::reduce(uint32_t(names_pair.high), last_names.size()));
+				text::add_to_substitution_map(m, text::variable_type::culture_first_name, state.to_string_view(first_name));
+				text::add_to_substitution_map(m, text::variable_type::culture_last_name, state.to_string_view(last_name));
+			}
+		}
+		text::add_to_substitution_map(m, text::variable_type::tech, state.world.nation_get_current_research(n).get_name());
+		text::add_to_substitution_map(m, text::variable_type::now, state.current_date);
+		if(auto plist = state.world.nation_get_province_ownership(n); plist.begin() != plist.end()) {
+			auto plist_size = uint32_t(plist.end() - plist.begin());
+			uint32_t index = rng::reduce(uint32_t(names_pair.high), plist_size);
+			text::add_to_substitution_map(m, text::variable_type::anyprovince, (*(plist.begin() + index)).get_province());
+		}
+	}
+
 	void reform_rules_description(sys::state& state, text::columnar_layout& contents, uint32_t rules) {
 		if((rules & (issue_rule::primary_culture_voting | issue_rule::culture_voting | issue_rule::culture_voting | issue_rule::all_voting | issue_rule::largest_share | issue_rule::dhont | issue_rule::sainte_laque | issue_rule::same_as_ruling_party | issue_rule::rich_only | issue_rule::state_vote | issue_rule::population_vote)) != 0) {
 			text::add_line(state, contents, "voting_rules");
