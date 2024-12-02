@@ -1109,27 +1109,10 @@ namespace ai {
 			if(max_projects > 0) {
 				project_provs.clear();
 				for(auto o : n.get_province_ownership()) {
-					if(!o.get_province().get_is_coast())
-						continue;
-					if(n != o.get_province().get_nation_from_province_control())
-						continue;
-					// avoid overbuilding!
-					if(!province::has_naval_base_being_built(state, o.get_province()))
-						max_projects -= 4;
-					if(military::province_is_under_siege(state, o.get_province()))
-						continue;
-					if(o.get_province().get_building_level(economy::province_building_type::naval_base) == 0 && o.get_province().get_state_membership().get_naval_base_is_taken())
-						continue;
-
-					int32_t current_lvl = o.get_province().get_building_level(economy::province_building_type::naval_base);
-					int32_t max_local_lvl = n.get_max_building_level(economy::province_building_type::naval_base);
-					int32_t min_build = int32_t(o.get_province().get_modifier_values(sys::provincial_mod_offsets::min_build_naval_base));
-
-					if(max_local_lvl - current_lvl - min_build <= 0)
-						continue;
-
-					if(!province::can_build_naval_base(state, o.get_province()))
+					if(n == o.get_province().get_nation_from_province_control()
+					&& province::can_build_naval_base(state, o.get_province())) {
 						project_provs.push_back(o.get_province().id);
+					}
 				}
 
 				auto cap = n.get_capital();
