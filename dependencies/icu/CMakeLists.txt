@@ -5,11 +5,11 @@ if(WIN32)
 	FetchContent_MakeAvailable(icu)
 	add_library(dependency_icu INTERFACE)
 	target_include_directories(dependency_icu SYSTEM INTERFACE "${icu_SOURCE_DIR}/include")
-	target_link_libraries(dependency_icu INTERFACE
-		"${icu_SOURCE_DIR}/lib64/icudt.lib"
-		"${icu_SOURCE_DIR}/lib64/icuuc.lib"
-		"${icu_SOURCE_DIR}/lib64/icuin.lib"
-	)
+	#target_link_libraries(dependency_icu INTERFACE
+	#	"${icu_SOURCE_DIR}/lib64/icudt.lib"
+	#	"${icu_SOURCE_DIR}/lib64/icuuc.lib"
+	#	"${icu_SOURCE_DIR}/lib64/icuin.lib"
+	#)
 else()
 	find_package(ICU COMPONENTS uc dt in REQUIRED)
 	add_library(dependency_icu INTERFACE)
