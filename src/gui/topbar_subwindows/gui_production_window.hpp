@@ -468,7 +468,6 @@ namespace ui {
 					auto& goods = state.world.factory_type_get_construction_costs(nf.type);
 					auto& cgoods = p.get_purchased_goods();
 					//
-					float construction_time = float(p.get_type().get_construction_time());
 					float total_inputs = 0.f;
 					float used_inputs = 0.f;
 					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
@@ -493,11 +492,7 @@ namespace ui {
 						ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_owner_cost, true);
 					}
 					text::add_line(state, contents, "cost_multiplied_by", text::variable_type::x, text::fp_percentage_one_place{ cost_mod });
-					if(total_inputs > 0.f) {
-						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
-						float rem_construction_time = rem_inputs_percent * construction_time;
-						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(rem_construction_time) });
-					}
+					text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(p.get_remaining_construction_time()) });
 					return;
 				}
 			}
@@ -550,11 +545,7 @@ namespace ui {
 						ui::active_modifiers_description(state, contents, p.get_nation(), 0, sys::national_mod_offsets::factory_owner_cost, true);
 					}
 					text::add_line(state, contents, "cost_multiplied_by", text::variable_type::x, text::fp_percentage_one_place{ cost_mod });
-					if(total_inputs > 0.f) {
-						float rem_inputs_percent = 1.f - (used_inputs / total_inputs);
-						float rem_construction_time = rem_inputs_percent * construction_time;
-						text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(rem_construction_time) });
-					}
+					text::add_line(state, contents, "estimated_time_to_finish", text::variable_type::x, text::pretty_integer{ int32_t(p.get_remaining_construction_time()) });
 					return;
 				}
 			}

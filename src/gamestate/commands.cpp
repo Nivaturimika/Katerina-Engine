@@ -536,7 +536,7 @@ namespace command {
 		}
 
 		auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(p, source));
-		new_rr.set_remaining_time(state.economy_definitions.building_definitions[uint8_t(type)].time);
+		new_rr.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(type)].time);
 		new_rr.set_is_pop_project(false);
 		new_rr.set_type(uint8_t(type));
 	}
@@ -684,7 +684,7 @@ namespace command {
 
 	void execute_begin_factory_building_construction(sys::state& state, dcon::nation_id source, dcon::state_instance_id location, dcon::factory_type_id type, bool is_upgrade) {
 		auto new_up = fatten(state.world, state.world.force_create_state_building_construction(location, source));
-		new_up.set_remaining_time(state.world.factory_type_get_construction_time(type));
+		new_up.set_remaining_construction_time(state.world.factory_type_get_construction_time(type));
 		new_up.set_is_pop_project(false);
 		new_up.set_is_upgrade(is_upgrade);
 		new_up.set_type(type);
@@ -757,7 +757,7 @@ namespace command {
 
 	void execute_start_naval_unit_construction(sys::state& state, dcon::nation_id source, dcon::province_id location, dcon::unit_type_id type, dcon::province_id template_province) {
 		auto c = fatten(state.world, state.world.try_create_province_naval_construction(location, source));
-		c.set_remaining_time(state.military_definitions.unit_base_definitions[type].build_time);
+		c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[type].build_time);
 		c.set_type(type);
 		c.set_template_province(template_province);
 	}
@@ -806,7 +806,7 @@ namespace command {
 		auto soldier = military::find_available_soldier(state, location, soldier_culture);
 
 		auto c = fatten(state.world, state.world.try_create_province_land_construction(soldier, source));
-		c.set_remaining_time(state.military_definitions.unit_base_definitions[type].build_time);
+		c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[type].build_time);
 		c.set_type(type);
 		c.set_template_province(template_province);
 	}
