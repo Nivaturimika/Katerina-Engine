@@ -1,8 +1,8 @@
 #pragma once
 #include "system_state.hpp"
-#include "economy_factory.hpp"
+//#include "economy_factory.hpp"
 
-namespace economy_factory {
+namespace economy {
 	template<typename T>
 	bool valid_artisan_good(sys::state& state, dcon::nation_id n, T cid) {
 		auto kf = state.world.commodity_get_key_factory(cid);

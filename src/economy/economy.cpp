@@ -45,17 +45,6 @@ namespace economy {
 		return true;
 	}
 
-	/*	Every day, a nation must pay its creditors. It must pay:
-		national-modifier-to-loan-interest x debt-amount x interest-to-debt-holder-rate / 30
-		When a nation takes a loan, the interest-to-debt-holder-rate is set at:
-		nation-taking-the-loan-technology-loan-interest-modifier + define:LOAN_BASE_INTEREST, with a minimum of 0.01. */
-	float interest_payment(sys::state& state, dcon::nation_id n) {
-		auto debt = state.world.nation_get_stockpiles(n, economy::money);
-		if(debt >= 0)
-			return 0.0f;
-		return -debt * std::max(0.01f, (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::loan_interest) + 1.0f) * state.defines.loan_base_interest) / 30.0f;
-	}
-
 	/*	There is an income cap to how much may be borrowed, namely:
 		define:MAX_LOAN_CAP_FROM_BANKS x (national-modifier-to-max-loan-amount + 1) x national-tax-base. */
 	float max_loan(sys::state& state, dcon::nation_id n) {
