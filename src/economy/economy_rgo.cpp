@@ -30,6 +30,7 @@ namespace economy_rgo {
 		return total;
 	}
 	
+	/* This function returns the total employment of the combined RGOs on a province */
 	float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_id p) {
 		float total = 0.f;
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
@@ -153,11 +154,8 @@ namespace economy_rgo {
 		float workforce = float(fp.get_rgo().get_rgo_workforce());
 		auto vl = fp.get_rgo().get_rgo_amount();
 		auto base = workforce == 0.f ? economy::default_workforce : std::ceil(sz / workforce);
-		auto tp = rgo_total_employment(state, n, p) / rgo_max_employment(state, n, p, c);
-		if(!std::isfinite(tp) || std::isnan(tp)) {
-			tp = 0.0f;
-		}
-		return vl * tp * base * ef * 1.2f;
+		float employment_ratio = fp.get_rgo_employment();
+		return employment_ratio * vl * base * ef * 1.2f;
 	}
 
 	economy::rgo_workers_breakdown rgo_relevant_population(sys::state& state, dcon::province_id p, dcon::nation_id n) {
