@@ -2,8 +2,14 @@
 #include "ai.hpp"
 #include "pdqsort.h"
 #include "gui_element_templates.hpp"
+#include "economy_templates.hpp"
 
 namespace ui {
+	std::string nation_budget_interest_text::get_text(sys::state& state, dcon::nation_id nation_id) noexcept {
+		auto budget = economy::interest_payment(state, nation_id);
+		return text::format_money(budget);
+	}
+
 	void simple_multiline_body_text::render(sys::state& state, int32_t x, int32_t y) noexcept {
 		auto old_handle = base_data.data.text_common.font_handle;
 		if(!state.user_settings.use_classic_fonts) {

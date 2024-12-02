@@ -226,7 +226,6 @@ namespace economy {
 	dcon::modifier_id get_province_selector_modifier(sys::state& state);
 	dcon::modifier_id get_province_immigrator_modifier(sys::state& state);
 	bool can_take_loans(sys::state& state, dcon::nation_id n);
-	float interest_payment(sys::state& state, dcon::nation_id n);
 	float max_loan(sys::state& state, dcon::nation_id n);
 
 	commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c);

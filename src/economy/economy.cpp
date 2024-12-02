@@ -12,7 +12,6 @@
 #include "economy_rgo.hpp"
 #include "pdqsort.h"
 #include "news.hpp"
-
 #include "economy_templates.hpp"
 
 namespace economy {
