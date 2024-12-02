@@ -2461,6 +2461,7 @@ namespace economy {
 			auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 			auto& current_purchased = state.world.province_building_construction_get_purchased_goods(c);
 
+			bool all_finished = true;
 			for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
 				if(base_cost.commodity_type[j]) {
 					if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * admin_cost_factor) {
@@ -2473,8 +2474,9 @@ namespace economy {
 
 			float construction_time = state.economy_definitions.building_definitions[int32_t(t)].time;
 			if(all_finished) {
-				all_finished = (state.world.province_building_construction_get_remaining_construction_time() <= 0);
-				state.world.province_building_construction_get_remaining_construction_time() -= 1;
+				auto time = state.world.province_building_construction_get_remaining_construction_time(c);
+				all_finished = (time <= 0);
+				state.world.province_building_construction_set_remaining_construction_time(c, time - 1);
 			}
 
 			if(all_finished) {
@@ -2559,8 +2561,9 @@ namespace economy {
 
 			float construction_time = state.world.factory_type_get_construction_time(type);
 			if(all_finished) {
-				all_finished = (state.world.state_building_construction_get_remaining_construction_time() <= 0);
-				state.world.state_building_construction_get_remaining_construction_time() -= 1;
+				auto time = state.world.state_building_construction_get_remaining_construction_time(c);
+				all_finished = (time <= 0);
+				state.world.state_building_construction_set_remaining_construction_time(c, time - 1);
 			}
 
 			if(all_finished) {

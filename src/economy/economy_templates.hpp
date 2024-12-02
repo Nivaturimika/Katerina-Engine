@@ -18,8 +18,9 @@ namespace economy {
 	template<typename T>
 	float interest_payment(sys::state& state, T n) {
 		auto debt = state.world.nation_get_stockpiles(n, economy::money);
-		auto nmod = ve::max(0.01f, (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::loan_interest) + 1.0f)
+		auto nmod = std::max(0.01f,
+			(state.world.nation_get_modifier_values(n, sys::national_mod_offsets::loan_interest) + 1.0f)
 			* state.defines.loan_base_interest);
-		return ve::select(debt >= 0, 0.0f, -debt * nmod / 30.0f);
+		return debt >= 0 ? 0.0f : -debt * nmod / 30.0f;
 	}
 }
