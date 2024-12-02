@@ -593,7 +593,6 @@ namespace ui {
 			progress = economy::province_building_construction(state, content, Value).progress;
 		}
 
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}

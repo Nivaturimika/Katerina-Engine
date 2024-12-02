@@ -706,25 +706,18 @@ namespace economy_factory {
 			}
 		}
 	}
-	
-
 
 	economy::construction_status factory_upgrade(sys::state& state, dcon::factory_id f) {
 		auto in_province = state.world.factory_get_province_from_factory_location(f);
 		auto in_state = state.world.province_get_state_membership(in_province);
 		auto factory_type_fat_id = state.world.factory_get_building_type(f);
-		for(auto state_building_construction_fat_id : state.world.state_instance_get_state_building_construction(in_state)) {
-			if(state_building_construction_fat_id.get_type() == factory_type_fat_id) {
-				float admin_eff = state.world.nation_get_administrative_efficiency(state_building_construction_fat_id.get_nation());
-				float build_cost_modifier = factory_build_cost_modifier(state, state_building_construction_fat_id.get_nation(), state_building_construction_fat_id.get_is_pop_project());
-				float total = 0.0f;
-				float purchased = 0.0f;
-				auto& goods = state.world.factory_type_get_construction_costs(factory_type_fat_id);
-				for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-					total += goods.commodity_amounts[i] * build_cost_modifier;
-					purchased += std::clamp(state_building_construction_fat_id.get_purchased_goods().commodity_amounts[i], 0.f, goods.commodity_amounts[i] * build_cost_modifier);
-				}
-				return economy::construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
+		for(auto c : state.world.state_instance_get_state_building_construction(in_state)) {
+			if(c.get_type() == factory_type_fat_id) {
+				float admin_eff = state.world.nation_get_administrative_efficiency(c.get_nation());
+				float build_cost_modifier = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
+				float total = c.get_type().get_construction_time();
+				float value = c.get_remaining_construction_time();
+				return economy::construction_status{ total > 0.f ? 1.f - (value / total) : 0.f, true };
 			}
 		}
 		return economy::construction_status{ 0.0f, false };

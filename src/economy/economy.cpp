@@ -2271,75 +2271,39 @@ namespace economy {
 	}
 
 	construction_status state_building_construction(sys::state& state, dcon::state_instance_id s, dcon::factory_type_id t) {
-		for(auto st_con : state.world.state_instance_get_state_building_construction(s)) {
-			if(st_con.get_type() == t) {
-				auto& goods = state.world.factory_type_get_construction_costs(st_con.get_type());
-				float cost_mod = economy_factory::factory_build_cost_modifier(state, st_con.get_nation(), st_con.get_is_pop_project());
-				float total = 0.0f;
-				float purchased = 0.0f;
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-					total += goods.commodity_amounts[i] * cost_mod;
-					purchased += std::clamp(st_con.get_purchased_goods().commodity_amounts[i], 0.f, goods.commodity_amounts[i] * cost_mod);
-				}
-				return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
+		for(auto c : state.world.state_instance_get_state_building_construction(s)) {
+			if(c.get_type() == t) {
+				float total = c.get_type().get_construction_time();
+				float value = c.get_remaining_construction_time();
+				return construction_status{ total > 0.f ? 1.f - (value / total) : 0.f, true };
 			}
 		}
 		return construction_status{ 0.0f, false };
 	}
 
 	construction_status province_building_construction(sys::state& state, dcon::province_id p, province_building_type t) {
-		for(auto pb_con : state.world.province_get_province_building_construction(p)) {
-			if(pb_con.get_type() == uint8_t(t)) {
-				float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_get_nation_from_province_ownership(p));
-				float admin_cost_factor = pb_con.get_is_pop_project() ? 1.0f : 2.0f - admin_eff;
-
-				float total = 0.0f;
-				float purchased = 0.0f;
-				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-					total += state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor;
-					purchased += std::clamp(pb_con.get_purchased_goods().commodity_amounts[i], 0.0f, state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[i] * admin_cost_factor);
-				}
-				return construction_status{ total > 0.0f ? purchased / total : 0.0f, true };
+		for(auto c : state.world.province_get_province_building_construction(p)) {
+			if(c.get_type() == uint8_t(t)) {
+				float total = state.economy_definitions[uint8_t(t)].time;
+				float value = c.get_remaining_construction_time();
+				return construction_status{ total > 0.f ? 1.f - (value / total) : 0.f, true };
 			}
 		}
 		return construction_status{ 0.0f, false };
 	}
 
 	float unit_construction_progress(sys::state& state, dcon::province_land_construction_id c) {
-
-		float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_land_construction_get_nation(c));
-		float admin_cost_factor = 2.0f - admin_eff;
-
-		auto& goods = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(c)].build_cost;
-		auto& cgoods = state.world.province_land_construction_get_purchased_goods(c);
-
-		float total = 0.0f;
-		float purchased = 0.0f;
-
-		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-			total += goods.commodity_amounts[i] * admin_cost_factor;
-			purchased += std::clamp(cgoods.commodity_amounts[i],0.0f, goods.commodity_amounts[i] * admin_cost_factor);
-		}
-
-		return total > 0.0f ? purchased / total : 0.0f;
+		auto& udef = state.military_definitions.unit_base_definitions[state.world.province_land_construction_get_type(c)];
+		float total = udef.build_time;
+		float value = state.world.province_land_construction_get_remaining_construction_time(c);
+		return total > 0.f ? 1.f - (value / total) : 0.f;
 	}
 
 	float unit_construction_progress(sys::state& state, dcon::province_naval_construction_id c) {
-		float admin_eff = state.world.nation_get_administrative_efficiency(state.world.province_naval_construction_get_nation(c));
-		float admin_cost_factor = 2.0f - admin_eff;
-
-		auto& goods = state.military_definitions.unit_base_definitions[state.world.province_naval_construction_get_type(c)].build_cost;
-		auto& cgoods = state.world.province_naval_construction_get_purchased_goods(c);
-
-		float total = 0.0f;
-		float purchased = 0.0f;
-
-		for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
-			total += goods.commodity_amounts[i] * admin_cost_factor;
-			purchased += std::clamp(cgoods.commodity_amounts[i], 0.0f, goods.commodity_amounts[i] * admin_cost_factor);
-		}
-
-		return total > 0.0f ? purchased / total : 0.0f;
+		auto& udef = state.military_definitions.unit_base_definitions[state.world.province_naval_construction_get_type(c)];
+		float total = udef.build_time;
+		float value = state.world.province_naval_construction_get_remaining_construction_time(c);
+		return total > 0.f ? 1.f - (value / total) : 0.f;
 	}
 
 	void resolve_constructions(sys::state& state) {

@@ -52,8 +52,7 @@ namespace ui {
 		}
 	};
 
-	class production_project_input_listbox
-		: public overlapping_listbox_element_base<production_project_input_item, production_project_input_data> {
+	class production_project_input_listbox : public overlapping_listbox_element_base<production_project_input_item, production_project_input_data> {
 		protected:
 		std::string_view get_row_element_name() override {
 			return "goods_need_template";
@@ -71,8 +70,11 @@ namespace ui {
 			float total = 0.f;
 			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 				dcon::commodity_id cid = cset.commodity_type[i];
-				if(bool(cid))
-				total += state.world.commodity_get_current_price(cid) * cset.commodity_amounts[i];
+				if(cid) {
+					total += state.world.commodity_get_current_price(cid) * cset.commodity_amounts[i];
+				} else {
+					break;
+				}
 			}
 			return total;
 		}
@@ -85,7 +87,7 @@ namespace ui {
 				auto fat_id = dcon::fatten(state.world, std::get<dcon::state_building_construction_id>(content));
 				return fat_id.get_state();
 			}
-		return dcon::state_instance_id{};
+			return dcon::state_instance_id{};
 		}
 
 		public:

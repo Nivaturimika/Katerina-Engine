@@ -69,7 +69,7 @@ namespace ui {
 	};
 
 	class factory_build_cost_text : public simple_text_element_base {
-		public:
+	public:
 		std::string get_text(sys::state& state, dcon::factory_type_id ftid) noexcept {
 			auto fat = dcon::fatten(state.world, ftid);
 			auto& name = fat.get_construction_costs();
@@ -95,7 +95,7 @@ namespace ui {
 	};
 
 	class factory_build_time_text : public simple_text_element_base {
-		public:
+	public:
 		std::string get_text(sys::state& state, dcon::factory_type_id ftid) noexcept {
 			auto fat = dcon::fatten(state.world, ftid);
 			auto name = fat.get_construction_time();
@@ -109,7 +109,7 @@ namespace ui {
 	};
 
 	class factory_build_item_button : public tinted_button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto sid = retrieve<dcon::state_instance_id>(state, parent);
 			auto content = retrieve<dcon::factory_type_id>(state, parent);

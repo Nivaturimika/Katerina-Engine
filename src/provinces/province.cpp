@@ -396,7 +396,7 @@ namespace province {
 		int32_t max_local_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::naval_base);
 		int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_naval_base));
 
-		return (max_local_lvl - current_lvl - min_build > 0) && (current_lvl > 0 || !si.get_naval_base_is_taken()) && !has_naval_base_being_built(state, id);
+		return (max_local_lvl - current_lvl - min_build > 0) && (current_lvl > 0 || (!si.get_naval_base_is_taken()) && !has_naval_base_being_built(state, id));
 	}
 
 	bool has_province_building_being_built(sys::state& state, dcon::province_id id, economy::province_building_type t) {
