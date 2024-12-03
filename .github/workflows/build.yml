@@ -62,10 +62,8 @@ jobs:
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     - name: Configure Build Files
-      env:
-        vcpkg-cmake-config: ${{ steps.install-icu.outputs.vcpkg-cmake-config }}
       run: |
-        cmake ${{ env.vcpkg-cmake-config }} -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
+        cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
@@ -96,10 +94,8 @@ jobs:
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     - name: Configure Build Files
-      env:
-        vcpkg-cmake-config: ${{ steps.install-icu.outputs.vcpkg-cmake-config }}
       run: |
-        cmake ${{ env.vcpkg-cmake-config }} -DARCHITECTURE=x86 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
+        cmake -DARCHITECTURE=x86 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |

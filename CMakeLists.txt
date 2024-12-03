@@ -209,9 +209,9 @@ if(WIN32)
 			target_link_options(KatEngineCommon INTERFACE /DEBUG:FULL /OPT:REF /OPT:ICF /LTCG /GENPROFILE)
 		else()
 			message(STATUS "Normal, not PGO, build")
+			# for faster debug builds, replace /RTC1 /Od with /O1 -- should be able to use /Ox, but for some reason that crashes ZSTD
 			target_compile_options(KatEngineCommon INTERFACE /Z7
-				$<$<CONFIG:Debug>: /EHsc /MTd /O1>
-				# for faster debug builds, replace /RTC1 /Od with /O1 -- should be able to use /Ox, but for some reason that crashes ZSTD
+				$<$<CONFIG:Debug>:			/EHsc /MTd /O1>
 				$<$<NOT:$<CONFIG:Debug>>: 	/DNDEBUG /wd4530 /MT /O2 /Oi /GL /sdl- /GS- /Gy /Gw /Zc:inline>)
 			target_link_options(KatEngineCommon INTERFACE
 				$<$<CONFIG:Debug>: 			/DEBUG:FULL>
