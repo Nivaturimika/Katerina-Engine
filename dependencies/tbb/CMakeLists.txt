@@ -34,14 +34,7 @@ add_library(dependency_tbb INTERFACE)
 target_link_libraries(dependency_tbb INTERFACE tbb)
 
 if(WIN32)
-	set(CMAKE_CXX_FLAGS "")
-	set(CMAKE_CXX_FLAGS_DEBUG "")
-	set(CMAKE_CXX_FLAGS_RELEASE "")
-	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set_target_properties(tbb PROPERTIES COMPILE_FLAGS "/MTd")
-	else()
-		set_target_properties(tbb PROPERTIES COMPILE_FLAGS "/MT")
-	endif()
+
 else() # GCC or CLANG
 	target_compile_options(tbb PRIVATE
 		$<$<CONFIG:Debug>:			-fexceptions>
