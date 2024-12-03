@@ -16,7 +16,7 @@
 
 namespace economy {
 	template<typename T, typename U>
-	void register_demand(sys::state& state, dcon::nation_id n, T commodity_type, U amount) {
+	inline void register_demand(sys::state& state, dcon::nation_id n, T commodity_type, U amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
 	}
@@ -894,7 +894,7 @@ namespace economy {
 				national-plurality (as a fraction of 100)) x pop-size
 				*/
 				float nmod = (0.5f + pl.get_pop().get_consciousness() / state.defines.pdef_base_con)
-				* (p.get_province().get_is_colonial() ? 1.f : 1.f + state.world.nation_get_plurality(n) * 0.01f);
+					* (p.get_province().get_is_colonial() ? 1.f : 1.f + state.world.nation_get_plurality(n) * 0.01f);
 				float ln_cost = nmod * state.world.nation_get_life_needs_costs(n, t) * total_pop;
 				float en_cost = nmod * state.world.nation_get_everyday_needs_costs(n, t) * total_pop;
 				float xn_cost = nmod * state.world.nation_get_luxury_needs_costs(n, t) * total_pop;
@@ -934,23 +934,21 @@ namespace economy {
 				state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), result_luxury);
 			}
 		}
-
-		float ln_mul[] = {
+		const float ln_mul[] = {
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f)
 		};
-		float en_mul[] = {
+		const float en_mul[] = {
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f)
 		};
-		float lx_mul[] = {
+		const float lx_mul[] = {
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
 			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
 		};
-
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto kf = state.world.commodity_get_key_factory(cid);
@@ -962,7 +960,6 @@ namespace economy {
 					float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
 					float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
 					float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
-
 					/* Invention factor doesn't factor for life needs */
 					auto total_demand =
 						base_life * pop_size * ln_mul[strata]
