@@ -33,9 +33,7 @@ add_library(dependency_tbb INTERFACE)
 # target_include_directories(dependency_tbb SYSTEM INTERFACE "${tbb_SOURCE_DIR}/include/oneapi/tbb")
 target_link_libraries(dependency_tbb INTERFACE tbb)
 
-if(WIN32)
-
-else() # GCC or CLANG
+if(NOT(WIN32)) # GCC or CLANG
 	target_compile_options(tbb PRIVATE
 		$<$<CONFIG:Debug>:			-fexceptions>
 		$<$<NOT:$<CONFIG:Debug>>: 	-fexceptions>
