@@ -76,22 +76,27 @@ namespace demographics {
 	template<typename F>
 	void sum_over_demographics(sys::state& state, dcon::demographics_key key, F const& source) {
 		// clear province
-	province::ve_for_each_land_province(state, [&](auto pi) { state.world.province_set_demographics(pi, key, ve::fp_vector()); });
+		province::ve_for_each_land_province(state, [&](auto pi) {
+			state.world.province_set_demographics(pi, key, ve::fp_vector());
+		});
 		// sum in province
 		state.world.for_each_pop([&](dcon::pop_id p) {
 			auto location = state.world.pop_get_province_from_pop_location(p);
 			state.world.province_get_demographics(location, key) += source(state, p);
 		});
 		// clear state
-		state.world.execute_serial_over_state_instance(
-			[&](auto si) { state.world.state_instance_set_demographics(si, key, ve::fp_vector()); });
+		state.world.execute_serial_over_state_instance([&](auto si) {
+			state.world.state_instance_set_demographics(si, key, ve::fp_vector());
+		});
 		// sum in state
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto location = state.world.province_get_state_membership(p);
 			state.world.state_instance_get_demographics(location, key) += state.world.province_get_demographics(p, key);
 		});
 		// clear nation
-	state.world.execute_serial_over_nation([&](auto ni) { state.world.nation_set_demographics(ni, key, ve::fp_vector()); });
+		state.world.execute_serial_over_nation([&](auto ni) {
+			state.world.nation_set_demographics(ni, key, ve::fp_vector());
+		});
 		// sum in nation
 		state.world.for_each_state_instance([&](dcon::state_instance_id s) {
 			auto location = state.world.state_instance_get_nation_from_state_ownership(s);
@@ -154,177 +159,177 @@ namespace demographics {
 		dcon::demographics_key key{dcon::demographics_key::value_base_t(index)};
 			if(index < count_special_keys) {
 				switch(index) {
-					case 0: // constexpr inline dcon::demographics_key total(0);
-				sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) { return state.world.pop_get_size(p); });
+				case 0: // constexpr inline dcon::demographics_key total(0);
+					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) { return state.world.pop_get_size(p); });
 					break;
-					case 1: // constexpr inline dcon::demographics_key employable(1);
+				case 1: // constexpr inline dcon::demographics_key employable(1);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_has_unemployment(state.world.pop_get_poptype(p)) ? state.world.pop_get_size(p) : 0.0f;
 					});
 					break;
-					case 2: // constexpr inline dcon::demographics_key employed(2);
+				case 2: // constexpr inline dcon::demographics_key employed(2);
 					sum_over_demographics(state, key,
 						[](sys::state const& state, dcon::pop_id p) { return state.world.pop_get_employment(p); });
 					break;
-					case 3: // constexpr inline dcon::demographics_key consciousness(3);
+				case 3: // constexpr inline dcon::demographics_key consciousness(3);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_get_consciousness(p) * state.world.pop_get_size(p);
 					});
 					break;
-					case 4: // constexpr inline dcon::demographics_key militancy(4);
+				case 4: // constexpr inline dcon::demographics_key militancy(4);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_get_militancy(p) * state.world.pop_get_size(p);
 					});
 					break;
-					case 5: // constexpr inline dcon::demographics_key literacy(5);
+				case 5: // constexpr inline dcon::demographics_key literacy(5);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_get_literacy(p) * state.world.pop_get_size(p);
 					});
 					break;
-					case 6: // constexpr inline dcon::demographics_key political_reform_desire(6);
+				case 6: // constexpr inline dcon::demographics_key political_reform_desire(6);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
-						if(state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(p)) == false) {
+						if(!state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(p))) {
 							auto movement = state.world.pop_get_movement_from_pop_movement_membership(p);
 							if(movement) {
 								auto opt = state.world.movement_get_associated_issue_option(movement);
 								auto optpar = state.world.issue_option_get_parent_issue(opt);
-								if(opt && state.world.issue_get_issue_type(optpar) == uint8_t(culture::issue_type::political))
-								return state.world.pop_get_size(p);
+								if(opt && state.world.issue_get_issue_type(optpar) == uint8_t(culture::issue_type::political)) {
+									return state.world.pop_get_size(p);
+								}
 							}
-							return 0.0f;
 						}
 						return 0.0f;
 					});
 					break;
-					case 7: // constexpr inline dcon::demographics_key social_reform_desire(7);
+				case 7: // constexpr inline dcon::demographics_key social_reform_desire(7);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
-						if(state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(p)) == false) {
+						if(!state.world.province_get_is_colonial(state.world.pop_get_province_from_pop_location(p))) {
 							auto movement = state.world.pop_get_movement_from_pop_movement_membership(p);
 							if(movement) {
 								auto opt = state.world.movement_get_associated_issue_option(movement);
 								auto optpar = state.world.issue_option_get_parent_issue(opt);
-								if(opt && state.world.issue_get_issue_type(optpar) == uint8_t(culture::issue_type::social))
-								return state.world.pop_get_size(p);
+								if(opt && state.world.issue_get_issue_type(optpar) == uint8_t(culture::issue_type::social)) {
+									return state.world.pop_get_size(p);
+								}
 							}
-							return 0.0f;
 						}
 						return 0.0f;
 					});
 					break;
-					case 8: // constexpr inline dcon::demographics_key poor_militancy(8);
+				case 8: // constexpr inline dcon::demographics_key poor_militancy(8);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::poor)
-										 ? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 9: // constexpr inline dcon::demographics_key middle_militancy(9);
+				case 9: // constexpr inline dcon::demographics_key middle_militancy(9);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::middle)
-										 ? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 10: // constexpr inline dcon::demographics_key rich_militancy(10);
+				case 10: // constexpr inline dcon::demographics_key rich_militancy(10);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::rich)
-										 ? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_militancy(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 11: // constexpr inline dcon::demographics_key poor_life_needs(11);
+				case 11: // constexpr inline dcon::demographics_key poor_life_needs(11);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::poor)
-										 ? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 12: // constexpr inline dcon::demographics_key middle_life_needs(12);
+				case 12: // constexpr inline dcon::demographics_key middle_life_needs(12);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::middle)
-										 ? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 13: // constexpr inline dcon::demographics_key rich_life_needs(13);
+				case 13: // constexpr inline dcon::demographics_key rich_life_needs(13);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::rich)
-										 ? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_life_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 14: // constexpr inline dcon::demographics_key poor_everyday_needs(14);
+				case 14: // constexpr inline dcon::demographics_key poor_everyday_needs(14);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::poor)
-										 ? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 15: // constexpr inline dcon::demographics_key middle_everyday_needs(15);
+				case 15: // constexpr inline dcon::demographics_key middle_everyday_needs(15);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::middle)
-										 ? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 16: // constexpr inline dcon::demographics_key rich_everyday_needs(16);
+				case 16: // constexpr inline dcon::demographics_key rich_everyday_needs(16);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::rich)
-										 ? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_everyday_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 17: // constexpr inline dcon::demographics_key poor_luxury_needs(17);
+				case 17: // constexpr inline dcon::demographics_key poor_luxury_needs(17);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::poor)
-										 ? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 18: // constexpr inline dcon::demographics_key middle_luxury_needs(18);
+				case 18: // constexpr inline dcon::demographics_key middle_luxury_needs(18);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::middle)
-										 ? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 19: // constexpr inline dcon::demographics_key rich_luxury_needs(19);
+				case 19: // constexpr inline dcon::demographics_key rich_luxury_needs(19);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::rich)
-										 ? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_luxury_needs_satisfaction(p) * state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 20: // constexpr inline dcon::demographics_key poor_total(20);
+				case 20: // constexpr inline dcon::demographics_key poor_total(20);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::poor)
-										 ? state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 21: // constexpr inline dcon::demographics_key middle_total(21);
+				case 21: // constexpr inline dcon::demographics_key middle_total(21);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::middle)
-										 ? state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
-					case 22: // constexpr inline dcon::demographics_key rich_total(22);
+				case 22: // constexpr inline dcon::demographics_key rich_total(22);
 					sum_over_demographics(state, key, [](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_type_get_strata(state.world.pop_get_poptype(p)) == uint8_t(culture::pop_strata::rich)
-										 ? state.world.pop_get_size(p)
-										 : 0.0f;
+							? state.world.pop_get_size(p)
+							: 0.0f;
 					});
 					break;
 				}
 				// common - pop type - employment - culture - ideology - issue option - religion
 			} else if(key.index() < to_employment_key(state, dcon::pop_type_id(0)).index()) { // pop type
-			dcon::pop_type_id pkey{ dcon::pop_type_id::value_base_t(index - (count_special_keys)) };
+				dcon::pop_type_id pkey{ dcon::pop_type_id::value_base_t(index - (count_special_keys)) };
 				sum_over_demographics(state, key, [pkey](sys::state const& state, dcon::pop_id p) {
 					return state.world.pop_get_poptype(p) == pkey ? state.world.pop_get_size(p) : 0.0f;
 				});
 			} else if(key.index() < to_key(state, dcon::culture_id(0)).index()) { // employment
-			dcon::pop_type_id pkey{ dcon::pop_type_id::value_base_t(index - (count_special_keys + state.world.pop_type_size())) };
+				dcon::pop_type_id pkey{ dcon::pop_type_id::value_base_t(index - (count_special_keys + state.world.pop_type_size())) };
 				if(state.world.pop_type_get_has_unemployment(pkey)) {
 					sum_over_demographics(state, key, [pkey](sys::state const& state, dcon::pop_id p) {
 						return state.world.pop_get_poptype(p) == pkey ? state.world.pop_get_employment(p) : 0.0f;
@@ -335,26 +340,24 @@ namespace demographics {
 					});
 				}
 			} else if(key.index() < to_key(state, dcon::ideology_id(0)).index()) { // culture
-				dcon::culture_id pkey{
-					dcon::culture_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2)) };
+				dcon::culture_id pkey{dcon::culture_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2)) };
 				sum_over_demographics(state, key, [pkey](sys::state const& state, dcon::pop_id p) {
 					return state.world.pop_get_culture(p) == pkey ? state.world.pop_get_size(p) : 0.0f;
 				});
 			} else if(key.index() < to_key(state, dcon::issue_option_id(0)).index()) { // ideology
-			dcon::ideology_id pkey{dcon::ideology_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size()))};
+				dcon::ideology_id pkey{dcon::ideology_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size()))};
 				auto pdemo_key = pop_demographics::to_key(state, pkey);
 				sum_over_demographics(state, key, [pdemo_key](sys::state const& state, dcon::pop_id p) {
 					return state.world.pop_get_demographics(p, pdemo_key) * state.world.pop_get_size(p);
 				});
 			} else if(key.index() < to_key(state, dcon::religion_id(0)).index()) { // issue option
-			dcon::issue_option_id pkey{dcon::issue_option_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size() + state.world.ideology_size()))};
+				dcon::issue_option_id pkey{dcon::issue_option_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size() + state.world.ideology_size()))};
 				auto pdemo_key = pop_demographics::to_key(state, pkey);
 				sum_over_demographics(state, key, [pdemo_key](sys::state const& state, dcon::pop_id p) {
 					return state.world.pop_get_demographics(p, pdemo_key) * state.world.pop_get_size(p);
 				});
 			} else  { // religion
-				dcon::religion_id pkey{dcon::religion_id::value_base_t(
-					index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size() + state.world.ideology_size() + state.world.issue_option_size()))};
+				dcon::religion_id pkey{dcon::religion_id::value_base_t(index - (count_special_keys + state.world.pop_type_size() * 2 + state.world.culture_size() + state.world.ideology_size() + state.world.issue_option_size()))};
 				sum_over_demographics(state, key, [pkey](sys::state const& state, dcon::pop_id p) {
 					return state.world.pop_get_religion(p) == pkey ? state.world.pop_get_size(p) : 0.0f;
 				});
