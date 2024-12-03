@@ -35,9 +35,9 @@ target_link_libraries(dependency_tbb INTERFACE tbb)
 
 if(WIN32)
 	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set_target_properties(harfbuzz PROPERTIES COMPILE_FLAGS "/MTd")
+		set_target_properties(tbb PROPERTIES COMPILE_FLAGS "/MTd")
 	else()
-		set_target_properties(harfbuzz PROPERTIES COMPILE_FLAGS "/MT")
+		set_target_properties(tbb PROPERTIES COMPILE_FLAGS "/MT")
 	endif()
 else() # GCC or CLANG
 	target_compile_options(tbb PRIVATE

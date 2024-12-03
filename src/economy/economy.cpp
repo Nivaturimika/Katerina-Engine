@@ -15,7 +15,8 @@
 #include "economy_templates.hpp"
 
 namespace economy {
-	void register_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
+	template<typename T, typename U>
+	void register_demand(sys::state& state, dcon::nation_id n, T commodity_type, U amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
 	}
@@ -963,12 +964,11 @@ namespace economy {
 					float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
 
 					/* Invention factor doesn't factor for life needs */
-					float demand_life = base_life * pop_size * ln_mul[strata];
-					float demand_everyday = base_everyday * pop_size * invention_factor * en_mul[strata];
-					float demand_luxury = base_luxury * pop_size * invention_factor * lx_mul[strata];
-					register_demand(state, n, cid, demand_life);
-					register_demand(state, n, cid, demand_everyday);
-					register_demand(state, n, cid, demand_luxury);
+					auto total_demand =
+						base_life * pop_size * ln_mul[strata]
+						+ base_everyday * pop_size * invention_factor * en_mul[strata]
+						+ base_luxury * pop_size * invention_factor * lx_mul[strata];
+					register_demand(state, n, cid, total_demand);
 				}
 			}
 		}
