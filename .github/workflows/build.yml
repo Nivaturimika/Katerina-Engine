@@ -67,7 +67,7 @@ jobs:
 
     - name: Build Katerina Engine
       run: |
-        cmake --preset=${{ matrix.config }} -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
+        cmake --preset=${{ matrix.config }} -DCMAKE_BUILD_TYPE=Release -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
 
     - name: Archive results
       uses: actions/upload-artifact@v4
@@ -95,7 +95,7 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake --preset=${{ matrix.config }} -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
+        cmake --preset=${{ matrix.config }} -DCMAKE_BUILD_TYPE=Release -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
