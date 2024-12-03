@@ -1492,7 +1492,7 @@ namespace ui {
 				auto current_employment = int64_t(rgo_employment);
 				auto max_employment = int64_t(economy_rgo::rgo_max_employment(state, n, p, c));
 				if(max_employment < 1.f)
-				return;
+					return;
 			
 				auto base_box = text::open_layout_box(contents);
 				auto name_box = base_box;

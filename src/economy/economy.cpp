@@ -91,7 +91,7 @@ namespace economy {
 		}
 	}
 
-	float pop_get_life_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	inline float pop_get_life_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_life_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
 			return 1.f;
@@ -99,7 +99,7 @@ namespace economy {
 		return 0.f;
 	}
 
-	float pop_get_everyday_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	inline float pop_get_everyday_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_everyday_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
 			return 1.f;
@@ -107,7 +107,7 @@ namespace economy {
 		return 0.f;
 	}
 
-	float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
+	inline float pop_get_luxury_needs_weight(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
 		auto kf = state.world.commodity_get_key_factory(c);
 		if(state.world.commodity_get_is_luxury_need(c) && (state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf)))) {
 			return 1.f;
@@ -416,7 +416,7 @@ namespace economy {
 
 	float effective_tariff_rate(sys::state& state, dcon::nation_id n) {
 		auto t_total = nations::tariff_efficiency(state, n) * float(state.world.nation_get_tariffs(n)) / 100.0f;
-		//assert(t_total >= 0.f);
+		assert(t_total >= 0.f);
 		return t_total;
 	}
 
@@ -461,23 +461,18 @@ namespace economy {
 				auto profitability_factor = (output_total * output_multiplier * throughput_multiplier * min_available - input_multiplier * input_total * throughput_multiplier * min_available) / (expected_min_wage * state.defines.ke_profitability_factor);
 				bool profitable = (output_total * output_multiplier - input_multiplier * input_total) >= 0.0f;
 
-				//if(profitability_factor <= -1.0f) {
-
-				//} else {
-					//profitability_factor = std::clamp(profitability_factor * 0.5f + 0.5f, 0.0f, 1.0f);
-					for(uint32_t j = 0; j < commodity_set::set_size; ++j) {
-						if(inputs.commodity_type[j]) {
-							register_intermediate_demand(state, n, inputs.commodity_type[j], input_multiplier * throughput_multiplier * max_production_scale * inputs.commodity_amounts[j] * (0.1f + 0.9f * min_available));
-						} else {
-							break;
-						}
+				//profitability_factor = std::clamp(profitability_factor * 0.5f + 0.5f, 0.0f, 1.0f);
+				for(uint32_t j = 0; j < commodity_set::set_size; ++j) {
+					if(inputs.commodity_type[j]) {
+						register_intermediate_demand(state, n, inputs.commodity_type[j], input_multiplier * throughput_multiplier * max_production_scale * inputs.commodity_amounts[j] * (0.1f + 0.9f * min_available));
+					} else {
+						break;
 					}
-					state.world.nation_set_artisan_actual_production(n, cid, state.world.commodity_get_artisan_output_amount(cid) * throughput_multiplier * output_multiplier * max_production_scale * min_available);
-					total_profit += std::max(0.0f, (output_total * output_multiplier - input_multiplier * input_total) * throughput_multiplier * max_production_scale * min_available);
-				//}
+				}
+				state.world.nation_set_artisan_actual_production(n, cid, state.world.commodity_get_artisan_output_amount(cid) * throughput_multiplier * output_multiplier * max_production_scale * min_available);
+				total_profit += std::max(0.0f, (output_total * output_multiplier - input_multiplier * input_total) * throughput_multiplier * max_production_scale * min_available);
 			}
 		}
-
 		state.world.nation_set_artisan_profit(n, total_profit);
 	}
 
@@ -796,7 +791,9 @@ namespace economy {
 		float o_spending = float(state.world.nation_get_overseas_spending(n)) / 100.f;
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto v = state.world.nation_get_construction_demand(n, cid) * c_spending * state.world.commodity_get_current_price(cid);
+			auto v = state.world.nation_get_construction_demand(n, cid)
+				* c_spending
+				* state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
 			total += v * true_construction_demand;
 		}
@@ -1462,14 +1459,14 @@ namespace economy {
 		move remaining domestic supply to global pool, clear domestic market
 		*/
 		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			// per good decay would be nice...
-			float decay = 0.5f;
-			float world_pool = state.world.commodity_get_global_market_pool(c) * decay;
 			ve::fp_vector sum;
 			state.world.execute_serial_over_nation([&](auto nids) {
 				sum = sum + state.world.nation_get_domestic_market_pool(nids, c);
 				state.world.nation_set_domestic_market_pool(nids, c, 0.0f);
 			});
+			// per good decay would be nice...
+			float decay = 0.75f;
+			float world_pool = state.world.commodity_get_global_market_pool(c) * decay;
 			state.world.commodity_set_global_market_pool(c, world_pool + sum.reduce());
 		});
 
@@ -1550,7 +1547,8 @@ namespace economy {
 				for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 					dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 					auto kf = state.world.commodity_get_key_factory(c);
-					if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
+					if(state.world.commodity_get_is_available_from_start(c)
+					|| (kf && state.world.nation_get_active_building(n, kf))) {
 						auto sat = state.world.nation_get_demand_satisfaction(n, c);
 
 						auto ln_val = state.world.pop_type_get_life_needs(pt, c) * pop_get_life_needs_weight(state, n, c);
@@ -1566,6 +1564,7 @@ namespace economy {
 						lx_max.get(pt) += lx_val * sat;
 					}
 				}
+
 				if(ln_total > 0.f)
 					ln_max.get(pt) /= ln_total;
 				else

@@ -7,7 +7,6 @@ namespace economy_estimations {
 	float estimate_stockpile_filling_spending(sys::state& state, dcon::nation_id n) {
 		float total = 0.0f;
 		uint32_t total_commodities = state.world.commodity_size();
-	
 		for(uint32_t i = 1; i < total_commodities; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto difference = state.world.nation_get_stockpile_targets(n, cid) - state.world.nation_get_stockpiles(n, cid);
@@ -15,29 +14,25 @@ namespace economy_estimations {
 				total += difference * state.world.commodity_get_current_price(cid) * state.world.nation_get_demand_satisfaction(n, cid);
 			}
 		}
-	
 		return total;
 	}
 	
 	float estimate_overseas_penalty_spending(sys::state& state, dcon::nation_id n) {
 		float total = 0.0f;
-	
 		auto overseas_factor = state.defines.province_overseas_penalty * float(state.world.nation_get_owned_province_count(n) - state.world.nation_get_central_province_count(n));
-		uint32_t total_commodities = state.world.commodity_size();
-	
-		if(overseas_factor > 0) {
+		if(overseas_factor > 0.f) {
+			uint32_t total_commodities = state.world.commodity_size();
 			for(uint32_t i = 1; i < total_commodities; ++i) {
 				dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-	
 				auto kf = state.world.commodity_get_key_factory(cid);
 				if(state.world.commodity_get_overseas_penalty(cid) && (state.world.commodity_get_is_available_from_start(cid) || (kf && state.world.nation_get_active_building(n, kf)))) {
 					total += overseas_factor * state.world.commodity_get_current_price(cid); //* state.world.nation_get_demand_satisfaction(n, cid);
 				}
 			}
 		}
-	
 		return total;
 	}
+	
 	float estimate_gold_income(sys::state& state, dcon::nation_id n) {
 		auto amount = 0.f;
 		for(auto poid : state.world.nation_get_province_ownership_as_nation(n)) {

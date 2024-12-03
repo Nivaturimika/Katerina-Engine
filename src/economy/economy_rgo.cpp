@@ -32,11 +32,12 @@ namespace economy_rgo {
 	
 	/* This function returns the total employment of the combined RGOs on a province */
 	float rgo_total_employment(sys::state& state, dcon::nation_id n, dcon::province_id p) {
-		float total = 0.f;
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			total += state.world.province_get_rgo_employment_per_good(p, c);
+		auto pids = ve::tagged_vector<dcon::province_id>(p);
+		float sum = 0.f;
+		state.world.execute_serial_over_commodity([&](auto ids) {
+			sum += state.world.province_get_rgo_employment_per_good(pids, ids).reduce();
 		});
-		return total;
+		return sum;
 	}
 	
 	float rgo_max_employment(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
@@ -57,10 +58,7 @@ namespace economy_rgo {
 			if(!owner)
 				return; //why bother? - pops are frozen
 	
-			auto current_employment = 0.f;
-			state.world.for_each_commodity([&](dcon::commodity_id c) {
-				current_employment += state.world.province_get_rgo_employment_per_good(p, c);
-			});
+			auto current_employment = economy_rgo::rgo_total_employment(state, owner, p);
 	
 			bool is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(p));
 			float worker_pool = 0.0f;
@@ -170,7 +168,6 @@ namespace economy_rgo {
 			.slaves = slaves,
 			.total = relevant_paid_population + slaves
 		};
-
 		return result;
 	}
 
@@ -180,8 +177,8 @@ namespace economy_rgo {
 		//we assume a "perfect ratio" of 1 aristo per N pops
 		float perfect_aristos_amount = total_relevant_population / 10000.f;
 		float aristos_desired_cut = perfect_aristos_amount * (
-		state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.aristocrat)
-		+ state.world.nation_get_life_needs_costs(n, state.culture_definitions.aristocrat)
+			state.world.nation_get_everyday_needs_costs(n, state.culture_definitions.aristocrat)
+			+ state.world.nation_get_life_needs_costs(n, state.culture_definitions.aristocrat)
 		);
 		float aristo_burden_per_worker = aristos_desired_cut / (total_relevant_population + 1);
 
@@ -214,21 +211,27 @@ namespace economy_rgo {
 	}
 
 	void update_province_rgo_production(sys::state& state, dcon::province_id p, dcon::nation_id n) {
-		state.world.province_set_rgo_full_profit(p, 0.f);
-		state.world.for_each_commodity([&](dcon::commodity_id c) {
-			auto amount = state.world.province_get_rgo_actual_production_per_good(p, c);
-			economy::register_domestic_supply(state, n, c, amount);
-
-			float profit = amount * state.world.commodity_get_current_price(c);
-			assert(std::isfinite(profit) && profit >= 0.f);
-
-			state.world.province_set_rgo_profit_per_good(p, c, profit);
-			state.world.province_get_rgo_full_profit(p) += profit;
-			if(state.world.commodity_get_money_rgo(c)) {
-				assert(std::isfinite(amount * state.defines.gold_to_cash_rate) && amount * state.defines.gold_to_cash_rate >= 0.0f);
-				state.world.nation_get_stockpiles(n, economy::money) += amount * state.defines.gold_to_cash_rate;
-			}
+		auto nids = ve::tagged_vector<dcon::nation_id>(n);
+		auto pids = ve::tagged_vector<dcon::province_id>(p);
+		// Main summation
+		ve::fp_vector full_profit;
+		ve::fp_vector full_money;
+		state.world.execute_serial_over_commodity([&](auto cids) {
+			auto amount = state.world.province_get_rgo_actual_production_per_good(pids, cids);
+			state.world.nation_get_domestic_market_pool(nids, cids) += amount;
+			// the total profit (per good)
+			auto profit = amount * state.world.commodity_get_current_price(cids);
+			state.world.province_set_rgo_profit_per_good(pids, cids, profit);
+			// how much money it adds?
+			auto mask = state.world.commodity_get_money_rgo(cids);
+			auto money = ve::select(mask, amount * state.defines.gold_to_cash_rate, 0.f);
+			// accumulators
+			full_profit = full_profit + profit;
+			full_money = full_money + money;
 		});
+		// Reduction
+		state.world.province_set_rgo_full_profit(p, full_profit.reduce());
+		state.world.nation_get_stockpiles(n, economy::money) += full_money.reduce();
 	}
 }
 
