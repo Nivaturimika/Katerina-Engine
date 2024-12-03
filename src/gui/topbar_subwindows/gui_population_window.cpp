@@ -6,7 +6,6 @@
 #include "triggers.hpp"
 
 namespace ui {
-
 	void describe_conversion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
 		auto location = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(location);
@@ -689,4 +688,17 @@ namespace ui {
 		}
 	}
 
+	void pop_unemployment_progress_bar::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+		auto content = retrieve<dcon::pop_id>(state, parent);
+
+		auto pfat_id = dcon::fatten(state.world, content);
+		float un_empl = state.world.pop_type_get_has_unemployment(state.world.pop_get_poptype(content))
+			? (1.f - pfat_id.get_employment() / pfat_id.get_size())
+			: 0.f;
+		auto box = text::open_layout_box(contents, 0);
+		text::localised_format_box(state, contents, box, std::string_view("unemployment"), text::substitution_map{});
+		text::add_space_to_layout_box(state, contents, box);
+		text::add_to_layout_box(state, contents, box, text::fp_percentage{un_empl});
+		text::close_layout_box(contents, box);
+	}
 } // namespace ui

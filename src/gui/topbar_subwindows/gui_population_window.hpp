@@ -686,31 +686,17 @@ namespace ui {
 	};
 
 	class pop_unemployment_progress_bar : public standard_pop_progress_bar {
-		public:
+	public:
 		float get_progress(sys::state& state, dcon::pop_id content) noexcept override {
 			auto pfat_id = dcon::fatten(state.world, content);
 			if(state.world.pop_type_get_has_unemployment(state.world.pop_get_poptype(content)))
-			return (1 - pfat_id.get_employment() / pfat_id.get_size());
-			return 0.0f;
+				return (1.f - pfat_id.get_employment() / pfat_id.get_size());
+			return 0.f;
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto content = retrieve<dcon::pop_id>(state, parent);
-
-			auto pfat_id = dcon::fatten(state.world, content);
-			float un_empl = state.world.pop_type_get_has_unemployment(state.world.pop_get_poptype(content))
-												? (1 - pfat_id.get_employment() / pfat_id.get_size())
-												: 0.0f;
-			auto box = text::open_layout_box(contents, 0);
-		text::localised_format_box(state, contents, box, std::string_view("unemployment"), text::substitution_map{});
-			text::add_space_to_layout_box(state, contents, box);
-		text::add_to_layout_box(state, contents, box, text::fp_percentage{un_empl});
-			text::close_layout_box(contents, box);
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 	class pop_life_needs_progress_bar : public standard_pop_needs_progress_bar {
 		public:
