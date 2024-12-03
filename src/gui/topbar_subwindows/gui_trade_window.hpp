@@ -821,43 +821,31 @@ namespace ui {
 			pop,
 			military_army,
 			military_navy,
-	} type{};
-	enum class value_type : uint8_t { used_by, produced_by, may_be_used_by } value_type{};
+		} type{};
+		enum class value_type : uint8_t { used_by, produced_by, may_be_used_by } value_type{};
 		union {
 			dcon::factory_id factory_id;			 // factory
 			dcon::province_id province_id;		 // province
 			dcon::province_id pop_province_id; // pop
 			dcon::army_id army_id;						 // army
 			dcon::navy_id navy_id;						 // navy
-	} data{};
+		} data{};
 
 		bool operator==(trade_flow_data const& o) const {
-			if(value_type != o.value_type)
-			return false;
-
+			if(value_type != o.value_type || type != o.type)
+				return false;
 			switch(type) {
-				case type::factory:
-				if(o.type != type::factory)
-				return false;
+			case type::factory:
 				return data.factory_id == o.data.factory_id;
-				case type::province:
-				if(o.type != type::province)
-				return false;
+			case type::province:
 				return data.province_id == o.data.province_id;
-				case type::pop:
-				if(o.type != type::pop)
-				return false;
+			case type::pop:
 				return data.pop_province_id == o.data.pop_province_id;
-				case type::military_army:
-				if(o.type != type::military_army)
-				return false;
+			case type::military_army:
 				return data.army_id == o.data.army_id;
-				case type::military_navy:
-				if(o.type != type::military_navy)
-				return false;
+			case type::military_navy:
 				return data.navy_id == o.data.navy_id;
 			}
-
 			return true;
 		}
 		bool operator!=(trade_flow_data const& o) const {

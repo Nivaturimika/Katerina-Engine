@@ -1534,7 +1534,6 @@ namespace ve {
 		}
 	}
 
-
 	template<typename T>
 	RELEASE_INLINE void store(contiguous_tags<T> e, float* dest, fp_vector values) {
 		_mm_store_ps(dest + e.value, values);
@@ -1568,7 +1567,6 @@ namespace ve {
 	RELEASE_INLINE auto store(unaligned_contiguous_tags<T> e, U* dest, tagged_vector<U> values) -> std::enable_if_t<sizeof(U) == 4, void> {
 		_mm_storeu_si128((__m128i*)(dest + e.value), values.to_original_values());
 	}
-
 
 	template<typename T>
 	RELEASE_INLINE void store(contiguous_tags_base<T> e, int16_t* dest, int_vector values) {
