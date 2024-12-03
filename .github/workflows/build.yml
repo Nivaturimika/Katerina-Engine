@@ -64,9 +64,6 @@ jobs:
     - name: Configure Build Files
       run: |
         cmake --preset=${{ matrix.config }} -DCMAKE_BUILD_TYPE=Release -DARCHITECTURE=x64 -G "Visual Studio 17 2022" -B build
-
-    - name: Build Katerina Engine
-      run: |
         cmake --build build --parallel -t KatEngine
 
     - name: Archive results
@@ -96,9 +93,6 @@ jobs:
     - name: Configure Build Files
       run: |
         cmake --preset=${{ matrix.config }} -DCMAKE_BUILD_TYPE=Release -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
-
-    - name: Build Katerina Engine
-      run: |
         cmake --build build --parallel -t KatEngine
 
     - name: Archive results
