@@ -61,6 +61,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/graphics/texture.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/glad.cpp"
+	"${PROJECT_SOURCE_DIR}/src/graphics/color.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/stb_image.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/stb_image_write.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_state.cpp"

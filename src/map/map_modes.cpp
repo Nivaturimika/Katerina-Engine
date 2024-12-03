@@ -1724,8 +1724,8 @@ std::vector<uint32_t> life_needs_map_from(sys::state& state) {
 			auto fat_id = dcon::fatten(state.world, prov_id);
 			auto cid = fat_id.get_continent().id.index();
 			auto i = province::to_map_id(prov_id);
-			float gradient_index = 1.f - (prov_population[i] / continent_max_pop[cid]);
-			auto color = ogl::color_gradient(gradient_index, 210, 100 << 8);
+			float gradient_index = prov_population[i] / continent_max_pop[cid];
+			auto color = ogl::gradient_viridis(gradient_index);
 			prov_color[i] = color;
 			prov_color[i + texture_size] = color;
 		}
@@ -1758,8 +1758,8 @@ std::vector<uint32_t> everyday_needs_map_from(sys::state& state) {
 			auto fat_id = dcon::fatten(state.world, prov_id);
 			auto cid = fat_id.get_continent().id.index();
 			auto i = province::to_map_id(prov_id);
-			float gradient_index = 1.f - (prov_population[i] / continent_max_pop[cid]);
-			auto color = ogl::color_gradient(gradient_index, 210, 100 << 8);
+			float gradient_index = prov_population[i] / continent_max_pop[cid];
+			auto color = ogl::gradient_viridis(gradient_index);
 			prov_color[i] = color;
 			prov_color[i + texture_size] = color;
 		}
@@ -1792,8 +1792,8 @@ std::vector<uint32_t> luxury_needs_map_from(sys::state& state) {
 			auto fat_id = dcon::fatten(state.world, prov_id);
 			auto cid = fat_id.get_continent().id.index();
 			auto i = province::to_map_id(prov_id);
-			float gradient_index = 1.f - (prov_population[i] / continent_max_pop[cid]);
-			auto color = ogl::color_gradient(gradient_index, 210, 100 << 8);
+			float gradient_index = prov_population[i] / continent_max_pop[cid];
+			auto color = ogl::gradient_viridis(gradient_index);
 			prov_color[i] = color;
 			prov_color[i + texture_size] = color;
 		}

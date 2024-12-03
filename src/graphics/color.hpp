@@ -48,6 +48,8 @@ namespace ogl {
 		return color;
 	}
 
+	uint32_t gradient_viridis(float x);
+
 	template<class T>
 	inline uint32_t get_ui_color(sys::state& state, T id) {
 		return dcon::fatten(state.world, id).get_color();
