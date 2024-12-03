@@ -54,7 +54,6 @@ namespace ve {
 		return vbitfield_type{ uint8_t(~(a.v ^ b.v)) };
 	}
 
-
 	struct alignas(__m256) mask_vector {
 		using wrapped_value = bool;
 
@@ -110,7 +109,6 @@ namespace ve {
 			return t;
 		}
 	};
-
 
 	RELEASE_INLINE vbitfield_type compress_mask(mask_vector mask) {
 		vbitfield_type t;

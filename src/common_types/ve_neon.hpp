@@ -99,12 +99,7 @@ namespace ve {
 			return t;
 		}
 	};
-
-
-
 	
-
-
 	struct alignas(__m128) fp_vector {
 		using wrapped_value = float;
 

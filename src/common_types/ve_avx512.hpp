@@ -110,7 +110,6 @@ namespace ve {
 		}
 	};
 
-
 	RELEASE_INLINE vbitfield_type compress_mask(mask_vector mask) {
 		vbitfield_type t;
 		t.v = uint16_t(mask.value);

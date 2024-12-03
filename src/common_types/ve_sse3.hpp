@@ -98,11 +98,6 @@ namespace ve {
 		}
 	};
 
-
-
-	
-
-
 	struct alignas(__m128) fp_vector {
 		using wrapped_value = float;
 
@@ -577,7 +572,6 @@ namespace ve {
 	RELEASE_INLINE uint32_t minimum_partial(first, T... args) {
 		return minimum_partial(args ...);
 	}
-
 
 	template<typename FUNC, typename ... PARAMS>
 	RELEASE_INLINE auto apply(FUNC&& f, PARAMS ... params) {
