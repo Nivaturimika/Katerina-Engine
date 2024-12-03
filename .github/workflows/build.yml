@@ -8,7 +8,7 @@ jobs:
   # linux-build:
   #   strategy:
   #     matrix:
-  #       config: [x64-debug-linux-clang]
+  #       config: [Debug]
   #       os: [ubuntu-latest]
 
   #   name: Ubuntu with ${{ matrix.compiler }} (${{ matrix.config }})
@@ -31,11 +31,11 @@ jobs:
 
   #   - name: Configure Build Files
   #     run: |
-  #       cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Debug -B build
+  #       cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DARCHITECTURE=x64 -B build
 
   #   - name: Build Katerina Engine
   #     run: |
-  #       cmake --build build -t KatEngine
+  #       cmake --build build --parallel -t KatEngine
 
   #   - name: Archive results
   #     uses: actions/upload-artifact@v4
@@ -63,16 +63,16 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake -DARCHITECTURE=x64 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DARCHITECTURE=x64 -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build -t KatEngine
+        cmake --preset=${{ matrix.config }} -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
 
     - name: Archive results
       uses: actions/upload-artifact@v4
       with:
-        name: katerina-engine-windows-x86_64
+        name: katerina-engine-windows-x64
         path: build/Release/KatEngine.exe
 
   windows-x86-build:
@@ -95,22 +95,22 @@ jobs:
 
     - name: Configure Build Files
       run: |
-        cmake -DARCHITECTURE=x86 -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -B build
+        cmake --preset=${{ matrix.config }} -DARCHITECTURE=x86 -G "Visual Studio 17 2022" -B build
 
     - name: Build Katerina Engine
       run: |
-        cmake --build build -t KatEngine
+        cmake --build build --parallel -t KatEngine
 
     - name: Archive results
       uses: actions/upload-artifact@v4
       with:
-        name: katerina-engine-windows-i686
+        name: katerina-engine-windows-x86
         path: build/Release/KatEngine.exe
 
   # macos-build:
   #   strategy:
   #     matrix:
-  #       config: [aarch64-debug-macos]
+  #       config: [Debug]
   #   runs-on: [macos-latest]
   #   name: MacOS (${{ matrix.config }})
   #   steps:
@@ -124,11 +124,11 @@ jobs:
 
   #   - name: Configure Build Files
   #     run: |
-  #       cmake -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -DCMAKE_BUILD_TYPE=Debug -B build
+  #       cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -B build
 
   #   - name: Build Katerina Engine
   #     run: |
-  #       cmake --build build -t KatEngine
+  #       cmake --build build --parallel -t KatEngine
 
   #   - name: Archive results
   #     uses: actions/upload-artifact@v4

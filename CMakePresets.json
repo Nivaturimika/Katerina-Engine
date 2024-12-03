@@ -58,7 +58,7 @@
 				"ARCHITECTURE": "x86"
 			},
 			"architecture": {
-				"value": "x86",
+				"value": "Win32",
 				"strategy": "external"
 			}
 		},
