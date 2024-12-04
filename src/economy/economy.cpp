@@ -568,7 +568,7 @@ namespace economy {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_construction_demand(ids, cid, 0.0f); });
 		}
-
+		
 		for(auto lc : state.world.in_province_land_construction) {
 			auto province = state.world.pop_get_province_from_pop_location(state.world.province_land_construction_get_pop(lc));
 			auto owner = state.world.province_get_nation_from_province_ownership(province);
@@ -581,9 +581,10 @@ namespace economy {
 				auto& current_purchased = state.world.province_land_construction_get_purchased_goods(lc);
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], excess_construction_demand * amount);
+						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
 						break;
@@ -591,7 +592,6 @@ namespace economy {
 				}
 			}
 		}
-
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			auto owner = state.world.province_get_nation_from_province_ownership(p);
 			if(!owner || state.world.province_get_nation_from_province_control(p) != owner) {
@@ -608,9 +608,10 @@ namespace economy {
 				auto& current_purchased = c.get_purchased_goods();
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], excess_construction_demand * amount);
+						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
 						break;
@@ -628,9 +629,10 @@ namespace economy {
 				auto& current_purchased = c.get_purchased_goods();
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
-							float amount = std::max(0.f, base_cost.commodity_amounts[i] * admin_cost_factor - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], excess_construction_demand * amount);
+						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
 						break;
@@ -646,9 +648,10 @@ namespace economy {
 				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
-							float amount = std::max(0.f, base_cost.commodity_amounts[i] * cost_mod - current_purchased.commodity_amounts[i]);
-							register_construction_demand(state, owner, base_cost.commodity_type[i], excess_construction_demand * amount);
+						auto amount = base_cost.commodity_amounts[i] * cost_mod;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
 						break;
@@ -795,7 +798,7 @@ namespace economy {
 				* c_spending
 				* state.world.commodity_get_current_price(cid);
 			assert(std::isfinite(v) && v >= 0.0f);
-			total += v * true_construction_demand;
+			total += v;
 		}
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
@@ -1086,19 +1089,6 @@ namespace economy {
 
 		float c_spending = state.world.nation_get_spending_level(n) * float(state.world.nation_get_construction_spending(n)) / 100.0f;
 		float p_spending = state.world.nation_get_private_investment_effective_fraction(n);
-
-		// Calculate refunds of extra goods bought (that werent needed
-		float refund_amount = 0.0f;
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
-			auto d_sat = state.world.nation_get_demand_satisfaction(n, c);
-			auto& nat_demand = state.world.nation_get_construction_demand(n, c);
-			assert(d_sat >= 0.f && d_sat <= 1.f);
-			refund_amount += nat_demand * c_spending * (1.0f - d_sat) * state.world.commodity_get_current_price(c);
-			nat_demand *= c_spending * d_sat;
-			state.world.nation_get_private_construction_demand(n, c) *= p_spending * d_sat;
-		}
-		state.world.nation_get_stockpiles(n, economy::money) += refund_amount;
 
 		//Replicate demand property into a temporal buffer (as to not modify the principal demand)
 		ve::vectorizable_buffer<float, dcon::commodity_id> gbuf(state.world.commodity_size());
@@ -1592,8 +1582,8 @@ namespace economy {
 					auto val = state.world.nation_get_navy_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					total += val;
 					refund += val * (1.f - sat) * spending_level * state.world.commodity_get_current_price(c);
+					total += val;
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
@@ -1625,11 +1615,11 @@ namespace economy {
 				for(uint32_t k = 1; k < state.world.commodity_size(); ++k) {
 					dcon::commodity_id c{ dcon::commodity_id::value_base_t(k) };
 					auto sat = state.world.nation_get_demand_satisfaction(n, c);
-					auto val = state.world.nation_get_construction_demand(n, c) * true_construction_demand;
+					auto val = state.world.nation_get_construction_demand(n, c);
 					assert(sat >= 0.f && sat <= 1.f);
 					assert(val >= 0.f);
-					total += val;
 					refund += val * (1.f - sat) * spending_level * state.world.commodity_get_current_price(c);
+					total += val;
 					max_sp += val * sat;
 				}
 				if(total > 0.f)
