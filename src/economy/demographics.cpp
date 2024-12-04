@@ -17,6 +17,7 @@ namespace pop_demographics {
 		return dcon::pop_demographics_key(
 			dcon::pop_demographics_key::value_base_t(state.world.ideology_size() + v.index() + count_special_keys));
 	}
+
 	uint32_t size(sys::state const& state) {
 		return state.world.ideology_size() + state.world.issue_option_size() + count_special_keys;
 	}
@@ -132,11 +133,9 @@ namespace demographics {
 	void regenerate_jingoism_support(sys::state& state, dcon::nation_id n) {
 		dcon::demographics_key key = to_key(state, state.culture_definitions.jingoism);
 		auto pdemo_key = pop_demographics::to_key(state, state.culture_definitions.jingoism);
-		for(const auto pc : state.world.nation_get_province_control_as_nation(n)) {
-			sum_over_single_nation_demographics(state, key, n, [pdemo_key](sys::state const& state, dcon::pop_id p) {
-				return state.world.pop_get_demographics(p, pdemo_key) * state.world.pop_get_size(p);
-			});
-		}
+		sum_over_single_nation_demographics(state, key, n, [pdemo_key](sys::state const& state, dcon::pop_id p) {
+			return state.world.pop_get_demographics(p, pdemo_key) * state.world.pop_get_size(p);
+		});
 	}
 
 	template<bool full>
