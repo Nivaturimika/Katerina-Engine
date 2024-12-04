@@ -204,7 +204,7 @@ namespace ui {
 					row_contents.push_back(c);
 				}
 			}
-			
+
 			std::function<bool(dcon::commodity_id a, dcon::commodity_id b)> fn;
 			switch(sort) {
 			case trade_sort::commodity:
@@ -344,8 +344,11 @@ namespace ui {
 			row_contents.clear();
 			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
-				row_contents.push_back(c);
+				if(state.world.commodity_get_global_market_pool(c) != 0.f) {
+					row_contents.push_back(c);
+				}
 			}
+			
 			std::function<bool(dcon::commodity_id a, dcon::commodity_id b)> fn;
 			switch(sort) {
 			case trade_sort::commodity:
