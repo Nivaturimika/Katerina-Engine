@@ -130,18 +130,15 @@ namespace ve {
 			return 0;
 		}
 		RELEASE_INLINE void set(uint32_t i, float v) noexcept {
-			// active member is float, safe-type-alias with bit_cast
-			// insert_epi32 will copy-as-is the bit values, no integer conversion
-			union {
-				uint32_t i;
-				float f;
-			} uv = { .f = v };
-			switch(i) {
-				case 0: value = _mm_insert_epi32(value, uv.i, 0); break;
-				case 1: value = _mm_insert_epi32(value, uv.i, 1); break;
-				case 2: value = _mm_insert_epi32(value, uv.i, 2); break;
-				case 3: value = _mm_insert_epi32(value, uv.i, 3); break;
-			}
+#ifdef _MSC_VER 
+#ifdef __clang__
+			value[i] = v;
+#else
+			value.m128_f32[i] = v;
+#endif
+#else
+			value[i] = v;
+#endif
 		}
 	};
 
