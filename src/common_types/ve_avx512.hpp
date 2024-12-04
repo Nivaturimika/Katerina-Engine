@@ -172,6 +172,9 @@ namespace ve {
 			uint32_t i, uint32_t j, uint32_t k, uint32_t l, uint32_t m, uint32_t n, uint32_t o, uint32_t p) :
 			value(_mm512_setr_epi32(int32_t(a), int32_t(b), int32_t(c), int32_t(d), int32_t(e), int32_t(f), int32_t(g), int32_t(h),
 				int32_t(i), int32_t(j), int32_t(k), int32_t(l), int32_t(m), int32_t(n), int32_t(o), int32_t(p))) {}
+		RELEASE_INLINE constexpr operator __m512i() const {
+			return value;
+		}
 
 		RELEASE_INLINE int32_t operator[](uint32_t i) const noexcept {
 			switch(i) {
@@ -987,6 +990,12 @@ namespace ve {
 	//new funcs
 	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
 		return _mm512_fmadd_ps(x, a, _mm512_mul_ps(1.f - x, b));
+	}
+	RELEASE_INLINE fp_vector convert_to_float(int_vector a) {
+		return _mm512_cvtepi32_ps(a);
+	}
+	RELEASE_INLINE int_vector convert_to_int(fp_vector a) {
+		return _mm512_cvttps_epi32(a);
 	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {

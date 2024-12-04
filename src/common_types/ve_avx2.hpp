@@ -177,6 +177,9 @@ namespace ve {
 		RELEASE_INLINE int_vector(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e, int32_t f, int32_t g, int32_t h) : value(_mm256_setr_epi32(a, b, c, d, e, f, g, h)) {}
 		RELEASE_INLINE int_vector(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t e, uint32_t f, uint32_t g, uint32_t h) :
 			value(_mm256_setr_epi32(int32_t(a), int32_t(b), int32_t(c), int32_t(d), int32_t(e), int32_t(f), int32_t(g), int32_t(h))) {}
+		RELEASE_INLINE constexpr operator __m256i() const {
+			return value;
+		}
 
 		RELEASE_INLINE int32_t operator[](uint32_t i) const noexcept {
 			switch(i) {
@@ -869,6 +872,12 @@ namespace ve {
 	//new funcs
 	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
 		return _mm256_fmadd_ps(x, a, _mm256_mul_ps(1.f - x, b));
+	}
+	RELEASE_INLINE fp_vector convert_to_float(int_vector a) {
+		return _mm256_cvtepi32_ps(a);
+	}
+	RELEASE_INLINE int_vector convert_to_int(fp_vector a) {
+		return _mm256_cvttps_epi32(a);
 	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {

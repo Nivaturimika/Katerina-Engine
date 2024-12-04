@@ -162,7 +162,10 @@ namespace ve {
 			value(_mm_setr_epi32(a, b, c, d)) {}
 		RELEASE_INLINE int_vector(uint32_t a, uint32_t b, uint32_t c, uint32_t d) :
 			value(_mm_setr_epi32(int32_t(a), int32_t(b), int32_t(c), int32_t(d))) {}
-		
+		RELEASE_INLINE constexpr operator __m128i() const {
+			return value;
+		}
+
 		RELEASE_INLINE int32_t operator[](uint32_t i) const noexcept {
 			union {
 				__m128i tmp;
@@ -840,6 +843,12 @@ namespace ve {
 	//new funcs
 	RELEASE_INLINE fp_vector lerp(fp_vector a, fp_vector b, fp_vector x) {
 		return x * a + (1.f - x) * b;
+	}
+	RELEASE_INLINE fp_vector convert_to_float(int_vector a) {
+		return _mm_cvtepi32_ps(a);
+	}
+	RELEASE_INLINE int_vector convert_to_int(fp_vector a) {
+		return _mm_cvttps_epi32(a);
 	}
 
 	RELEASE_INLINE mask_vector operator<(fp_vector a, fp_vector b) {
