@@ -195,12 +195,16 @@ namespace ui {
 			on_update(state);
 		}
 		void on_update(sys::state& state) noexcept override {
+			auto n = state.local_player_nation;
+
 			row_contents.clear();
 			for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
-				row_contents.push_back(c);
+				if(economy::commodity_market_activity(state, n, c) != 0.f) {
+					row_contents.push_back(c);
+				}
 			}
-			auto n = state.local_player_nation;
+			
 			std::function<bool(dcon::commodity_id a, dcon::commodity_id b)> fn;
 			switch(sort) {
 			case trade_sort::commodity:
