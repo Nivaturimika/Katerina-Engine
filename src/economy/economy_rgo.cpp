@@ -12,8 +12,9 @@ namespace economy_rgo {
 		*/
 		bool is_mine = state.world.commodity_get_is_mine(c);
 		auto rgo = state.world.province_get_rgo(p);
-		if(rgo != c)
+		if(rgo != c) {
 			return 0.f;
+		}
 		auto sz = state.world.province_get_rgo_size(p);
 		auto pmod = state.world.province_get_modifier_values(p, is_mine ? sys::provincial_mod_offsets::mine_rgo_size : sys::provincial_mod_offsets::farm_rgo_size);
 		auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_size : sys::national_mod_offsets::farm_rgo_size);
@@ -129,6 +130,7 @@ namespace economy_rgo {
 			}
 		});
 	}
+
 	float rgo_efficiency(sys::state& state, dcon::nation_id n, dcon::province_id p, dcon::commodity_id c) {
 		bool is_mine = state.world.commodity_get_is_mine(c);
 		auto nmod = state.world.nation_get_modifier_values(n, is_mine ? sys::national_mod_offsets::mine_rgo_eff : sys::national_mod_offsets::farm_rgo_eff);
@@ -161,7 +163,6 @@ namespace economy_rgo {
 			relevant_paid_population += state.world.province_get_demographics(p, demographics::to_key(state, wt));
 		}
 		auto slaves = state.world.province_get_demographics(p, demographics::to_employment_key(state, state.culture_definitions.slaves));
-
 		economy::rgo_workers_breakdown result = {
 			.paid_workers = relevant_paid_population,
 			.slaves = slaves,
@@ -190,7 +191,6 @@ namespace economy_rgo {
 		auto lx_costs = state.world.nation_get_luxury_needs_costs(n, pop_type);
 
 		float min_wage_burden_per_worker = min_wage;
-
 		float desired_profit_by_worker = aristo_burden_per_worker + min_wage_burden_per_worker / (1.f - economy::rgo_owners_cut);
 
 		// we want to employ at least someone, so we decrease our desired profits when employment is low.
