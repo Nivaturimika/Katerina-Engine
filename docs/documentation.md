@@ -35,3 +35,5 @@ Now for the part that matters,
 - Try to use ternaries, if/else is okay too, but understand that if the compiler can synthetize your expression from `1 < x ? 3 : 6` to `int arr[2] = { 6, 3 }; arr[1 < x]` then you are good.
 - Keep cache locality!
 - Remember DCON is a giant database, treat it as such, every query you do incurs an associated cost (for memory prefetch). So if you have to absolutely read something, try to read it in a way that minimizes reads: for example, "eveyr army of a nation" can be done by querying `nation -> army_control -> army` (3 reads), instead of `all armies -> if army -> army_control -> controller == nation` (5 reads)
+- Usage of `_mm_extract_ps` is not allowed, see here: https://community.intel.com/t5/Intel-Moderncode-for-Parallel/mm-extract-ps-returns-int-for-a-long-long-time/td-p/1145389
+- Try to keep your code "simple" (no need for a complex solution)
