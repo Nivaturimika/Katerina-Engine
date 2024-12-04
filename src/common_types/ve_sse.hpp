@@ -121,13 +121,15 @@ namespace ve {
 			return _mm_cvtss_f32(sums);
 		}
 		RELEASE_INLINE float operator[](uint32_t i) const noexcept {
-			switch(i) {
-				case 0: return _mm_extract_ps(value, 0);
-				case 1: return _mm_extract_ps(value, 1);
-				case 2: return _mm_extract_ps(value, 2);
-				case 3: return _mm_extract_ps(value, 3);
-			}
-			return 0;
+#ifdef _MSC_VER 
+#ifdef __clang__
+			return value[i];
+#else
+			return value.m128_f32[i];
+#endif
+#else
+			return value[i];
+#endif
 		}
 		RELEASE_INLINE void set(uint32_t i, float v) noexcept {
 #ifdef _MSC_VER 
