@@ -559,9 +559,10 @@ namespace economy {
 		});
 	}
 
+	// Construction projects buy only up to 1/100th of their daily needed demand
+	constexpr inline float construction_daily_demand_factor = 1.f / 100.f;
 	// we want "cheaper per day"(= slower) construction at the start to avoid initial demand bomb
 	// and "more expensive"(=faster) construction at late game
-
 	void populate_construction_consumption(sys::state& state) {
 		uint32_t total_commodities = state.world.commodity_size();
 		for(uint32_t i = 1; i < total_commodities; ++i) {
@@ -583,7 +584,8 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -610,7 +612,8 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -631,7 +634,8 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -650,7 +654,8 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * cost_mod;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i]);
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -675,10 +680,14 @@ namespace economy {
 				auto t = economy::province_building_type(c.get_type());
 				auto& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
 				auto& current_purchased = c.get_purchased_goods();
+				auto cost_mod = 1.f;
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i]) {
-							state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += base_cost.commodity_amounts[i];
+						auto amount = base_cost.commodity_amounts[i] * cost_mod;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
+							state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += amount;
 						}
 					} else {
 						break;
@@ -694,8 +703,10 @@ namespace economy {
 				float cost_mod = economy_factory::factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(base_cost.commodity_type[i]) {
-						if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * cost_mod) {
-							auto amount = base_cost.commodity_amounts[i] * cost_mod;
+						auto amount = base_cost.commodity_amounts[i] * cost_mod;
+						if(current_purchased.commodity_amounts[i] < amount) {
+							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
+								* construction_daily_demand_factor;
 							state.world.nation_get_private_construction_demand(owner, base_cost.commodity_type[i]) += amount;
 						}
 					} else {
