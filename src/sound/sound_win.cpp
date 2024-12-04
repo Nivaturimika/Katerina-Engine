@@ -45,32 +45,32 @@ namespace sound {
 
 			HRESULT hr = CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
 			if(FAILED(hr)) {
-				reports::write_debug("failed to create graph builder", false);
+				reports::write_debug("failed to create graph builder\n");
 				return;
 			}
 
 			hr = pGraph->RenderFile((wchar_t const*)(filename.c_str()), nullptr);
 			if(FAILED(hr)) {
-				reports::write_debug("unable to play audio file", false);
+				reports::write_debug("unable to play audio file\n");
 				volume_multiplier = 0.0f;
 				return;
 			}
 			IMediaControl* pControl = nullptr;
 			hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
 			if(FAILED(hr)) {
-				reports::write_debug("failed to get control interface", false);
+				reports::write_debug("failed to get control interface\n");
 				return;
 			}
 			if(as_music) {
 				IMediaEventEx* pEvent = nullptr;
 				hr = pGraph->QueryInterface(IID_IMediaEventEx, (void**)&pEvent);
 				if(FAILED(hr)) {
-					reports::write_debug("failed to get event interface", false);
+					reports::write_debug("failed to get event interface\n");
 					return;
 				}
 				auto const res_b = pEvent->SetNotifyWindow((OAHWND)window_handle, WM_GRAPHNOTIFY, NULL);
 				if(FAILED(res_b)) {
-					reports::write_debug("failed to set notification window", false);
+					reports::write_debug("failed to set notification window\n");
 					return;
 				}
 				event_interface = pEvent;
@@ -78,13 +78,13 @@ namespace sound {
 			IBasicAudio* pAudio = nullptr;
 			hr = pGraph->QueryInterface(IID_IBasicAudio, (void**)&pAudio);
 			if(FAILED(hr)) {
-				reports::write_debug("failed to get audio interface", false);
+				reports::write_debug("failed to get audio interface\n");
 				return;
 			}
 			IMediaSeeking* pSeek = nullptr;
 			hr = pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
 			if(FAILED(hr)) {
-				reports::write_debug("failed to get seeking interface", false);
+				reports::write_debug("failed to get seeking interface\n");
 				return;
 			}
 			graph_interface = pGraph;
@@ -93,36 +93,36 @@ namespace sound {
 			seek_interface = pSeek;
 			hr = ((IBasicAudio*)pAudio)->put_Volume(volume_function(volume * volume_multiplier));
 			if(FAILED(hr)) {
-				reports::write_debug("failed to put_Volume", false);
+				reports::write_debug("failed to put_Volume\n");
 			}
 			LONGLONG new_position = 0;
 			hr = ((IMediaSeeking*)pSeek)->SetPositions(&new_position, AM_SEEKING_AbsolutePositioning, nullptr, AM_SEEKING_NoPositioning);
 			if(FAILED(hr)) {
-				reports::write_debug("failed to SetPositions", false);
+				reports::write_debug("failed to SetPositions\n");
 			}
 			hr = ((IMediaControl*)pControl)->Run();
 			if(FAILED(hr)) {
-				reports::write_debug("failed to Run", false);
+				reports::write_debug("failed to Run\n");
 			}
 		} else {
 			HRESULT hr;
 			if(audio_interface) {
 				hr = audio_interface->put_Volume(volume_function(volume * volume_multiplier));
 				if(FAILED(hr)) {
-					reports::write_debug("failed to put_Volume", false);
+					reports::write_debug("failed to put_Volume\n");
 				}
 			}
 			if(seek_interface) {
 				LONGLONG new_position = 0;
 				hr = seek_interface->SetPositions(&new_position, AM_SEEKING_AbsolutePositioning, nullptr, AM_SEEKING_NoPositioning);
 				if(FAILED(hr)) {
-					reports::write_debug("failed to SetPositions", false);
+					reports::write_debug("failed to SetPositions\n");
 				}
 			}
 			if(control_interface) {
 				hr = control_interface->Run();
 				if(FAILED(hr)) {
-					reports::write_debug("failed to Run", false);
+					reports::write_debug("failed to Run\n");
 				}
 			}
 		}
