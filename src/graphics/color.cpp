@@ -2,6 +2,49 @@
 #include "color.hpp"
 
 namespace ogl {
+	// borrowed from http://www.burtleburtle.net/bob/hash/doobs.html
+	uint32_t color_from_hash(uint32_t color) {
+		uint32_t m1 = 0x1337CAFE;
+		uint32_t m2 = 0xDEADBEEF;
+		m1 -= m2;
+		m1 -= color;
+		m1 ^= (color >> 13);
+		m2 -= color;
+		m2 -= m1;
+		m2 ^= (m1 << 8);
+		color -= m1;
+		color -= m2;
+		color ^= (m2 >> 13);
+		m1 -= m2;
+		m1 -= color;
+		m1 ^= (color >> 12);
+		m2 -= color;
+		m2 -= m1;
+		m2 ^= (m1 << 16);
+		color -= m1;
+		color -= m2;
+		color ^= (m2 >> 5);
+		m1 -= m2;
+		m1 -= color;
+		m1 ^= (color >> 3);
+		m2 -= color;
+		m2 -= m1;
+		m2 ^= (m1 << 10);
+		color -= m1;
+		color -= m2;
+		color ^= (m2 >> 15);
+		return color;
+	}
+
+	uint32_t color_gradient(float percent, uint32_t top_color, uint32_t bot_color) {
+		uint32_t color = 0;
+		for(uint32_t i = 0; i <= 16; i += 8) {
+			auto diff = int32_t(top_color >> i & 0xFF) - int32_t(bot_color >> i & 0xFF);
+			color |= uint32_t(int32_t(bot_color >> i & 0xFF) + diff * percent) << i;
+		}
+		return color;
+	}
+
 	// CC0 from matplotlib - https://github.com/BIDS/colormap/blob/master/colormaps.py
 	uint32_t gradient_viridis(float x) {
 		//(-3.9741952365322133*x^4 + 10.34582562913701*x^3 - 6.5526233193290189*x^2 + 0.90723692672422241*x + 0.267004)/(2.2204460492503131e-15*x^4 - 4.1078251911130793e-15*x^3 + 3.3306690738754696e-15*x^2 - 7.4940054162198071e-16*x + 1.0)
