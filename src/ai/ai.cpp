@@ -994,7 +994,8 @@ namespace ai {
 				});
 
 				// try to upgrade factories first:
-				if((rules & issue_rule::expand_factory) != 0) { // can't build -- by elimination, can upgrade
+				// desired types filled: try to construct or upgrade
+				if((rules & issue_rule::build_factory) == 0 && (rules & issue_rule::expand_factory) != 0) { // can't build -- by elimination, can upgrade
 					for(auto si : ordered_states) {
 						if(max_projects <= 0)
 							break;
@@ -1023,17 +1024,12 @@ namespace ai {
 										new_up.set_is_upgrade(true);
 										new_up.set_type(type);
 										--max_projects;
-										//return;
+										return;
 									}
 								}
 							}
 						});
 					}
-				}
-
-				// desired types filled: try to construct or upgrade
-				if((rules & issue_rule::build_factory) == 0 && (rules & issue_rule::expand_factory) != 0) { // can't build -- by elimination, can upgrade
-
 				} else if((rules & issue_rule::build_factory) != 0) { // -- i.e. if building is possible
 					dcon::factory_type_id top_desired_type{};
 					float top_desired_value = 0.f;
@@ -1045,8 +1041,11 @@ namespace ai {
 							}
 						}
 					}
-					//
-					if(top_desired_type) {
+					// limit to building only if there is less than these
+					constexpr int32_t max_parallel_state_constructions = 4;
+					auto sc = state.world.nation_get_state_building_construction(n);
+					if(top_desired_type
+					&& int32_t(sc.end() - sc.begin()) < max_parallel_state_constructions) {
 						for(auto si : ordered_states) {
 							if(max_projects <= 0)
 								break;
@@ -1087,6 +1086,7 @@ namespace ai {
 								}
 							});
 							// else -- try to build -- must have room
+							// limit 
 							if(!is_present
 							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
