@@ -11,7 +11,6 @@
 
 namespace ogl {
 	namespace parameters {
-
 		inline constexpr GLuint screen_width = 0;
 		inline constexpr GLuint screen_height = 1;
 		inline constexpr GLuint drawing_rectangle = 2;
@@ -39,16 +38,12 @@ namespace ogl {
 		inline constexpr GLuint alternate_tint = 16;
 		inline constexpr GLuint linegraph_color = 17;
 	} // namespace parameters
-
-enum class color_modification { none, disabled, interactable, interactable_disabled };
-
+	enum class color_modification { none, disabled, interactable, interactable_disabled };
 	struct color3f {
 		float r = 0.0f;
 		float g = 0.0f;
 		float b = 0.0f;
 	};
-
-
 
 	struct image {
 		uint8_t* data = nullptr;
@@ -56,8 +51,7 @@ enum class color_modification { none, disabled, interactable, interactable_disab
 		int32_t size_y = 0;
 		int32_t channels = 0;
 
-	image() { }
-
+		image() { }
 		image(uint8_t* data, int32_t size_x, int32_t size_y, int32_t channels) {
 			this->data = data;
 			this->size_x = size_x;
@@ -147,21 +141,19 @@ enum class color_modification { none, disabled, interactable, interactable_disab
 	void load_global_squares(sys::state& state);
 
 	class lines {
-		private:
+	private:
 		float* buffer = nullptr;
 		GLuint buffer_handle = 0;
 		GLuint array_handle = 0;
 		bool pending_data_update = true;
-
-		public:
+	public:
 		uint32_t count = 0;
 
 		lines(uint32_t c) : count(c) {
 			buffer = new float[count * 4];
 			set_default_y();
 		}
-		lines(lines&& o) noexcept
-			: buffer(o.buffer), buffer_handle(o.buffer_handle), pending_data_update(o.pending_data_update), count(o.count) {
+		lines(lines&& o) noexcept : buffer(o.buffer), buffer_handle(o.buffer_handle), pending_data_update(o.pending_data_update), count(o.count) {
 			o.buffer = nullptr;
 		}
 		lines& operator=(lines&& o) noexcept {
@@ -180,6 +172,7 @@ enum class color_modification { none, disabled, interactable, interactable_disab
 		void set_y(float* v);
 		void bind_buffer();
 	};
+
 	void render_simple_rect(sys::state const& state, float x, float y, float width, float height, ui::rotation r, bool flipped);
 	void render_textured_rect(sys::state const& state, color_modification enabled, float x, float y, float width, float height,
 		GLuint texture_handle, ui::rotation r, bool flipped, bool rtl);

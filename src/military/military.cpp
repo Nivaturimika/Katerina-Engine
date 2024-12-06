@@ -2293,10 +2293,11 @@ namespace military {
 
 	float primary_warscore(sys::state& state, dcon::war_id w) {
 		return std::clamp(
-		primary_warscore_from_occupation(state, w)
-		+ primary_warscore_from_battles(state, w)
-		+ primary_warscore_from_blockades(state, w)
-		+ primary_warscore_from_war_goals(state, w), -100.0f, 100.0f);
+			primary_warscore_from_occupation(state, w)
+			+ primary_warscore_from_battles(state, w)
+			+ primary_warscore_from_blockades(state, w)
+			+ primary_warscore_from_war_goals(state, w),
+			-100.0f, 100.0f);
 	}
 
 	float primary_warscore_from_occupation(sys::state& state, dcon::war_id w) {
