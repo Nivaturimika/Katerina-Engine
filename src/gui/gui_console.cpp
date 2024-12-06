@@ -1427,11 +1427,11 @@ void ui::console_edit::edit_box_enter(sys::state& state, std::string_view s) noe
 	}
 	case command_info::type::instant_construction:
 	{
-		log_to_console(state, parent, !state.cheat_data.instant_army ? "✔" : "✘");
+		log_to_console(state, parent, !state.cheat_data.instant_army ? "@(T)" : "@(F)");
 		command::c_instant_army(state, state.local_player_nation);
-		log_to_console(state, parent, !state.cheat_data.instant_navy ? "✔" : "✘");
+		log_to_console(state, parent, !state.cheat_data.instant_navy ? "@(T)" : "@(F)");
 		command::c_instant_navy(state, state.local_player_nation);
-		log_to_console(state, parent, !state.cheat_data.instant_industry ? "✔" : "✘");
+		log_to_console(state, parent, !state.cheat_data.instant_industry ? "@(T)" : "@(F)");
 		command::c_instant_industry(state, state.local_player_nation);
 		break;
 	}
