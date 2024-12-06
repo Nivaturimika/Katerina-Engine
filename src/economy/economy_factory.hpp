@@ -94,7 +94,7 @@ namespace economy_factory {
 	void update_factory_triggered_modifiers(sys::state& state);
 
 	void update_single_factory_consumption(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::province_id p, dcon::state_instance_id sid, float mobilization_impact, float expected_min_wage, bool occupied);;
-	void update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage);
+	float update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage);
 
 	economy::construction_status factory_upgrade(sys::state& state, dcon::factory_id f);
 	economy::profit_distribution distribute_factory_profit(sys::state const& state, dcon::state_instance_id sid, float min_wage, float total_profit);

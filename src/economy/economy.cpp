@@ -1687,9 +1687,13 @@ namespace economy {
 
 			for(auto p : state.world.nation_get_province_ownership(n)) {
 				// perform production
+				float subsidies_spending = 0.f;
 				for(auto f : state.world.province_get_factory_location(p.get_province())) {
-					economy_factory::update_single_factory_production(state, f.get_factory(), n, factory_min_wage);
+					subsidies_spending = economy_factory::update_single_factory_production(state, f.get_factory(), n, factory_min_wage);
 				}
+				state.world.nation_get_stockpiles(n, economy::money) -= subsidies_spending;
+				state.world.nation_get_subsidies_spending(n) += subsidies_spending;
+				
 				// rgo
 				economy_rgo::update_province_rgo_production(state, p.get_province(), n);
 				/* adjust pop satisfaction based on consumption */
@@ -2311,7 +2315,9 @@ namespace economy {
 			auto& current_purchased = c.get_purchased_goods();
 
 			bool all_finished = true;
-			if(!(c.get_nation().get_is_player_controlled() && state.cheat_data.instant_army)) {
+			if((c.get_nation().get_is_player_controlled() && state.cheat_data.instant_army)) {
+				// all_finished true, skip over
+			} else {
 				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
 					if(base_cost.commodity_type[j]) {
 						if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * admin_cost_factor) {
@@ -2321,12 +2327,11 @@ namespace economy {
 						break;
 					}
 				}
-			}
-
-			float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-			if(all_finished) {
-				all_finished = (c.get_remaining_construction_time() <= 0);
-				c.get_remaining_construction_time() -= 1;
+				float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
+				if(all_finished) {
+					all_finished = (c.get_remaining_construction_time() <= 0);
+					c.get_remaining_construction_time() -= 1;
+				}
 			}
 
 			if(all_finished) {

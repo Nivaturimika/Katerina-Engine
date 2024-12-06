@@ -678,7 +678,9 @@ namespace economy_factory {
 		state.world.factory_set_full_profit(factory_id, pure_profit);
 	}
 
-	void update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage) {
+	/* Updates the production of a given factory, additionally it also returns the costs of subsidizing said factory
+	   0 is returned if it isn't subsidized */
+	float update_single_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, float expected_min_wage) {
 		auto factory_production = state.world.factory_get_actual_production(f);
 		if(factory_production > 0.f) {
 			auto ft = state.world.factory_get_building_type(f);
@@ -690,12 +692,12 @@ namespace economy_factory {
 			} else {
 				float min_wages = expected_min_wage * state.world.factory_get_level(f) * state.world.factory_get_primary_employment(f);
 				if(money_made < min_wages) {
-					auto difference = min_wages - money_made;
-					assert(difference > 0.0f);
-					if(state.world.nation_get_stockpiles(n, economy::money) > difference || economy::can_take_loans(state, n)) {
+					auto diff = min_wages - money_made;
+					assert(diff > 0.0f);
+					auto nat_money = state.world.nation_get_stockpiles(n, economy::money);
+					if(nat_money > diff || economy::can_take_loans(state, n)) {
 						state.world.factory_set_full_profit(f, min_wages);
-						state.world.nation_get_stockpiles(n, economy::money) -= difference;
-						state.world.nation_get_subsidies_spending(n) += difference;
+						return diff;
 					} else {
 						state.world.factory_set_full_profit(f, std::max(money_made, 0.0f));
 						state.world.factory_set_subsidized(f, false);
@@ -705,6 +707,7 @@ namespace economy_factory {
 				}
 			}
 		}
+		return 0.f;
 	}
 
 	economy::construction_status factory_upgrade(sys::state& state, dcon::factory_id f) {
