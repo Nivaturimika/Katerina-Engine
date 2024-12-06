@@ -2315,8 +2315,8 @@ namespace economy {
 			auto& current_purchased = c.get_purchased_goods();
 
 			bool all_finished = true;
-			if((c.get_nation().get_is_player_controlled() && state.cheat_data.instant_army)) {
-				// all_finished true, skip over
+			if(c.get_nation().get_is_player_controlled() && state.cheat_data.instant_army) {
+				// If instant_army cheat enabled, construction must be finished
 			} else {
 				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
 					if(base_cost.commodity_type[j]) {
@@ -2372,7 +2372,9 @@ namespace economy {
 				auto& current_purchased = c.get_purchased_goods();
 
 				bool all_finished = true;
-				if(!(c.get_nation().get_is_player_controlled() && state.cheat_data.instant_navy)) {
+				if(c.get_nation().get_is_player_controlled() && state.cheat_data.instant_navy) {
+				// If instant_navy cheat enabled, construction must be finished
+				} else {
 					for(uint32_t i = 0; i < commodity_set::set_size && all_finished; ++i) {
 						if(base_cost.commodity_type[i]) {
 							if(current_purchased.commodity_amounts[i] < base_cost.commodity_amounts[i] * admin_cost_factor) {
@@ -2382,13 +2384,13 @@ namespace economy {
 							break;
 						}
 					}
+					float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
+					if(all_finished) {
+						all_finished = (c.get_remaining_construction_time() <= 0);
+						c.get_remaining_construction_time() -= 1;
+					}
 				}
 
-				float construction_time = float(state.military_definitions.unit_base_definitions[c.get_type()].build_time);
-				if(all_finished) {
-					all_finished = (c.get_remaining_construction_time() <= 0);
-					c.get_remaining_construction_time() -= 1;
-				}
 
 				if(all_finished) {
 					auto new_ship = military::create_new_ship(state, c.get_nation(), c.get_type());
@@ -2509,8 +2511,11 @@ namespace economy {
 			auto& base_cost = state.world.factory_type_get_construction_costs(type);
 			auto& current_purchased = state.world.state_building_construction_get_purchased_goods(c);
 			float cost_mod = economy_factory::factory_build_cost_modifier(state, n, state.world.state_building_construction_get_is_pop_project(c));
+
 			bool all_finished = true;
-			if(!(state.world.nation_get_is_player_controlled(n) && state.cheat_data.instant_industry)) {
+			if(state.world.nation_get_is_player_controlled(n) && state.cheat_data.instant_industry) {
+				// If instant_industry cheat enabled, construction must be finished
+			} else {
 				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
 					if(base_cost.commodity_type[j]) {
 						if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * cost_mod) {
@@ -2520,13 +2525,12 @@ namespace economy {
 						break;
 					}
 				}
-			}
-
-			float construction_time = state.world.factory_type_get_construction_time(type);
-			if(all_finished) {
-				auto time = state.world.state_building_construction_get_remaining_construction_time(c);
-				all_finished = (time <= 0);
-				state.world.state_building_construction_set_remaining_construction_time(c, time - 1);
+				float construction_time = state.world.factory_type_get_construction_time(type);
+				if(all_finished) {
+					auto time = state.world.state_building_construction_get_remaining_construction_time(c);
+					all_finished = (time <= 0);
+					state.world.state_building_construction_set_remaining_construction_time(c, time - 1);
+				}
 			}
 
 			if(all_finished) {
