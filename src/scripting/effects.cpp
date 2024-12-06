@@ -2540,7 +2540,7 @@ namespace effect {
 		auto amount = trigger::read_float_from_payload(tval + 1);
 		assert(std::isfinite(amount));
 		for(auto p : ws.world.province_get_pop_location(trigger::to_prov(primary_slot))) {
-			p.get_pop().get_size() *= amount;
+			p.get_pop().get_size() *= std::max(0.f, amount);
 		}
 		return 0;
 	}
@@ -2549,7 +2549,7 @@ namespace effect {
 		assert(std::isfinite(amount));
 		for(auto pr : ws.world.nation_get_province_ownership(trigger::to_nation(primary_slot))) {
 			for(auto p : pr.get_province().get_pop_location()) {
-				p.get_pop().get_size() *= amount;
+				p.get_pop().get_size() *= std::max(0.f, amount);
 			}
 		}
 		return 0;
@@ -2559,7 +2559,7 @@ namespace effect {
 		assert(std::isfinite(amount));
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&ws, amount](dcon::province_id pr) {
 			for(auto p : ws.world.province_get_pop_location(pr)) {
-				p.get_pop().get_size() *= amount;
+				p.get_pop().get_size() *= std::max(0.f, amount);
 			}
 		});
 		return 0;
