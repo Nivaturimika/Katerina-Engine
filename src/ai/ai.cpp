@@ -982,8 +982,9 @@ namespace ai {
 				static std::vector<dcon::state_instance_id> ordered_states;
 				ordered_states.clear();
 				for(auto si : n.get_state_ownership()) {
-					if(si.get_state().get_capital().get_is_colonial() == false)
+					if(si.get_state().get_capital().get_is_colonial() == false) {
 						ordered_states.push_back(si.get_state().id);
+					}
 				}
 				pdqsort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
 					auto apop = state.world.state_instance_get_demographics(a, demographics::total);
@@ -993,6 +994,21 @@ namespace ai {
 					return a.index() < b.index();
 				});
 
+				// subsidize key industries
+				if((rules & issue_rule::can_subsidise) != 0) {
+					for(auto si : ordered_states) {
+						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
+							for(auto f : state.world.province_get_factory_location(p)) {
+								// subsidize factories that are not satisfying demand
+								auto c = f.get_factory().get_building_type().get_output();
+								if(state.world.nation_get_demand_satisfaction(n, c) < 1.f) {
+									f.get_factory().set_subsidized(true);
+								}
+							}
+						});
+					}
+				}
+
 				// try to upgrade factories first:
 				// desired types filled: try to construct or upgrade
 				if((rules & issue_rule::build_factory) == 0 && (rules & issue_rule::expand_factory) != 0) { // can't build -- by elimination, can upgrade
@@ -1001,34 +1017,28 @@ namespace ai {
 							break;
 
 						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-							for(auto fac : state.world.province_get_factory_location(p)) {
-								auto type = fac.get_factory().get_building_type();
-								auto unprofitable = fac.get_factory().get_unprofitable();
-								auto factory_level = fac.get_factory().get_level();
-								auto primary_employment = fac.get_factory().get_primary_employment();
-								if(!unprofitable
-								&& primary_employment >= 0.9f
-								&& factory_level < uint8_t(255)) {
+							for(auto f : state.world.province_get_factory_location(p)) {
+								auto type = f.get_factory().get_building_type();
+								if(!f.get_factory().get_unprofitable()
+								&& f.get_factory().get_primary_employment() >= 0.9f
+								&& f.get_factory().get_level() < uint8_t(255)) {
 									// test if factory is already upgrading
 									auto ug_in_progress = false;
 									for(auto c : state.world.state_instance_get_state_building_construction(si)) {
-										if(c.get_type() == type) {
+										if(c.get_type() == f.get_factory().get_building_type()) {
 											ug_in_progress = true;
 											break;
 										}
 									}
 									if(!ug_in_progress) {
 										auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-										new_up.set_remaining_construction_time(type.get_construction_time());
+										new_up.set_remaining_construction_time(f.get_factory().get_building_type().get_construction_time());
 										new_up.set_is_pop_project(false);
 										new_up.set_is_upgrade(true);
-										new_up.set_type(type);
+										new_up.set_type(f.get_factory().get_building_type());
 										--max_projects;
 										return;
 									}
-								} else if(unprofitable && (rules & issue_rule::can_subsidise) != 0) {
-									// subsidize factories that are unprofitable
-									fac.get_factory().set_subsidized(true);
 								}
 							}
 						});
