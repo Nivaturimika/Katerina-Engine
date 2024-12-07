@@ -1011,7 +1011,8 @@ namespace ai {
 
 				// try to upgrade factories first:
 				// desired types filled: try to construct or upgrade
-				if((rules & issue_rule::expand_factory) != 0) { // can upgrade
+				if((rules & issue_rule::expand_factory) != 0
+				&& max_projects > 0) { // can upgrade
 					for(auto si : ordered_states) {
 						if(max_projects <= 0)
 							break;
@@ -1044,7 +1045,8 @@ namespace ai {
 						});
 					}
 				}
-				if((rules & issue_rule::build_factory) != 0) { // -- i.e. if building is possible
+				if((rules & issue_rule::build_factory) != 0
+				&& max_projects > 0) { // -- i.e. if building is possible
 					dcon::factory_type_id top_desired_type{};
 					float top_desired_value = 0.f;
 					for(const auto ft : state.world.in_factory_type) {
