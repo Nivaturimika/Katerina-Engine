@@ -119,22 +119,21 @@ namespace ai {
 			// must be independent
 			if(n.get_overlord_as_subject().get_ruler() == dcon::nation_id{}) {
 				// We shouldn't unally when have a rival, if we have a rival, we want as many
-				// allies as possible.
-				if(n.get_ai_rival()) {
+				// allies as possible. Or when we are threatened
+				if(n.get_ai_rival() || threatened) {
 					auto rival_str = estimate_strength(state, n.get_ai_rival());
 					auto ol = n.get_ai_rival().get_overlord_as_subject().get_ruler();
 					if(ol || n.get_ai_rival().get_in_sphere_of() == n || rival_str * 2 < self_str || self_str * 2 < rival_str) {
 						n.set_ai_rival(dcon::nation_id{});
 					}
-				} else if(n.get_diplomatic_points() > state.defines.cancelalliance_diplomatic_cost) {
+				} else if(n.get_diplomatic_points() >= state.defines.cancelalliance_diplomatic_cost) {
 					float min_str = 0.0f;
 					dcon::nation_id potential;
 					for(auto adj : n.get_nation_adjacency()) {
 						auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
 						auto ol = other.get_overlord_as_subject().get_ruler();
 						if(!ol && other.get_in_sphere_of() != n
-						&& n.get_in_sphere_of() != other
-						&& (!threatened || !nations::are_allied(state, n, other))) {
+						&& n.get_in_sphere_of() != other) {
 							auto other_str = estimate_strength(state, other);
 							if(self_str * 0.5f < other_str && other_str <= self_str * 1.5f && min_str > self_str) {
 								min_str = other_str;
