@@ -126,28 +126,6 @@ namespace ai {
 					if(ol || n.get_ai_rival().get_in_sphere_of() == n || rival_str * 2 < self_str || self_str * 2 < rival_str) {
 						n.set_ai_rival(dcon::nation_id{});
 					}
-				} else if(n.get_diplomatic_points() >= state.defines.cancelalliance_diplomatic_cost) {
-					float min_str = 0.0f;
-					dcon::nation_id potential;
-					for(auto adj : n.get_nation_adjacency()) {
-						auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
-						auto ol = other.get_overlord_as_subject().get_ruler();
-						if(!ol && other.get_in_sphere_of() != n
-						&& n.get_in_sphere_of() != other) {
-							auto other_str = estimate_strength(state, other);
-							if(self_str * 0.5f < other_str && other_str <= self_str * 1.5f && min_str > self_str) {
-								min_str = other_str;
-								potential = other;
-							}
-						}
-					}
-					if(potential) {
-						if(nations::are_allied(state, n, potential)) {
-							assert(command::can_cancel_alliance(state, n, potential));
-							command::execute_cancel_alliance(state, n, potential);
-						}
-						n.set_ai_rival(potential);
-					}
 				}
 			}
 		}
@@ -219,30 +197,8 @@ namespace ai {
 		for(auto n : state.world.in_nation) {
 			if(!n.get_is_player_controlled()
 			&& !n.get_ai_is_threatened()
-			&& !(n.get_overlord_as_subject().get_ruler())) {
-				static std::vector<dcon::nation_id> prune_targets;
-				prune_targets.clear();
-				for(auto dr : n.get_diplomatic_relation()) {
-					if(dr.get_are_allied()) {
-						auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-						if(other.get_in_sphere_of() != n && !military::are_allied_in_war(state, n, other)) {
-							prune_targets.push_back(other);
-						}
-					}
-				}
-
-				if(prune_targets.empty()) {
-					continue;
-				}
-
-				pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					auto a_str = estimate_strength(state, a);
-					auto b_str = estimate_strength(state, b);
-					if(a_str != b_str)
-						return a_str > b_str;
-					return a.index() > b.index();
-				});
-
+			&& !(n.get_overlord_as_subject().get_ruler())
+			&& n.get_diplomatic_points() >= state.defines.cancelalliance_diplomatic_cost) {
 				float greatest_neighbor = 0.0f;
 				auto in_sphere_of = state.world.nation_get_in_sphere_of(n);
 
@@ -256,7 +212,27 @@ namespace ai {
 				float defensive_str = estimate_defensive_strength(state, n);
 				auto ll = state.world.nation_get_last_war_loss(n);
 				auto safety_margin = defensive_str - safety_factor * greatest_neighbor;
-
+				
+				static std::vector<dcon::nation_id> prune_targets;
+				prune_targets.clear();
+				for(auto dr : n.get_diplomatic_relation()) {
+					if(dr.get_are_allied()) {
+						auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
+						if(other.get_in_sphere_of() != n && !military::are_allied_in_war(state, n, other)) {
+							prune_targets.push_back(other);
+						}
+					}
+				}
+				if(prune_targets.empty()) {
+					continue;
+				}
+				pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+					auto a_str = estimate_strength(state, a);
+					auto b_str = estimate_strength(state, b);
+					if(a_str != b_str)
+						return a_str > b_str;
+					return a.index() > b.index();
+				});
 				for(auto pt : prune_targets) {
 					auto weakest_str = estimate_strength(state, pt);
 					if(weakest_str * 1.25 < safety_margin) {
