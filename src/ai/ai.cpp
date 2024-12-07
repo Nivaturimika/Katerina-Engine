@@ -922,7 +922,7 @@ namespace ai {
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(inputs.commodity_type[i]) {
 				// lacks input, do not build (early break)
-				if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.98f) {
+				if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.75f) {
 					return false;
 				}
 				continue; // -- it does not lack an input
@@ -1035,9 +1035,10 @@ namespace ai {
 					float top_desired_value = 0.f;
 					for(const auto ft : state.world.in_factory_type) {
 						if(get_is_desirable_factory_type(state, n, ft)) {
-							if(ft.get_output().get_total_real_demand() > top_desired_value) {
+							auto sat = state.world.nation_get_demand_satisfaction(n, ft.get_output());
+							if(sat < top_desired_value) {
 								top_desired_type = ft;
-								top_desired_value = ft.get_output().get_total_real_demand();
+								top_desired_value = sat;
 							}
 						}
 					}
@@ -2742,7 +2743,7 @@ namespace ai {
 		auto send_offer_up_to = [&](dcon::nation_id from, dcon::nation_id to, dcon::war_id w, bool attacker, int32_t score_max, bool concession) {
 			if(auto off = state.world.nation_get_peace_offer_from_pending_peace_offer(from); off) {
 				if(state.world.peace_offer_get_is_crisis_offer(off) == true || state.world.peace_offer_get_war_from_war_settlement(off))
-				return; // offer in flight
+					return; // offer in flight
 				state.world.delete_peace_offer(off); // else -- offer has been already resolved and was just pending gc
 			}
 
@@ -2778,9 +2779,9 @@ namespace ai {
 			&& w.get_primary_defender().get_owned_province_count() > 0) {
 				//postpone until military gc does magic
 				if(military::get_role(state, w, w.get_primary_attacker()) != military::war_role::attacker)
-				continue;
+					continue;
 				if(military::get_role(state, w, w.get_primary_defender()) != military::war_role::defender)
-				continue;
+					continue;
 
 				auto overall_score = military::primary_warscore(state, w);
 				if(overall_score >= 0) { // attacker winning
