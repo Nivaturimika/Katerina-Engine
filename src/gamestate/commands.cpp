@@ -2584,22 +2584,21 @@ namespace command {
 	}
 	bool can_cancel_alliance(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target)
-		return false;
+			return false;
 
 		if(state.world.nation_get_diplomatic_points(source) < state.defines.cancelalliance_diplomatic_cost)
-		return false;
+			return false;
 
 		auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(target, source);
 		if(!state.world.diplomatic_relation_get_are_allied(rel))
-		return false;
+			return false;
 
 		//if(military::are_allied_in_war(state, source, target))
 		//	return false;
 
 		auto ol = state.world.nation_get_overlord_as_subject(source);
 		if(state.world.overlord_get_ruler(ol) == target)
-		return false;
-
+			return false;
 		return true;
 	}
 	void execute_cancel_alliance(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
