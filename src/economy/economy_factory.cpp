@@ -687,9 +687,7 @@ namespace economy_factory {
 			auto money_made = state.world.factory_get_full_profit(f);
 			state.world.factory_set_actual_production(f, factory_production);
 			economy::register_domestic_supply(state, n, state.world.factory_type_get_output(ft), factory_production);
-			if(!state.world.factory_get_subsidized(f)) {
-				state.world.factory_set_full_profit(f, money_made);
-			} else {
+			if(state.world.factory_get_subsidized(f)) {
 				float min_wages = expected_min_wage * state.world.factory_get_level(f) * state.world.factory_get_primary_employment(f);
 				if(money_made < min_wages) {
 					auto diff = min_wages - money_made;
@@ -705,6 +703,8 @@ namespace economy_factory {
 				} else {
 					state.world.factory_set_full_profit(f, money_made);
 				}
+			} else {
+				state.world.factory_set_full_profit(f, money_made);
 			}
 		}
 		return 0.f;

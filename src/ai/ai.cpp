@@ -1026,6 +1026,9 @@ namespace ai {
 										--max_projects;
 										return;
 									}
+								} else if(unprofitable && (rules & issue_rule::can_subsidise) != 0) {
+									// subsidize factories that are unprofitable
+									fac.get_factory().set_subsidized(true);
 								}
 							}
 						});
@@ -1087,7 +1090,6 @@ namespace ai {
 								}
 							});
 							// else -- try to build -- must have room
-							// limit 
 							if(!is_present
 							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
