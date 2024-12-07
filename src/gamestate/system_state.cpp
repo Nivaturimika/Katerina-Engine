@@ -813,11 +813,12 @@ namespace sys {
 			}
 		}
 
-		if(!current_scene.based_on_map) {
+		if(current_scene.based_on_map) {
+			current_scene.render_map(*this);
+		} else {
 			glClearColor(0.f, 0.f, 0.f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
-		current_scene.render_map(*this);
 
 		//UI rendering
 		glEnable(GL_BLEND);
