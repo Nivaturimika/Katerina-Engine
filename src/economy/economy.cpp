@@ -2535,6 +2535,18 @@ namespace economy {
 
 			if(all_finished) {
 				economy_factory::add_factory_level_to_state(state, state.world.state_building_construction_get_state(c), type, state.world.state_building_construction_get_is_upgrade(c));
+				
+				// make it be subsidized
+				province::for_each_province_in_state_instance(state, state.world.state_building_construction_get_state(c), [&](dcon::province_id p) {
+					for(auto fl : state.world.province_get_factory_location(p)) {
+						if(fl.get_factory().get_building_type() == type) {
+							fl.get_factory().set_subsidized(fl.get_factory().get_subsidized()
+								|| !state.world.state_building_construction_get_is_pop_project(c));
+							break;
+						}
+					}
+				});
+				
 				if(state.world.state_building_construction_get_nation(c) == state.local_player_nation
 				&& !state.world.state_building_construction_get_is_pop_project(c)) {
 					notification::post(state, notification::message{ [](sys::state& state, text::layout_base& contents) {
