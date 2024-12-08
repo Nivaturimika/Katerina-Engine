@@ -2,8 +2,10 @@ message(STATUS "Finding icu...")
 
 if(WIN32)
 	if(ARCHITECTURE STREQUAL "x64")
+		message(STATUS "Fetching icu-x64...")
 		FetchContent_Declare(icu
-			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win64-MSVC2022.zip")
+			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win64-MSVC2022.zip"
+			DOWNLOAD_EXTRACT_TIMESTAMP true)
 		FetchContent_MakeAvailable(icu)
 		# icudt
 		add_library(icudt SHARED IMPORTED)
@@ -20,9 +22,15 @@ if(WIN32)
 		set_target_properties(icuin PROPERTIES
 			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin64/icuin75.dll"
 			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib64/icuin.lib")
+		# interface target
+		add_library(dependency_icu INTERFACE)
+		target_include_directories(dependency_icu SYSTEM INTERFACE "${icu_SOURCE_DIR}/include")
+		target_link_libraries(dependency_icu INTERFACE icudt icuuc icuin)
 	else()
+		message(STATUS "Fetching icu-x86...")
 		FetchContent_Declare(icu
-			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win32-MSVC2022.zip")
+			URL "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-Win32-MSVC2022.zip"
+			DOWNLOAD_EXTRACT_TIMESTAMP true)
 		FetchContent_MakeAvailable(icu)
 		# icudt
 		add_library(icudt SHARED IMPORTED)
@@ -39,12 +47,11 @@ if(WIN32)
 		set_target_properties(icuin PROPERTIES
 			IMPORTED_LOCATION "${icu_SOURCE_DIR}/bin/icuin75.dll"
 			IMPORTED_IMPLIB "${icu_SOURCE_DIR}/lib/icuin.lib")
+		# interface target
+		add_library(dependency_icu INTERFACE)
+		target_include_directories(dependency_icu SYSTEM INTERFACE "${icu_SOURCE_DIR}/include")
+		target_link_libraries(dependency_icu INTERFACE icudt icuuc icuin)
 	endif()
-	#
-	# interface target
-	add_library(dependency_icu INTERFACE)
-	target_include_directories(dependency_icu SYSTEM INTERFACE "${icu_SOURCE_DIR}/include")
-	target_link_libraries(dependency_icu INTERFACE icudt icuuc icuin)
 else()
 	find_package(ICU COMPONENTS uc dt in REQUIRED)
 	add_library(dependency_icu INTERFACE)

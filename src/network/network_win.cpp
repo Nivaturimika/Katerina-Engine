@@ -15,9 +15,6 @@
 #include "pcp.h"
 #include "network.hpp"
 
-#pragma comment(lib, "Iphlpapi.lib")
-#pragma comment(lib, "ntdll.lib")
-
 namespace network {
 	struct local_addresses {
 		std::string address;

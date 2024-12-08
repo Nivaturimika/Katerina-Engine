@@ -15,8 +15,6 @@
 #include <cstdlib>
 #include "pdqsort.h"
 
-#pragma comment(lib, "Shlwapi.lib")
-
 namespace simple_fs {
 	static native_string steam_path;
 

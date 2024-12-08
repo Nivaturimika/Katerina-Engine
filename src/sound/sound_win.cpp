@@ -4,7 +4,6 @@
 
 #include "Dshow.h"
 #define WM_GRAPHNOTIFY (WM_APP + 1)
-#pragma comment(lib, "Strmiids.lib")
 
 namespace sound {
 
