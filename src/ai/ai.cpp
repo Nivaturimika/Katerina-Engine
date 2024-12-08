@@ -218,7 +218,9 @@ namespace ai {
 				for(auto dr : n.get_diplomatic_relation()) {
 					if(dr.get_are_allied()) {
 						auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-						if(other.get_in_sphere_of() != n && !military::are_allied_in_war(state, n, other)) {
+						if(n.get_in_sphere_of() != other
+						&& other.get_in_sphere_of() != n
+						&& !military::are_allied_in_war(state, n, other)) {
 							prune_targets.push_back(other);
 						}
 					}
