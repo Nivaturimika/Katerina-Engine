@@ -4336,19 +4336,16 @@ struct empty_mask { };
 	}
 	TRIGGER_FUNCTION(tf_war_score) {
 		auto result = ve::apply([&](dcon::nation_id n) {
-			auto score = 0.f;
+			auto total_score = 0.f;
 			auto wp = ws.world.nation_get_war_participant(n);
 			if(wp.begin() == wp.end()) {
 				return 0.f;
 			}
 			for(auto w : wp) {
-				if(w.get_is_attacker()) {
-					score += military::primary_warscore(ws, w.get_war());
-				} else {
-					score -= military::primary_warscore(ws, w.get_war());
-				}
+				auto score = military::primary_warscore(ws, w.get_war());
+				total_score += w.get_is_attacker() ? score : -score;
 			}
-			return score / float(wp.end() - wp.begin());
+			return total_score / float(wp.end() - wp.begin());
 		}, to_nation(primary_slot));
 		return compare_values(tval[0], result, read_float_from_payload(tval + 1));
 	}
