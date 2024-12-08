@@ -9,10 +9,9 @@ namespace notification {
 		// But, probably don't try to fiter out by "interesting" except for considering whether the player nation is itself involved
 		// as that will probably be a more computationally expensive check
 		//
-
-		//bool v = state.new_messages.try_emplace(std::move(m));
-		//assert(v);
-		state.new_messages.emplace(std::move(m));
+		bool v = state.new_messages.try_emplace(std::move(m));
+		assert(v);
+		//state.new_messages.emplace(std::move(m));
 	}
 
 	bool nation_is_interesting(sys::state& state, dcon::nation_id n) {
