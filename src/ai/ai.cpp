@@ -225,28 +225,24 @@ namespace ai {
 						}
 					}
 				}
-				if(prune_targets.empty()) {
-					continue;
-				}
-				pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-					auto a_str = estimate_strength(state, a);
-					auto b_str = estimate_strength(state, b);
-					if(a_str != b_str)
-						return a_str > b_str;
-					return a.index() > b.index();
-				});
-				for(auto pt : prune_targets) {
-					auto weakest_str = estimate_strength(state, pt);
-					if(weakest_str * 1.25 < safety_margin) {
-						safety_margin -= weakest_str;
-						assert(command::can_cancel_alliance(state, n, pt));
-						command::execute_cancel_alliance(state, n, pt);
-					} else if(state.world.nation_get_infamy(pt) >= state.defines.badboy_limit) {
-						safety_margin -= weakest_str;
-						assert(command::can_cancel_alliance(state, n, pt));
-						command::execute_cancel_alliance(state, n, pt);
-					} else {
-						break;
+				if(prune_targets.size() > 0) {
+					pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+						auto a_str = estimate_strength(state, a);
+						auto b_str = estimate_strength(state, b);
+						if(a_str != b_str)
+							return a_str > b_str;
+						return a.index() > b.index();
+					});
+					for(auto pt : prune_targets) {
+						auto weakest_str = estimate_strength(state, pt);
+						if(weakest_str * 1.25 < safety_margin
+						|| state.world.nation_get_infamy(pt) >= state.defines.badboy_limit) {
+							safety_margin -= weakest_str;
+							assert(command::can_cancel_alliance(state, n, pt));
+							command::execute_cancel_alliance(state, n, pt);
+						} else {
+							break;
+						}
 					}
 				}
 			}
