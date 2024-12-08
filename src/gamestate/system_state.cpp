@@ -3736,7 +3736,6 @@ namespace sys {
 		ai::make_defense(*this);
 		ai::make_attacks(*this);
 		ai::update_ships(*this);
-		ai::take_ai_decisions(*this);
 
 		// Once per month updates, spread out over the month
 		switch(ymd_date.day) {
@@ -3754,6 +3753,7 @@ namespace sys {
 			ai::add_gw_goals(*this);
 			break;
 		case 4:
+			ai::take_ai_decisions(*this);
 			break;
 		case 5:
 			rebel::update_movements(*this);
