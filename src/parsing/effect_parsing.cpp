@@ -1648,13 +1648,13 @@ namespace parsers {
 	void effect_body::country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(context.this_slot == trigger::slot_contents::nation)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_nation));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_nation));
 			else if(context.this_slot == trigger::slot_contents::province)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_province));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_province));
 			else if(context.this_slot == trigger::slot_contents::state)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_state));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_state));
 			else if(context.this_slot == trigger::slot_contents::pop)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_pop));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_this_pop));
 			else {
 				err.accumulated_errors +=
 					"country_event effect used in an incorrect scope type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
@@ -1681,16 +1681,15 @@ namespace parsers {
 			}
 		} else if(context.main_slot == trigger::slot_contents::province) {
 			if(context.this_slot == trigger::slot_contents::nation)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_nation));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_nation));
 			else if(context.this_slot == trigger::slot_contents::province)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_province));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_province));
 			else if(context.this_slot == trigger::slot_contents::state)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_state));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_state));
 			else if(context.this_slot == trigger::slot_contents::pop)
-			context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_pop));
+				context.compiled_effect.push_back(uint16_t(effect::country_event_immediate_province_this_pop));
 			else {
-				err.accumulated_errors +=
-					"country_event effect used in an incorrect scope type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "country_event effect used in an incorrect scope type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			if(auto it = context.outer_context.map_of_national_events.find(value);
@@ -1708,8 +1707,7 @@ namespace parsers {
 				}
 			} else {
 				auto ev_id = context.outer_context.state.world.create_national_event();
-				context.outer_context.map_of_national_events.insert_or_assign(value,
-					pending_nat_event{ev_id, trigger::slot_contents::nation, trigger::slot_contents::nation, context.this_slot});
+				context.outer_context.map_of_national_events.insert_or_assign(value, pending_nat_event{ev_id, trigger::slot_contents::nation, trigger::slot_contents::nation, context.this_slot});
 				context.compiled_effect.push_back(trigger::payload(ev_id).value);
 			}
 		} else {
@@ -1722,16 +1720,15 @@ namespace parsers {
 	void effect_body::province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::province) {
 			if(context.this_slot == trigger::slot_contents::nation)
-			context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_nation));
+				context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_nation));
 			else if(context.this_slot == trigger::slot_contents::province)
-			context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_province));
+				context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_province));
 			else if(context.this_slot == trigger::slot_contents::state)
-			context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_state));
+				context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_state));
 			else if(context.this_slot == trigger::slot_contents::pop)
-			context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_pop));
+				context.compiled_effect.push_back(uint16_t(effect::province_event_immediate_this_pop));
 			else {
-				err.accumulated_errors +=
-					"province_event effect used in an incorrect scope type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "province_event effect used in an incorrect scope type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			if(auto it = context.outer_context.map_of_provincial_events.find(value);
@@ -1761,6 +1758,15 @@ namespace parsers {
 	}
 
 	void effect_body::country_event(ef_country_event const& value, error_handler& err, int32_t line, effect_building_context& context) {
+		auto days = value.days;
+		if(days < 0) {
+			err.accumulated_warnings += "country_event given negative days, parsed as 0 (" + err.file_name + ")\n";
+			days = 0;
+		}
+		if(days > 32767) {
+			err.accumulated_warnings += "country_event given " + std::to_string(days) + " days (" + err.file_name + ")\n";
+			days = 32767;
+		}
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(context.this_slot == trigger::slot_contents::nation)
 				context.compiled_effect.push_back(uint16_t(effect::country_event_this_nation));
@@ -1776,7 +1782,7 @@ namespace parsers {
 				return;
 			}
 			context.compiled_effect.push_back(trigger::payload(value.id_).value);
-			context.compiled_effect.push_back(uint16_t(value.days));
+			context.compiled_effect.push_back(uint16_t(days));
 		} else if(context.main_slot == trigger::slot_contents::province) {
 			if(context.this_slot == trigger::slot_contents::nation)
 				context.compiled_effect.push_back(uint16_t(effect::country_event_province_this_nation));
@@ -1791,15 +1797,24 @@ namespace parsers {
 				return;
 			}
 			context.compiled_effect.push_back(trigger::payload(value.id_).value);
-			context.compiled_effect.push_back(uint16_t(value.days));
+			context.compiled_effect.push_back(uint16_t(days));
 		} else {
 			err.accumulated_errors += "country_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
 	void effect_body::province_event(ef_province_event const& value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(!context.outer_context.use_extensions && value.days > 1) {
+		auto days = value.days;
+		if(!context.outer_context.use_extensions && days > 1) {
 			err.accumulated_warnings += "province_event with more than 1 day could cause crashes (" + err.file_name + ")\n";
+		}
+		if(days < 0) {
+			err.accumulated_warnings += "province_event given negative days, parsed as 0 (" + err.file_name + ")\n";
+			days = 0;
+		}
+		if(days > 32767) {
+			err.accumulated_warnings += "province_event given " + std::to_string(days) + " days (" + err.file_name + ")\n";
+			days = 32767;
 		}
 		if(context.main_slot == trigger::slot_contents::province) {
 			if(context.this_slot == trigger::slot_contents::nation)
@@ -1815,7 +1830,7 @@ namespace parsers {
 				return;
 			}
 			context.compiled_effect.push_back(trigger::payload(value.id_).value);
-			context.compiled_effect.push_back(uint16_t(value.days));
+			context.compiled_effect.push_back(uint16_t(days));
 		} else {
 			err.accumulated_errors += "province_event effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
