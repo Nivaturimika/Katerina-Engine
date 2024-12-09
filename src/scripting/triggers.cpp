@@ -15,11 +15,19 @@ namespace trigger {
 #if defined(MSVC) || defined(__clang__) //clang and msvc
 #define CALLTYPE __vectorcall
 #else //gcc
-#define CALLTYPE __attribute__((hot, noinline, aligned(64)))
+#define CALLTYPE __attribute__((aligned(64)))
+#endif
+
+/* Only mark very VERY used entrypoints as hot, don't just mark everything hot
+   The compiler will assume these functions will get called VERY often, and optimize it a bunch */
+#if defined(__GNUC__)
+#define MARK_AS_HOT __attribute__((hot))
+#else
+#define MARK_AS_HOT
 #endif
 
 	template<typename A, typename B>
-	[[nodiscard]] auto compare_values(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
+	[[nodiscard]] inline auto compare_values(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
 		switch(trigger_code & trigger::association_mask) {
 		case trigger::association_eq:
 			return value_a == value_b;
@@ -39,7 +47,7 @@ namespace trigger {
 	}
 
 	template<typename A, typename B>
-	[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
+	[[nodiscard]] inline auto compare_values_eq(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
 		switch(trigger_code & trigger::association_mask) {
 		case trigger::association_eq:
 			return value_a == value_b;
@@ -59,7 +67,7 @@ namespace trigger {
 	}
 
 	template<typename B>
-	[[nodiscard]] auto compare_values_eq(uint16_t trigger_code, dcon::nation_fat_id value_a, B value_b) -> decltype(value_a.id == value_b) {
+	[[nodiscard]] inline auto compare_values_eq(uint16_t trigger_code, dcon::nation_fat_id value_a, B value_b) -> decltype(value_a.id == value_b) {
 		switch(trigger_code & trigger::association_mask) {
 		case trigger::association_eq:
 			return value_a.id == value_b;
@@ -79,7 +87,7 @@ namespace trigger {
 	}
 
 	template<typename A>
-	[[nodiscard]] auto compare_to_true(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
+	[[nodiscard]] inline auto compare_to_true(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
 		switch(trigger_code & trigger::association_mask) {
 		case trigger::association_eq:
 			return value_a;
@@ -98,7 +106,7 @@ namespace trigger {
 		}
 	}
 	template<typename A>
-	[[nodiscard]] auto compare_to_false(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
+	[[nodiscard]] inline auto compare_to_false(uint16_t trigger_code, A value_a) -> decltype(!value_a) {
 		switch(trigger_code & trigger::association_mask) {
 		case trigger::association_eq:
 			return !value_a;
@@ -165,11 +173,11 @@ namespace trigger {
 	using gathered_t = typename gathered_s<T>::type;
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
+	MARK_AS_HOT static return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
 
 #define TRIGGER_FUNCTION(function_name) \
 	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
-	return_type CALLTYPE function_name(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot)
+	static return_type CALLTYPE function_name(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot)
 
 	template<typename T>
 	struct full_mask { };
@@ -193,10 +201,10 @@ namespace trigger {
 		static constexpr ve::vbitfield_type value = ve::vbitfield_type{ve::vbitfield_type::storage(0)};
 	};
 
-	bool compare(bool a, bool b) {
+	inline bool compare(bool a, bool b) {
 		return a == b;
 	}
-	bool compare(ve::vbitfield_type a, ve::vbitfield_type b) {
+	inline bool compare(ve::vbitfield_type a, ve::vbitfield_type b) {
 		return a.v == b.v;
 	}
 
@@ -255,16 +263,13 @@ namespace trigger {
 		uint32_t index = 0;
 		int32_t accumulated_mask = 0;
 		bool fixup_kludge = false;
-		public:
+	public:
 		bool result = false;
-
-	true_accumulator(F&& f) : F(std::move(f)) { }
-
+		true_accumulator(F&& f) : F(std::move(f)) { }
 		void add_value(int32_t v) {
 			if(!result) {
 				accumulated_mask |= (int32_t(v != -1) << index);
 				value.set(index++, v);
-
 				if(index == ve::vector_size) {
 					result = (ve::compress_mask(F::operator()(value)).v & accumulated_mask) != 0;
 					value = ve::tagged_vector<int32_t>();
@@ -291,16 +296,13 @@ namespace trigger {
 		uint32_t index = 0;
 		int32_t accumulated_mask = 0;
 		bool fixup_kludge = false;
-		public:
+	public:
 		bool result = true;
-
-	false_accumulator(F&& f) : F(std::move(f)) { }
-
+		false_accumulator(F&& f) : F(std::move(f)) { }
 		void add_value(int32_t v) {
 			if(result) {
 				accumulated_mask |= (int32_t(v != -1) << index);
 				value.set(index++, v);
-
 				if(index == ve::vector_size) {
 					result = (ve::compress_mask(F::operator()(value)).v & accumulated_mask) == accumulated_mask;
 					value = ve::tagged_vector<int32_t>();
@@ -3094,26 +3096,23 @@ namespace trigger {
 	}
 	TRIGGER_FUNCTION(tf_produces_state) {
 		auto good = payload(tval[1]).com_id;
-		return compare_to_true(tval[0],
-			ve::apply(
-					[&](dcon::state_instance_id si, dcon::nation_id o) {
-						auto d = ws.world.state_instance_get_definition(si);
-						for(auto p : ws.world.state_definition_get_abstract_state_membership(d)) {
-							if(p.get_province().get_nation_from_province_ownership() == o) {
-								if(p.get_province().get_rgo() == good)
-									return true;
-								//if(p.get_province().get_artisan_production() == good)
-								//	return true;
+		return compare_to_true(tval[0], ve::apply([&](dcon::state_instance_id si, dcon::nation_id o) {
+			auto d = ws.world.state_instance_get_definition(si);
+			for(auto p : ws.world.state_definition_get_abstract_state_membership(d)) {
+				if(p.get_province().get_nation_from_province_ownership() == o) {
+					if(p.get_province().get_rgo() == good)
+						return true;
+					//if(p.get_province().get_artisan_production() == good)
+					//	return true;
 
-								for(auto f : p.get_province().get_factory_location()) {
-									if(f.get_factory().get_building_type().get_output() == good)
-										return true;
-								}
-							}
-						}
-						return false;
-					},
-					to_state(primary_slot), ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot))));
+					for(auto f : p.get_province().get_factory_location()) {
+						if(f.get_factory().get_building_type().get_output() == good)
+							return true;
+					}
+				}
+			}
+			return false;
+		}, to_state(primary_slot), ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot))));
 	}
 	TRIGGER_FUNCTION(tf_produces_pop) {
 		auto pop_location = ws.world.pop_get_province_from_pop_location(to_pop(primary_slot));
@@ -5627,8 +5626,8 @@ namespace trigger {
 	}
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
-		alignas(64) constexpr static return_type(*trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
+	MARK_AS_HOT static return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
+		constexpr static return_type(*trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
 			tf_none<return_type, primary_type, this_type, from_type>,
 			// non-scopes
 #define TRIGGER_BYTECODE_ELEMENT(code, name, arg) tf_##name <return_type, primary_type, this_type, from_type>,
@@ -5646,7 +5645,7 @@ namespace trigger {
 #undef CALLTYPE
 #undef TRIGGER_FUNCTION
 
-	float evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier, int32_t primary, int32_t this_slot, int32_t from_slot) {
+	MARK_AS_HOT float evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier, int32_t primary, int32_t this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		float product = base.factor;
 		for(uint32_t i = 0; i < base.segments_count && product != 0; ++i) {
@@ -5657,7 +5656,7 @@ namespace trigger {
 		}
 		return product;
 	}
-	float evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier, int32_t primary, int32_t this_slot,
+	MARK_AS_HOT float evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier, int32_t primary, int32_t this_slot,
 		int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		float sum = base.base;
@@ -5671,8 +5670,7 @@ namespace trigger {
 		}
 		return sum * base.factor;
 	}
-
-	ve::fp_vector evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier, ve::contiguous_tags<int32_t> primary, ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
+	MARK_AS_HOT ve::fp_vector evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier, ve::contiguous_tags<int32_t> primary, ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		ve::fp_vector product = base.factor;
 		for(uint32_t i = 0; i < base.segments_count; ++i) {
@@ -5684,7 +5682,7 @@ namespace trigger {
 		}
 		return product;
 	}
-	ve::fp_vector evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier,
+	MARK_AS_HOT ve::fp_vector evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier,
 		ve::contiguous_tags<int32_t> primary, ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		ve::fp_vector sum = base.base;
@@ -5698,8 +5696,7 @@ namespace trigger {
 		}
 		return sum * base.factor;
 	}
-
-	ve::fp_vector evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier,
+	MARK_AS_HOT ve::fp_vector evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier,
 		ve::contiguous_tags<int32_t> primary, ve::contiguous_tags<int32_t> this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		ve::fp_vector product = base.factor;
@@ -5713,7 +5710,7 @@ namespace trigger {
 		}
 		return product;
 	}
-	ve::fp_vector evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier,
+	MARK_AS_HOT ve::fp_vector evaluate_additive_modifier(sys::state& state, dcon::value_modifier_key modifier,
 		ve::contiguous_tags<int32_t> primary, ve::contiguous_tags<int32_t> this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
 		ve::fp_vector sum = base.base;
@@ -5727,41 +5724,36 @@ namespace trigger {
 		}
 		return sum * base.factor;
 	}
-
-	bool evaluate(sys::state& state, dcon::trigger_key key, int32_t primary, int32_t this_slot, int32_t from_slot) {
-		return test_trigger_generic<bool>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state, primary,
-			this_slot, from_slot);
+	MARK_AS_HOT bool evaluate(sys::state& state, dcon::trigger_key key, int32_t primary, int32_t this_slot, int32_t from_slot) {
+		return test_trigger_generic<bool>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state, primary, this_slot, from_slot);
 	}
-	bool evaluate(sys::state& state, uint16_t const* data, int32_t primary, int32_t this_slot, int32_t from_slot) {
+	MARK_AS_HOT bool evaluate(sys::state& state, uint16_t const* data, int32_t primary, int32_t this_slot, int32_t from_slot) {
 		return test_trigger_generic<bool>(data, state, primary, this_slot, from_slot);
 	}
 
-	ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::contiguous_tags<int32_t> primary,
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::contiguous_tags<int32_t> primary,
 		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
-		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state,
-			primary, this_slot, from_slot);
+		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state, primary, this_slot, from_slot);
 	}
-	ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::contiguous_tags<int32_t> primary,
-		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
-		return test_trigger_generic<ve::mask_vector>(data, state, primary, this_slot, from_slot);
-	}
-
-	ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::tagged_vector<int32_t> primary,
-		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
-		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state,
-			primary, this_slot, from_slot);
-	}
-	ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::tagged_vector<int32_t> primary,
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::contiguous_tags<int32_t> primary,
 		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
 		return test_trigger_generic<ve::mask_vector>(data, state, primary, this_slot, from_slot);
 	}
 
-	ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::contiguous_tags<int32_t> primary,
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::tagged_vector<int32_t> primary,
+		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
+		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state, primary, this_slot, from_slot);
+	}
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::tagged_vector<int32_t> primary,
+		ve::tagged_vector<int32_t> this_slot, int32_t from_slot) {
+		return test_trigger_generic<ve::mask_vector>(data, state, primary, this_slot, from_slot);
+	}
+
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, dcon::trigger_key key, ve::contiguous_tags<int32_t> primary,
 		ve::contiguous_tags<int32_t> this_slot, int32_t from_slot) {
-		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state,
-			primary, this_slot, from_slot);
+		return test_trigger_generic<ve::mask_vector>(state.trigger_data.data() + state.trigger_data_indices[key.index() + 1], state, primary, this_slot, from_slot);
 	}
-	ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::contiguous_tags<int32_t> primary,
+	MARK_AS_HOT ve::mask_vector evaluate(sys::state& state, uint16_t const* data, ve::contiguous_tags<int32_t> primary,
 		ve::contiguous_tags<int32_t> this_slot, int32_t from_slot) {
 		return test_trigger_generic<ve::mask_vector>(data, state, primary, this_slot, from_slot);
 	}
