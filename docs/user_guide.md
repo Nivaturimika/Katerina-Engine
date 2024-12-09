@@ -100,6 +100,7 @@ Other controls are described directly on the tooltip (for example, right clickin
 * `-port <port>`: Use a given port to host, the default is `1984`.
 * `-ext-script-ui`: Be able to use scripted UI (otherwise any scripted buttons will fail and cause OOS)
 * `-daily-oos`: Turn on daily OOS checks (as opposed to monthly ones).
+* `-seed <n>`: Use a given seed, if not specified, a random one will be generated with the default random device
 
 ## Game directory
 

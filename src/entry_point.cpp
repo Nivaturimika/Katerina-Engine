@@ -177,6 +177,7 @@ int scenario_validate(simple_fs::file_system& fs_root, native_string path) {
 	@return The error code, EXIT_SUCCESS if no error was generated.
 */
 int process_command_line(std::vector<native_string>& argv) {
+	uint32_t default_seed = uint32_t(std::random_device()());
 	int32_t headless_speed = 6;
 	int32_t headless_ticks = 0; //0 -- infinite, >1 run for n specified amount
 	bool headless_repeat = false;
@@ -269,6 +270,12 @@ int process_command_line(std::vector<native_string>& argv) {
 				headless_ticks = int32_t(std::atoi(str.c_str()));
 				i++;
 			}
+		} else if(native_string(argv[i]) == NATIVE("-seed")) {
+			if(i + 1 < argv.size()) {
+				auto str = text::native_to_utf8(native_string(argv[i + 1]));
+				default_seed = int32_t(std::atoi(str.c_str()));
+				i++;
+			}
 		} else if(native_string(argv[i]) == NATIVE("-path")) {
 			if(i + 1 < argv.size()) {
 				opt_fs_path = native_string(argv[i + 1]);
@@ -338,6 +345,9 @@ int process_command_line(std::vector<native_string>& argv) {
 			}
 		}
 	}
+
+	// Likely overriden by network
+	game_state.game_seed = default_seed;
 	network::init(game_state);
 	
 	// UI won't be baked onto scenario whuen not using scripted UI, nor can it be used
