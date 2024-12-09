@@ -8,13 +8,14 @@
 #include "province_templates.hpp"
 #include "ve_scalar_extensions.hpp"
 #include "script_constants.hpp"
+#include "politics.hpp"
 
 namespace trigger {
 
-#ifdef WIN32
+#if defined(MSVC) || defined(__clang__) //clang and msvc
 #define CALLTYPE __vectorcall
-#else
-#define CALLTYPE __attribute__((sseregparm))
+#else //gcc
+#define CALLTYPE __attribute__((hot, noinline, aligned(64)))
 #endif
 
 	template<typename A, typename B>
@@ -164,36 +165,32 @@ namespace trigger {
 	using gathered_t = typename gathered_s<T>::type;
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot,
-		from_type from_slot);
+	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
 
-	#define TRIGGER_FUNCTION(function_name)                                                                                          \
-	template<typename return_type, typename primary_type, typename this_type, typename from_type>                                  \
-	return_type CALLTYPE function_name(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot,       \
-			from_type from_slot)
+#define TRIGGER_FUNCTION(function_name) \
+	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
+	return_type CALLTYPE function_name(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot)
 
 	template<typename T>
-struct full_mask { };
-
+	struct full_mask { };
 	template<>
 	struct full_mask<bool> {
 		static constexpr bool value = true;
 	};
 	template<>
 	struct full_mask<ve::vbitfield_type> {
-	static constexpr ve::vbitfield_type value = ve::vbitfield_type{ve::vbitfield_type::storage(-1)};
+		static constexpr ve::vbitfield_type value = ve::vbitfield_type{ve::vbitfield_type::storage(-1)};
 	};
 
 	template<typename T>
-struct empty_mask { };
-
+	struct empty_mask { };
 	template<>
 	struct empty_mask<bool> {
 		static constexpr bool value = false;
 	};
 	template<>
 	struct empty_mask<ve::vbitfield_type> {
-	static constexpr ve::vbitfield_type value = ve::vbitfield_type{ve::vbitfield_type::storage(0)};
+		static constexpr ve::vbitfield_type value = ve::vbitfield_type{ve::vbitfield_type::storage(0)};
 	};
 
 	bool compare(bool a, bool b) {
@@ -206,7 +203,6 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(apply_disjuctively) {
 		auto const source_size = 1 + get_trigger_scope_payload_size(tval);
 		auto sub_units_start = tval + 2 + trigger_scope_data_payload(tval[0]);
-
 		return_type result = return_type(false);
 		while(sub_units_start < tval + source_size) {
 			result = result | test_trigger_generic<return_type, primary_type, this_type, from_type>(sub_units_start, ws, primary_slot, this_slot, from_slot);
@@ -222,7 +218,6 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(apply_conjuctively) {
 		auto const source_size = 1 + get_trigger_scope_payload_size(tval);
 		auto sub_units_start = tval + 2 + trigger_scope_data_payload(tval[0]);
-
 		return_type result = return_type(true);
 		while(sub_units_start < tval + source_size) {
 			result = result & test_trigger_generic<return_type, primary_type, this_type, from_type>(sub_units_start, ws, primary_slot, this_slot, from_slot);
@@ -5528,6 +5523,10 @@ struct empty_mask { };
 	}
 
 	TRIGGER_FUNCTION(tf_tags_eq) {
+		//auto const a = read_int32_t_from_payload(tval + 1);
+		//auto const b = read_int32_t_from_payload(tval + 3);
+		//auto const v = read_int32_t_from_payload(tval + 3);
+		//ws.news_definitions.currently_collected.tags[a][b] == v;
 		return true;
 	}
 	TRIGGER_FUNCTION(tf_strings_eq) {
@@ -5578,16 +5577,58 @@ struct empty_mask { };
 	TRIGGER_FUNCTION(tf_news_printing_count) {
 		return true;
 	}
+	
 	TRIGGER_FUNCTION(tf_party_name) {
-		return true;
+		auto ideo = trigger::payload(tval[1]).ideo_id;
+		dcon::text_key new_name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 2)) };
+		if(ideo) {
+			auto nat = trigger::to_nation(primary_slot);
+			auto holder = ws.world.nation_get_identity_from_identity_holder(nat);
+			return compare_to_true(tval[0], ve::apply([&ws, ideo, new_name](dcon::national_identity_id h, dcon::nation_id n) {
+				auto start = ws.world.national_identity_get_political_party_first(h).id.index();
+				auto end = start + ws.world.national_identity_get_political_party_count(h);
+				for(int32_t i = start; i < end; i++) {
+					auto pid = dcon::political_party_id(dcon::political_party_id::value_base_t(i));
+					if(politics::political_party_is_active(ws, n, pid) && ws.world.political_party_get_ideology(pid) == ideo) {
+						return ws.world.political_party_get_name(pid) == new_name;
+					}
+				}
+				return false;
+			}, holder, nat));
+		} else {
+			auto n = trigger::to_nation(primary_slot);
+			auto rp = ws.world.nation_get_ruling_party(n);
+			return compare_to_true(tval[0], ws.world.political_party_get_name(rp) == new_name);
+		}
 	}
 	TRIGGER_FUNCTION(tf_party_position) {
-		return true;
+		auto ideo = trigger::payload(tval[1]).ideo_id;
+		dcon::issue_option_id new_opt = trigger::payload(tval[2]).opt_id;
+		auto popt = ws.world.issue_option_get_parent_issue(new_opt);
+		if(ideo) {
+			auto nat = trigger::to_nation(primary_slot);
+			auto holder = ws.world.nation_get_identity_from_identity_holder(nat);
+			return compare_to_true(tval[0], ve::apply([&ws, ideo, new_opt, popt](dcon::national_identity_id h, dcon::nation_id n) {
+				auto start = ws.world.national_identity_get_political_party_first(h).id.index();
+				auto end = start + ws.world.national_identity_get_political_party_count(h);
+				for(int32_t i = start; i < end; i++) {
+					auto pid = dcon::political_party_id(dcon::political_party_id::value_base_t(i));
+					if(politics::political_party_is_active(ws, n, pid) && ws.world.political_party_get_ideology(pid) == ideo) {
+						return ws.world.political_party_get_party_issues(pid, popt) == new_opt;
+					}
+				}
+				return false;
+			}, holder, nat));
+		} else {
+			auto n = trigger::to_nation(primary_slot);
+			auto rp = ws.world.nation_get_ruling_party(n);
+			return compare_to_true(tval[0], ws.world.political_party_get_party_issues(rp, popt) == new_opt);
+		}
 	}
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	struct trigger_container {
-		constexpr static return_type(CALLTYPE* trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
+	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
+		alignas(64) constexpr static return_type(*trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
 			tf_none<return_type, primary_type, this_type, from_type>,
 			// non-scopes
 #define TRIGGER_BYTECODE_ELEMENT(code, name, arg) tf_##name <return_type, primary_type, this_type, from_type>,
@@ -5598,14 +5639,8 @@ struct empty_mask { };
 		TRIGGER_SCOPE_BYTECODE_LIST
 #undef TRIGGER_SCOPE_BYTECODE_ELEMENT
 		};
-	};
-
-	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot,
-		from_type from_slot) {
 		assert(!ws.trigger_eval_is_ub);
-		return trigger_container<return_type, primary_type, this_type, from_type>::trigger_functions[*tval & trigger::code_mask](tval,
-			ws, primary_slot, this_slot, from_slot);
+		return trigger_functions[*tval & trigger::code_mask](tval, ws, primary_slot, this_slot, from_slot);
 	}
 
 #undef CALLTYPE
