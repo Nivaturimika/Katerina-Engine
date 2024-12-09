@@ -85,24 +85,6 @@ namespace demographics {
 			auto location = state.world.pop_get_province_from_pop_location(p);
 			state.world.province_get_demographics(location, key) += source(state, p);
 		});
-		// clear state
-		state.world.execute_serial_over_state_instance([&](auto si) {
-			state.world.state_instance_set_demographics(si, key, ve::fp_vector());
-		});
-		// sum in state
-		province::for_each_land_province(state, [&](dcon::province_id p) {
-			auto location = state.world.province_get_state_membership(p);
-			state.world.state_instance_get_demographics(location, key) += state.world.province_get_demographics(p, key);
-		});
-		// clear nation
-		state.world.execute_serial_over_nation([&](auto ni) {
-			state.world.nation_set_demographics(ni, key, ve::fp_vector());
-		});
-		// sum in nation
-		state.world.for_each_state_instance([&](dcon::state_instance_id s) {
-			auto location = state.world.state_instance_get_nation_from_state_ownership(s);
-			state.world.nation_get_demographics(location, key) += state.world.state_instance_get_demographics(s, key);
-		});
 	}
 
 	inline constexpr uint32_t extra_demo_grouping = 8;
@@ -364,6 +346,38 @@ namespace demographics {
 					return state.world.pop_get_religion(p) == pkey ? state.world.pop_get_size(p) : 0.0f;
 				});
 			}
+		});
+
+		// propagate province values to new values
+		concurrency::parallel_for(uint32_t(0), full ?  sz : csz + extra_group_size, [&](uint32_t base_index) {
+			auto index = base_index;
+			if constexpr(!full) {
+				if(index >= csz) {
+					index += extra_group_size * (state.current_date.value % extra_demo_grouping);
+					if(index >= sz) {
+						return;
+					}
+				}
+			}
+			dcon::demographics_key key{dcon::demographics_key::value_base_t(index)};
+			// clear state
+			state.world.execute_serial_over_state_instance([&](auto si) {
+				state.world.state_instance_set_demographics(si, key, ve::fp_vector());
+			});
+			// sum in state
+			province::for_each_land_province(state, [&](dcon::province_id p) {
+				auto location = state.world.province_get_state_membership(p);
+				state.world.state_instance_get_demographics(location, key) += state.world.province_get_demographics(p, key);
+			});
+			// clear nation
+			state.world.execute_serial_over_nation([&](auto ni) {
+				state.world.nation_set_demographics(ni, key, ve::fp_vector());
+			});
+			// sum in nation
+			state.world.for_each_state_instance([&](dcon::state_instance_id s) {
+				auto location = state.world.state_instance_get_nation_from_state_ownership(s);
+				state.world.nation_get_demographics(location, key) += state.world.state_instance_get_demographics(s, key);
+			});
 		});
 
 		//
