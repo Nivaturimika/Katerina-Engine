@@ -964,10 +964,10 @@ namespace parsers {
 		context.map_of_model_names.insert_or_assign(std::string(obj.name), dcon::emfx_object_id(dcon::emfx_object_id::value_base_t(index)));
 
 		new_obj.name = context.full_state.add_key_win1252(obj.name);
-		new_obj.actorfile = context.full_state.add_key_win1252(obj.actorfile);
-		new_obj.attack = context.full_state.add_key_win1252(obj.attack);
-		new_obj.idle = context.full_state.add_key_win1252(obj.idle);
-		new_obj.move = context.full_state.add_key_win1252(obj.move);
+		new_obj.actorfile = context.full_state.add_key_win1252(simple_fs::remove_double_backslashes(obj.actorfile));
+		new_obj.attack = context.full_state.add_key_win1252(simple_fs::remove_double_backslashes(obj.attack));
+		new_obj.idle = context.full_state.add_key_win1252(simple_fs::remove_double_backslashes(obj.idle));
+		new_obj.move = context.full_state.add_key_win1252(simple_fs::remove_double_backslashes(obj.move));
 		new_obj.scale = obj.scale;
 	}
 
