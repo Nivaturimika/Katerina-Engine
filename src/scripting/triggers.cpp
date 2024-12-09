@@ -11,11 +11,11 @@
 
 namespace trigger {
 
-	#ifdef WIN32
-	#define CALLTYPE __vectorcall
-	#else
-	#define CALLTYPE
-	#endif
+#ifdef WIN32
+#define CALLTYPE __vectorcall
+#else
+#define CALLTYPE __attribute__((sseregparm))
+#endif
 
 	template<typename A, typename B>
 	[[nodiscard]] auto compare_values(uint16_t trigger_code, A value_a, B value_b) -> decltype(value_a == value_b) {
@@ -5608,8 +5608,8 @@ struct empty_mask { };
 			ws, primary_slot, this_slot, from_slot);
 	}
 
-	#undef CALLTYPE
-	#undef TRIGGER_FUNCTION
+#undef CALLTYPE
+#undef TRIGGER_FUNCTION
 
 	float evaluate_multiplicative_modifier(sys::state& state, dcon::value_modifier_key modifier, int32_t primary, int32_t this_slot, int32_t from_slot) {
 		auto base = state.value_modifiers[modifier];
