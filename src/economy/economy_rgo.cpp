@@ -71,7 +71,7 @@ namespace economy_rgo {
 			float total_population = state.world.province_get_demographics(p, demographics::total);
 	
 			//sorting goods by profitability
-			static std::vector<dcon::commodity_id> ordered_rgo_goods;
+			static std::vector<dcon::commodity_id, dcon::cache_aligned_allocator<dcon::commodity_id>> ordered_rgo_goods;
 			ordered_rgo_goods.clear();
 			state.world.for_each_commodity([&](dcon::commodity_id c) {
 				if(rgo_max_employment(state, owner, p, c) > 0.f) {

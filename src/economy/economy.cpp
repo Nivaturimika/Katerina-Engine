@@ -216,8 +216,8 @@ namespace economy {
 		auto const csize = state.world.commodity_size();
 		float distribution_drift_speed = 0.01f;
 
-		std::vector<float> current_distribution;
-		std::vector<float> profits;
+		std::vector<float, dcon::cache_aligned_allocator<float>> current_distribution;
+		std::vector<float, dcon::cache_aligned_allocator<float>> profits;
 		profits.resize(csize + 1);
 
 		float mult = get_artisans_multiplier(state, n);
@@ -2001,8 +2001,7 @@ namespace economy {
 			if(n.get_private_investment() > total_cost
 			&& n.get_is_civilized()
 			&& (nation_rules & (issue_rule::pop_build_factory | issue_rule::pop_expand_factory)) != 0) {
-
-				static std::vector<dcon::state_instance_id> states_in_order;
+				static std::vector<dcon::state_instance_id, dcon::cache_aligned_allocator<dcon::state_instance_id>> states_in_order;
 				states_in_order.clear();
 				for(auto si : n.get_state_ownership()) {
 					if(si.get_state().get_capital().get_is_colonial() == false) {
@@ -2093,7 +2092,7 @@ namespace economy {
 						if(economy_factory::state_factory_count(state, s) >= int32_t(state.defines.factories_per_state))
 							continue;
 						if(!desired_types.empty()) {
-							std::vector<dcon::factory_type_id> valid_desired_types;
+							std::vector<dcon::factory_type_id, dcon::cache_aligned_allocator<dcon::factory_type_id>> valid_desired_types;
 							for(const auto ft : desired_types) {
 								if(state.world.factory_type_get_is_coastal(ft) && !province::state_is_coastal(state, s))
 									continue;
@@ -2142,7 +2141,8 @@ namespace economy {
 				}
 
 				if((nation_rules & issue_rule::pop_build_factory) != 0) {
-					static std::vector<std::pair<dcon::province_id, int32_t>> provinces_in_order;
+					using province_factories_pair = std::pair<dcon::province_id, int32_t>;
+					static std::vector<province_factories_pair, dcon::cache_aligned_allocator<province_factories_pair>> provinces_in_order;
 					provinces_in_order.clear();
 					for(auto si : n.get_state_ownership()) {
 						if(si.get_state().get_capital().get_is_colonial() == false) {

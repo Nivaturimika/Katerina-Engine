@@ -131,7 +131,7 @@ namespace ai {
 		}
 	}
 
-	static void internal_get_alliance_targets_by_adjacency(sys::state& state, dcon::nation_id n, dcon::nation_id adj, std::vector<dcon::nation_id>& alliance_targets) {
+	static void internal_get_alliance_targets_by_adjacency(sys::state& state, dcon::nation_id n, dcon::nation_id adj, std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>>& alliance_targets) {
 		for(auto nb : state.world.nation_get_nation_adjacency(adj)) {
 			auto other = nb.get_connected_nations(0) != adj ? nb.get_connected_nations(0) : nb.get_connected_nations(1);
 			bool b = other.get_is_player_controlled() ? true : ai_will_accept_alliance(state, other, n);
@@ -140,7 +140,8 @@ namespace ai {
 			}
 		}
 	}
-	static void internal_get_alliance_targets(sys::state& state, dcon::nation_id n, std::vector<dcon::nation_id>& alliance_targets) {
+
+	static void internal_get_alliance_targets(sys::state& state, dcon::nation_id n, std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>>& alliance_targets) {
 		// Adjacency with us
 		internal_get_alliance_targets_by_adjacency(state, n, n, alliance_targets);
 		if(!alliance_targets.empty())
@@ -169,7 +170,7 @@ namespace ai {
 		auto ymd = state.current_date.to_ymd(state.start_date);
 		for(auto n : state.world.in_nation) {
 			if(!n.get_is_player_controlled() && n.get_ai_is_threatened() && !(n.get_overlord_as_subject().get_ruler())) {
-				static std::vector<dcon::nation_id> alliance_targets;
+				static std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>> alliance_targets;
 				alliance_targets.clear();
 				internal_get_alliance_targets(state, n, alliance_targets);
 				if(!alliance_targets.empty()) {
@@ -213,7 +214,7 @@ namespace ai {
 				auto ll = state.world.nation_get_last_war_loss(n);
 				auto safety_margin = defensive_str - safety_factor * greatest_neighbor;
 				
-				static std::vector<dcon::nation_id> prune_targets;
+				static std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>> prune_targets;
 				prune_targets.clear();
 				for(auto dr : n.get_diplomatic_relation()) {
 					if(dr.get_are_allied()) {
@@ -402,8 +403,7 @@ namespace ai {
 				dcon::technology_id id;
 				float weight = 0.0f;
 			};
-
-			std::vector<potential_techs> potential;
+			std::vector<potential_techs, dcon::cache_aligned_allocator<potential_techs>> potential;
 
 			for(auto tid : state.world.in_technology) {
 				if(state.world.nation_get_active_technologies(n, tid)) {
@@ -467,7 +467,7 @@ namespace ai {
 			if(state.world.nation_get_is_player_controlled(n.nation))
 				continue;
 
-			static std::vector<weighted_nation> targets;
+			static std::vector<weighted_nation, dcon::cache_aligned_allocator<weighted_nation>> targets;
 			targets.clear();
 			for(auto t : state.world.in_nation) {
 				if(t.get_is_great_power())
@@ -667,7 +667,7 @@ namespace ai {
 			auto clergy_frac = n.get_demographics(demographics::to_key(state, state.culture_definitions.clergy)) / n.get_demographics(demographics::total);
 			bool max_clergy = clergy_frac >= base_opt;
 
-			static std::vector<dcon::state_instance_id> ordered_states;
+			static std::vector<dcon::state_instance_id, dcon::cache_aligned_allocator<dcon::state_instance_id>> ordered_states;
 			ordered_states.clear();
 			for(auto si : n.get_state_ownership()) {
 				ordered_states.push_back(si.get_state().id);
@@ -781,7 +781,7 @@ namespace ai {
 
 	void take_ai_decisions(sys::state& state) {
 		using decision_nation_pair = std::pair<dcon::decision_id, dcon::nation_id>;
-		concurrency::combinable<std::vector<decision_nation_pair>> decisions_taken;
+		concurrency::combinable<std::vector<decision_nation_pair, dcon::cache_aligned_allocator<decision_nation_pair>>> decisions_taken;
 
 		// execute in staggered blocks
 		uint32_t d_block_size = state.world.decision_size() / 32;
@@ -826,7 +826,7 @@ namespace ai {
 		});
 		// combination and final execution
 		auto total_vector = decisions_taken.combine([](auto& a, auto& b) {
-			std::vector<decision_nation_pair> result(a.begin(), a.end());
+			std::vector<decision_nation_pair, dcon::cache_aligned_allocator<decision_nation_pair>> result(a.begin(), a.end());
 			result.insert(result.end(), b.begin(), b.end());
 			return result;
 		});
