@@ -918,36 +918,24 @@ namespace demographics {
 		state.world.for_each_ideology([&](dcon::ideology_id i) {
 			if(state.world.ideology_get_enabled(i)) {
 				auto const i_key = pop_demographics::to_key(state, i);
-				if(state.world.ideology_get_is_civilized_only(i)) {
-					pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
-						auto owner = nations::owner_of_pop(state, ids);
-						auto amount = ve::max(ve::fp_vector{}, ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-							if(state.world.nation_get_is_civilized(o)) {
-								auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-								return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
-							}
-							return 0.0f;
-						}, ids, state.world.pop_get_poptype(ids), owner));
-						ibuf.temp_buffers[i].set(ids, amount);
-						ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
-					});
-				} else {
-					pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
-						auto owner = nations::owner_of_pop(state, ids);
-						auto amount = ve::max(ve::fp_vector{}, ve::apply([&](dcon::pop_id pid, dcon::pop_type_id ptid, dcon::nation_id o) {
-							auto ptrigger = state.world.pop_type_get_ideology(ptid, i);
-							return ptrigger ? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0) : 0.0f;
-						}, ids, state.world.pop_get_poptype(ids), owner));
-						ibuf.temp_buffers[i].set(ids, amount);
-						ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
-					});
-				}
+				pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
+					auto const owner = nations::owner_of_pop(state, ids);
+					auto const mod_keys = state.world.pop_type_get_ideology(state.world.pop_get_poptype(ids), i);
+					auto const filter = !state.world.ideology_get_is_civilized_only(i)
+						|| state.world.nation_get_is_civilized(owner);
+					auto const amount = ve::max(ve::fp_vector{}, ve::apply([&](dcon::pop_id pid, dcon::value_modifier_key ptrigger, bool passed_filter) {
+						return (passed_filter && ptrigger)
+							? trigger::evaluate_multiplicative_modifier(state, ptrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)
+							: 0.0f;
+					}, ids, mod_keys, filter));
+					ibuf.temp_buffers[i].set(ids, amount);
+					ibuf.totals.set(ids, ibuf.totals.get(ids) + amount);
+				});
 			}
 		});
 	}
 
 	void apply_ideologies(sys::state& state, uint32_t offset, uint32_t divisions, ideology_buffer& pbuf) {
-
 		/*
 		- For ideologies after their enable date (actual discovery / activation is irrelevant),
 		and not restricted to civs only for pops in an unciv, the attraction modifier is computed
@@ -959,11 +947,9 @@ namespace demographics {
 		- Otherwise: subtract 0.25 from the pop's current support for the ideology (to a minimum of zero)
 		- The ideological support of the pop is then normalized after the changes.
 		*/
-
 		state.world.for_each_ideology([&](dcon::ideology_id i) {
 			if(state.world.ideology_get_enabled(i)) {
 				auto const i_key = pop_demographics::to_key(state, i);
-
 				execute_staggered_blocks(offset, divisions, std::min(state.world.pop_size(), pbuf.size), [&](auto ids) {
 					auto ttotal = pbuf.totals.get(ids);
 					auto avalue = pbuf.temp_buffers[i].get(ids) / ttotal;
@@ -980,14 +966,8 @@ namespace demographics {
 		normalized. Then we zero the attraction for any issue that is not currently possible (i.e. its trigger condition is not met or
 		it is not the next/previous step for a next-step type issue, and for uncivs only the party issues are valid here)
 		*/
-
 		auto new_pop_count = state.world.pop_size();
 		ibuf.update(state, new_pop_count);
-
-		// clear totals
-		execute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
-			ibuf.totals.set(ids, ve::fp_vector{});
-		});
 
 		// update
 		pexecute_staggered_blocks(offset, divisions, new_pop_count, [&](auto ids) {
@@ -1006,7 +986,7 @@ namespace demographics {
 				auto const modifier_key = is_social_issue ? sys::national_mod_offsets::social_reform_desire : sys::national_mod_offsets::political_reform_desire;
 				//
 				auto const current_issue_setting = state.world.nation_get_issues(owner, parent_issue);
-				auto const allowed_by_owner =
+				auto const filter =
 					(state.world.nation_get_is_civilized(owner) || ve::mask_vector(is_party_issue))
 					&& (ve::mask_vector(!state.world.issue_get_is_next_step_only(parent_issue)) ||
 					(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index()) ||
@@ -1014,11 +994,11 @@ namespace demographics {
 					(ve::tagged_vector<int32_t>(current_issue_setting) == iid.index() + 1));
 				auto const owner_modifier = has_modifier ? (state.world.nation_get_modifier_values(owner, modifier_key) + 1.0f) : ve::fp_vector(1.0f);
 				auto const mod_keys = state.world.pop_type_get_issues(state.world.pop_get_poptype(ids), iid);
-				auto amount = ve::max(ve::fp_vector{}, owner_modifier * ve::apply([&](dcon::pop_id pid, dcon::value_modifier_key mtrigger, dcon::nation_id o, bool passed_filter) {
+				auto amount = ve::max(ve::fp_vector{}, owner_modifier * ve::apply([&](dcon::pop_id pid, dcon::value_modifier_key mtrigger, bool passed_filter) {
 					return (passed_filter && mtrigger)
 						? trigger::evaluate_multiplicative_modifier(state, mtrigger, trigger::to_generic(pid), trigger::to_generic(pid), 0)
 						: 0.f;
-				}, ids, mod_keys, owner, allowed_by_owner));
+				}, ids, mod_keys, filter));
 				ibuf.temp_buffers[iid].set(ids, amount);
 				total = total + amount;
 			});

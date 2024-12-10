@@ -733,22 +733,33 @@ TEST_CASE("bench_simdify_demo_part") {
 TEST_CASE("bench_simdify_demo_full") {
 	BENCHMARK_ADVANCED("old-demo1")(Catch::Benchmark::Chronometer meter) {
 		auto& state = load_testing_scenario_file();
-		// buffers
-		auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
-		auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
-		auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
 		meter.measure([&] {
 			demographics_duplicate::regenerate_from_pop_data_old<true>(state);
 		});
 	};
 	BENCHMARK_ADVANCED("new-demo2")(Catch::Benchmark::Chronometer meter) {
 		auto& state = load_testing_scenario_file();
-		// buffers
-		auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
-		auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
-		auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
 		meter.measure([&] {
 			demographics::regenerate_from_pop_data_full(state);
+		});
+	};
+}
+
+
+TEST_CASE("bench_simdify_demo_issues") {
+	BENCHMARK_ADVANCED("issues-demo1")(Catch::Benchmark::Chronometer meter) {
+		auto& state = load_testing_scenario_file();
+		// buffers
+		static demographics::issues_buffer isbuf(state);
+		auto ymd_date = state.current_date.to_ymd(state.start_date);
+		auto month_start = sys::year_month_day{ ymd_date.year, ymd_date.month, uint16_t(1) };
+		auto next_month_start = ymd_date.month != 12 ? sys::year_month_day{ ymd_date.year, uint16_t(ymd_date.month + 1), uint16_t(1) } : sys::year_month_day{ ymd_date.year + 1, uint16_t(1), uint16_t(1) };
+		auto const days_in_month = uint32_t(sys::days_difference(month_start, next_month_start));
+		meter.measure([&] {
+			auto o = uint32_t(ymd_date.day + 1);
+			if(o >= days_in_month)
+				o -= days_in_month;
+			demographics::update_issues(state, o, days_in_month, isbuf);
 		});
 	};
 }
