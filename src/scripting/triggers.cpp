@@ -173,7 +173,7 @@ namespace trigger {
 	using gathered_t = typename gathered_s<T>::type;
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	MARK_AS_HOT static return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
+	inline return_type test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
 
 #define TRIGGER_FUNCTION(function_name) \
 	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
@@ -208,7 +208,8 @@ namespace trigger {
 		return a.v == b.v;
 	}
 
-	TRIGGER_FUNCTION(apply_disjuctively) {
+	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
+	inline return_type CALLTYPE apply_disjuctively(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
 		auto const source_size = 1 + get_trigger_scope_payload_size(tval);
 		auto sub_units_start = tval + 2 + trigger_scope_data_payload(tval[0]);
 		return_type result = return_type(false);
@@ -223,7 +224,8 @@ namespace trigger {
 		return result;
 	}
 
-	TRIGGER_FUNCTION(apply_conjuctively) {
+	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
+	inline return_type CALLTYPE apply_conjuctively(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
 		auto const source_size = 1 + get_trigger_scope_payload_size(tval);
 		auto sub_units_start = tval + 2 + trigger_scope_data_payload(tval[0]);
 		return_type result = return_type(true);
@@ -238,21 +240,16 @@ namespace trigger {
 		return result;
 	}
 
-	TRIGGER_FUNCTION(apply_subtriggers) {
+	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
+	inline return_type CALLTYPE apply_subtriggers(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
 		if((*tval & trigger::is_disjunctive_scope) != 0) {
 			return apply_disjuctively<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
 		}
 		return apply_conjuctively<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
 	}
 
-	TRIGGER_FUNCTION(tf_none) {
-		return return_type(true);
-	}
-	TRIGGER_FUNCTION(tf_unused_1) {
-		return return_type(true);
-	}
-
-	TRIGGER_FUNCTION(tf_generic_scope) {
+	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
+	inline return_type CALLTYPE tf_generic_scope(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
 		return apply_subtriggers<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
 	}
 
@@ -379,6 +376,14 @@ namespace trigger {
 		return make_false_accumulator([&ws, tval, this_slot, from_slot](ve::tagged_vector<int32_t> v) {
 			return apply_subtriggers<ve::mask_vector, ve::tagged_vector<int32_t>, int32_t, int32_t>(tval, ws, v, this_slot, from_slot);
 		});
+	}
+
+	TRIGGER_FUNCTION(tf_none) {
+		return return_type(true);
+	}
+	
+	TRIGGER_FUNCTION(tf_unused_1) {
+		return return_type(true);
 	}
 
 	TRIGGER_FUNCTION(tf_x_neighbor_province_scope) {
@@ -5626,8 +5631,9 @@ namespace trigger {
 	}
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	MARK_AS_HOT static return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
-		constexpr static return_type(*trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
+	inline return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {
+		assert(!ws.trigger_eval_is_ub);
+		alignas(64) constexpr static return_type(CALLTYPE *trigger_functions[trigger::first_invalid_code])(uint16_t const*, sys::state&, primary_type, this_type, from_type) = {
 			tf_none<return_type, primary_type, this_type, from_type>,
 			// non-scopes
 #define TRIGGER_BYTECODE_ELEMENT(code, name, arg) tf_##name <return_type, primary_type, this_type, from_type>,
@@ -5635,11 +5641,27 @@ namespace trigger {
 #undef TRIGGER_BYTECODE_ELEMENT
 			// scopes
 #define TRIGGER_SCOPE_BYTECODE_ELEMENT(name, code) tf_##name <return_type, primary_type, this_type, from_type>,
-		TRIGGER_SCOPE_BYTECODE_LIST
+			TRIGGER_SCOPE_BYTECODE_LIST
 #undef TRIGGER_SCOPE_BYTECODE_ELEMENT
 		};
-		assert(!ws.trigger_eval_is_ub);
 		return trigger_functions[*tval & trigger::code_mask](tval, ws, primary_slot, this_slot, from_slot);
+		/*
+		switch(*tval & trigger::code_mask) {
+			// non-scopes
+#define TRIGGER_BYTECODE_ELEMENT(code, name, arg) \
+	case code: \
+		return tf_##name<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
+			TRIGGER_BYTECODE_LIST
+#undef TRIGGER_BYTECODE_ELEMENT
+			// scopes
+#define TRIGGER_SCOPE_BYTECODE_ELEMENT(name, code) \
+	case (code + trigger::first_scope_code): \
+		return tf_##name<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
+			TRIGGER_SCOPE_BYTECODE_LIST
+#undef TRIGGER_SCOPE_BYTECODE_ELEMENT
+			default: return tf_none<return_type, primary_type, this_type, from_type>(tval, ws, primary_slot, this_slot, from_slot);
+		}
+		*/
 	}
 
 #undef CALLTYPE
