@@ -716,8 +716,8 @@ namespace demographics {
 		});
 	}
 
-	template<typename T>
-	ve::fp_vector pop_get_new_militancy(sys::state& state, dcon::pop_demographics_key conservatism_key, T ids) {
+	template<typename vector_type, typename tag_type>
+	vector_type pop_get_new_militancy(sys::state& state, dcon::pop_demographics_key conservatism_key, tag_type ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(loc);
 		auto ruling_party = state.world.nation_get_ruling_party(owner);
@@ -730,11 +730,9 @@ namespace demographics {
 		auto ref_mod = ve::select(state.world.province_get_is_colonial(loc), 0.0f,
 			(state.world.pop_get_social_reform_desire(ids) + state.world.pop_get_political_reform_desire(ids))
 			* (state.defines.mil_require_reform * 0.25f));
-
 		auto o_spending = state.world.nation_get_overseas_penalty(owner);
 		auto spending_level = state.world.nation_get_spending_level(owner);
-		auto overseas_mil = ve::select(province::is_overseas(state, loc), (state.defines.alice_overseas_mil * 2.f) * (0.5f - (o_spending * spending_level)), 0.f);
-
+		auto overseas_mil = ve::select(province::is_overseas(state, loc), 0.5f - (o_spending * spending_level), 0.f);
 		auto sub_t = (lx_mod + ruling_sup) + (con_sup + ref_mod);
 		auto pmod = state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::pop_militancy_modifier);
 		auto omod = state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_pop_militancy_modifier);
@@ -774,13 +772,13 @@ namespace demographics {
 		*/
 		auto const conservatism_key = pop_demographics::to_key(state, state.culture_definitions.conservative);
 		execute_staggered_blocks(offset, divisions, state.world.pop_size(), [&](auto ids) {
-			state.world.pop_set_militancy(ids, pop_get_new_militancy(state, conservatism_key, ids));
+			state.world.pop_set_militancy(ids, pop_get_new_militancy<ve::fp_vector>(state, conservatism_key, ids));
 		});
 	}
 
 	float get_estimated_mil_change(sys::state& state, dcon::pop_id ids) {
 		auto const conservatism_key = pop_demographics::to_key(state, state.culture_definitions.conservative);
-		return pop_get_new_militancy(state, conservatism_key, ids)[0] - state.world.pop_get_militancy(ids);
+		return pop_get_new_militancy<ve::fp_vector>(state, conservatism_key, ids)[0] - state.world.pop_get_militancy(ids);
 	}
 
 	float get_estimated_mil_change(sys::state& state, dcon::nation_id n) {
@@ -794,8 +792,8 @@ namespace demographics {
 		return t != 0.f ? sum / t : 0.f;
 	}
 
-	template<typename T>
-	ve::fp_vector pop_get_new_consciousness(sys::state& state, dcon::demographics_key clergy_key, T ids) {
+	template<typename vector_type, typename tag_type>
+	vector_type pop_get_new_consciousness(sys::state& state, dcon::demographics_key clergy_key, tag_type ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(loc);
 		auto cfrac = state.world.province_get_demographics(loc, clergy_key) / state.world.province_get_demographics(loc, demographics::total);
@@ -805,7 +803,7 @@ namespace demographics {
 		auto lit_mod = ((state.world.nation_get_plurality(owner) / 10.0f)
 			* (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f)
 			* state.defines.con_literacy * state.world.pop_get_literacy(ids)
-			* ve::select(state.world.province_get_is_colonial(loc), ve::fp_vector{ state.defines.con_colonial_factor }, 1.0f)) / 10.f;
+			* ve::select(state.world.province_get_is_colonial(loc), vector_type(state.defines.con_colonial_factor), 1.0f)) / 10.f;
 		auto pmod = state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::pop_consciousness_modifier);
 		auto omod = state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::global_pop_consciousness_modifier);
 		auto cmod = ve::select(state.world.province_get_is_colonial(loc), 0.0f, state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::core_pop_consciousness_modifier));
@@ -829,13 +827,13 @@ namespace demographics {
 		*/
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
 		execute_staggered_blocks(offset, divisions, state.world.pop_size(), [&](auto ids) {
-			state.world.pop_set_consciousness(ids, pop_get_new_consciousness(state, clergy_key, ids));
+			state.world.pop_set_consciousness(ids, pop_get_new_consciousness<ve::fp_vector>(state, clergy_key, ids));
 		});
 	}
 
 	float get_estimated_con_change(sys::state& state, dcon::pop_id ids) {
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
-		return pop_get_new_consciousness(state, clergy_key, ids)[0] - state.world.pop_get_consciousness(ids);
+		return pop_get_new_consciousness<ve::fp_vector>(state, clergy_key, ids)[0] - state.world.pop_get_consciousness(ids);
 	}
 
 	float get_estimated_con_change(sys::state& state, dcon::nation_id n) {
@@ -849,8 +847,8 @@ namespace demographics {
 		return t != 0.f ? sum / t : 0.f;
 	}
 
-	template<typename T>
-	ve::fp_vector pop_get_new_literacy(sys::state& state, dcon::demographics_key clergy_key, T ids) {
+	template<typename vector_type, typename tag_type>
+	vector_type pop_get_new_literacy(sys::state& state, dcon::demographics_key clergy_key, tag_type ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(loc);
 		auto cfrac = state.world.province_get_demographics(loc, clergy_key) / state.world.province_get_demographics(loc, demographics::total);
@@ -883,13 +881,13 @@ namespace demographics {
 
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
 		execute_staggered_blocks(offset, divisions, state.world.pop_size(), [&](auto ids) {
-			state.world.pop_set_literacy(ids, pop_get_new_literacy(state, clergy_key, ids));
+			state.world.pop_set_literacy(ids, pop_get_new_literacy<ve::fp_vector>(state, clergy_key, ids));
 		});
 	}
 
 	float get_estimated_literacy_change(sys::state& state, dcon::pop_id ids) {
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
-		return pop_get_new_literacy(state, clergy_key, ids)[0] - state.world.pop_get_literacy(ids);
+		return pop_get_new_literacy<ve::fp_vector>(state, clergy_key, ids)[0] - state.world.pop_get_literacy(ids);
 	}
 
 	float get_estimated_literacy_change(sys::state& state, dcon::nation_id n) {
@@ -1874,23 +1872,21 @@ namespace demographics {
 	}
 
 	float get_estimated_internal_migration(sys::state& state, dcon::pop_id ids) {
-
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
+		if(!state.world.province_get_is_colonial(loc)) {
+			if(state.world.pop_get_poptype(ids) != state.culture_definitions.slaves) {
+				auto owners = state.world.province_get_nation_from_province_ownership(loc);
+				auto pop_sizes = state.world.pop_get_size(ids);
+				auto amount = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.migration_chance,
+					trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f) * pop_sizes * std::max(0.0f, (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f)) * state.defines.immigration_scale;
 
-		if(state.world.province_get_is_colonial(loc))
-			return 0.0f; // early exit
-		if(state.world.pop_get_poptype(ids) == state.culture_definitions.slaves)
-			return 0.0f; // early exit
-
-		auto owners = state.world.province_get_nation_from_province_ownership(loc);
-		auto pop_sizes = state.world.pop_get_size(ids);
-		auto amount = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.migration_chance,
-			trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f) * pop_sizes * std::max(0.0f, (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f)) * state.defines.immigration_scale;
-
-		if(amount <= 0.0f)
-			return 0.0f; // early exit
-		auto pop_size = state.world.pop_get_size(ids);
-		return std::min(pop_size, std::ceil(amount));
+				if(amount > 0.0f) {
+					auto pop_size = state.world.pop_get_size(ids);
+					return std::min(pop_size, std::ceil(amount));
+				}
+			}
+		}
+		return 0.f;
 	}
 
 	void update_colonial_migration(sys::state& state, uint32_t offset, uint32_t divisions, migration_buffer& pbuf) {
@@ -1984,7 +1980,9 @@ namespace demographics {
 			auto dest = ve::apply([&](dcon::pop_id p, dcon::nation_id owner, bool passed_filter) {
 				if(passed_filter) {
 					auto ndest = impl::get_immigration_target(state, owner, p, state.current_date);
-					return impl::get_province_target_in_nation(state, ndest, p);
+					if(ndest) {
+						return impl::get_province_target_in_nation(state, ndest, p);
+					}
 				}
 				return dcon::province_id{};
 			}, ids, owners, filter_a);
