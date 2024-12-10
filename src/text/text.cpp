@@ -101,7 +101,7 @@ namespace text {
 			if(file_size >= 3) {
 				// skip utf8 BOM if present
 				// 0xEF, 0xBB, 0xBF)
-				if(int(file_content[0]) == 0xEF && int(file_content[1]) == 0xBB && int(file_content[2]) == 0xBF) {
+				if(uint8_t(file_content[0]) == 0xEF && uint8_t(file_content[1]) == 0xBB && uint8_t(file_content[2]) == 0xBF) {
 					cpos += 3;
 				}
 			}
