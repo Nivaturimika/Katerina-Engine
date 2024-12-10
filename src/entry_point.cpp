@@ -1,6 +1,7 @@
 #include "system_state.hpp"
 #include "parsers.hpp"
 #include "parsers_declarations.hpp"
+#include <random>
 
 static sys::state game_state; // too big for the stack
 
