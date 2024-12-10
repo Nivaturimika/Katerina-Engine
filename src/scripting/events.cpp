@@ -573,7 +573,8 @@ namespace event {
 			result.insert(result.end(), b.begin(), b.end());
 			return result;
 		});
-		std::sort(total_vector.begin(), total_vector.end());
+		pdqsort(total_vector.begin(), total_vector.end());
+		
 		for(auto& v : total_vector) {
 			if(trigger::evaluate(state, state.world.free_national_event_get_trigger(v.e), trigger::to_generic(v.n), trigger::to_generic(v.n), 0)) {
 				event::trigger_national_event(state, v.e, v.n, uint32_t((state.current_date.value) ^ (v.e.value << 3)), uint32_t(v.n.value));
@@ -628,7 +629,8 @@ namespace event {
 			result.insert(result.end(), b.begin(), b.end());
 			return result;
 		});
-		std::sort(total_p_vector.begin(), total_p_vector.end());
+		pdqsort(total_p_vector.begin(), total_p_vector.end());
+
 		for(auto& v : total_p_vector) {
 			if(trigger::evaluate(state, state.world.free_provincial_event_get_trigger(v.e), trigger::to_generic(v.p), trigger::to_generic(v.p), 0)) {
 				trigger_provincial_event(state, v.e, v.p, uint32_t((state.current_date.value) ^ (v.e.value << 3)), uint32_t(v.p.value));
