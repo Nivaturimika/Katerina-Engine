@@ -15,14 +15,14 @@
 #include "economy_templates.hpp"
 
 namespace economy {
-	template<typename T, typename U>
-	inline void register_demand(sys::state& state, dcon::nation_id n, T commodity_type, U amount) {
+	template<typename vector_type, typename tag_type>
+	inline void register_demand(sys::state& state, dcon::nation_id n, tag_type commodity_type, vector_type amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
 	}
 
 	void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount) {
-		register_demand(state, n, commodity_type, amount);
+		register_demand<float>(state, n, commodity_type, amount);
 		state.world.nation_get_intermediate_demand(n, commodity_type) += amount;
 	}
 
@@ -145,10 +145,9 @@ namespace economy {
 	}
 
 	//crude approximation of exp
-	float pseudo_exp_for_negative(float f) {
-		if(f < -128.f) {
-			return 0.f;
-		}
+	template<typename vector_type>
+	vector_type pseudo_exp_for_negative(vector_type f) {
+		auto g = f;
 		f = f / 128.f;
 		f = 1 + f + f * f / 2 + f * f * f / 6;
 		f = f * f; // 2
@@ -158,7 +157,7 @@ namespace economy {
 		f = f * f; // 32
 		f = f * f; // 64
 		f = f * f; // 128
-		return f;
+		return ve::select(g < -128.f, vector_type(0.f), f);
 	}
 
 	float get_artisans_multiplier(sys::state& state, dcon::nation_id n) {
@@ -183,24 +182,26 @@ namespace economy {
 		return max_score;
 	}
 
-	float total_artisan_exp_score(sys::state& state, dcon::nation_id n, float multiplier, float max_score) {
+	template<typename vector_type, typename tag_type>
+	vector_type total_artisan_exp_score(sys::state& state, tag_type n, vector_type multiplier, vector_type max_score) {
 		auto const csize = state.world.commodity_size();
-		float total = 0.f;
-		float baseline = artisan_baseline_score / multiplier;
+		auto const baseline = artisan_baseline_score / multiplier;
+		auto total = 0.f;
 		// crude approximation of softmax
 		for(uint32_t i = 1; i < csize; ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			float score = state.world.nation_get_artisan_distribution(n, cid);
-			float dist = pseudo_exp_for_negative((score - max_score) * multiplier);
-			total += dist;
+			auto const score = state.world.nation_get_artisan_distribution(n, cid);
+			total += pseudo_exp_for_negative<vector_type>((score - max_score) * multiplier);
 		}
-		total += pseudo_exp_for_negative((baseline - max_score) * multiplier);
-		return total;
+		return total + pseudo_exp_for_negative<vector_type>((baseline - max_score) * multiplier);
 	}
 
-	float get_artisan_distribution_fast(sys::state& state, dcon::nation_id n, dcon::commodity_id c, float max_score, float total_score, float multiplier) {
-		float score = state.world.nation_get_artisan_distribution(n, c);
-		return pseudo_exp_for_negative((score - max_score) * multiplier) / (total_score + 0.001f);
+	template<typename vector_type, typename tag_type>
+	vector_type get_artisan_distribution_fast(sys::state& state, tag_type n, dcon::commodity_id c, vector_type max_score, vector_type total_score, float multiplier) {
+		auto score = state.world.nation_get_artisan_distribution(n, c);
+		return total_score > 0.f
+			? pseudo_exp_for_negative<vector_type>((score - max_score) * multiplier) / total_score
+			: 0.f;
 	}
 
 	float get_artisan_distribution_slow(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
@@ -208,7 +209,7 @@ namespace economy {
 		float multiplier = get_artisans_multiplier(state, n);
 		float max_score = max_artisan_score(state, n, multiplier);
 		float total_score = total_artisan_exp_score(state, n, multiplier, max_score);
-		return get_artisan_distribution_fast(state, n, c, max_score, total_score, multiplier);
+		return get_artisan_distribution_fast<float>(state, n, c, max_score, total_score, multiplier);
 	}
 
 	void adjust_artisan_balance(sys::state& state, dcon::nation_id n) {
@@ -236,12 +237,12 @@ namespace economy {
 
 		float multiplier = get_artisans_multiplier(state, n);
 		float max_score = max_artisan_score(state, n, multiplier);
-		float total_score = total_artisan_exp_score(state, n, multiplier, max_score);
+		float total_score = total_artisan_exp_score<float>(state, n, multiplier, max_score);
 
 		for(uint32_t i = 1; i < csize; ++i) {
-		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto& w = state.world.nation_get_artisan_distribution(n, cid);
-			auto last_distribution = get_artisan_distribution_fast(state, n, cid, max_score, total_score, multiplier);
+			auto last_distribution = get_artisan_distribution_fast<float>(state, n, cid, max_score, total_score, multiplier);
 			auto output = state.world.commodity_get_artisan_output_amount(cid);
 			auto next_score = w * 0.8f + distribution_drift_speed * profits[cid.index()] * (1 - last_distribution) / output;
 			w = next_score;
@@ -408,15 +409,23 @@ namespace economy {
 
 		float multiplier = get_artisans_multiplier(state, n);
 		float max_score = max_artisan_score(state, n, multiplier);
-		float total_score = total_artisan_exp_score(state, n, multiplier, max_score);
+		float total_score = total_artisan_exp_score<float>(state, n, multiplier, max_score);
 
 		for(uint32_t i = 1; i < csize; ++i) {
-		dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			state.world.nation_set_artisan_actual_production(n, cid, 0.0f);
 			if(valid_artisan_good(state, n, cid)) {
-				float input_total = 0.0f;
+				auto const output_total = state.world.commodity_get_artisan_output_amount(cid) * state.world.commodity_get_current_price(cid);
+				auto const input_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
+				auto const throughput_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_throughput));
+				auto const output_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
+
+				auto const distribution = get_artisan_distribution_fast<float>(state, n, cid, max_score, total_score, multiplier);
+				auto const max_production_scale = num_artisans * distribution / 1000.0f * mobilization_impact;
+
+				auto input_total = 0.0f;
+				auto min_available = 1.0f;
 				auto const& inputs = state.world.commodity_get_artisan_inputs(cid);
-				float min_available = 1.0f;
 				for(uint32_t j = 0; j < commodity_set::set_size; ++j) {
 					if(inputs.commodity_type[j]) {
 						input_total += inputs.commodity_amounts[j] * commodity_effective_price(state, n, inputs.commodity_type[j]);
@@ -425,14 +434,6 @@ namespace economy {
 						break;
 					}
 				}
-
-				float output_total = state.world.commodity_get_artisan_output_amount(cid) * state.world.commodity_get_current_price(cid);
-				float input_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_input));
-				float throughput_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_throughput));
-				float output_multiplier = std::max(0.1f, artisan_buff_factor + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::artisan_output));
-
-				float distribution = get_artisan_distribution_fast(state, n, cid, max_score, total_score, multiplier);
-				float max_production_scale = num_artisans * distribution / 1000.0f * std::max(0.0f, mobilization_impact);
 
 				auto profitability_factor = (output_total * output_multiplier * throughput_multiplier * min_available - input_multiplier * input_total * throughput_multiplier * min_available) / (expected_min_wage * state.defines.ke_profitability_factor);
 				bool profitable = (output_total * output_multiplier - input_multiplier * input_total) >= 0.0f;
