@@ -3,10 +3,22 @@
 #include "ve.hpp"
 
 namespace ve {
-
 	template<typename T>
 	inline T select(bool v, T a, T b) {
 		return v ? a : b;
+	}
+
+	inline float max(float a, float b) {
+		return a > b ? a : b;
+	}
+	inline float min(float a, float b) {
+		return a > b ? a : b;
+	}
+	inline float ceil(float a, float b) {
+		return a > b ? a : b;
+	}
+	inline float floor(float a, float b) {
+		return a > b ? a : b;
 	}
 
 	inline float to_float(int32_t a) {
