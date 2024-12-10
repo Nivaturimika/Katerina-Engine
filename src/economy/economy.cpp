@@ -16,7 +16,7 @@
 
 namespace economy {
 	template<typename vector_type, typename tag_type>
-	inline void register_demand(sys::state& state, dcon::nation_id n, tag_type commodity_type, vector_type amount) {
+	inline void register_demand(sys::state& state, tag_type n, dcon::commodity_id commodity_type, vector_type amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
 		assert(std::isfinite(state.world.nation_get_real_demand(n, commodity_type)));
 	}
@@ -343,17 +343,16 @@ namespace economy {
 		we let the share factor be 0 if it needs to be used in any other calculation. */
 	float sphere_leader_share_factor(sys::state& state, dcon::nation_id sphere_leader, dcon::nation_id sphere_member) {
 		if(state.world.nation_get_is_civilized(sphere_member)) {
-			float base = state.world.nation_get_rank(sphere_member) <= state.defines.colonial_rank
-			? state.defines.second_rank_base_share_factor
-			: state.defines.civ_base_share_factor;
+			auto const base = state.world.nation_get_rank(sphere_member) <= state.defines.colonial_rank
+				? state.defines.second_rank_base_share_factor
+				: state.defines.civ_base_share_factor;
 			auto const ul = state.world.get_unilateral_relationship_by_unilateral_pair(sphere_member, sphere_leader);
-			float sl_investment = state.world.unilateral_relationship_get_foreign_investment(ul);
-			float total_investment = nations::get_foreign_investment(state, sphere_member);
-			float investment_fraction = total_investment > 0.0001f ? sl_investment / total_investment : 0.0f;
+			auto const sl_investment = state.world.unilateral_relationship_get_foreign_investment(ul);
+			auto const total_investment = nations::get_foreign_investment(state, sphere_member);
+			auto const investment_fraction = total_investment > 0.0001f ? sl_investment / total_investment : 0.0f;
 			return base + (1.0f - base) * investment_fraction;
-		} else {
-			return state.defines.unciv_base_share_factor;
 		}
+		return state.defines.unciv_base_share_factor;
 	}
 
 	/*	- Each sphere member has its domestic x its - share - factor(see above) of its base supply and demand added to its
@@ -922,41 +921,54 @@ namespace economy {
 				state.world.pop_set_luxury_needs_satisfaction(pl.get_pop(), result_luxury);
 			}
 		}
-		const float ln_mul[] = {
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f)
+
+		const ve::fp_vector ln_mul[] = {
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f)
 		};
-		const float en_mul[] = {
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f)
+		const ve::fp_vector en_mul[] = {
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f)
 		};
-		const float lx_mul[] = {
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
-			std::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
+		const ve::fp_vector lx_mul[] = {
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
+			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
 		};
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			auto kf = state.world.commodity_get_key_factory(cid);
-			if(state.world.commodity_get_is_available_from_start(cid)
-			|| (kf && state.world.nation_get_active_building(n, kf))) {
-				for(const auto t : state.world.in_pop_type) {
-					auto strata = state.world.pop_type_get_strata(t);
-					float base_life = state.world.pop_type_get_life_needs(t, cid);
-					float base_everyday = state.world.pop_type_get_everyday_needs(t, cid);
-					float base_luxury = state.world.pop_type_get_luxury_needs(t, cid);
-					float pop_size = state.world.nation_get_demographics(n, demographics::to_key(state, t));
+		state.world.execute_serial_over_commodity([&](auto cids) {
+			auto const kf = state.world.commodity_get_key_factory(cids);
+			auto const mask_kf = ve::apply([&](dcon::factory_type_id ft) {
+				return state.world.nation_get_active_building(n, ft);
+			}, kf) == true;
+			auto const mask = state.world.commodity_get_is_available_from_start(cids)
+				|| (kf != dcon::factory_type_id{} && mask_kf);
+			ve::fp_vector total_demand{};
+			state.world.execute_serial_over_pop_type([&](auto pids) {
+				auto const strata = state.world.pop_type_get_strata(pids);
+				auto const pop_size = ve::apply([&](dcon::pop_type_id pt) {
+					return state.world.nation_get_demographics(n, demographics::to_key(state, pt));
+				}, pids);
+				ve::apply([&](dcon::commodity_id c) {
+					auto const base_life = state.world.pop_type_get_life_needs(pids, c);
+					auto const base_everyday = state.world.pop_type_get_everyday_needs(pids, c);
+					auto const base_luxury = state.world.pop_type_get_luxury_needs(pids, c);
 					/* Invention factor doesn't factor for life needs */
-					auto total_demand =
-						base_life * pop_size * ln_mul[strata]
-						+ base_everyday * pop_size * invention_factor * en_mul[strata]
-						+ base_luxury * pop_size * invention_factor * lx_mul[strata];
-					register_demand(state, n, cid, total_demand);
-				}
-			}
-		}
+					auto const life_demand = base_life * pop_size
+						* ve::select(strata == 0, ln_mul[0], ve::select(strata == 1, ln_mul[1], ln_mul[2]));
+					auto const en_demand = base_everyday * pop_size * invention_factor
+						* ve::select(strata == 0, en_mul[0], ve::select(strata == 1, en_mul[1], en_mul[2]));
+					auto const lx_demand = base_luxury * pop_size * invention_factor
+						* ve::select(strata == 0, lx_mul[0], ve::select(strata == 1, lx_mul[1], lx_mul[2]));
+					total_demand = ve::select(mask, total_demand + life_demand + en_demand + lx_demand, total_demand);
+				}, cids);
+			});
+			ve::apply([&](dcon::commodity_id c, float value) {
+				state.world.nation_set_real_demand(n, c,
+					state.world.nation_get_real_demand(n, c) + value);
+			}, cids, total_demand);
+		});
 	}
 
 	void limit_pop_demand_to_production(sys::state& state) {
@@ -1029,17 +1041,17 @@ namespace economy {
 		- We calculate an adjusted pop-size as (0.5 + pop-consciousness / define:PDEF_BASE_CON) x (for non-colonial pops: 1 +
 		national-plurality (as a fraction of 100)) x pop-size */
 	void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_demand, float invention_factor) {
-		ve::fp_vector ln_mul[] = {
+		const ve::fp_vector ln_mul[] = {
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_life_needs) + 1.0f)
 		};
-		ve::fp_vector en_mul[] = {
+		const ve::fp_vector en_mul[] = {
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_everyday_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_everyday_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_everyday_needs) + 1.0f)
 		};
-		ve::fp_vector lx_mul[] = {
+		const ve::fp_vector lx_mul[] = {
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_luxury_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_luxury_needs) + 1.0f),
 			ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::rich_luxury_needs) + 1.0f)
