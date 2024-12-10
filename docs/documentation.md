@@ -309,3 +309,29 @@ We simply exchanged `float` for `ve::fp_vector`, we also don't have an overloade
 Note that we didn't SIMD the commodities, this is because we can't address multiple objects as vectors at the same time. `state.world.pop_type_get_life_needs(ids, c)` will not work if both `ids` and `c` are vectors - as the system wasn't designed to handle this kind of input.
 
 For now this caveat prevents some major optimizations from being done. Both by the compiler and the programmer.
+
+### Non-determinism
+
+See this code, see anything wrong?
+
+```c++
+// combination and final execution
+auto total_vector = decisions_taken.combine([](auto& a, auto& b) {
+	std::vector<decision_nation_pair> result(a.begin(), a.end());
+	result.insert(result.end(), b.begin(), b.end());
+	return result;
+});
+```
+
+Exactly, it's missing total ordering. This will cause Out-Of-Synch errors, non-determinism and you will get angry victorians yelling "why the fuck is this OOSing". So remember, to always, sort, in a total order-deterministic fashion:
+
+```c++
+// ensure total deterministic ordering
+pdqsort(total_vector.begin(), total_vector.end(), [&](auto a, auto b) {
+	auto na = a.second;
+	auto nb = b.second;
+	if(na != nb)
+		return na.index() < nb.index();
+	return a.first.index() < b.first.index();
+});
+```

@@ -830,6 +830,15 @@ namespace ai {
 			result.insert(result.end(), b.begin(), b.end());
 			return result;
 		});
+		// ensure total deterministic ordering
+		pdqsort(total_vector.begin(), total_vector.end(), [&](auto a, auto b) {
+			auto na = a.second;
+			auto nb = b.second;
+			if(na != nb)
+				return na.index() < nb.index();
+			return a.first.index() < b.first.index();
+		});
+		// assumption 1: no duplicate pair of <n, d>
 		for(const auto& v : total_vector) {
 			auto n = v.second;
 			auto d = v.first;
