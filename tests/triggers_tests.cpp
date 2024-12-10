@@ -792,7 +792,7 @@ TEST_CASE("complex full reduction", "[trigger_tests]") {
 }
 
 #if 0
-std::unique_ptr<sys::state> load_testing_scenario_file();
+sys::state& load_testing_scenario_file();
 TEST_CASE("batch-individual comparision", "[trigger_tests]") {
 	auto ws = load_testing_scenario_file();
 

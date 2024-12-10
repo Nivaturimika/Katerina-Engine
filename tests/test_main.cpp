@@ -9,20 +9,15 @@
 #include "system_state.hpp"
 #include "serialization.hpp"
 
-std::unique_ptr<sys::state> load_testing_scenario_file() {
-	std::unique_ptr<sys::state> game_state = std::make_unique<sys::state>(); // too big for the stack
+static sys::state game_state;
 
-	add_root(game_state->common_fs, NATIVE("."));        // for the moment this lets us find the shader files
-
-	if (!sys::try_read_scenario_and_save_file(*game_state, NATIVE("tests_scenario.bin"))) {
-		// scenario making functions
-		parsers::error_handler err("");
-		game_state->load_scenario_data(err, sys::year_month_day{ 1836, 1, 1 });
-		sys::write_scenario_file(*game_state, NATIVE("tests_scenario.bin"), 1);
+sys::state& load_testing_scenario_file() {
+	//add_root(game_state.common_fs, NATIVE(".")); // for the moment this lets us find the shader files
+	if(sys::try_read_scenario_and_save_file(game_state, NATIVE("tests_scenario.bin"))) {
+		game_state.fill_unsaved_data();
 	} else {
-		game_state->fill_unsaved_data();
+		std::abort();
 	}
-
 	return game_state;
 }
 

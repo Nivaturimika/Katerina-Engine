@@ -1,3 +1,9 @@
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/benchmark/catch_benchmark.hpp>
+#include <catch2/benchmark/catch_constructor.hpp>
+#include <catch2/generators/catch_generators_range.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
 #include "system_state.hpp"
 #include "dcon_generated.hpp"
 
@@ -137,7 +143,7 @@ void populate_needs_costs_1(sys::state& state, dcon::nation_id n, float base_dem
 }
 
 // New (simdified) code
-void populate_needs_costs(sys::state& state, dcon::nation_id n, float base_demand, float invention_factor) {
+void populate_needs_costs_2(sys::state& state, dcon::nation_id n, float base_demand, float invention_factor) {
 	ve::fp_vector ln_mul[] = {
 		ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::poor_life_needs) + 1.0f),
 		ve::max(0.001f, state.world.nation_get_modifier_values(n, sys::national_mod_offsets::middle_life_needs) + 1.0f),
@@ -285,4 +291,75 @@ void nation_spending_calc_1(sys::state& state, dcon::nation_id n) {
 	assert(std::isfinite(refund) && refund >= 0.0f);
 	// TODO: Fix refund
 	state.world.nation_get_stockpiles(n, economy::money) += refund;
+}
+
+//
+// TEST CASES
+//
+sys::state& load_testing_scenario_file();
+TEST_CASE("bench_simdify") {
+	BENCHMARK_ADVANCED("populate-ln-en-lx-1")(Catch::Benchmark::Chronometer meter) {
+		auto& state = load_testing_scenario_file();
+		// buffers
+		auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
+		meter.measure([&] {
+			for(const auto n : state.world.in_nation) {
+				populate_ln_en_lx_1(state, n, ln_max, en_max, lx_max);
+			}
+		});
+		// prevent optimizing away
+		float s = 0.f;
+		for(uint32_t i = 0; i < state.world.pop_type_size(); ++i) {
+			s += ln_max.get(dcon::pop_type_id(i))
+				+ en_max.get(dcon::pop_type_id(i))
+				+ lx_max.get(dcon::pop_type_id(i));
+		}
+		return s;
+	};
+	BENCHMARK_ADVANCED("populate-ln-en-lx-2")(Catch::Benchmark::Chronometer meter) {
+		auto& state = load_testing_scenario_file();
+		// buffers
+		auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
+		meter.measure([&] {
+			for(const auto n : state.world.in_nation) {
+				populate_ln_en_lx_2(state, n, ln_max, en_max, lx_max);
+			}
+		});
+		// prevent optimizing away
+		float s = 0.f;
+		for(uint32_t i = 0; i < state.world.pop_type_size(); ++i) {
+			s += ln_max.get(dcon::pop_type_id(i))
+				+ en_max.get(dcon::pop_type_id(i))
+				+ lx_max.get(dcon::pop_type_id(i));
+		}
+		return s;
+	};
+}
+
+TEST_CASE("bench_simdify2") {
+	BENCHMARK_ADVANCED("populate-needs-costs-1")(Catch::Benchmark::Chronometer meter) {
+		auto& state = load_testing_scenario_file();
+		// buffers
+		meter.measure([&] {
+			for(const auto n : state.world.in_nation) {
+				populate_needs_costs_1(state, n, n.get_administrative_efficiency(), n.get_capital_ship_score());
+			}
+		});
+	};
+	BENCHMARK_ADVANCED("populate-needs-costs-2")(Catch::Benchmark::Chronometer meter) {
+		auto& state = load_testing_scenario_file();
+		// buffers
+		auto ln_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto en_max = state.world.pop_type_make_vectorizable_float_buffer();
+		auto lx_max = state.world.pop_type_make_vectorizable_float_buffer();
+		meter.measure([&] {
+			for(const auto n : state.world.in_nation) {
+				populate_needs_costs_2(state, n, n.get_administrative_efficiency(), n.get_capital_ship_score());
+			}
+		});
+	};
 }
