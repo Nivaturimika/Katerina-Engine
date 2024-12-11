@@ -407,6 +407,7 @@ namespace sys {
 		bool always_potential_decisions = false;
 		// Fixups
 		bool extension_use_scripted_ui = false;
+		bool extension_use_vanilla_parser = false;
 	};
 
 	struct crisis_member_def {

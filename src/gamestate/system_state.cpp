@@ -1589,7 +1589,10 @@ namespace sys {
 		auto common = open_directory(root, NATIVE("common"));
 
 		parsers::scenario_building_context context(*this);
-
+		if(cheat_data.extension_use_vanilla_parser) {
+			context.use_extensions = false;
+		}
+		
 		// UI doesn't affect checksum, however, when using scripted UI, it will
 		ui::load_fixed_gui_definitions(*this, context.gfx_context, err);
 		if(cheat_data.extension_use_scripted_ui) {

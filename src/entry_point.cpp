@@ -288,6 +288,8 @@ int process_command_line(std::vector<native_string>& argv) {
 			game_state.cheat_data.daily_oos_check = true;
 		} else if(native_string(argv[i]) == NATIVE("-ext-script-ui")) {
 			game_state.cheat_data.extension_use_scripted_ui = true;
+		} else if(native_string(argv[i]) == NATIVE("-vanilla-parser")) {
+			game_state.cheat_data.extension_use_vanilla_parser = true;
 		}
 	}
 

@@ -101,6 +101,7 @@ Other controls are described directly on the tooltip (for example, right clickin
 * `-ext-script-ui`: Be able to use scripted UI (otherwise any scripted buttons will fail and cause OOS)
 * `-daily-oos`: Turn on daily OOS checks (as opposed to monthly ones).
 * `-seed <n>`: Use a given seed, if not specified, a random one will be generated with the default random device
+* `-vanilla-parser`: Use vanilla parser for validation (disables usage of any KE-specific extensions)
 
 ## Game directory
 
