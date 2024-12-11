@@ -646,35 +646,31 @@ namespace demographics {
 				break;
 			}
 			case 15: {
-				{
-					// clear nation
-					state.world.execute_serial_over_nation([&](auto ni) { state.world.nation_set_non_colonial_population(ni, ve::fp_vector()); });
-					// sum in nation
-					auto const k = demographics::total;
-					state.world.execute_serial_over_state_instance([&](auto ids) {
-						auto const mask = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(ids));
-						auto const location = state.world.state_instance_get_nation_from_state_ownership(ids);
-						auto const v = state.world.nation_get_non_colonial_bureaucrats(location);
-						state.world.nation_set_non_colonial_bureaucrats(location, ve::select(mask,
-							v + state.world.state_instance_get_demographics(ids, k), v));
-					});
-				}
+				// clear nation
+				state.world.execute_serial_over_nation([&](auto ni) { state.world.nation_set_non_colonial_population(ni, ve::fp_vector()); });
+				// sum in nation
+				auto const k = demographics::total;
+				state.world.for_each_state_instance([&](auto ids) {
+					auto const mask = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(ids));
+					auto const location = state.world.state_instance_get_nation_from_state_ownership(ids);
+					auto const v = state.world.nation_get_non_colonial_bureaucrats(location);
+					state.world.nation_set_non_colonial_bureaucrats(location, ve::select(mask,
+						v + state.world.state_instance_get_demographics(ids, k), v));
+				});
 				break;
 			}
 			case 16: {
-				{
-					// clear nation
-					state.world.execute_serial_over_nation([&](auto ni) { state.world.nation_set_non_colonial_bureaucrats(ni, ve::fp_vector()); });
-					// sum in nation
-					auto const k = demographics::to_key(state, state.culture_definitions.bureaucrat);
-					state.world.execute_serial_over_state_instance([&](auto ids) {
-						auto const mask = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(ids));
-						auto const location = state.world.state_instance_get_nation_from_state_ownership(ids);
-						auto const v = state.world.nation_get_non_colonial_bureaucrats(location);
-						state.world.nation_set_non_colonial_bureaucrats(location, ve::select(mask,
-							v + state.world.state_instance_get_demographics(ids, k), v));
-					});
-				}
+				// clear nation
+				state.world.execute_serial_over_nation([&](auto ni) { state.world.nation_set_non_colonial_bureaucrats(ni, ve::fp_vector()); });
+				// sum in nation
+				auto const k = demographics::to_key(state, state.culture_definitions.bureaucrat);
+				state.world.for_each_state_instance([&](auto ids) {
+					auto const mask = !state.world.province_get_is_colonial(state.world.state_instance_get_capital(ids));
+					auto const location = state.world.state_instance_get_nation_from_state_ownership(ids);
+					auto const v = state.world.nation_get_non_colonial_bureaucrats(location);
+					state.world.nation_set_non_colonial_bureaucrats(location, ve::select(mask,
+						v + state.world.state_instance_get_demographics(ids, k), v));
+				});
 				break;
 			}
 			default:
