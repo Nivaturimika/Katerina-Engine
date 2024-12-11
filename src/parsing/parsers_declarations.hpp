@@ -450,8 +450,8 @@ namespace parsers {
 
 		dcon::text_key noimage;
 
-	dcon::modifier_id modifier_by_terrain_index[64] = {}; // these are the given mappings from the raw palette index to terrain type
-	uint32_t color_by_terrain_index[64] = {0}; // these are the (packed) colors given for the terrain type modifier at the given palette index
+		dcon::modifier_id modifier_by_terrain_index[64] = {}; // these are the given mappings from the raw palette index to terrain type
+		uint32_t color_by_terrain_index[64] = {0}; // these are the (packed) colors given for the terrain type modifier at the given palette index
 		dcon::modifier_id ocean_terrain;
 
 		scenario_building_context(sys::state& state);
@@ -465,13 +465,12 @@ namespace parsers {
 		int32_t number_of_national_values_seen = 0;
 		bool new_maps = false;
 		bool money_set = false;
-		bool use_extensions = true; // use ke extensions?
+		bool use_extensions = true; // Use KE extensions?
 	};
 
 	struct national_identity_file {
-		void any_value(std::string_view tag, association_type, std::string_view txt, error_handler& err, int32_t line,
-			scenario_building_context& context);
-	void finish(scenario_building_context& context) { }
+		void any_value(std::string_view tag, association_type, std::string_view txt, error_handler& err, int32_t line, scenario_building_context& context);
+		void finish(scenario_building_context& context) { }
 	};
 
 	struct color_from_3f {

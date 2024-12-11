@@ -53,25 +53,16 @@ namespace ui {
 	};
 
 	class console_list : public scrollable_text {
-		public:
+	public:
 		std::string raw_text;
-		void on_update(sys::state& state) noexcept override {
-			auto contents = text::create_endless_layout(state, delegate->internal_layout,
-			text::layout_parameters{ 0, 0, int16_t(base_data.size.x), int16_t(base_data.size.y),
-				base_data.data.text.font_handle, 0, text::alignment::left,
-			text::is_black_from_font_id(base_data.data.text.font_handle) ? text::text_color::black : text::text_color::white, false });
-			auto box = text::open_layout_box(contents);
-			text::add_unparsed_text_to_layout_box(state, contents, box, raw_text);
-			text::close_layout_box(contents, box);
-			calibrate_scrollbar(state);
-		}
+		void on_update(sys::state& state) noexcept override;
 	};
 
 	class console_window : public window_element_base {
-		private:
+	private:
 		console_list* console_output_list = nullptr;
 		console_edit* edit_box = nullptr;
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			window_element_base::on_create(state);
 			set_visible(state, false);

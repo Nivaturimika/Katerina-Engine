@@ -2276,7 +2276,7 @@ struct national_focus_overwrite_close { };
 			} else {
 				send(state, parent, category);
 				if constexpr(category == country_list_filter::all) {
-				send(state, parent, dcon::modifier_id{});
+					send(state, parent, dcon::modifier_id{});
 				}
 			}
 		}
@@ -2308,28 +2308,28 @@ struct national_focus_overwrite_close { };
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t t, text::columnar_layout& contents) noexcept override {
 			switch(category) {
-				case country_list_filter::all:
+			case country_list_filter::all:
 				text::add_line(state, contents, "filter_all");
 				break;
-				case country_list_filter::neighbors:
-				case country_list_filter::neighbors_no_vassals:
+			case country_list_filter::neighbors:
+			case country_list_filter::neighbors_no_vassals:
 				text::add_line(state, contents, "filter_neighbors");
 				break;
-				case country_list_filter::sphere:
-				case country_list_filter::influenced:
+			case country_list_filter::sphere:
+			case country_list_filter::influenced:
 				text::add_line(state, contents, "filter_sphere");
 				break;
-				case country_list_filter::enemies:
+			case country_list_filter::enemies:
 				text::add_line(state, contents, "filter_enemies");
 				break;
-				case country_list_filter::find_allies:
-				case country_list_filter::allies:
+			case country_list_filter::find_allies:
+			case country_list_filter::allies:
 				text::add_line(state, contents, "filter_allies");
 				break;
-				case country_list_filter::best_guess:
+			case country_list_filter::best_guess:
 				text::add_line(state, contents, "filter_best_guess");
 				break;
-				default:
+			default:
 				break;
 			}
 		}

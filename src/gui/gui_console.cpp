@@ -1627,3 +1627,14 @@ void ui::console_window::show_toggle(sys::state& state) {
 	if(state.ui_state.console_window->is_visible())
 		state.ui_state.root->move_child_to_front(state.ui_state.console_window);
 }
+
+void ui::console_list::on_update(sys::state& state) noexcept {
+	auto contents = text::create_endless_layout(state, delegate->internal_layout,
+	text::layout_parameters{ 0, 0, int16_t(base_data.size.x), int16_t(base_data.size.y),
+		base_data.data.text.font_handle, 0, text::alignment::left,
+	text::is_black_from_font_id(base_data.data.text.font_handle) ? text::text_color::black : text::text_color::white, false });
+	auto box = text::open_layout_box(contents);
+	text::add_unparsed_text_to_layout_box(state, contents, box, raw_text);
+	text::close_layout_box(contents, box);
+	calibrate_scrollbar(state);
+}
