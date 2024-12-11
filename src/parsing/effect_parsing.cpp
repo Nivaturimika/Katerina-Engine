@@ -2775,21 +2775,19 @@ namespace parsers {
 			context.compiled_effect.push_back(uint16_t(effect::years_of_research));
 			context.add_float_to_payload(value);
 		} else {
-			err.accumulated_errors +=
-				"years_of_research effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
+			err.accumulated_errors += "years_of_research effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void effect_body::prestige_factor(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
-			if(value >= 0.0f)
-			context.compiled_effect.push_back(uint16_t(effect::prestige_factor_positive));
-			else
-			context.compiled_effect.push_back(uint16_t(effect::prestige_factor_negative));
+			if(value >= 0.0f) {
+				context.compiled_effect.push_back(uint16_t(effect::prestige_factor_positive));
+			} else {
+				context.compiled_effect.push_back(uint16_t(effect::prestige_factor_negative));
+			}
 			context.add_float_to_payload(value);
 		} else {
-			err.accumulated_errors +=
-				"prestige_factor effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "prestige_factor effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -2806,8 +2804,7 @@ namespace parsers {
 				return;
 			}
 		} else {
-			err.accumulated_errors += "military_reform effect supplied with invalid issue option name " + std::string(value) + " (" +
-															err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "military_reform effect supplied with invalid issue option name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}

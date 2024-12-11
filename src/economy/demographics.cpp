@@ -1882,7 +1882,6 @@ namespace demographics {
 
 	void update_colonial_migration(sys::state& state, uint32_t offset, uint32_t divisions, migration_buffer& pbuf) {
 		pbuf.update(state.world.pop_size());
-
 		pexecute_staggered_blocks(offset, divisions, state.world.pop_size(), [&](auto ids) {
 			/*
 			If a nation has colonies, non-factory worker, non-rich pops in provinces with a total population > 100 may move to the
@@ -2016,19 +2015,16 @@ namespace demographics {
 	float get_estimated_emigration(sys::state& state, dcon::pop_id ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owners = state.world.province_get_nation_from_province_ownership(loc);
-		if(state.world.nation_get_is_civilized(owners)) {
-			if(!state.world.province_get_is_colonial(loc)) {
-				if(state.world.pop_get_poptype(ids) != state.culture_definitions.slaves) {
-					if(state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids)))) {
-						auto pop_sizes = state.world.pop_get_size(ids);
-						auto impush = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
-						auto trigger_result = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.emigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
-						auto amounts = trigger_result * pop_sizes * std::max(impush, 0.0f) * std::max(impush, 1.0f) * state.defines.immigration_scale;
-						if(amounts > 0.0f) {
-							return std::min(pop_sizes, std::ceil(amounts));
-						}
-					}
-				}
+		if(state.world.nation_get_is_civilized(owners)
+		&& !state.world.province_get_is_colonial(loc)
+		&& state.world.pop_get_poptype(ids) != state.culture_definitions.slaves
+		&& state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids)))) {
+			auto pop_sizes = state.world.pop_get_size(ids);
+			auto impush = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
+			auto trigger_result = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.emigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
+			auto amounts = trigger_result * pop_sizes * std::max(impush, 0.0f) * std::max(impush, 1.0f) * state.defines.immigration_scale;
+			if(amounts > 0.0f) {
+				return std::min(pop_sizes, std::ceil(amounts));
 			}
 		}
 		return 0.f;
