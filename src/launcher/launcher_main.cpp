@@ -1893,7 +1893,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 				auto y = GET_Y_LPARAM(lParam);
 
 				POINTS adj{ SHORT(x - rcWindow.left), SHORT(y - rcWindow.top) };
-				memcpy(&lParam, &adj, sizeof(LPARAM));
+				std::memcpy(&lParam, &adj, sizeof(LPARAM));
 
 				mouse_x = int32_t(float(GET_X_LPARAM(lParam)) / scaling_factor);
 				mouse_y = int32_t(float(GET_Y_LPARAM(lParam)) / scaling_factor);

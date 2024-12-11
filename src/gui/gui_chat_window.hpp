@@ -249,7 +249,7 @@ namespace ui {
 					}
 				}
 				if(len > 0) {
-					memcpy(body, s.data() + sent_len, len);
+					std::memcpy(body, s.data() + sent_len, len);
 					body[len] = '\0';
 					command::chat_message(state, state.local_player_nation, body, target);
 					sent_len += len;

@@ -18,29 +18,29 @@ namespace sys {
 	template<typename T>
 	inline uint8_t* serialize(uint8_t* ptr_in, std::vector<T> const& vec) {
 		uint32_t length = uint32_t(vec.size());
-		memcpy(ptr_in, &length, sizeof(uint32_t));
-		memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
+		std::memcpy(ptr_in, &length, sizeof(uint32_t));
+		std::memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
 		return ptr_in + sizeof(uint32_t) + sizeof(T) * vec.size();
 	}
 
 	template<typename T>
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, std::vector<T>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 		vec.resize(length);
-		memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
+		std::memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
 		return ptr_in + sizeof(uint32_t) + sizeof(T) * length;
 	}
 
 	template<typename T>
 	inline uint8_t* memcpy_serialize(uint8_t* ptr_in, T const& obj) {
-		memcpy(ptr_in, &obj, sizeof(T));
+		std::memcpy(ptr_in, &obj, sizeof(T));
 		return ptr_in + sizeof(T);
 	}
 
 	template<typename T>
 	inline uint8_t const* memcpy_deserialize(uint8_t const* ptr_in, T& obj) {
-		memcpy(&obj, ptr_in, sizeof(T));
+		std::memcpy(&obj, ptr_in, sizeof(T));
 		return ptr_in + sizeof(T);
 	}
 
@@ -52,17 +52,17 @@ namespace sys {
 	template<typename T, typename tag_type>
 	inline uint8_t* serialize(uint8_t* ptr_in, tagged_vector<T, tag_type> const& vec) {
 		uint32_t length = uint32_t(vec.size());
-		memcpy(ptr_in, &length, sizeof(uint32_t));
-		memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
+		std::memcpy(ptr_in, &length, sizeof(uint32_t));
+		std::memcpy(ptr_in + sizeof(uint32_t), vec.data(), sizeof(T) * vec.size());
 		return ptr_in + sizeof(uint32_t) + sizeof(T) * vec.size();
 	}
 
 	template<typename T, typename tag_type>
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, tagged_vector<T, tag_type>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 		vec.resize(length);
-		memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
+		std::memcpy(vec.data(), ptr_in + sizeof(uint32_t), sizeof(T) * length);
 		return ptr_in + sizeof(uint32_t) + sizeof(T) * length;
 	}
 
@@ -82,22 +82,22 @@ namespace sys {
 	}
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<dcon::text_key, uint32_t, text::vector_backed_ci_hash, text::vector_backed_ci_eq>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 
 		std::remove_cvref_t<decltype(vec.values())> new_vec;
 		new_vec.resize(length);
-		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		std::memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
 		vec.replace(std::move(new_vec));
 
 		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
 	}
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::set<dcon::text_key, text::vector_backed_ci_hash, text::vector_backed_ci_eq>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 
 		std::remove_cvref_t<decltype(vec.values())> new_vec;
 		new_vec.resize(length);
-		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		std::memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
 		vec.replace(std::move(new_vec));
 
 		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
@@ -111,11 +111,11 @@ namespace sys {
 	}
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<dcon::modifier_id, dcon::text_key, sys::modifier_hash>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 
 		std::remove_cvref_t<decltype(vec.values())> new_vec;
 		new_vec.resize(length);
-		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		std::memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
 		vec.replace(std::move(new_vec));
 
 		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
@@ -130,11 +130,11 @@ namespace sys {
 	}
 	inline uint8_t const* deserialize(uint8_t const* ptr_in, ankerl::unordered_dense::map<uint16_t, dcon::text_key>& vec) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 
 		std::remove_cvref_t<decltype(vec.values())> new_vec;
 		new_vec.resize(length);
-		memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
+		std::memcpy(new_vec.data(), ptr_in + sizeof(uint32_t), sizeof(vec.values()[0]) * length);
 		vec.replace(std::move(new_vec));
 
 		return ptr_in + sizeof(uint32_t) + sizeof(vec.values()[0]) * length;
@@ -142,28 +142,28 @@ namespace sys {
 
 	uint8_t const* read_scenario_header(uint8_t const* ptr_in, scenario_header& header_out) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
-		memcpy(&header_out, ptr_in + sizeof(uint32_t), std::min(length, uint32_t(sizeof(scenario_header))));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&header_out, ptr_in + sizeof(uint32_t), std::min(length, uint32_t(sizeof(scenario_header))));
 		return ptr_in + sizeof(uint32_t) + length;
 	}
 
 	uint8_t const* read_save_header(uint8_t const* ptr_in, save_header& header_out) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
-		memcpy(&header_out, ptr_in + sizeof(uint32_t), std::min(length, uint32_t(sizeof(save_header))));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&header_out, ptr_in + sizeof(uint32_t), std::min(length, uint32_t(sizeof(save_header))));
 		return ptr_in + sizeof(uint32_t) + length;
 	}
 
 	uint8_t* write_scenario_header(uint8_t* ptr_in, scenario_header const& header_in) {
 		uint32_t length = uint32_t(sizeof(scenario_header));
-		memcpy(ptr_in, &length, sizeof(uint32_t));
-		memcpy(ptr_in + sizeof(uint32_t), &header_in, sizeof(scenario_header));
+		std::memcpy(ptr_in, &length, sizeof(uint32_t));
+		std::memcpy(ptr_in + sizeof(uint32_t), &header_in, sizeof(scenario_header));
 		return ptr_in + sizeof_scenario_header(header_in);
 	}
 	uint8_t* write_save_header(uint8_t* ptr_in, save_header const& header_in) {
 		uint32_t length = uint32_t(sizeof(save_header));
-		memcpy(ptr_in, &length, sizeof(uint32_t));
-		memcpy(ptr_in + sizeof(uint32_t), &header_in, sizeof(save_header));
+		std::memcpy(ptr_in, &length, sizeof(uint32_t));
+		std::memcpy(ptr_in + sizeof(uint32_t), &header_in, sizeof(save_header));
 		return ptr_in + sizeof_save_header(header_in);
 	}
 
@@ -180,7 +180,7 @@ namespace sys {
 		if(size_t(lim - ptr_in) < sizeof(uint32_t))
 		return;
 
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 		ptr_in += sizeof(uint32_t);
 
 		if(size_t(lim - ptr_in) < sizeof(uint32_t) + length * sizeof(native_char))
@@ -190,7 +190,7 @@ namespace sys {
 	}
 	uint8_t const* load_mod_path(uint8_t const* ptr_in, sys::state& state) {
 		uint32_t length = 0;
-		memcpy(&length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&length, ptr_in, sizeof(uint32_t));
 		ptr_in += sizeof(uint32_t);
 
 		simple_fs::restore_state(state.common_fs, native_string_view(reinterpret_cast<native_char const*>(ptr_in), length));
@@ -198,9 +198,9 @@ namespace sys {
 	}
 	uint8_t* write_mod_path(uint8_t* ptr_in, native_string const& path_in) {
 		uint32_t length = uint32_t(path_in.length());
-		memcpy(ptr_in, &length, sizeof(uint32_t));
+		std::memcpy(ptr_in, &length, sizeof(uint32_t));
 		ptr_in += sizeof(uint32_t);
-		memcpy(ptr_in, path_in.c_str(), length * sizeof(native_char));
+		std::memcpy(ptr_in, path_in.c_str(), length * sizeof(native_char));
 		ptr_in += length * sizeof(native_char);
 		return ptr_in;
 	}
@@ -237,8 +237,8 @@ namespace sys {
 		uint32_t section_length = uint32_t(ZSTD_compress(ptr_out + sizeof(uint32_t) * 2, ZSTD_compressBound(uncompressed_size), ptr_in,
 		uncompressed_size, 0)); // write compressed data
 
-		memcpy(ptr_out, &section_length, sizeof(uint32_t));
-		memcpy(ptr_out + sizeof(uint32_t), &decompressed_length, sizeof(uint32_t));
+		std::memcpy(ptr_out, &section_length, sizeof(uint32_t));
+		std::memcpy(ptr_out + sizeof(uint32_t), &decompressed_length, sizeof(uint32_t));
 
 		return ptr_out + sizeof(uint32_t) * 2 + section_length;
 	}
@@ -247,8 +247,8 @@ namespace sys {
 	uint8_t const* with_decompressed_section(uint8_t const* ptr_in, T const& function) {
 		uint32_t section_length = 0;
 		uint32_t decompressed_length = 0;
-		memcpy(&section_length, ptr_in, sizeof(uint32_t));
-		memcpy(&decompressed_length, ptr_in + sizeof(uint32_t), sizeof(uint32_t));
+		std::memcpy(&section_length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&decompressed_length, ptr_in + sizeof(uint32_t), sizeof(uint32_t));
 
 		uint8_t* temp_buffer = new uint8_t[decompressed_length];
 		// TODO: allocate memory for decompression and decompress into it
@@ -280,11 +280,11 @@ namespace sys {
 			ptr_in = deserialize(ptr_in, state.map_state.map_data.diagonal_borders);
 		}
 		{
-			memcpy(&(state.defines), ptr_in, sizeof(parsing::defines));
+			std::memcpy(&(state.defines), ptr_in, sizeof(parsing::defines));
 			ptr_in += sizeof(parsing::defines);
 		}
 		{
-			memcpy(&(state.economy_definitions), ptr_in, sizeof(economy::global_economy_state));
+			std::memcpy(&(state.economy_definitions), ptr_in, sizeof(economy::global_economy_state));
 			ptr_in += sizeof(economy::global_economy_state);
 		}
 		{ // culture definitions
@@ -426,11 +426,11 @@ namespace sys {
 			ptr_in = serialize(ptr_in, state.map_state.map_data.diagonal_borders);
 		}
 		{
-			memcpy(ptr_in, &(state.defines), sizeof(parsing::defines));
+			std::memcpy(ptr_in, &(state.defines), sizeof(parsing::defines));
 			ptr_in += sizeof(parsing::defines);
 		}
 		{
-			memcpy(ptr_in, &(state.economy_definitions), sizeof(economy::global_economy_state));
+			std::memcpy(ptr_in, &(state.economy_definitions), sizeof(economy::global_economy_state));
 			ptr_in += sizeof(economy::global_economy_state);
 		}
 		{ // culture definitions
@@ -1023,7 +1023,7 @@ namespace sys {
 		header.cgov = state.world.nation_get_government_type(state.local_player_nation);
 		header.d = state.current_date;
 
-		memcpy(header.save_name, name.c_str(), std::min(name.length(), size_t(31)));
+		std::memcpy(header.save_name, name.c_str(), std::min(name.length(), size_t(31)));
 		if(name.length() < 31) {
 			header.save_name[name.length()] = 0;
 		} else {

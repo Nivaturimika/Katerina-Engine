@@ -4296,7 +4296,7 @@ namespace command {
 		p.type = command_type::chat_message;
 		p.source = source;
 		p.data.chat_message.target = target;
-		memcpy(p.data.chat_message.body, std::string(body).c_str(), std::min<size_t>(body.length() + 1, size_t(ui::max_chat_message_len)));
+		std::memcpy(p.data.chat_message.body, std::string(body).c_str(), std::min<size_t>(body.length() + 1, size_t(ui::max_chat_message_len)));
 		p.data.chat_message.body[ui::max_chat_message_len - 1] = '\0';
 		add_to_command_queue(state, p);
 	}

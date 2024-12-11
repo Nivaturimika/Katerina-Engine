@@ -468,7 +468,7 @@ namespace text {
 	void font_manager::load_font(font& fnt, char const* file_data, uint32_t file_size) {
 		fnt.file_data = std::unique_ptr<FT_Byte[]>(new FT_Byte[file_size]);
 
-		memcpy(fnt.file_data.get(), file_data, file_size);
+		std::memcpy(fnt.file_data.get(), file_data, file_size);
 		FT_New_Memory_Face(ft_library, fnt.file_data.get(), file_size, 0, &fnt.font_face);
 		FT_Select_Charmap(fnt.font_face, FT_ENCODING_UNICODE);
 		FT_Set_Pixel_Sizes(fnt.font_face, dr_size, dr_size);

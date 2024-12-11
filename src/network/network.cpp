@@ -95,8 +95,8 @@ namespace network {
 		uint32_t decompressed_length = uncompressed_size;
 		uint32_t section_length = uint32_t(ZSTD_compress(ptr_out + sizeof(uint32_t) * 2, ZSTD_compressBound(uncompressed_size), ptr_in,
 		uncompressed_size, ZSTD_maxCLevel())); // write compressed data
-		memcpy(ptr_out, &section_length, sizeof(uint32_t));
-		memcpy(ptr_out + sizeof(uint32_t), &decompressed_length, sizeof(uint32_t));
+		std::memcpy(ptr_out, &section_length, sizeof(uint32_t));
+		std::memcpy(ptr_out + sizeof(uint32_t), &decompressed_length, sizeof(uint32_t));
 		return ptr_out + sizeof(uint32_t) * 2 + section_length;
 	}
 
@@ -104,8 +104,8 @@ namespace network {
 	static uint8_t const* with_network_decompressed_section(uint8_t const* ptr_in, T const& function) {
 		uint32_t section_length = 0;
 		uint32_t decompressed_length = 0;
-		memcpy(&section_length, ptr_in, sizeof(uint32_t));
-		memcpy(&decompressed_length, ptr_in + sizeof(uint32_t), sizeof(uint32_t));
+		std::memcpy(&section_length, ptr_in, sizeof(uint32_t));
+		std::memcpy(&decompressed_length, ptr_in + sizeof(uint32_t), sizeof(uint32_t));
 		auto temp_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[decompressed_length]);
 		ZSTD_decompress(temp_buffer.get(), decompressed_length, ptr_in + sizeof(uint32_t) * 2, section_length);
 		function(temp_buffer.get(), decompressed_length);

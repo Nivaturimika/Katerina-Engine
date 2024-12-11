@@ -92,7 +92,7 @@ namespace map {
 							decompressed_data.get() + std::abs(size_x) * std::abs(size_y) - out_ptr,
 							start + content.file_size - (ptr + 2)
 						));
-						memcpy(out_ptr, ptr + 2, amount_to_copy);
+						std::memcpy(out_ptr, ptr + 2, amount_to_copy);
 						ptr += 2 + int32_t(ptr[1]) + ((ptr[1] & 1) != 0);
 						out_ptr += num_pixels;
 					}
