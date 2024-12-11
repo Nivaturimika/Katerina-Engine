@@ -12,7 +12,7 @@
 
 namespace trigger {
 
-#if defined(MSVC) || defined(__clang__) //clang and msvc
+#if defined(_MSC_VER) || defined(__clang__) //clang and msvc
 #define CALLTYPE __vectorcall
 #else //gcc
 #define CALLTYPE __attribute__((aligned(64)))
