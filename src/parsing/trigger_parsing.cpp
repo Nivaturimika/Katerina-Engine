@@ -4479,7 +4479,6 @@ namespace parsers {
 			return;
 		}
 	}
-	void trigger_body::badboy(association_type a, float value, error_handler& err, int32_t line, trigger_building_context& context);
 	void trigger_body::has_building(association_type a, std::string_view value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::state) {
@@ -5154,10 +5153,6 @@ namespace parsers {
 															std::to_string(line) + ")\n";
 		}
 	}
-	void trigger_body::ruling_party(association_type a, std::string_view value, error_handler& err, int32_t line,
-		trigger_building_context& context);
-	void trigger_body::has_leader(association_type a, std::string_view value, error_handler& err, int32_t line,
-		trigger_building_context& context);
 	void trigger_body::is_ideology_enabled(association_type a, std::string_view value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(auto it = context.outer_context.map_of_ideologies.find(std::string(value));

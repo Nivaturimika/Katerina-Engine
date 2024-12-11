@@ -1204,4 +1204,32 @@ namespace ui {
 			}
 		}
 	}
+
+	std::unique_ptr<element_base> news_page_window::make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept {
+		if(name == "window_bg") {
+			return make_element_by_type<draggable_target>(state, id);
+		} else if(name == "close_button") {
+			return make_element_by_type<generic_close_button>(state, id);
+		} else if(name == "date") {
+			return make_element_by_type<news_page_date>(state, id);
+		} else if(name == "article_main") {
+			return make_element_by_type<news_article_window<news::news_size_huge, 0>>(state, id);
+		} else if(name == "article_medium_1") {
+			return make_element_by_type<news_article_window<news::news_size_medium, 0>>(state, id);
+		} else if(name == "article_medium_2") {
+			return make_element_by_type<news_article_window<news::news_size_medium, 1>>(state, id);
+		} else if(name == "article_small_1") {
+			return make_element_by_type<news_article_window<news::news_size_small, 0>>(state, id);
+		} else if(name == "article_small_2") {
+			return make_element_by_type<news_article_window<news::news_size_small, 1>>(state, id);
+		} else if(name == "article_small_3") {
+			return make_element_by_type<news_article_window<news::news_size_small, 2>>(state, id);
+		} else if(name == "article_small_4") {
+			return make_element_by_type<news_article_window<news::news_size_small, 3>>(state, id);
+		} else if(name == "article_small_5") {
+			return make_element_by_type<news_article_window<news::news_size_small, 4>>(state, id);
+		} else {
+			return nullptr;
+		}
+	}
 }

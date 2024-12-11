@@ -3132,8 +3132,6 @@ namespace parsers {
 		}
 		context.compiled_effect.push_back(uint16_t(effect::trigger_crisis));
 	}
-	void effect_body::country_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-	void effect_body::province_event(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 	void effect_body::military_access(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(is_this(value)) {
