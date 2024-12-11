@@ -173,7 +173,7 @@ namespace trigger {
 	using gathered_t = typename gathered_s<T>::type;
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
-	inline return_type test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
+	inline return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot);
 
 #define TRIGGER_FUNCTION(function_name) \
 	template<typename return_type, typename primary_type, typename this_type, typename from_type> \
