@@ -11,14 +11,75 @@ namespace ve {
 	inline float max(float a, float b) {
 		return a > b ? a : b;
 	}
+
 	inline float min(float a, float b) {
-		return a > b ? a : b;
+		return a < b ? a : b;
 	}
-	inline float ceil(float a, float b) {
-		return a > b ? a : b;
+
+	// Both ceil and floor are taken from glibc
+	// https://www.gnu.org/software/libc/
+	// https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/ieee754/flt-32/s_floorf.c;h=a5c38818f1f23ad495f560c673b41796511f9363;hb=HEAD
+	// https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/ieee754/flt-32/s_ceilf.c;h=0263552deeda45fa05152a7ae49d911c622d3c20;hb=HEAD
+	inline float ceil(float x) {
+		/* Use generic implementation.  */
+		int32_t i0 = *reinterpret_cast<const int32_t*>(&x);
+		int32_t j0 = ((i0 >> 23) & 0xff) - 0x7f;
+		if (j0 < 23) {
+			if (j0 < 0) {
+				/* return 0 * sign (x) if |x| < 1  */
+				if (i0 < 0) {
+					i0 = 0x80000000;
+				} else if (i0 != 0) {
+					i0 = 0x3f800000;
+				}
+			} else {
+				uint32_t i = (0x007fffff) >> j0;
+				if ((i0 & i) == 0) {
+					return x;		/* x is integral  */
+				}
+				if (i0 > 0) {
+					i0 += (0x00800000) >> j0;
+				}
+				i0 &= (~i);
+			}
+		} else {
+			if (j0 != 0x80) { /* x is integral  */
+				return x;
+			}
+			return x + x; /* inf or NaN  */
+		}
+		return *reinterpret_cast<const float*>(&i0);
 	}
-	inline float floor(float a, float b) {
-		return a > b ? a : b;
+
+	inline float floor(float x) {
+		/* Use generic implementation.  */
+		int32_t i0 = *reinterpret_cast<const int32_t*>(&x);
+		int32_t j0 = ((i0 >> 23) & 0xff) - 0x7f;
+		if(j0 < 23) {
+			if(j0 < 0) {
+				/* return 0 * sign (x) if |x| < 1  */
+				if (i0 >= 0) {
+					i0 = 0;
+				} else if ((i0 & 0x7fffffff) != 0) {
+					i0 = 0xbf800000;
+				}
+			} else {
+				uint32_t i = (0x007fffff) >> j0;
+				if ((i0 & i) == 0) {
+					return x;		/* x is integral  */
+				}
+				if (i0 < 0) {
+					i0 += (0x00800000) >> j0;
+				}
+				i0 &= (~i);
+			}
+		} else {
+			if (j0 != 0x80) { /* x is integral  */
+				return x;
+			}
+			return x + x; /* inf or NaN  */
+		}
+		return *reinterpret_cast<const float*>(&i0);
 	}
 
 	inline float to_float(int32_t a) {

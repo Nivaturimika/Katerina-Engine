@@ -59,8 +59,9 @@ namespace nations {
 
 		auto state_owner = state.world.state_instance_get_nation_from_state_ownership(target_state);
 		if(state_owner == source) {
-			if(focus == state.national_definitions.flashpoint_focus)
-			return false;
+			if(focus == state.national_definitions.flashpoint_focus) {
+				return false;
+			}
 			if(auto ideo = state.world.national_focus_get_ideology(focus); ideo) {
 				if(state.world.ideology_get_enabled(ideo) == false ||
 					(state.world.ideology_get_is_civilized_only(ideo) && !state.world.nation_get_is_civilized(source))) {
@@ -70,16 +71,18 @@ namespace nations {
 			auto prov = state.world.state_instance_get_capital(target_state);
 			auto k = state.world.national_focus_get_limit(focus);
 			if(k && !trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(state_owner), -1))
-			return false;
+				return false;
 			return true;
 		} else {
 			auto pc = state.world.nation_get_primary_culture(source);
-			if(nations::nation_accepts_culture(state, state_owner, pc))
-			return false;
+			if(nations::nation_accepts_culture(state, state_owner, pc)) {
+				return false;
+			}
 
 			auto ident = state.world.nation_get_identity_from_identity_holder(source);
-			if(state.world.national_identity_get_is_not_releasable(ident))
-			return false;
+			if(state.world.national_identity_get_is_not_releasable(ident)) {
+				return false;
+			}
 
 			bool state_contains_core = false;
 			province::for_each_province_in_state_instance(state, target_state, [&](dcon::province_id p) {
@@ -92,12 +95,10 @@ namespace nations {
 	}
 
 	namespace influence {
-
 		int32_t get_level(sys::state& state, dcon::nation_id gp, dcon::nation_id target) {
 			auto rel = state.world.get_gp_relationship_by_gp_influence_pair(target, gp);
 			return state.world.gp_relationship_get_status(rel) & influence::level_mask;
 		}
-
 	} // namespace influence
 
 	template auto nation_accepts_culture<ve::tagged_vector<dcon::nation_id>, dcon::culture_id>(sys::state const&, ve::tagged_vector<dcon::nation_id>, dcon::culture_id);
@@ -108,35 +109,32 @@ namespace nations {
 	template auto central_has_crime_fraction<ve::tagged_vector<dcon::nation_id>>(sys::state const&, ve::tagged_vector<dcon::nation_id>);
 	template auto occupied_provinces_fraction<ve::tagged_vector<dcon::nation_id>>(sys::state const&, ve::tagged_vector<dcon::nation_id>);
 
+	/* This should return the differance of the population of a nation between this month and next month, or this month and last
+	 * month, depending which one is better to implement. */
 	int64_t get_monthly_pop_increase_of_nation(sys::state& state, dcon::nation_id n) {
-		/* TODO -
-		 * This should return the differance of the population of a nation between this month and next month, or this month and last
-		 * month, depending which one is better to implement Used in gui/topbar_subwindows/gui_population_window.hpp - Return value is
-		 * divided by 30
-		 */
-		int64_t estimated_change = 0;
-		for(auto p : state.world.nation_get_province_ownership(n)) {
-			for(auto pl : state.world.province_get_pop_location(p.get_province())) {
-				auto growth = int64_t(demographics::get_monthly_pop_increase(state, pl.get_pop()));
-				auto colonial_migration = -int64_t(demographics::get_estimated_colonial_migration(state, pl.get_pop()));
-				auto emigration = -int64_t(demographics::get_estimated_emigration(state, pl.get_pop()));
-				auto total = int64_t(growth) + colonial_migration + emigration;
-				estimated_change += total;
+		float total = 0.f;
+		for(auto const p : state.world.nation_get_province_ownership(n)) {
+			for(auto const pl : state.world.province_get_pop_location(p.get_province())) {
+				auto const growth = demographics::get_monthly_pop_increase(state, pl.get_pop());
+				auto const colonial_migration = demographics::get_estimated_colonial_migration(state, pl.get_pop());
+				auto const emigration = demographics::get_estimated_emigration(state, pl.get_pop());
+				total += growth - colonial_migration - emigration;
 			}
 		}
-		return estimated_change;
+		return int64_t(total);
 	}
 
 	dcon::nation_id get_nth_great_power(sys::state const& state, uint16_t n) {
 		uint16_t count = 0;
 		for(uint16_t i = 0; i < uint16_t(state.nations_by_rank.size()); ++i) {
 			if(is_great_power(state, state.nations_by_rank[i])) {
-				if(count == n)
-				return state.nations_by_rank[i];
+				if(count == n) {
+					return state.nations_by_rank[i];
+				}
 				++count;
 			}
 		}
-	return dcon::nation_id{};
+		return dcon::nation_id{};
 	}
 
 	dcon::nation_id owner_of_pop(sys::state const& state, dcon::pop_id pop_ids) {
