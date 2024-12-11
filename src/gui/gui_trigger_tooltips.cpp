@@ -1451,6 +1451,24 @@ namespace ui {
 			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_overseas_culture"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
+		void tf_is_banned_from_tag(TRIGGER_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
+			text::close_layout_box(layout, box);
+		}
+		void tf_is_banned_from_this(TRIGGER_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
+			text::close_layout_box(layout, box);
+		}
+		void tf_is_banned_from_from(TRIGGER_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
+			text::close_layout_box(layout, box);
+		}
 		void tf_is_independant(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
@@ -8509,6 +8527,9 @@ namespace ui {
 			tf_party_name, //TRIGGER_BYTECODE_ELEMENT(0x02E2, party_name, 3)
 			tf_party_position, //TRIGGER_BYTECODE_ELEMENT(0x02E3, party_position, 2)
 			tf_is_overseas_culture,
+			tf_is_banned_from_tag,
+			tf_is_banned_from_this,
+			tf_is_banned_from_from,
 
 			//
 			// scopes

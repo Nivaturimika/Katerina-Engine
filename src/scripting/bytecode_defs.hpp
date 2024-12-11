@@ -1325,6 +1325,9 @@
 	TRIGGER_BYTECODE_ELEMENT(0x02F4, party_name, 3) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F5, party_position, 2) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F6, is_overseas_culture, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F7, is_banned_from_tag, 1) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F8, is_banned_from_this, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F9, is_banned_from_from, 0) \
 
 // scopes
 #define TRIGGER_SCOPE_BYTECODE_LIST \

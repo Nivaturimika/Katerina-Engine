@@ -1380,6 +1380,24 @@ namespace trigger {
 		auto cg = ws.world.culture_get_group_from_culture_group_membership(cul);
 		return compare_to_true(tval[0], ws.world.culture_group_get_is_overseas(cg));
 	}
+	TRIGGER_FUNCTION(tf_is_banned_from_tag) {
+		auto const source = to_nation(primary_slot);
+		auto const target = trigger::payload(tval[1]).tag_id;
+		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
+	}
+	TRIGGER_FUNCTION(tf_is_banned_from_this) {
+		auto const source = to_nation(primary_slot);
+		auto const target = to_nation(this_slot);
+		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
+	}
+	TRIGGER_FUNCTION(tf_is_banned_from_from) {
+		auto const source = to_nation(primary_slot);
+		auto const target = to_nation(from_slot);
+		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
+	}
 	TRIGGER_FUNCTION(tf_is_independant) {
 		return compare_values_eq(tval[0], ws.world.overlord_get_ruler(ws.world.nation_get_overlord_as_subject(to_nation(primary_slot))),
 			dcon::nation_id());

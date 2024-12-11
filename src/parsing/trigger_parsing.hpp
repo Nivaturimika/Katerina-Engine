@@ -444,6 +444,7 @@ namespace parsers {
 		void party_name(tr_party_name const& value, error_handler& err, int32_t line, trigger_building_context& context);
 		void party_position(tr_party_position const& value, error_handler& err, int32_t line, trigger_building_context& context);
 		void is_overseas_culture(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context);
+		void is_banned_from(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context);
 		void any_value(std::string_view label, association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context);
 	};
 

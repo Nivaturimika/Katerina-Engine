@@ -343,6 +343,7 @@ trigger_body
 	party_name					 group tr_party_name					member_fn
 	party_position				 group tr_party_position				member_fn
 	is_overseas_culture          value bool                             member_fn
+	is_banned_from               value text                             member_fn
 	#any                         extern tr_scope_variable               discard
 
 stored_condition

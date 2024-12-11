@@ -2741,11 +2741,40 @@ namespace parsers {
 			err.accumulated_errors += "Usage of trigger extension is_overseas_culture but parser isn't in extension mode (" + err.file_name + ")\n";
 			return;
 		}
-		
 		if(context.main_slot == trigger::slot_contents::pop) {
 			context.compiled_trigger.push_back(uint16_t(trigger::is_overseas_culture | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
 			err.accumulated_errors += "is_overseas_culture trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+
+	void trigger_body::is_banned_from(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension is_banned_from but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+		if(context.main_slot == trigger::slot_contents::nation) {
+			if(is_this(value)) {
+				if(context.this_slot == trigger::slot_contents::nation) {
+					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_bool_code(a, value)));
+				} else {
+					err.accumulated_errors += "is_banned_from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
+			} else if(is_from(value)) {
+				if(context.this_slot == trigger::slot_contents::nation) {
+					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_bool_code(a, value)));
+				} else {
+					err.accumulated_errors += "is_banned_from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
+			} else if(auto it = context.outer_context.map_of_ident_names.find(nations::tag_to_int(value[0], value[1], value[2])); it != context.outer_context.map_of_ident_names.end()) {
+				context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_tag | trigger::no_payload | association_to_bool_code(a, value)));
+				context.compiled_trigger.push_back(trigger::payload(it->second).value);
+			}
+		} else {
+			err.accumulated_errors += "is_banned_from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
