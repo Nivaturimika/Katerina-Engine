@@ -774,7 +774,7 @@ namespace demographics {
 
 	float get_estimated_mil_change(sys::state& state, dcon::pop_id ids) {
 		auto const conservatism_key = pop_demographics::to_key(state, state.culture_definitions.conservative);
-		return pop_get_new_militancy<ve::fp_vector>(state, conservatism_key, ids)[0] - state.world.pop_get_militancy(ids);
+		return pop_get_new_militancy<float>(state, conservatism_key, ids) - state.world.pop_get_militancy(ids);
 	}
 
 	float get_estimated_mil_change(sys::state& state, dcon::nation_id n) {
@@ -795,7 +795,7 @@ namespace demographics {
 		auto cfrac = state.world.province_get_demographics(loc, clergy_key) / state.world.province_get_demographics(loc, demographics::total);
 		auto types = state.world.pop_get_poptype(ids);
 		auto lx_mod = state.world.pop_get_luxury_needs_satisfaction(ids) * state.defines.con_luxury_goods;
-		auto cl_mod = cfrac * ve::select(state.world.pop_type_get_strata(types) == int32_t(culture::pop_strata::poor), ve::fp_vector{ state.defines.con_poor_clergy }, ve::fp_vector{ state.defines.con_midrich_clergy });
+		auto cl_mod = cfrac * ve::select(state.world.pop_type_get_strata(types) == int32_t(culture::pop_strata::poor), vector_type(state.defines.con_poor_clergy), vector_type(state.defines.con_midrich_clergy));
 		auto lit_mod = ((state.world.nation_get_plurality(owner) / 10.0f)
 			* (state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::literacy_con_impact) + 1.0f)
 			* state.defines.con_literacy * state.world.pop_get_literacy(ids)
@@ -829,7 +829,7 @@ namespace demographics {
 
 	float get_estimated_con_change(sys::state& state, dcon::pop_id ids) {
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
-		return pop_get_new_consciousness<ve::fp_vector>(state, clergy_key, ids)[0] - state.world.pop_get_consciousness(ids);
+		return pop_get_new_consciousness<float>(state, clergy_key, ids) - state.world.pop_get_consciousness(ids);
 	}
 
 	float get_estimated_con_change(sys::state& state, dcon::nation_id n) {
@@ -883,7 +883,7 @@ namespace demographics {
 
 	float get_estimated_literacy_change(sys::state& state, dcon::pop_id ids) {
 		auto const clergy_key = demographics::to_key(state, state.culture_definitions.clergy);
-		return pop_get_new_literacy<ve::fp_vector>(state, clergy_key, ids)[0] - state.world.pop_get_literacy(ids);
+		return pop_get_new_literacy<float>(state, clergy_key, ids) - state.world.pop_get_literacy(ids);
 	}
 
 	float get_estimated_literacy_change(sys::state& state, dcon::nation_id n) {
@@ -1025,8 +1025,8 @@ namespace demographics {
 
 	constexpr float max_pop_size = 4000000.f;
 
-	template<typename T>
-	ve::fp_vector pop_get_new_size(sys::state& state, T ids) {
+	template<typename vector_type, typename tag_type>
+	vector_type pop_get_new_size(sys::state& state, tag_type ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(loc);
 		auto base_life_rating = ve::to_float(state.world.province_get_life_rating(loc));
@@ -1061,12 +1061,12 @@ namespace demographics {
 		*/
 
 		execute_staggered_blocks(offset, divisions, state.world.pop_size(), [&](auto ids) {
-			state.world.pop_set_size(ids, pop_get_new_size(state, ids));
+			state.world.pop_set_size(ids, pop_get_new_size<ve::fp_vector>(state, ids));
 		});
 	}
 
 	float get_monthly_pop_increase(sys::state& state, dcon::pop_id ids) {
-		return pop_get_new_size(state, ids)[0] - state.world.pop_get_size(ids);
+		return pop_get_new_size<float>(state, ids) - state.world.pop_get_size(ids);
 	}
 
 	int64_t get_monthly_pop_increase(sys::state& state, dcon::nation_id n) {
@@ -1875,7 +1875,6 @@ namespace demographics {
 				auto pop_sizes = state.world.pop_get_size(ids);
 				auto amount = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.migration_chance,
 					trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f) * pop_sizes * std::max(0.0f, (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f)) * state.defines.immigration_scale;
-
 				if(amount > 0.0f) {
 					auto pop_size = state.world.pop_get_size(ids);
 					return std::min(pop_size, std::ceil(amount));
@@ -1912,7 +1911,7 @@ namespace demographics {
 				&& !state.world.province_get_is_colonial(loc)
 				&& pt != state.culture_definitions.slaves
 				&& pt != state.culture_definitions.primary_factory_worker
-				&& pt == state.culture_definitions.secondary_factory_worker;
+				&& pt != state.culture_definitions.secondary_factory_worker;
 			auto dest = ve::apply([&](dcon::pop_id p, dcon::nation_id owner, bool passed_filter) {
 				if(passed_filter) {
 					return impl::get_colonial_province_target_in_nation(state, owner, p);
@@ -1927,27 +1926,28 @@ namespace demographics {
 	float get_estimated_colonial_migration(sys::state& state, dcon::pop_id ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owner = state.world.province_get_nation_from_province_ownership(loc);
-
-		if(state.world.nation_get_is_colonial_nation(owner) == false)
-			return 0.0f; // early exit
-		auto pt = state.world.pop_get_poptype(ids);
-		if(state.world.pop_type_get_strata(pt) == uint8_t(culture::pop_strata::rich))
-			return 0.0f; // early exit
-		if(state.world.province_get_is_colonial(loc))
-			return 0.0f; // early exit
-		if(pt == state.culture_definitions.slaves || pt == state.culture_definitions.primary_factory_worker || pt == state.culture_definitions.secondary_factory_worker)
-			return 0.0f; // early exit
-
-		auto pop_sizes = state.world.pop_get_size(ids);
-		auto amounts = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f)
-			* pop_sizes
-			* std::max((state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f), 0.0f)
-			* std::max((state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::colonial_migration) + 1.0f), 0.0f)
-			* state.defines.immigration_scale;
-		if(amounts <= 0.0f)
-			return 0.0f; // early exit
-		auto pop_size = state.world.pop_get_size(ids);
-		return std::min(pop_size, std::ceil(amounts));
+		if(state.world.nation_get_is_colonial_nation(owner)) {
+			auto pt = state.world.pop_get_poptype(ids);
+			if(state.world.pop_type_get_strata(pt) != uint8_t(culture::pop_strata::rich)) {
+				if(!state.world.province_get_is_colonial(loc)) {
+					if(pt != state.culture_definitions.slaves
+					&& pt != state.culture_definitions.primary_factory_worker
+					&& pt != state.culture_definitions.secondary_factory_worker) {
+						auto pop_sizes = state.world.pop_get_size(ids);
+						auto amounts = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.colonialmigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0),  0.0f)
+							* pop_sizes
+							* std::max((state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f), 0.0f)
+							* std::max((state.world.nation_get_modifier_values(owner, sys::national_mod_offsets::colonial_migration) + 1.0f), 0.0f)
+							* state.defines.immigration_scale;
+						if(amounts > 0.0f) {
+							auto pop_size = state.world.pop_get_size(ids);
+							return std::min(pop_size, std::ceil(amounts));
+						}
+					}
+				}
+			}
+		}
+		return 0.f;
 	}
 
 	void update_immigration(sys::state& state, uint32_t offset, uint32_t divisions, migration_buffer& pbuf) {
@@ -2024,22 +2024,22 @@ namespace demographics {
 	float get_estimated_emigration(sys::state& state, dcon::pop_id ids) {
 		auto loc = state.world.pop_get_province_from_pop_location(ids);
 		auto owners = state.world.province_get_nation_from_province_ownership(loc);
-		if(state.world.nation_get_is_civilized(owners) == false)
-			return 0.0f; // early exit
-		if(state.world.province_get_is_colonial(loc))
-			return 0.0f; // early exit
-		if(state.world.pop_get_poptype(ids) == state.culture_definitions.slaves)
-			return 0.0f; // early exit
-		if(state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids))) == false)
-			return 0.0f; // early exit
-
-		auto pop_sizes = state.world.pop_get_size(ids);
-		auto impush = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
-		auto trigger_result = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.emigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
-		auto amounts = trigger_result * pop_sizes * std::max(impush, 0.0f) * std::max(impush, 1.0f) * state.defines.immigration_scale;
-		if(amounts <= 0.0f)
-			return 0.0f; // early exit
-		return std::min(pop_sizes, std::ceil(amounts));
+		if(state.world.nation_get_is_civilized(owners)) {
+			if(!state.world.province_get_is_colonial(loc)) {
+				if(state.world.pop_get_poptype(ids) != state.culture_definitions.slaves) {
+					if(state.world.culture_group_get_is_overseas(state.world.culture_get_group_from_culture_group_membership(state.world.pop_get_culture(ids)))) {
+						auto pop_sizes = state.world.pop_get_size(ids);
+						auto impush = (state.world.province_get_modifier_values(loc, sys::provincial_mod_offsets::immigrant_push) + 1.0f);
+						auto trigger_result = std::max(trigger::evaluate_additive_modifier(state, state.culture_definitions.emigration_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0), 0.0f);
+						auto amounts = trigger_result * pop_sizes * std::max(impush, 0.0f) * std::max(impush, 1.0f) * state.defines.immigration_scale;
+						if(amounts > 0.0f) {
+							return std::min(pop_sizes, std::ceil(amounts));
+						}
+					}
+				}
+			}
+		}
+		return 0.f;
 	}
 
 	namespace impl {
