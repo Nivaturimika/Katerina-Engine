@@ -1065,32 +1065,32 @@ namespace demographics {
 		return pop_get_new_size<ve::fp_vector>(state, ids)[0] - state.world.pop_get_size(ids);
 	}
 
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::nation_id n) {
+	float get_monthly_pop_increase(sys::state& state, dcon::nation_id n) {
 		float t = 0.0f;
 		for(auto prov : state.world.nation_get_province_ownership(n)) {
 			for(auto pop : prov.get_province().get_pop_location()) {
 				t += get_monthly_pop_increase(state, pop.get_pop());
 			}
 		}
-		return int64_t(t);
+		return t;
 	}
 
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::state_instance_id n) {
+	float get_monthly_pop_increase(sys::state& state, dcon::state_instance_id n) {
 		float t = 0.0f;
 		province::for_each_province_in_state_instance(state, n, [&](dcon::province_id prov) {
 			for(auto pop : state.world.province_get_pop_location(prov)) {
 				t += get_monthly_pop_increase(state, pop.get_pop());
 			}
 		});
-		return int64_t(t);
+		return t;
 	}
 
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::province_id n) {
+	float get_monthly_pop_increase(sys::state& state, dcon::province_id n) {
 		float t = 0.0f;
 		for(auto pop : state.world.province_get_pop_location(n)) {
 			t += get_monthly_pop_increase(state, pop.get_pop());
 		}
-		return int64_t(t);
+		return t;
 	}
 
 	void update_type_changes(sys::state& state, uint32_t offset, uint32_t divisions, promotion_buffer& pbuf) {
@@ -1263,7 +1263,7 @@ namespace demographics {
 	}
 
 	float get_effective_estimation_type_change(sys::state& state, dcon::nation_id nation, dcon::pop_type_id target_type) {
-		float total_effective_change = .0f;
+		float total_effective_change = 0.f;
 
 		for(auto prov : state.world.nation_get_province_ownership(nation)) {
 			for(auto pop : prov.get_province().get_pop_location()) {
@@ -1384,8 +1384,8 @@ namespace demographics {
 		for(auto prov : state.world.nation_get_province_ownership(nation)) {
 			for(auto pop : prov.get_province().get_pop_location()) {
 				if(pop.get_pop().get_poptype() == target_type) {
-					total_effective_change -= get_estimated_type_change(state, pop.get_pop());
 					total_effective_change += get_monthly_pop_increase(state, pop.get_pop());
+					total_effective_change -= get_estimated_type_change(state, pop.get_pop());
 					total_effective_change -= get_estimated_emigration(state, pop.get_pop());
 				}
 			}

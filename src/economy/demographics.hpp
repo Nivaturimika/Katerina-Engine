@@ -192,9 +192,9 @@ namespace demographics {
 	void remove_small_pops(sys::state& state);
 
 	float get_monthly_pop_increase(sys::state& state, dcon::pop_id);
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::nation_id n);
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::state_instance_id n);
-	int64_t get_monthly_pop_increase(sys::state& state, dcon::province_id n);
+	float get_monthly_pop_increase(sys::state& state, dcon::nation_id n);
+	float get_monthly_pop_increase(sys::state& state, dcon::state_instance_id n);
+	float get_monthly_pop_increase(sys::state& state, dcon::province_id n);
 
 	float get_estimated_literacy_change(sys::state& state, dcon::pop_id n);
 	float get_estimated_mil_change(sys::state& state, dcon::pop_id n);

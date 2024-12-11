@@ -131,9 +131,9 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			auto content = retrieve<dcon::nation_id>(state, parent);
 			auto result = demographics::get_monthly_pop_increase(state, content);
-			if(result > 0) {
+			if(result > 0.f) {
 				frame = 0;
-			} else if(result < 0) {
+			} else if(result < 0.f) {
 				frame = 2;
 			} else {
 				frame = 1;
@@ -433,13 +433,13 @@ namespace ui {
 			auto internal_migration = -int64_t(demographics::get_estimated_internal_migration(state, pop));
 			auto colonial_migration = -int64_t(demographics::get_estimated_colonial_migration(state, pop));
 			auto emigration = -int64_t(demographics::get_estimated_emigration(state, pop));
-			auto total = int64_t(growth) + promote + assimilation + conversion + internal_migration + colonial_migration + emigration;
+			auto total = growth + promote + assimilation + conversion + internal_migration + colonial_migration + emigration;
 
 			{
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "pop_size_1");
 				if(total >= 0) {
-				text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
+					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
 					text::add_to_layout_box(state, contents, box, total, text::text_color::green);
 				} else {
 					text::add_to_layout_box(state, contents, box, total, text::text_color::red);
@@ -450,8 +450,8 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "pop_size_2");
-				if(growth >= 0) {
-				text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
+				if(growth >= 0.f) {
+					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
 					text::add_to_layout_box(state, contents, box, growth, text::text_color::green);
 				} else {
 					text::add_to_layout_box(state, contents, box, growth, text::text_color::red);
@@ -462,7 +462,7 @@ namespace ui {
 				auto box = text::open_layout_box(contents);
 				text::localised_format_box(state, contents, box, "pop_size_3");
 				if(promote >= 0) {
-				text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
+					text::add_to_layout_box(state, contents, box, std::string_view{"+"}, text::text_color::green);
 					text::add_to_layout_box(state, contents, box, promote, text::text_color::green);
 				} else {
 					text::add_to_layout_box(state, contents, box, promote, text::text_color::red);

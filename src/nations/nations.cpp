@@ -111,7 +111,7 @@ namespace nations {
 
 	/* This should return the differance of the population of a nation between this month and next month, or this month and last
 	 * month, depending which one is better to implement. */
-	int64_t get_monthly_pop_increase_of_nation(sys::state& state, dcon::nation_id n) {
+	float get_monthly_pop_increase_of_nation(sys::state& state, dcon::nation_id n) {
 		float total = 0.f;
 		for(auto const p : state.world.nation_get_province_ownership(n)) {
 			for(auto const pl : state.world.province_get_pop_location(p.get_province())) {
@@ -121,7 +121,7 @@ namespace nations {
 				total += growth - colonial_migration - emigration;
 			}
 		}
-		return int64_t(total);
+		return total;
 	}
 
 	dcon::nation_id get_nth_great_power(sys::state const& state, uint16_t n) {

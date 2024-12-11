@@ -1101,7 +1101,7 @@ namespace ui {
 			auto box = text::open_layout_box(contents);
 
 			text::localised_format_box(state, contents, box, std::string_view("mapmode_tooltip_population_change"));
-			text::add_to_layout_box(state, contents, box, text::format_float(float(demographics::get_monthly_pop_increase(state, fat.id)), 0), text::text_color::yellow);
+			text::add_to_layout_box(state, contents, box, text::format_float(demographics::get_monthly_pop_increase(state, fat.id), 0), text::text_color::yellow);
 
 			text::close_layout_box(contents, box);
 		}
