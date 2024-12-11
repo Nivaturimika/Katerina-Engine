@@ -152,6 +152,7 @@ loop_bounded = {
 - `has_province_flag = flag`: Didn't work in the original but now it does
 - `crisis_attacker = { ... }`: Scopes into the primary attacker of a crisis
 - `crisis_defender = { ... }`: Scopes into the primary defender of a crisis
+- `is_overseas_culture = yes/no`: Checks if the pop in scope pertains to a culture that is overseas.
 
 ### FROM bounce
 FROM bouncing is a technique where before, modders would do:

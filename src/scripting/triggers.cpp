@@ -1375,6 +1375,11 @@ namespace trigger {
 	TRIGGER_FUNCTION(tf_is_slave_pop) {
 		return compare_values_eq(tval[0], ws.world.pop_get_poptype(to_pop(primary_slot)), ws.culture_definitions.slaves);
 	}
+	TRIGGER_FUNCTION(tf_is_overseas_culture) {
+		auto cul = ws.world.pop_get_culture(to_pop(primary_slot));
+		auto cg = ws.world.culture_get_group_from_culture_group_membership(cul);
+		return compare_to_true(tval[0], ws.world.culture_group_get_is_overseas(cg));
+	}
 	TRIGGER_FUNCTION(tf_is_independant) {
 		return compare_values_eq(tval[0], ws.world.overlord_get_ruler(ws.world.nation_get_overlord_as_subject(to_nation(primary_slot))),
 			dcon::nation_id());

@@ -4190,19 +4190,19 @@ namespace parsers {
 	void effect_body::is_slave(association_type t, bool value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::state) {
 			if(value)
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_state_yes | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_state_yes | effect::no_payload));
 			else
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_state_no | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_state_no | effect::no_payload));
 		} else if(context.main_slot == trigger::slot_contents::province) {
 			if(value)
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_province_yes | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_province_yes | effect::no_payload));
 			else
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_province_no | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_province_no | effect::no_payload));
 		} else if(context.main_slot == trigger::slot_contents::pop) {
 			if(value)
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_pop_yes | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_pop_yes | effect::no_payload));
 			else
-			context.compiled_effect.push_back(uint16_t(effect::is_slave_pop_no | effect::no_payload));
+				context.compiled_effect.push_back(uint16_t(effect::is_slave_pop_no | effect::no_payload));
 		} else {
 			err.accumulated_errors +=
 				"is_slave effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";

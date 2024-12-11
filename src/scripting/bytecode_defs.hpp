@@ -1323,7 +1323,8 @@
 	TRIGGER_BYTECODE_ELEMENT(0x02F2, length_greater_dates, 4) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F3, news_printing_count, 1) \
 	TRIGGER_BYTECODE_ELEMENT(0x02F4, party_name, 3) \
-	TRIGGER_BYTECODE_ELEMENT(0x02F5, party_position, 2)
+	TRIGGER_BYTECODE_ELEMENT(0x02F5, party_position, 2) \
+	TRIGGER_BYTECODE_ELEMENT(0x02F6, is_overseas_culture, 0) \
 
 // scopes
 #define TRIGGER_SCOPE_BYTECODE_LIST \
@@ -1381,3 +1382,4 @@
 	TRIGGER_SCOPE_BYTECODE_ELEMENT(x_provinces_in_variable_region_proper, 0x0033) \
 	TRIGGER_SCOPE_BYTECODE_ELEMENT(crisis_attacker_scope, 0x0034) \
 	TRIGGER_SCOPE_BYTECODE_ELEMENT(crisis_defender_scope, 0x0035) \
+

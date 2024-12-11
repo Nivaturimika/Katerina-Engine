@@ -2736,6 +2736,20 @@ namespace parsers {
 		}
 	}
 
+	void trigger_body::is_overseas_culture(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of trigger extension is_overseas_culture but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+		
+		if(context.main_slot == trigger::slot_contents::pop) {
+			context.compiled_trigger.push_back(uint16_t(trigger::is_overseas_culture | trigger::no_payload | association_to_bool_code(a, value)));
+		} else {
+			err.accumulated_errors += "is_overseas_culture trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+
 	void trigger_body::is_independant(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(
@@ -6885,8 +6899,7 @@ namespace parsers {
 	void trigger_body::can_build_railway_in_capital(tr_can_build_railway_in_capital const& value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors += "can_build_railway_in_capital trigger used in an invalid context (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "can_build_railway_in_capital trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		} else if(value.in_whole_capital_state) {
 			if(value.limit_to_world_greatest_level)
@@ -6907,30 +6920,28 @@ namespace parsers {
 	void trigger_body::can_build_fort_in_capital(tr_can_build_fort_in_capital const& value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::nation) {
-			err.accumulated_errors += "can_build_fort_in_capital trigger used in an invalid context (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "can_build_fort_in_capital trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		} else if(value.in_whole_capital_state) {
 			if(value.limit_to_world_greatest_level)
-			context.compiled_trigger.push_back(uint16_t(
+				context.compiled_trigger.push_back(uint16_t(
 					trigger::can_build_fort_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-			context.compiled_trigger.push_back(uint16_t(
+				context.compiled_trigger.push_back(uint16_t(
 					trigger::can_build_fort_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		} else {
 			if(value.limit_to_world_greatest_level)
-			context.compiled_trigger.push_back(uint16_t(
+				context.compiled_trigger.push_back(uint16_t(
 					trigger::can_build_fort_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-			context.compiled_trigger.push_back(
+				context.compiled_trigger.push_back(
 					uint16_t(trigger::can_build_fort_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		}
 	}
 
 	void trigger_body::work_available(tr_work_available const& value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(value.pop_type_list.size() > 1 || value.pop_type_list.size() == 0) {
-			err.accumulated_errors += "work_available trigger used with an unsupported number of worker types (" + err.file_name +
-															", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "work_available trigger used with an unsupported number of worker types (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 
