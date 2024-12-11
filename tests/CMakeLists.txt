@@ -12,6 +12,7 @@ list(APPEND TESTS_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/tests/test_simdify.cpp"
 	"${PROJECT_SOURCE_DIR}/tests/test_simdify_demo.cpp"
 	"${PROJECT_SOURCE_DIR}/tests/triggers_tests.cpp"
+	"${PROJECT_SOURCE_DIR}/tests/ve_tests.cpp"
 )
 
 if(WIN32)
