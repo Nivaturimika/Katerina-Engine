@@ -383,6 +383,7 @@ enum class war_role { none, attacker, defender };
 		dcon::national_identity_id primary_wargoal_tag, dcon::nation_id primary_wargoal_secondary);
 	void call_defender_allies(sys::state& state, dcon::war_id wfor);
 	void call_attacker_allies(sys::state& state, dcon::war_id wfor);
+	void call_allies_to_all_wars(sys::state& state, dcon::nation_id n);
 	void add_wargoal(sys::state& state, dcon::war_id wfor, dcon::nation_id added_by, dcon::nation_id target, dcon::cb_type_id type,
 		dcon::state_definition_id sd, dcon::national_identity_id tag, dcon::nation_id secondary_nation);
 	void add_to_war(sys::state& state, dcon::war_id w, dcon::nation_id n, bool as_attacker, bool on_war_creation = false);
