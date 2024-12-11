@@ -308,14 +308,13 @@ namespace nations {
 		*/
 		state.world.execute_serial_over_nation([&](auto ids) {
 			auto admin_mod = state.world.nation_get_modifier_values(ids, sys::national_mod_offsets::administrative_efficiency_modifier);
-			ve::fp_vector issue_sum;
+			ve::fp_vector issue_sum{};
 			for(auto i : state.culture_definitions.social_issues) {
 				issue_sum = issue_sum + state.world.issue_option_get_administrative_multiplier(state.world.nation_get_issues(ids, i));
 			}
 			auto from_issues = issue_sum * state.defines.bureaucracy_percentage_increment + state.defines.max_bureaucracy_percentage;
 			auto non_colonial = state.world.nation_get_non_colonial_population(ids);
-			auto total = ve::select(non_colonial > 0.0f,
-			(admin_mod + 1.0f) * state.world.nation_get_non_colonial_bureaucrats(ids) / (non_colonial * from_issues), 0.0f);
+			auto total = ve::select(non_colonial > 0.0f, (admin_mod + 1.0f) * state.world.nation_get_non_colonial_bureaucrats(ids) / (non_colonial * from_issues), 0.0f);
 			state.world.nation_set_administrative_efficiency(ids, ve::min(total, 1.0f));
 		});
 	}
