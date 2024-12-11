@@ -1028,7 +1028,6 @@ namespace ai {
 
 						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 							for(auto f : state.world.province_get_factory_location(p)) {
-								auto type = f.get_factory().get_building_type();
 								if(!f.get_factory().get_unprofitable()
 								&& f.get_factory().get_primary_employment() >= 0.9f
 								&& f.get_factory().get_level() < uint8_t(255)) {
@@ -5478,7 +5477,7 @@ namespace ai {
 			for(uint32_t i = 0; i < state.military_definitions.unit_base_definitions.size(); ++i) {
 			dcon::unit_type_id utid{ dcon::unit_type_id::value_base_t(i) };
 				if(!state.military_definitions.unit_base_definitions[utid].is_land
-				|| !n.get_active_unit(utid) && !state.military_definitions.unit_base_definitions[utid].active)
+				|| (!n.get_active_unit(utid) && !state.military_definitions.unit_base_definitions[utid].active))
 					continue;
 				float s2 = estimate_unit_type_value(state, n, utid);
 				if(state.military_definitions.unit_base_definitions[utid].type == military::unit_type::infantry) {
