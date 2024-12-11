@@ -459,6 +459,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in poor_strata scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -489,6 +492,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in middle_strata scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -519,6 +525,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in rich_strata scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -915,6 +924,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::province;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in capital_scope scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -946,6 +958,9 @@ namespace parsers {
 
 		context.main_slot = context.this_slot;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in this scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -978,6 +993,9 @@ namespace parsers {
 
 		context.main_slot = context.from_slot;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in from_scope scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1002,6 +1020,9 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in sea_zone scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1025,6 +1046,9 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in cultural_union scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1048,6 +1072,9 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in overlord scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1071,6 +1098,9 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in sphere_owner scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1096,6 +1126,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::nation;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in independence scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1121,6 +1154,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::nation;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in flashpoint_tag scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1140,6 +1176,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::state;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in crisis_state scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1185,6 +1224,9 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::state;
 		parse_effect_body(gen, err, context);
+		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_warnings += "Usage of limit in state scope is an extension (" + err.file_name + ")\n";
+		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 		context.limit_position = old_limit_offset;
@@ -1236,7 +1278,7 @@ namespace parsers {
 	}
 
 	dcon::value_modifier_key read_chance_modifier(token_generator& gen, error_handler& err, effect_building_context& context) {
-	trigger_building_context t_context{ context.outer_context, context.main_slot, context.this_slot, context.from_slot };
+		trigger_building_context t_context{ context.outer_context, context.main_slot, context.this_slot, context.from_slot };
 		return make_value_modifier(gen, err, t_context);
 	}
 
@@ -1279,7 +1321,7 @@ namespace parsers {
 	}
 
 	void ef_scope_variable(std::string_view label, token_generator& gen, error_handler& err, effect_building_context& context) {
-	std::string str_label{label};
+		std::string str_label{label};
 		if(auto it = context.outer_context.map_of_state_names.find(str_label); it != context.outer_context.map_of_state_names.end()) {
 			auto old_limit_offset = context.limit_position;
 			auto old_main = context.main_slot;
@@ -1296,6 +1338,9 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::province;
 			parse_effect_body(gen, err, context);
+			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_warnings += "Usage of limit in variable state scope is an extension (" + err.file_name + ")\n";
+			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 			context.limit_position = old_limit_offset;
@@ -1316,6 +1361,9 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::province;
 			parse_effect_body(gen, err, context);
+			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_warnings += "Usage of limit in variable region scope is an extension (" + err.file_name + ")\n";
+			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 			context.limit_position = old_limit_offset;
@@ -1348,6 +1396,9 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::pop;
 			parse_effect_body(gen, err, context);
+			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_warnings += "Usage of limit in variable pop type scope is an extension (" + err.file_name + ")\n";
+			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 			context.limit_position = old_limit_offset;
@@ -1370,6 +1421,9 @@ namespace parsers {
 
 				context.main_slot = trigger::slot_contents::province;
 				parse_effect_body(gen, err, context);
+				if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+					err.accumulated_warnings += "Usage of limit in variable province scope is an extension (" + err.file_name + ")\n";
+				}
 
 				context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 				context.limit_position = old_limit_offset;
@@ -1398,6 +1452,9 @@ namespace parsers {
 
 				context.main_slot = trigger::slot_contents::nation;
 				parse_effect_body(gen, err, context);
+				if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+					err.accumulated_warnings += "Usage of limit in variable tag scope is an extension (" + err.file_name + ")\n";
+				}
 
 				context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
 				context.limit_position = old_limit_offset;
