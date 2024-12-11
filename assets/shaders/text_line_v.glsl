@@ -29,9 +29,9 @@ void main() {
 
 	vec4 center_point = calc_gl_position(vec3(vertex_position.x, 0.f, vertex_position.y));
 	vec2 v1 = vertex_position + unadj_direction * 0.0001f;
-	vec4 right_point = thickness * 10000 * (calc_gl_position(vec3(v1.x, 0.f, v1.y)) - center_point);
+	vec4 right_point = thickness * 10000.0f * (calc_gl_position(vec3(v1.x, 0.f, v1.y)) - center_point);
 	vec2 v2 = vertex_position + unadj_normal * 0.0001f;
-	vec4 top_point = thickness * 10000 * (calc_gl_position(vec3(v2.x, 0.f, v2.y)) - center_point);
+	vec4 top_point = thickness * 10000.0f * (calc_gl_position(vec3(v2.x, 0.f, v2.y)) - center_point);
 
 	vec4 temp_result = center_point + (normal_direction.x * right_point + normal_direction.y * top_point);
     
