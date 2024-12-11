@@ -42,6 +42,9 @@ namespace parsers {
 		CT_STRING_ENUM(naval_rally_point)
 		CT_STRING_ENUM(release_and_play_as)
 		CT_STRING_ENUM(release_and_make_vassal)
+		CT_STRING_ENUM(on_colonial_migration)
+		CT_STRING_ENUM(on_immigration)
+		CT_STRING_ENUM(on_internal_migration)
 #undef CT_STRING_ENUM
 	}
 

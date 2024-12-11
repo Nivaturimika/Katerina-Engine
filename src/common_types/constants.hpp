@@ -309,6 +309,9 @@ namespace sys {
 		naval_rally_point,
 		release_and_play_as,
 		release_and_make_vassal,
+		on_colonial_migration,
+		on_immigration,
+		on_internal_migration,
 		count,
 	};
 };

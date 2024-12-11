@@ -486,3 +486,41 @@ action = {
 		}
 	}
 }
+
+action = {
+	type = "on_colonial_migration"
+	#THIS/main = pop
+	limit = {
+		is_colonial_nation = yes
+		location = {
+			empty = no
+			is_colonial = no
+		}
+		stata != rich
+		is_slave = no
+	}
+}
+action = {
+	type = "on_immigration"
+	#THIS/main = pop
+	limit = {
+		location = {
+			empty = no
+			is_colonial = no
+		}
+		civilized = yes
+		is_slave = no
+		is_overseas_culture = yes
+	}
+}
+action = {
+	type = "on_internal_migration"
+	#THIS/main = pop
+	limit = {
+		location = {
+			empty = no
+			is_colonial = no
+		}
+		is_slave = no
+	}
+}
