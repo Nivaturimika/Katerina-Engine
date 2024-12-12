@@ -224,10 +224,12 @@ namespace sound {
 		if(state.sound_ptr.get()) {
 			state.sound_ptr->global_pause = true;
 			if(state.sound_ptr->effect_sound.has_value()) {
-				ma_sound_stop(&*state.sound_ptr->effect_sound);
+				ma_sound_uninit(&*state.sound_ptr->effect_sound);
+				state.sound_ptr->effect_sound.reset();
 			}
 			if(state.sound_ptr->interface_sound.has_value()) {
-				ma_sound_stop(&*state.sound_ptr->interface_sound);
+				ma_sound_uninit(&*state.sound_ptr->interface_sound);
+				state.sound_ptr->interface_sound.reset();
 			}
 			if(state.sound_ptr->music.has_value()) {
 				ma_sound_stop(&*state.sound_ptr->music);
