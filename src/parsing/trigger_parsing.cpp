@@ -1170,7 +1170,6 @@ namespace parsers {
 	void trigger_body::ruling_party(association_type a, std::string_view value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
-
 			context.compiled_trigger.push_back(uint16_t(trigger::ruling_party | association_to_bool_code(a)));
 		} else {
 			err.accumulated_errors += "ruling_party trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
@@ -2757,20 +2756,20 @@ namespace parsers {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			if(is_this(value)) {
 				if(context.this_slot == trigger::slot_contents::nation) {
-					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_bool_code(a, value)));
+					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_trigger_code(a)));
 				} else {
 					err.accumulated_errors += "is_banned_from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(is_from(value)) {
 				if(context.this_slot == trigger::slot_contents::nation) {
-					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_bool_code(a, value)));
+					context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_this | trigger::no_payload | association_to_trigger_code(a)));
 				} else {
 					err.accumulated_errors += "is_banned_from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(auto it = context.outer_context.map_of_ident_names.find(nations::tag_to_int(value[0], value[1], value[2])); it != context.outer_context.map_of_ident_names.end()) {
-				context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_tag | trigger::no_payload | association_to_bool_code(a, value)));
+				context.compiled_trigger.push_back(uint16_t(trigger::is_banned_from_tag | trigger::no_payload | association_to_trigger_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			}
 		} else {

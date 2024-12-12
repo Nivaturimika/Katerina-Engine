@@ -1381,21 +1381,22 @@ namespace trigger {
 		return compare_to_true(tval[0], ws.world.culture_group_get_is_overseas(cg));
 	}
 	TRIGGER_FUNCTION(tf_is_banned_from_tag) {
-		auto const source = to_nation(primary_slot);
-		auto const target = trigger::payload(tval[1]).tag_id;
-		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		auto const tag = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
+		auto const gprel = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
+			return ws.world.get_gp_relationship_by_gp_influence_pair(b, a);
+		}, to_nation(primary_slot), tag);
 		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
 	}
 	TRIGGER_FUNCTION(tf_is_banned_from_this) {
-		auto const source = to_nation(primary_slot);
-		auto const target = to_nation(this_slot);
-		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		auto const gprel = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
+			return ws.world.get_gp_relationship_by_gp_influence_pair(b, a);
+		}, to_nation(primary_slot), to_nation(this_slot));
 		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
 	}
 	TRIGGER_FUNCTION(tf_is_banned_from_from) {
-		auto const source = to_nation(primary_slot);
-		auto const target = to_nation(from_slot);
-		auto const gprel = ws.world.get_gp_relationship_by_gp_influence_pair(target, source);
+		auto const gprel = ve::apply([&ws](dcon::nation_id a, dcon::nation_id b) {
+			return ws.world.get_gp_relationship_by_gp_influence_pair(b, a);
+		}, to_nation(primary_slot), to_nation(from_slot));
 		return compare_to_true(tval[0], (ws.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0);
 	}
 	TRIGGER_FUNCTION(tf_is_independant) {
@@ -3105,25 +3106,23 @@ namespace trigger {
 		return compare_values_eq(tval[0], ws.world.nation_get_in_sphere_of(to_nation(primary_slot)), owner);
 	}
 	TRIGGER_FUNCTION(tf_in_sphere_this_state) {
-		auto owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(this_slot));
+		auto const owner = ws.world.state_instance_get_nation_from_state_ownership(to_state(this_slot));
 		return compare_values_eq(tval[0], ws.world.nation_get_in_sphere_of(to_nation(primary_slot)), owner);
 	}
 	TRIGGER_FUNCTION(tf_in_sphere_this_pop) {
-		auto owner = nations::owner_of_pop(ws, to_pop(this_slot));
+		auto const owner = nations::owner_of_pop(ws, to_pop(this_slot));
 		return compare_values_eq(tval[0], ws.world.nation_get_in_sphere_of(to_nation(primary_slot)), owner);
 	}
 	TRIGGER_FUNCTION(tf_produces_nation) {
-		auto good = payload(tval[1]).com_id;
+		auto const good = payload(tval[1]).com_id;
 		return compare_to_true(tval[0], ws.world.nation_get_domestic_market_pool(to_nation(primary_slot), good) > 0.0f);
 	}
 	TRIGGER_FUNCTION(tf_produces_province) {
-		/* return compare_to_true(tval[0],
-			(ws.world.province_get_rgo(to_prov(primary_slot)) == payload(tval[1]).com_id) ||
-					(ws.world.province_get_artisan_production(to_prov(primary_slot)) == payload(tval[1]).com_id)); */
-		return compare_to_true(tval[0], ws.world.province_get_rgo(to_prov(primary_slot)) == payload(tval[1]).com_id);
+		auto const good = payload(tval[1]).com_id;
+		return compare_to_true(tval[0], ws.world.province_get_rgo(to_prov(primary_slot)) == good);
 	}
 	TRIGGER_FUNCTION(tf_produces_state) {
-		auto good = payload(tval[1]).com_id;
+		auto const good = payload(tval[1]).com_id;
 		return compare_to_true(tval[0], ve::apply([&](dcon::state_instance_id si, dcon::nation_id o) {
 			auto d = ws.world.state_instance_get_definition(si);
 			for(auto p : ws.world.state_definition_get_abstract_state_membership(d)) {
@@ -3132,7 +3131,6 @@ namespace trigger {
 						return true;
 					//if(p.get_province().get_artisan_production() == good)
 					//	return true;
-
 					for(auto f : p.get_province().get_factory_location()) {
 						if(f.get_factory().get_building_type().get_output() == good)
 							return true;
@@ -3143,14 +3141,10 @@ namespace trigger {
 		}, to_state(primary_slot), ws.world.state_instance_get_nation_from_state_ownership(to_state(primary_slot))));
 	}
 	TRIGGER_FUNCTION(tf_produces_pop) {
-		auto pop_location = ws.world.pop_get_province_from_pop_location(to_pop(primary_slot));
-		auto good = payload(tval[1]).com_id;
-
-		/*return compare_to_true(tval[0], (ws.world.pop_get_poptype(to_pop(primary_slot)) == ws.culture_definitions.artisans) &&
-																			(ws.world.province_get_artisan_production(pop_location) == good)); */
-
-		//return compare_to_true(tval[0], (ws.world.pop_get_poptype(to_pop(primary_slot)).get_is_paid_rgo_worker()) && (ws.world.province_get_rgo(pop_location) == good));
-		return compare_to_true(tval[0], false);
+		auto const pop_location = ws.world.pop_get_province_from_pop_location(to_pop(primary_slot));
+		auto const good = payload(tval[1]).com_id;
+		return compare_to_true(tval[0], (ws.world.pop_get_poptype(to_pop(primary_slot)).get_is_paid_rgo_worker())
+			&& (ws.world.province_get_rgo(pop_location) == good));
 	}
 	TRIGGER_FUNCTION(tf_average_militancy_nation) {
 		auto total_pop = ws.world.nation_get_demographics(to_nation(primary_slot), demographics::total);
