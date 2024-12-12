@@ -1449,7 +1449,7 @@ namespace ui {
 		text::close_layout_box(contents, box);
 	}
 
-	void topbar_nation_name::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
+	void topbar_nation_name::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
 		if(state.cheat_data.show_province_id_tooltip) {
 			auto box = text::open_layout_box(contents);
 			text::add_to_layout_box(state, contents, box, std::string_view("Nation ID:"));
