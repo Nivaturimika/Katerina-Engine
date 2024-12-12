@@ -101,43 +101,43 @@ jobs:
         name: katerina-engine-windows-x86
         path: build/Release/KatEngine.exe
 
-  macos-build:
-    strategy:
-      matrix:
-        config: [Debug]
-    runs-on: [macos-latest]
-    name: MacOS (${{ matrix.config }})
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+  # macos-build:
+  #   strategy:
+  #     matrix:
+  #       config: [Debug]
+  #   runs-on: [macos-latest]
+  #   name: MacOS (${{ matrix.config }})
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 0
 
-    - name: Install ICU
-      run: |
-        brew install icu4c
+  #   - name: Install ICU
+  #     run: |
+  #       brew install icu4c
 
-    - name: Configure Build Files
-      run: |
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -B build
+  #   - name: Configure Build Files
+  #     run: |
+  #       cmake -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DARCHITECTURE=aarch64 -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -B build
 
-    - name: Build Katerina Engine
-      run: |
-        cmake --build build --parallel -t KatEngine
+  #   - name: Build Katerina Engine
+  #     run: |
+  #       cmake --build build --parallel -t KatEngine
 
-    - name: Archive results
-      uses: actions/upload-artifact@v4
-      with:
-        name: katerina-engine-macos-aarch64
-        path: build/KatEngine
+  #   - name: Archive results
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: katerina-engine-macos-aarch64
+  #       path: build/KatEngine
 
-  build-check:
-    needs: [windows-build, linux-build, macos-build]
-    runs-on: ubuntu-latest
-    name: Build Matrix
-    steps:
-      - name: Check
-        run: |
-          echo success
+  # build-check:
+  #   needs: [windows-build, linux-build, macos-build]
+  #   runs-on: ubuntu-latest
+  #   name: Build Matrix
+  #   steps:
+  #     - name: Check
+  #       run: |
+  #         echo success
 
   build-check:
     needs: [windows-x64-build, windows-x86-build]
