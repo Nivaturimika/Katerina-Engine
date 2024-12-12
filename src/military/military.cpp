@@ -24,8 +24,7 @@ namespace military {
 	void invalidate_unowned_wargoals(sys::state& state) {
 		for(auto wg : state.world.in_wargoal) {
 			if(wg.get_war_from_wargoals_attached()) {
-				auto s = wg.get_associated_state();
-				if(s) {
+				if(auto s = wg.get_associated_state(); s) {
 					bool found_state = false;
 					for(auto si : wg.get_target_nation().get_state_ownership()) {
 						if(si.get_state().get_definition() == s) {
@@ -42,11 +41,9 @@ namespace military {
 	}
 
 	void restore_unsaved_values(sys::state& state) {
-		state.world.for_each_nation([&](dcon::nation_id n) {
-			auto w = state.world.nation_get_war_participant(n);
-			if(w.begin() != w.end()) {
-				state.world.nation_set_is_at_war(n, true);
-			}
+		state.world.execute_serial_over_nation([&](auto ids) {
+			auto w = state.world.nation_get_war_participant(ids);
+			state.world.nation_set_is_at_war(ids, w.begin() != w.end());
 		});
 		update_all_recruitable_regiments(state);
 		regenerate_total_regiment_counts(state);
@@ -60,19 +57,15 @@ namespace military {
 	bool compute_blockade_status(sys::state& state, dcon::province_id p) {
 		auto controller = state.world.province_get_nation_from_province_control(p);
 		auto owner = state.world.province_get_nation_from_province_ownership(p);
-		if(!owner)
-		return false;
-		if(controller != owner)
-		return false;
-
-		auto port_to = state.world.province_get_port_to(p);
-		if(!port_to)
-		return false;
-
-		for(auto n : state.world.province_get_navy_location(port_to)) {
-			if(n.get_navy().get_is_retreating() == false && !n.get_navy().get_battle_from_navy_battle_participation()) {
-				if(military::are_at_war(state, owner, n.get_navy().get_controller_from_navy_control()))
-				return true;
+		if(owner && controller == owner) {
+			if(auto port_to = state.world.province_get_port_to(p); port_to) {
+				for(auto n : state.world.province_get_navy_location(port_to)) {
+					if(n.get_navy().get_is_retreating() == false && !n.get_navy().get_battle_from_navy_battle_participation()) {
+						if(military::are_at_war(state, owner, n.get_navy().get_controller_from_navy_control())) {
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;
@@ -89,8 +82,9 @@ namespace military {
 	}
 
 	float recruited_pop_fraction(sys::state const& state, dcon::nation_id n) {
-		// TODO: implement function
-		return 0.0f;
+		auto const total = float(state.world.nation_get_recruitable_regiments(n));
+		auto const value = float(state.world.nation_get_active_regiments(n));
+		return total > 0.f ? total / value : 0.f;
 	}
 
 	bool state_has_naval_base(sys::state const& state, dcon::state_instance_id si) {

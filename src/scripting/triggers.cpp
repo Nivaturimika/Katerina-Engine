@@ -3222,12 +3222,16 @@ namespace trigger {
 		return compare_to_true(tval[0], false);
 	}
 	TRIGGER_FUNCTION(tf_recruited_percentage_nation) {
-	auto value = ve::apply([&ws](dcon::nation_id n) { return military::recruited_pop_fraction(ws, n); }, to_nation(primary_slot));
+		auto value = ve::apply([&ws](dcon::nation_id n) {
+			return military::recruited_pop_fraction(ws, n);
+		}, to_nation(primary_slot));
 		return compare_values(tval[0], value, read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_recruited_percentage_pop) {
 		auto owner = nations::owner_of_pop(ws, to_pop(primary_slot));
-	auto value = ve::apply([&ws](dcon::nation_id n) { return military::recruited_pop_fraction(ws, n); }, owner);
+		auto value = ve::apply([&ws](dcon::nation_id n) {
+			return military::recruited_pop_fraction(ws, n);
+		}, owner);
 		return compare_values(tval[0], value, read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_has_culture_core) {
