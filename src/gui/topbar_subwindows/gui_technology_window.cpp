@@ -225,7 +225,7 @@ namespace ui {
 	}
 
 	template<typename T>
-	void commodity_mod_description(sys::state& state, text::layout_base& contents, int32_t indent, auto T& list, std::string_view locale_base_name, std::string_view locale_farm_base_name) {
+	void commodity_mod_description(sys::state& state, text::layout_base& contents, int32_t indent, const T& list, std::string_view locale_base_name, std::string_view locale_farm_base_name) {
 		for(const auto mod : list) {
 			auto box = text::open_layout_box(contents, indent);
 			auto name = state.world.commodity_get_name(mod.type);
@@ -241,11 +241,10 @@ namespace ui {
 	}
 
 	template<typename T>
-	void activate_unit_description(sys::state& state, text::layout_base& contents, T fat_id, dcon::unit_type_id id) {
+	void activate_unit_description(sys::state& state, text::layout_base& contents, int32_t indent, T fat_id, dcon::unit_type_id id) {
 		if(dcon::fatten(state.world, fat_id).get_activate_unit(id)) {
 			auto unit_type_name = state.military_definitions.unit_base_definitions[id].name;
-
-			auto box = text::open_layout_box(contents, 0);
+			auto box = text::open_layout_box(contents, indent);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "enable_unit_tech"), text::text_color::white);
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, unit_type_name), text::text_color::yellow);
@@ -254,15 +253,15 @@ namespace ui {
 	}
 
 	template<typename T>
-	auto activate_factory_description(sys::state& state, text::layout_base& contents, T fat_id, dcon::factory_type_id id) {
+	auto activate_factory_description(sys::state& state, text::layout_base& contents, int32_t indent, T fat_id, dcon::factory_type_id id) {
 		if(dcon::fatten(state.world, fat_id).get_activate_building(id)) {
 			auto factory_type_fat_id = dcon::fatten(state.world, id);
-			auto box = text::open_layout_box(contents, 0);
+			auto box = text::open_layout_box(contents, indent);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "enable_building_tech"), text::text_color::white);
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, factory_type_fat_id.get_name()), text::text_color::yellow);
 			text::close_layout_box(contents, box);
-			box = text::open_layout_box(contents, 0);
+			box = text::open_layout_box(contents, indent);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "activate_goods"), text::text_color::white);
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, factory_type_fat_id.get_output().get_name()), text::text_color::yellow);
@@ -328,12 +327,12 @@ namespace ui {
 
 		for(uint8_t unit_type_i = 0; unit_type_i < iid.get_activate_unit_size(); ++unit_type_i) {
 			dcon::unit_type_id id(unit_type_i);
-			activate_unit_description(state, contents, iid.id, id);
+			activate_unit_description(state, contents, indent, iid.id, id);
 		}
 
 		for(uint8_t building_type_i = 0; building_type_i < iid.get_activate_building_size(); ++building_type_i) {
 			dcon::factory_type_id id(building_type_i);
-			activate_factory_description(state, contents, iid.id, id);
+			activate_factory_description(state, contents, indent, iid.id, id);
 		}
 
 		for(auto i = state.culture_definitions.crimes.size(); i-- > 0;) {
@@ -429,12 +428,12 @@ namespace ui {
 
 		for(uint8_t unit_type_i = 0; unit_type_i < tech_fat_id.get_activate_unit_size(); ++unit_type_i) {
 			dcon::unit_type_id id(unit_type_i);
-			activate_unit_description(state, contents, tech_fat_id.id, id);
+			activate_unit_description(state, contents, 0, tech_fat_id.id, id);
 		}
 
 		for(uint8_t building_type_i = 0; building_type_i < tech_fat_id.get_activate_building_size(); ++building_type_i) {
 			dcon::factory_type_id id(building_type_i);
-			activate_factory_description(state, contents, tech_fat_id.id, id);
+			activate_factory_description(state, contents, 0, tech_fat_id.id, id);
 		}
 		
 		commodity_mod_description(state, contents, 0, tech_fat_id.get_factory_goods_output(), "tech_output", "tech_output");
