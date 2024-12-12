@@ -24,20 +24,11 @@
 namespace ui {
 
 	class topbar_nation_name : public generic_name_text<dcon::nation_id> {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			if(state.cheat_data.show_province_id_tooltip) {
-				auto box = text::open_layout_box(contents);
-				text::add_to_layout_box(state, contents, box, std::string_view("Nation ID:"));
-				text::add_space_to_layout_box(state, contents, box);
-				text::add_to_layout_box(state, contents, box, std::to_string(state.local_player_nation.value));
-				text::close_layout_box(contents, box);
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class topbar_nation_prestige_text : public nation_prestige_text {
@@ -257,7 +248,7 @@ namespace ui {
 	};
 
 	class topbar_nation_mobilization_size_text : public nation_mobilization_size_text {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
@@ -641,14 +632,14 @@ namespace ui {
 	};
 
 	class topbar_at_peace_text : public standard_nation_text {
-		public:
+	public:
 		std::string get_text(sys::state& state, dcon::nation_id nation_id) noexcept override {
 			return text::produce_simple_string(state, "atpeace");
 		}
 	};
 
 	class topbar_building_factories_icon : public standard_nation_icon {
-		public:
+	public:
 		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
 			return int32_t(!economy_factory::nation_is_constructing_factories(state, nation_id));
 		}
@@ -657,32 +648,7 @@ namespace ui {
 			return tooltip_behavior::variable_tooltip;
 		}
 
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			if(parent) {
-			Cyto::Any payload = dcon::nation_id{};
-				parent->impl_get(state, payload);
-				auto nation_id = any_cast<dcon::nation_id>(payload);
-
-				auto box = text::open_layout_box(contents, 0);
-				if(!economy_factory::nation_is_constructing_factories(state, nation_id)) {
-				text::localised_format_box(state, contents, box, "countryalert_no_isbuildingfactories", text::substitution_map{});
-				} else if(economy_factory::nation_is_constructing_factories(state, nation_id)) {
-				text::localised_format_box(state, contents, box, "countryalert_isbuildingfactories", text::substitution_map{});
-					auto nation_fat_id = dcon::fatten(state.world, nation_id);
-					nation_fat_id.for_each_state_building_construction([&](dcon::state_building_construction_id building_slim_id) {
-						auto building_fat_id = dcon::fatten(state.world, building_slim_id);
-						auto stateName = building_fat_id.get_state().get_definition().get_name();
-						auto factoryType = building_fat_id.get_type().get_name();
-
-						text::add_line_break_to_layout_box(state, contents, box);
-						text::add_to_layout_box(state, contents, box, stateName);
-						text::add_space_to_layout_box(state, contents, box);
-						text::add_to_layout_box(state, contents, box, factoryType);
-					});
-				}
-				text::close_layout_box(contents, box);
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class topbar_closed_factories_icon : public standard_nation_icon {
@@ -768,223 +734,33 @@ namespace ui {
 	};
 
 	class topbar_ongoing_election_icon : public standard_nation_icon {
-		public:
-		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			return int32_t(!politics::is_election_ongoing(state, nation_id));
-		}
-
+	public:
+		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
-		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto nation_id = retrieve<dcon::nation_id>(state, parent);
-			auto box = text::open_layout_box(contents, 0);
-			if(politics::has_elections(state, nation_id)) {
-				if(!politics::is_election_ongoing(state, nation_id)) {
-					text::localised_format_box(state, contents, box, std::string_view("countryalert_no_isinelection"),
-						text::substitution_map{});
-				} else if(politics::is_election_ongoing(state, nation_id)) {
-					text::substitution_map sub;
-					text::add_to_substitution_map(sub, text::variable_type::date, dcon::fatten(state.world, nation_id).get_election_ends());
-					text::localised_format_box(state, contents, box, std::string_view("countryalert_isinelection"), sub);
-				}
-			} else {
-				text::localised_format_box(state, contents, box, std::string_view("term_for_life"));
-			}
-			text::close_layout_box(contents, box);
 		}
 	};
 
 	class topbar_rebels_icon : public button_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			for(auto rf : state.world.nation_get_rebellion_within(state.local_player_nation)) {
-				auto org = rf.get_rebels().get_organization();
-				if(org >= 0.01f) {
-					frame = 0;
-					return;
-				}
-			}
-			frame = 1;
-		}
-
+	public:
+		void on_update(sys::state& state) noexcept override;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
+		void button_action(sys::state& state) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
-		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			bool showed_title = false;
-
-			for(auto rf : state.world.nation_get_rebellion_within(state.local_player_nation)) {
-				auto org = rf.get_rebels().get_organization();
-				if(org >= 0.01f) {
-					if(!showed_title) {
-						text::add_line(state, contents, "countryalert_haverebels");
-						text::add_line_break_to_layout(state, contents);
-						showed_title = true;
-					}
-					auto rebelname = rebel::rebel_name(state, rf.get_rebels());
-					auto rebelsize = rf.get_rebels().get_possible_regiments();
-
-					text::add_line(state, contents, "topbar_faction",
-					text::variable_type::name, std::string_view{ rebelname },
-					text::variable_type::strength, text::pretty_integer{ rebelsize },
-					text::variable_type::org, text::fp_percentage{org});
-				}
-			}
-		}
-
-		void button_action(sys::state& state) noexcept override {
-			if(state.ui_state.politics_subwindow && state.ui_state.politics_subwindow->is_visible()) {
-				state.ui_state.politics_subwindow->set_visible(state, false);
-				return;
-			}
-			state.open_politics();
-
-			Cyto::Any defs = Cyto::make_any<politics_window_tab>(politics_window_tab::movements);
-			state.ui_state.politics_subwindow->impl_get(state, defs);
 		}
 	};
 
 	class topbar_colony_icon : public standard_nation_button {
 		uint32_t index = 0;
-
-		dcon::province_id get_state_def_province(sys::state& state, dcon::state_definition_id sdef) noexcept {
-			for(auto const p : state.world.state_definition_get_abstract_state_membership(sdef)) {
-				if(!p.get_province().get_nation_from_province_ownership()) {
-					return p.get_province();
-				}
-			}
-		return dcon::province_id{};
-		}
-		public:
-		void button_action(sys::state& state) noexcept override {
-			std::vector<dcon::province_id> provinces;
-			auto nation_id = retrieve<dcon::nation_id>(state, parent);
-			auto nation_fat_id = dcon::fatten(state.world, nation_id);
-			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
-				if(province::can_integrate_colony(state, si.get_state())) {
-					provinces.push_back(si.get_state().get_capital());
-				}
-			}
-
-			state.world.for_each_state_definition([&](dcon::state_definition_id sdef) {
-				if(province::can_start_colony(state, nation_id, sdef)) {
-					dcon::province_id province;
-					for(auto p : state.world.state_definition_get_abstract_state_membership(sdef)) {
-						if(!p.get_province().get_nation_from_province_ownership()) {
-							province = p.get_province().id;
-							break;
-						}
-					}
-					if(province) {
-						provinces.push_back(province);
-					}
-				}
-			});
-
-			nation_fat_id.for_each_colonization([&](dcon::colonization_id colony) {
-				auto sdef = state.world.colonization_get_state(colony);
-				if(state.world.state_definition_get_colonization_stage(sdef) == 3) { //make protectorate
-					provinces.push_back(get_state_def_province(state, sdef));
-				} else if(province::can_invest_in_colony(state, nation_id, sdef)) { //invest
-					provinces.push_back(get_state_def_province(state, sdef));
-				} else { //losing rase
-					auto lvl = state.world.colonization_get_level(colony);
-					for(auto cols : state.world.state_definition_get_colonization(sdef)) {
-						if(lvl < cols.get_level()) {
-							provinces.push_back(get_state_def_province(state, sdef));
-							break;
-						}
-					}
-				}
-			});
-			if(!provinces.empty()) {
-				index++;
-				if(index >= uint32_t(provinces.size())) {
-					index = 0;
-				}
-				if(auto prov = provinces[index]; prov && prov.value < state.province_definitions.first_sea_province.value) {
-					sound::play_interface_sound(state, sound::get_click_sound(state), state.user_settings.interface_volume * state.user_settings.master_volume);
-					state.map_state.set_selected_province(prov);
-					game_scene::open_province_window(state, prov);
-					if(state.map_state.get_zoom() < map::zoom_very_close)
-					state.map_state.zoom = map::zoom_very_close;
-					state.map_state.center_map_on_province(state, prov);
-				}
-			}
-		}
-
-		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override {
-			bool any_integratable = false;
-			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
-				if(province::can_integrate_colony(state, si.get_state())) {
-					any_integratable = true;
-					break;
-				}
-			}
-			state.world.for_each_state_definition([&](dcon::state_definition_id sdef) {
-				if(province::can_start_colony(state, nation_id, sdef)) {
-					any_integratable = true;
-				}
-			});
-			if(nations::can_expand_colony(state, nation_id) || any_integratable) {
-				return 0;
-			} else if(nations::is_losing_colonial_race(state, nation_id)) {
-				return 1;
-			} else {
-				return 2;
-			}
-		}
-		// TODO - when the player clicks on the colony icon and there are colonies to expand then we want to teleport their camera to the
-		// colony's position & open the prov window
-
+		dcon::province_id get_state_def_province(sys::state& state, dcon::state_definition_id sdef) noexcept;
+	public:
+		void button_action(sys::state& state) noexcept override;
+		int32_t get_icon_frame(sys::state& state, dcon::nation_id nation_id) noexcept override;
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
-		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto nation_id = retrieve<dcon::nation_id>(state, parent);
-			auto nation_fat_id = dcon::fatten(state.world, nation_id);
-
-			bool is_empty = true;
-
-			for(auto si : state.world.nation_get_state_ownership(nation_id)) {
-				if(province::can_integrate_colony(state, si.get_state())) {
-					text::add_line(state, contents, "countryalert_colonialgood_state", text::variable_type::region, si.get_state().id);
-					is_empty = false;
-				}
-			}
-
-			state.world.for_each_state_definition([&](dcon::state_definition_id sdef) {
-				if(province::can_start_colony(state, nation_id, sdef)) {
-					text::add_line(state, contents, "alice_countryalert_colonialgood_start", text::variable_type::region, sdef);
-					is_empty = false;
-				}
-			});
-
-			nation_fat_id.for_each_colonization([&](dcon::colonization_id colony) {
-				auto sdef = state.world.colonization_get_state(colony);
-				if(state.world.state_definition_get_colonization_stage(sdef) == 3) {
-					text::add_line(state, contents, "countryalert_colonialgood_colony", text::variable_type::region, sdef);
-					is_empty = false;
-				} else if(province::can_invest_in_colony(state, nation_id, sdef)) {
-					text::add_line(state, contents, "countryalert_colonialgood_invest", text::variable_type::region, sdef);
-					is_empty = false;
-				}
-				auto lvl = state.world.colonization_get_level(colony);
-				for(auto cols : state.world.state_definition_get_colonization(sdef)) {
-					if(lvl < cols.get_level()) {
-						text::add_line(state, contents, "countryalert_colonialbad_influence", text::variable_type::region, sdef);
-						is_empty = false;
-					}
-				}
-			});
-
-			if(is_empty) {
-				text::add_line(state, contents, "countryalert_no_colonial");
-			}
 		}
 	};
 

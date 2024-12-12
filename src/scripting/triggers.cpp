@@ -3127,13 +3127,14 @@ namespace trigger {
 			auto d = ws.world.state_instance_get_definition(si);
 			for(auto p : ws.world.state_definition_get_abstract_state_membership(d)) {
 				if(p.get_province().get_nation_from_province_ownership() == o) {
-					if(p.get_province().get_rgo() == good)
+					if(p.get_province().get_rgo() != good) {
+						for(auto f : p.get_province().get_factory_location()) {
+							if(f.get_factory().get_building_type().get_output() == good) {
+								return true;
+							}
+						}
+					} else {
 						return true;
-					//if(p.get_province().get_artisan_production() == good)
-					//	return true;
-					for(auto f : p.get_province().get_factory_location()) {
-						if(f.get_factory().get_building_type().get_output() == good)
-							return true;
 					}
 				}
 			}
@@ -3143,8 +3144,12 @@ namespace trigger {
 	TRIGGER_FUNCTION(tf_produces_pop) {
 		auto const pop_location = ws.world.pop_get_province_from_pop_location(to_pop(primary_slot));
 		auto const good = payload(tval[1]).com_id;
-		return compare_to_true(tval[0], (ws.world.pop_get_poptype(to_pop(primary_slot)).get_is_paid_rgo_worker())
-			&& (ws.world.province_get_rgo(pop_location) == good));
+		auto const pt = ws.world.pop_get_poptype(to_pop(primary_slot));
+		auto const filter_a = //rgo workers
+			(ws.world.pop_type_get_is_paid_rgo_worker(pt))
+			&& (ws.world.province_get_rgo(pop_location) == good);
+		auto const filter_b = (pt == ws.culture_definitions.artisans); //artisans
+		return compare_to_true(tval[0], filter_a || filter_b);
 	}
 	TRIGGER_FUNCTION(tf_average_militancy_nation) {
 		auto total_pop = ws.world.nation_get_demographics(to_nation(primary_slot), demographics::total);
