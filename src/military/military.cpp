@@ -42,8 +42,11 @@ namespace military {
 
 	void restore_unsaved_values(sys::state& state) {
 		state.world.execute_serial_over_nation([&](auto ids) {
-			auto w = state.world.nation_get_war_participant(ids);
-			state.world.nation_set_is_at_war(ids, w.begin() != w.end());
+			auto result = ve::apply([&](dcon::nation_id n) {
+				auto w = state.world.nation_get_war_participant(n);
+				return w.begin() != w.end();
+			}, ids);
+			state.world.nation_set_is_at_war(ids, result);
 		});
 		update_all_recruitable_regiments(state);
 		regenerate_total_regiment_counts(state);
