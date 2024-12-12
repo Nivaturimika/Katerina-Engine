@@ -130,17 +130,17 @@ jobs:
         name: katerina-engine-macos-aarch64
         path: build/KatEngine
 
-  build-check:
-    needs: [windows-build, linux-build, macos-build]
-    runs-on: ubuntu-latest
-    name: Build Matrix
-    steps:
-      - name: Check
-        run: |
-          echo success
+  # build-check:
+  #   needs: [windows-build, linux-build, macos-build]
+  #   runs-on: ubuntu-latest
+  #   name: Build Matrix
+  #   steps:
+  #     - name: Check
+  #       run: |
+  #         echo success
 
   build-check:
-    needs: [windows-x64-build, windows-x86-build]
+    needs: [windows-x64-build, windows-x86-build, macos-build]
     runs-on: ubuntu-latest
     name: Build Matrix
     steps:
