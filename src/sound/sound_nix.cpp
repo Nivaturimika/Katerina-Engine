@@ -52,7 +52,7 @@ namespace sound {
 	void sound_impl::play_music(int32_t track, float volume) {
 		current_music = track;
 
-	audio_instance audio{};
+		audio_instance audio{};
 		audio.filename = music_list[track].filename.c_str();
 		override_sound(music, audio, volume);
 	}
@@ -80,8 +80,9 @@ namespace sound {
 	}
 
 	bool sound_impl::music_finished() {
-		if(music.has_value())
-		return music->atEnd;
+		if(music.has_value()) {
+			return music->atEnd;
+		}
 		return true;
 	}
 
@@ -192,7 +193,7 @@ namespace sound {
 	}
 
 	void play_effect(sys::state& state, audio_instance& s, float volume) {
-		if(!state.sound_ptr->global_pause) {
+		if(!state.sound_ptr->global_pause && !state.sound_ptr->effect_sound.has_value()) {
 			state.sound_ptr->override_sound(state.sound_ptr->effect_sound, s, volume);
 		}
 	}

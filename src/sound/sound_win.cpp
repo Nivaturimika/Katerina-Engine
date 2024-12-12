@@ -224,8 +224,9 @@ namespace sound {
 		if(global_pause)
 		return;
 
-		if(current_interface_sound)
-		current_interface_sound->stop();
+		if(current_interface_sound) {
+			current_interface_sound->stop();
+		}
 		current_interface_sound = &s;
 		s.play(volume, false, window_handle);
 	}
