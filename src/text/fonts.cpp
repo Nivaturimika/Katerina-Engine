@@ -164,7 +164,7 @@ namespace text {
 		//	FT_Done_Face(font_face);
 	}
 
-	int32_t transform_offset_b(int32_t x, int32_t y, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
+	inline int32_t transform_offset_b(int32_t x, int32_t y, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
 		int32_t bmp_x = x - btmap_x_off;
 		int32_t bmp_y = y - btmap_y_off;
 		if((bmp_x < 0) || (bmp_x >= (int32_t)width) || (bmp_y < 0) || (bmp_y >= (int32_t)height)) {
@@ -176,7 +176,7 @@ namespace text {
 
 	constexpr float rt_2 = 1.41421356237309504f;
 
-	void init_in_map(bool in_map[dr_size * dr_size], uint8_t const* bmp_data, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
+	inline void init_in_map(bool in_map[dr_size * dr_size], uint8_t const* bmp_data, int32_t btmap_x_off, int32_t btmap_y_off, uint32_t width, uint32_t height, uint32_t pitch) {
 		for(uint32_t j = 0; j < dr_size; ++j) {
 			for(uint32_t i = 0; i < dr_size; ++i) {
 				auto const boff = transform_offset_b(i, j, btmap_x_off, btmap_y_off, width, height, pitch);
@@ -189,8 +189,7 @@ namespace text {
 	// based on The "dead reckoning" signed distance transform
 	// Grevera, George J. (2004) Computer Vision and Image Understanding 95 pages 317–333
 	//
-
-	void dead_reckoning(float distance_map[dr_size * dr_size], bool const in_map[dr_size * dr_size]) {
+	inline void dead_reckoning(float distance_map[dr_size * dr_size], bool const in_map[dr_size * dr_size]) {
 		for(uint32_t i = 0; i < dr_size * dr_size; ++i) {
 			distance_map[i] = std::numeric_limits<float>::infinity();
 		}

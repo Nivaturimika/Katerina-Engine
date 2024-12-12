@@ -1362,7 +1362,7 @@ namespace map {
 				cartesian_coords.x *= -1.f;
 				cartesian_coords.y *= -1.f;
 				if(cartesian_coords.y > 0.f)
-				return false;
+					return false;
 				cartesian_coords += glm::vec3(0.5f);
 
 				target_pos = glm::vec2(cartesian_coords.x, cartesian_coords.z);
@@ -1424,7 +1424,7 @@ namespace map {
 				cartesian_coords.z = -(far_plane + near_plane) / (far_plane - near_plane) * cartesian_coords.z - 2 * far_plane * near_plane / (far_plane - near_plane);
 
 				if(cartesian_coords.z > far_plane)
-				return false;
+					return false;
 
 				target_pos = glm::vec2(cartesian_coords.x, cartesian_coords.y) / w;
 				target_pos.x *= screen_size.y / screen_size.x;
@@ -1439,22 +1439,22 @@ namespace map {
 				//v.w = 1.f - v.z;
 				v /= -v.z + 1.f;
 				if(v.x < -1.f || v.x > 1.f || v.y < -1.f || v.y > 1.f)
-				return false;
+					return false;
 
 				target_pos = ((glm::vec2(v.x, v.y) + 1.f) / 2.f) * screen_size;
 				if(target_pos.x >= float(std::numeric_limits<int16_t>::max() / 2.f)
 				|| target_pos.x <= float(std::numeric_limits<int16_t>::min() / 2.f)
 				|| target_pos.y >= float(std::numeric_limits<int16_t>::max() / 2.f)
 				|| target_pos.y <= float(std::numeric_limits<int16_t>::min() / 2.f))
-				return false;
+					return false;
 				if(target_pos.x < 0.f || target_pos.y < 0.f
 				|| target_pos.x > screen_size.x || target_pos.y > screen_size.y)
-				return false;
+					return false;
 				break;
 			}
 			case sys::projection_mode::num_of_modes:
 			default:
-			return false;
+				return false;
 		}
 		screen_pos = target_pos;
 		return true;
