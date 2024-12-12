@@ -681,7 +681,7 @@ namespace military {
 		reg.set_type(t);
 		// TODO make name
 		auto exp = (state.world.nation_get_modifier_values(n, sys::national_mod_offsets::land_unit_start_experience)
-		+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level)) * 0.01f;
+			+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::regular_experience_level)) * 0.01f;
 		reg.set_experience(std::clamp(exp, 0.f, 1.f));
 		reg.set_strength(1.f);
 		reg.set_org(1.f);

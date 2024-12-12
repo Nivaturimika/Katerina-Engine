@@ -1107,9 +1107,10 @@ namespace command {
 		// The source must be a great power, while the target must not be a great power.
 		// And the embassy can't be banned
 		auto const gprel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, source);
-		if(gprel && (state.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0) {
+		if(gprel && (state.world.gp_relationship_get_status(gprel) & nations::influence::is_banned) != 0)
 			return false;
-		}
+		if(military::are_at_war(state, source, influence_target))
+			return false;
 		return state.world.nation_get_is_great_power(source) && !state.world.nation_get_is_great_power(influence_target);
 	}
 	void execute_change_influence_priority(sys::state& state, dcon::nation_id source, dcon::nation_id influence_target, uint8_t priority) {
