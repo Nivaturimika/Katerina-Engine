@@ -5537,8 +5537,8 @@ namespace military {
 			location_modifier = 0.1f;
 		}
 		auto combined = state.defines.reinforce_speed * spending_level * location_modifier
-		* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed))
-		* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
+			* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_speed))
+			* (1.0f + tech_nation.get_modifier_values(sys::national_mod_offsets::reinforce_rate));
 		return combined;
 	}
 
@@ -5552,7 +5552,7 @@ namespace military {
 		*/
 		for(auto ar : state.world.in_army) {
 			if(ar.get_battle_from_army_battle_participation() || ar.get_navy_from_army_transport() || ar.get_is_retreating())
-			continue;
+				continue;
 			auto in_nation = ar.get_controller_from_army_control();
 			auto tech_nation = in_nation ? in_nation : ar.get_controller_from_army_rebel_control().get_ruler_from_rebellion_within();
 			auto min_exp = (tech_nation.get_modifier_values(sys::national_mod_offsets::regular_experience_level)

@@ -60,14 +60,14 @@ namespace sys {
 	MOD_LIST_ELEMENT(50, conversion_rate, true, modifier_display_type::percent, "modifier_conversion_rate")
 	#define MOD_PROV_LIST_COUNT 51
 
-	#define MOD_NAT_LIST                                                                                                             \
+#define MOD_NAT_LIST                                                                                                             \
 	MOD_LIST_ELEMENT(0, war_exhaustion, false, modifier_display_type::fp_two_places, "war_exhaustion")                             \
 	MOD_LIST_ELEMENT(1, max_war_exhaustion, true, modifier_display_type::integer, "max_war_exhaustion")                            \
 	MOD_LIST_ELEMENT(2, leadership, true, modifier_display_type::integer, "leadership")                                            \
 	MOD_LIST_ELEMENT(3, leadership_modifier, true, modifier_display_type::percent, "modifier_global_leadership_modifier")          \
 	MOD_LIST_ELEMENT(4, supply_consumption, false, modifier_display_type::percent, "modifier_supply_consumption")                  \
 	MOD_LIST_ELEMENT(5, org_regain, true, modifier_display_type::percent, "modifier_org_regain")                                   \
-	MOD_LIST_ELEMENT(6, reinforce_speed, false, modifier_display_type::percent, "modifier_reinforce_speed")                         \
+	MOD_LIST_ELEMENT(6, reinforce_speed, true, modifier_display_type::percent, "modifier_reinforce_speed")                         \
 	MOD_LIST_ELEMENT(7, land_organisation, true, modifier_display_type::percent, "modifier_land_organisation")                     \
 	MOD_LIST_ELEMENT(8, naval_organisation, true, modifier_display_type::percent, "modifier_naval_organisation")                   \
 	MOD_LIST_ELEMENT(9, research_points, true, modifier_display_type::integer, "modifier_research_points")                         \
@@ -165,7 +165,7 @@ namespace sys {
 	MOD_LIST_ELEMENT(101, colonial_migration, true, modifier_display_type::percent, "colonial_migration_tech")                     \
 	MOD_LIST_ELEMENT(102, max_national_focus, true, modifier_display_type::integer, "tech_max_focus")                              \
 	MOD_LIST_ELEMENT(103, education_efficiency, true, modifier_display_type::percent, "edu_eff_tech")                              \
-	MOD_LIST_ELEMENT(104, reinforce_rate, false, modifier_display_type::percent, "reinforce_tech")                                  \
+	MOD_LIST_ELEMENT(104, reinforce_rate, true, modifier_display_type::percent, "reinforce_tech")                                  \
 	MOD_LIST_ELEMENT(105, influence, true, modifier_display_type::percent, "tech_gp_influence")                                    \
 	MOD_LIST_ELEMENT(106, dig_in_cap, true, modifier_display_type::integer, "digin_from_tech")                                     \
 	MOD_LIST_ELEMENT(107, combat_width, false, modifier_display_type::integer, "combat_width_tech")                                \
