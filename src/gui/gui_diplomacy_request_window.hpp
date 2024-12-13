@@ -233,7 +233,7 @@ namespace ui {
 	};
 
 	class diplomacy_request_count_text : public simple_text_element_base {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			simple_text_element_base::on_create(state);
 			black_text = false;
@@ -241,7 +241,7 @@ namespace ui {
 	};
 
 	class diplomacy_request_flag_button : public flag_button {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			base_data.position.y -= 6;
 			base_data.size.y += 32;
@@ -270,7 +270,7 @@ namespace ui {
 	};
 
 	class diplomacy_request_player_flag_button : public diplomacy_request_flag_button {
-		public:
+	public:
 		dcon::national_identity_id get_current_nation(sys::state& state) noexcept override {
 			auto fat_id = dcon::fatten(state.world, state.local_player_nation);
 			return fat_id.get_identity_from_identity_holder();
@@ -280,8 +280,7 @@ namespace ui {
 	class diplomacy_request_window : public window_element_base {
 		simple_text_element_base* count_text = nullptr;
 		int32_t index = 0;
-
-		public:
+	public:
 		std::vector<diplomatic_message::message> messages;
 
 		void on_create(sys::state& state) noexcept override {

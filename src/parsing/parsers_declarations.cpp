@@ -3270,6 +3270,24 @@ namespace parsers {
 		}
 	}
 
+	void generic_event::finish(event_building_context& context) {
+		if(!picture_) {
+			error_handler err("");
+			picture(association_type::eq, "", err, 0, context);
+		}
+		if(window_type.empty()) {
+			if(major) {
+				window_type = "event_major_window";
+			} else if(issue_group_) {
+				window_type = "event_election_window";
+			} else if(context.main_slot == trigger::slot_contents::nation) {
+				window_type = "event_country_window";
+			} else {
+				window_type = "event_province_window";
+			}
+		}
+	}
+
 	void generic_event::desc(association_type, std::string_view value, error_handler& err, int32_t line,
 		event_building_context& context) {
 		desc_ = text::find_or_add_key(context.outer_context.state, value, false);

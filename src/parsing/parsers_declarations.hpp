@@ -2354,23 +2354,7 @@ namespace parsers {
 		void news_desc_medium(association_type, std::string_view value, error_handler& err, int32_t line, event_building_context& context);
 		void news_desc_short(association_type, std::string_view value, error_handler& err, int32_t line, event_building_context& context);
 		void news_picture(association_type, std::string_view value, error_handler& err, int32_t line, event_building_context& context);
-		void finish(event_building_context& context) {
-			if(!picture_) {
-				error_handler err("");
-				picture(association_type::eq, "", err, 0, context);
-			}
-			if(window_type.empty()) {
-				if(major) {
-					window_type = "event_major_window";
-				} else if(issue_group_) {
-					window_type = "event_election_window";
-				} else if(context.main_slot == trigger::slot_contents::nation) {
-					window_type = "event_country_window";
-				} else {
-					window_type = "event_province_window";
-				}
-			}
-		}
+		void finish(event_building_context& context);
 	};
 
 	dcon::trigger_key make_event_trigger(token_generator& gen, error_handler& err, event_building_context& context);

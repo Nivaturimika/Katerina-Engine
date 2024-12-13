@@ -2178,15 +2178,13 @@ namespace sys {
 		world.for_each_national_identity([&](dcon::national_identity_id i) {
 			auto country_file = open_file(common, text::win1250_to_native(context.file_names_for_idents[i]));
 			if(country_file) {
-			parsers::country_file_context c_context{ context, i };
+				parsers::country_file_context c_context{ context, i };
 				auto content = view_contents(*country_file);
 				err.file_name = context.file_names_for_idents[i];
 				parsers::token_generator gen(content.data, content.data + content.file_size);
 				parsers::parse_country_file(gen, err, c_context);
 			}
 		});
-
-		world.province_resize_rgo_max_size_per_good(world.commodity_size());
 
 		// load province history files
 		auto history = open_directory(root, NATIVE("history"));

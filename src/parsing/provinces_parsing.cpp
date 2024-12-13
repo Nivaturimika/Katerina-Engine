@@ -427,11 +427,9 @@ namespace parsers {
 	}
 
 	void province_rgo_ext::entry(province_rgo_ext_desc const& value, error_handler& err, int32_t line, province_file_context& context) {
-		if(value.trade_good_id) {
-			auto p = context.id;
-			context.outer_context.state.world.province_set_rgo_max_size_per_good(p, value.trade_good_id, value.max_employment_value / context.outer_context.state.defines.alice_rgo_per_size_employment);
-			context.outer_context.state.world.province_set_rgo_was_set_during_scenario_creation(p, true);
-		}
+		//if(value.trade_good_id) {
+		//	auto p = context.id;
+		//}
 	}
 
 	void make_pop_province_list(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {
@@ -441,7 +439,7 @@ namespace parsers {
 			gen.discard_group();
 		} else {
 			auto province_id = context.original_id_to_prov_id_map[province_int];
-		pop_history_province_context new_context{context, province_id};
+			pop_history_province_context new_context{context, province_id};
 			parse_pop_province_list(gen, err, new_context);
 		}
 	}

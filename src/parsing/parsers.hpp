@@ -53,7 +53,7 @@ namespace parsers {
 	};
 
 	class error_handler {
-		public:
+	public:
 		std::string file_name;
 		std::string accumulated_errors;
 		std::string accumulated_warnings;
