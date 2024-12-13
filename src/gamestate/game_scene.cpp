@@ -902,15 +902,16 @@ namespace game_scene {
 		ui::open_chat_before_game(state);
 	}
 
-	void highlight_player_nation(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province) {
-		for(const auto pc : state.world.nation_get_province_ownership_as_nation(state.local_player_nation)) {
-			data[province::to_map_id(pc.get_province())] = 0x2B2B2B2B;
+	void highlight_player_nation(sys::state& state, std::vector<uint8_t>& data, dcon::province_id selected_province) {
+		auto const n = state.local_player_nation;
+		for(const auto pc : state.world.nation_get_province_ownership_as_nation(n)) {
+			data[province::to_map_id(pc.get_province())] = 0x3B;
 		}
 	}
 
-	void highlight_given_province(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province) {
+	void highlight_given_province(sys::state& state, std::vector<uint8_t>& data, dcon::province_id selected_province) {
 		if(selected_province) {
-			data[province::to_map_id(selected_province)] = 0x2B2B2B2B;
+			data[province::to_map_id(selected_province)] = 0x3B;
 		}
 	}
 

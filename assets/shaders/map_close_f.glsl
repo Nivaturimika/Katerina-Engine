@@ -94,7 +94,7 @@ vec4 get_water_terrain() {
 	specular = pow(specular, SpecValueOne);
 	OutColor += (specular / SpecValueTwo);
 	OutColor *= COLOR_LIGHTNESS;
-	OutColor *= texture(province_fow, prov_id).rgb;
+	OutColor *= texture(province_fow, prov_id).r;
 	return vec4(OutColor, vWaterTransparens);
 }
 
@@ -162,7 +162,7 @@ vec4 get_land_political_close() {
 	float stripeFactor = texture(stripes_texture, stripe_coord).a;
 	float prov_highlight = texture(province_highlight, prov_id).r * (abs(cos(time * 3.f)) + 1.f);
 	vec3 political = clamp(mix(prov_color, stripe_color, stripeFactor) + vec4(prov_highlight), 0.0, 1.0).rgb;
-	political *= texture(province_fow, prov_id).rgb;
+	political *= texture(province_fow, prov_id).r;
 	political -= POLITICAL_LIGHTNESS;
 
 	// Mix together the terrain and map mode color

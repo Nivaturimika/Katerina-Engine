@@ -72,6 +72,49 @@ namespace duplicates {
 }
 
 namespace map {
+	inline void gen_prov_highlight_texture(GLuint texture_handle, std::vector<uint8_t> const& data) {
+		glBindTexture(GL_TEXTURE_2D, texture_handle);
+		uint32_t rows = ((uint32_t)data.size()) / 256;
+		uint32_t left_on_last_row = ((uint32_t)data.size()) % 256;
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, rows, GL_RED, GL_UNSIGNED_BYTE, &data[0]);
+		if(left_on_last_row > 0) {
+			uint32_t width = left_on_last_row;
+			uint32_t height = 1;
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, rows, width, height, GL_RED, GL_UNSIGNED_BYTE, &data[rows * 256]);
+		}
+	}
+
+	template<uint8_t layers>
+	inline void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& data) {
+		if(layers == 1) {
+			glBindTexture(GL_TEXTURE_2D, texture_handle);
+		} else {
+			glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
+		}
+		uint32_t rows = ((uint32_t)data.size()) / 256;
+		uint32_t left_on_last_row = ((uint32_t)data.size()) % 256;
+		uint32_t x = 0;
+		uint32_t y = 0;
+		uint32_t width = 256;
+		uint32_t height = rows;
+		if(layers == 1) {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
+		} else {
+			// Set the texture data for each layer
+			for(uint8_t i = 0; i < layers; i++) {
+				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, x, y, i, width, height / layers, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data[i * (data.size() / layers)]);
+			}
+		}
+		x = 0;
+		y = rows;
+		width = left_on_last_row;
+		height = 1;
+		// SCHOMBERT: added a conditional to block reading from after the end in the case it is evenly divisible by 256
+		// SCHOMBERT: that looks right to me, but I don't fully understand the intent
+		if(left_on_last_row > 0 && layers == 1) {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &data[rows * 256]);
+		}
+	}
 
 	void display_data::update_borders(sys::state& state) {
 
@@ -110,7 +153,7 @@ namespace map {
 
 	void display_data::update_fog_of_war(sys::state& state) {
 		// update fog of war too
-		std::vector<uint32_t> province_fows(state.world.province_size() + 1, 0xFFFFFFFF);
+		std::vector<uint8_t> province_fows(state.world.province_size() + 1, 0xFF);
 		state.map_state.visible_provinces.clear();
 		if(state.local_player_nation != state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id)
 		&& (state.user_settings.fow_enabled || state.network_mode != sys::network_mode_type::single_player)
@@ -135,12 +178,12 @@ namespace map {
 				}
 			}
 			for(auto p : state.world.in_province) {
-				province_fows[province::to_map_id(p)] = uint32_t(state.map_state.visible_provinces[province::to_map_id(p)] ? 0xFFFFFFFF : 0x7B7B7B7B);
+				province_fows[province::to_map_id(p)] = uint32_t(state.map_state.visible_provinces[province::to_map_id(p)] ? 0xFF : 0x7B);
 			}
 		} else {
 			state.map_state.visible_provinces.resize(state.world.province_size() + 1, true);
 		}
-		gen_prov_color_texture(textures[texture_province_fow], province_fows, 1);
+		gen_prov_highlight_texture(textures[texture_province_fow], province_fows);
 	}
 
 	void create_textured_line_vbo(GLuint vbo, std::vector<textured_line_vertex>& data) {
@@ -1675,45 +1718,14 @@ namespace map {
 		}
 	}
 
-	void display_data::gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers) {
-		if(layers == 1) {
-			glBindTexture(GL_TEXTURE_2D, texture_handle);
-		} else {
-			glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
-		}
-		uint32_t rows = ((uint32_t)prov_color.size()) / 256;
-		uint32_t left_on_last_row = ((uint32_t)prov_color.size()) % 256;
-		uint32_t x = 0;
-		uint32_t y = 0;
-		uint32_t width = 256;
-		uint32_t height = rows;
-		if(layers == 1) {
-			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[0]);
-		} else {
-			// Set the texture data for each layer
-			for(int i = 0; i < layers; i++) {
-				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, x, y, i, width, height / layers, 1, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[i * (prov_color.size() / layers)]);
-			}
-		}
-		x = 0;
-		y = rows;
-		width = left_on_last_row;
-		height = 1;
-		// SCHOMBERT: added a conditional to block reading from after the end in the case it is evenly divisible by 256
-		// SCHOMBERT: that looks right to me, but I don't fully understand the intent
-		if(left_on_last_row > 0 && layers == 1) {
-			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &prov_color[rows * 256]);
-		}
-	}
-
 	void display_data::set_selected_province(sys::state& state, dcon::province_id prov_id) {
-		std::vector<uint32_t> province_highlights(state.world.province_size() + 1, 0);
+		std::vector<uint8_t> province_highlights(state.world.province_size() + 1, 0);
 		state.current_scene.update_highlight_texture(state, province_highlights, prov_id);
-		gen_prov_color_texture(textures[texture_province_highlight], province_highlights, 1);
+		gen_prov_highlight_texture(textures[texture_province_highlight], province_highlights);
 	}
 
-	void display_data::set_province_color(std::vector<uint32_t> const& prov_color) {
-		gen_prov_color_texture(texture_arrays[texture_array_province_color], prov_color, 2);
+	void display_data::set_province_color(std::vector<uint32_t> const& data) {
+		gen_prov_color_texture<2>(texture_arrays[texture_array_province_color], data);
 	}
 
 	void add_drag_box_line(std::vector<screen_vertex>& drag_box_vertices, glm::vec2 pos1, glm::vec2 pos2, glm::vec2 size, bool vertical) {
@@ -3197,6 +3209,7 @@ namespace map {
 
 		textures[texture_selection] = load_dds_texture(test_dir, NATIVE("selection.dds"));
 		ogl::set_gltex_parameters(textures[texture_selection], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+		
 		textures[texture_capital] = load_dds_texture(map_items_dir, NATIVE("building_capital.dds"));
 		ogl::set_gltex_parameters(textures[texture_capital], GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -3208,29 +3221,28 @@ namespace map {
 		ogl::set_gltex_parameters(texture_arrays[texture_array_province_color], GL_TEXTURE_2D_ARRAY, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		// Get the province_highlight handle
-		glGenTextures(1, &textures[texture_province_highlight]);
-		glBindTexture(GL_TEXTURE_2D, textures[texture_province_highlight]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		textures[texture_province_highlight] = ogl::make_gl_texture(NULL, 256, 256, 1);
 		ogl::set_gltex_parameters(textures[texture_province_highlight], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		// Get the province_fow handle
-		glGenTextures(1, &textures[texture_province_fow]);
-		glBindTexture(GL_TEXTURE_2D, textures[texture_province_fow]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		textures[texture_province_fow] = ogl::make_gl_texture(NULL, 256, 256, 1);
 		ogl::set_gltex_parameters(textures[texture_province_fow], GL_TEXTURE_2D, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
 		reports::write_debug("Generating province color and highlight textures\n");
 		uint32_t province_size = state.world.province_size() + 1;
 		province_size += 256 - province_size % 256;
 
-		std::vector<uint32_t> test_highlight(province_size);
-		gen_prov_color_texture(textures[texture_province_highlight], test_highlight, 1);
+		// highlight texture
+		std::vector<uint8_t> test_highlight(province_size);
+		gen_prov_highlight_texture(textures[texture_province_highlight], test_highlight);
 		for(uint32_t i = 0; i < test_highlight.size(); ++i) {
-			test_highlight[i] = 255;
+			test_highlight[i] = 0xFF;
 		}
+
+		// test color
 		std::vector<uint32_t> test_color(province_size * 4);
 		for(uint32_t i = 0; i < test_color.size(); ++i) {
-			test_color[i] = 255;
+			test_color[i] = 0xFFFFFFFF;
 		}
 		set_province_color(test_color);
 

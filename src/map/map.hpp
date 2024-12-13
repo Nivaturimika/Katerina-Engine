@@ -393,8 +393,6 @@ namespace map {
 		void render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom);
 		void load_shaders(simple_fs::directory& root);
 		void create_meshes();
-		void gen_prov_color_texture(GLuint texture_handle, std::vector<uint32_t> const& prov_color, uint8_t layers = 1);
-
 		void create_curved_river_vertices(parsers::scenario_building_context& context, std::vector<uint8_t> const& river_data, std::vector<uint8_t> const& terrain_data);
 	};
 

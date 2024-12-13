@@ -77,8 +77,8 @@ namespace game_scene {
 	void open_chat_during_game(sys::state& state);
 	void open_chat_before_game(sys::state& state);
 
-	void highlight_player_nation(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province);
-	void highlight_given_province(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province);
+	void highlight_player_nation(sys::state& state, std::vector<uint8_t>& data, dcon::province_id selected_province);
+	void highlight_given_province(sys::state& state, std::vector<uint8_t>& data, dcon::province_id selected_province);
 
 	ui::element_base* root_end_screen(sys::state& state);
 	ui::element_base* root_pick_nation(sys::state& state);
@@ -125,7 +125,7 @@ namespace game_scene {
 		//other functions:
 		std::function <void(sys::state& state)> open_chat = open_chat_during_game;
 		// graphics
-		std::function <void(sys::state& state, std::vector<uint32_t>& data, dcon::province_id selected_province)> update_highlight_texture = highlight_given_province;
+		std::function <void(sys::state& state, std::vector<uint8_t>& data, dcon::province_id selected_province)> update_highlight_texture = highlight_given_province;
 	};
 
 	scene_properties nation_picker();
