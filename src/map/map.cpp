@@ -638,17 +638,6 @@ namespace map {
 		return current; //ourselves
 	}
 
-	float sum_of_bone_chain_length(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, uint32_t current, float sum) {
-		for(uint32_t i = start; i < start + count; i++) {
-			if(i != current && list[current].parent_id == list[i].bone_id) {
-				auto const a = glm::vec3(list[current].bone_pose_matrix[3]);
-				auto const b = glm::vec3(list[i].bone_pose_matrix[3]);
-				return glm::distance(a, b) + sum_of_bone_chain_length(list, start, count, i, sum);
-			}
-		}
-		return sum;
-	}
-
 	void display_data::render_models(sys::state& state, std::vector<model_render_command> const& list, float time_counter, sys::projection_mode map_view_mode, float zoom) {
 		glBindVertexArray(vao_array[vo_static_mesh]);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_array[vo_static_mesh]);

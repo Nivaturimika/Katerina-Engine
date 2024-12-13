@@ -281,8 +281,8 @@ namespace emfx {
 	inline xac_vector4f vec4_to_glsl(xac_vector4f q) {
 		return xac_vector4f{
 			q.x,
-			q.z,
 			q.y,
+			q.z,
 			q.w
 		};
 	}
@@ -987,8 +987,8 @@ namespace emfx {
 		if(t1 == t2) {
 			return 1.f;
 		}
-		float cur_frame = time - t1;
-		float end_frame = t2 - t1;
+		auto const cur_frame = time - t1;
+		auto const end_frame = t2 - t1;
 		return cur_frame / end_frame;
 	}
 

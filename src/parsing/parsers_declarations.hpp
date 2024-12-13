@@ -2324,7 +2324,7 @@ namespace parsers {
 		dcon::trigger_key trigger;
 		dcon::value_modifier_key mean_time_to_happen;
 		std::array<sys::event_option, sys::max_event_options> options;
-		int32_t last_option_added = 0;
+		uint32_t last_option_added = 0;
 		dcon::effect_key immediate_;
 		bool major = false;
 		bool fire_only_once = false;

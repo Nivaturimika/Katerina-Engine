@@ -1455,7 +1455,6 @@ namespace parsers {
 		context.compiled_trigger.push_back(uint16_t(trigger::year | association_to_trigger_code(a)));
 		context.compiled_trigger.push_back(trigger::payload(uint16_t(value)).value);
 	}
-	void trigger_body::is_canal_enabled(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context);
 	void trigger_body::month(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
 		context.compiled_trigger.push_back(uint16_t(trigger::month | association_to_trigger_code(a)));
 		context.compiled_trigger.push_back(trigger::payload(uint16_t(value)).value);
