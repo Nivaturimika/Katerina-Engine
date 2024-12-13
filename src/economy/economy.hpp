@@ -10,20 +10,9 @@ namespace economy {
 	// From the total construction demand, multiply the budget by this factor to obtain the actual
 	// spending (and also to not get refunded for non-existing goods)
 	constexpr inline float true_construction_demand = 1.f;
-
-	constexpr float default_workforce = 40000.f;
-
-	constexpr float pop_payout_factor = 1.f;
-	constexpr float consumption_factor = 1.f;
-
-	constexpr float aristocrat_investment_ratio = 0.60f;
-	constexpr float capitalist_investment_ratio = 0.85f;
-
-	constexpr float satisfaction_delay_factor = 0.1f;
-	constexpr float artisan_buff_factor = 1.25f;
-
+	constexpr inline float default_workforce = 40000.f;
+	constexpr inline float pop_payout_factor = 1.f;
 	inline constexpr float ln_2 = 0.30103f;
-
 	constexpr float artisan_baseline_score = 6.25f;
 
 	enum commodity_production_type {
@@ -128,13 +117,6 @@ namespace economy {
 
 	float get_artisan_distribution_slow(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 
-	// base subsistence
-	inline constexpr float subsistence_factor = 10.0f;
-	inline constexpr float subsistence_score_life = 30.0f;
-	inline constexpr float subsistence_score_everyday = 50.0f;
-	inline constexpr float subsistence_score_luxury = 80.0f;
-	inline constexpr float subsistence_score_total = subsistence_score_life + subsistence_score_everyday + subsistence_score_luxury;
-
 	struct global_economy_state {
 		building_information building_definitions[max_building_types];
 		float craftsmen_fraction = 0.8f;
@@ -158,10 +140,7 @@ namespace economy {
 	}
 
 	constexpr inline dcon::commodity_id money(0);
-
-	inline constexpr float production_scale_delta = 0.1f;
 	inline constexpr uint32_t price_history_length = 256;
-	inline constexpr uint32_t gdp_history_length = 128;
 	inline constexpr float rgo_owners_cut = 0.05f;
 
 	void presimulate(sys::state& state);
@@ -230,8 +209,6 @@ namespace economy {
 
 	commodity_production_type get_commodity_production_type(sys::state& state, dcon::commodity_id c);
 
-	//void update_land_ownership(sys::state& state);
-	//void update_local_subsistence_factor(sys::state& state);
 	float commodity_effective_price(sys::state& state, dcon::nation_id n, dcon::commodity_id c);
 	void register_intermediate_demand(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);
 	void register_domestic_supply(sys::state& state, dcon::nation_id n, dcon::commodity_id commodity_type, float amount);

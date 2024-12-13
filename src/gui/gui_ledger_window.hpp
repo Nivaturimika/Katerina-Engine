@@ -2067,21 +2067,17 @@ namespace ui {
 	};
 
 	class ledger_window : public window_element_base {
-	dcon::gui_def_id listbox_def_id{};
-	dcon::gui_def_id sort_buttons_window_id{};
+		dcon::gui_def_id listbox_def_id{};
+		dcon::gui_def_id sort_buttons_window_id{};
 
 		all_prices_graph* commodity_linegraph = nullptr;
-		gdp_graph* gdp_linegraph = nullptr;
 
 		commodity_linegraph_legend_window* commodity_linegraph_legend = nullptr;
-		nations_linegraph_legend_window* gdp_linegraph_legend = nullptr;
-
 		image_element_base* commodity_linegraph_image = nullptr;
-		image_element_base* gdp_linegraph_image = nullptr;
 
 		simple_text_element_base* page_number_text = nullptr;
 		simple_text_element_base* ledger_header_text = nullptr;
-	ledger_page_number page_num{int8_t(1)};
+		ledger_page_number page_num{int8_t(1)};
 
 		ledger_nation_ranking_listbox* nation_ranking_listbox = nullptr;
 		ledger_nation_comparison_listbox* nation_compare_listbox = nullptr;
@@ -2112,11 +2108,6 @@ namespace ui {
 			commodity_linegraph->set_visible(state, false);
 			commodity_linegraph_legend->set_visible(state, false);
 			commodity_linegraph_image->set_visible(state, false);
-
-
-			gdp_linegraph->set_visible(state, false);
-			gdp_linegraph_legend->set_visible(state, false);
-			gdp_linegraph_image->set_visible(state, false);
 		}
 
 		price_toggle_list price_toggle_status;

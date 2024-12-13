@@ -15,6 +15,11 @@
 #include "economy_templates.hpp"
 
 namespace economy {
+	constexpr inline float satisfaction_delay_factor = 0.1f;
+	constexpr inline float artisan_buff_factor = 1.25f;
+	constexpr inline float aristocrat_investment_ratio = 0.60f;
+	constexpr inline float capitalist_investment_ratio = 0.85f;
+
 	template<typename vector_type, typename tag_type>
 	inline void register_demand(sys::state& state, tag_type n, dcon::commodity_id commodity_type, vector_type amount) {
 		state.world.nation_get_real_demand(n, commodity_type) += amount;
