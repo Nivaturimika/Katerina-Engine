@@ -3256,30 +3256,77 @@ namespace ai {
 	}
 
 	void update_budget(sys::state& state) {
+		state.world.execute_parallel_over_nation([&](auto ids) {
+			// read phase -- daily income
+			auto const was_profitable = state.world.nation_get_last_treasury(ids) <= state.world.nation_get_stockpiles(ids, economy::money);
+			auto const subopt_admin = state.world.nation_get_administrative_efficiency(ids) < 0.95f || state.world.nation_get_administrative_spending(ids) < 10;
+			auto const at_war = state.world.nation_get_is_at_war(ids);
+			auto const at_risk = state.world.nation_get_ai_is_threatened(ids);
+
+			auto const s_step = ve::int_vector(5); //small
+			auto const m_step = ve::int_vector(7); //medium
+			auto const l_step = ve::int_vector(10); //large
+
+			auto const new_adm = state.world.nation_get_administrative_spending(ids) + ve::select(was_profitable, s_step, ve::select(subopt_admin, s_step, -s_step));
+			auto const new_edu = state.world.nation_get_education_spending(ids) + ve::select(was_profitable, s_step, -s_step);
+			auto const new_social = state.world.nation_get_social_spending(ids) + ve::select(was_profitable, s_step, -s_step);
+
+			// large/medium increases, small decreases
+			auto const new_con = state.world.nation_get_construction_spending(ids) + ve::select(was_profitable, l_step, ve::select(at_risk, m_step, -s_step));
+			auto const new_land = state.world.nation_get_land_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war || at_risk, l_step, -s_step));
+			auto const new_navy = state.world.nation_get_naval_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war || at_risk, l_step, -s_step));
+
+			// large increases, small decreases
+			auto const new_tax_r = state.world.nation_get_rich_tax(ids) + ve::select(was_profitable, -s_step, l_step);
+			auto const new_tax_m = state.world.nation_get_middle_tax(ids) + ve::select(was_profitable, -s_step, l_step);
+			auto const new_tax_p = state.world.nation_get_poor_tax(ids) + ve::select(was_profitable, -s_step, l_step);
+
+			auto const raise_tariffs = (new_tax_r >= 95 || new_tax_m >= 95 || new_tax_p >= 95) && !was_profitable;
+			auto const new_tariff = state.world.nation_get_tariffs(ids) + ve::select(raise_tariffs, s_step, -s_step);
+
+			// apply (write phase)
+			auto const filter = !state.world.nation_get_is_player_controlled(ids) && state.world.nation_get_owned_province_count(ids) > 0;
+			state.world.nation_set_administrative_spending(ids, ve::select(filter, new_adm, state.world.nation_get_administrative_spending(ids)));
+			state.world.nation_set_education_spending(ids, ve::select(filter, new_edu, state.world.nation_get_education_spending(ids)));
+			state.world.nation_set_construction_spending(ids, ve::select(filter, new_con, state.world.nation_get_construction_spending(ids)));
+			state.world.nation_set_land_spending(ids, ve::select(filter, new_land, state.world.nation_get_land_spending(ids)));
+			state.world.nation_set_naval_spending(ids, ve::select(filter, new_navy, state.world.nation_get_naval_spending(ids)));
+			state.world.nation_set_social_spending(ids, ve::select(filter, new_social, state.world.nation_get_social_spending(ids)));
+			state.world.nation_set_rich_tax(ids, ve::select(filter, new_tax_r, state.world.nation_get_rich_tax(ids)));
+			state.world.nation_set_middle_tax(ids, ve::select(filter, new_tax_m, state.world.nation_get_middle_tax(ids)));
+			state.world.nation_set_poor_tax(ids, ve::select(filter, new_tax_p, state.world.nation_get_poor_tax(ids)));
+			state.world.nation_set_tariffs(ids, ve::select(filter, new_tariff, state.world.nation_get_tariffs(ids)));
+			// filter to boundaries
+			ve::apply([&](dcon::nation_id n) {
+				economy::bound_budget_settings(state, n);
+			}, ids);
+		});
+
+			/*
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
 			dcon::nation_id nid{ dcon::nation_id::value_base_t(i) };
 			auto n = fatten(state.world, nid);
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 				return;
 
-			float base_income = economy_estimations::estimate_daily_income(state, n); //+ n.get_stockpiles(economy::money) / 365.f;
-			/*
-			auto max_percentage = 1.0f;
-			auto min_percentage = 0.0f;
-			auto tariff_min= state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff);
-			auto tariff_max = std::clamp( state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff),0.0f,0.95f);
-			auto military_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending);
-			auto military_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending);
-			auto tax_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax);
-			auto tax_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax);
-			auto social_spending_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending);
-			auto social_spending_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending);
-			auto construction_min = state.defines.trade_cap_low_limit_constructions;
-			auto construction_max = 1.0f;
-			auto land_min = state.defines.trade_cap_low_limit_land;
-			auto land_max = 1.0f;
-			auto naval_min = state.defines.trade_cap_low_limit_naval;
-			auto naval_max = 1.0f;
+			auto const daily_income = economy_estimations::estimate_daily_income(state, n);
+
+			auto const max_percentage = 1.0f;
+			auto const min_percentage = 0.0f;
+			auto const tariff_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tariff);
+			auto const tariff_max = std::clamp( state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tariff),0.0f,0.95f);
+			auto const military_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_military_spending);
+			auto const military_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_military_spending);
+			auto const tax_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_tax);
+			auto const tax_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_tax);
+			auto const social_spending_min = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::min_social_spending);
+			auto const social_spending_max = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::max_social_spending);
+			auto const construction_min = state.defines.trade_cap_low_limit_constructions;
+			auto const construction_max = 1.0f;
+			auto const land_min = state.defines.trade_cap_low_limit_land;
+			auto const land_max = 1.0f;
+			auto const naval_min = state.defines.trade_cap_low_limit_naval;
+			auto const naval_max = 1.0f;
 
 			float est_gold_income = economy_estimations::estimate_gold_income(state, n);
 			float est_war_sub_income = economy_estimations::estimate_war_subsidies_income(state, n);
@@ -3437,7 +3484,6 @@ namespace ai {
 			n.set_education_spending(int8_t(set_educ_to * 100.f));
 			n.set_administrative_spending(int8_t(set_admin_to * 100.f));			
 			n.set_social_spending(int8_t(set_social_to * 100.f));
-			*/
 
 			// they don't have to add up to 1.f
 			// the reason they are there is to slow down AI spendings,
@@ -3630,6 +3676,7 @@ namespace ai {
 			n.set_overseas_spending(int8_t(overseas_max_ratio));
 			economy::bound_budget_settings(state, n);
 		});
+			*/
 	}
 
 
