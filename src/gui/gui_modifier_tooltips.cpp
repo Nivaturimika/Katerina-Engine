@@ -318,6 +318,16 @@ namespace ui {
 			if(bool(state.world.nation_get_is_bankrupt(n)))
 			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)], identation, header, nmid);
 		}
+		// difficulty modifiers
+		if(state.world.nation_get_is_player_controlled(n)) {
+			if(auto m = get_player_difficulty_modifier(state, state.difficulty); m) {
+				active_single_modifier_description(state, layout, m, identation, header, nmid);
+			}
+		} else {
+			if(auto m = get_ai_difficulty_modifier(state, state.difficulty); m) {
+				active_single_modifier_description(state, layout, m, identation, header, nmid);
+			}
+		}
 		// TODO: debt
 
 		for(auto tm : state.national_definitions.triggered_modifiers) {

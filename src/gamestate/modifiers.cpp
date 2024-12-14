@@ -291,8 +291,10 @@ namespace sys {
 		}
 
 		concurrency::parallel_for(uint32_t(0), sys::national_mod_offsets::count, [&](uint32_t i) {
-		dcon::national_modifier_value mid{dcon::national_modifier_value::value_base_t(i)};
-		state.world.execute_serial_over_nation([&](auto ids) { state.world.nation_set_modifier_values(ids, mid, ve::fp_vector{}); });
+			dcon::national_modifier_value mid{dcon::national_modifier_value::value_base_t(i)};
+			state.world.execute_serial_over_nation([&](auto ids) {
+				state.world.nation_set_modifier_values(ids, mid, ve::fp_vector{});
+			});
 		});
 
 		for(auto n : state.world.in_nation) {
@@ -354,7 +356,6 @@ namespace sys {
 				}
 			}
 		}
-
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
 			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)],
 				[&](auto ids) { return state.world.nation_get_infamy(ids); });
@@ -431,6 +432,15 @@ namespace sys {
 			bulk_apply_masked_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)],
 				[&](auto ids) { return state.world.nation_get_is_bankrupt(ids); });
 		}
+		// difficulty modifiers
+		if(auto m = get_player_difficulty_modifier(state, state.difficulty); m) {
+			bulk_apply_masked_modifier_to_nations(state, m,
+				[&](auto ids) { return state.world.nation_get_is_player_controlled(ids); });
+		}
+		if(auto m = get_ai_difficulty_modifier(state, state.difficulty); m) {
+			bulk_apply_masked_modifier_to_nations(state, m,
+				[&](auto ids) { return !state.world.nation_get_is_player_controlled(ids); });
+		}
 		// TODO: debt
 
 		if(update_tm) {
@@ -464,17 +474,16 @@ namespace sys {
 	}
 
 	void update_single_nation_modifiers(sys::state& state, dcon::nation_id n) {
-
 		for(uint32_t i = uint32_t(0); i < sys::national_mod_offsets::count; ++i) {
-		dcon::national_modifier_value mid{dcon::national_modifier_value::value_base_t(i)};
+			dcon::national_modifier_value mid{dcon::national_modifier_value::value_base_t(i)};
 			state.world.nation_set_modifier_values(n, mid, 0.0f);
 		}
 
 		if(auto ts = state.world.nation_get_tech_school(n); ts)
-		apply_modifier_values_to_nation(state, n, ts);
+			apply_modifier_values_to_nation(state, n, ts);
 
 		if(auto nv = state.world.nation_get_national_value(n); nv)
-		apply_modifier_values_to_nation(state, n, nv);
+			apply_modifier_values_to_nation(state, n, nv);
 
 		for(auto mpr : state.world.nation_get_current_modifiers(n)) {
 			apply_modifier_values_to_nation(state, n, mpr.mod_id);
@@ -512,11 +521,13 @@ namespace sys {
 
 		auto in_wars = state.world.nation_get_war_participant(n);
 		if(in_wars.begin() != in_wars.end()) {
-			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]) {
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]);
+			}
 		} else {
-			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]) {
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]);
+			}
 		}
 
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
@@ -560,29 +571,17 @@ namespace sys {
 
 		if(state.world.nation_get_is_civilized(n) == false) {
 			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)]);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::unciv_nation)]);
 		} else if(nations::is_great_power(state, n)) {
 			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)]);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::great_power)]);
 		} else if(state.world.nation_get_rank(n) <= uint16_t(state.defines.colonial_rank)) {
 			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)]);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::second_power)]);
 		} else {
 			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)])
-			apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]);
+				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::civ_nation)]);
 		}
-
-		switch(state.difficulty) {
-		case sys::difficulty_level::very_easy:
-		case sys::difficulty_level::easy:
-		case sys::difficulty_level::hard:
-		case sys::difficulty_level::very_hard:
-			break;
-		case sys::difficulty_level::normal:
-		default:
-			break;
-		}
-
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]) {
 			if(bool(state.world.nation_get_disarmed_until(n)) && state.world.nation_get_disarmed_until(n) > state.current_date) {
 				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::disarming)]);
@@ -591,6 +590,16 @@ namespace sys {
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]) {
 			if(bool(state.world.nation_get_is_bankrupt(n))) {
 				apply_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::in_bankrupcy)]);
+			}
+		}
+		// difficulty modifiers
+		if(state.world.nation_get_is_player_controlled(n)) {
+			if(auto m = get_player_difficulty_modifier(state, state.difficulty); m) {
+				apply_modifier_values_to_nation(state, n, m);
+			}
+		} else {
+			if(auto m = get_ai_difficulty_modifier(state, state.difficulty); m) {
+				apply_modifier_values_to_nation(state, n, m);
 			}
 		}
 		// TODO: debt
