@@ -304,16 +304,16 @@ namespace economy_factory {
 				+ 10.f
 			);
 
-		float relative_modifier = (1.f / (relative_production_amount + 0.01f)) / 1000.f;
-		float effective_production_scale = 0.0f;
-		float new_production_scale = 0.0f;
+		auto const relative_modifier = (1.f / (relative_production_amount + 0.01f)) / 1000.f;
+		auto const effective_production_scale = 0.0f;
+		auto new_production_scale = 0.0f;
 		if(state.world.factory_get_subsidized(f)) {
 			new_production_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + several_workers_scale * state.world.factory_get_level(f) * 10.f);
 		} else {
-			float over_profit_ratio = (raw_profit) / (desired_raw_profit + 0.0001f) - 1.f;
-			float under_profit_ratio = (desired_raw_profit) / (raw_profit + 0.0001f) - 1.f;
-			float speed_modifier = (over_profit_ratio - under_profit_ratio);
-			float speed = economy::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
+			auto const over_profit_ratio = (raw_profit) / (desired_raw_profit + 0.0001f) - 1.f;
+			auto const under_profit_ratio = (desired_raw_profit) / (raw_profit + 0.0001f) - 1.f;
+			auto const speed_modifier = (over_profit_ratio - under_profit_ratio);
+			auto speed = production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
 			speed = std::clamp(speed, -relative_modifier, relative_modifier);
 			new_production_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
 		}
