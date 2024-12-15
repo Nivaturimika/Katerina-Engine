@@ -3100,6 +3100,13 @@ namespace ai {
 			return false;
 		if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
 			return false;
+		for(auto const pc : state.world.nation_get_province_ownership(real_target)) {
+			for(auto const al : pc.get_province().get_army_location()) {
+				if(al.get_army().get_controller_from_army_control() == n) {
+					return false;
+				}
+			}
+		}
 		return military::can_use_cb_against(state, n, other);
 	}
 
