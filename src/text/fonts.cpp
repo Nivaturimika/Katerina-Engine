@@ -232,7 +232,7 @@ namespace text {
 					// inherit from previous (i - 1, j - 1)
 					yborder[i + dr_size * j] = yvalues[0];
 					xborder[i + dr_size * j] = xvalues[0];
-					distance_map[i + dr_size * j] = math::sqrti(
+					distance_map[i + dr_size * j] = std::sqrt(
 						(i - xvalues[0]) * (i - xvalues[0])
 						+ (j - yvalues[0]) * (j - yvalues[0])
 					);
@@ -240,7 +240,7 @@ namespace text {
 					// inherit from previous (i, j - 1)
 					yborder[i + dr_size * j] = yvalues[1];
 					xborder[i + dr_size * j] = xvalues[1];
-					distance_map[i + dr_size * j] = math::sqrti(
+					distance_map[i + dr_size * j] = std::sqrt(
 						(i - xvalues[1]) * (i - xvalues[1])
 						+ (j - yvalues[1]) * (j - yvalues[1])
 					);
@@ -248,7 +248,7 @@ namespace text {
 					// inherit from previous (i + 1, j - 1)
 					yborder[i + dr_size * j] = yvalues[2];
 					xborder[i + dr_size * j] = xvalues[2];
-					distance_map[i + dr_size * j] = math::sqrti(
+					distance_map[i + dr_size * j] = std::sqrt(
 						(i - xvalues[2]) * (i - xvalues[2])
 						+ (j - yvalues[2]) * (j - yvalues[2])
 					);
@@ -256,7 +256,7 @@ namespace text {
 					// inherit from previous (i - 1, j)
 					yborder[i + dr_size * j] = yvalues[3];
 					xborder[i + dr_size * j] = xvalues[3];
-					distance_map[i + dr_size * j] = math::sqrti(
+					distance_map[i + dr_size * j] = std::sqrt(
 						(i - xvalues[3]) * (i - xvalues[3])
 						+ (j - yvalues[3]) * (j - yvalues[3])
 					);
@@ -268,22 +268,22 @@ namespace text {
 				if(distance_map[(i + 1) + dr_size * (j)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i - 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i - 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i - 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i) + dr_size * (j + 1)] + 1.0f < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 				if(distance_map[(i + 1) + dr_size * (j + 1)] + rt_2 < distance_map[(i) + dr_size * (j)]) {
 					yborder[i + dr_size * j] = yborder[(i + 1) + dr_size * (j + 1)];
 					xborder[i + dr_size * j] = xborder[(i + 1) + dr_size * (j + 1)];
-					distance_map[(i) + dr_size * (j)] = math::sqrti((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
+					distance_map[(i) + dr_size * (j)] = std::sqrt((i - xborder[i + dr_size * j]) * (i - xborder[i + dr_size * j]) + (j - yborder[i + dr_size * j]) * (j - yborder[i + dr_size * j]));
 				}
 			}
 		}
