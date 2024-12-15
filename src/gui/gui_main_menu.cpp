@@ -191,19 +191,19 @@ namespace ui {
 
 		//
 		if(state.ui_state.units_root)
-		state.ui_state.units_root->impl_on_reset_text(state);
+			state.ui_state.units_root->impl_on_reset_text(state);
 		if(state.ui_state.colonizations_root)
-		state.ui_state.colonizations_root->impl_on_reset_text(state);
+			state.ui_state.colonizations_root->impl_on_reset_text(state);
 		if(state.ui_state.rgos_root)
-		state.ui_state.rgos_root->impl_on_reset_text(state);
+			state.ui_state.rgos_root->impl_on_reset_text(state);
 		if(state.ui_state.root)
-		state.ui_state.root->impl_on_reset_text(state);
+			state.ui_state.root->impl_on_reset_text(state);
 		if(state.ui_state.nation_picker)
-		state.ui_state.nation_picker->impl_on_reset_text(state);
+			state.ui_state.nation_picker->impl_on_reset_text(state);
 		if(state.ui_state.select_states_legend)
-		state.ui_state.select_states_legend->impl_on_reset_text(state);
+			state.ui_state.select_states_legend->impl_on_reset_text(state);
 		if(state.ui_state.end_screen)
-		state.ui_state.end_screen->impl_on_reset_text(state);
+			state.ui_state.end_screen->impl_on_reset_text(state);
 		state.province_ownership_changed.store(true, std::memory_order::release); //update map
 		state.province_name_changed.store(true, std::memory_order::release);
 		state.game_state_updated.store(true, std::memory_order::release); //update ui

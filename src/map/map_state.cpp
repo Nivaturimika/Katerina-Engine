@@ -230,7 +230,7 @@ namespace map {
 		auto& f = state.font_collection.get_font(state, text::font_selection::map_font);
 		auto const font_id = text::name_into_font_id(state, "mapfont_56");
 		//auto const& bm_font = text::get_bm_font(state, font_id);
-		auto font_size = float(text::size_from_font_id(font_id));
+		auto const font_size = float(text::size_from_font_id(font_id));
 
 		// retroscipt
 		std::vector<text_line_generator_data> text_data;
@@ -240,8 +240,8 @@ namespace map {
 
 		constexpr int32_t samples_N = 100;
 		constexpr int32_t samples_M = 50;
-		float step_x = float(map_data.size_x) / float(samples_N);
-		float step_y = float(map_data.size_y) / float(samples_M);
+		auto const step_x = float(map_data.size_x) / float(samples_N);
+		auto const step_y = float(map_data.size_y) / float(samples_M);
 		// vassal names overriden by overlords
 		for(auto const candidate : state.world.in_province) {
 			auto const rid = candidate.get_connected_region_id();
@@ -259,9 +259,10 @@ namespace map {
 				}
 			}
 		}
-
 		for(auto n : state.world.in_nation) {
 			n = get_top_overlord(state, n.id);
+			if(!n || n.get_owned_province_count() == 0)
+				continue;
 			for(auto po : state.world.nation_get_province_ownership(n)) {
 				auto p = po.get_province();
 				if(p.id.index() >= state.province_definitions.first_sea_province.index())
@@ -287,8 +288,6 @@ namespace map {
 						}
 					}
 				}
-				if(!n || n.get_owned_province_count() == 0)
-					continue;
 
 				auto nation_name = text::produce_simple_string(state, text::get_name(state, n));
 				nation_name = nation_name_prettify_for_map(state, nation_name);
@@ -410,8 +409,6 @@ namespace map {
 					break; //no fix
 				}
 
-				
-
 				std::transform(name.begin(), name.end(), name.begin(), [](auto const ch) {
 					return char(toupper(ch));
 				});
@@ -444,8 +441,8 @@ namespace map {
 					continue;
 				}
 
-				std::vector<glm::vec2> points;
-				std::vector<glm::vec2> bad_points;
+				std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> points;
+				std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> bad_points;
 
 				rough_box_bottom = std::max(0.f, rough_box_bottom - step_y);
 				rough_box_top = std::min(float(map_data.size_y), rough_box_top + step_y);
@@ -539,13 +536,13 @@ namespace map {
 				if(points.size() < num_of_clusters) {
 					num_of_clusters = points.size();
 				}
-				std::vector<glm::vec2> centroids;
+				std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> centroids;
 				for(size_t i = 0; i < num_of_clusters; i++) {
 					centroids.push_back(points[i]);
 				}
 				for(int step = 0; step < 100; step++) {
-					std::vector<glm::vec2> new_centroids;
-					std::vector<int> counters;
+					std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> new_centroids;
+					std::vector<int32_t, dcon::cache_aligned_allocator<int32_t>> counters;
 					for(size_t i = 0; i < num_of_clusters; i++) {
 						new_centroids.push_back(glm::vec2(0, 0));
 						counters.push_back(0);
@@ -569,9 +566,9 @@ namespace map {
 					centroids = new_centroids;
 				}
 
-				std::vector<size_t> good_centroids;
+				std::vector<size_t, dcon::cache_aligned_allocator<size_t>> good_centroids;
 				float min_cross = 1.f;
-				std::vector<glm::vec2> final_points;
+				std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> final_points;
 				for(size_t i = 0; i < num_of_clusters; i++) {
 					float locally_good_distance = std::numeric_limits<float>::max();
 					for(size_t j = 0; j < num_of_clusters; j++) {
@@ -602,7 +599,7 @@ namespace map {
 				}
 
 				//throwing away bad cluster
-				std::vector<glm::vec2> good_points;
+				std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>> good_points;
 				glm::vec2 sum_points = { 0.f, 0.f };
 				for(auto point : points) {
 					size_t closest = 0;

@@ -274,9 +274,7 @@ namespace sys {
 
 		if(game_state_was_updated) {
 			update_tech_queue();
-
 			current_scene.on_game_state_update(*this);
-
 			nations::update_ui_rankings(*this);
 			// Processing of (gamestate <=> ui) queues
 			if(current_scene.accept_events) {
@@ -628,8 +626,7 @@ namespace sys {
 		ui::display_pending_error_window(*this);
 
 		// Do not update state sensitive updates!
-		if(network_state.save_slock.load(std::memory_order::acquire) == false
-		&& game_state_updated.load(std::memory_order::acquire) == true) {
+		if(network_state.save_slock.load(std::memory_order::acquire) == false) {
 			update_render();
 		}
 
