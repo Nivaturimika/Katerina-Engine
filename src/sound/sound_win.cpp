@@ -425,9 +425,6 @@ namespace sound {
 	}
 
 	void sound_impl::update_graphs() {
-		if(music_finished()) {
-			play_new_track(state);
-		}
 		// fix for WINE
 		if(current_effect && current_effect->is_finished()) {
 			current_effect->stop();
@@ -438,6 +435,9 @@ namespace sound {
 	}
 
 	void update_music_track(sys::state& state) {
+		if(state.sound_ptr->music_finished()) {
+			state.sound_ptr->play_new_track(state);
+		}
 		if(state.sound_ptr) {
 			state.sound_ptr->update_graphs();
 		}
