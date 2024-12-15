@@ -721,8 +721,10 @@ namespace ui {
 		auto const pt = state.world.pop_get_poptype(content);
 		
 		describe_savings<true>(state, contents, "pop_details_balance_savings", state.world.pop_get_savings(content));
+		auto const tax_pop = state.world.nation_get_demographics(n, demographics::total);
+		auto const tax_ratio = tax_pop > 0.f ? state.world.pop_get_size(content) / tax_pop : 0.f;
 		auto const taxes = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata(state.world.pop_type_get_strata(pt)));
-		describe_savings<false>(state, contents, "pop_details_balance_taxes", taxes);
+		describe_savings<false>(state, contents, "pop_details_balance_taxes", taxes * tax_ratio);
 		auto const total = state.world.pop_get_size(content)
 			* (state.world.nation_get_life_needs_costs(n, pt)
 			+ state.world.nation_get_everyday_needs_costs(n, pt)

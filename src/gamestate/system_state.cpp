@@ -172,11 +172,9 @@ namespace sys {
 			ui::mouse_probe_type::scroll).under_mouse;
 			auto belongs_on_map = [&](ui::element_base* b) {
 				while(b != nullptr) {
-					if(b == ui_state.units_root.get())
-						return true;
-					if(b == ui_state.colonizations_root.get())
-						return true;
-					if(b == ui_state.rgos_root.get())
+					if(b == ui_state.units_root.get()
+					|| b == ui_state.colonizations_root.get()
+					|| b == ui_state.rgos_root.get())
 						return true;
 					b = b->parent;
 				}
@@ -186,7 +184,6 @@ namespace sys {
 				ui_state.scroll_target->impl_on_scroll(*this, ui_state.relative_mouse_location.x, ui_state.relative_mouse_location.y, amount, mod);
 			} else if(ui_state.under_mouse == nullptr || belongs_on_map(ui_state.under_mouse)) {
 				map_state.on_mouse_wheel(x, y, x_size, y_size, mod, amount);
-
 				if(ui_state.mouse_sensitive_target) {
 					ui_state.mouse_sensitive_target->set_visible(*this, false);
 					ui_state.mouse_sensitive_target = nullptr;
