@@ -2667,7 +2667,7 @@ namespace parsers {
 			context.outer_context.state.world.diplomatic_relation_set_truce_until(rel, sys::date(v, context.outer_context.state.start_date));
 		} else {
 			auto new_rel = context.outer_context.state.world.force_create_diplomatic_relation(context.nation_with, context.nation_for);
-			context.outer_context.state.world.diplomatic_relation_set_truce_until(rel, sys::date(v, context.outer_context.state.start_date));
+			context.outer_context.state.world.diplomatic_relation_set_truce_until(new_rel, sys::date(v, context.outer_context.state.start_date));
 		}
 	}
 
