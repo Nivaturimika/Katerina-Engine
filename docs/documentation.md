@@ -335,3 +335,21 @@ pdqsort(total_vector.begin(), total_vector.end(), [&](auto a, auto b) {
 	return a.first.index() < b.first.index();
 });
 ```
+
+## Project guidelines
+
+### Release numbering
+
+KE uses four numbers for telling the version of KE: x.y.z.t. x will be only increase if we the devs believe that KE is release quality. y will be increased after a lot of change happend to KE (usually 4-6 months of changes). And z increases when we are confident that this version is better than the previous one. t is only used if we want to signal that we aren't sure that KE has improved from the previous version enough for z to be increased. Meaning that if we use t it signals that this version may have unfinished, not tested features.
+
+So both x.y.z and x.y.z.t is a valid version. Only difference is that the first one is a release and the second one is a pre release.
+
+The following is an example of the system:
+0.1.0
+0.1.1.1
+0.1.1.2
+0.1.1.3
+0.1.1
+0.1.2.1
+0.1.2.2
+0.1.2
