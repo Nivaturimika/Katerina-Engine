@@ -348,6 +348,8 @@ namespace ui {
 	}
 	void vassal_names_checkbox::button_action(sys::state& state) noexcept {
 		state.user_settings.vassal_names = !state.user_settings.vassal_names;
+		state.province_ownership_changed.store(true, std::memory_order::release); //update map
+		state.province_name_changed.store(true, std::memory_order::release);
 		send(state, parent, notify_setting_update{});
 	}
 
@@ -357,7 +359,7 @@ namespace ui {
 	void railroad_checkbox::button_action(sys::state& state) noexcept {
 		state.user_settings.railroads_enabled = !state.user_settings.railroads_enabled;
 		state.railroad_built.store(true, std::memory_order::release);
-	send(state, parent, notify_setting_update{});
+		send(state, parent, notify_setting_update{});
 	}
 
 	bool river_checkbox::is_active(sys::state& state) noexcept {
@@ -365,7 +367,7 @@ namespace ui {
 	}
 	void river_checkbox::button_action(sys::state& state) noexcept {
 		state.user_settings.rivers_enabled = !state.user_settings.rivers_enabled;
-	send(state, parent, notify_setting_update{});
+		send(state, parent, notify_setting_update{});
 	}
 
 	void map_label_left::button_action(sys::state& state) noexcept {
