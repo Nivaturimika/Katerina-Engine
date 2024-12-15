@@ -370,13 +370,7 @@ namespace ui {
 			return tooltip_behavior::variable_tooltip;
 		}
 
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto content = retrieve<dcon::pop_id>(state, parent);
-			auto fat_id = dcon::fatten(state.world, content);
-			auto box = text::open_layout_box(contents, 0);
-			text::localised_single_sub_box(state, contents, box, std::string_view("pop_daily_money"), text::variable_type::val, text::fp_currency{state.world.pop_get_savings(fat_id.id)});
-			text::close_layout_box(contents, box);
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class pop_production_icon : public image_element_base {

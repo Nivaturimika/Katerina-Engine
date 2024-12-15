@@ -4,6 +4,7 @@
 #include "gui_modifier_tooltips.hpp"
 #include "gui_trigger_tooltips.hpp"
 #include "triggers.hpp"
+#include "economy_estimations.hpp"
 
 namespace ui {
 	void describe_conversion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
@@ -700,5 +701,41 @@ namespace ui {
 		text::add_space_to_layout_box(state, contents, box);
 		text::add_to_layout_box(state, contents, box, text::fp_percentage{un_empl});
 		text::close_layout_box(contents, box);
+	}
+
+	template<bool always_show>
+	void describe_savings(sys::state& state, text::columnar_layout& contents, std::string_view sv, float value) {
+		if(value != 0.f || always_show) {
+			auto box = text::open_layout_box(contents, 0);
+			text::localised_format_box(state, contents, box, sv);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_currency{ value }, value >= 0.f ? text::text_color::green : text::text_color::red);
+			text::close_layout_box(contents, box);
+		}
+	}
+
+	void pop_cash_reserve_text::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+		auto const content = retrieve<dcon::pop_id>(state, parent);
+		auto const p = state.world.pop_get_province_from_pop_location(content);
+		auto const n = state.world.province_get_nation_from_province_ownership(p);
+		auto const pt = state.world.pop_get_poptype(content);
+		
+		describe_savings<true>(state, contents, "pop_details_balance_savings", state.world.pop_get_savings(content));
+		auto const taxes = economy_estimations::estimate_tax_income_by_strata(state, n, culture::pop_strata(state.world.pop_type_get_strata(pt)));
+		describe_savings<false>(state, contents, "pop_details_balance_taxes", taxes);
+		auto const total = state.world.pop_get_size(content)
+			* (state.world.nation_get_life_needs_costs(n, pt)
+			+ state.world.nation_get_everyday_needs_costs(n, pt)
+			+ state.world.nation_get_luxury_needs_costs(n, pt));
+		describe_savings<false>(state, contents, "pop_details_balance_needs", total);
+		if(state.world.pop_type_get_has_unemployment(pt)) {
+			auto const total_employed = state.world.nation_get_demographics(n, demographics::employed);
+			auto const total_employable = state.world.nation_get_demographics(n, demographics::employable);
+			auto const total_unemp = total_employable - total_employed;
+			auto const s_spending = economy_estimations::estimate_social_spending(state, n);
+			if(total_unemp > 0.f) {
+				describe_savings<false>(state, contents, "pop_details_balance_social", s_spending / total_unemp);
+			}
+		}
 	}
 } // namespace ui

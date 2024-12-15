@@ -51,27 +51,27 @@ namespace economy_estimations {
 	}
 
 	float estimate_social_spending(sys::state& state, dcon::nation_id n) {
-		auto total = 0.f;
 		auto const s_spending = state.world.nation_get_administrative_efficiency(n) * float(state.world.nation_get_social_spending(n)) / 100.0f;
 		auto const p_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::pension_level);
 		auto const unemp_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::unemployment_benefit);
+		auto total = 0.f;
 		state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
-			auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
-			if(adj_pop_of_type <= 0)
-				return;
-			auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
-			if(ln_type == culture::income_type::administration
-			|| ln_type == culture::income_type::education
-			|| ln_type == culture::income_type::military) {
-				//nothing
-			} else { // unemployment, pensions
-				total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
-				if(state.world.pop_type_get_has_unemployment(pt)) {
-					auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
-					//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
-					//after the employment one?
-					emp = std::min(emp, adj_pop_of_type);
-					total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+			auto size = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
+			if(size > 0.f) {
+				auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
+				if(ln_type == culture::income_type::administration
+				|| ln_type == culture::income_type::education
+				|| ln_type == culture::income_type::military) {
+					//nothing
+				} else { // unemployment, pensions
+					total += s_spending * size * p_level * state.world.nation_get_life_needs_costs(n, pt);
+					if(state.world.pop_type_get_has_unemployment(pt)) {
+						auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
+						//sometimes emp > size, why? no idea, perhaps we are doing the pop growth update
+						//after the employment one?
+						emp = std::min(emp, size);
+						total += s_spending * (size - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+					}
 				}
 			}
 		});
@@ -81,20 +81,20 @@ namespace economy_estimations {
 	float estimate_pop_payouts_by_income_type(sys::state& state, dcon::nation_id n, culture::income_type in) {
 		auto total = 0.f;
 		state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
-			auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
-			if(adj_pop_of_type <= 0)
-				return;
-			auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
-			if(ln_type == in) {
-				total += adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
-			}
-			auto en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
-			if(en_type == in) {
-				total += adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
-			}
-			auto lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
-			if(lx_type == in) {
-				total += adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
+			auto const size = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
+			if(size > 0.f) {
+				auto const ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
+				if(ln_type == in) {
+					total += size * state.world.nation_get_life_needs_costs(n, pt);
+				}
+				auto const en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
+				if(en_type == in) {
+					total += size * state.world.nation_get_everyday_needs_costs(n, pt);
+				}
+				auto const lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
+				if(lx_type == in) {
+					total += size * state.world.nation_get_luxury_needs_costs(n, pt);
+				}
 			}
 		});
 		return total * economy::pop_payout_factor;
@@ -127,13 +127,15 @@ namespace economy_estimations {
 		return total;
 	}
 	float estimate_reparations_income(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
+		auto total = 0.0f;
 		for(auto uni : state.world.nation_get_unilateral_relationship_as_target(n)) {
 			if(uni.get_reparations() && state.current_date < uni.get_source().get_reparations_until()) {
-				auto source = uni.get_source();
+				auto const source = uni.get_source();
 				auto const tax_eff = nations::tax_efficiency(state, n);
-				auto total_tax_base = state.world.nation_get_total_rich_income(source) + state.world.nation_get_total_middle_income(source) + state.world.nation_get_total_poor_income(source);
-				auto payout = total_tax_base * tax_eff * state.defines.reparations_tax_hit;
+				auto const total_tax_base = state.world.nation_get_total_rich_income(source)
+					+ state.world.nation_get_total_middle_income(source)
+					+ state.world.nation_get_total_poor_income(source);
+				auto const payout = total_tax_base * tax_eff * state.defines.reparations_tax_hit;
 				total += payout;
 			}
 		}
@@ -141,7 +143,7 @@ namespace economy_estimations {
 	}
 
 	float estimate_war_subsidies_spending(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
+		auto total = 0.0f;
 		for(auto uni : state.world.nation_get_unilateral_relationship_as_source(n)) {
 			if(uni.get_war_subsidies()) {
 				total += uni.get_target().get_maximum_military_costs() * state.defines.warsubsidies_percent;
@@ -166,8 +168,8 @@ namespace economy_estimations {
 	}
 
 	float estimate_diplomatic_balance(sys::state& state, dcon::nation_id n) {
-		float w_sub = estimate_war_subsidies_income(state, n) - estimate_war_subsidies_spending(state, n);
-		float w_reps = estimate_reparations_income(state, n) - estimate_reparations_spending(state, n);
+		auto const w_sub = estimate_war_subsidies_income(state, n) - estimate_war_subsidies_spending(state, n);
+		auto const w_reps = estimate_reparations_income(state, n) - estimate_reparations_spending(state, n);
 		return w_sub + w_reps;
 	}
 
