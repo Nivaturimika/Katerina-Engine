@@ -150,14 +150,14 @@ namespace ui {
 					index = int32_t(messages.size()) - 1;
 				}
 			}
+			desc_text->impl_on_update(state);
 			// Automatically resize the message window :)
-			desc_text->on_update(state);
 			auto const new_height = std::max(desc_text->line_height
 				* float(desc_text->internal_layout.number_of_lines), 72.f);
 			base_data.size.y = new_height + 196;
 			bg_elm->base_data.size.y = new_height + 196;
-			dismiss_btn->base_data.position.y = desc_text->base_data.position.y + desc_text->base_data.size.y + 24;
 			desc_text->base_data.size.y = new_height;
+			dismiss_btn->base_data.position.y = desc_text->base_data.position.y + desc_text->base_data.size.y + 24;
 			//
 			prev_size = int32_t(messages.size());
 			count_text->set_text(state, std::to_string(int32_t(index) + 1) + "/" + std::to_string(int32_t(messages.size())));
