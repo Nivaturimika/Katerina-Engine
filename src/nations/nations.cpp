@@ -188,7 +188,7 @@ namespace nations {
 		for(auto n : state.world.in_nation) {
 			n.set_is_great_power(false);
 		}
-		for(auto& gp : state.great_nations) {
+		for(auto const& gp : state.great_nations) {
 			state.world.nation_set_is_great_power(gp.nation, true);
 		}
 		state.world.execute_serial_over_nation([&](auto ids) {
@@ -204,6 +204,21 @@ namespace nations {
 				state.world.nation_set_in_sphere_of(t, gp);
 			}
 		});
+
+		// GPs can't have GP relations with each other, nor can a GP be in sphere of another
+		for(auto const& gp1 : state.great_nations) {
+			state.world.nation_set_in_sphere_of(gp1.nation, dcon::nation_id{});
+			for(auto const& gp2 : state.great_nations) {
+				if(gp1.nation != gp2.nation) {
+					if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(gp1.nation, gp2.nation)) {
+						state.world.delete_gp_relationship(rel);
+					}
+					if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(gp2.nation, gp1.nation)) {
+						state.world.delete_gp_relationship(rel);
+					}
+				}
+			}
+		}
 
 		restore_cached_values(state);
 	}
