@@ -353,11 +353,11 @@ Additionally, the order of execution for `if` and `else`/`else_if` statments all
 ```
 if = {
 	limit = { a = yes }
-		money = 1
+	money = 1
 	if = {
 		limit = { b = yes }
 		money = 50
-	} else {
+	} else = {
 		money = 100
 	}
 }
@@ -368,7 +368,7 @@ if = {
 	limit = { a = yes b = yes }
 	money = 1
 	money = 50
-} else_if {
+} else_if = {
 	limit = { a = yes }
 	money = 1
 	money = 100
@@ -379,7 +379,7 @@ Additionally, negation of statments are implicit, in other words:
 ```
 if = {
 	limit = { test == yes }
-} else {
+} else = {
 	limit = { test != yes }
 }
 ```
@@ -480,11 +480,9 @@ It's "current frame" would be controlled by the variable `gui_frame_doomsday_clo
 `size = { x = 5 y = 10 }` can be written as `size = { 5 10 }`, as can most places expecting an x and y pair.
 Additionally, `maxwidth = 5` and `maxheight = 10` can be written as `maxsize = { 5 10 }`
 
-### .gui layout extensions
+### `.gui` layout extensions
 
-Laying out elements in the GUI can be a tedious process, while a WYSWYG editor would be ideal, it's not currently available at the moment.
-
-However, the following new extensions will make GUI editing way less painful:
+Laying out elements in the GUI can be a tedious process, while a WYSWYG editor would be ideal, it's not currently available at the moment. However, the following new extensions will make GUI editing way less painful:
 
 - `add_size = { x y }`: Adds the specified amount to the current `size`
 - `add_position = { x y }`: Adds the specified amount to the current `position`
@@ -501,7 +499,6 @@ KatEngine adds a handful of new defines:
 - `alice_speed_2`: Same as above but with speed 2
 - `alice_speed_3`: Same as above but with speed 3
 - `alice_speed_4`: Same as above but with speed 4
-- `alice_speed_5`: Same as above but with speed 5
 - `alice_ai_gather_radius`: Radius AI will use to gather nearby armies to make deathstacks
 - `alice_ai_threat_radius`: Radius AI will scan for threats
 - `alice_ai_threat_overestimate`: Overestimate AI opponents (higher values leads to camping)
@@ -531,11 +528,11 @@ KatEngine adds a handful of new defines:
 - `alice_sat_delay_factor`: Satisfaction delay factor
 - `alice_need_drift_speed`: Drift speed of need weights for POPs
 - `alice_disable_divergent_any_country_effect`: On events, `any_country = { ... }` refers to any country, including non-existant and the one scoped, in decisions, `any_country = { ... }` refers only to existing nations and not the one on scope. Set 0 to keep this behaviour, set 1 to use a universal `any_country = { ... }` that scopes existing countries including the currently scoped nation.
-- `alice_unciv_civ_forbid_war`: Forbids civilized nations from aiding uncivilized ones except via scripted events
-- `alice_ideology_base_change_rate`: Base change rate for ideology for pops
-- `alice_nurture_religion_assimilation`: Whetever religion assimilation should also convert pops or not (0 = yes, 1 = no)
-- `alice_surrender_on_cores_lost`: Force AI to surrender when they have lost their cores, or if they have no cores, all of their land
-- `alice_artificial_gp_limitant`: Limit the number of GP allies the AI can have
+- `alice_unciv_civ_forbid_war`: Forbids AI civilized nations from aiding AI uncivilized ones except via scripted events
+- `alice_ideology_base_change_rate`: Base change rate for ideology for pops.
+- `alice_nurture_religion_assimilation`: Whetever religion assimilation should also convert pops or not (0 = yes, 1 = no).
+- `alice_surrender_on_cores_lost`: Force AI to surrender when they have lost their cores, or if they have no cores, all of their land.
+- `alice_artificial_gp_limitant`: Limit the number of GP allies the AI can have.
 - `alice_rename_dont_use_localisation`: Keys specified on `change_region_name` or `change_province_name` will be treated as CSV keys, otherwise they will define in-line.
 - `alice_spherelings_only_ally_sphere`: Spherelings will only ally their spherelord.
 - `alice_overseas_mil`: Militancy increase in overseas provinces when overseas maintenance is at zero.
@@ -549,17 +546,19 @@ party_issues = {
 	trade_policy = {
 		protectionism = {
 			vote_modifiers = { ... }
-		...
+		}
+	}
+}
 ```
 Inside the `vote_modifiers` section one or more modifiers can be defined for reform options belonging to social or political issues. (These modifiers share the same format with the `add_political_reform` modifiers in the ideology file. Like those modifiers, they are computed additively, and like those modifiers they contain the nation in their primary and THIS scopes.) For example, you could add something like the following (not that it makes much sense as an example, but whatever).
 ```
-		trinket_health_care = {
-			base = 1
-			modifier = {
-				factor = -1
-				NOT = { ruling_party_ideology = fascist }
-			}
-		}
+trinket_health_care = {
+	base = 1
+	modifier = {
+		factor = -1
+		NOT = { ruling_party_ideology = fascist }
+	}
+}
 ```
 When these modifiers are present, instead of using the generic add/remove political/social reform modifiers for an ideology to determine reform support the support for a particular reform option, the game will first attempt to use the modifier(s) associated with the active issue options of the active party associated with that ideology (if there is more than one such party, one will be picked arbitrarily for this). This will completely override the generic add/remove reform modifiers, allowing a party-ideology combination to support (or oppose) particular reforms in a category even when it would otherwise generically oppose (or support) all such reforms.
 

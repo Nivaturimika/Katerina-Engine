@@ -4029,10 +4029,10 @@ namespace sys {
 	void state::game_loop() {
 		static int32_t game_speed[] = {
 			0,		// speed 0
-			2000,	// speed 1 -- 2 seconds
-			750,		// speed 2 -- 0.75 seconds
-			250, 	// speed 3 -- 0.25 seconds
-			125,		// speed 4 -- 0.125 seconds
+			2000, // speed 1 -- 2 seconds
+			750, // speed 2 -- 0.75 seconds
+			250, // speed 3 -- 0.25 seconds
+			125, // speed 4 -- 0.125 seconds
 		};
 		game_speed[1] = int32_t(defines.alice_speed_1);
 		game_speed[2] = int32_t(defines.alice_speed_2);

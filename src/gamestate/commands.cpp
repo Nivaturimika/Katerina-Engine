@@ -2634,34 +2634,35 @@ namespace command {
 		dcon::nation_id real_target = target;
 
 		auto target_ol_rel = state.world.nation_get_overlord_as_subject(target);
-		if(state.world.overlord_get_ruler(target_ol_rel))
-		real_target = state.world.overlord_get_ruler(target_ol_rel);
+		if(state.world.overlord_get_ruler(target_ol_rel)) {
+			real_target = state.world.overlord_get_ruler(target_ol_rel);
+		}
 
 		if(source == target || source == real_target)
-		return false;
+			return false;
 
 		if(state.world.nation_get_owned_province_count(target) == 0 || state.world.nation_get_owned_province_count(real_target) == 0)
-		return false;
+			return false;
 
 		if(military::are_allied_in_war(state, source, real_target) || military::are_at_war(state, source, real_target))
-		return false;
+			return false;
 
 		if(nations::are_allied(state, real_target, source))
-		return false;
+			return false;
 
 		auto source_ol_rel = state.world.nation_get_overlord_as_subject(source);
 		if(state.world.overlord_get_ruler(source_ol_rel) && state.world.overlord_get_ruler(source_ol_rel) != real_target)
-		return false;
+			return false;
 
 		if(state.world.nation_get_in_sphere_of(real_target) == source)
-		return false;
+			return false;
 
-		if(state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.declarewar_diplomatic_cost)
-		return false;
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.declarewar_diplomatic_cost)
+			return false;
 
 		// check CB validity
 		if(!military::cb_instance_conditions_satisfied(state, source, target, primary_cb, cb_state, cb_tag, cb_secondary_nation))
-		return false;
+			return false;
 
 		//no armies on nation
 		for(auto const pc : state.world.nation_get_province_ownership(target)) {

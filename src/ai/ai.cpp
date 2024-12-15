@@ -3096,11 +3096,11 @@ namespace ai {
 			return false;
 		if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
 			return false;
+		if(military::are_allied_in_war(state, n, other) || military::are_allied_in_war(state, n, real_target))
+			return false;
 		if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
 			return false;
-		if(!military::can_use_cb_against(state, n, other))
-			return false;
-		return true;
+		return military::can_use_cb_against(state, n, other);
 	}
 
 	/* Whetever or not this declaration of war would be geopolitically/strategically viable */
