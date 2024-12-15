@@ -2391,7 +2391,7 @@ namespace economy {
 
 				bool all_finished = true;
 				if(c.get_nation().get_is_player_controlled() && state.cheat_data.instant_navy) {
-				// If instant_navy cheat enabled, construction must be finished
+					// If instant_navy cheat enabled, construction must be finished
 				} else {
 					for(uint32_t i = 0; i < commodity_set::set_size && all_finished; ++i) {
 						if(base_cost.commodity_type[i]) {
@@ -2445,21 +2445,25 @@ namespace economy {
 			auto& current_purchased = state.world.province_building_construction_get_purchased_goods(c);
 
 			bool all_finished = true;
-			for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
-				if(base_cost.commodity_type[j]) {
-					if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * admin_cost_factor) {
-						all_finished = false;
+			if(state.world.nation_get_is_player_controlled(state.world.province_building_construction_get_nation(c))
+			&& state.cheat_data.instant_industry) {
+				// If instant_industry cheat enabled, construction must be finished
+			} else {
+				for(uint32_t j = 0; j < commodity_set::set_size && all_finished; ++j) {
+					if(base_cost.commodity_type[j]) {
+						if(current_purchased.commodity_amounts[j] < base_cost.commodity_amounts[j] * admin_cost_factor) {
+							all_finished = false;
+						}
+					} else {
+						break;
 					}
-				} else {
-					break;
 				}
-			}
-
-			float construction_time = state.economy_definitions.building_definitions[int32_t(t)].time;
-			if(all_finished) {
-				auto time = state.world.province_building_construction_get_remaining_construction_time(c);
-				all_finished = (time <= 0);
-				state.world.province_building_construction_set_remaining_construction_time(c, time - 1);
+				float construction_time = state.economy_definitions.building_definitions[int32_t(t)].time;
+				if(all_finished) {
+					auto time = state.world.province_building_construction_get_remaining_construction_time(c);
+					all_finished = (time <= 0);
+					state.world.province_building_construction_set_remaining_construction_time(c, time - 1);
+				}
 			}
 
 			if(all_finished) {
