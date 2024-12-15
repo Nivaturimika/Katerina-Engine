@@ -10,19 +10,20 @@ typedef struct HWND__* HWND;
 namespace sound {
 
 	class audio_instance {
-		private:
+	private:
 		IGraphBuilder* graph_interface = nullptr;
 		IMediaControl* control_interface = nullptr;
 		IBasicAudio* audio_interface = nullptr;
 		IMediaSeeking* seek_interface = nullptr;
 		IMediaEventEx* event_interface = nullptr;
 		std::atomic<bool> interface_lock;
-		public:
+		bool is_finished() const;
+	public:
 		std::wstring filename;
 		float volume_multiplier = 1.0f;
 
-	audio_instance() { }
-	audio_instance(std::wstring const& file) : filename(file) { }
+		audio_instance() { }
+		audio_instance(std::wstring const& file) : filename(file) { }
 		audio_instance(audio_instance const&) = delete;
 		audio_instance(audio_instance&& o) noexcept
 			: graph_interface(o.graph_interface), control_interface(o.control_interface),
@@ -46,6 +47,7 @@ namespace sound {
 		void stop() const;
 		bool is_playing() const;
 		void change_volume(float new_volume) const;
+
 
 		friend class sound_impl;
 	};

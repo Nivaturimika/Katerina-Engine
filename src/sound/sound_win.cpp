@@ -40,28 +40,28 @@ namespace sound {
 			return;
 
 		if(!graph_interface) {
-			IGraphBuilder* pGraph = nullptr;
-
-			HRESULT hr = CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
+			// graph interface not built yet (first time playing)
+			// so play
+			IGraphBuilder* pGraph = NULL;
+			HRESULT hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
 			if(FAILED(hr)) {
 				reports::write_debug("failed to create graph builder\n");
 				return;
 			}
-
-			hr = pGraph->RenderFile((wchar_t const*)(filename.c_str()), nullptr);
+			hr = pGraph->RenderFile((wchar_t const*)(filename.c_str()), NULL);
 			if(FAILED(hr)) {
 				reports::write_debug("unable to play audio file\n");
 				volume_multiplier = 0.0f;
 				return;
 			}
-			IMediaControl* pControl = nullptr;
+			IMediaControl* pControl = NULL;
 			hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
 			if(FAILED(hr)) {
 				reports::write_debug("failed to get control interface\n");
 				return;
 			}
 			if(as_music) {
-				IMediaEventEx* pEvent = nullptr;
+				IMediaEventEx* pEvent = NULL;
 				hr = pGraph->QueryInterface(IID_IMediaEventEx, (void**)&pEvent);
 				if(FAILED(hr)) {
 					reports::write_debug("failed to get event interface\n");
@@ -74,13 +74,13 @@ namespace sound {
 				}
 				event_interface = pEvent;
 			}
-			IBasicAudio* pAudio = nullptr;
+			IBasicAudio* pAudio = NULL;
 			hr = pGraph->QueryInterface(IID_IBasicAudio, (void**)&pAudio);
 			if(FAILED(hr)) {
 				reports::write_debug("failed to get audio interface\n");
 				return;
 			}
-			IMediaSeeking* pSeek = nullptr;
+			IMediaSeeking* pSeek = NULL;
 			hr = pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
 			if(FAILED(hr)) {
 				reports::write_debug("failed to get seeking interface\n");
@@ -90,39 +90,25 @@ namespace sound {
 			control_interface = pControl;
 			audio_interface = pAudio;
 			seek_interface = pSeek;
-			hr = ((IBasicAudio*)pAudio)->put_Volume(volume_function(volume * volume_multiplier));
+		}
+		HRESULT hr;
+		if(audio_interface) {
+			hr = audio_interface->put_Volume(volume_function(volume * volume_multiplier));
 			if(FAILED(hr)) {
 				reports::write_debug("failed to put_Volume\n");
 			}
+		}
+		if(seek_interface) {
 			LONGLONG new_position = 0;
-			hr = ((IMediaSeeking*)pSeek)->SetPositions(&new_position, AM_SEEKING_AbsolutePositioning, nullptr, AM_SEEKING_NoPositioning);
+			hr = seek_interface->SetPositions(&new_position, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning);
 			if(FAILED(hr)) {
 				reports::write_debug("failed to SetPositions\n");
 			}
-			hr = ((IMediaControl*)pControl)->Run();
+		}
+		if(control_interface) {
+			hr = control_interface->Run();
 			if(FAILED(hr)) {
 				reports::write_debug("failed to Run\n");
-			}
-		} else {
-			HRESULT hr;
-			if(audio_interface) {
-				hr = audio_interface->put_Volume(volume_function(volume * volume_multiplier));
-				if(FAILED(hr)) {
-					reports::write_debug("failed to put_Volume\n");
-				}
-			}
-			if(seek_interface) {
-				LONGLONG new_position = 0;
-				hr = seek_interface->SetPositions(&new_position, AM_SEEKING_AbsolutePositioning, nullptr, AM_SEEKING_NoPositioning);
-				if(FAILED(hr)) {
-					reports::write_debug("failed to SetPositions\n");
-				}
-			}
-			if(control_interface) {
-				hr = control_interface->Run();
-				if(FAILED(hr)) {
-					reports::write_debug("failed to Run\n");
-				}
 			}
 		}
 	}
@@ -149,9 +135,27 @@ namespace sound {
 			LONGLONG current_position = 0;
 			auto const result = seek_interface->GetPositions(&current_position, &end_position);
 			return !(FAILED(result) || current_position >= end_position);
-		} else {
-			return false;
 		}
+		return false;
+	}
+
+	bool audio_instance::is_finished() const {
+		if(event_interface) {
+			LONG_PTR param1;
+			LONG_PTR param2;
+			long evCode;
+			while(SUCCEEDED(event_interface->GetEvent(&evCode, &param1, &param2, 0))) {
+				event_interface->FreeEventParams(evCode, param1, param2);
+				switch(evCode) {
+				case EC_COMPLETE: //Fall through.
+				case EC_USERABORT: //Fall through.
+					return true;
+				default:;
+					// nothing
+				}
+			}
+		}
+		return false;
 	}
 
 	void audio_instance::change_volume(float new_volume) const {
@@ -186,49 +190,29 @@ namespace sound {
 	}
 
 	bool sound_impl::music_finished() const {
-		auto const lm = last_music;
-		if(lm == -1)
-		return false;
-
-		long evCode;
-		LONG_PTR param1, param2;
-		auto const event_interface = music_list[lm].event_interface;
-		if(event_interface) {
-			while(SUCCEEDED(event_interface->GetEvent(&evCode, &param1, &param2, 0))) {
-				event_interface->FreeEventParams(evCode, param1, param2);
-				switch(evCode) {
-					case EC_COMPLETE:	 // Fall through.
-					case EC_USERABORT: // Fall through.
-					return true;
-					default:;
-					// nothing
-				}
-			}
-			return false;
-		} else {
-			return false;
+		if(last_music != -1) {
+			return music_list[last_music].is_finished();
 		}
+		return false;
 	}
 
 	void sound_impl::play_effect(audio_instance& s, float volume) {
-		if(global_pause)
-		return;
-
-		if(!current_effect || current_effect->is_playing() == false) {
-			current_effect = &s;
-			s.play(volume, false, window_handle);
+		if(!global_pause) {
+			if(!current_effect || current_effect->is_playing() == false) {
+				current_effect = &s;
+				s.play(volume, false, window_handle);
+			}
 		}
 	}
 
 	void sound_impl::play_interface_sound(audio_instance& s, float volume) {
-		if(global_pause)
-		return;
-
-		if(current_interface_sound) {
-			current_interface_sound->stop();
+		if(!global_pause) {
+			if(current_interface_sound) {
+				current_interface_sound->stop();
+			}
+			current_interface_sound = &s;
+			s.play(volume, false, window_handle);
 		}
-		current_interface_sound = &s;
-		s.play(volume, false, window_handle);
 	}
 
 	void sound_impl::play_music(int32_t track, float volume) {
@@ -441,8 +425,16 @@ namespace sound {
 	}
 
 	void update_music_track(sys::state& state) {
-		if(state.sound_ptr->music_finished())
-		state.sound_ptr->play_new_track(state);
+		if(state.sound_ptr->music_finished()) {
+			state.sound_ptr->play_new_track(state);
+		}
+		// fix for WINE
+		if(state.sound_ptr->current_effect && state.sound_ptr->current_effect->is_finished()) {
+			state.sound_ptr->current_effect->stop();
+		}
+		if(state.sound_ptr->current_interface_sound && state.sound_ptr->current_interface_sound->is_finished()) {
+			state.sound_ptr->current_interface_sound->stop();
+		}
 	}
 
 	// returns the default click sound -- expect this list of functions to expand as
