@@ -201,34 +201,34 @@ namespace text {
 		if(auto it = state.font_collection.bitmap_fonts.find(font_handle); it != state.font_collection.bitmap_fonts.end()) {
 			return it->second;
 		} else {
-			auto fit = state.font_collection.font_names.find(font_handle);
+			auto const fit = state.font_collection.font_names.find(font_handle);
 			assert(fit != state.font_collection.font_names.end());
-			auto fname = [&]() {
+			auto const fname = [&]() {
 				auto sv = state.to_string_view(fit->second);
 				if(sv == "Main_14")
-				return std::string("garamond_14");
-				if(sv == "Main_14_plain")
-				return std::string("garamond_14");
-				if(sv == "Main_14_grey")
-				return std::string("garamond_14_bold");
-				if(sv == "Main_14_black")
-				return std::string("garamond_14_bold");
-				if(sv == "Main_14_red")
-				return std::string("garamond_14_bold");
-				if(sv == "Main_14_bold")
-				return std::string("garamond_14_bold");
-				if(sv == "Main_14_orange")
-				return std::string("garamond_14_bold");
-				if(sv == "Main_14_eu")
-				return std::string("garamond_14");
-				if(sv == "tahoma_60")
-				return std::string("mapfont_56");
-				if(sv == "mapfont_56_small")
-				return std::string("vic_22_bl");
-				if(sv == "ToolTip_Font")
-				return std::string("vic_18");
-				if(sv == "FPS_Font")
-				return std::string("Arial14");
+					return std::string("garamond_14");
+				else if(sv == "Main_14_plain")
+					return std::string("garamond_14");
+				else if(sv == "Main_14_grey")
+					return std::string("garamond_14_bold");
+				else if(sv == "Main_14_black")
+					return std::string("garamond_14_bold");
+				else if(sv == "Main_14_red")
+					return std::string("garamond_14_bold");
+				else if(sv == "Main_14_bold")
+					return std::string("garamond_14_bold");
+				else if(sv == "Main_14_orange")
+					return std::string("garamond_14_bold");
+				else if(sv == "Main_14_eu")
+					return std::string("garamond_14");
+				else if(sv == "tahoma_60")
+					return std::string("mapfont_56");
+				else if(sv == "mapfont_56_small")
+					return std::string("vic_22_bl");
+				else if(sv == "ToolTip_Font")
+					return std::string("vic_18");
+				else if(sv == "FPS_Font")
+					return std::string("Arial14");
 				return std::string(sv);
 			}();
 
