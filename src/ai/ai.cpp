@@ -3257,6 +3257,7 @@ namespace ai {
 			auto const at_war = state.world.nation_get_is_at_war(ids);
 			auto const at_risk = state.world.nation_get_ai_is_threatened(ids);
 
+			auto const t_step = ve::int_vector(2); //tiny
 			auto const s_step = ve::int_vector(5); //small
 			auto const m_step = ve::int_vector(7); //medium
 			auto const l_step = ve::int_vector(10); //large
@@ -3264,6 +3265,7 @@ namespace ai {
 			auto const new_adm = state.world.nation_get_administrative_spending(ids) + ve::select(was_profitable, s_step, ve::select(subopt_admin, s_step, -s_step));
 			auto const new_edu = state.world.nation_get_education_spending(ids) + ve::select(was_profitable, s_step, -s_step);
 			auto const new_social = state.world.nation_get_social_spending(ids) + ve::select(was_profitable, s_step, -s_step);
+			auto const new_dominv = state.world.nation_get_domestic_investment_spending(ids) + ve::select(was_profitable, t_step, -s_step);
 
 			// large/medium increases, small decreases
 			auto const new_con = state.world.nation_get_construction_spending(ids) + ve::select(was_profitable, l_step, ve::select(at_risk, m_step, -s_step));
@@ -3271,8 +3273,11 @@ namespace ai {
 			auto const new_navy = state.world.nation_get_naval_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war || at_risk, l_step, -s_step));
 
 			// large increases, small decreases
-			auto const new_tax_r = state.world.nation_get_rich_tax(ids) + ve::select(was_profitable, -s_step, l_step);
-			auto const new_tax_m = state.world.nation_get_middle_tax(ids) + ve::select(was_profitable, -s_step, l_step);
+			auto const rules = state.world.nation_get_combined_issue_rules(ids);
+			auto const is_lf = ((rules & issue_rule::pop_build_factory) != 0 || (rules & issue_rule::pop_expand_factory) != 0);
+
+			auto const new_tax_r = state.world.nation_get_rich_tax(ids) + ve::select(was_profitable, -ve::select(is_lf, l_step, s_step), ve::select(is_lf, t_step, s_step));
+			auto const new_tax_m = state.world.nation_get_middle_tax(ids) + ve::select(was_profitable, -s_step, m_step);
 			auto const new_tax_p = state.world.nation_get_poor_tax(ids) + ve::select(was_profitable, -s_step, l_step);
 
 			auto const raise_tariffs = (new_tax_r >= 95 || new_tax_m >= 95 || new_tax_p >= 95) && !was_profitable;
@@ -3282,6 +3287,7 @@ namespace ai {
 			auto const filter = !state.world.nation_get_is_player_controlled(ids) && state.world.nation_get_owned_province_count(ids) > 0;
 			state.world.nation_set_administrative_spending(ids, ve::select(filter, new_adm, state.world.nation_get_administrative_spending(ids)));
 			state.world.nation_set_education_spending(ids, ve::select(filter, new_edu, state.world.nation_get_education_spending(ids)));
+			state.world.nation_set_domestic_investment_spending(ids, ve::select(filter, new_dominv, state.world.nation_get_domestic_investment_spending(ids)));
 			state.world.nation_set_construction_spending(ids, ve::select(filter, new_con, state.world.nation_get_construction_spending(ids)));
 			state.world.nation_set_land_spending(ids, ve::select(filter, new_land, state.world.nation_get_land_spending(ids)));
 			state.world.nation_set_naval_spending(ids, ve::select(filter, new_navy, state.world.nation_get_naval_spending(ids)));
