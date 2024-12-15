@@ -481,6 +481,21 @@ guiTypes = {
 					position = { 51 370 }
 					quadTextureSprite = "GFX_checkbox_default"
 				}
+
+				instantTextBoxType = {
+					name = "vassal_names_label"
+					position = { 194 370 }
+					text = "vassal_names_label"
+					font = "Arial16"
+					maxsize = { 236 18 }
+					orientation = "UPPER_LEFT"
+					format = left
+				}
+				guiButtonType = {
+					name = "vassal_names_checkbox"
+					position = { 167 370 }
+					quadTextureSprite = "GFX_checkbox_default"
+				}
 			}
 			windowType = {
 				name = "sub_menu_2"

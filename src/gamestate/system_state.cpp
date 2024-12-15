@@ -1279,6 +1279,7 @@ namespace sys {
 		US_SAVE(UNUSED_UINT32_T);
 		US_SAVE(locale);
 		US_SAVE(map_counter_factor);
+		US_SAVE(vassal_names);
 #undef US_SAVE
 		simple_fs::write_file(settings_location, NATIVE("user_settings.dat"), &buffer[0], uint32_t(ptr - buffer));
 	}
@@ -1332,6 +1333,7 @@ namespace sys {
 				US_LOAD(UNUSED_UINT32_T);
 				US_LOAD(locale);
 				US_LOAD(map_counter_factor);
+				US_LOAD(vassal_names);
 #undef US_LOAD
 			} while(false);
 

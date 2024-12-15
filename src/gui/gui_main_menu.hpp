@@ -181,6 +181,11 @@ namespace ui {
 		bool is_active(sys::state& state) noexcept override;
 		void button_action(sys::state& state) noexcept override;
 	};
+	class vassal_names_checkbox : public checkbox_button {
+		public:
+		bool is_active(sys::state& state) noexcept override;
+		void button_action(sys::state& state) noexcept override;
+	};
 	class railroad_checkbox : public checkbox_button {
 		public:
 		bool is_active(sys::state& state) noexcept override;
@@ -355,6 +360,8 @@ struct notify_setting_update { };
 				return make_element_by_type<render_models_checkbox>(state, id);
 			} else if(name == "black_map_font_checkbox") {
 				return make_element_by_type<black_map_font_checkbox>(state, id);
+			} else if(name == "vassal_names_checkbox") {
+				return make_element_by_type<vassal_names_checkbox>(state, id);
 			} else if(name == "railroad_checkbox") {
 				return make_element_by_type<railroad_checkbox>(state, id);
 			} else if(name == "river_checkbox") {

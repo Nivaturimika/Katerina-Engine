@@ -340,7 +340,15 @@ namespace ui {
 	}
 	void black_map_font_checkbox::button_action(sys::state& state) noexcept {
 		state.user_settings.black_map_font = !state.user_settings.black_map_font;
-	send(state, parent, notify_setting_update{});
+		send(state, parent, notify_setting_update{});
+	}
+
+	bool vassal_names_checkbox::is_active(sys::state& state) noexcept {
+		return state.user_settings.vassal_names;
+	}
+	void vassal_names_checkbox::button_action(sys::state& state) noexcept {
+		state.user_settings.vassal_names = !state.user_settings.vassal_names;
+		send(state, parent, notify_setting_update{});
 	}
 
 	bool railroad_checkbox::is_active(sys::state& state) noexcept {

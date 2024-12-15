@@ -387,6 +387,7 @@ namespace sys {
 		uint32_t UNUSED_UINT32_T = 0;
 		char locale[16] = "en_US";
 		float map_counter_factor = 0.185f;
+		bool vassal_names = false;
 	};
 
 	struct global_scenario_data_s { // this struct holds miscellaneous global properties of the scenario

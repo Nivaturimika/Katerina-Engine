@@ -237,25 +237,43 @@ namespace map {
 		std::vector<uint16_t> group_of_regions;
 		ankerl::unordered_dense::map<uint16_t, std::set<uint16_t>> regions_graph;
 
-		int samples_N = 100;
-		int samples_M = 50;
+		constexpr int32_t samples_N = 100;
+		constexpr int32_t samples_M = 50;
 		float step_x = float(map_data.size_x) / float(samples_N);
 		float step_y = float(map_data.size_y) / float(samples_M);
 
-		// generate graph of regions:
-		for(auto candidate : state.world.in_province) {
-			auto rid = candidate.get_connected_region_id();
-
-			auto nation = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(candidate));
-			for(auto adj : candidate.get_province_adjacency()) {
-				auto indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
-				auto neighbor = adj.get_connected_provinces(indx);
-				// if sea, try to jump to the next province
-				if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
-					auto nation_2 = state.world.province_get_nation_from_province_ownership(neighbor);
-					nation_2 = get_top_overlord(state, nation_2);
-					if(nation == nation_2) {
-						regions_graph[rid].insert(neighbor.get_connected_region_id());
+		if(state.user_settings.vassal_names) {
+			// vassal names shown independant of overlords
+			for(auto const candidate : state.world.in_province) {
+				auto const rid = candidate.get_connected_region_id();
+				auto const nation = state.world.province_get_nation_from_province_ownership(candidate);
+				for(auto const adj : candidate.get_province_adjacency()) {
+					auto const indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
+					auto const neighbor = adj.get_connected_provinces(indx);
+					// if sea, try to jump to the next province
+					if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
+						auto const nation_2 = state.world.province_get_nation_from_province_ownership(neighbor);
+						if(nation == nation_2) {
+							regions_graph[rid].insert(neighbor.get_connected_region_id());
+						}
+					}
+				}
+			}
+		} else {
+			// vassal names overriden by overlords
+			for(auto const candidate : state.world.in_province) {
+				auto const rid = candidate.get_connected_region_id();
+				auto const nation = get_top_overlord(state, state.world.province_get_nation_from_province_ownership(candidate));
+				for(auto const adj : candidate.get_province_adjacency()) {
+					auto const indx = adj.get_connected_provinces(0) != candidate.id ? 0 : 1;
+					auto const neighbor = adj.get_connected_provinces(indx);
+					// if sea, try to jump to the next province
+					if(neighbor.id.index() < state.province_definitions.first_sea_province.index()) {
+						auto nation_2 = state.world.province_get_nation_from_province_ownership(neighbor);
+						nation_2 = get_top_overlord(state, nation_2);
+						if(nation == nation_2) {
+							regions_graph[rid].insert(neighbor.get_connected_region_id());
+						}
 					}
 				}
 			}
