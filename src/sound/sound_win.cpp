@@ -424,16 +424,22 @@ namespace sound {
 		state.sound_ptr->resume_music();
 	}
 
-	void update_music_track(sys::state& state) {
-		if(state.sound_ptr->music_finished()) {
-			state.sound_ptr->play_new_track(state);
+	void sound_impl::update_graphs() {
+		if(music_finished()) {
+			play_new_track(state);
 		}
 		// fix for WINE
-		if(state.sound_ptr->current_effect && state.sound_ptr->current_effect->is_finished()) {
-			state.sound_ptr->current_effect->stop();
+		if(current_effect && current_effect->is_finished()) {
+			current_effect->stop();
 		}
-		if(state.sound_ptr->current_interface_sound && state.sound_ptr->current_interface_sound->is_finished()) {
-			state.sound_ptr->current_interface_sound->stop();
+		if(current_interface_sound && current_interface_sound->is_finished()) {
+			current_interface_sound->stop();
+		}
+	}
+
+	void update_music_track(sys::state& state) {
+		if(state.sound_ptr) {
+			state.sound_ptr->update_graphs();
 		}
 	}
 
