@@ -84,6 +84,11 @@ namespace parsers {
 			|| context.action_type == sys::static_game_rule::change_stockpile_settings) {
 			t_context.main_slot = trigger::slot_contents::nation;
 			t_context.this_slot = trigger::slot_contents::nation;
+		} else if(context.action_type == sys::static_game_rule::on_colonial_migration
+			|| context.action_type == sys::static_game_rule::on_immigration
+			|| context.action_type == sys::static_game_rule::on_internal_migration) {
+			t_context.main_slot = trigger::slot_contents::pop;
+			t_context.this_slot = trigger::slot_contents::pop;
 		} else {
 			t_context.main_slot = trigger::slot_contents::nation;
 			t_context.this_slot = trigger::slot_contents::nation;

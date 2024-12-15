@@ -150,8 +150,8 @@ loop_bounded = {
 - `have_core_in = THIS/FROM/TAG`: Doesn't work in vanilla, but will work here.
 - `treasury = x`: Alias of `money`.
 - `has_province_flag = flag`: Didn't work in the original but now it does
-- `crisis_attacker = { ... }`: Scopes into the primary attacker of a crisis
-- `crisis_defender = { ... }`: Scopes into the primary defender of a crisis
+- `crisis_attacker_scope = { ... }`: Scopes into the primary attacker of a crisis
+- `crisis_defender_scope = { ... }`: Scopes into the primary defender of a crisis
 - `is_overseas_culture = yes/no`: Checks if the pop in scope pertains to a culture that is overseas.
 - `is_banned_from = THIS/FROM/TAG`: Checks if the embassy of the country on scope is banned on the given country.
 

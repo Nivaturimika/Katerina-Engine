@@ -398,7 +398,7 @@ action = {
 	#THIS/main = nation source
 	#FROM = province
 	limit = {
-		owned_by = THIS
+		FROM = { owned_by = THIS }
 	}
 	effect = {
 	}
@@ -466,20 +466,21 @@ action = {
 		capital_scope = {
 			OR = {
 				continent = europe
-				crisis_state = { continent = THIS }
-				crisis_defender = { capital_scope = { continent = THIS } }
+				crisis_state_scope = { continent = THIS }
+				crisis_defender_scope = { capital_scope = { continent = THIS } }
+				# Yes, really, they're hardcoded in the original
 				AND = {
 					continent = north_america
 					OR = {
-						crisis_state = { continent = south_america }
-						crisis_defender = { continent = south_america }
+						crisis_state_scope = { continent = south_america }
+						crisis_defender_scope = { continent = south_america }
 					}
 				}
 				AND = {
 					continent = south_america
 					OR = {
-						crisis_state = { continent = north_america }
-						crisis_defender = { continent = north_america }
+						crisis_state_scope = { continent = north_america }
+						crisis_defender_scope = { continent = north_america }
 					}
 				}
 			}
@@ -491,7 +492,7 @@ action = {
 	type = "on_colonial_migration"
 	#THIS/main = pop
 	limit = {
-		is_colonial_nation = yes
+		colonial_nation = yes
 		location = {
 			empty = no
 			is_colonial = no
