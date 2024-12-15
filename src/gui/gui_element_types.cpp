@@ -1229,8 +1229,8 @@ namespace ui {
 	void scrollable_text::calibrate_scrollbar(sys::state& state) noexcept {
 		if(delegate->internal_layout.number_of_lines > delegate->visible_lines) {
 			text_scrollbar->set_visible(state, true);
-			text_scrollbar->change_settings(state,
-				mutable_scrollbar_settings{0, delegate->internal_layout.number_of_lines - delegate->visible_lines, 0, 0, false});
+			text_scrollbar->scale_to_parent(); //needed for resizing elements
+			text_scrollbar->change_settings(state, mutable_scrollbar_settings{0, delegate->internal_layout.number_of_lines - delegate->visible_lines, 0, 0, false});
 		} else {
 			text_scrollbar->set_visible(state, false);
 			delegate->current_line = 0;
@@ -1251,9 +1251,8 @@ namespace ui {
 			auto event = any_cast<multiline_text_scroll_event>(payload);
 			delegate->current_line = event.new_value;
 			return message_result::consumed;
-		} else {
-			return message_result::unseen;
 		}
+		return message_result::unseen;
 	}
 
 	void listbox2_scrollbar::on_value_change(sys::state& state, int32_t v) noexcept {

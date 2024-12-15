@@ -247,8 +247,7 @@ namespace ui {
 	message_result element_base::impl_on_key_down(sys::state& state, sys::virtual_key key, sys::key_modifiers mods) noexcept {
 		return on_key_down(state, key, mods);
 	}
-	message_result element_base::impl_on_scroll(sys::state& state, int32_t x, int32_t y, float amount,
-		sys::key_modifiers mods) noexcept {
+	message_result element_base::impl_on_scroll(sys::state& state, int32_t x, int32_t y, float amount, sys::key_modifiers mods) noexcept {
 		return on_scroll(state, x, y, amount, mods);
 	}
 	message_result element_base::impl_on_mouse_move(sys::state& state, int32_t x, int32_t y, sys::key_modifiers mods) noexcept {
