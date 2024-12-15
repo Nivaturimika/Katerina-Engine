@@ -304,7 +304,7 @@ issues_file
 	#any           extern    make_issues_group      discard
 
 government_type
-	flagtype                 value     text        member_fn
+	flagtype                 value     text        member
 	election                 value     bool        member_fn
 	duration                 value     int         member_fn
 	appoint_ruling_party     value     bool        member_fn
@@ -1180,7 +1180,7 @@ govt_flag_block
 	flag                            value      text                              member_fn
 
 scripted_govt_flag_block
-	flag_type                       value      text                              member_fn
+	flag_type                       value      text                              member
 	trigger                         extern     make_scripted_govt_flag_trigger   member
 
 upper_house_block

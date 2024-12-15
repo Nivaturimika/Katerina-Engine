@@ -1150,14 +1150,12 @@ namespace parsers {
 		dcon::government_type_id id;
 	};
 	struct government_type {
+		std::string flagtype;
 		void election(association_type, bool value, error_handler& err, int32_t line, government_type_context& context);
 		void appoint_ruling_party(association_type, bool value, error_handler& err, int32_t line, government_type_context& context);
 		void duration(association_type, int32_t value, error_handler& err, int32_t line, government_type_context& context);
-		void flagtype(association_type, std::string_view value, error_handler& err, int32_t line, government_type_context& context);
-		void any_value(std::string_view text, association_type, bool value, error_handler& err, int32_t line,
-			government_type_context& context);
-
-	void finish(government_type_context&) { }
+		void any_value(std::string_view text, association_type, bool value, error_handler& err, int32_t line, government_type_context& context);
+		void finish(government_type_context&);
 	};
 
 	struct governments_file {
@@ -2606,9 +2604,9 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 	};
 
 	struct scripted_govt_flag_block {
+		std::string flag_type;
 		dcon::flag_type_id flag_;
 		dcon::trigger_key trigger;
-		void flag_type(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void finish(country_history_context& context);
 	};
 	dcon::trigger_key make_scripted_govt_flag_trigger(token_generator& gen, error_handler& err, country_history_context& context);

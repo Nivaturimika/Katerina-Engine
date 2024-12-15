@@ -165,30 +165,27 @@ namespace parsers {
 		context.outer_context.state.world.government_type_set_duration(context.id, int8_t(value));
 	}
 
-	void government_type::flagtype(association_type, std::string_view value, error_handler& err, int32_t line, government_type_context& context) {
-		if(auto it = context.outer_context.map_of_flag_types.find(std::string(value)); it != context.outer_context.map_of_flag_types.end()) {
-			context.outer_context.state.world.government_type_set_flag_type(context.id, it->second);
-		} else {
-			auto id = dcon::flag_type_id(uint8_t(context.outer_context.state.flag_type_names.size()));
-			auto name = context.outer_context.state.add_key_win1252(value);
-			context.outer_context.state.flag_type_names.push_back(name);
-			context.outer_context.map_of_flag_types.insert_or_assign(std::string(value), id);
-			//
-			context.outer_context.state.world.government_type_set_flag_type(context.id, id);
-		}
-	}
-
-	void government_type::any_value(std::string_view text, association_type, bool value, error_handler& err, int32_t line,
-		government_type_context& context) {
+	void government_type::any_value(std::string_view text, association_type, bool value, error_handler& err, int32_t line, government_type_context& context) {
 		if(value) {
 			auto found_ideology = context.outer_context.map_of_ideologies.find(std::string(text));
 			if(found_ideology != context.outer_context.map_of_ideologies.end()) {
 				context.outer_context.state.world.government_type_get_ideologies_allowed(context.id) |=
 					::culture::to_bits(found_ideology->second.id);
 			} else {
-				err.accumulated_errors +=
-					"Unknown ideology " + std::string(text) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
+				err.accumulated_errors += "Unknown ideology " + std::string(text) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
 			}
+		}
+	}
+
+	void government_type::finish(government_type_context&) {
+		if(auto it = context.outer_context.map_of_flag_types.find(flagtype); it != context.outer_context.map_of_flag_types.end()) {
+			context.outer_context.state.world.government_type_set_flag_type(context.id, it->second);
+		} else {
+			auto const id = dcon::flag_type_id(uint8_t(context.outer_context.state.flag_type_names.size()));
+			auto const name = context.outer_context.state.add_key_win1252(flagtype);
+			context.outer_context.state.flag_type_names.push_back(name);
+			context.outer_context.map_of_flag_types.insert_or_assign(flagtype, id);
+			context.outer_context.state.world.government_type_set_flag_type(context.id, id);
 		}
 	}
 
@@ -2705,20 +2702,16 @@ namespace parsers {
 		}
 	}
 
-	void scripted_govt_flag_block::flag_type(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
-		if(auto it = context.outer_context.map_of_flag_types.find(std::string(value)); it != context.outer_context.map_of_flag_types.end()) {
+	void scripted_govt_flag_block::finish(country_history_context& context) {
+		if(auto it = context.outer_context.map_of_flag_types.find(flag_type); it != context.outer_context.map_of_flag_types.end()) {
 			flag_ = it->second;
 		} else {
-			auto id = dcon::flag_type_id(uint8_t(context.outer_context.state.flag_type_names.size()));
-			auto name = context.outer_context.state.add_key_win1252(value);
+			auto const id = dcon::flag_type_id(uint8_t(context.outer_context.state.flag_type_names.size()));
+			auto const name = context.outer_context.state.add_key_win1252(flag_type);
 			context.outer_context.state.flag_type_names.push_back(name);
-			context.outer_context.map_of_flag_types.insert_or_assign(std::string(value), id);
+			context.outer_context.map_of_flag_types.insert_or_assign(flag_type, id);
 			flag_ = id;
 		}
-	}
-
-	void scripted_govt_flag_block::finish(country_history_context& context) {
-
 	}
 
 	dcon::trigger_key make_scripted_govt_flag_trigger(token_generator& gen, error_handler& err, country_history_context& context) {
@@ -2727,14 +2720,12 @@ namespace parsers {
 	}
 
 	void upper_house_block::any_value(std::string_view value, association_type, float v, error_handler& err, int32_t line, country_history_context& context) {
-		if(!context.holder_id)
-		return;
-
-		if(auto it = context.outer_context.map_of_ideologies.find(std::string(value)); it != context.outer_context.map_of_ideologies.end()) {
-			context.outer_context.state.world.nation_set_upper_house(context.holder_id, it->second.id, v);
-		} else {
-			err.accumulated_errors +=
-				"invalid ideology " + std::string(value) + " encountered  (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		if(context.holder_id) {
+			if(auto it = context.outer_context.map_of_ideologies.find(std::string(value)); it != context.outer_context.map_of_ideologies.end()) {
+				context.outer_context.state.world.nation_set_upper_house(context.holder_id, it->second.id, v);
+			} else {
+				err.accumulated_errors += "invalid ideology " + std::string(value) + " encountered  (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			}
 		}
 	}
 
