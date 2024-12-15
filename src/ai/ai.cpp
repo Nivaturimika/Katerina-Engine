@@ -200,48 +200,44 @@ namespace ai {
 			&& !n.get_ai_is_threatened()
 			&& !(n.get_overlord_as_subject().get_ruler())
 			&& n.get_diplomatic_points() >= state.defines.cancelalliance_diplomatic_cost) {
-				float greatest_neighbor = 0.0f;
-				auto in_sphere_of = state.world.nation_get_in_sphere_of(n);
-
-				for(auto b : state.world.nation_get_nation_adjacency_as_connected_nations(n)) {
-					auto other = b.get_connected_nations(0) != n ? b.get_connected_nations(0) : b.get_connected_nations(1);
-					if(!nations::are_allied(state, n, other) && (!in_sphere_of || in_sphere_of != other.get_in_sphere_of())) {
-						greatest_neighbor = std::max(greatest_neighbor, estimate_strength(state, other));
-					}
-				}
-
-				float defensive_str = estimate_defensive_strength(state, n);
-				auto ll = state.world.nation_get_last_war_loss(n);
-				auto safety_margin = defensive_str - safety_factor * greatest_neighbor;
-				
-				static std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>> prune_targets;
-				prune_targets.clear();
-				for(auto dr : n.get_diplomatic_relation()) {
-					if(dr.get_are_allied()) {
-						auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
-						if(n.get_in_sphere_of() != other
-						&& other.get_in_sphere_of() != n
-						&& !military::are_allied_in_war(state, n, other)) {
-							prune_targets.push_back(other);
+				// Don't break alliances if we recently lost a war
+				auto const defensive_str = estimate_defensive_strength(state, n);
+				auto const ll = state.world.nation_get_last_war_loss(n);
+				if(ll == sys::date{} || ll + 365 >= state.current_date) {
+					auto greatest_neighbor = 0.0f;
+					auto const in_sphere_of = state.world.nation_get_in_sphere_of(n);
+					for(auto b : state.world.nation_get_nation_adjacency_as_connected_nations(n)) {
+						auto other = b.get_connected_nations(0) != n ? b.get_connected_nations(0) : b.get_connected_nations(1);
+						if(!nations::are_allied(state, n, other) && (!in_sphere_of || in_sphere_of != other.get_in_sphere_of())) {
+							greatest_neighbor = std::max(greatest_neighbor, estimate_strength(state, other));
 						}
 					}
-				}
-				if(prune_targets.size() > 0) {
-					pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-						auto a_str = estimate_strength(state, a);
-						auto b_str = estimate_strength(state, b);
-						if(a_str != b_str)
-							return a_str > b_str;
-						return a.index() > b.index();
-					});
-					for(auto pt : prune_targets) {
-						auto weakest_str = estimate_strength(state, pt);
+					auto const safety_margin = defensive_str - safety_factor * greatest_neighbor;
+					static std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>> prune_targets;
+					prune_targets.clear();
+					for(auto dr : n.get_diplomatic_relation()) {
+						if(dr.get_are_allied()) {
+							auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
+							if(n.get_in_sphere_of() != other
+							&& other.get_in_sphere_of() != n
+							&& !military::are_allied_in_war(state, n, other)) {
+								prune_targets.push_back(other);
+							}
+						}
+					}
+					if(prune_targets.size() > 0) {
+						pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+							auto a_str = estimate_strength(state, a);
+							auto b_str = estimate_strength(state, b);
+							if(a_str != b_str)
+								return a_str > b_str;
+							return a.index() > b.index();
+						});
+						auto const weakest_str = estimate_strength(state, prune_targets[0]);
 						if(weakest_str * 1.25 < safety_margin
-						|| state.world.nation_get_infamy(pt) >= state.defines.badboy_limit) {
-							safety_margin -= weakest_str;
-							assert(command::can_cancel_alliance(state, n, pt));
-							command::execute_cancel_alliance(state, n, pt);
-						} else {
+						|| state.world.nation_get_infamy(prune_targets[0]) >= state.defines.badboy_limit) {
+							assert(command::can_cancel_alliance(state, n, prune_targets[0]));
+							command::execute_cancel_alliance(state, n, prune_targets[0]);
 							break;
 						}
 					}
