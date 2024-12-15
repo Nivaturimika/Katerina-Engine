@@ -7,6 +7,11 @@
 #include "triggers.hpp"
 #include "ve_scalar_extensions.hpp"
 
+namespace sys {
+	dcon::modifier_id get_player_difficulty_modifier(sys::state& state, sys::difficulty_level v);
+	dcon::modifier_id get_ai_difficulty_modifier(sys::state& state, sys::difficulty_level v);
+}
+
 namespace ui {
 
 	enum class modifier_display_type : uint8_t {
