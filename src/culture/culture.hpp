@@ -161,8 +161,8 @@ enum class rebel_independence : uint8_t { none = 0, culture, culture_group, reli
 	void apply_invention(sys::state& state, dcon::nation_id target_nation, dcon::invention_id inv_id);
 	void remove_technology(sys::state& state, dcon::nation_id target_nation, dcon::technology_id tech_id);
 	void remove_invention(sys::state& state, dcon::nation_id target_nation, dcon::invention_id inv_id);
-	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::nation_id target_nation);
-	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::national_identity_id identity);
+	dcon::flag_type_id get_current_flag_type(sys::state& state, dcon::nation_id target_nation);
+	dcon::flag_type_id get_current_flag_type(sys::state& state, dcon::national_identity_id identity);
 	void update_nation_issue_rules(sys::state& state, dcon::nation_id n_id); // note: does react to changes in slavery rule
 	void update_all_nations_issue_rules(sys::state& state);									 // note: doesn't react to changes in slavery rule
 

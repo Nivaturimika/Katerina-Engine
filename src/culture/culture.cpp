@@ -662,17 +662,17 @@ namespace culture {
 		}
 	}
 
-	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::nation_id n) {
-		if(state.world.nation_get_owned_province_count(n) > 0) {
-			auto const nid = state.world.nation_get_identity_from_identity_holder(n);
-			// scripted goverment flags
-			if(auto const p = state.world.national_identity_get_scripted_govt_flag(nid); p.size() > 0) {
-				for(const auto sft : p) {
-					if(trigger::evaluate(state, sft.trigger, trigger::to_generic(n), trigger::to_generic(n), -1)) {
-						return sft.flag_type;
-					}
+	dcon::flag_type_id get_current_flag_type(sys::state& state, dcon::nation_id n) {
+		// scripted goverment flags
+		auto const nid = state.world.nation_get_identity_from_identity_holder(n);
+		if(auto const p = state.world.national_identity_get_scripted_flag_type(nid); p.size() > 0) {
+			for(const auto sft : p) {
+				if(trigger::evaluate(state, sft.trigger, trigger::to_generic(n), trigger::to_generic(n), -1)) {
+					return sft.flag_type;
 				}
 			}
+		}
+		if(state.world.nation_get_owned_province_count(n) > 0) {
 			auto const gov = state.world.nation_get_government_type(n);
 			if(gov) {
 				// identity specific flag type?
@@ -683,18 +683,17 @@ namespace culture {
 		return dcon::flag_type_id{};
 	}
 
-	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::national_identity_id nid) {
-		auto const nid = state.world.nation_get_identity_from_identity_holder(n);
+	dcon::flag_type_id get_current_flag_type(sys::state& state, dcon::national_identity_id nid) {
+		auto const n = state.world.national_identity_get_nation_from_identity_holder(nid);
 		// scripted goverment flags
-		if(auto const p = state.world.national_identity_get_scripted_govt_flag(nid); p.size() > 0) {
+		if(auto const p = state.world.national_identity_get_scripted_flag_type(nid); p.size() > 0) {
 			for(const auto sft : p) {
 				if(trigger::evaluate(state, sft.trigger, trigger::to_generic(n), trigger::to_generic(n), -1)) {
 					return sft.flag_type;
 				}
 			}
 		}
-		auto holder = state.world.national_identity_get_nation_from_identity_holder(nid);
-		return holder ? get_current_flag_type(state, holder) : dcon::flag_type_id{};
+		return n ? get_current_flag_type(state, n) : dcon::flag_type_id{};
 	}
 	void fix_slaves_in_province(sys::state& state, dcon::nation_id owner, dcon::province_id p) {
 		auto rules = state.world.nation_get_combined_issue_rules(owner);

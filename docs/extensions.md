@@ -1083,3 +1083,5 @@ scripted_govt_flag = {
 	}
 }
 ```
+
+The trigger will be checked even for nations that don't exist (but only when they're displayed). This can be useful to portray flags of formables or releasables.
