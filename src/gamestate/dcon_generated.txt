@@ -126,6 +126,11 @@ object{
 		type{ uint8_t }
 		tag{ scenario }
 	}
+	property{
+		name{ scripted_flag_type }
+		type{vector_pool{100}{culture::scripted_flag_type}}
+		tag{ scenario }
+	}
 }
 
 object {

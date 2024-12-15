@@ -1068,3 +1068,18 @@ Note that `days` can be anything from `0`, to negative numbers or even positive 
 Knowing if an event will loop back into itself would require solving the halting problem, or doing some smart static analysis. Hence, the only protection against an event causing a crash is `alice_max_event_iterations`, defining how much "depth" an event will be evaluated for.
 
 Immediate events get evaluated on the immediate context. This can lead to crashes (on both the original and here) if not used carefully.
+
+## Scripted goverment flags
+
+You can script the use of government flags, those whill be checked each time a flag is requested. They will override the government default flag as long as the trigger is active. They are checked each time the UI updates - so be considerate of that (the engine will lazily check only nations with scripted government flags).
+
+```
+scripted_govt_flag = {
+	flag_type = dynamic_00 #Will load TAG_dynamic_00.tga
+	# THIS and main scope are the nation that has this flag
+	trigger = {
+		has_country_flag = XXX
+		money > 1000
+	}
+}
+```

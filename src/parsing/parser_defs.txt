@@ -1179,6 +1179,10 @@ govt_flag_block
 	government                      value      text                              member_fn
 	flag                            value      text                              member_fn
 
+scripted_govt_flag_block
+	flag_type                       value      text                              member_fn
+	trigger                         extern     make_scripted_govt_flag_trigger   member
+
 upper_house_block
 	#any                            value      float                             member_fn
 
@@ -1214,6 +1218,7 @@ country_history_file
 	set_country_flag                value      text                              member_fn
 	set_global_flag               value      text                              member_fn
 	decision                        value      text                              member_fn
+	scripted_govt_flag              group      scripted_govt_flag_block          member_fn
 
 history_war_goal
 	casus_belli                     value      text                              member_fn

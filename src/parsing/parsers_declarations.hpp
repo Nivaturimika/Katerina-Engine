@@ -2592,7 +2592,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 
 	struct govt_flag_block {
 		void finish(country_history_context&) { }
-		dcon::flag_type_id flag_ = dcon::flag_type_id{};
+		dcon::flag_type_id flag_;
 		dcon::government_type_id government_;
 		void flag(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void government(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
@@ -2604,6 +2604,15 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 			}
 		}
 	};
+
+	struct scripted_govt_flag_block {
+		dcon::flag_type_id flag_;
+		dcon::trigger_key trigger;
+		void flag_type(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
+		void finish(country_history_context& context);
+	};
+	dcon::trigger_key make_scripted_govt_flag_trigger(token_generator& gen, error_handler& err, country_history_context& context);
+
 	struct upper_house_block {
 	void finish(country_history_context&) { }
 		void any_value(std::string_view value, association_type, float v, error_handler& err, int32_t line,
@@ -2618,7 +2627,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 	struct country_history_file {
 		foreign_investment_block foreign_investment;
 		upper_house_block upper_house;
-	void finish(country_history_context&) { }
+		void finish(country_history_context&) { }
 		void set_country_flag(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void set_global_flag(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void colonial_points(association_type, int32_t value, error_handler& err, int32_t line, country_history_context& context);
@@ -2645,6 +2654,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		void nonstate_consciousness(association_type, float value, error_handler& err, int32_t line, country_history_context& context);
 		void oob(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void govt_flag(govt_flag_block const& value, error_handler& err, int32_t line, country_history_context& context);
+		void scripted_govt_flag(scripted_govt_flag_block const& value, error_handler& err, int32_t line, country_history_context& context);
 		void ruling_party(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void decision(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 	};

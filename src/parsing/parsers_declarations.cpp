@@ -2705,6 +2705,27 @@ namespace parsers {
 		}
 	}
 
+	void scripted_govt_flag_block::flag_type(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
+		if(auto it = context.outer_context.map_of_flag_types.find(std::string(value)); it != context.outer_context.map_of_flag_types.end()) {
+			flag_ = it->second;
+		} else {
+			auto id = dcon::flag_type_id(uint8_t(context.outer_context.state.flag_type_names.size()));
+			auto name = context.outer_context.state.add_key_win1252(value);
+			context.outer_context.state.flag_type_names.push_back(name);
+			context.outer_context.map_of_flag_types.insert_or_assign(std::string(value), id);
+			flag_ = id;
+		}
+	}
+
+	void scripted_govt_flag_block::finish(country_history_context& context) {
+
+	}
+
+	dcon::trigger_key make_scripted_govt_flag_trigger(token_generator& gen, error_handler& err, country_history_context& context) {
+		trigger_building_context t_context{ context.outer_context, trigger::slot_contents::nation, trigger::slot_contents::nation, trigger::slot_contents::empty };
+		return make_trigger(gen, err, t_context);
+	}
+
 	void upper_house_block::any_value(std::string_view value, association_type, float v, error_handler& err, int32_t line, country_history_context& context) {
 		if(!context.holder_id)
 		return;
@@ -2997,6 +3018,13 @@ namespace parsers {
 
 	void country_history_file::govt_flag(govt_flag_block const& value, error_handler& err, int32_t line, country_history_context& context) {
 		context.outer_context.state.world.national_identity_set_government_flag_type(context.nat_ident, value.government_, value.flag_);
+	}
+
+	void country_history_file::scripted_govt_flag(scripted_govt_flag_block const& value, error_handler& err, int32_t line, country_history_context& context) {
+		::culture::scripted_flag_type sft;
+		sft.flag_type = value.flag_;
+		sft.trigger = value.trigger;
+		context.outer_context.state.world.national_identity_get_scripted_flag_type(context.nat_ident).push_back(sft);
 	}
 
 	void country_history_file::ruling_party(association_type, std::string_view value, error_handler& err, int32_t line,

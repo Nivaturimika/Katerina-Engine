@@ -664,10 +664,18 @@ namespace culture {
 
 	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::nation_id n) {
 		if(state.world.nation_get_owned_province_count(n) > 0) {
+			auto const nid = state.world.nation_get_identity_from_identity_holder(n);
+			// scripted goverment flags
+			if(auto const p = state.world.national_identity_get_scripted_govt_flag(nid); p.size() > 0) {
+				for(const auto sft : p) {
+					if(trigger::evaluate(state, sft.trigger, trigger::to_generic(n), trigger::to_generic(n), -1)) {
+						return sft.flag_type;
+					}
+				}
+			}
 			auto const gov = state.world.nation_get_government_type(n);
 			if(gov) {
 				// identity specific flag type?
-				auto const nid = state.world.nation_get_identity_from_identity_holder(n);
 				auto const ft = state.world.national_identity_get_government_flag_type(nid, gov);
 				return ft ? ft : state.world.government_type_get_flag_type(gov);
 			}
@@ -675,12 +683,18 @@ namespace culture {
 		return dcon::flag_type_id{};
 	}
 
-	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::national_identity_id identity) {
-		auto holder = state.world.national_identity_get_nation_from_identity_holder(identity);
-		if(holder) {
-			return get_current_flag_type(state, holder);
+	dcon::flag_type_id get_current_flag_type(sys::state const& state, dcon::national_identity_id nid) {
+		auto const nid = state.world.nation_get_identity_from_identity_holder(n);
+		// scripted goverment flags
+		if(auto const p = state.world.national_identity_get_scripted_govt_flag(nid); p.size() > 0) {
+			for(const auto sft : p) {
+				if(trigger::evaluate(state, sft.trigger, trigger::to_generic(n), trigger::to_generic(n), -1)) {
+					return sft.flag_type;
+				}
+			}
 		}
-		return dcon::flag_type_id{};
+		auto holder = state.world.national_identity_get_nation_from_identity_holder(nid);
+		return holder ? get_current_flag_type(state, holder) : dcon::flag_type_id{};
 	}
 	void fix_slaves_in_province(sys::state& state, dcon::nation_id owner, dcon::province_id p) {
 		auto rules = state.world.nation_get_combined_issue_rules(owner);
