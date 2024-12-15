@@ -177,7 +177,7 @@ namespace parsers {
 		}
 	}
 
-	void government_type::finish(government_type_context&) {
+	void government_type::finish(government_type_context& context) {
 		if(auto it = context.outer_context.map_of_flag_types.find(flagtype); it != context.outer_context.map_of_flag_types.end()) {
 			context.outer_context.state.world.government_type_set_flag_type(context.id, it->second);
 		} else {

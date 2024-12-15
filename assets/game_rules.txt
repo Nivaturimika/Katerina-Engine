@@ -497,7 +497,7 @@ action = {
 			empty = no
 			is_colonial = no
 		}
-		stata != rich
+		strata != rich
 		is_slave = no
 	}
 }
