@@ -206,7 +206,7 @@ namespace simple_fs {
 	namespace impl {
 		bool contains_non_ascii(native_char const* str) {
 			for(auto c = str; *c != 0; ++c) {
-				if(int32_t(*c) > 127 || int32_t(*c) < 0) {
+				if(int32_t(uint16_t(*c)) > 127 || int32_t(uint16_t(*c)) < 0) {
 					return true;
 				}
 			}
