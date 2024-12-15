@@ -3121,13 +3121,11 @@ namespace ai {
 		auto targets = ve::vectorizable_buffer<dcon::nation_id, dcon::nation_id>(state.world.nation_size());
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
 			dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
-			if(state.world.nation_get_owned_province_count(n) == 0)
-				return;
-			if(state.world.nation_get_is_at_war(n))
-				return;
-			if(state.world.nation_get_is_player_controlled(n))
-				return;
-			if(state.world.nation_get_military_score(n) == 0)
+			if(state.world.nation_get_owned_province_count(n) == 0
+			|| state.world.nation_get_is_at_war(n)
+			|| state.world.nation_get_is_player_controlled(n)
+			|| state.world.nation_get_military_score(n) == 0
+			|| state.world.nation_get_diplomatic_points(n) < state.defines.declarewar_diplomatic_cost)
 				return;
 			if(auto ol = state.world.nation_get_overlord_as_subject(n); state.world.overlord_get_ruler(ol))
 				return;
