@@ -8,18 +8,12 @@ Remember that a nation in the game is not, for us, the same thing as a tag. To g
 
 ### Flags
 
-All the flag types will be added to the vector `state::flag_types` which is the size of the number of unique flags that have been loaded. And the `state::flag_type_map` will contain a remapping of the flag_types into a texture offset id.
-
-To obtain the dynamically-assigned Id for an specific type of flag, use the following function:
-```c++
-uint32_t culture::get_remapped_flag_type(sys::state const& state, culture::flag_type type);
-```
-The flag type must be already registered by the scenario, otherwise the function will fail an assertion (that assumes that the application will only ever use flag-types which have been registered - and not arbitrary ones).
+All the flag types will be added to the vector `state::flag_type_names` which associates a `flag_type_id` and a `text_key` for the flag type in question. This is created at scenario time and will stay static through the entire game.
 
 The flag to display for a nation is determined by two factors: the national identity associated with the nation and its current government type. The current type of government for a nation is found in a nation's `government_type` property. Once you have the national identity and the type of government you can then look up the type of flag we are supposed to display using the following function:
 ```c++
-culture::flag_type culture::get_current_flag_type(sys::state const& state, dcon::nation_id target_nation);
+dcon::flag_type_id culture::get_current_flag_type(sys::state const& state, dcon::nation_id target_nation);
 ```
-With that information you can then call `GLuint ogl::get_flag_handle(sys::state& state, dcon::national_identity_id nat_id, culture::flag_type type);` which will return a handle to the flag texture (loading it from disk if necessary).
+With that information you can then call `GLuint ogl::get_flag_handle(sys::state& state, dcon::national_identity_id nat_id, dcon::flag_type_id type);` which will return a handle to the flag texture (loading it from disk if necessary).
 
 Because the lookups required to determine which flag to display are a bit convoluted, it is probably best to cache either the combination of national identity and flag type or the handle to the texture itself and then recalculate those values upon receiving the `update` message. 

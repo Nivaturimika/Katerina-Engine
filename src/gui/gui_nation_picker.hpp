@@ -190,61 +190,55 @@ namespace ui {
 	};
 
 	class save_flag : public button_element_base {
-		protected:
+	protected:
 		GLuint flag_texture_handle = 0;
 		bool visible = false;
-		public:
-	void button_action(sys::state& state) noexcept override { }
-
+	public:
+		void button_action(sys::state& state) noexcept override { }
 		void on_update(sys::state& state) noexcept  override {
 			save_item* i = retrieve< save_item*>(state, parent);
 			auto tag = i->save_flag;
 			auto gov = i->as_gov;
 			visible = !i->is_new_game && !i->is_bookmark();
-
-			if(!visible)
-				return;
-
-			tag = tag ? tag : state.national_definitions.rebel_id;
-
-			culture::flag_type ft = culture::flag_type::default_flag;
-			if(gov) {
-				auto id = state.world.national_identity_get_government_flag_type(tag, gov);
-				ft = culture::flag_type(id != 0 ? id - 1 : state.world.government_type_get_flag(gov));
-			}
-			flag_texture_handle = ogl::get_flag_handle(state, tag, ft);
-		}
-
-		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
-			if(!visible)
-				return;
-
-			dcon::gfx_object_id gid;
-			if(base_data.get_element_type() == element_type::image) {
-				gid = base_data.data.image.gfx_object;
-			} else if(base_data.get_element_type() == element_type::button) {
-				gid = base_data.data.button.button_image;
-			}
-			if(gid && flag_texture_handle > 0) {
-				auto& gfx_def = state.ui_defs.gfx[gid];
-				if(gfx_def.type_dependent) {
-					auto mask_handle = ogl::get_texture_handle(state, dcon::texture_id(gfx_def.type_dependent - 1), true);
-					auto& mask_tex = state.open_gl.asset_textures[dcon::texture_id(gfx_def.type_dependent - 1)];
-					ogl::render_masked_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
-						float(x) + float(base_data.size.x - mask_tex.size_x) * 0.5f,
-						float(y) + float(base_data.size.y - mask_tex.size_y) * 0.5f,
-						float(mask_tex.size_x),
-						float(mask_tex.size_y),
-						flag_texture_handle, mask_handle, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
-						false);
-				} else {
-					ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
-						float(x), float(y), float(base_data.size.x), float(base_data.size.y), flag_texture_handle, base_data.get_rotation(),
-						gfx_def.is_vertically_flipped(),
-						false);
+			if(visible) {
+				tag = tag ? tag : state.national_definitions.rebel_id;
+				dcon::flag_type_id ft{};
+				if(gov) {
+					auto id = state.world.national_identity_get_government_flag_type(tag, gov);
+					ft = id ? id : state.world.government_type_get_flag_type(gov);
 				}
+				flag_texture_handle = ogl::get_flag_handle(state, tag, ft);
 			}
-			image_element_base::render(state, x, y);
+		}
+		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
+			if(visible) {
+				dcon::gfx_object_id gid;
+				if(base_data.get_element_type() == element_type::image) {
+					gid = base_data.data.image.gfx_object;
+				} else if(base_data.get_element_type() == element_type::button) {
+					gid = base_data.data.button.button_image;
+				}
+				if(gid && flag_texture_handle > 0) {
+					auto& gfx_def = state.ui_defs.gfx[gid];
+					if(gfx_def.type_dependent) {
+						auto mask_handle = ogl::get_texture_handle(state, dcon::texture_id(gfx_def.type_dependent - 1), true);
+						auto& mask_tex = state.open_gl.asset_textures[dcon::texture_id(gfx_def.type_dependent - 1)];
+						ogl::render_masked_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+							float(x) + float(base_data.size.x - mask_tex.size_x) * 0.5f,
+							float(y) + float(base_data.size.y - mask_tex.size_y) * 0.5f,
+							float(mask_tex.size_x),
+							float(mask_tex.size_y),
+							flag_texture_handle, mask_handle, base_data.get_rotation(), gfx_def.is_vertically_flipped(),
+							false);
+					} else {
+						ogl::render_textured_rect(state, get_color_modification(this == state.ui_state.under_mouse, disabled, interactable),
+							float(x), float(y), float(base_data.size.x), float(base_data.size.y), flag_texture_handle, base_data.get_rotation(),
+							gfx_def.is_vertically_flipped(),
+							false);
+					}
+				}
+				image_element_base::render(state, x, y);
+			}
 		}
 	};
 

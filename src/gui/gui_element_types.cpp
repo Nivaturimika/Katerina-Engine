@@ -1446,7 +1446,7 @@ namespace ui {
 		}
 
 		auto reb_tag = state.national_definitions.rebel_id;
-		flag_texture_handle = ogl::get_flag_handle(state, reb_tag, culture::flag_type::default_flag);
+		flag_texture_handle = ogl::get_flag_handle(state, reb_tag, dcon::flag_type_id{});
 	}
 
 	void flag_button2::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
@@ -1503,18 +1503,17 @@ namespace ui {
 	}
 
 	void flag_button::set_current_nation(sys::state& state, dcon::national_identity_id ident) noexcept {
-		if(!bool(ident))
-		ident = state.national_definitions.rebel_id;
-
-		auto fat_id = dcon::fatten(state.world, ident);
-		auto nation = fat_id.get_nation_from_identity_holder();
-	culture::flag_type flag_type = culture::flag_type{};
-		if(bool(nation.id) && nation.get_owned_province_count() != 0) {
-			flag_type = culture::get_current_flag_type(state, nation.id);
-		} else {
-			flag_type = culture::get_current_flag_type(state, ident);
+		if(!ident) { //no identity -> rebels
+			ident = state.national_definitions.rebel_id;
 		}
-		flag_texture_handle = ogl::get_flag_handle(state, ident, flag_type);
+		auto const n = state.world.national_identity_get_nation_from_identity_holder(ident);
+		dcon::flag_type_id ft{};
+		if(n && state.world.nation_get_owned_province_count(n) != 0) {
+			ft = culture::get_current_flag_type(state, n);
+		} else {
+			ft = culture::get_current_flag_type(state, ident);
+		}
+		flag_texture_handle = ogl::get_flag_handle(state, ident, ft);
 	}
 
 	void flag_button::on_update(sys::state& state) noexcept {

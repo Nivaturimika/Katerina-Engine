@@ -550,10 +550,7 @@ namespace sys {
 		// this We also may push this into the save game if we handle unit renaming using this
 
 		ui::definitions ui_defs; // definitions for graphics and ui
-
-		std::vector<uint8_t> flag_type_map;   // flag_type remapper for saving space while also allowing
-		                                      // mods to add flags not present in vanilla
-		std::vector<culture::flag_type> flag_types; // List of unique flag types
+		tagged_vector<dcon::text_key, dcon::flag_type_id> flag_type_names; // List of unique flag types
 
 		//
 		// persistent user settings

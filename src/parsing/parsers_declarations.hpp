@@ -430,6 +430,7 @@ namespace parsers {
 		ankerl::unordered_dense::map<std::string, std::vector<saved_stored_condition>> map_of_stored_triggers;
 		ankerl::unordered_dense::map<std::string, dcon::national_focus_id> map_of_national_focuses;
 		ankerl::unordered_dense::map<std::string, dcon::provincial_flag_id> map_of_provincial_flags;
+		ankerl::unordered_dense::map<std::string, dcon::flag_type_id> map_of_flag_types;
 
 		tagged_vector<province_data, dcon::province_id> prov_id_to_original_id_map;
 		std::vector<dcon::province_id> original_id_to_prov_id_map;
@@ -2590,19 +2591,16 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 	};
 
 	struct govt_flag_block {
-	void finish(country_history_context&) { }
-
-		::culture::flag_type flag_ = ::culture::flag_type::default_flag;
+		void finish(country_history_context&) { }
+		dcon::flag_type_id flag_ = dcon::flag_type_id{};
 		dcon::government_type_id government_;
-
 		void flag(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context);
 		void government(association_type, std::string_view value, error_handler& err, int32_t line, country_history_context& context) {
 			if(auto it = context.outer_context.map_of_governments.find(std::string(value));
 				it != context.outer_context.map_of_governments.end()) {
 				government_ = it->second;
 			} else {
-				err.accumulated_errors += "invalid government type " + std::string(value) + " encountered  (" + err.file_name + " line " +
-																std::to_string(line) + ")\n";
+				err.accumulated_errors += "invalid government type " + std::string(value) + " encountered  (" + err.file_name + " line " + std::to_string(line) + ")\n";
 			}
 		}
 	};

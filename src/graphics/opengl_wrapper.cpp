@@ -483,29 +483,12 @@ namespace ogl {
 		load_shaders(state); // create shaders
 		load_global_squares(state); // create various squares to drive the shaders with
 
-		state.flag_type_map.resize(size_t(culture::flag_type::count), 0);
-		// Create the remapping for flags
-		state.world.for_each_national_identity([&](dcon::national_identity_id ident_id) {
-			auto fat_id = dcon::fatten(state.world, ident_id);
-			auto nat_id = fat_id.get_nation_from_identity_holder().id;
-			for(auto gov_id : state.world.in_government_type) {
-				state.flag_types.push_back(culture::flag_type(gov_id.get_flag()));
-			}
-		});
-		// Eliminate duplicates
-		pdqsort(state.flag_types.begin(), state.flag_types.end());
-		state.flag_types.erase(std::unique(state.flag_types.begin(), state.flag_types.end()), state.flag_types.end());
-
-		// Automatically assign texture offsets to the flag_types
-		auto id = 0;
-		for(auto type : state.flag_types) {
-			state.flag_type_map[uint32_t(type)] = uint8_t(id++);
-		}
-		assert(state.flag_type_map[0] == 0); // default_flag
-
-		// Allocate textures for the flags
-		state.open_gl.asset_textures.resize(state.ui_defs.textures.size() + (state.world.national_identity_size() + 1) * state.flag_types.size());
-
+		// Textures from 0 to flag_type_names(size) + 1 are reserved for flags
+		// The +1 is for the default flag of a nation (no flag type)
+		// Allocate textures for the flags (+UI textures)
+		auto const ui_textures = state.ui_defs.textures.size();
+		auto const flag_textures = (1 + state.world.national_identity_size()) * (state.flag_type_names.size() + 1);
+		state.open_gl.asset_textures.resize(ui_textures + flag_textures);
 		state.map_state.load_map(state);
 
 		load_special_icons(state);
@@ -824,25 +807,26 @@ namespace ogl {
 		ltag[1] = char(toupper(tag[1]));
 		ltag[2] = char(toupper(tag[2]));
 		dcon::national_identity_id ident{};
-		state.world.for_each_national_identity([&](dcon::national_identity_id id) {
-			auto curr = nations::int_to_tag(state.world.national_identity_get_identifying_int(id));
+		for(const auto nid : state.world.in_national_identity) {
+			auto curr = nations::int_to_tag(state.world.national_identity_get_identifying_int(nid));
 			if(curr[0] == ltag[0] && curr[1] == ltag[1] && curr[2] == ltag[2]) {
-				ident = id;
+				ident = nid;
+				break;
 			}
-		});
-		if(!bool(ident)) {
-			// QOL: We will print the text instead of displaying the flag, for ease of viewing invalid tags
-			return 0;
 		}
-		auto fat_id = dcon::fatten(state.world, ident);
-		auto nation = fat_id.get_nation_from_identity_holder();
-		culture::flag_type flag_type = culture::flag_type{};
-		if(bool(nation.id) && nation.get_owned_province_count() != 0) {
-			flag_type = culture::get_current_flag_type(state, nation.id);
-		} else {
-			flag_type = culture::get_current_flag_type(state, ident);
+		if(ident) {
+			auto fat_id = dcon::fatten(state.world, ident);
+			auto nation = fat_id.get_nation_from_identity_holder();
+			dcon::flag_type_id ft{};
+			if(nation.id && nation.get_owned_province_count() != 0) {
+				ft = culture::get_current_flag_type(state, nation.id);
+			} else {
+				ft = culture::get_current_flag_type(state, ident);
+			}
+			return ogl::get_flag_handle(state, ident, ft);
 		}
-		return ogl::get_flag_handle(state, ident, flag_type);
+		// QOL: We will print the text instead of displaying the flag, for ease of viewing invalid tags
+		return 0;
 	}
 
 	bool display_tag_is_valid(sys::state& state, char tag[3]) {
@@ -899,13 +883,13 @@ namespace ogl {
 
 		auto fat_id = dcon::fatten(state.world, ico.tag);
 		auto nation = fat_id.get_nation_from_identity_holder();
-		culture::flag_type flag_type = culture::flag_type{};
-		if(bool(nation.id) && nation.get_owned_province_count() != 0) {
-			flag_type = culture::get_current_flag_type(state, nation.id);
+		dcon::flag_type_id ft{};
+		if(nation.id && nation.get_owned_province_count() != 0) {
+			ft = culture::get_current_flag_type(state, nation.id);
 		} else {
-			flag_type = culture::get_current_flag_type(state, ico.tag);
+			ft = culture::get_current_flag_type(state, ico.tag);
 		}
-		GLuint flag_texture_handle = ogl::get_flag_handle(state, ico.tag, flag_type);
+		GLuint flag_texture_handle = ogl::get_flag_handle(state, ico.tag, ft);
 
 		GLuint icon_subroutines[2] = { map_color_modification_to_index(cmod), parameters::no_filter };
 		glUniform2ui(state.open_gl.ui_shader_subroutines_index_uniform, icon_subroutines[0], icon_subroutines[1]);

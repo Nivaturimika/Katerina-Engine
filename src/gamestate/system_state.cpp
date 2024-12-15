@@ -2964,17 +2964,16 @@ namespace sys {
 				if(auto f = simple_fs::peek_file(flags_dir, tag_native + NATIVE(".tga")); !f) {
 					err.accumulated_warnings += "Flag missing " + text::native_to_utf8(tag_native) + ".tga\n";
 				}
-				std::array<bool, size_t(culture::flag_type::count)> has_reported;
-				std::fill(has_reported.begin(), has_reported.end(), false);
+				std::vector<bool> has_reported(flag_type_names.size() + 1, false);
 				for(auto g : world.in_government_type) {
-					if(!has_reported[g.get_flag()]) {
+					if(!has_reported[g.get_flag_type().index() + 1]) {
 						native_string file_str = tag_native;
-						file_str += ogl::flag_type_to_name(*this, culture::flag_type(g.get_flag()));
+						file_str += ogl::flag_type_to_name(*this, g.get_flag_type());
 						file_str += NATIVE(".tga");
 						if(auto f = simple_fs::peek_file(flags_dir, file_str); !f) {
 							err.accumulated_warnings += "Flag missing " + text::native_to_utf8(file_str) + "\n";
 						}
-						has_reported[g.get_flag()] = true;
+						has_reported[g.get_flag_type().index() + 1] = true;
 					}
 				}
 			}

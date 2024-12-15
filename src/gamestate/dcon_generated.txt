@@ -26,6 +26,7 @@ make_index{demographics_key}{uint16_t}
 make_index{provincial_modifier_value}{uint8_t}
 make_index{national_modifier_value}{uint8_t}
 make_index{provincial_flag_id}{uint16_t}
+make_index{flag_type_id}{uint8_t}
 
 object{
 	name{ national_identity }
@@ -77,7 +78,7 @@ object{
 	}
 	property{
 		name{ government_flag_type }
-		type{ array{government_type_id}{uint8_t} }
+		type{ array{government_type_id}{flag_type_id} }
 		tag{ scenario }
 	}
 	property{
@@ -1346,8 +1347,8 @@ object {
 		tag{ scenario }
 	}
 	property{
-		name{ flag }
-		type{ uint8_t }
+		name{ flag_type }
+		type{ flag_type_id }
 		tag{ scenario }
 	}
 }
