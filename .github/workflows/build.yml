@@ -140,7 +140,7 @@ jobs:
   #         echo success
 
   build-check:
-    needs: [windows-x64-build, windows-x86-build, macos-build]
+    needs: [windows-x64-build, windows-x86-build]
     runs-on: ubuntu-latest
     name: Build Matrix
     steps:
