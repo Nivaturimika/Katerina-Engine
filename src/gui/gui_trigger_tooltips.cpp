@@ -71,22 +71,14 @@ namespace ui {
 		}
 
 		inline std::string_view any_all_code_to_fixed_ui(uint16_t code) {
-			if(code & trigger::is_disjunctive_scope)
-			return "any_of_the_following";
-			else
-			return "all_of_the_following";
+			return (code & trigger::is_disjunctive_scope) ? "any_of_the_following" : "all_of_the_following";
 		}
 
 		inline std::string_view every_any_code_to_fixed_ui(uint16_t code) {
-			if(code & trigger::is_existence_scope)
-			return "any";
-			else
-			return "every";
+			return (code & trigger::is_existence_scope)  ? "any" : "every";
 		}
 
-		void display_with_comparison(uint16_t trigger_code, text::substitution left_label, text::substitution value, sys::state& ws,
-		text::layout_base& layout, text::layout_box& box) {
-
+		void display_with_comparison(uint16_t trigger_code, text::substitution left_label, text::substitution value, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
 			text::add_to_layout_box(ws, layout, box, left_label, text::text_color::white);
 			text::add_space_to_layout_box(ws, layout, box);
 			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, cmp_code_to_fixed_ui(trigger_code)),
@@ -95,9 +87,7 @@ namespace ui {
 			text::add_to_layout_box(ws, layout, box, value, text::text_color::white);
 		}
 
-		void display_with_has_comparison(uint16_t trigger_code, text::substitution left_label, text::substitution value, sys::state& ws,
-		text::layout_base& layout, text::layout_box& box) {
-
+		void display_with_has_comparison(uint16_t trigger_code, text::substitution left_label, text::substitution value, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
 			text::add_to_layout_box(ws, layout, box, left_label, text::text_color::white);
 			text::add_space_to_layout_box(ws, layout, box);
 			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, cmp_has_code_to_fixed_ui(trigger_code)),
@@ -105,33 +95,24 @@ namespace ui {
 			text::add_space_to_layout_box(ws, layout, box);
 			text::add_to_layout_box(ws, layout, box, value, text::text_color::white);
 		}
-
-		void display_with_comparison(uint16_t trigger_code, text::substitution value, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
+		void display_with_comparison(uint16_t trigger_code, text::substitution value, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
 			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, cmp_code_to_fixed_ui(trigger_code)),
 			text::text_color::white);
 			text::add_space_to_layout_box(ws, layout, box);
 			text::add_to_layout_box(ws, layout, box, value, text::text_color::white);
 		}
-
-		void display_with_has_comparison(uint16_t trigger_code, text::substitution value, sys::state& ws, text::layout_base& layout,
-		text::layout_box& box) {
-
+		void display_with_has_comparison(uint16_t trigger_code, text::substitution value, sys::state& ws, text::layout_base& layout, text::layout_box& box) {
 			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, cmp_has_code_to_fixed_ui(trigger_code)),
 			text::text_color::white);
 			text::add_space_to_layout_box(ws, layout, box);
 			text::add_to_layout_box(ws, layout, box, value, text::text_color::white);
 		}
 
-		void make_trigger_description(sys::state& ws, text::layout_base& layout, uint16_t const* tval, int32_t primary_slot,
-		int32_t this_slot, int32_t from_slot, int32_t indentation, bool show_condition);
+		void make_trigger_description(sys::state& ws, text::layout_base& layout, uint16_t const* tval, int32_t primary_slot, int32_t this_slot, int32_t from_slot, int32_t indentation, bool show_condition);
 
 		inline constexpr int32_t indentation_amount = 15;
 
-		inline void display_subtriggers(uint16_t const* source, sys::state& ws, text::layout_base& layout, int32_t primary_slot,
-		int32_t this_slot, int32_t from_slot, int32_t indentation, bool show_condition) {
-
+		inline void display_subtriggers(uint16_t const* source, sys::state& ws, text::layout_base& layout, int32_t primary_slot, int32_t this_slot, int32_t from_slot, int32_t indentation, bool show_condition) {
 			auto const source_size = 1 + trigger::get_trigger_payload_size(source);
 			auto sub_units_start = source + 2 + trigger::trigger_scope_data_payload(source[0]);
 			while(sub_units_start < source + source_size) {
@@ -140,13 +121,12 @@ namespace ui {
 			}
 		}
 
-		#define TRIGGER_DISPLAY_PARAMS                                                                                                   \
-		uint16_t const *tval, sys::state &ws, text::layout_base &layout, int32_t primary_slot, int32_t this_slot, int32_t from_slot,   \
-			int32_t indentation, bool show_condition
+#define TRIGGER_DISPLAY_PARAMS \
+	uint16_t const *tval, sys::state &ws, text::layout_base &layout, int32_t primary_slot, int32_t this_slot, int32_t from_slot, int32_t indentation, bool show_condition
 
-	void tf_none(TRIGGER_DISPLAY_PARAMS) { }
+		void tf_none(TRIGGER_DISPLAY_PARAMS) { }
 
-	void tf_unused_1(TRIGGER_DISPLAY_PARAMS) { }
+		void tf_unused_1(TRIGGER_DISPLAY_PARAMS) { }
 
 		void make_condition(TRIGGER_DISPLAY_PARAMS, text::layout_box& box) {
 			if(show_condition) {
@@ -1446,28 +1426,55 @@ namespace ui {
 			text::close_layout_box(layout, box);
 		}
 		void tf_is_overseas_culture(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_overseas_culture"), ws, layout, box);
-			text::close_layout_box(layout, box);
+			auto it = (tval[0] & trigger::association_mask) == trigger::association_eq
+				? ws.lookup_key(std::string_view("is_overseas_culture"))
+				: ws.lookup_key(std::string_view("is_not_overseas_culture"));
+			if(it) {
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, it);
+				text::close_layout_box(layout, box);
+			}
 		}
 		void tf_is_banned_from_tag(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
-			text::close_layout_box(layout, box);
+			auto it = (tval[0] & trigger::association_mask) == trigger::association_eq
+				? ws.lookup_key(std::string_view("is_banned_from"))
+				: ws.lookup_key(std::string_view("is_not_banned_from"));
+			if(it) {
+				auto const n = ws.world.national_identity_get_nation_from_identity_holder(trigger::payload(tval[1]).tag_id);
+				text::substitution_map map;
+				text::add_to_substitution_map(map, text::variable_type::text, n);
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, it, map);
+				text::close_layout_box(layout, box);
+			}
 		}
 		void tf_is_banned_from_this(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
-			text::close_layout_box(layout, box);
+			auto it = (tval[0] & trigger::association_mask) == trigger::association_eq
+				? ws.lookup_key(std::string_view("is_banned_from"))
+				: ws.lookup_key(std::string_view("is_not_banned_from"));
+			if(it) {
+				text::substitution_map map;
+				text::add_to_substitution_map(map, text::variable_type::text, trigger::to_nation(this_slot));
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, it, map);
+				text::close_layout_box(layout, box);
+			}
 		}
 		void tf_is_banned_from_from(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "is_banned_from"), ws, layout, box);
-			text::close_layout_box(layout, box);
+			auto it = (tval[0] & trigger::association_mask) == trigger::association_eq
+				? ws.lookup_key(std::string_view("is_banned_from"))
+				: ws.lookup_key(std::string_view("is_not_banned_from"));
+			if(it) {
+				text::substitution_map map;
+				text::add_to_substitution_map(map, text::variable_type::text, trigger::to_nation(from_slot));
+				auto box = text::open_layout_box(layout, indentation);
+				make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
+				text::add_to_layout_box(ws, layout, box, it, map);
+				text::close_layout_box(layout, box);
+			}
 		}
 		void tf_is_independant(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);

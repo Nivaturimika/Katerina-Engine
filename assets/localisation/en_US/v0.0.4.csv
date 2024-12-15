@@ -117,3 +117,7 @@ pop_details_balance_savings;Savings:
 pop_details_balance_taxes;Paid taxes:
 pop_details_balance_needs;Required needs:
 pop_details_balance_social;Social welfare:
+is_banned_from;Is banned from $text$
+is_not_banned_from;Isn't banned from $text$
+is_overseas_culture;Is an overseas culture
+is_not_overseas_culture;Isn't an overseas culture
