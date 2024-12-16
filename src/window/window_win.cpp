@@ -48,7 +48,7 @@ namespace window {
 
 				DWORD win32Style = WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-			RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
+				RECT rectangle = {left, top, left + game_state.win_ptr->creation_x_size, top + game_state.win_ptr->creation_y_size};
 				if(HINSTANCE hUser32dll = LoadLibrary(L"User32.dll"); hUser32dll) {
 					auto pAdjustWindowRectExForDpi = (decltype(&AdjustWindowRectExForDpi))GetProcAddress(hUser32dll, "AdjustWindowRectExForDpi");
 					if(pAdjustWindowRectExForDpi != NULL) {

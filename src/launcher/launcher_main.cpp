@@ -2142,7 +2142,7 @@ int WINAPI wWinMain(
 			NULL,
 			int(launcher::scaling_factor * launcher::base_width),
 			int(launcher::scaling_factor * launcher::base_height),
-			SWP_NOMOVE | SWP_FRAMECHANGED);
+			SWP_NOMOVE | SWP_FRAMECHANGED | SWP_DRAWFRAME);
 
 		ShowWindow((HWND)(launcher::m_hwnd), SW_SHOWNORMAL);
 		UpdateWindow((HWND)(launcher::m_hwnd));
