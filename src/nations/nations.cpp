@@ -1568,37 +1568,38 @@ namespace nations {
 
 	bool other_nation_is_influencing(sys::state& state, dcon::nation_id target, dcon::gp_relationship_id rel) {
 		for(auto orel : state.world.nation_get_gp_relationship_as_influence_target(target)) {
-			if(orel != rel && orel.get_influence() > 0.0f)
-			return true;
+			if(orel != rel && orel.get_influence() > 0.0f) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	bool can_accumulate_influence_with(sys::state& state, dcon::nation_id gp, dcon::nation_id target, dcon::gp_relationship_id rel) {
-		if((state.world.gp_relationship_get_status(rel) & influence::is_banned) != 0)
-		return false;
+		if(rel && (state.world.gp_relationship_get_status(rel) & influence::is_banned) != 0)
+			return false;
 		if(military::has_truce_with(state, gp, target))
-		return false;
+			return false;
 		if(military::are_at_war(state, gp, target))
-		return false;
+			return false;
 		if(state.world.gp_relationship_get_influence(rel) >= state.defines.max_influence
 		&& !other_nation_is_influencing(state, target, rel))
-		return false;
+			return false;
 		return true;
 	}
 
 	float get_base_shares(sys::state& state, dcon::gp_relationship_id gp, float total_gain, int32_t total_influence_shares) {
 		if(total_influence_shares == 0)
-		return 0.f;
+			return 0.f;
 		switch(state.world.gp_relationship_get_status(gp) & influence::priority_mask) {
-			case influence::priority_one:
+		case influence::priority_one:
 			return total_gain / float(total_influence_shares);
-			case influence::priority_two:
+		case influence::priority_two:
 			return 2.0f * total_gain / float(total_influence_shares);
-			case influence::priority_three:
+		case influence::priority_three:
 			return 3.0f * total_gain / float(total_influence_shares);
-			default:
-			case influence::priority_zero:
+		default:
+		case influence::priority_zero:
 			return 0.0f;
 		}
 	}
@@ -1606,11 +1607,22 @@ namespace nations {
 	bool has_sphere_neighbour(sys::state& state, dcon::nation_id n, dcon::nation_id target) {
 		for(auto g : state.world.nation_get_nation_adjacency(target)) {
 			if(g.get_connected_nations(0) != target && g.get_connected_nations(0).get_in_sphere_of() == n)
-			return true;
+				return true;
 			if(g.get_connected_nations(1) != target && g.get_connected_nations(1).get_in_sphere_of() == n)
-			return true;
+				return true;
 		}
 		return false;
+	}
+
+	float total_influence_gain(sys::state& state, dcon::nation_id n) {
+		/*
+		The nation gets a daily increase of define:BASE_GREATPOWER_DAILY_INFLUENCE x (national-modifier-to-influence-gain + 1)
+		x (technology-modifier-to-influence + 1). This is then divided among the nations they are accumulating influence with
+		in proportion to their priority (so a target with priority 2 receives 2 shares instead of 1, etc).
+		*/
+		return state.defines.base_greatpower_daily_influence
+			* (1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::influence_modifier))
+			* (1.0f + state.world.nation_get_modifier_values(n, sys::national_mod_offsets::influence));
 	}
 
 	void update_influence(sys::state& state) {
@@ -1623,38 +1635,30 @@ namespace nations {
 		for(auto& grn : state.great_nations) {
 			dcon::nation_fat_id n = fatten(state.world, grn.nation);
 			if(!is_great_power(state, n))
-			continue; // skip
+				continue; // skip
 
 			int32_t total_influence_shares = 0;
 			for(auto rel : n.get_gp_relationship_as_great_power()) {
 				if(can_accumulate_influence_with(state, n, rel.get_influence_target(), rel)) {
 					switch(rel.get_status() & influence::priority_mask) {
-						case influence::priority_one:
+					case influence::priority_one:
 						total_influence_shares += 1;
 						break;
-						case influence::priority_two:
+					case influence::priority_two:
 						total_influence_shares += 2;
 						break;
-						case influence::priority_three:
+					case influence::priority_three:
 						total_influence_shares += 3;
 						break;
-						default:
-						case influence::priority_zero:
+					default:
+					case influence::priority_zero:
 						break;
 					}
 				}
 			}
 
 			if(total_influence_shares > 0) {
-				/*
-				The nation gets a daily increase of define:BASE_GREATPOWER_DAILY_INFLUENCE x (national-modifier-to-influence-gain + 1)
-				x (technology-modifier-to-influence + 1). This is then divided among the nations they are accumulating influence with
-				in proportion to their priority (so a target with priority 2 receives 2 shares instead of 1, etc).
-				*/
-				float total_gain = state.defines.base_greatpower_daily_influence *
-				(1.0f + n.get_modifier_values(sys::national_mod_offsets::influence_modifier)) *
-				(1.0f + n.get_modifier_values(sys::national_mod_offsets::influence));
-
+				auto const total_gain = total_influence_gain(state, n);
 				/*
 				This influence value does not translate directly into influence with the target nation. Instead it is first multiplied
 				by the following factor: 1 + define:DISCREDIT_INFLUENCE_GAIN_FACTOR (if discredited) +
@@ -1667,68 +1671,52 @@ namespace nations {
 				define:LARGE_POPULATION_INFLUENCE_PENALTY x target-population / define:LARGE_POPULATION_INFLUENCE_PENALTY_CHUNK (if
 				the target nation has population greater than define:LARGE_POPULATION_LIMIT) + (1 - target-score / influencer-score)^0
 				*/
-
-				float gp_score = n.get_industrial_score() + n.get_military_score() + prestige_score(state, n);
-
+				auto const gp_score = n.get_industrial_score() + n.get_military_score() + prestige_score(state, n);
 				for(auto rel : n.get_gp_relationship_as_great_power()) {
 					if(can_accumulate_influence_with(state, n, rel.get_influence_target(), rel)) {
-						float base_shares = get_base_shares(state, rel, total_gain, total_influence_shares);
+						auto const base_shares = get_base_shares(state, rel, total_gain, total_influence_shares);
 						if(base_shares <= 0.0f)
-						continue; // skip calculations for priority zero nations
-
-						float total_fi = nations::get_foreign_investment(state, rel.get_influence_target());
-						auto gp_invest = state.world.unilateral_relationship_get_foreign_investment(
-						state.world.get_unilateral_relationship_by_unilateral_pair(rel.get_influence_target(), n));
-
-						float discredit_factor = (rel.get_status() & influence::is_discredited) != 0 ? state.defines.discredit_influence_gain_factor : 0.0f;
-						float neighbor_factor = bool(state.world.get_nation_adjacency_by_nation_adjacency_pair(n, rel.get_influence_target()))
-						? state.defines.neighbour_bonus_influence_percent
-						: 0.0f;
-						float sphere_neighbor_factor = nations::has_sphere_neighbour(state, n, rel.get_influence_target())
-						? state.defines.sphere_neighbour_bonus_influence_percent
-						: 0.0f;
-						float continent_factor = n.get_capital().get_continent() != rel.get_influence_target().get_capital().get_continent()
-						? state.defines.other_continent_bonus_influence_percent
-						: 0.0f;
-						float puppet_factor = rel.get_influence_target().get_overlord_as_subject().get_ruler() == n
-						? state.defines.puppet_bonus_influence_percent
-						: 0.0f;
-						float relationship_factor = state.world.diplomatic_relation_get_value(state.world.get_diplomatic_relation_by_diplomatic_pair(n, rel.get_influence_target())) / state.defines.relation_influence_modifier;
-
-						float investment_factor = total_fi > 0.0f ? state.defines.investment_influence_defense * gp_invest / total_fi : 0.0f;
-						float pop_factor =
-						rel.get_influence_target().get_demographics(demographics::total) > state.defines.large_population_limit
-						? state.defines.large_population_influence_penalty
-						* rel.get_influence_target().get_demographics(demographics::total)
-						/ state.defines.large_population_influence_penalty_chunk
-						: 0.0f;
-						float score_factor = gp_score > 0.0f
-						? std::max(1.0f - (rel.get_influence_target().get_industrial_score() + rel.get_influence_target().get_military_score() + prestige_score(state, rel.get_influence_target())) / gp_score,  0.0f)
-						: 0.0f;
-
-						float culture_factor = state.world.nation_get_primary_culture(grn.nation) == state.world.nation_get_primary_culture(n) ? 1.25f : 0.75f;
-
-						auto cgp = state.world.nation_get_primary_culture(grn.nation);
-						auto cn = state.world.nation_get_primary_culture(n);
-
-						auto ggp = state.world.culture_get_group_from_culture_group_membership(cgp);
-						auto gn = state.world.culture_get_group_from_culture_group_membership(cn);
-
+							continue; // skip calculations for priority zero nations
+						auto const total_fi = nations::get_foreign_investment(state, rel.get_influence_target());
+						auto gp_invest = state.world.unilateral_relationship_get_foreign_investment(state.world.get_unilateral_relationship_by_unilateral_pair(rel.get_influence_target(), n));
+						auto const discredit_factor = (rel.get_status() & influence::is_discredited) != 0 ? state.defines.discredit_influence_gain_factor : 0.0f;
+						auto const neighbor_factor = bool(state.world.get_nation_adjacency_by_nation_adjacency_pair(n, rel.get_influence_target()))
+							? state.defines.neighbour_bonus_influence_percent
+							: 0.0f;
+						auto const sphere_neighbor_factor = nations::has_sphere_neighbour(state, n, rel.get_influence_target())
+							? state.defines.sphere_neighbour_bonus_influence_percent
+							: 0.0f;
+						auto const continent_factor = n.get_capital().get_continent() != rel.get_influence_target().get_capital().get_continent()
+							? state.defines.other_continent_bonus_influence_percent
+							: 0.0f;
+						auto const puppet_factor = rel.get_influence_target().get_overlord_as_subject().get_ruler() == n
+							? state.defines.puppet_bonus_influence_percent
+							: 0.0f;
+						auto const relationship_factor = state.world.diplomatic_relation_get_value(state.world.get_diplomatic_relation_by_diplomatic_pair(n, rel.get_influence_target())) / state.defines.relation_influence_modifier;
+						auto const investment_factor = total_fi > 0.0f ? state.defines.investment_influence_defense * gp_invest / total_fi : 0.0f;
+						auto const pop_factor =
+							rel.get_influence_target().get_demographics(demographics::total) > state.defines.large_population_limit
+							? state.defines.large_population_influence_penalty * rel.get_influence_target().get_demographics(demographics::total) / state.defines.large_population_influence_penalty_chunk
+							: 0.0f;
+						auto const score_factor = gp_score > 0.0f
+							? std::max(1.0f - (rel.get_influence_target().get_industrial_score() + rel.get_influence_target().get_military_score() + prestige_score(state, rel.get_influence_target())) / gp_score,  0.0f)
+							: 0.0f;
+						auto const cgp = state.world.nation_get_primary_culture(grn.nation);
+						auto const cn = state.world.nation_get_primary_culture(n);
+						auto const ggp = state.world.culture_get_group_from_culture_group_membership(cgp);
+						auto const gn = state.world.culture_get_group_from_culture_group_membership(cn);
+						auto culture_factor = state.world.nation_get_primary_culture(grn.nation) == state.world.nation_get_primary_culture(n) ? 1.25f : 0.75f;
 						culture_factor = ggp == gn ? std::max(1.0f, culture_factor) : culture_factor;
-
-						float total_multiplier = 1.0f + discredit_factor + neighbor_factor + sphere_neighbor_factor + continent_factor + puppet_factor + relationship_factor + investment_factor + pop_factor + score_factor;
-						auto gain_amount = base_shares * total_multiplier * culture_factor;
-
+						auto const total_multiplier = 1.0f + discredit_factor + neighbor_factor + sphere_neighbor_factor + continent_factor + puppet_factor + relationship_factor + investment_factor + pop_factor + score_factor;
+						auto const gain_amount = base_shares * total_multiplier * culture_factor;
 						/*
 						Any influence that accumulates beyond the max (define:MAX_INFLUENCE) will be subtracted from the influence of
 						the great power with the most influence (other than the influencing nation).
 						*/
-
 						rel.get_influence() += std::max(0.0f, gain_amount);
 						if(rel.get_influence() > state.defines.max_influence) {
 							auto overflow = rel.get_influence() - state.defines.max_influence;
 							rel.get_influence() = state.defines.max_influence;
-
 							dcon::gp_relationship_id other_rel;
 							for(auto orel : rel.get_influence_target().get_gp_relationship_as_influence_target()) {
 								if(orel != rel) {
@@ -1737,7 +1725,6 @@ namespace nations {
 									}
 								}
 							}
-
 							if(other_rel) {
 								auto& orl_i = state.world.gp_relationship_get_influence(other_rel);
 								orl_i = std::max(0.0f, orl_i - overflow);

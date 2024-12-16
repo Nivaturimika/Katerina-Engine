@@ -21,8 +21,10 @@ namespace military {
 				return true;
 			}
 		}
+		/* Extremely costly to check this! */
 		for(auto cb : state.world.in_cb_type) {
-			if((cb.get_type_bits() & military::cb_flag::always) != 0 && cb_conditions_satisfied(state, from, target, cb)) {
+			if((cb.get_type_bits() & military::cb_flag::always) != 0
+			&& cb_conditions_satisfied(state, from, target, cb)) {
 				return true;
 			}
 		}

@@ -2740,13 +2740,13 @@ namespace command {
 		defines:GW_JINGOISM_REQUIREMENT_MOD in a great war).
 		*/
 		if(source == target)
-		return false;
+			return false;
 
 		if(state.world.nation_get_is_player_controlled(source) && state.cheat_data.always_allow_wargoals)
-		return true;
+			return true;
 
 		if(state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.addwargoal_diplomatic_cost)
-		return false;
+			return false;
 
 		bool is_attacker = military::is_attacker(state, w, source);
 		bool target_in_war = false;
@@ -2754,21 +2754,21 @@ namespace command {
 		for(auto par : state.world.war_get_war_participant(w)) {
 			if(par.get_nation() == target) {
 				if(par.get_is_attacker() == is_attacker)
-				return false;
+					return false;
 				target_in_war = true;
 				break;
 			}
 		}
 
 		if(!is_attacker && military::defenders_have_status_quo_wargoal(state, w))
-		return false;
+			return false;
 
 		if(!target_in_war)
-		return false;
+			return false;
 
 		// prevent duplicate war goals
 		if(military::war_goal_would_be_duplicate(state, source, w, target, cb_type, cb_state, cb_tag, cb_secondary_nation))
-		return false;
+			return false;
 
 		if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::always) == 0) {
 			bool cb_fabbed = false;
@@ -2780,31 +2780,29 @@ namespace command {
 			}
 			if(!cb_fabbed) {
 				if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::is_not_constructing_cb) != 0)
-				return false; // can only add a constructable cb this way
+					return false; // can only add a constructable cb this way
 
 				auto totalpop = state.world.nation_get_demographics(source, demographics::total);
 				auto jingoism_perc = totalpop > 0 ? state.world.nation_get_demographics(source, demographics::to_key(state, state.culture_definitions.jingoism)) / totalpop : 0.0f;
 
 				if(state.world.war_get_is_great(w)) {
 					if(jingoism_perc < state.defines.wargoal_jingoism_requirement * state.defines.gw_wargoal_jingoism_requirement_mod)
-					return false;
+						return false;
 				} else {
 					if(jingoism_perc < state.defines.wargoal_jingoism_requirement)
-					return false;
+						return false;
 				}
 			}
 		}
 		if(!military::cb_instance_conditions_satisfied(state, source, target, cb_type, cb_state, cb_tag, cb_secondary_nation))
-		return false;
+			return false;
 
 		return true;
 	}
-	void execute_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target,
-		dcon::cb_type_id cb_type, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag,
-		dcon::nation_id cb_secondary_nation) {
-
+	
+	void execute_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target, dcon::cb_type_id cb_type, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation) {
 		if(!can_add_war_goal(state, source, w, target, cb_type, cb_state, cb_tag, cb_secondary_nation))
-		return;
+			return;
 
 		state.world.nation_get_diplomatic_points(source) -= state.defines.addwargoal_diplomatic_cost;
 		nations::adjust_relationship(state, source, target, state.defines.addwargoal_relation_on_accept);

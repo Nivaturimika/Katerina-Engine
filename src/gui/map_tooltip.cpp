@@ -5,6 +5,10 @@
 #include "nations_templates.hpp"
 #include "pdqsort.h"
 
+namespace ai {
+	float estimate_strength(sys::state& state, dcon::nation_id n);
+}
+
 namespace ui {
 	float selected_relative_attrition_amount(sys::state& state, dcon::nation_id n, std::vector<dcon::army_id>& list, dcon::province_id prov) {
 		float total_army_weight = 0.f;
@@ -50,18 +54,30 @@ namespace ui {
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, prov.index());
 			text::add_line_break_to_layout_box(state, contents, box);
+
 			text::localised_format_box(state, contents, box, "nation_tag", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, nations::int_to_tag(owner.get_identity_from_identity_holder().get_identifying_int()));
 			text::add_line_break_to_layout_box(state, contents, box);
+
 			text::localised_format_box(state, contents, box, "province_sorting_distance", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::fp_four_places{ province::sorting_distance(state, state.map_state.selected_province, prov) });
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			text::add_divider_to_layout_box(state, contents, box);
+			text::localised_format_box(state, contents, box, "ai_assigned_rival", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, state.world.nation_get_ai_rival(owner));
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			text::localised_format_box(state, contents, box, "ai_estimated_strength", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_strength(state, owner) });
+			text::add_line_break_to_layout_box(state, contents, box);
 		}
 
 		if(owner) {
