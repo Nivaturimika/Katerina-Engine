@@ -111,7 +111,7 @@ namespace ui {
 				}
 			}
 		}
-		sys::merge_sort(row_contents.begin() + 1, row_contents.end(), [](std::shared_ptr<save_item> const& a, std::shared_ptr<save_item> const& b) {
+		std::sort(row_contents.begin() + 1, row_contents.end(), [](std::shared_ptr<save_item> const& a, std::shared_ptr<save_item> const& b) {
 			if(a->is_bookmark() != b->is_bookmark())
 				return a->is_bookmark();
 			return a->timestamp > b->timestamp;
