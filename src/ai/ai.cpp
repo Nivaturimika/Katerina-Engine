@@ -902,7 +902,7 @@ namespace ai {
 		return state.world.nation_get_demographics(n, demographics::to_key(state, iid));
 	}
 
-	bool ai_can_appoint_political_party(sys::state& state, dcon::nation_id n) {
+	bool can_appoint_political_party(sys::state& state, dcon::nation_id n) {
 		if(!politics::can_appoint_ruling_party(state, n))
 			return false;
 		auto last_change = state.world.nation_get_ruling_party_last_appointed(n);
@@ -916,25 +916,35 @@ namespace ai {
 		return true;
 	}
 
+	bool political_party_is_state_economy(sys::state& state, dcon::political_party_id pid) {
+		uint32_t combined = 0;
+		for(const auto iid : state.world.in_issue) {
+			combined |= state.world.political_party_get_party_issues(pid, iid).get_rules();
+		}
+		return ((combined & issue_rule::build_factory) != 0)
+			&& ((combined & issue_rule::expand_factory) != 0);
+	}
+
 	void update_ai_ruling_party(sys::state& state) {
 		for(auto n : state.world.in_nation) {
 			// skip over: non ais, dead nations
 			if(n.get_is_player_controlled() || n.get_owned_province_count() == 0)
 				continue;
 
-			if(ai_can_appoint_political_party(state, n)) {
+			if(ai::can_appoint_political_party(state, n)) {
 				auto gov = n.get_government_type();
 				auto identity = n.get_identity_from_identity_holder();
 				auto start = state.world.national_identity_get_political_party_first(identity).id.index();
 				auto end = start + state.world.national_identity_get_political_party_count(identity);
 
-				dcon::political_party_id target;
-				float max_support = estimate_pop_party_support(state, n, state.world.nation_get_ruling_party(n));
+				dcon::political_party_id target{};
+				float max_support = 0.f; //estimate_pop_party_support(state, n, state.world.nation_get_ruling_party(n));
 				for(int32_t i = start; i < end; i++) {
 					auto pid = dcon::political_party_id(uint16_t(i));
 					if(pid != state.world.nation_get_ruling_party(n) && politics::political_party_is_active(state, n, pid) && (gov.get_ideologies_allowed() & ::culture::to_bits(state.world.political_party_get_ideology(pid))) != 0) {
 						auto support = estimate_pop_party_support(state, n, pid);
-						if(support > max_support) {
+						if(support > max_support
+						&& ai::political_party_is_state_economy(state, pid)) {
 							target = pid;
 							max_support = support;
 						}
@@ -3332,27 +3342,35 @@ namespace ai {
 				+ state.world.nation_get_total_middle_income(ids)
 				+ state.world.nation_get_total_poor_income(ids);
 			/* We need to have 60 days of income worth in our treasury, additionally, have not lost money in the previous day */
-			auto const was_profitable = (
-				(total_income * 60.f) <= state.world.nation_get_stockpiles(ids, economy::money)
-				&& state.world.nation_get_last_treasury(ids) <= state.world.nation_get_stockpiles(ids, economy::money));
+			auto const treasury = state.world.nation_get_stockpiles(ids, economy::money);
+			auto const was_profitable = ((total_income * 365.f) <= treasury)
+				|| (state.world.nation_get_last_treasury(ids) <= treasury && (total_income * 120.f) <= treasury);
 			auto const subopt_admin = state.world.nation_get_administrative_efficiency(ids) < 0.95f || state.world.nation_get_administrative_spending(ids) < 10;
 			auto const at_war = state.world.nation_get_is_at_war(ids);
 			auto const at_risk = state.world.nation_get_ai_is_threatened(ids);
+
+			auto const lt_adm = state.world.nation_get_administrative_spending(ids) <= 20;
+			auto const lt_edu = state.world.nation_get_education_spending(ids) <= 55;
+			auto const lt_mil = state.world.nation_get_military_spending(ids) <= 55;
+			auto const lt_con = state.world.nation_get_construction_spending(ids) <= 55;
 
 			auto const t_step = ve::int_vector(2); //tiny
 			auto const s_step = ve::int_vector(5); //small
 			auto const m_step = ve::int_vector(7); //medium
 			auto const l_step = ve::int_vector(10); //large
 
-			auto const new_adm = state.world.nation_get_administrative_spending(ids) + ve::select(was_profitable, s_step, ve::select(subopt_admin, s_step, -s_step));
-			auto const new_edu = state.world.nation_get_education_spending(ids) + ve::select(was_profitable, s_step, -s_step);
-			auto const new_social = state.world.nation_get_social_spending(ids) + ve::select(was_profitable, s_step, -s_step);
-			auto const new_dominv = state.world.nation_get_domestic_investment_spending(ids) + ve::select(was_profitable, t_step, -s_step);
+			// these 3 are always kept at >15%, always
+			auto const new_adm = ve::select(lt_adm, ve::int_vector(20), state.world.nation_get_administrative_spending(ids) +  ve::select(was_profitable, t_step, ve::select(subopt_admin, l_step, -s_step)));
+			auto const new_edu = ve::select(lt_edu, ve::int_vector(55), state.world.nation_get_education_spending(ids) + ve::select(was_profitable, s_step, -s_step));
+			auto const new_mil = ve::select(lt_mil, ve::int_vector(55), state.world.nation_get_military_spending(ids) + ve::select(was_profitable, s_step, ve::select(at_risk, -t_step, -s_step)));
+			
+			auto const new_social = state.world.nation_get_social_spending(ids) + ve::select(was_profitable, s_step, -t_step);
+			auto const new_dominv = state.world.nation_get_domestic_investment_spending(ids) + ve::select(was_profitable, s_step, -t_step);
 
 			// large/medium increases, small decreases
-			auto const new_con = state.world.nation_get_construction_spending(ids) + ve::select(was_profitable, l_step, ve::select(at_risk, m_step, -s_step));
-			auto const new_land = state.world.nation_get_land_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war || at_risk, l_step, -s_step));
-			auto const new_navy = state.world.nation_get_naval_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war || at_risk, l_step, -s_step));
+			auto const new_con = ve::select(lt_con, ve::int_vector(55), state.world.nation_get_construction_spending(ids) + ve::select(was_profitable, m_step, -t_step));
+			auto const new_land = ve::select(at_war, ve::int_vector(100), state.world.nation_get_land_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_risk, -s_step, -m_step)));
+			auto const new_navy = state.world.nation_get_naval_spending(ids) + ve::select(was_profitable, m_step, ve::select(at_war, l_step, ve::select(at_risk, -s_step, -m_step)));
 
 			// large increases, small decreases
 			auto const rules = state.world.nation_get_combined_issue_rules(ids);
@@ -3370,6 +3388,7 @@ namespace ai {
 			state.world.nation_set_administrative_spending(ids, ve::select(filter, new_adm, state.world.nation_get_administrative_spending(ids)));
 			state.world.nation_set_education_spending(ids, ve::select(filter, new_edu, state.world.nation_get_education_spending(ids)));
 			state.world.nation_set_domestic_investment_spending(ids, ve::select(filter, new_dominv, state.world.nation_get_domestic_investment_spending(ids)));
+			state.world.nation_set_military_spending(ids, ve::select(filter, new_mil, state.world.nation_get_military_spending(ids)));
 			state.world.nation_set_construction_spending(ids, ve::select(filter, new_con, state.world.nation_get_construction_spending(ids)));
 			state.world.nation_set_land_spending(ids, ve::select(filter, new_land, state.world.nation_get_land_spending(ids)));
 			state.world.nation_set_naval_spending(ids, ve::select(filter, new_navy, state.world.nation_get_naval_spending(ids)));
