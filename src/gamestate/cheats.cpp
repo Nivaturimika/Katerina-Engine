@@ -32,7 +32,7 @@ namespace command {
 	}
 	void execute_c_switch_nation(sys::state& state, dcon::nation_id source, dcon::national_identity_id t) {
 		if(!can_c_switch_nation(state, source, t))
-		return;
+			return;
 
 		dcon::nation_id target = state.world.national_identity_get_nation_from_identity_holder(t);
 		if(bool(source) && source != state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id)) {

@@ -199,10 +199,10 @@ namespace network {
 			/* Reload clients */
 			std::vector<dcon::nation_id> players;
 			for(const auto n : state.world.in_nation)
-			if(state.world.nation_get_is_player_controlled(n))
-				players.push_back(n);
+				if(state.world.nation_get_is_player_controlled(n))
+					players.push_back(n);
 			dcon::nation_id old_local_player_nation = state.local_player_nation;
-		state.local_player_nation = dcon::nation_id{ };
+			state.local_player_nation = dcon::nation_id{ };
 			network::write_network_save(state);
 			/* Then reload as if we loaded the save data */
 			state.preload();
@@ -212,7 +212,7 @@ namespace network {
 			//network::write_network_save(state);
 			state.fill_unsaved_data();
 			for(const auto n : players)
-			state.world.nation_set_is_player_controlled(n, true);
+				state.world.nation_set_is_player_controlled(n, true);
 			state.local_player_nation = old_local_player_nation;
 			assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 			#if 0

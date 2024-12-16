@@ -1011,9 +1011,9 @@ namespace command {
 		state.world.nation_set_is_player_controlled(source, old_controller);
 
 		if(state.world.nation_get_is_player_controlled(holder))
-		ai::remove_ai_data(state, holder);
+			ai::remove_ai_data(state, holder);
 		if(state.world.nation_get_is_player_controlled(source))
-		ai::remove_ai_data(state, source);
+			ai::remove_ai_data(state, source);
 
 		if(state.local_player_nation == source) {
 			state.local_player_nation = holder;
@@ -4326,11 +4326,11 @@ namespace command {
 		state.network_state.map_of_player_names.insert_or_assign(source.index(), name);
 		/* Hotjoin */
 		if(state.current_scene.game_in_progress)
-		ai::remove_ai_data(state, source);
+			ai::remove_ai_data(state, source);
 
-	ui::chat_message m{};
+		ui::chat_message m{};
 		m.source = source;
-	text::substitution_map sub{};
+		text::substitution_map sub{};
 		text::add_to_substitution_map(sub, text::variable_type::playername, name.to_string_view());
 		m.body = text::resolve_string_substitution(state, "chat_player_joins", sub);
 		post_chat_message(state, m);
@@ -4351,9 +4351,9 @@ namespace command {
 			state.world.nation_set_is_player_controlled(source, false);
 		}
 
-	ui::chat_message m{};
+		ui::chat_message m{};
 		m.source = source;
-	text::substitution_map sub{};
+		text::substitution_map sub{};
 		text::add_to_substitution_map(sub, text::variable_type::playername, state.network_state.map_of_player_names[source.index()].to_string_view());
 		m.body = text::resolve_string_substitution(state, "chat_player_leaves", sub);
 		post_chat_message(state, m);
@@ -4368,7 +4368,7 @@ namespace command {
 	}
 	bool can_notify_player_ban(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target) // can't perform on self
-		return false;
+			return false;
 		return true;
 	}
 	void execute_notify_player_ban(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
@@ -4381,9 +4381,9 @@ namespace command {
 		}
 		state.world.nation_set_is_player_controlled(target, false);
 
-	ui::chat_message m{};
+		ui::chat_message m{};
 		m.source = source;
-	text::substitution_map sub{};
+		text::substitution_map sub{};
 		text::add_to_substitution_map(sub, text::variable_type::playername, state.network_state.map_of_player_names[target.index()].to_string_view());
 		m.body = text::resolve_string_substitution(state, "chat_player_ban", sub);
 		post_chat_message(state, m);
@@ -4398,7 +4398,7 @@ namespace command {
 	}
 	bool can_notify_player_kick(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target) // can't perform on self
-		return false;
+			return false;
 		return true;
 	}
 	void execute_notify_player_kick(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
@@ -4411,9 +4411,9 @@ namespace command {
 		}
 		state.world.nation_set_is_player_controlled(target, false);
 
-	ui::chat_message m{};
+		ui::chat_message m{};
 		m.source = source;
-	text::substitution_map sub{};
+		text::substitution_map sub{};
 		text::add_to_substitution_map(sub, text::variable_type::playername, state.network_state.map_of_player_names[target.index()].to_string_view());
 		m.body = text::resolve_string_substitution(state, "chat_player_kick", sub);
 		post_chat_message(state, m);
@@ -4428,9 +4428,9 @@ namespace command {
 	}
 	bool can_notify_player_picks_nation(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(source == target) //redundant
-		return false;
+			return false;
 		if(!bool(target) || target == state.world.national_identity_get_nation_from_identity_holder(state.national_definitions.rebel_id)) //Invalid OR rebel nation
-		return false;
+			return false;
 		// TODO: Support Co-op (one day)
 		return state.world.nation_get_is_player_controlled(target) == false;
 	}
@@ -4445,8 +4445,8 @@ namespace command {
 		}
 		// We will also re-assign all chat messages from this nation to the new one
 		for(auto& msg : state.ui_state.chat_messages)
-		if(bool(msg.source) && msg.source == source)
-			msg.source = target;
+			if(bool(msg.source) && msg.source == source)
+				msg.source = target;
 
 		// Update map
 		state.map_state.unhandled_province_selection = true;
@@ -5570,11 +5570,11 @@ namespace command {
 			state.network_state.is_new_game = false;
 			if(state.network_mode == sys::network_mode_type::host) {
 				/* Save the buffer before we fill the unsaved data */
-			state.local_player_nation = dcon::nation_id{ };
+				state.local_player_nation = dcon::nation_id{ };
 				network::write_network_save(state);
 				state.fill_unsaved_data();
 				for(const auto n : players)
-				state.world.nation_set_is_player_controlled(n, true);
+					state.world.nation_set_is_player_controlled(n, true);
 				state.local_player_nation = old_local_player_nation;
 				assert(state.world.nation_get_is_player_controlled(state.local_player_nation));
 				/* Now send the saved buffer before filling the unsaved data to the clients
@@ -5582,7 +5582,7 @@ namespace command {
 				command::payload c{};
 				c.type = command::command_type::notify_save_loaded;
 				c.source = state.local_player_nation;
-			c.data.notify_save_loaded.target = dcon::nation_id{};
+				c.data.notify_save_loaded.target = dcon::nation_id{};
 				network::broadcast_save_to_clients(state, c, state.network_state.current_save_buffer.get(), state.network_state.current_save_length, state.network_state.current_save_checksum);
 			} else {
 				state.fill_unsaved_data();
@@ -5590,7 +5590,7 @@ namespace command {
 		}
 		/* Savefiles might load with new railroads, so for responsiveness we
 			update whenever one is loaded. */
-	state.map_state.set_selected_province(dcon::province_id{});
+		state.map_state.set_selected_province(dcon::province_id{});
 		state.map_state.unhandled_province_selection = true;
 		state.railroad_built.store(true, std::memory_order::release);
 		state.province_ownership_changed.store(true, std::memory_order::release);
