@@ -2659,31 +2659,30 @@ namespace military {
 			auto reserves = state.world.land_battle_get_reserves(b);
 			for(auto reg : state.world.army_get_army_membership(a)) {
 				if(reg.get_regiment().get_strength() <= 0.0f)
-				continue;
-
+					continue;
 				auto type = state.military_definitions.unit_base_definitions[reg.get_regiment().get_type()].type;
 				switch(type) {
-					case unit_type::infantry:
-				reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_infantry});
+				case unit_type::infantry:
+					reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_infantry});
 					state.world.land_battle_get_defender_infantry(b) += reg.get_regiment().get_strength();
 					break;
-					case unit_type::cavalry:
-				reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_cavalry});
+				case unit_type::cavalry:
+					reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_cavalry});
 					state.world.land_battle_get_defender_cav(b) += reg.get_regiment().get_strength();
 					break;
-					case unit_type::special:
-					case unit_type::support:
-				reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_support});
+				case unit_type::special:
+				case unit_type::support:
+					reserves.push_back(reserve_regiment{reg.get_regiment().id, reserve_regiment::type_support});
 					state.world.land_battle_get_defender_support(b) += reg.get_regiment().get_strength();
 					break;
-					default:
+				default:
 					assert(false);
 				}
 			}
 		}
 
 		state.world.army_set_battle_from_army_battle_participation(a, b);
-	state.world.army_set_arrival_time(a, sys::date{}); // pause movement
+		state.world.army_set_arrival_time(a, sys::date{}); // pause movement
 	}
 
 	void army_arrives_in_province(sys::state& state, dcon::army_id a, dcon::province_id p, crossing_type crossing, dcon::land_battle_id from) {

@@ -3328,7 +3328,13 @@ namespace ai {
 	void update_budget(sys::state& state) {
 		state.world.execute_parallel_over_nation([&](auto ids) {
 			// read phase -- daily income
-			auto const was_profitable = state.world.nation_get_last_treasury(ids) <= state.world.nation_get_stockpiles(ids, economy::money);
+			auto const total_income = state.world.nation_get_total_rich_income(ids)
+				+ state.world.nation_get_total_middle_income(ids)
+				+ state.world.nation_get_total_poor_income(ids);
+			/* We need to have 60 days of income worth in our treasury, additionally, have not lost money in the previous day */
+			auto const was_profitable = (
+				(total_income * 60.f) <= state.world.nation_get_stockpiles(ids, economy::money)
+				&& state.world.nation_get_last_treasury(ids) <= state.world.nation_get_stockpiles(ids, economy::money));
 			auto const subopt_admin = state.world.nation_get_administrative_efficiency(ids) < 0.95f || state.world.nation_get_administrative_spending(ids) < 10;
 			auto const at_war = state.world.nation_get_is_at_war(ids);
 			auto const at_risk = state.world.nation_get_ai_is_threatened(ids);

@@ -3,6 +3,10 @@
 #include "economy.hpp"
 #include "economy_factory.hpp"
 
+namespace economy {
+	float full_private_investment_cost(sys::state const& state, dcon::nation_id n);
+}
+
 namespace economy_estimations {
 	float estimate_stockpile_filling_spending(sys::state& state, dcon::nation_id n) {
 		float total = 0.0f;
@@ -175,12 +179,7 @@ namespace economy_estimations {
 
 	float estimate_domestic_investment(sys::state& state, dcon::nation_id n) {
 		auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f;
-		return di_spending *
-			(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists))
-			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists)
-			+ state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))
-			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.aristocrat))
-			* economy::pop_payout_factor;
+		return di_spending * economy::full_private_investment_cost(state, n);
 	}
 
 	float estimate_land_spending(sys::state& state, dcon::nation_id n) {

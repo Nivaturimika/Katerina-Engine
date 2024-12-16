@@ -708,56 +708,47 @@ namespace economy {
 		assert(p_level >= 0.f);
 		auto const unemp_level = state.world.nation_get_modifier_values(n, sys::national_mod_offsets::unemployment_benefit);
 		assert(unemp_level >= 0.f);
-		auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) / 100.0f;
-		float total = di_spending *
-			(state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.capitalists))
-			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.capitalists)
-			+ state.world.nation_get_demographics(n, demographics::to_key(state, state.culture_definitions.aristocrat))
-			* state.world.nation_get_luxury_needs_costs(n, state.culture_definitions.aristocrat));
-		assert(std::isfinite(total) && total >= 0.0f);
+		float total = 0.f;
 		state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
 			auto adj_pop_of_type = state.world.nation_get_demographics(n, demographics::to_key(state, pt));
-			if(adj_pop_of_type <= 0)
-				return;
-			assert(std::isfinite(adj_pop_of_type) && adj_pop_of_type >= 0.0f);
-			//
-			auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
-			if(ln_type == culture::income_type::administration) {
-				total += a_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
-			} else if(ln_type == culture::income_type::education) {
-				total += e_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
-			} else if(ln_type == culture::income_type::military) {
-				total += m_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
-			} else { // unemployment, pensions
-				total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
-				if(state.world.pop_type_get_has_unemployment(pt)) {
-					auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
-					//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
-					//after the employment one?
-					emp = std::min(emp, adj_pop_of_type);
-					total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+			if(adj_pop_of_type > 0.f) {
+				auto ln_type = culture::income_type(state.world.pop_type_get_life_needs_income_type(pt));
+				if(ln_type == culture::income_type::administration) {
+					total += a_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
+				} else if(ln_type == culture::income_type::education) {
+					total += e_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
+				} else if(ln_type == culture::income_type::military) {
+					total += m_spending * adj_pop_of_type * state.world.nation_get_life_needs_costs(n, pt);
+				} else { // unemployment, pensions
+					total += s_spending * adj_pop_of_type * p_level * state.world.nation_get_life_needs_costs(n, pt);
+					if(state.world.pop_type_get_has_unemployment(pt)) {
+						auto emp = state.world.nation_get_demographics(n, demographics::to_employment_key(state, pt));
+						//sometimes emp > adj_pop_of_type, why? no idea, perhaps we are doing the pop growth update
+						//after the employment one?
+						emp = std::min(emp, adj_pop_of_type);
+						total += s_spending * (adj_pop_of_type - emp) * unemp_level * state.world.nation_get_life_needs_costs(n, pt);
+					}
 				}
+				auto en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
+				if(en_type == culture::income_type::administration) {
+					total += a_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
+				} else if(en_type == culture::income_type::education) {
+					total += e_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
+				} else if(en_type == culture::income_type::military) {
+					total += m_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
+				}
+				auto lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
+				if(lx_type == culture::income_type::administration) {
+					total += a_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
+				} else if(lx_type == culture::income_type::education) {
+					total += e_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
+				} else if(lx_type == culture::income_type::military) {
+					total += m_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
+				}
+				assert(std::isfinite(total) && total >= 0.0f);
 			}
-			auto en_type = culture::income_type(state.world.pop_type_get_everyday_needs_income_type(pt));
-			if(en_type == culture::income_type::administration) {
-				total += a_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
-			} else if(en_type == culture::income_type::education) {
-				total += e_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
-			} else if(en_type == culture::income_type::military) {
-				total += m_spending * adj_pop_of_type * state.world.nation_get_everyday_needs_costs(n, pt);
-			}
-			auto lx_type = culture::income_type(state.world.pop_type_get_luxury_needs_income_type(pt));
-			if(lx_type == culture::income_type::administration) {
-				total += a_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
-			} else if(lx_type == culture::income_type::education) {
-				total += e_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
-			} else if(lx_type == culture::income_type::military) {
-				total += m_spending * adj_pop_of_type * state.world.nation_get_luxury_needs_costs(n, pt);
-			}
-			assert(std::isfinite(total) && total >= 0.0f);
 		});
-		total *= pop_payout_factor;
-		return total;
+		return total * pop_payout_factor;
 	}
 
 	float military_spending_cost(sys::state& state, dcon::nation_id n) {
@@ -780,10 +771,25 @@ namespace economy {
 		return total;
 	}
 
+	/* Obtains the full private investment cost */
+	float full_private_investment_cost(sys::state const& state, dcon::nation_id n) {
+		auto total = 0.0f;
+		uint32_t total_commodities = state.world.commodity_size();
+		for(uint32_t i = 1; i < total_commodities; ++i) {
+			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
+			total += state.world.nation_get_private_construction_demand(n, cid) * state.world.commodity_get_current_price(cid);
+		}
+		return total;
+	}
+
+	/* Obtains the full cost of spending assuming all spendings are effectively at 100% (of their set amount)
+	   For example if construction is set at 50%, then a 50% effectivity means 25%. */
 	float full_spending_cost(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
-		float c_spending = float(state.world.nation_get_construction_spending(n)) / 100.0f;
-		float o_spending = float(state.world.nation_get_overseas_spending(n)) / 100.f;
+		/* Full cost of spending */
+		auto const c_spending = float(state.world.nation_get_construction_spending(n)) / 100.0f;
+		auto const o_spending = float(state.world.nation_get_overseas_spending(n)) / 100.f;
+		auto total = 0.f;
+
 		for(uint32_t i = 1; i < state.world.commodity_size(); ++i) {
 			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
 			auto v = state.world.nation_get_construction_demand(n, cid)
@@ -815,16 +821,6 @@ namespace economy {
 			}
 		}
 		assert(std::isfinite(total) && total >= 0.0f);
-		return total;
-	}
-	
-	float full_private_investment_cost(sys::state& state, dcon::nation_id n) {
-		float total = 0.0f;
-		uint32_t total_commodities = state.world.commodity_size();
-		for(uint32_t i = 1; i < total_commodities; ++i) {
-			dcon::commodity_id cid{ dcon::commodity_id::value_base_t(i) };
-			total += state.world.nation_get_private_construction_demand(n, cid) * state.world.commodity_get_current_price(cid);
-		}
 		return total;
 	}
 
@@ -1387,16 +1383,35 @@ namespace economy {
 			limit_pop_demand_to_production(state);
 
 			{
+				//
 				// update national spending
 				// step 1: figure out total
+				//
 				float total = full_spending_cost(state, n);
 				float military_total = military_spending_cost(state, n);
 				state.world.nation_set_maximum_military_costs(n, military_total);
+				//
 				// step 2: sum military and interest
+				//
 				total += military_total;
 				total += interest_payment(state, n);
 				total += full_pop_spending_cost(state, n);
-				// step 2: limit to actual budget
+				//
+				// step 3: sum private investment (contributions from government)
+				//
+				auto const pi_total = full_private_investment_cost(state, n);
+				auto pi_budget = state.world.nation_get_private_investment(n);
+				/* Investment from the government */
+				auto const di_spending = float(state.world.nation_get_domestic_investment_spending(n)) / 100.f;
+				total += di_spending * pi_total;
+				pi_budget += di_spending * pi_total;
+				/* Calculate final scale */
+				auto pi_scale = pi_total <= pi_budget ? 1.0f : pi_budget / pi_total;
+				state.world.nation_set_private_investment_effective_fraction(n, pi_scale);
+				state.world.nation_set_private_investment(n, std::max(0.0f, pi_budget - pi_total));
+				//
+				// step 4: limit to actual budget
+				//
 				float spending_scale = 0.0f;
 				float budget = 0.f;
 				assert(budget >= 0.f);
@@ -1414,12 +1429,6 @@ namespace economy {
 
 				state.world.nation_get_stockpiles(n, economy::money) -= std::min(budget, total * spending_scale);
 				state.world.nation_set_spending_level(n, spending_scale);
-
-				float pi_total = full_private_investment_cost(state, n);
-				float pi_budget = state.world.nation_get_private_investment(n);
-				auto pi_scale = pi_total <= pi_budget ? 1.0f : pi_budget / pi_total;
-				state.world.nation_set_private_investment_effective_fraction(n, pi_scale);
-				state.world.nation_set_private_investment(n, std::max(0.0f, pi_budget - pi_total));
 
 				update_national_consumption(state, n, spending_scale, pi_scale);
 			}
@@ -1500,7 +1509,6 @@ namespace economy {
 			auto const m_spending = owner_spending * ve::to_float(state.world.nation_get_military_spending(owners)) / 100.0f;
 			auto const p_level = state.world.nation_get_modifier_values(owners, sys::national_mod_offsets::pension_level);
 			auto const unemp_level = state.world.nation_get_modifier_values(owners, sys::national_mod_offsets::unemployment_benefit);
-			auto const di_level = owner_spending * ve::to_float(state.world.nation_get_domestic_investment_spending(owners)) / 100.f;
 
 			auto types = state.world.pop_get_poptype(ids);
 
@@ -1525,9 +1533,6 @@ namespace economy {
 			acc_a = acc_a + ve::select(en_types == int32_t(culture::income_type::administration), a_spending * adj_pop_of_type * en_costs, 0.0f);
 			acc_e = acc_e + ve::select(en_types == int32_t(culture::income_type::education), e_spending * adj_pop_of_type * en_costs, 0.0f);
 			acc_m = acc_m + ve::select(en_types == int32_t(culture::income_type::military), m_spending * adj_pop_of_type * en_costs, 0.0f);
-
-			acc_u = acc_u + ve::select(types == state.culture_definitions.capitalists, di_level * adj_pop_of_type * lx_costs, 0.0f);
-			acc_u = acc_u + ve::select(types == state.culture_definitions.aristocrat, di_level * adj_pop_of_type * lx_costs, 0.0f);
 
 			acc_a = acc_a + ve::select(lx_types == int32_t(culture::income_type::administration), a_spending * adj_pop_of_type * lx_costs, 0.0f);
 			acc_e = acc_e + ve::select(lx_types == int32_t(culture::income_type::education), e_spending * adj_pop_of_type * lx_costs, 0.0f);
@@ -2084,12 +2089,11 @@ namespace economy {
 					}
 
 					//try to invest into something new...
-					//bool found_investment = false;
 					auto existing_constructions = state.world.state_instance_get_state_building_construction(s);
 					if(existing_constructions.begin() != existing_constructions.end())
 						continue; // already building
 
-					if(n.get_private_investment() * 0.01f < total_cost + total_cost_added)
+					if(n.get_private_investment() * 0.05f < total_cost + total_cost_added)
 						continue;
 
 					if(num_factories < int32_t(state.defines.factories_per_state) && (nation_rules & issue_rule::pop_build_factory) != 0) {
@@ -2139,7 +2143,6 @@ namespace economy {
 										break;
 									}
 								}
-								//found_investment = true;
 							}
 						}
 					}
@@ -2171,19 +2174,20 @@ namespace economy {
 					}
 					if(!provinces_in_order.empty()) {
 						std::pair<dcon::province_id, int32_t> best_p = provinces_in_order[0];
-						for(auto e : provinces_in_order)
-							if(e.second > best_p.second)
+						for(auto e : provinces_in_order) {
+							if(e.second > best_p.second) {
 								best_p = e;
+							}
+						}
 
 						auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_p.first, n));
 						new_rr.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::railroad)].time);
 						new_rr.set_is_pop_project(true);
 						new_rr.set_type(uint8_t(province_building_type::railroad));
-						//found_investment = true;
 					}
 				}
 			}
-			n.set_private_investment(0.0f);
+			//n.set_private_investment(0.0f);
 		}
 	}
 
