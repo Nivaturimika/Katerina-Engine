@@ -69,12 +69,11 @@ namespace ui {
 		} else if(i->is_bookmark()) {
 			set_text(state, text::produce_simple_string(state, i->name));
 		} else {
-			auto n = state.world.national_identity_get_nation_from_identity_holder(i->save_flag);
-			auto name = text::get_name(state, n);
+			auto name = state.world.national_identity_get_name(i->save_flag);
 			if(auto gov_name = state.world.national_identity_get_government_name(i->save_flag, i->as_gov); state.key_is_localized(gov_name)) {
 				name = gov_name;
 			}
-			if(!n || !i->save_flag || i->save_flag == state.national_definitions.rebel_id) {
+			if(!i->save_flag || i->save_flag == state.national_definitions.rebel_id) {
 				set_text(state, text::produce_simple_string(state, "spectator_game"));
 			} else {
 				set_text(state, text::produce_simple_string(state, name));

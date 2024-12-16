@@ -957,8 +957,9 @@ namespace text {
 		auto gov_id = state.world.nation_get_government_type(id);
 		if(gov_id) {
 			auto gname =  state.world.national_identity_get_government_name(ident, gov_id);
-			if(state.key_is_localized(gname))
-			return gname;
+			if(state.key_is_localized(gname)) {
+				return gname;
+			}
 		}
 		return state.world.national_identity_get_name(ident);
 	}
