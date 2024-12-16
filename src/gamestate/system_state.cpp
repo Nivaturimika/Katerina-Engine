@@ -16,6 +16,7 @@
 #include "prng.hpp"
 #include "blake2.h"
 #include "reports.hpp"
+#include "serialization.hpp"
 
 #include "gui_element_base.hpp"
 #include "gui_element_templates.hpp"

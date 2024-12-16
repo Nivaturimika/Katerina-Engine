@@ -73,6 +73,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_diplomacy_request_topbar.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_message_settings_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_message_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/gui_nation_picker.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_effect_tooltips.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_graphics.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/gui_leader_select.cpp"
