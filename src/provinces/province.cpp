@@ -13,6 +13,10 @@
 #include "economy_rgo.hpp"
 #include "news.hpp"
 
+namespace military {
+	void run_army_gc(sys::state& state);
+}
+
 namespace province {
 
 	template auto is_overseas<ve::tagged_vector<dcon::province_id>>(sys::state const&, ve::tagged_vector<dcon::province_id>);
@@ -877,11 +881,15 @@ namespace province {
 		for(auto ar : state.world.province_get_army_location_as_location(id)) {
 			if(ar.get_army() && ar.get_army().get_army_rebel_control().get_controller()) {
 				assert(!ar.get_army().get_army_control().get_controller());
-			state.world.army_set_controller_from_army_control(ar.get_army(), dcon::nation_id{});
-			state.world.army_set_controller_from_army_rebel_control(ar.get_army(), dcon::rebel_faction_id{});
+				state.world.army_set_controller_from_army_control(ar.get_army(), dcon::nation_id{});
+				state.world.army_set_controller_from_army_rebel_control(ar.get_army(), dcon::rebel_faction_id{});
 				state.world.army_set_is_retreating(ar.get_army(), true);
 			}
 		}
+		/* 1 in a million chance: A rebel finishes sieging a province (100% siege), the siege occurs
+		   then since the army wasn't GC'ed correctly, the siege ends up in control of nobody.
+		   So we have to handle that edge case! */
+		military::run_army_gc(state);
 
 		if(state_is_new && old_owner) {
 			news::news_scope scope;

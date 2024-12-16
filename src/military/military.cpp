@@ -1711,6 +1711,20 @@ namespace military {
 		}
 	}
 
+	void run_army_gc(sys::state& state) {
+		for(uint32_t i = state.world.army_size(); i-- > 0; ) {
+			dcon::army_id n{ dcon::army_id::value_base_t(i) };
+			if(state.world.army_is_valid(n)) {
+				auto rng = state.world.army_get_army_membership(n);
+				if(!state.world.army_get_battle_from_army_battle_participation(n)) {
+					if(rng.begin() == rng.end() || (!state.world.army_get_controller_from_army_rebel_control(n) && !state.world.army_get_controller_from_army_control(n))) {
+						military::cleanup_army(state, n);
+					}
+				}
+			}
+		}
+	}
+
 	void run_gc(sys::state& state) {
 
 		//
@@ -1746,12 +1760,14 @@ namespace military {
 		to_delete.clear();
 		for(auto w : state.world.in_war) {
 			for(auto wg : w.get_wargoals_attached()) {
-				if(get_role(state, w, wg.get_wargoal().get_added_by()) == war_role::none || get_role(state, w, wg.get_wargoal().get_target_nation()) == war_role::none)
-				to_delete.push_back(wg.get_wargoal());
+				if(get_role(state, w, wg.get_wargoal().get_added_by()) == war_role::none || get_role(state, w, wg.get_wargoal().get_target_nation()) == war_role::none) {
+					to_delete.push_back(wg.get_wargoal());
+				}
 			}
 		}
-		for(auto g : to_delete)
-		state.world.delete_wargoal(g);
+		for(auto g : to_delete) {
+			state.world.delete_wargoal(g);
+		}
 
 		for(auto w : state.world.in_war) {
 			if(get_role(state, w, w.get_primary_attacker()) != war_role::attacker || w.get_primary_attacker().get_overlord_as_subject().get_ruler()) {
@@ -1810,15 +1826,16 @@ namespace military {
 		for(auto wg : state.world.in_wargoal) {
 			auto po = wg.get_peace_offer_from_peace_offer_item();
 			auto wr = wg.get_war_from_wargoals_attached();
-			if(!po && !wr)
-			state.world.delete_wargoal(wg);
+			if(!po && !wr) {
+				state.world.delete_wargoal(wg);
+			}
 		}
 
 		//
 		// empty armies / navies or leaderless ones
 		//
 		for(uint32_t i = state.world.navy_size(); i-- > 0; ) {
-		dcon::navy_id n{ dcon::navy_id::value_base_t(i) };
+			dcon::navy_id n{ dcon::navy_id::value_base_t(i) };
 			if(state.world.navy_is_valid(n)) {
 				auto rng = state.world.navy_get_navy_membership(n);
 				if(!state.world.navy_get_battle_from_navy_battle_participation(n)) {
@@ -1828,17 +1845,7 @@ namespace military {
 				}
 			}
 		}
-		for(uint32_t i = state.world.army_size(); i-- > 0; ) {
-		dcon::army_id n{ dcon::army_id::value_base_t(i) };
-			if(state.world.army_is_valid(n)) {
-				auto rng = state.world.army_get_army_membership(n);
-				if(!state.world.army_get_battle_from_army_battle_participation(n)) {
-					if(rng.begin() == rng.end() || (!state.world.army_get_controller_from_army_rebel_control(n) && !state.world.army_get_controller_from_army_control(n))) {
-						military::cleanup_army(state, n);
-					}
-				}
-			}
-		}
+		military::run_army_gc(state);
 	}
 
 	void add_truce_between_sides(sys::state& state, dcon::war_id w, int32_t months) {
@@ -3214,8 +3221,8 @@ namespace military {
 		assert(location);
 
 		auto make_leaderless = [&](dcon::army_id a) {
-		state.world.army_set_controller_from_army_control(a, dcon::nation_id{});
-		state.world.army_set_controller_from_army_rebel_control(a, dcon::rebel_faction_id{});
+			state.world.army_set_controller_from_army_control(a, dcon::nation_id{});
+			state.world.army_set_controller_from_army_rebel_control(a, dcon::rebel_faction_id{});
 			state.world.army_set_is_retreating(a, true);
 		};
 
@@ -3226,23 +3233,25 @@ namespace military {
 			auto nation_owner = state.world.army_get_controller_from_army_control(n.get_army());
 
 			auto role_in_war = bool(war)
-			? get_role(state, war, n.get_army().get_controller_from_army_control())
-			: (bool(nation_owner) ? war_role::defender : war_role::attacker);
+				? get_role(state, war, n.get_army().get_controller_from_army_control())
+				: (bool(nation_owner) ? war_role::defender : war_role::attacker);
 
 			bool battle_attacker = (role_in_war == war_role::attacker) == state.world.land_battle_get_war_attacker_is_attacker(b);
 			if(battle_attacker && result == battle_result::defender_won) {
 				if(!can_retreat_from_battle(state, b)) {
 					make_leaderless(n.get_army());
 				} else {
-					if(!retreat(state, n.get_army()))
-					make_leaderless(n.get_army());
+					if(!retreat(state, n.get_army())) {
+						make_leaderless(n.get_army());
+					}
 				}
 			} else if(!battle_attacker && result == battle_result::attacker_won) {
 				if(!can_retreat_from_battle(state, b)) {
 					make_leaderless(n.get_army());
 				} else {
-					if(!retreat(state, n.get_army()))
-					make_leaderless(n.get_army());
+					if(!retreat(state, n.get_army())) {
+						make_leaderless(n.get_army());
+					}
 				}
 			} else {
 				auto path = n.get_army().get_path();
@@ -3264,10 +3273,10 @@ namespace military {
 		value / 100 as added prestige. The winning nations gets (define:LEADER_PRESTIGE_LAND_GAIN + 1) x (prestige-from-tech-modifier + 1)
 		x that value. Similarly, the losing nation and leader have their prestige reduced, calculated in the same way.
 		*/
-
 		if(result != battle_result::indecisive) {
-			if(war)
-			state.world.war_get_number_of_battles(war)++;
+			if(war) {
+				state.world.war_get_number_of_battles(war)++;
+			}
 
 			auto a_leader = state.world.land_battle_get_general_from_attacking_general(b);
 			auto b_leader = state.world.land_battle_get_general_from_defending_general(b);
@@ -3317,8 +3326,8 @@ namespace military {
 
 					rep.location = state.world.land_battle_get_location_from_land_battle_location(b);
 					rep.player_on_winning_side = bool(war)
-					? is_attacker(state, war, state.local_player_nation) == state.world.land_battle_get_war_attacker_is_attacker(b)
-					: !state.world.land_battle_get_war_attacker_is_attacker(b);
+						? is_attacker(state, war, state.local_player_nation) == state.world.land_battle_get_war_attacker_is_attacker(b)
+						: !state.world.land_battle_get_war_attacker_is_attacker(b);
 
 					if(war) {
 						if(rep.player_on_winning_side) {
@@ -3380,8 +3389,8 @@ namespace military {
 
 					rep.location = state.world.land_battle_get_location_from_land_battle_location(b);
 					rep.player_on_winning_side = bool(war)
-					? is_attacker(state, war, state.local_player_nation) != state.world.land_battle_get_war_attacker_is_attacker(b)
-					: state.world.land_battle_get_war_attacker_is_attacker(b);
+						? is_attacker(state, war, state.local_player_nation) != state.world.land_battle_get_war_attacker_is_attacker(b)
+						: state.world.land_battle_get_war_attacker_is_attacker(b);
 
 					if(war) {
 						if(rep.player_on_winning_side) {
@@ -3401,7 +3410,7 @@ namespace military {
 			auto par_range = state.world.land_battle_get_army_battle_participation(b);
 			while(par_range.begin() != par_range.end()) {
 				auto n = (*par_range.begin()).get_army();
-			n.set_battle_from_army_battle_participation(dcon::land_battle_id{});
+				n.set_battle_from_army_battle_participation(dcon::land_battle_id{});
 				army_arrives_in_province(state, n, location, crossing_type::none, b);
 			}
 		}
@@ -5190,7 +5199,7 @@ namespace military {
 				}
 			}
 
-			 if(total_sieging_strength == 0.0f) {
+			if(total_sieging_strength == 0.0f) {
 				 // Garrison recovers at 10% per day when not being sieged (to 100%)
 				 auto local_battles = state.world.province_get_land_battle_location(prov);
 				 if(local_battles.begin() != local_battles.end()) {
@@ -5243,13 +5252,13 @@ namespace military {
 				sieging it back) x (1.1 if the sieger is not the owner but does have a core) / Siege-Table\[effective-fort-level\]
 				*/
 
-			static constexpr float siege_table[] = {1.0f, 2.0f, 2.8f, 3.4f, 3.8f, 4.2f, 4.5f, 4.8f, 5.0f, 5.2f};
-			static constexpr float progress_table[] = {0.0f, 0.2f, 0.5f, 0.75f, 0.75f, 1, 1.1f, 1.1f, 1.25f, 1.25f};
+				static constexpr float siege_table[] = {1.0f, 2.0f, 2.8f, 3.4f, 3.8f, 4.2f, 4.5f, 4.8f, 5.0f, 5.2f};
+				static constexpr float progress_table[] = {0.0f, 0.2f, 0.5f, 0.75f, 0.75f, 1, 1.1f, 1.1f, 1.25f, 1.25f};
 
-				float added_progress = siege_speed_modifier * num_brigades_modifier *
-														 progress_table[rng::get_random(state, uint32_t(prov.value)) % 10] *
-														 (owner_involved ? 1.25f : (core_owner_involved ? 1.1f : 1.0f)) / siege_table[effective_fort_level];
-
+				float added_progress = siege_speed_modifier * num_brigades_modifier
+					* progress_table[rng::get_random(state, uint32_t(prov.value)) % 10]
+					* (owner_involved ? 1.25f : (core_owner_involved ? 1.1f : 1.0f)) / siege_table[effective_fort_level];
+				
 				auto& progress = state.world.province_get_siege_progress(prov);
 				progress += siege_speed_mul * added_progress;
 
@@ -5265,9 +5274,9 @@ namespace military {
 					auto old_rf = state.world.province_get_rebel_faction_from_province_rebel_control(prov);
 					if(old_rf) {
 						for(auto pop : state.world.province_get_pop_location(prov)) {
-							//if(pop.get_pop().get_rebel_faction_from_pop_rebellion_membership() == old_rf) {
+							if(pop.get_pop().get_rebel_faction_from_pop_rebellion_membership() == old_rf) {
 								pop.get_pop().get_militancy() /= state.defines.reduction_after_defeat;
-							//}
+							}
 						}
 					}
 
