@@ -1341,68 +1341,19 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 	};
 
 	class wargoal_icon : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto wg = retrieve<dcon::wargoal_id>(state, parent);
 			frame = state.world.cb_type_get_sprite_index(state.world.wargoal_get_type(wg)) - 1;
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto wg = retrieve<dcon::wargoal_id>(state, parent);
-			auto cb = state.world.wargoal_get_type(wg);
-			text::add_line(state, contents, state.world.cb_type_get_name(cb));
-
-			text::add_line_break_to_layout(state, contents);
-			text::add_line(state, contents, "war_goal_1", text::variable_type::x, state.world.wargoal_get_added_by(wg));
-			text::add_line(state, contents, "war_goal_2", text::variable_type::x, state.world.wargoal_get_target_nation(wg));
-			if(state.world.wargoal_get_associated_state(wg)) {
-				text::add_line(state, contents, "war_goal_3", text::variable_type::x, state.world.wargoal_get_associated_state(wg));
-			}
-			if(state.world.wargoal_get_associated_tag(wg)) {
-				text::add_line(state, contents, "war_goal_10", text::variable_type::x, state.world.wargoal_get_associated_tag(wg));
-			} else if(state.world.wargoal_get_secondary_nation(wg)) {
-				text::add_line(state, contents, "war_goal_4", text::variable_type::x, state.world.wargoal_get_secondary_nation(wg));
-			}
-			if(state.world.wargoal_get_ticking_war_score(wg) != 0) {
-			text::add_line(state, contents, "war_goal_5", text::variable_type::x, text::fp_one_place{state.world.wargoal_get_ticking_war_score(wg)});
-				{
-					auto box = text::open_layout_box(contents);
-				text::substitution_map sub{};
-				text::add_to_substitution_map(sub, text::variable_type::x, text::fp_percentage{ state.defines.tws_fulfilled_idle_space });
-				text::add_to_substitution_map(sub, text::variable_type::y, text::fp_two_places{ state.defines.tws_fulfilled_speed });
-					text::localised_format_box(state, contents, box, "war_goal_6", sub);
-					text::close_layout_box(contents, box);
-				}
-				{
-					auto box = text::open_layout_box(contents);
-				text::substitution_map sub{};
-				text::add_to_substitution_map(sub, text::variable_type::x, text::pretty_integer{ int32_t(state.defines.tws_grace_period_days) });
-				text::add_to_substitution_map(sub, text::variable_type::y, text::fp_two_places{ state.defines.tws_not_fulfilled_speed });
-					text::localised_format_box(state, contents, box, "war_goal_7", sub);
-					text::close_layout_box(contents, box);
-				}
-				auto const start_date = state.world.war_get_start_date(state.world.wargoal_get_war_from_wargoals_attached(wg));
-				auto const end_date = start_date + int32_t(state.defines.tws_grace_period_days);
-				auto box = text::open_layout_box(contents);
-			text::substitution_map sub{};
-				text::add_to_substitution_map(sub, text::variable_type::x, start_date);
-				text::add_to_substitution_map(sub, text::variable_type::y, end_date);
-				if(end_date <= state.current_date) {
-					text::localised_format_box(state, contents, box, "war_goal_9", sub);
-				} else {
-					text::localised_format_box(state, contents, box, "war_goal_8", sub);
-				}
-				text::close_layout_box(contents, box);
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class overlapping_wargoal_icon : public listbox_row_element_base<dcon::wargoal_id> {
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "wargoal_icon") {
 				return make_element_by_type<wargoal_icon>(state, id);
@@ -1414,26 +1365,25 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 
 	template<bool B>
 	class diplomacy_war_overlapping_wargoals : public overlapping_listbox_element_base<overlapping_wargoal_icon, dcon::wargoal_id> {
-		protected:
+	protected:
 		std::string_view get_row_element_name() override {
 			return "wargoal";
 		}
-
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			row_contents.clear();
-
 			dcon::war_id content = retrieve<dcon::war_id>(state, parent);
 			for(auto wg : state.world.war_get_wargoals_attached(content)) {
-				if(military::is_attacker(state, content, wg.get_wargoal().get_added_by()) == B)
-				row_contents.push_back(wg.get_wargoal().id);
+				if(military::is_attacker(state, content, wg.get_wargoal().get_added_by()) == B) {
+					row_contents.push_back(wg.get_wargoal().id);
+				}
 			}
-
 			update(state);
 		}
 	};
 
 	class war_name_text : public simple_text_element_base {
+	public:
 		void on_update(sys::state& state) noexcept override {
 			auto w = retrieve<dcon::war_id>(state, parent);
 			auto s = military::get_war_name(state, w);
@@ -1442,26 +1392,17 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 	};
 
 	class war_score_progress_bar : public progress_bar {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
-			auto war = retrieve<dcon::war_id>(state, parent);
-			if(war) {
-				auto ws = military::primary_warscore(state, war);
+			if(auto const w = retrieve<dcon::war_id>(state, parent); w) {
+				auto const ws = military::primary_warscore(state, w);
 				progress = ws / 200.0f + 0.5f;
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto war = retrieve<dcon::war_id>(state, parent);
-		text::add_line(state, contents, "war_score_1", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_occupation(state, war)});
-		text::add_line(state, contents, "war_score_2", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_battles(state, war)});
-		text::add_line(state, contents, "war_score_3", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_war_goals(state, war)});
-		text::add_line(state, contents, "war_score_4", text::variable_type::x, text::fp_one_place{ military::primary_warscore_from_blockades(state, war) });
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	struct war_bar_position {

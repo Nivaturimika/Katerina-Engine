@@ -226,4 +226,63 @@ namespace ui {
 		text::close_layout_box(contents, box);
 		active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::influence, false);
 	}
+
+	void wargoal_icon::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+		auto wg = retrieve<dcon::wargoal_id>(state, parent);
+		auto cb = state.world.wargoal_get_type(wg);
+		text::add_line(state, contents, state.world.cb_type_get_name(cb));
+		text::add_line_break_to_layout(state, contents);
+		text::add_line(state, contents, "war_goal_1", text::variable_type::x, state.world.wargoal_get_added_by(wg));
+		text::add_line(state, contents, "war_goal_2", text::variable_type::x, state.world.wargoal_get_target_nation(wg));
+		if(state.world.wargoal_get_associated_state(wg)) {
+			text::add_line(state, contents, "war_goal_3", text::variable_type::x, state.world.wargoal_get_associated_state(wg));
+		}
+		if(state.world.wargoal_get_associated_tag(wg)) {
+			text::add_line(state, contents, "war_goal_10", text::variable_type::x, state.world.wargoal_get_associated_tag(wg));
+		} else if(state.world.wargoal_get_secondary_nation(wg)) {
+			text::add_line(state, contents, "war_goal_4", text::variable_type::x, state.world.wargoal_get_secondary_nation(wg));
+		}
+		if(state.world.wargoal_get_ticking_war_score(wg) != 0) {
+			text::add_line(state, contents, "war_goal_5", text::variable_type::x, text::fp_one_place{state.world.wargoal_get_ticking_war_score(wg)});
+			{
+				auto box = text::open_layout_box(contents);
+				text::substitution_map sub{};
+				text::add_to_substitution_map(sub, text::variable_type::x, text::fp_percentage{ state.defines.tws_fulfilled_idle_space });
+				text::add_to_substitution_map(sub, text::variable_type::y, text::fp_two_places{ state.defines.tws_fulfilled_speed });
+				text::localised_format_box(state, contents, box, "war_goal_6", sub);
+				text::close_layout_box(contents, box);
+			}
+			{
+				auto box = text::open_layout_box(contents);
+				text::substitution_map sub{};
+				text::add_to_substitution_map(sub, text::variable_type::x, text::pretty_integer{ int32_t(state.defines.tws_grace_period_days) });
+				text::add_to_substitution_map(sub, text::variable_type::y, text::fp_two_places{ state.defines.tws_not_fulfilled_speed });
+				text::localised_format_box(state, contents, box, "war_goal_7", sub);
+				text::close_layout_box(contents, box);
+			}
+			auto const start_date = state.world.war_get_start_date(state.world.wargoal_get_war_from_wargoals_attached(wg));
+			auto const end_date = start_date + int32_t(state.defines.tws_grace_period_days);
+			auto box = text::open_layout_box(contents);
+			text::substitution_map sub{};
+			text::add_to_substitution_map(sub, text::variable_type::x, start_date);
+			text::add_to_substitution_map(sub, text::variable_type::y, end_date);
+			if(end_date <= state.current_date) {
+				text::localised_format_box(state, contents, box, "war_goal_9", sub);
+			} else {
+				text::localised_format_box(state, contents, box, "war_goal_8", sub);
+			}
+			text::close_layout_box(contents, box);
+		}
+	}
+
+	void war_score_progress_bar::update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept {
+		auto war = retrieve<dcon::war_id>(state, parent);
+		text::add_line(state, contents, "war_score_1", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_occupation(state, war)});
+		text::add_line(state, contents, "war_score_2", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_battles(state, war)});
+		text::add_line(state, contents, "war_score_3", text::variable_type::x, text::fp_one_place{military::primary_warscore_from_war_goals(state, war)});
+		text::add_line(state, contents, "war_score_4", text::variable_type::x, text::fp_one_place{ military::primary_warscore_from_blockades(state, war) });
+		//if(state.cheat_data.show_province_id_tooltip) {
+		//	text::add_line_with_condition(state, contents, "ai_defender_will_surrender", ai::ai_will_accept_alliance(state, , dcon::nation_id from));
+		//}
+	}
 }
