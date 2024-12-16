@@ -16,11 +16,6 @@
 #include "pdqsort.h"
 #include "ve.hpp"
 
-namespace command {
-	void execute_decrease_relations(sys::state& state, dcon::nation_id source, dcon::nation_id target);
-	void execute_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target, dcon::cb_type_id cb_type, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation);
-}
-
 namespace ai {
 	/* Additional (counting allies) offensiv strenght of a country, except the country itself */
 	constexpr inline float additional_offensive_str_factor = 0.5f;

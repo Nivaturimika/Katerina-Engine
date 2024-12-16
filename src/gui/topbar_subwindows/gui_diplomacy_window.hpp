@@ -1207,15 +1207,16 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 
 	template<bool IsAttacker>
 	class war_side_strength_text : public button_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
 			dcon::war_id content = retrieve<dcon::war_id>(state, parent);
-
 			auto fat_id = dcon::fatten(state.world, content);
 			int32_t strength = 0;
-			for(auto o : fat_id.get_war_participant())
-			if(o.get_is_attacker() == IsAttacker)
-				strength += int32_t(o.get_nation().get_military_score());
+			for(auto o : fat_id.get_war_participant()) {
+				if(o.get_is_attacker() == IsAttacker) {
+					strength += int32_t(o.get_nation().get_military_score());
+				}
+			}
 			set_button_text(state, std::to_string(strength));
 		}
 
@@ -1226,25 +1227,22 @@ enum class diplomacy_window_tab : uint8_t { great_powers = 0x0, wars = 0x1, casu
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			dcon::war_id content = retrieve<dcon::war_id>(state, parent);
 			auto fat_id = dcon::fatten(state.world, content);
-			{
-				auto box = text::open_layout_box(contents, 0);
+			auto box = text::open_layout_box(contents, 0);
 			text::substitution_map sub{};
-				text::add_to_substitution_map(sub, text::variable_type::date, fat_id.get_start_date());
-				text::localised_format_box(state, contents, box, "war_start_date_desc", sub);
-				text::close_layout_box(contents, box);
-			}
+			text::add_to_substitution_map(sub, text::variable_type::date, fat_id.get_start_date());
+			text::localised_format_box(state, contents, box, "war_start_date_desc", sub);
 			for(auto o : fat_id.get_war_participant()) {
 				if(o.get_is_attacker() == IsAttacker) {
+					text::add_line_break_to_layout_box(state, contents, box);
 					auto name = text::get_name(state, o.get_nation().id);
-					auto box = text::open_layout_box(contents, 0);
 					text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, name), text::text_color::yellow);
-				text::add_to_layout_box(state, contents, box, std::string{":"}, text::text_color::yellow);
+					text::add_to_layout_box(state, contents, box, std::string{":"}, text::text_color::yellow);
 					text::add_space_to_layout_box(state, contents, box);
 					auto strength = int32_t(o.get_nation().get_military_score());
 					text::add_to_layout_box(state, contents, box, std::to_string(strength), text::text_color::white);
-					text::close_layout_box(contents, box);
 				}
 			}
+			text::close_layout_box(contents, box);
 		}
 	};
 
