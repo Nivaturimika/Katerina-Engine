@@ -280,6 +280,7 @@ namespace ui {
 	class diplomacy_request_window : public window_element_base {
 		simple_text_element_base* count_text = nullptr;
 		int32_t index = 0;
+		int32_t prev_size = 0;
 	public:
 		std::vector<diplomatic_message::message> messages;
 
@@ -337,24 +338,29 @@ namespace ui {
 				|| !diplomatic_message::can_accept(state, m);
 			});
 			messages.erase(it, messages.end());
-
 			if(messages.empty()) {
 				set_visible(state, false);
+			} else {
+				if(int32_t(messages.size()) > prev_size) {
+					index = int32_t(messages.size()) - 1;
+				} else {
+					if(index >= int32_t(messages.size())) {
+						index = 0;
+					} else if(index < 0) {
+						index = int32_t(messages.size()) - 1;
+					}
+				}
+				//
+				prev_size = int32_t(messages.size());
+				count_text->set_text(state, std::to_string(int32_t(index) + 1) + "/" + std::to_string(int32_t(messages.size())));
 			}
-
-			count_text->set_text(state, std::to_string(int32_t(index + 1)) + "/" + std::to_string(int32_t(messages.size())));
 		}
 		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
-			if(messages.empty()) {
+			if(index >= int32_t(messages.size())) {
 				index = 0;
-			} else {
-				if(index >= int32_t(messages.size())) {
-					index = 0;
-				} else if(index < 0) {
-					index = int32_t(messages.size()) - 1;
-				}
+			} else if(index < 0) {
+				index = int32_t(messages.size()) - 1;
 			}
-
 			if(payload.holds_type<dcon::nation_id>()) {
 				if(messages.empty()) {
 					payload.emplace<dcon::nation_id>(dcon::nation_id{});
