@@ -654,9 +654,9 @@ namespace launcher {
 
 	constexpr inline ui_active_rect ui_rects[] = {
 		ui_active_rect{ 880 - 31,  0 , 31, 31}, // close
-		ui_active_rect{ 30, 208, 21, 93}, // left
-		ui_active_rect{ 515, 208, 21, 93}, // right
-		ui_active_rect{ 555, 48 + 156 * 0 + 36 * 0, 286, 33 }, // play game
+		ui_active_rect{ 30, 207, 21, 93}, // left
+		ui_active_rect{ 515, 207, 21, 93}, // right
+		ui_active_rect{ 555, 75 + 32 * 0 + 4, 286, 33 }, // play game
 		ui_active_rect{ 555, 48 + 156 * 1 + 36 * 0, 138, 33 }, // host game
 		ui_active_rect{ 703, 48 + 156 * 1 + 36 * 0, 138, 33 }, // join game
 		ui_active_rect{ 555, 54 + 156 * 1 + 36 * 2, 200, 23 }, // ip address textbox
@@ -1439,8 +1439,10 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 		launcher::ogl::render_textured_rect(launcher::ogl::color_modification::none, 0, 0, int32_t(base_width), int32_t(base_height), bg_tex.get_texture_handle(), ui::rotation::upright, false);
 
 		launcher::ogl::render_new_text("Katerina Engine", launcher::ogl::color_modification::none, 83, 5, 26, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+
+		// bottom right corner
 		std::string version_text = "v" + std::to_string(sys::scenario_file_version);
-		launcher::ogl::render_new_text(version_text.c_str(), launcher::ogl::color_modification::none, 83, 42, 16, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text(version_text.c_str(), launcher::ogl::color_modification::none, 613, 380, 16, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
 
 		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_close ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 		ui_rects[ui_obj_close].x,
@@ -1573,8 +1575,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 
 		for(int32_t i = 0; i < ui_list_count && list_offset + i < int32_t(mod_list.size()); ++i) {
 			auto& mod_ref = mod_list[list_offset + i];
-
-			if(i % 2 == 1) {
+			if(i % 2 != 1) {
 				launcher::ogl::render_textured_rect(
 				launcher::ogl::color_modification::none,
 				60,
@@ -1583,7 +1584,6 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 				ui_row_height,
 				launcher::line_bg_tex.get_texture_handle(), ui::rotation::upright, false);
 			}
-
 			if(mod_ref.mod_selected) {
 				launcher::ogl::render_textured_rect(obj_under_mouse == ui_list_first + 3 * i + ui_list_checkbox ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 				ui_rects[ui_list_first + 3 * i + ui_list_checkbox].x,
