@@ -2234,10 +2234,10 @@ namespace command {
 
 		auto bits = state.world.cb_type_get_type_bits(type);
 		if((bits & (military::cb_flag::always | military::cb_flag::is_not_constructing_cb)) != 0)
-		return false;
+			return false;
 
 		if(!military::cb_conditions_satisfied(state, source, target, type))
-		return false;
+			return false;
 
 		return true;
 	}
@@ -2731,8 +2731,7 @@ namespace command {
 		p.data.new_war_goal.war = w;
 		add_to_command_queue(state, p);
 	}
-	bool can_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target, dcon::cb_type_id cb_type,
-		dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation) {
+	bool can_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target, dcon::cb_type_id cb_type, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation) {
 		/*
 		The nation adding the war goal must have positive war score against the target of the war goal (see below). And the nation
 		must be already able to use the CB in question (e.g. it as fabricated previously) or it must be a constructible CB and the
@@ -2745,12 +2744,11 @@ namespace command {
 		if(state.world.nation_get_is_player_controlled(source) && state.cheat_data.always_allow_wargoals)
 			return true;
 
-		if(state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.addwargoal_diplomatic_cost)
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.addwargoal_diplomatic_cost)
 			return false;
 
 		bool is_attacker = military::is_attacker(state, w, source);
 		bool target_in_war = false;
-
 		for(auto par : state.world.war_get_war_participant(w)) {
 			if(par.get_nation() == target) {
 				if(par.get_is_attacker() == is_attacker)
@@ -2759,11 +2757,10 @@ namespace command {
 				break;
 			}
 		}
-
-		if(!is_attacker && military::defenders_have_status_quo_wargoal(state, w))
-			return false;
-
 		if(!target_in_war)
+			return false;
+		if((!is_attacker && military::defenders_have_status_quo_wargoal(state, w))
+		|| (is_attacker && military::attackers_have_status_quo_wargoal(state, w)))
 			return false;
 
 		// prevent duplicate war goals
@@ -2772,7 +2769,7 @@ namespace command {
 
 		if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::always) == 0) {
 			bool cb_fabbed = false;
-			for(auto& fab_cb : state.world.nation_get_available_cbs(source)) {
+			for(auto const& fab_cb : state.world.nation_get_available_cbs(source)) {
 				if(fab_cb.cb_type == cb_type && fab_cb.target == target) {
 					cb_fabbed = true;
 					break;
@@ -2781,10 +2778,9 @@ namespace command {
 			if(!cb_fabbed) {
 				if((state.world.cb_type_get_type_bits(cb_type) & military::cb_flag::is_not_constructing_cb) != 0)
 					return false; // can only add a constructable cb this way
-
-				auto totalpop = state.world.nation_get_demographics(source, demographics::total);
-				auto jingoism_perc = totalpop > 0 ? state.world.nation_get_demographics(source, demographics::to_key(state, state.culture_definitions.jingoism)) / totalpop : 0.0f;
-
+				auto const total_pop = state.world.nation_get_demographics(source, demographics::total);
+				auto const total_jingo = state.world.nation_get_demographics(source, demographics::to_key(state, state.culture_definitions.jingoism));
+				auto jingoism_perc = total_pop > 0.f ? total_jingo / total_pop : 0.0f;
 				if(state.world.war_get_is_great(w)) {
 					if(jingoism_perc < state.defines.wargoal_jingoism_requirement * state.defines.gw_wargoal_jingoism_requirement_mod)
 						return false;
@@ -2794,10 +2790,7 @@ namespace command {
 				}
 			}
 		}
-		if(!military::cb_instance_conditions_satisfied(state, source, target, cb_type, cb_state, cb_tag, cb_secondary_nation))
-			return false;
-
-		return true;
+		return military::cb_instance_conditions_satisfied(state, source, target, cb_type, cb_state, cb_tag, cb_secondary_nation);
 	}
 	
 	void execute_add_war_goal(sys::state& state, dcon::nation_id source, dcon::war_id w, dcon::nation_id target, dcon::cb_type_id cb_type, dcon::state_definition_id cb_state, dcon::national_identity_id cb_tag, dcon::nation_id cb_secondary_nation) {

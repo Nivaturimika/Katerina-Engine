@@ -193,7 +193,7 @@ attacker_wg_label;Attacker war goal: $text$
 defender_wg_label;Defender war goal: $text$
 attacker_no_allies;Attacker's allies will not be called in
 attacker_yes_allies;Attacker's allies will be called in
-war_start_date_desc;war started in ?Y$date$?!
+war_start_date_desc;War started in ?Y$date$?!
 cmp_ge;is at least
 cmp_le;is at most
 cmp_gt;is greater than

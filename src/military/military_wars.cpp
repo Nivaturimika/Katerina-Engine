@@ -123,7 +123,8 @@ namespace military {
 
 	bool defenders_have_non_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
-			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) == 0 && is_defender_wargoal(state, w, wg.get_wargoal()))
+			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) == 0
+			&& is_defender_wargoal(state, w, wg.get_wargoal()))
 				return true;
 		}
 		return false;
@@ -131,14 +132,16 @@ namespace military {
 
 	bool defenders_have_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
-			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0 && is_defender_wargoal(state, w, wg.get_wargoal()))
+			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0
+			&& is_defender_wargoal(state, w, wg.get_wargoal()))
 				return true;
 		}
 		return false;
 	}
 	bool attackers_have_status_quo_wargoal(sys::state const& state, dcon::war_id w) {
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
-			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0 && !is_defender_wargoal(state, w, wg.get_wargoal()))
+			if((wg.get_wargoal().get_type().get_type_bits() & cb_flag::po_status_quo) != 0
+			&& !is_defender_wargoal(state, w, wg.get_wargoal()))
 				return true;
 		}
 		return false;
