@@ -561,8 +561,8 @@ namespace launcher {
 		ui_active_rect{ 30, 207, 21, 93}, // left
 		ui_active_rect{ 515, 207, 21, 93}, // right
 		ui_active_rect{ 555, 75 + 32 * 0 + 4, 286, 33 }, // play game
-		ui_active_rect{ 555, 48 + 156 * 1 + 36 * 0, 138, 33 }, // host game
-		ui_active_rect{ 703, 48 + 156 * 1 + 36 * 0, 138, 33 }, // join game
+		ui_active_rect{ 555, 48 + 156 * 1 + 36 * 0 + 2, 138, 33 }, // host game
+		ui_active_rect{ 703, 48 + 156 * 1 + 36 * 0 + 2, 138, 33 }, // join game
 		ui_active_rect{ 555, 54 + 156 * 1 + 36 * 2, 200, 23 }, // ip address textbox
 		ui_active_rect{ 555, 54 + 156 * 1 + 36 * 3 + 12, 200, 23 }, // password textbox
 		ui_active_rect{ 765, 54 + 156 * 1 + 36 * 2, 76, 23 }, // player name textbox
@@ -1388,7 +1388,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 				right_tex.get_texture_handle(), ui::rotation::upright, false);
 			}
 		}
-		
+
 		launcher::ogl::render_textured_rect(obj_under_mouse == ui_obj_play_game ? launcher::ogl::color_modification::interactable : launcher::ogl::color_modification::none,
 			ui_rects[ui_obj_play_game].x,
 			ui_rects[ui_obj_play_game].y,
