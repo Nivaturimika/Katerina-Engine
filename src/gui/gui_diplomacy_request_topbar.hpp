@@ -6,7 +6,6 @@
 #include "gui_diplomacy_request_window.hpp"
 
 namespace ui {
-
 	class diplomatic_message_topbar_button : public button_element_base {
 		std::string_view get_type_key(diplomatic_message::type_t type) {
 			switch(type) {
@@ -126,7 +125,7 @@ namespace ui {
 		void on_update(sys::state& state) noexcept override {
 			auto it = std::remove_if(messages.begin(), messages.end(), [&](auto& m) {
 				return m.when + diplomatic_message::expiration_in_days <= state.current_date
-				|| !diplomatic_message::can_accept(state, m);
+					|| !diplomatic_message::can_accept(state, m);
 			});
 			messages.erase(it, messages.end());
 			row_contents.clear();

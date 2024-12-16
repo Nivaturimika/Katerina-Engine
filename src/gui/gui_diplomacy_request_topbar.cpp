@@ -23,8 +23,9 @@ namespace ui {
 	void diplomatic_message_topbar_flag_button::button_action(sys::state& state) noexcept {
 		if(parent) {
 			auto win = static_cast<diplomatic_message_topbar_entry_window*>(parent);
-			if(win->btn)
-			win->btn->button_action(state);
+			if(win->btn) {
+				win->btn->button_action(state);
+			}
 		}
 	}
 }
