@@ -2,6 +2,8 @@
 
 ## Simple effects
 
+Effects that take a single parameter.
+
 ### `capital = <province id>`
 - **Version**: Base
 - **Scopes**: Any
@@ -448,6 +450,8 @@
 - **Comment**: N/A
 
 ## Effects with parameters
+
+Effects that take multiple parameters.
 
 ### `trigger_revolt = { ... }`
 ```
@@ -1071,7 +1075,7 @@ sea_zone = {
 ```
 - **Version**: Base
 - **Scopes**: Province
-- **Comment**: N/A
+- **Comment**: Scopes all adjacent sea tiles (similar to `any_neighbor_province` but for sea)
 
 ### `cultural_union = { ... }`
 ```
@@ -1207,3 +1211,900 @@ clear_news_scopes = {
 - **Version**: Base
 - **Scopes**: Any
 - **Comment**: N/A
+
+# Scripting (triggers)
+
+## Simple triggers
+
+### `total_sunk_by_us = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `ai = <yes/no>`
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: Is the current scoped country AI controlled?
+
+### `tag = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: Is the current scoped country the tag?
+
+### `war = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Is the current country at war?
+
+### `owns = <province id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `port = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Has path to capital and has a naval base
+
+### `rank = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `type = <pop type>`
+- **Version**: Base
+- **Scopes**: Pop
+- **Comment**: N/A
+
+### `has_pop_type = <pop type>`
+- **Version**: Base
+- **Scopes**: Country, State, Province
+- **Comment**: N/A
+
+### `year = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `empty = <yes/no>`
+- **Version**: Base
+- **Scopes**: State, Province
+- **Comment**: N/A
+
+### `money = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `month = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `always = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `badboy = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Factor `<n>` is % of infamy relative to the infamy limit
+
+### `exists = <THIS/FROM/TAG/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `region = <region name>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: As defined in `regions.txt`
+
+### `strata = <poor/middle/rich>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `capital = <province id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `culture = <culture>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_culture = <culture>`
+- **Version**: Base
+- **Scopes**: Pop
+- **Comment**: N/A
+
+### `is_core = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: State, Province
+- **Comment**: N/A
+
+### `blockade = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `controls = <province id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `election = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_slave = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `literacy = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `neighbor = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `owned_by = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `poor_tax = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `low_tax = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_type = <pop type>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `prestige = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `produces = <goods>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `religion = <religion>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rich_tax = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `state_id = <province id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `treasury = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `war_with = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `civilized = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `continent = <continent>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_crime = <crime>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `in_sphere = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `invention = <invention>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_vassal = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_subject = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `militancy = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_militancy = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `plurality = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `vassal_of = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `war_score = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Average of all war scores
+
+### `corruption = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `government = <government>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_leader = <name>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Case sensitive
+
+### `in_default = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_capital = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_coastal = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `life_needs = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `middle_tax = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `minorities = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `revanchism = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `total_pops = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `truce_with = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `casus_belli = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_colonial = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_disarmed = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_overseas = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_substate = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `life_rating = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `nationalism = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `province_id = <province id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `substate_of = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `tech_school = <tech school>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `trade_goods = <goods>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `big_producer = <goods>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `crisis_exist = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_building = <building type>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_blockaded = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_mobilised = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `luxury_needs = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_ports = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `ruling_party = <ruling party>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `unemployment = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `alliance_with = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `cash_reserves = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `consciousness = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `controlled_by = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `culture_group = <culture group>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: As defined in `cultures.txt`
+
+### `has_factories = <yes/no>`
+- **Version**: Base
+- **Scopes**: State, Province
+- **Comment**: N/A
+
+### `is_our_vassal = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `lost_national = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `nationalvalue = <national value>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_allies = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_cities = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `crime_fighting = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `everyday_needs = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_flashpoint = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_independant = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_next_reform = <reform>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `military_score = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_revolts = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_vassals = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `part_of_sphere = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `unit_in_battle = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `unit_has_leader = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `war_exhaustion = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_nationalize = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `colonial_nation = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `constructing_cb = <THIS/FROM/TAG/cb type>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_global_flag = <flag>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_claim_crisis = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `military_access = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `primary_culture = <THIS/FROM/TAG/culture>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `social_movement = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `social_spending = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `accepted_culture = <culture>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `brigades_compare = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_country_flag = <flag>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_news_flag = <flag>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_culture_core = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_pop_religion = <religion>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `industrial_score = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `stronger_army_than = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_canal_enabled = <id>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_culture_group = <culture group>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_greater_power = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Not equivalent to `rank = 8`, since it also holds for GPs who are falling
+
+### `is_state_capital = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: State capital of the capital of a nation may differ from the capital itself (for example Berlin could be the capital, but an adjacent province could be the state capital).
+
+### `num_of_substates = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `number_of_states = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `average_militancy = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_build_factory = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_cultural_union = <THIS/TAG/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_state_religion = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `military_spending = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `mobilisation_size = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `revolt_percentage = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `units_in_province = <THIS/FROM/province id/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `country_units_in_state = <THIS/FROM/state id/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_create_vassals = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `crisis_temperature = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `education_spending = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `flashpoint_tension = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `great_wars_enabled = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `involved_in_crisis = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_possible_vassal = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_primary_culture = <THIS/FROM/culture>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_secondary_power = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `political_movement = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_majority_issue = <issue>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `social_reform_want = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `this_culture_union = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `total_num_of_ports = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `world_wars_enabled = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_cultural_sphere = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_unclaimed_cores = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_accepted_culture = <THIS/culture/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_ideology_enabled = <ideology>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_sphere_leader_of = <THIS/FROM/TAG>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rich_tax_above_poor = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `constructing_cb_type = <THIS/FROM/TAG/cb type>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `controlled_by_rebels = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_country_modifier = <modifier>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_liberation_crisis = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_releasable_vassal = <THIS/FROM/TAG/yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_majority_culture = <culture>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rebel_power_fraction = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `recruited_percentage = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `trade_goods_in_state = <goods>`
+- **Version**: Base
+- **Scopes**: State, Province, Pop
+- **Comment**: N/A
+
+### `average_consciousness = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `civilization_progress = <n>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `culture_has_union_tag = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_national_minority = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_province_modifier = <modifier>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_recent_imigration = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_recently_lost_war = <yes/no>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+## Triggers with multiple parameters
+TODO
+
+## Trigger scopes
+TODO
+
+## Broken triggers
+
+### `have_core_in = <text>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Doesn't work in base.
+
+### `has_province_flag = <flag>`
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Doesn't work in base.
