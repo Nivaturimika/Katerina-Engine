@@ -2865,9 +2865,9 @@ namespace command {
 	}
 	bool can_start_crisis_peace_offer(sys::state& state, dcon::nation_id source, bool is_concession) {
 		if(source != state.primary_crisis_attacker && source != state.primary_crisis_defender)
-		return false;
+			return false;
 		if(state.current_crisis_mode != sys::crisis_mode::heating_up)
-		return false;
+			return false;
 
 		auto pending = state.world.nation_get_peace_offer_from_pending_peace_offer(source);
 		return !pending;

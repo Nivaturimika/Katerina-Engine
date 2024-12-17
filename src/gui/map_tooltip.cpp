@@ -4,9 +4,13 @@
 #include "unit_tooltip.hpp"
 #include "nations_templates.hpp"
 #include "pdqsort.h"
+#include "ai.hpp"
+#include "ai_templates.hpp"
 
 namespace ai {
 	float estimate_strength(sys::state& state, dcon::nation_id n);
+	float province_supply_usage(sys::state& state, dcon::nation_id n, dcon::province_id p);
+	float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by);
 }
 
 namespace ui {
@@ -77,6 +81,24 @@ namespace ui {
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_strength(state, owner) });
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			text::localised_format_box(state, contents, box, "ai_province_supply_usage", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_supply_usage(state, owner, prov) });
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			text::localised_format_box(state, contents, box, "ai_province_strategic_weight", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_strategic_weight<float>(state, prov) });
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			text::localised_format_box(state, contents, box, "ai_estimated_enemy_defensive_force", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_enemy_defensive_force(state, prov, state.local_player_nation) });
 			text::add_line_break_to_layout_box(state, contents, box);
 		}
 

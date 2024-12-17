@@ -2544,7 +2544,7 @@ namespace military {
 	float effective_army_speed(sys::state& state, dcon::army_id a) {
 		auto owner = state.world.army_get_controller_from_army_control(a);
 		if(!owner)
-		owner = state.world.rebel_faction_get_ruler_from_rebellion_within(state.world.army_get_controller_from_army_rebel_control(a));
+			owner = state.world.rebel_faction_get_ruler_from_rebellion_within(state.world.army_get_controller_from_army_rebel_control(a));
 
 		float min_speed = 10000.0f;
 		for(auto reg : state.world.army_get_army_membership(a)) {
@@ -2566,9 +2566,9 @@ namespace military {
 
 		auto leader_move = state.world.leader_trait_get_speed(bg) + state.world.leader_trait_get_speed(per);
 		return min_speed * (state.world.army_get_is_retreating(a) ? 2.0f : 1.0f) *
-				 (1.0f + state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), economy::province_building_type::railroad) *
-										 state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure) *
-				 (leader_move + 1.0f);
+			(1.0f + state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), economy::province_building_type::railroad)
+			* state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure) *
+			(leader_move + 1.0f);
 	}
 	float effective_navy_speed(sys::state& state, dcon::navy_id n) {
 		auto owner = state.world.navy_get_controller_from_navy_control(n);
@@ -2795,9 +2795,9 @@ namespace military {
 			if(gather_to_battle) {
 				for(auto o : state.world.province_get_army_location(p)) {
 					if(o.get_army() == a)
-					continue;
+						continue;
 					if(o.get_army().get_is_retreating() || o.get_army().get_black_flag() || o.get_army().get_navy_from_army_transport() || o.get_army().get_battle_from_army_battle_participation())
-					continue;
+						continue;
 
 					auto other_nation = o.get_army().get_controller_from_army_control();
 					if(battle_in_war) {
@@ -2807,15 +2807,6 @@ namespace military {
 					} else { // battle vs. rebels
 						add_army_to_battle(state, o.get_army(), gather_to_battle, !bool(other_nation) ? war_role::attacker : war_role::defender);
 					}
-				}
-
-				if(battle_in_war) { // gather as part of war
-					for(auto par : state.world.war_get_war_participant(battle_in_war)) {
-						if(par.get_nation().get_is_player_controlled() == false)
-						ai::gather_to_battle(state, par.get_nation(), p);
-					}
-				} else if(state.world.nation_get_is_player_controlled(owner_nation) == false) { // gather vs. rebels
-					ai::gather_to_battle(state, owner_nation, p);
 				}
 			}
 		}
@@ -4750,12 +4741,11 @@ namespace military {
 			// start battle
 			dcon::naval_battle_id gather_to_battle;
 			dcon::war_id battle_in_war;
-
 			for(auto o : state.world.province_get_navy_location(p)) {
 				if(o.get_navy() == n)
-				continue;
+					continue;
 				if(o.get_navy().get_is_retreating() || o.get_navy().get_battle_from_navy_battle_participation())
-				continue;
+					continue;
 
 				auto other_nation = o.get_navy().get_controller_from_navy_control();
 
@@ -4780,9 +4770,9 @@ namespace military {
 			if(gather_to_battle) {
 				for(auto o : state.world.province_get_navy_location(p)) {
 					if(o.get_navy() == n)
-					continue;
+						continue;
 					if(o.get_navy().get_is_retreating() || o.get_navy().get_battle_from_navy_battle_participation())
-					continue;
+						continue;
 
 					auto other_nation = o.get_navy().get_controller_from_navy_control();
 
