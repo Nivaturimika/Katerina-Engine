@@ -122,3 +122,4 @@ is_not_banned_from;Isn't banned from $text$
 is_overseas_culture;Is an overseas culture
 is_not_overseas_culture;Isn't an overseas culture
 add_or_create_pop;Add $x$ $culture$ $religion$ $type$
+release_random_vassal;Release a random nation

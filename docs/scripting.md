@@ -284,7 +284,7 @@ Effects that take a single parameter.
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Random will select the tag that appears first in the file.
+- **Comment**: Random will select the tag that appears first in the file. Releasing `REB` will release the defection tag from the `FROM` scope.
 
 ### `change_province_name = <name>`
 
@@ -2061,7 +2061,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Only checks for country units, rebels are ignored.
 
 ### `unit_has_leader = <yes/no>`
 

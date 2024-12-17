@@ -3434,7 +3434,7 @@ namespace ui {
 		}
 		uint32_t ef_release_vassal_random(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
-			text::localised_format_box(ws, layout, box, "no_effect");
+			text::localised_format_box(ws, layout, box, "release_random_vassal");
 			text::close_layout_box(layout, box);
 			return 0;
 		}
