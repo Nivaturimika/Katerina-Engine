@@ -2755,9 +2755,13 @@ namespace parsers {
 			err.accumulated_errors += "Usage of effect extension add_or_create_pop but parser isn't in extension mode (" + err.file_name + ")\n";
 			return;
 		}
+		if(value.amount <= 0.f || !value.pop_type_ || !value.culture_ || !value.religion_) {
+			err.accumulated_errors += "Invalid use of add_or_create_pop (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
 		if(context.main_slot == trigger::slot_contents::province) {
 			context.compiled_effect.push_back(uint16_t(effect::add_or_create_pop));
-			context.add_float_to_payload(value.value);
+			context.add_float_to_payload(value.amount);
 			context.compiled_effect.push_back(trigger::payload(value.pop_type_).value);
 			context.compiled_effect.push_back(trigger::payload(value.culture_).value);
 			context.compiled_effect.push_back(trigger::payload(value.religion_).value);
