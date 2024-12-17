@@ -1679,6 +1679,11 @@ namespace ai {
 	}
 
 	void update_crisis_leaders(sys::state& state) {
+		/* Either leader must be with "free" hands to be able to send peace offers */
+		if(state.world.nation_get_pending_peace_offer(state.primary_crisis_attacker)
+		|| state.world.nation_get_pending_peace_offer(state.primary_crisis_defender))
+			return;
+
 		if(state.crisis_temperature > 0.75f) { // make peace offer
 			auto str_est = estimate_crisis_str(state);
 
