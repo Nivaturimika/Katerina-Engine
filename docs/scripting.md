@@ -2826,7 +2826,7 @@ custom_tooltip = {
 
 - **Version**: 0.1.0
 - **Scopes**: Any
-- **Comments**: Evaluates a scripted trigger from `scripted triggers/`, see `[extensions.md](extensions.md)` for more usage info
+- **Comments**: Evaluates a scripted trigger from `scripted triggers/`, see [extensions.md](extensions.md) for more usage info
 
 ### `any_country = { ... }`
 
