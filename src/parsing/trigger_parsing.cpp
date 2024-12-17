@@ -6910,18 +6910,14 @@ namespace parsers {
 			return;
 		} else if(value.in_whole_capital_state) {
 			if(value.limit_to_world_greatest_level)
-			context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_railway_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-			context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_railway_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		} else {
 			if(value.limit_to_world_greatest_level)
-			context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_railway_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-			context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_railway_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		}
 	}
 	void trigger_body::can_build_fort_in_capital(tr_can_build_fort_in_capital const& value, error_handler& err, int32_t line,
@@ -6931,18 +6927,14 @@ namespace parsers {
 			return;
 		} else if(value.in_whole_capital_state) {
 			if(value.limit_to_world_greatest_level)
-				context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_fort_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_fort_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-				context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_fort_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_fort_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		} else {
 			if(value.limit_to_world_greatest_level)
-				context.compiled_trigger.push_back(uint16_t(
-					trigger::can_build_fort_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_fort_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
 			else
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::can_build_fort_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+				context.compiled_trigger.push_back(uint16_t(trigger::can_build_fort_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
 		}
 	}
 
@@ -6953,14 +6945,13 @@ namespace parsers {
 		}
 
 		if(context.main_slot == trigger::slot_contents::nation)
-		context.compiled_trigger.push_back(uint16_t(trigger::work_available_nation | trigger::association_eq));
+			context.compiled_trigger.push_back(uint16_t(trigger::work_available_nation | trigger::association_eq));
 		else if(context.main_slot == trigger::slot_contents::state)
-		context.compiled_trigger.push_back(uint16_t(trigger::work_available_state | trigger::association_eq));
+			context.compiled_trigger.push_back(uint16_t(trigger::work_available_state | trigger::association_eq));
 		else if(context.main_slot == trigger::slot_contents::province)
-		context.compiled_trigger.push_back(uint16_t(trigger::work_available_province | trigger::association_eq));
+			context.compiled_trigger.push_back(uint16_t(trigger::work_available_province | trigger::association_eq));
 		else {
-			err.accumulated_errors +=
-				"work_available trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "work_available trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 		context.compiled_trigger.push_back(trigger::payload(value.pop_type_list[0]).value);

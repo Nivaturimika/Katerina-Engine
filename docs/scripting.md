@@ -2698,11 +2698,60 @@ clear_news_scopes = {
 - **Version**: Base
 - **Scopes**: Any
 - **Comment**: N/A
+
 ### `news_printing_count = <n>`
 
 - **Version**: Base
 - **Scopes**: Any
 - **Comment**: N/A
+
+### `[pop type] = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Checks if there is atleast `<n>` pops of a given type.
+
+### `[issue option] = <n>`
+
+- **Version**: Base
+- **Scopes**: Country, State, Province, Pop
+- **Comment**: Checks if there is atleast `<n>` support for the given issue option.
+
+### `[issue] = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Checks if there is atleast `<n>` support for the given issue.
+
+### `[reform] = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Checks if there is atleast `<n>` support for the given reform.
+
+### `[technology] = <1>`
+
+- **Version**: Base
+- **Scopes**: Country, State, Province, Pop
+- **Comment**: Checks if the country on scope has technology
+
+### `[invention] = <1>`
+
+- **Version**: Base
+- **Scopes**: Country, State, Province, Pop
+- **Comment**: Checks if the country on scope has technology
+
+### `[ideology] = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Checks if there is atleast `<n>` support for the given ideology.
+
+### `[goods] = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Checks if there is atleast `<n>` of a given good on the stockpile.
 
 ## Triggers with multiple parameters
 
@@ -2821,7 +2870,7 @@ can_build_railway_in_capital = {
 ```
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country
 - **Comment**: N/A
 
 ### `can_build_fort_in_capital = { ... }`
@@ -2834,7 +2883,7 @@ can_build_fort_in_capital = {
 ```
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country
 - **Comment**: N/A
 
 ### `work_available = { ... }`
@@ -2846,7 +2895,7 @@ work_available = {
 ```
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country, State, Province
 - **Comment**: N/A
 
 ### `tags_eq = { ... }`
