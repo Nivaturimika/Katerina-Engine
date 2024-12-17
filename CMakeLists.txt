@@ -137,7 +137,7 @@ if(WIN32)
 	add_executable(KatEngine WIN32
 		${ALICE_CORE_SOURCES_LIST}
 		"${PROJECT_SOURCE_DIR}/src/entry_point_win.cpp"
-		"${PROJECT_SOURCE_DIR}/src/alice.rc"
+		"${PROJECT_SOURCE_DIR}/src/KatEngine.rc"
 		${ASSET_FILES})
 else()
 	add_executable(KatEngine WIN32
@@ -460,7 +460,7 @@ endif()
 
 # Installation
 if(NOT WIN32)
-    install(FILES ${PROJECT_SOURCE_DIR}/src/alice.desktop DESTINATION /usr/share/applications)
-    install(FILES ${PROJECT_SOURCE_DIR}/src/alice.png DESTINATION /usr/share/icons/hicolor/128x128/apps)
+    install(FILES ${PROJECT_SOURCE_DIR}/src/KatEngine.desktop DESTINATION /usr/share/applications)
+    install(FILES ${PROJECT_SOURCE_DIR}/src/KatEngine.png DESTINATION /usr/share/icons/hicolor/512x512/apps)
 endif()
 

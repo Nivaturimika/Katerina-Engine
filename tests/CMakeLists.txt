@@ -25,7 +25,7 @@ add_executable(tests_project
 	"${PROJECT_SOURCE_DIR}/src/map/map_borders.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map.cpp"
 	"${PROJECT_SOURCE_DIR}/src/graphics/xac.cpp"
-	"${PROJECT_SOURCE_DIR}/src/alice.rc")
+	"${PROJECT_SOURCE_DIR}/src/KatEngine.rc")
 else()
 add_executable(tests_project
 	${TESTS_CORE_SOURCES_LIST}

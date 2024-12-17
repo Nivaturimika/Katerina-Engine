@@ -1,7 +1,7 @@
 add_executable(KatEngine_Launcher WIN32
 	${ALICE_CORE_SOURCES_LIST}
 	"${PROJECT_SOURCE_DIR}/src/launcher/launcher_main.cpp"
-	"${PROJECT_SOURCE_DIR}/src/alice.rc")
+	"${PROJECT_SOURCE_DIR}/src/KatEngine.rc")
 
 target_compile_definitions(KatEngine_Launcher PUBLIC ALICE_NO_ENTRY_POINT)
 
