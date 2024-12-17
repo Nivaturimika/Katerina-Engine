@@ -15,6 +15,9 @@ namespace pop_demographics {
 
 } // namespace pop_demographics
 namespace demographics {
+	namespace impl {
+		dcon::pop_id find_or_make_pop(sys::state& state, dcon::province_id loc, dcon::culture_id cid, dcon::religion_id rid, dcon::pop_type_id ptid, float l);
+	}
 
 	constexpr inline dcon::demographics_key total(0);
 	constexpr inline dcon::demographics_key employable(1);

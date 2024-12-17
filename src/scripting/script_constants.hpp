@@ -17,7 +17,7 @@ namespace effect {
 #define EFFECT_BYTECODE_ELEMENT(code, name, arg) constexpr inline uint16_t name = code;
 	EFFECT_BYTECODE_LIST
 #undef EFFECT_BYTECODE_ELEMENT
-	constexpr inline uint16_t first_scope_code = 0x01C7;
+	constexpr inline uint16_t first_scope_code = 0x01C9;
 
 #define EFFECT_SCOPE_BYTECODE_ELEMENT(name, code) constexpr inline uint16_t name = first_scope_code + code;
 	EFFECT_SCOPE_BYTECODE_LIST

@@ -2342,12 +2342,12 @@ namespace effect {
 		auto itag = ws.world.rebel_faction_get_defection_target(trigger::to_rebel(from_slot));
 		auto holder = ws.world.national_identity_get_nation_from_identity_holder(itag);
 		if(!holder)
-		return 0;
+			return 0;
 		auto hprovs = ws.world.nation_get_province_ownership(holder);
 		if(hprovs.begin() == hprovs.end()) {
 			nations::liberate_nation_from(ws, itag, trigger::to_nation(primary_slot));
 			if(ws.world.nation_get_owned_province_count(holder) == 0)
-			return 0;
+				return 0;
 			ws.world.force_create_overlord(holder, trigger::to_nation(primary_slot));
 			if(ws.world.nation_get_is_great_power(trigger::to_nation(primary_slot))) {
 				auto sr = ws.world.force_create_gp_relationship(holder, trigger::to_nation(primary_slot));
@@ -2370,7 +2370,7 @@ namespace effect {
 	uint32_t ef_release_vassal_province(EFFECT_PARAMTERS) {
 		auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot));
 		if(owner)
-		return ef_release_vassal(tval, ws, trigger::to_generic(owner), this_slot, from_slot, r_hi, r_lo, els);
+			return ef_release_vassal(tval, ws, trigger::to_generic(owner), this_slot, from_slot, r_hi, r_lo, els);
 		return 0;
 	}
 	uint32_t ef_release_vassal_province_this_nation(EFFECT_PARAMTERS) {
@@ -2528,6 +2528,24 @@ namespace effect {
 	}
 	uint32_t ef_neutrality(EFFECT_PARAMTERS) {
 		nations::destroy_diplomatic_relationships(ws, trigger::to_nation(primary_slot));
+		return 0;
+	}
+	uint32_t ef_change_pop_size(EFFECT_PARAMTERS) {
+		auto amount = trigger::read_int32_t_from_payload(tval + 1);
+		auto const size = ws.world.pop_get_size(trigger::to_pop(primary_slot));
+		ws.world.pop_set_size(trigger::to_pop(primary_slot), std::max(0.f, size + float(amount)));
+		return 0;
+	}
+	uint32_t ef_add_or_create_pop(EFFECT_PARAMTERS) {
+		auto const amount = trigger::read_int32_t_from_payload(tval + 1);
+		auto const type = trigger::payload(tval[3]).popt_id;
+		auto const cul = trigger::payload(tval[4]).cul_id;
+		auto const rel = trigger::payload(tval[5]).rel_id;
+		auto const pop = demographics::impl::find_or_make_pop(ws, trigger::to_prov(primary_slot), cul, rel, type, amount);
+		if(pop) {
+			auto const size = ws.world.pop_get_size(trigger::to_pop(primary_slot));
+			ws.world.pop_set_size(trigger::to_pop(primary_slot), std::max(0.f, size + float(amount)));
+		}
 		return 0;
 	}
 	uint32_t ef_reduce_pop(EFFECT_PARAMTERS) {

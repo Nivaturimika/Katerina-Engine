@@ -448,6 +448,18 @@ namespace parsers {
 		void position(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
 		void finish(effect_building_context&) { }
 	};
+
+	struct ef_add_or_create_pop {
+		float amount;
+		dcon::pop_type_id pop_type_;
+		dcon::culture_id culture_;
+		dcon::religion_id religion_;
+		void type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
+		void culture(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
+		void religion(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context);
+		void finish(effect_building_context&) { }
+	};
+
 	struct ef_trigger_crisis {
 		bool overwrite;
 		sys::crisis_type type_;
@@ -622,6 +634,8 @@ namespace parsers {
 		void build_bank_in_capital(ef_build_bank_in_capital const& value, error_handler& err, int32_t line, effect_building_context& context);
 		void build_university_in_capital(ef_build_university_in_capital const& value, error_handler& err, int32_t line, effect_building_context& context);
 		void build_fort_in_capital(ef_build_fort_in_capital const& value, error_handler& err, int32_t line, effect_building_context& context);
+		void change_pop_size(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
+		void add_or_create_pop(ef_add_or_create_pop const& value, error_handler& err, int32_t line, effect_building_context& context);
 		void any_value(std::string_view label, association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);
 		void limit(dcon::trigger_key lim, error_handler& err, int32_t line, effect_building_context& context) {
 			context.compiled_effect[context.limit_position] = trigger::payload(lim).value;

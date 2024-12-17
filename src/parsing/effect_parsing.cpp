@@ -2737,6 +2737,35 @@ namespace parsers {
 			return;
 		}
 	}
+	void effect_body::change_pop_size(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension change_pop_size but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+		if(context.main_slot == trigger::slot_contents::pop) {
+			context.compiled_effect.push_back(uint16_t(effect::change_pop_size));
+			context.add_int32_t_to_payload(value);
+		} else {
+			err.accumulated_errors += "change_pop_size effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
+	void effect_body::add_or_create_pop(ef_add_or_create_pop const& value, error_handler& err, int32_t line, effect_building_context& context) {
+		if(!context.outer_context.use_extensions) {
+			err.accumulated_errors += "Usage of effect extension add_or_create_pop but parser isn't in extension mode (" + err.file_name + ")\n";
+			return;
+		}
+		if(context.main_slot == trigger::slot_contents::province) {
+			context.compiled_effect.push_back(uint16_t(effect::add_or_create_pop));
+			context.add_float_to_payload(value.value);
+			context.compiled_effect.push_back(trigger::payload(value.pop_type_).value);
+			context.compiled_effect.push_back(trigger::payload(value.culture_).value);
+			context.compiled_effect.push_back(trigger::payload(value.religion_).value);
+		} else {
+			err.accumulated_errors += "add_or_create_pop effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			return;
+		}
+	}
 	void effect_body::move_pop(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::pop) {
 			if(0 <= value && size_t(value) < context.outer_context.original_id_to_prov_id_map.size()) {
@@ -5197,6 +5226,29 @@ namespace parsers {
 			err.accumulated_errors += "Invalid issue option " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
+
+	void ef_add_or_create_pop::type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(auto it = context.outer_context.map_of_poptypes.find(std::string(v)); it != context.outer_context.map_of_poptypes.end()) {
+			pop_type_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid pop type " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void ef_add_or_create_pop::culture(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(auto it = context.outer_context.map_of_culture_names.find(std::string(v)); it != context.outer_context.map_of_culture_names.end()) {
+			culture_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid culture " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+	void ef_add_or_create_pop::religion(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
+		if(auto it = context.outer_context.map_of_religion_names.find(std::string(v)); it != context.outer_context.map_of_religion_names.end()) {
+			religion_ = it->second.id;
+		} else {
+			err.accumulated_errors += "Invalid religion " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+		}
+	}
+
 	void ef_trigger_crisis::type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
 		if(parsers::is_fixed_token(v.data(), v.data() + v.length(), "claim")) {
 			type_ = sys::crisis_type::claim;

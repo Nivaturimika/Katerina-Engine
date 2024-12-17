@@ -3726,6 +3726,31 @@ namespace ui {
 			}
 			return 0;
 		}
+		uint32_t ef_change_pop_size(EFFECT_DISPLAY_PARAMS) {
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::localised_format_box(ws, layout, box, "pop_size", m);
+			text::add_space_to_layout_box(ws, layout, box);
+			auto const amount = trigger::read_int32_t_from_payload(tval + 1);
+			display_value(text::fp_two_places{ float(amount) }, true, ws, layout, box);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
+		uint32_t ef_add_or_create_pop(EFFECT_DISPLAY_PARAMS) {
+			auto const amount = trigger::read_int32_t_from_payload(tval + 1);
+			auto const type = trigger::payload(tval[3]).popt_id;
+			auto const cul = trigger::payload(tval[4]).cul_id;
+			auto const rel = trigger::payload(tval[5]).rel_id;
+			auto box = text::open_layout_box(layout, indentation);
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::x, text::pretty_integer{ amount });
+			text::add_to_substitution_map(m, text::variable_type::type, ws.world.pop_type_get_name(type));
+			text::add_to_substitution_map(m, text::variable_type::culture, ws.world.culture_get_name(cul));
+			text::add_to_substitution_map(m, text::variable_type::religion, ws.world.religion_get_name(rel));
+			text::localised_format_box(ws, layout, box, "add_or_create_pop", m);
+			text::close_layout_box(layout, box);
+			return 0;
+		}
 		uint32_t ef_reduce_pop_nation(EFFECT_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			text::substitution_map m;

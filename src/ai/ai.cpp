@@ -828,12 +828,12 @@ namespace ai {
 		//uint32_t block_index = (state.current_date.value & 31);
 		//auto d_block_end = block_index == 31 ? state.world.decision_size() : d_block_size * (block_index + 1);
 		concurrency::parallel_for(d_block_size * block_index, d_block_end, [&](uint32_t i) {
-			auto d = dcon::fatten(state.world, dcon::decision_id{dcon::decision_id::value_base_t(i)});
-			auto e = d.get_effect();
+			auto d = dcon::decision_id{ dcon::decision_id::value_base_t(i) };
+			auto e = state.world.decision_get_effect(d);
 			if(e) {
-				auto potential = d.get_potential();
-				auto allow = d.get_allow();
-				auto ai_will_do = d.get_ai_will_do();
+				auto potential = state.world.decision_get_potential(d);
+				auto allow = state.world.decision_get_allow(d);
+				auto ai_will_do = state.world.decision_get_ai_will_do(d);
 				ve::execute_serial_fast<dcon::nation_id>(state.world.nation_size(), [&](auto ids) {
 					// AI-only, not dead nations
 					ve::mask_vector filter_a = !state.world.nation_get_is_player_controlled(ids)
@@ -984,10 +984,9 @@ namespace ai {
 
 	void get_desired_factory_types(sys::state& state, dcon::nation_id nid, std::vector<dcon::factory_type_id>& desired_types) {
 		assert(desired_types.empty());
-		auto n = dcon::fatten(state.world, nid);
 		if(desired_types.empty()) {
 			for(auto type : state.world.in_factory_type) {
-				if(get_is_desirable_factory_type(state, n, type)) {
+				if(get_is_desirable_factory_type(state, nid, type)) {
 					desired_types.push_back(type.id);
 				}
 			}

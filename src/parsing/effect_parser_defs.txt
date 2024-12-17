@@ -160,10 +160,13 @@ ef_trigger_crisis
 	liberation_tag					value	text							member
 	colony							value	text							member
 
+ef_add_or_create_pop
+	amount							value	float					member
+	type							value	text					member_fn
+	culture							value	text					member_fn
+	religion						value	text					member_fn
+
 effect_body
-	if                              extern      ef_scope_if         discard
-	else_if                         extern      ef_scope_else_if    discard
-	else                            extern      ef_scope_else_if    discard (else_if)
 	capital                         value       int                 member_fn
 	add_core                        value       text                member_fn
 	remove_core                     value       text                member_fn
@@ -351,6 +354,10 @@ effect_body
 	loop_iterations					value		int							member
 	remove_crisis					value		bool						member_fn
 	trigger_crisis					group		ef_trigger_crisis			member_fn
+	change_pop_size                 value       int                         member_fn
+	if                              extern      ef_scope_if         discard
+	else_if                         extern      ef_scope_else_if    discard
+	else                            extern      ef_scope_else_if    discard (else_if)
 	#any                            extern      ef_scope_variable           discard
 
 ef_scope_random_by_modifier
