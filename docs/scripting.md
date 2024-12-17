@@ -897,7 +897,7 @@ build_railway_in_capital = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Does not go higher than what the scoped country tech level allows
 
 ### `build_fort_in_capital = { ... }`
 
@@ -910,7 +910,7 @@ build_fort_in_capital = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Does not go higher than what the scoped country tech level allows
 
 ## Effect scopes
 
@@ -1757,11 +1757,11 @@ clear_news_scopes = {
 - **Scopes**: Any
 - **Comment**: Case sensitive
 
-### `in_default = <THIS/FROM/TAG>`
+### `in_default = <THIS/FROM/TAG/yes/no>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Returns if the given country has defaulted on debts, for `yes/no` is only valid in country scope
 
 ### `is_capital = <yes/no>`
 
@@ -2105,6 +2105,18 @@ clear_news_scopes = {
 - **Scopes**: Any
 - **Comment**: N/A
 
+### `is_colonial_crisis = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `is_influence_crisis = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
 ### `military_access = <THIS/FROM/TAG>`
 
 - **Version**: Base
@@ -2426,13 +2438,13 @@ clear_news_scopes = {
 ### `pop_majority_culture = <culture>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country, State, Province, Pop
 - **Comment**: N/A
 
 ### `rebel_power_fraction = <n>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country
 - **Comment**: N/A
 
 ### `recruited_percentage = <n>`
@@ -2456,34 +2468,237 @@ clear_news_scopes = {
 ### `civilization_progress = <n>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country
 - **Comment**: N/A
 
 ### `culture_has_union_tag = <yes/no>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country, Pop
 - **Comment**: N/A
 
 ### `has_national_minority = <yes/no>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Country, State, Province
 - **Comment**: N/A
 
 ### `has_province_modifier = <modifier>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Province
 - **Comment**: N/A
 
 ### `has_recent_imigration = <yes/no>`
 
 - **Version**: Base
-- **Scopes**: Any
+- **Scopes**: Province
 - **Comment**: N/A
 
 ### `has_recently_lost_war = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Country, Pop
+- **Comment**: N/A
+
+### `political_reform_want = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `poor_strata_militancy = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_majority_ideology = <ideology>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_majority_religion = <religion>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `province_control_days = <n>`
+
+- **Version**: Base
+- **Scopes**: Province
+- **Comment**: N/A
+
+### `rich_strata_militancy = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `ruling_party_ideology = <ideology>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `total_amount_of_ships = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `poor_strata_life_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rich_strata_life_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `administration_spending = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `agree_with_ruling_party = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `middle_strata_militancy = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `constructing_cb_progress = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_empty_adjacent_state = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `middle_strata_life_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `poor_strata_luxury_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rich_strata_luxury_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `social_movement_strength = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `country_units_in_province = <THIS/FROM/TAG/province id>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `total_amount_of_divisions = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `middle_strata_luxury_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `poor_strata_everyday_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `rich_strata_everyday_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `constructing_cb_discovered = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `someone_can_form_union_tag = <FROM/other>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `crime_higher_than_education = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `has_empty_adjacent_province = <yes/no>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `national_provinces_occupied = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `num_of_vassals_no_substates = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `political_movement_strength = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `middle_strata_everyday_needs = <n>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_build_factory_in_capital_state = <factory name>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+### `news_printing_count = <n>`
 
 - **Version**: Base
 - **Scopes**: Any
@@ -2491,11 +2706,702 @@ clear_news_scopes = {
 
 ## Triggers with multiple parameters
 
-TODO
+### `diplomatic_influence = { ... }`
+
+```
+diplomatic_influence = {
+	who = <THIS/FROM/TAG>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `pop_unemployment = { ... }`
+
+```
+pop_unemployment = {
+	type = <pop type>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `relation = { ... }`
+
+```
+relation = {
+	who = <THIS/FROM/TAG>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `check_variable = { ... }`
+
+```
+check_variable = {
+	which = <variable>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `upper_house = { ... }`
+
+```
+upper_house = {
+	ideology = <ideology>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `unemployment_by_type = { ... }`
+
+```
+unemployment_by_type = {
+	type = <type>
+	value = <n>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `party_loyalty = { ... }`
+
+```
+party_loyalty = {
+	ideology = <ideology>
+	value = <n>
+	province_id = <province id>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_build_in_province = { ... }`
+
+```
+can_build_in_province = {
+	building = <type>
+	limit_to_world_greatest_level = <yes/no>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_build_railway_in_capital = { ... }`
+
+```
+can_build_railway_in_capital = {
+	in_whole_capital_state = <yes/no>
+	limit_to_world_greatest_level = <yes/no>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `can_build_fort_in_capital = { ... }`
+
+```
+can_build_fort_in_capital = {
+	in_whole_capital_state = <yes/no>
+	limit_to_world_greatest_level = <yes/no>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `work_available = { ... }`
+
+```
+work_available = {
+	worker = <pop type>
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `tags_eq = { ... }`
+
+```
+tags_eq = { <n> <m> <tag> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `values_eq = { ... }`
+
+```
+values_eq = { <n> <m> <value> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `strings_eq = { ... }`
+
+```
+strings_eq = { <n> <m> <string> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `dates_eq = { ... }`
+
+```
+dates_eq = { <n> <m> <date> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `tags_greater = { ... }`
+
+```
+tags_greater = { <n> <m> <tag> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `values_greater = { ... }`
+
+```
+values_greater = { <n> <m> <value> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `strings_greater = { ... }`
+
+```
+strings_greater = { <n> <m> <string> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `dates_greater = { ... }`
+
+```
+dates_greater = { <n> <m> <date> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `tags_match = { ... }`
+
+```
+tags_match = { <n> <m> <o> <p> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `values_match = { ... }`
+
+```
+values_match = { <n> <m> <o> <p> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `strings_match = { ... }`
+
+```
+strings_match = { <n> <m> <o> <p> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `dates_match = { ... }`
+
+```
+dates_match = { <n> <m> <o> <p> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `dates_match = { ... }`
+
+```
+dates_match = { <n> <m> <o> <p> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `tags_contains = { ... }`
+
+```
+tags_contains = { <n> <tag> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `values_contains = { ... }`
+
+```
+values_contains = { <n> <value> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `strings_contains = { ... }`
+
+```
+strings_contains = { <n> <string> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `dates_contains = { ... }`
+
+```
+dates_contains = { <n> <date> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `length_greater = { ... }`
+
+```
+length_greater = { <tags/strings/values/dates> <n> <m> }
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Newspaper trigger, must actually say the type, for example `length_greater = { tags 0 0 }`.
 
 ## Trigger scopes
 
-TODO
+### `AND = { ... }`
+
+```
+AND = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `OR = { ... }`
+
+```
+OR = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `NOT = { ... }`
+
+```
+NOT = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_neighbor_province = { ... }`
+
+```
+any_neighbor_province = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Province
+- **Comment**: N/A
+
+### `any_neighbor_country = { ... }`
+
+```
+any_neighbor_country = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: N/A
+
+### `war_countries = { ... }`
+
+```
+war_countries = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: N/A
+
+### `any_greater_power = { ... }`
+
+```
+any_greater_power = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_owned_province = { ... }`
+
+```
+any_owned_province = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: N/A
+
+### `any_core = { ... }`
+
+```
+any_core = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: N/A
+
+### `all_core = { ... }`
+
+```
+all_core = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Country
+- **Comment**: N/A
+
+### `any_state = { ... }`
+
+```
+any_state = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_substate = { ... }`
+
+```
+any_substate = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_sphere_member = { ... }`
+
+```
+any_sphere_member = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_pop = { ... }`
+
+```
+any_pop = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `owner = { ... }`
+
+```
+owner = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `controller = { ... }`
+
+```
+controller = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `location = { ... }`
+
+```
+location = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `country = { ... }`
+
+```
+country = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `capital_scope = { ... }`
+
+```
+capital_scope = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `THIS = { ... }`
+
+```
+THIS = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `FROM = { ... }`
+
+```
+FROM = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `sea_zone = { ... }`
+
+```
+sea_zone = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `cultural_union = { ... }`
+
+```
+cultural_union = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `overlord = { ... }`
+
+```
+overlord = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `sphere_owner = { ... }`
+
+```
+sphere_owner = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `independence = { ... }`
+
+```
+independence = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `flashpoint_tag_scope = { ... }`
+
+```
+flashpoint_tag_scope = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `crisis_state_scope = { ... }`
+
+```
+crisis_state_scope = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `state_scope = { ... }`
+
+```
+state_scope = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `state_scope = { ... }`
+
+```
+state_scope = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: N/A
+
+### `any_substate = { ... }`
+
+```
+any_substate = {
+	...
+}
+```
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comments**: Scope any substate, not vassals
 
 ## Broken triggers
 
@@ -2747,12 +3653,6 @@ custom_tooltip = {
 - **Version**: 0.1.0
 - **Scopes**: Any
 - **Comments**: Forward whatever is in the current scope to be "bounced" to `THIS`, until the end of this scope
-
-### `any_substate = { ... }`
-
-- **Version**: 0.1.0
-- **Scopes**: Any
-- **Comments**: Scope any substate, for parity with triggers, scopes any substates of the country.
 
 ### `province_immigrator = <n>`
 

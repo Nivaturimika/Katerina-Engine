@@ -1183,13 +1183,12 @@ namespace parsers {
 		trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(uint16_t(trigger::has_leader | association_to_bool_code(a)));
+			auto name_id = context.outer_context.state.add_unit_name(value);
+			context.add_int32_t_to_payload(name_id.index());
 		} else {
-			err.accumulated_errors += "has_leader trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) +
-															"(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_leader trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
-		auto name_id = context.outer_context.state.add_unit_name(value);
-		context.add_int32_t_to_payload(name_id.index());
 	}
 
 	// news xxx_eq
@@ -1247,11 +1246,11 @@ namespace parsers {
 			err.accumulated_errors += "tags_greater trigger supplied with insufficient parameters (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
-		context.compiled_trigger.push_back(uint16_t(trigger::tags_eq | trigger::association_gt));
-		context.add_int32_t_to_payload(parse_int(value.list[0], line, err));
-		context.add_int32_t_to_payload(parse_int(value.list[1], line, err));
 		if(auto it = context.outer_context.map_of_ident_names.find(parse_tag(value.list[2], line, err));
 			it != context.outer_context.map_of_ident_names.end()) {
+			context.compiled_trigger.push_back(uint16_t(trigger::tags_eq | trigger::association_gt));
+			context.add_int32_t_to_payload(parse_int(value.list[0], line, err));
+			context.add_int32_t_to_payload(parse_int(value.list[1], line, err));
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
 			err.accumulated_errors += "tags_greater trigger supplied with an invalid tag \"" + std::string(value.list[2]) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
@@ -1342,10 +1341,10 @@ namespace parsers {
 			err.accumulated_errors += "tags_contains trigger supplied with insufficient parameters (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
-		context.compiled_trigger.push_back(uint16_t(trigger::tags_contains));
-		context.add_int32_t_to_payload(parse_int(value.list[0], line, err));
 		if(auto it = context.outer_context.map_of_ident_names.find(parse_tag(value.list[1], line, err));
 			it != context.outer_context.map_of_ident_names.end()) {
+			context.compiled_trigger.push_back(uint16_t(trigger::tags_contains));
+			context.add_int32_t_to_payload(parse_int(value.list[0], line, err));
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
 			err.accumulated_errors += "tags_contains trigger supplied with an invalid tag \"" + std::string(value.list[2]) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
@@ -1689,22 +1688,16 @@ namespace parsers {
 		trigger_building_context& context) {
 		if(is_from(value)) {
 			if(context.from_slot == trigger::slot_contents::nation)
-			context.compiled_trigger.push_back(
-					uint16_t(trigger::someone_can_form_union_tag_from | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::someone_can_form_union_tag_from | trigger::no_payload | association_to_bool_code(a)));
 			else {
-				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
 			if(context.from_slot == trigger::slot_contents::nation)
-			context.compiled_trigger.push_back(uint16_t(trigger::someone_can_form_union_tag_other | trigger::no_payload |
-																									association_to_bool_code(a, parse_bool(value, line, err))));
+				context.compiled_trigger.push_back(uint16_t(trigger::someone_can_form_union_tag_other | trigger::no_payload | association_to_bool_code(a, parse_bool(value, line, err))));
 			else {
-				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		}
@@ -4982,31 +4975,22 @@ namespace parsers {
 		if(context.main_slot == trigger::slot_contents::province) {
 			if(is_this(value)) {
 				if(context.this_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::units_in_province_this_nation | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_this_nation | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::state)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::units_in_province_this_state | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_this_state | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::province)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::units_in_province_this_province | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_this_province | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::pop)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::units_in_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else {
-					err.accumulated_errors += "units_in_province = this trigger used in an incorrect scope type " +
-																	slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					err.accumulated_errors += "units_in_province = this trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(is_from(value)) {
 				if(context.from_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::units_in_province_from | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::units_in_province_from | trigger::no_payload | association_to_bool_code(a)));
 				else {
-					err.accumulated_errors += "units_in_province = from trigger used in an incorrect scope type " +
-																	slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																	std::to_string(line) + ")\n";
+					err.accumulated_errors += "units_in_province = from trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 					return;
 				}
 			} else if(is_integer(value.data(), value.data() + value.length())) {
@@ -5019,18 +5003,14 @@ namespace parsers {
 					context.compiled_trigger.push_back(trigger::payload(it->second).value);
 				} else {
 					context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
-					err.accumulated_errors +=
-					"units_in_province trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					err.accumulated_errors += "units_in_province trigger supplied with an invalid tag \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				}
 			} else {
 				context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
-				err.accumulated_errors +=
-				"units_in_province trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "units_in_province trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			}
 		} else {
-			err.accumulated_errors += "units_in_province trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "units_in_province trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
