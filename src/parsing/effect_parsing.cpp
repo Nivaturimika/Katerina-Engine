@@ -5229,21 +5229,21 @@ namespace parsers {
 
 	void ef_add_or_create_pop::type(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
 		if(auto it = context.outer_context.map_of_poptypes.find(std::string(v)); it != context.outer_context.map_of_poptypes.end()) {
-			pop_type_ = it->second.id;
+			pop_type_ = it->second;
 		} else {
 			err.accumulated_errors += "Invalid pop type " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void ef_add_or_create_pop::culture(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
 		if(auto it = context.outer_context.map_of_culture_names.find(std::string(v)); it != context.outer_context.map_of_culture_names.end()) {
-			culture_ = it->second.id;
+			culture_ = it->second;
 		} else {
 			err.accumulated_errors += "Invalid culture " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 	void ef_add_or_create_pop::religion(association_type t, std::string_view v, error_handler& err, int32_t line, effect_building_context& context) {
 		if(auto it = context.outer_context.map_of_religion_names.find(std::string(v)); it != context.outer_context.map_of_religion_names.end()) {
-			religion_ = it->second.id;
+			religion_ = it->second;
 		} else {
 			err.accumulated_errors += "Invalid religion " + std::string(v) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
