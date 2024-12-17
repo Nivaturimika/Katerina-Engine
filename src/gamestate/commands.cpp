@@ -869,27 +869,19 @@ namespace command {
 	bool can_delete_factory(sys::state& state, dcon::nation_id source, dcon::factory_id f) {
 		auto loc = state.world.factory_get_province_from_factory_location(f);
 		if(state.world.province_get_nation_from_province_ownership(loc) != source)
-		return false;
+			return false;
 		auto rules = state.world.nation_get_combined_issue_rules(source);
 		if((rules & issue_rule::destroy_factory) == 0)
-		return false;
+			return false;
 		return true;
 	}
 	void execute_delete_factory(sys::state& state, dcon::nation_id source, dcon::province_id location, dcon::factory_type_id type) {
-		if(state.world.province_get_nation_from_province_ownership(location) != source)
-		return;
-
-		auto rules = state.world.nation_get_combined_issue_rules(source);
-		if((rules & issue_rule::destroy_factory) == 0)
-		return;
-
 		for(auto sc : state.world.state_instance_get_state_building_construction(state.world.province_get_state_membership(location))) {
 			if(sc.get_type() == type) {
 				state.world.delete_state_building_construction(sc);
 				break;
 			}
 		}
-
 		for(auto f : state.world.province_get_factory_location(location)) {
 			if(f.get_factory().get_building_type() == type) {
 				state.world.delete_factory(f.get_factory());

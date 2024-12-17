@@ -66,8 +66,8 @@ namespace economy_factory {
 		auto sdef = state.world.state_instance_get_definition(sid);
 		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(sdef)) {
 			if(state_membership_id.get_province().get_state_membership() == sid) {
-				for(auto factory_location_fat_id : state_membership_id.get_province().get_factory_location()) {
-					if(factory_location_fat_id.get_factory().get_building_type() == f)
+				for(auto fl : state_membership_id.get_province().get_factory_location()) {
+					if(fl.get_factory().get_building_type() == f)
 						return true;
 				}
 			}
@@ -359,17 +359,17 @@ namespace economy_factory {
 		return number_of_factories;
 	}
 
-	void add_factory_level_to_state(sys::state& state, dcon::state_instance_id state_instance_id, dcon::factory_type_id factory_type_id, bool is_upgrade) {
+	void add_factory_level_to_state(sys::state& state, dcon::state_instance_id state_instance_id, dcon::factory_type_id ft, bool is_upgrade) {
 		if(is_upgrade) {
 			auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
 			auto nation_id = state.world.state_instance_get_nation_from_state_ownership(state_instance_id);
 			for(auto state_membership_fat_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id)) {
 				if(state_membership_fat_id.get_province().get_nation_from_province_ownership() == nation_id) {
-					for(auto factory_location_fat_id : state_membership_fat_id.get_province().get_factory_location()) {
-						if(factory_location_fat_id.get_factory().get_building_type() == factory_type_id) {
-							auto factory_level = factory_location_fat_id.get_factory().get_level();
-							auto new_factory_level = std::min(float(std::numeric_limits<uint8_t>::max()), float(factory_level) + 1.f + math::sqrt(factory_location_fat_id.get_factory().get_level()) / 2.f);
-							factory_location_fat_id.get_factory().get_level() = uint8_t(new_factory_level);
+					for(auto fl : state_membership_fat_id.get_province().get_factory_location()) {
+						if(fl.get_factory().get_building_type() == ft) {
+							auto factory_level = fl.get_factory().get_level();
+							auto new_factory_level = std::min(float(std::numeric_limits<uint8_t>::max()), float(factory_level) + 1.f + math::sqrt(fl.get_factory().get_level()) / 2.f);
+							fl.get_factory().get_level() = uint8_t(new_factory_level);
 							return;
 						}
 					}
@@ -385,7 +385,7 @@ namespace economy_factory {
 
 		auto state_capital_province_fat_id = state.world.state_instance_get_capital(state_instance_id);
 		auto new_factory_fat_id = fatten(state.world, state.world.create_factory());
-		new_factory_fat_id.set_building_type(factory_type_id);
+		new_factory_fat_id.set_building_type(ft);
 		new_factory_fat_id.set_level(uint8_t(1));
 		new_factory_fat_id.set_production_scale(1.0f);
 		// new factories start subsidized
@@ -398,6 +398,21 @@ namespace economy_factory {
 		state.world.try_create_factory_location(new_factory_fat_id, state_capital_province_fat_id);
 	}
 
+	void delete_factory(sys::state& state, dcon::factory_id f) {
+		auto const p = state.world.factory_get_province_from_factory_location(f);
+		auto const si = state.world.province_get_state_membership(p);
+		auto const ft = state.world.factory_get_building_type(f);
+		/* Delete the factory */
+		state.world.delete_factory(f);
+		/* Delete all projects to upgrade the factory */
+		for(auto sbc : state.world.state_instance_get_state_building_construction(si)) {
+			if(sbc.get_type() == ft && sbc.get_is_upgrade()) {
+				state.world.delete_state_building_construction(sbc);
+				break;
+			}
+		}
+	}
+
 	void prune_factories(sys::state& state) {
 		for(auto state_instance_fat_id : state.world.in_state_instance) {
 			auto owner = state_instance_fat_id.get_nation_from_state_ownership();
@@ -407,15 +422,15 @@ namespace economy_factory {
 
 			dcon::factory_id deletion_choice;
 			int32_t factory_count = 0;
-
 			province::for_each_province_in_state_instance(state, state_instance_fat_id, [&](dcon::province_id p) {
-				for(auto factory_location_fat_id : state.world.province_get_factory_location(p)) {
+				for(auto fl : state.world.province_get_factory_location(p)) {
 					++factory_count;
-					auto scale = factory_location_fat_id.get_factory().get_production_scale();
-					float ten_workers = 10.f / factory_max_employment(state, factory_location_fat_id.get_factory());
-					bool unprofitable = factory_location_fat_id.get_factory().get_unprofitable();
-					if(((scale < ten_workers) && unprofitable) && (!deletion_choice || state.world.factory_get_level(deletion_choice) > factory_location_fat_id.get_factory().get_level())) {
-						deletion_choice = factory_location_fat_id.get_factory();
+					auto const scale = fl.get_factory().get_production_scale();
+					auto const ten_workers = 10.f / factory_max_employment(state, fl.get_factory());
+					bool unprofitable = fl.get_factory().get_unprofitable();
+					if(((scale < ten_workers) && unprofitable)
+					&& (!deletion_choice || state.world.factory_get_level(deletion_choice) > fl.get_factory().get_level())) {
+						deletion_choice = fl.get_factory();
 					}
 				}
 			});
@@ -426,14 +441,7 @@ namespace economy_factory {
 				auto production_type = state.world.factory_get_building_type(deletion_choice);
 				// and only iff production > real demand
 				if(production_type.get_output().get_total_production() > production_type.get_output().get_total_real_demand()) {
-					state.world.delete_factory(deletion_choice);
-					// only delete pop projects, not player's
-					for(auto sbc : state.world.state_instance_get_state_building_construction(state_instance_fat_id)) {
-						if(sbc.get_type() == production_type && sbc.get_is_pop_project()) {
-							state.world.delete_state_building_construction(sbc);
-							break;
-						}
-					}
+					economy_factory::delete_factory(state, deletion_choice);
 				}
 			}
 		}
@@ -466,9 +474,9 @@ namespace economy_factory {
 		auto state_definition_fat_id = state.world.state_instance_get_definition(state_instance_id);
 		for(auto state_membership_fat_id : state.world.state_definition_get_abstract_state_membership(state_definition_fat_id)) {
 			if(state_membership_fat_id.get_province().get_nation_from_province_ownership() == nation_id) {
-				for(auto factory_location_fat_id : state_membership_fat_id.get_province().get_factory_location()) {
+				for(auto fl : state_membership_fat_id.get_province().get_factory_location()) {
 					++number_of_factories;
-					if(factory_location_fat_id.get_factory().get_building_type() == factory_type_id)
+					if(fl.get_factory().get_building_type() == factory_type_id)
 						return; // can't build another of this type
 				}
 			}
