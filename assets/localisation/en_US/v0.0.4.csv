@@ -123,3 +123,11 @@ is_overseas_culture;Is an overseas culture
 is_not_overseas_culture;Isn't an overseas culture
 add_or_create_pop;Add $x$ $culture$ $religion$ $type$
 release_random_vassal;Release a random nation
+percentage_rebel_power;Percentage of rebel power
+ef_annex_null;Annex to null
+ef_building;Build $type$
+ef_building_state;Build $type$ in the entire state
+tr_build_factory_in_capital_state;Can build factory $type$ in capital state
+tr_not_build_factory_in_capital_state;Can't build factory $type$ in capital state
+a_member_of_social_mov;a member of a social movement
+a_member_of_political_mov;a member of a political movement

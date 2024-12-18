@@ -4054,8 +4054,8 @@ namespace ui {
 		void tf_rebel_power_fraction(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			text::add_to_layout_box(ws, layout, box,
-			text::produce_simple_string(ws, (tval[0] & trigger::association_mask) == trigger::association_eq ? "never" : "always"));
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "percentage_rebel_power"),
+			text::fp_percentage{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_recruited_percentage_nation(TRIGGER_DISPLAY_PARAMS) {
@@ -6142,25 +6142,26 @@ namespace ui {
 		void tf_social_movement_strength(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "social_mov_support"),
-			text::fp_percentage{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "social_mov_support"), text::fp_percentage{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_political_movement_strength(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_comparison(tval[0], text::produce_simple_string(ws, "political_mov_support"),
-			text::fp_percentage{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
+			display_with_comparison(tval[0], text::produce_simple_string(ws, "political_mov_support"), text::fp_percentage{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_can_build_factory_in_capital_state(TRIGGER_DISPLAY_PARAMS) {
-			// stub: virtually unused
+			auto const ft = trigger::payload(tval[1]).fac_id;
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			if((tval[0] & trigger::association_mask) == trigger::association_eq)
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "always"));
-			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "never"));
+			text::substitution_map m;
+			text::add_to_substitution_map(m, text::variable_type::type, ws.world.factory_type_get_name(ft));
+			if((tval[0] & trigger::association_mask) == trigger::association_eq) {
+				text::localised_format_box(ws, layout, box, "tr_build_factory_in_capital_state", m);
+			} else {
+				text::localised_format_box(ws, layout, box, "tr_not_build_factory_in_capital_state", m);
+			}
 			text::close_layout_box(layout, box);
 		}
 		void tf_social_movement(TRIGGER_DISPLAY_PARAMS) {
@@ -6205,9 +6206,9 @@ namespace ui {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 			if((tval[0] & trigger::association_mask) == trigger::association_eq)
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "ww_enabled"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "ww_enabled"));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "ww_not_enabled"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "ww_not_enabled"));
 			text::close_layout_box(layout, box);
 		}
 		void tf_has_pop_culture_pop_this_pop(TRIGGER_DISPLAY_PARAMS) {

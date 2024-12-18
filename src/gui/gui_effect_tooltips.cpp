@@ -7089,7 +7089,8 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, "building_level", m);
+				text::add_to_substitution_map(m, text::variable_type::type, ws.world.province_building_type_get_name(pbt));
+				text::localised_format_box(ws, layout, box, "ef_building", m);
 				text::add_space_to_layout_box(ws, layout, box);
 				display_value(int64_t(amount), true, ws, layout, box);
 				text::close_layout_box(layout, box);
@@ -7102,7 +7103,8 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, "building_level", m);
+				text::add_to_substitution_map(m, text::variable_type::type, ws.world.province_building_type_get_name(pbt));
+				text::localised_format_box(ws, layout, box, "ef_building_state", m);
 				text::add_space_to_layout_box(ws, layout, box);
 				display_value(int64_t(amount), true, ws, layout, box);
 				text::close_layout_box(layout, box);
@@ -7111,11 +7113,11 @@ namespace ui {
 		}
 
 		uint32_t ef_annex_to_null_nation(EFFECT_DISPLAY_PARAMS) {
-			text::add_line(ws, layout, text::produce_simple_string(ws, "e_annex_null"));
+			text::add_line(ws, layout, text::produce_simple_string(ws, "ef_annex_null"));
 			return 0;
 		}
 		uint32_t ef_annex_to_null_province(EFFECT_DISPLAY_PARAMS) {
-			text::add_line(ws, layout, text::produce_simple_string(ws, "e_annex_null"));
+			text::add_line(ws, layout, text::produce_simple_string(ws, "ef_annex_null"));
 			return 0;
 		}
 
