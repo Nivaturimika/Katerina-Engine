@@ -900,7 +900,10 @@ set to one or more of the following values.	*/
 
 	native_string flag_type_to_name(sys::state& state, dcon::flag_type_id type) {
 		if(type) {
-			return NATIVE("_") + text::win1250_to_native(state.to_string_view(state.flag_type_names[type]));
+			auto const sv = state.to_string_view(state.flag_type_names[type]);
+			if(sv.size() > 0) {
+				return NATIVE("_") + text::win1250_to_native(sv);
+			}
 		}
 		return NATIVE("");
 	}
