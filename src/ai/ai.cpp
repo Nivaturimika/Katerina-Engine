@@ -1030,7 +1030,7 @@ namespace ai {
 				continue; //if our army is too small, ignore buildings:
 
 			auto treasury = n.get_stockpiles(economy::money);
-			int32_t max_projects = std::max(16, int32_t(n.get_owned_state_count()));
+			int32_t max_projects = std::max(4, int32_t(n.get_owned_state_count()));
 
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
@@ -1101,7 +1101,7 @@ namespace ai {
 						}
 					}
 					// limit to building only if there is less than these
-					constexpr int32_t max_parallel_state_constructions = 4;
+					constexpr int32_t max_parallel_state_constructions = 2;
 					auto sc = state.world.nation_get_state_building_construction(n);
 					if(top_desired_type
 					&& int32_t(sc.end() - sc.begin()) < max_parallel_state_constructions) {
@@ -1129,6 +1129,7 @@ namespace ai {
 								for(auto fac : state.world.province_get_factory_location(p)) {
 									auto type = fac.get_factory().get_building_type();
 									if(top_desired_type == type
+									&& f.get_factory().get_primary_employment() >= 0.9f
 									&& fac.get_factory().get_level() < uint8_t(255)) {
 										bool under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
 										if(!under_cap && (rules & issue_rule::expand_factory) != 0) {
