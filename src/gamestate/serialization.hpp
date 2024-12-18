@@ -6,7 +6,7 @@
 #include "simple_fs.hpp"
 
 namespace sys {
-	constexpr inline uint32_t save_file_version = 78;
+	constexpr inline uint32_t save_file_version = 79;
 	constexpr inline uint32_t scenario_file_version = 131 + save_file_version;
 
 	struct scenario_header {
