@@ -201,7 +201,6 @@ effect_body
 	annex_to                        value       text                member_fn
 	release                         value       text                member_fn
 	change_controller               value       text                member_fn
-	infrastructure                  value       int                 member_fn
 	money                           value       float               member_fn
 	prestige_factor                 value       float               member_fn
 	leadership                      value       int                 member_fn
@@ -249,11 +248,6 @@ effect_body
 	consciousness                   value       float               member_fn
 	militancy                       value       float               member_fn
 	rgo_size                        value       int                 member_fn
-	fort                            value       int                 member_fn
-	naval_base                      value       int                 member_fn
-	railroad                        value       int                 member_fn  (infrastructure)
-	bank                            value       int                 member_fn
-	university                      value       int                 member_fn
 	kill_leader						value       text                 member_fn
 	set_province_flag               value       text                member_fn
 	clr_province_flag               value       text                member_fn
