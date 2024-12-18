@@ -659,7 +659,10 @@ namespace map {
 		return mt * mr * ms;
 	}
 
-	void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, std::array<glm::mat4x4, map::display_data::max_bone_matrices>& matrices, uint32_t start, uint32_t count, uint32_t current, float time_counter, glm::mat4x4 parent_m) {
+	using model_matrix_array = std::array<glm::mat4x4, map::display_data::max_bone_matrices>;
+	static constexpr model_matrix_array identity_matrix_array = model_matrix_array{ glm::mat4x4(1.f) };
+
+	static void get_hierachical_animation_bone(std::vector<emfx::xsm_animation> const& list, model_matrix_array& matrices, uint32_t start, uint32_t count, uint32_t current, float time_counter, glm::mat4x4 parent_m) {
 		auto const node_m = get_animation_bone_matrix(list[current], time_counter);
 		auto const global_m = parent_m * node_m;
 		for(uint32_t i = start; i < start + count; i++) { //recurse thru all of our children
@@ -672,7 +675,7 @@ namespace map {
 
 	/*	Finds a given root node, or most importantly, the end of a chain on a given bone hierachy,
 		for example the torso, if the arm is given! */
-	uint32_t get_root_node(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, uint32_t current) {
+	static uint32_t get_root_node(std::vector<emfx::xsm_animation> const& list, uint32_t start, uint32_t count, uint32_t current) {
 		for(uint32_t i = start; i < start + count; i++) {
 			if(i != current && list[current].parent_id == list[i].bone_id) {
 				return get_root_node(list, start, count, i); //our parent
@@ -694,53 +697,79 @@ namespace map {
 		constexpr float animation_zoom_threshold = map::zoom_very_close + 2.f;
 		if(zoom > animation_zoom_threshold) { // do animation logic only when close enough
 			auto const emfx_size = std::min(map::display_data::max_static_meshes, uint32_t(state.ui_defs.emfx.size()));
-			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_idle_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
-			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_move_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
-			std::vector<std::array<glm::mat4x4, max_bone_matrices>> final_attack_matrices(emfx_size, std::array<glm::mat4x4, max_bone_matrices>{ glm::mat4x4(1.f) });
-			std::vector<uint8_t> model_needs_matrix(emfx_size);
+			//
+			using model_matrix_array_list = std::vector<model_matrix_array, dcon::cache_aligned_allocator<model_matrix_array>>;
+			static model_matrix_array_list final_idle_matrices(emfx_size);
+			static model_matrix_array_list final_move_matrices(emfx_size);
+			static model_matrix_array_list final_attack_matrices(emfx_size);
+			static std::vector<uint8_t> model_needs_matrix(emfx_size);
+			//
+			std::fill(model_needs_matrix.begin(), model_needs_matrix.end(), 0);
 			for(auto const& obj : list) {
 				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::idle) ? 0x80 : 0x00;
 				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::move) ? 0x40 : 0x00;
 				model_needs_matrix[obj.emfx.index()] |= (obj.anim == emfx::animation_type::attack) ? 0x20 : 0x00;
 			}
-			for(uint32_t i = 0; i < emfx_size; i++) {
-				if((model_needs_matrix[i] & 0x80) != 0) {
-					auto start = static_mesh_idle_animation_start[i];
-					auto count = static_mesh_idle_animation_count[i];
-					auto& matrices = final_idle_matrices[i];
-					for(uint32_t k = start; k < start + count; k++) {
-						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+			// Compute animations in parallel
+			concurrency::parallel_for(uint32_t(0), uint32_t(4), [&](uint32_t index) {
+				switch(index) {
+				case 0: { //idle
+					std::fill(final_idle_matrices.begin(), final_idle_matrices.end(), identity_matrix_array);
+					for(uint32_t i = 0; i < emfx_size; i++) {
+						if((model_needs_matrix[i] & 0x80) != 0) {
+							auto start = static_mesh_idle_animation_start[i];
+							auto count = static_mesh_idle_animation_count[i];
+							auto& matrices = final_idle_matrices[i];
+							for(uint32_t k = start; k < start + count; k++) {
+								auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+								get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+							}
+							for(uint32_t k = start; k < start + count; k++) {
+								matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
+							}
+						}
 					}
-					for(uint32_t k = start; k < start + count; k++) {
-						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
-					}
+					break;
 				}
-				if((model_needs_matrix[i] & 0x40) != 0) {
-					auto start = static_mesh_move_animation_start[i];
-					auto count = static_mesh_move_animation_count[i];
-					auto& matrices = final_move_matrices[i];
-					for(uint32_t k = start; k < start + count; k++) {
-						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+				case 1: { //move
+					std::fill(final_move_matrices.begin(), final_move_matrices.end(), identity_matrix_array);
+					for(uint32_t i = 0; i < emfx_size; i++) {
+						if((model_needs_matrix[i] & 0x40) != 0) {
+							auto start = static_mesh_move_animation_start[i];
+							auto count = static_mesh_move_animation_count[i];
+							auto& matrices = final_move_matrices[i];
+							for(uint32_t k = start; k < start + count; k++) {
+								auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+								get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+							}
+							for(uint32_t k = start; k < start + count; k++) {
+								matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
+							}
+						}
 					}
-					for(uint32_t k = start; k < start + count; k++) {
-						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
-					}
+					break;
 				}
-				if((model_needs_matrix[i] & 0x20) != 0) {
-					auto start = static_mesh_attack_animation_start[i];
-					auto count = static_mesh_attack_animation_count[i];
-					auto& matrices = final_attack_matrices[i];
-					for(uint32_t k = start; k < start + count; k++) {
-						auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
-						get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+				case 2: { //attack
+					std::fill(final_attack_matrices.begin(), final_attack_matrices.end(), identity_matrix_array);
+					for(uint32_t i = 0; i < emfx_size; i++) {
+						if((model_needs_matrix[i] & 0x20) != 0) {
+							auto start = static_mesh_attack_animation_start[i];
+							auto count = static_mesh_attack_animation_count[i];
+							auto& matrices = final_attack_matrices[i];
+							for(uint32_t k = start; k < start + count; k++) {
+								auto anim_time = std::fmod(time_counter * (1.f / animations[k].total_anim_time), 1.f);
+								get_hierachical_animation_bone(animations, matrices, start, count, k, anim_time, glm::mat4x4(1.f));
+							}
+							for(uint32_t k = start; k < start + count; k++) {
+								matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
+							}
+						}
 					}
-					for(uint32_t k = start; k < start + count; k++) {
-						matrices[animations[k].bone_id] = matrices[animations[k].bone_id] * glm::inverse(animations[k].bone_bind_pose_matrix);
-					}
+					break;
 				}
-			}
+				}
+			});
+
 			for(const auto& obj : list) {
 				auto index = obj.emfx.index();
 				if(obj.anim == emfx::animation_type::idle) {
