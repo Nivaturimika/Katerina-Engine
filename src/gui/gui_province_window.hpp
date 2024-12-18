@@ -442,11 +442,7 @@ namespace ui {
 
 	class province_building_icon : public image_element_base {
 	public:
-		void on_update(sys::state& state) noexcept override {
-			auto type = retrieve<dcon::province_building_type_id>(state, parent);
-			auto prov = retrieve<dcon::province_id>(state, parent);
-			frame = state.world.province_get_building_level(prov, type);
-		}
+		void on_update(sys::state& state) noexcept override;
 	};
 	class province_building_expand_button : public button_element_base {
 	public:
@@ -485,6 +481,13 @@ namespace ui {
 			return tooltip_behavior::variable_tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<dcon::province_building_type_id>()) {
+				payload.emplace<dcon::province_building_type_id>(content);
+				return message_result::consumed;
+			}
+			return button_element_base::get(state, payload);
+		}
 	};
 
 	class province_building_progress : public progress_bar {
@@ -512,13 +515,20 @@ namespace ui {
 		image_element_base* under_construction_icon = nullptr;
 		element_base* building_progress = nullptr;
 		element_base* expanding_text = nullptr;
-		std::string get_icon_name() noexcept {
-			return "build_icon" + std::to_string(content.index());
-		}
+
+		ankerl::unordered_dense::map<int32_t, element_base*> build_icons;
 	public:
 		dcon::province_building_type_id content;
+
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override;
 		void on_update(sys::state& state) noexcept override;
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<dcon::province_building_type_id>()) {
+				payload.emplace<dcon::province_building_type_id>(content);
+				return message_result::consumed;
+			}
+			return window_element_base::get(state, payload);
+		}
 	};
 
 	class province_country_flag_button : public flag_button {
@@ -535,6 +545,13 @@ namespace ui {
 			return tooltip_behavior::variable_tooltip;
 		}
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
+		message_result get(sys::state& state, Cyto::Any& payload) noexcept override {
+			if(payload.holds_type<dcon::province_building_type_id>()) {
+				payload.emplace<dcon::province_building_type_id>(content);
+				return message_result::consumed;
+			}
+			return province_building_icon::get(state, payload);
+		}
 	};
 
 	class province_invest_factory_button : public button_element_base {

@@ -416,13 +416,13 @@ namespace ui {
 			expand_button = ptr.get();
 			return ptr;
 		} else if(name == "description") {
-			auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-			ptr->set_text(state, text::produce_simple_string(state, state.world.province_building_type_get_name(content)));
-			return ptr;
-		} else if(name == get_icon_name()) {
-			return make_element_by_type<province_building_icon>(state, id);
+			return make_element_by_type<generic_name_text<dcon::province_building_type_id>>(state, id);
 		} else if(name.substr(0, 10) == "build_icon") {
-			return make_element_by_type<invisible_element>(state, id);
+			auto ptr = make_element_by_type<province_building_icon>(state, id);
+			// TODO: allow more than 9 buildings
+			auto const index = name.size() > 10 ? name[10] - '0' : '9';
+			build_icons.insert_or_assign(index, ptr.get());
+			return ptr;
 		} else {
 			return nullptr;
 		}
@@ -435,5 +435,17 @@ namespace ui {
 		under_construction_icon->set_visible(state, is_building);
 		building_progress->set_visible(state, is_building);
 		expanding_text->set_visible(state, is_building);
+		// Set visible relevant building icon
+		for(const auto pt : state.world.in_province_building_type) {
+			if(auto it = build_icons.find(pt.id.index()); it != build_icons.end()) {
+				it->second->set_visible(state, content == pt);
+			}
+		}
+	}
+
+	void province_building_icon::on_update(sys::state& state) noexcept {
+		auto type = retrieve<dcon::province_building_type_id>(state, parent);
+		auto prov = retrieve<dcon::province_id>(state, parent);
+		frame = state.world.province_get_building_level(prov, type);
 	}
 }
