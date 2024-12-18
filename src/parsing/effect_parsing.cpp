@@ -459,8 +459,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in poor_strata scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in poor_strata scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -492,8 +492,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in middle_strata scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in middle_strata scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -525,8 +525,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::pop;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in rich_strata scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in rich_strata scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -656,9 +656,15 @@ namespace parsers {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_effect.push_back(uint16_t(effect::x_core_scope | effect::scope_has_limit));
 			context.main_slot = trigger::slot_contents::province;
-		} else if(context.outer_context.use_extensions && context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::x_core_scope_province | effect::scope_has_limit));
-			context.main_slot = trigger::slot_contents::nation;
+		} else if(context.main_slot == trigger::slot_contents::province) {
+			if(context.outer_context.use_extensions) {
+				context.compiled_effect.push_back(uint16_t(effect::x_core_scope_province | effect::scope_has_limit));
+				context.main_slot = trigger::slot_contents::nation;
+			} else {
+				gen.discard_group();
+				err.accumulated_errors += "all_core effect scope in province is an extension (" + err.file_name + ")\n";
+				return;
+			}
 		} else {
 			gen.discard_group();
 			err.accumulated_errors += "all_core effect scope used in an incorrect scope type (" + err.file_name + ")\n";
@@ -924,8 +930,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::province;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in capital_scope scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in capital_scope scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -958,8 +964,8 @@ namespace parsers {
 
 		context.main_slot = context.this_slot;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in this scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in this scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -993,8 +999,8 @@ namespace parsers {
 
 		context.main_slot = context.from_slot;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in from_scope scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in from_scope scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1020,8 +1026,8 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in sea_zone scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in sea_zone scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1046,8 +1052,8 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in cultural_union scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in cultural_union scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1072,8 +1078,8 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in overlord scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in overlord scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1098,8 +1104,8 @@ namespace parsers {
 		context.compiled_effect.push_back(trigger::payload(dcon::trigger_key()).value);
 
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in sphere_owner scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in sphere_owner scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1126,8 +1132,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::nation;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in independence scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in independence scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1154,8 +1160,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::nation;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in flashpoint_tag scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in flashpoint_tag scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1176,8 +1182,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::state;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in crisis_state scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in crisis_state scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1224,8 +1230,8 @@ namespace parsers {
 
 		context.main_slot = trigger::slot_contents::state;
 		parse_effect_body(gen, err, context);
-		if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-			err.accumulated_warnings += "Usage of limit in state scope is an extension (" + err.file_name + ")\n";
+		if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+			err.accumulated_errors += "Usage of limit in state scope is an extension (" + err.file_name + ")\n";
 		}
 
 		context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1338,8 +1344,8 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::province;
 			parse_effect_body(gen, err, context);
-			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-				err.accumulated_warnings += "Usage of limit in variable state scope is an extension (" + err.file_name + ")\n";
+			if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_errors += "Usage of limit in variable state scope is an extension (" + err.file_name + ")\n";
 			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1361,8 +1367,8 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::province;
 			parse_effect_body(gen, err, context);
-			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-				err.accumulated_warnings += "Usage of limit in variable region scope is an extension (" + err.file_name + ")\n";
+			if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_errors += "Usage of limit in variable region scope is an extension (" + err.file_name + ")\n";
 			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1396,8 +1402,8 @@ namespace parsers {
 
 			context.main_slot = trigger::slot_contents::pop;
 			parse_effect_body(gen, err, context);
-			if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-				err.accumulated_warnings += "Usage of limit in variable pop type scope is an extension (" + err.file_name + ")\n";
+			if(!context.outer_context.use_extensions && context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+				err.accumulated_errors += "Usage of limit in variable pop type scope is an extension (" + err.file_name + ")\n";
 			}
 
 			context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1421,8 +1427,8 @@ namespace parsers {
 
 				context.main_slot = trigger::slot_contents::province;
 				parse_effect_body(gen, err, context);
-				if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-					err.accumulated_warnings += "Usage of limit in variable province scope is an extension (" + err.file_name + ")\n";
+				if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+					err.accumulated_errors += "Usage of limit in variable province scope is an extension (" + err.file_name + ")\n";
 				}
 
 				context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -1452,8 +1458,8 @@ namespace parsers {
 
 				context.main_slot = trigger::slot_contents::nation;
 				parse_effect_body(gen, err, context);
-				if(context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
-					err.accumulated_warnings += "Usage of limit in variable tag scope is an extension (" + err.file_name + ")\n";
+				if(!context.outer_context.use_extensions && context.compiled_effect[context.limit_position] != trigger::payload(dcon::trigger_key()).value) {
+					err.accumulated_errors += "Usage of limit in variable tag scope is an extension (" + err.file_name + ")\n";
 				}
 
 				context.compiled_effect[payload_size_offset] = uint16_t(context.compiled_effect.size() - payload_size_offset);
@@ -3550,45 +3556,6 @@ namespace parsers {
 			return;
 		}
 	}
-	void effect_body::infrastructure(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::infrastructure));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_effect.push_back(uint16_t(effect::infrastructure_state));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else {
-			err.accumulated_errors +=
-				"infrastructure effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
-	void effect_body::fort(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::fort));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_effect.push_back(uint16_t(effect::fort_state));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else {
-			err.accumulated_errors +=
-				"fort effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
-	void effect_body::naval_base(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::naval_base));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_effect.push_back(uint16_t(effect::naval_base_state));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else {
-			err.accumulated_errors +=
-				"naval_base effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
 	void effect_body::money(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_effect.push_back(uint16_t(effect::treasury));
@@ -4048,24 +4015,26 @@ namespace parsers {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union | effect::no_payload));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "this_union")) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union_this | effect::no_payload));
-			} else if(context.outer_context.use_extensions && is_fixed_token_ci(value.data(), value.data() + value.length(), "from_union")) {
-				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union_from | effect::no_payload));
+			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "from_union")) {
+				if(context.outer_context.use_extensions) {
+					context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_union_from | effect::no_payload));
+				} else {
+					err.accumulated_errors += "add_accepted_culture = from_union effect is an extension " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+					return;
+				}
 			} else if(is_this(value)) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_this | effect::no_payload));
 			} else if(is_from(value)) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture_from | effect::no_payload));
-			} else if(auto it = context.outer_context.map_of_culture_names.find(std::string(value));
-							it != context.outer_context.map_of_culture_names.end()) {
+			} else if(auto it = context.outer_context.map_of_culture_names.find(std::string(value)); it != context.outer_context.map_of_culture_names.end()) {
 				context.compiled_effect.push_back(uint16_t(effect::add_accepted_culture));
 				context.compiled_effect.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors += "add_accepted_culture effect supplied with invalid culture name " + std::string(value) + " (" +
-																err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "add_accepted_culture effect supplied with invalid culture name " + std::string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			err.accumulated_errors += "add_accepted_culture effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "add_accepted_culture effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -5136,15 +5105,16 @@ namespace parsers {
 				err.accumulated_errors += "named reform effect used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
-		} else if(auto iti = context.outer_context.map_of_province_building_types.find(); iti != context.outer_context.map_of_province_building_types.end()) {
+		} else if(auto iti = context.outer_context.map_of_province_building_types.find(str_label); iti != context.outer_context.map_of_province_building_types.end()) {
+			auto const amount = parse_int(value, line, err);
 			if(context.main_slot == trigger::slot_contents::province) {
 				context.compiled_effect.push_back(uint16_t(effect::building));
-				context.compiled_effect.push_back(trigger::payload(iti->second).pbt_id);
-				context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
+				context.compiled_effect.push_back(trigger::payload(iti->second).value);
+				context.compiled_effect.push_back(trigger::payload(int16_t(amount)).value);
 			} else if(context.main_slot == trigger::slot_contents::state) {
 				context.compiled_effect.push_back(uint16_t(effect::building_state));
-				context.compiled_effect.push_back(trigger::payload(iti->second).pbt_id);
-				context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
+				context.compiled_effect.push_back(trigger::payload(iti->second).value);
+				context.compiled_effect.push_back(trigger::payload(int16_t(amount)).value);
 			} else {
 				err.accumulated_errors += "named building effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;

@@ -536,11 +536,6 @@ namespace parsers {
 		void annex_to(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);
 		void release(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);
 		void change_controller(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);
-		void infrastructure(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void fort(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void naval_base(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void bank(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void university(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void money(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context);
 		void leadership(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void create_vassal(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);
