@@ -2445,7 +2445,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Country
-- **Comment**: N/A
+- **Comment**: Returns true if any rebellion within the country is atleast `<n>` percent strong
 
 ### `recruited_percentage = <n>`
 

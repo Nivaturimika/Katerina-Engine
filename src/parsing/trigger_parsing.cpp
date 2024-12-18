@@ -5652,20 +5652,16 @@ namespace parsers {
 															std::to_string(line) + ")\n";
 		}
 	}
-	void trigger_body::rebel_power_fraction(association_type a, float value, error_handler& err, int32_t line,
-		trigger_building_context& context) {
+	void trigger_body::rebel_power_fraction(association_type a, float value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(uint16_t(trigger::rebel_power_fraction | association_to_trigger_code(a)));
+			context.add_float_to_payload(value);
 		} else {
-			err.accumulated_errors += "rebel_power_fraction trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "rebel_power_fraction trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
-		context.add_float_to_payload(value);
 	}
-	void trigger_body::recruited_percentage(association_type a, float value, error_handler& err, int32_t line,
-		trigger_building_context& context) {
+	void trigger_body::recruited_percentage(association_type a, float value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_trigger.push_back(uint16_t(trigger::recruited_percentage_nation | association_to_trigger_code(a)));
 		} else if(context.main_slot == trigger::slot_contents::pop) {
@@ -5695,39 +5691,29 @@ namespace parsers {
 	void trigger_body::nationalism(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::province) {
 			context.compiled_trigger.push_back(uint16_t(trigger::nationalism | association_to_trigger_code(a)));
+			context.compiled_trigger.push_back(trigger::payload(uint16_t(value)).value);
 		} else {
-			err.accumulated_errors += "nationalism trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "nationalism trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
-		context.compiled_trigger.push_back(trigger::payload(uint16_t(value)).value);
 	}
 	void trigger_body::is_overseas(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::is_overseas | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::is_overseas | trigger::no_payload | association_to_bool_code(a, value)));
 		} else if(context.main_slot == trigger::slot_contents::pop) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::is_overseas_pop | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::is_overseas_pop | trigger::no_payload | association_to_bool_code(a, value)));
 		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::is_overseas_state | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::is_overseas_state | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "is_overseas trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "is_overseas trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
 	void trigger_body::controlled_by_rebels(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::controlled_by_rebels | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::controlled_by_rebels | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "controlled_by_rebels trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "controlled_by_rebels trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}

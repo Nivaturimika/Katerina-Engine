@@ -3210,8 +3210,16 @@ namespace trigger {
 		return compare_values_eq(tval[0], active_option, prior_opt);
 	}
 	TRIGGER_FUNCTION(tf_rebel_power_fraction) {
-		// note: virtually unused
-		return compare_to_true(tval[0], false);
+		auto const amount = read_float_from_payload(tval + 1);
+		auto const result = ve::apply([&ws](dcon::nation_id n, float f) {
+			for(const auto rf : ws.world.nation_get_rebellion_within(n)) {
+				if(rf.get_rebels().get_organization() >= f) {
+					return true;
+				}
+			}
+			return false;
+		}, to_nation(primary_slot), amount);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_recruited_percentage_nation) {
 		auto value = ve::apply([&ws](dcon::nation_id n) {
