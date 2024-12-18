@@ -4517,42 +4517,32 @@ namespace parsers {
 		trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::state) {
 			if(is_fixed_token_ci(value.data(), value.data() + value.length(), "factory")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_factory | trigger::no_payload | association_to_bool_code(a)));
-			}  else if(auto it = context.outer_context.map_of_factory_names.find(std::string(value));
-						it != context.outer_context.map_of_factory_names.end()) {
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_factory | trigger::no_payload | association_to_bool_code(a)));
+			}  else if(auto it = context.outer_context.map_of_factory_names.find(std::string(value)); it != context.outer_context.map_of_factory_names.end()) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_building_state | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors +=
-					"has_building trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "has_building trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else if(context.main_slot == trigger::slot_contents::province) {
-			if(is_fixed_token_ci(value.data(), value.data() + value.length(), "fort")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_building_fort | trigger::no_payload | association_to_bool_code(a)));
+			if(auto it = context.outer_context.map_of_province_building_types.find(std::string(value)); it != context.outer_context.map_of_province_building_types.end()) {
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "railroad")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_building_railroad | trigger::no_payload | association_to_bool_code(a)));
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "naval_base")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_building_naval_base | trigger::no_payload | association_to_bool_code(a)));
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "bank")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_building_bank | trigger::no_payload | association_to_bool_code(a)));
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "university")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_building_university | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(trigger::payload(context.outer_context.state.economy_definitions.railroad_building).value);
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "factory")) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_building_factory_from_province | trigger::no_payload | association_to_bool_code(a)));
 			} else if(auto it = context.outer_context.map_of_factory_names.find(std::string(value)); it != context.outer_context.map_of_factory_names.end()) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_building_state_from_province | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors +=
-					"has_building trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				err.accumulated_errors += "has_building trigger supplied with an invalid value \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			err.accumulated_errors += "has_building trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "has_building trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -4562,8 +4552,7 @@ namespace parsers {
 		} else if(context.main_slot == trigger::slot_contents::state) {
 			context.compiled_trigger.push_back(uint16_t(trigger::empty_state | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "empty trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) +
-															"(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "empty trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -4571,9 +4560,7 @@ namespace parsers {
 		if(context.main_slot == trigger::slot_contents::province) {
 			context.compiled_trigger.push_back(uint16_t(trigger::is_blockaded | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "is_blockaded trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "is_blockaded trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -4587,9 +4574,7 @@ namespace parsers {
 			} else if(context.main_slot == trigger::slot_contents::province) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_country_modifier_province | association_to_bool_code(a)));
 			} else {
-				err.accumulated_errors += "has_country_modifier trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+				err.accumulated_errors += "has_country_modifier trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);

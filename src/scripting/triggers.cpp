@@ -381,10 +381,6 @@ namespace trigger {
 	TRIGGER_FUNCTION(tf_none) {
 		return return_type(true);
 	}
-	
-	TRIGGER_FUNCTION(tf_unused_1) {
-		return return_type(true);
-	}
 
 	TRIGGER_FUNCTION(tf_x_neighbor_province_scope) {
 		return ve::apply(
@@ -2342,34 +2338,30 @@ namespace trigger {
 	TRIGGER_FUNCTION(tf_badboy) {
 		return compare_values(tval[0], ws.world.nation_get_infamy(to_nation(primary_slot)), read_float_from_payload(tval + 1));
 	}
-	TRIGGER_FUNCTION(tf_has_building_fort) {
-		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.fort_building) != 0);
+	TRIGGER_FUNCTION(tf_has_building) {
+		auto const pbt = trigger::payload(tval[1]).pbt_id;
+		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot), pbt) != 0);
 	}
-	TRIGGER_FUNCTION(tf_has_building_railroad) {
-		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.railroad_building) != 0);
-	}
-	TRIGGER_FUNCTION(tf_has_building_naval_base) {
-		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) != 0);
-	}
-
 	TRIGGER_FUNCTION(tf_has_building_factory) {
-	auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, to_state(primary_slot));
+		auto const result = ve::apply([&ws](dcon::state_instance_id s) {
+			return economy_factory::has_factory(ws, s);
+		}, to_state(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_building_state) {
-		auto result =
-			ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) { return economy::has_building(ws, s, f); },
-					to_state(primary_slot));
+		auto const result = ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) {
+			return economy::has_building(ws, s, f);
+		}, to_state(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_building_state_from_province) {
-		auto state = ws.world.province_get_state_membership(to_prov(primary_slot));
-		auto result = ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) { return economy::has_building(ws, s, f); }, state);
+		auto const state = ws.world.province_get_state_membership(to_prov(primary_slot));
+		auto const result = ve::apply([&ws, f = payload(tval[1]).fac_id](dcon::state_instance_id s) { return economy::has_building(ws, s, f); }, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_building_factory_from_province) {
-		auto state = ws.world.province_get_state_membership(to_prov(primary_slot));
-		auto result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
+		auto const state = ws.world.province_get_state_membership(to_prov(primary_slot));
+		auto const result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_empty) {
@@ -5545,13 +5537,6 @@ namespace trigger {
 		return compare_to_true(tval[0], test_result);
 	}
 
-	TRIGGER_FUNCTION(tf_has_building_bank) {
-		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.bank_building) != 0);
-	}
-	TRIGGER_FUNCTION(tf_has_building_university) {
-		return compare_to_true(tval[0], ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.university_building) != 0);
-	}
-
 	TRIGGER_FUNCTION(tf_tags_eq) {
 		//auto const a = read_int32_t_from_payload(tval + 1);
 		//auto const b = read_int32_t_from_payload(tval + 3);
@@ -5655,6 +5640,15 @@ namespace trigger {
 			return compare_to_true(tval[0], ws.world.political_party_get_party_issues(rp, popt) == new_opt);
 		}
 	}
+
+#define TRIGGER_UNUSED(x) TRIGGER_FUNCTION(tf_unused_##x) { return 0; }
+	TRIGGER_UNUSED(0)
+	TRIGGER_UNUSED(1)
+	TRIGGER_UNUSED(2)
+	TRIGGER_UNUSED(3)
+	TRIGGER_UNUSED(4)
+	TRIGGER_UNUSED(5)
+#undef TRIGGER_UNUSED
 
 	template<typename return_type, typename primary_type, typename this_type, typename from_type>
 	inline return_type CALLTYPE test_trigger_generic(uint16_t const* tval, sys::state& ws, primary_type primary_slot, this_type this_slot, from_type from_slot) {

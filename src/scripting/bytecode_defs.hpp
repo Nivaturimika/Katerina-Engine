@@ -717,9 +717,9 @@
 	TRIGGER_BYTECODE_ELEMENT(0x0096, prestige_this_pop, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x0097, badboy, 2) \
 	TRIGGER_BYTECODE_ELEMENT(0x0098, has_building_state, 1) \
-	TRIGGER_BYTECODE_ELEMENT(0x0099, has_building_fort, 0) \
-	TRIGGER_BYTECODE_ELEMENT(0x009A, has_building_railroad, 0) \
-	TRIGGER_BYTECODE_ELEMENT(0x009B, has_building_naval_base, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x0099, has_building, 1) \
+	TRIGGER_BYTECODE_ELEMENT(0x009A, unused_0, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x009B, unused_1, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x009C, empty, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x009D, is_blockaded, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x009E, has_country_modifier, 1) \
@@ -1144,7 +1144,7 @@
 	TRIGGER_BYTECODE_ELEMENT(0x023F, work_available_state, 1) \
 	TRIGGER_BYTECODE_ELEMENT(0x0240, work_available_province, 1) \
 	/*variable name*/\
-	TRIGGER_BYTECODE_ELEMENT(0x0241, unused_1, 0) /* UNUSED 1 */ \
+	TRIGGER_BYTECODE_ELEMENT(0x0241, unused_2, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x0242, variable_ideology_name_nation, 3) \
 	TRIGGER_BYTECODE_ELEMENT(0x0243, variable_ideology_name_state, 3) \
 	TRIGGER_BYTECODE_ELEMENT(0x0244, variable_ideology_name_province, 3) \
@@ -1300,8 +1300,8 @@
 	TRIGGER_BYTECODE_ELEMENT(0x02D9, industrial_score_tag, 1) \
 	TRIGGER_BYTECODE_ELEMENT(0x02DA, has_factories_nation, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x02DB, is_coastal_state, 0) \
-	TRIGGER_BYTECODE_ELEMENT(0x02DC, has_building_bank, 0) \
-	TRIGGER_BYTECODE_ELEMENT(0x02DD, has_building_university, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x02DC, unused_4, 0) \
+	TRIGGER_BYTECODE_ELEMENT(0x02DD, unused_5, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x02DE, test, 1) \
 	TRIGGER_BYTECODE_ELEMENT(0x02DF, unit_has_leader, 0) \
 	TRIGGER_BYTECODE_ELEMENT(0x02E0, has_national_focus_state, 1) \

@@ -2831,9 +2831,9 @@ namespace ui {
 			ws, layout, box);
 			text::add_space_to_layout_box(ws, layout, box);
 			if(this_slot != -1)
-			text::add_to_layout_box(ws, layout, box, ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)));
+				text::add_to_layout_box(ws, layout, box, ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::close_layout_box(layout, box);
 		}
 		void tf_prestige_this_pop(TRIGGER_DISPLAY_PARAMS) {
@@ -2843,9 +2843,9 @@ namespace ui {
 			ws, layout, box);
 			text::add_space_to_layout_box(ws, layout, box);
 			if(this_slot != -1)
-			text::add_to_layout_box(ws, layout, box, nations::owner_of_pop(ws, trigger::to_pop(this_slot)));
+				text::add_to_layout_box(ws, layout, box, nations::owner_of_pop(ws, trigger::to_pop(this_slot)));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::close_layout_box(layout, box);
 		}
 		void tf_badboy(TRIGGER_DISPLAY_PARAMS) {
@@ -2855,22 +2855,11 @@ namespace ui {
 			text::fp_one_place{trigger::read_float_from_payload(tval + 1)}, ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
-		void tf_has_building_fort(TRIGGER_DISPLAY_PARAMS) {
+		void tf_has_building(TRIGGER_DISPLAY_PARAMS) {
+			auto const pbt = trigger::payload(tval[1]).pbt_id;
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "a_fort"), ws, layout, box);
-			text::close_layout_box(layout, box);
-		}
-		void tf_has_building_railroad(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "a_railroad"), ws, layout, box);
-			text::close_layout_box(layout, box);
-		}
-		void tf_has_building_naval_base(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "a_naval_base"), ws, layout, box);
+			display_with_has_comparison(tval[0], ws.world.province_building_type_get_name(pbt), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 
@@ -7703,19 +7692,6 @@ namespace ui {
 			text::close_layout_box(layout, box);
 		}
 
-		void tf_has_building_bank(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "tt_a_bank"), ws, layout, box);
-			text::close_layout_box(layout, box);
-		}
-		void tf_has_building_university(TRIGGER_DISPLAY_PARAMS) {
-			auto box = text::open_layout_box(layout, indentation);
-			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "tt_a_university"), ws, layout, box);
-			text::close_layout_box(layout, box);
-		}
-
 		void tf_party_name(TRIGGER_DISPLAY_PARAMS) {
 			auto ideology = trigger::payload(tval[1]).ideo_id;
 			dcon::text_key new_name{ dcon::text_key::value_base_t(trigger::read_int32_t_from_payload(tval + 2)) };
@@ -7907,9 +7883,9 @@ namespace ui {
 			tf_prestige_this_pop,													// constexpr inline uint16_t prestige_this_pop = 0x0096;
 			tf_badboy,																		// constexpr inline uint16_t badboy = 0x0097;
 			tf_has_building_state,												// constexpr inline uint16_t has_building_state = 0x0098;
-			tf_has_building_fort,													// constexpr inline uint16_t has_building_fort = 0x0099;
-			tf_has_building_railroad,											// constexpr inline uint16_t has_building_railroad = 0x009A;
-			tf_has_building_naval_base,										// constexpr inline uint16_t has_building_naval_base = 0x009B;
+			tf_has_building,													// constexpr inline uint16_t has_building_fort = 0x0099;
+			tf_none,											// constexpr inline uint16_t has_building_railroad = 0x009A;
+			tf_none,										// constexpr inline uint16_t has_building_naval_base = 0x009B;
 			tf_empty,																			// constexpr inline uint16_t empty = 0x009C;
 			tf_is_blockaded,															// constexpr inline uint16_t is_blockaded = 0x009D;
 			tf_has_country_modifier,											// constexpr inline uint16_t has_country_modifier = 0x009E;
@@ -8507,8 +8483,8 @@ namespace ui {
 			tf_industrial_score_tag, //constexpr inline uint16_t industrial_score_tag = 0x02D8;
 			tf_has_factories_nation, // constexpr inline uint16_t has_factories_state = 0x02D9;
 			tf_is_coastal_state, // constexpr inline uint16_t is_coastal_state = 0x02DA;
-			tf_has_building_bank, // constexpr inline uint16_t has_building_bank = 0x02DB;
-			tf_has_building_university, // constexpr inline uint16_t has_building_university = 0x02DC;
+			tf_none, // constexpr inline uint16_t has_building_bank = 0x02DB;
+			tf_none, // constexpr inline uint16_t has_building_university = 0x02DC;
 			tf_test, // constexpr inline uint16_t test = 0x02DD;
 			tf_unit_has_leader, //constexpr inline uint16_t unit_has_leader = 0x02DF
 			tf_has_national_focus_state, //constexpr inline uint16_t has_national_focus_state = 0x02E0
