@@ -75,6 +75,9 @@ namespace economy_factory {
 		return false;
 	}
 
+	/* Checks if the given state contains a factory:
+		- Either one that is being built
+		- Or one that is already in-place */
 	bool state_contains_factory(sys::state& state, dcon::state_instance_id state_instance_id, dcon::factory_type_id factory_type_id) {
 		auto sdef = state.world.state_instance_get_definition(state_instance_id);
 		for(auto state_membership_id : state.world.state_definition_get_abstract_state_membership(sdef)) {

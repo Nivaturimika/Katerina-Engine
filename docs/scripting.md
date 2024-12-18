@@ -2129,11 +2129,11 @@ clear_news_scopes = {
 - **Scopes**: Any
 - **Comment**: N/A
 
-### `social_movement = <yes/no>`
+### `social_movement = <REB/yes/no>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Checks if the pop is part of a social movement, or in the case of REB, check if the rebel faction is part of a social movement
 
 ### `social_spending = <n>`
 
@@ -2333,11 +2333,11 @@ clear_news_scopes = {
 - **Scopes**: Any
 - **Comment**: N/A
 
-### `political_movement = <yes/no>`
+### `political_movement = <REB/yes/no>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Checks if the pop is part of a politcal movement, or in the case of REB, check if the rebel faction is part of a political movement
 
 ### `pop_majority_issue = <issue>`
 
@@ -2613,7 +2613,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Check if there is any movement with atleast `<n>` % strength
 
 ### `country_units_in_province = <THIS/FROM/TAG/province id>`
 
@@ -2696,8 +2696,8 @@ clear_news_scopes = {
 ### `can_build_factory_in_capital_state = <factory name>`
 
 - **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
+- **Scopes**: Country
+- **Comment**: Checks if the given nation can build a factory in its capital state
 
 ### `news_printing_count = <n>`
 

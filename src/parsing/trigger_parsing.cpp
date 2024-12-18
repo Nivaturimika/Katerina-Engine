@@ -1517,29 +1517,21 @@ namespace parsers {
 
 	void trigger_body::social_movement(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::pop) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::social_movement | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::social_movement | trigger::no_payload | association_to_bool_code(a, value)));
 		} else if(context.from_slot == trigger::slot_contents::rebel) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::social_movement_from_reb | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::social_movement_from_reb | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "social_movement trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "social_movement trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
 	void trigger_body::political_movement(association_type a, bool value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::pop) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::political_movement | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::political_movement | trigger::no_payload | association_to_bool_code(a, value)));
 		} else if(context.from_slot == trigger::slot_contents::rebel) {
-			context.compiled_trigger.push_back(
-				uint16_t(trigger::political_movement_from_reb | trigger::no_payload | association_to_bool_code(a, value)));
+			context.compiled_trigger.push_back(uint16_t(trigger::political_movement_from_reb | trigger::no_payload | association_to_bool_code(a, value)));
 		} else {
-			err.accumulated_errors += "political_movement trigger used in an incorrect scope type " +
-															slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-															std::to_string(line) + ")\n";
+			err.accumulated_errors += "political_movement trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		}
 	}
@@ -1687,16 +1679,16 @@ namespace parsers {
 	void trigger_body::someone_can_form_union_tag(association_type a, std::string_view value, error_handler& err, int32_t line,
 		trigger_building_context& context) {
 		if(is_from(value)) {
-			if(context.from_slot == trigger::slot_contents::nation)
+			if(context.from_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::someone_can_form_union_tag_from | trigger::no_payload | association_to_bool_code(a)));
-			else {
+			} else {
 				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			if(context.from_slot == trigger::slot_contents::nation)
+			if(context.from_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::someone_can_form_union_tag_other | trigger::no_payload | association_to_bool_code(a, parse_bool(value, line, err))));
-			else {
+			} else {
 				err.accumulated_errors += "someone_can_form_union_tag trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
@@ -2851,14 +2843,11 @@ namespace parsers {
 				context.compiled_trigger.push_back(uint16_t(trigger::can_build_factory_in_capital_state | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {
-				err.accumulated_errors += "can_build_factory_in_capital_state trigger used in an incorrect scope type " +
-					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-					std::to_string(line) + ")\n";
+				err.accumulated_errors += "can_build_factory_in_capital_state trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {
-			err.accumulated_errors += "can_build_factory_in_capital_state trigger supplied with an government type (" + err.file_name +
-				", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "can_build_factory_in_capital_state trigger supplied with an invalid factory type (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void trigger_body::capital(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
@@ -6808,24 +6797,19 @@ namespace parsers {
 		} else if(value.limit_to_world_greatest_level) {
 			if(context.this_slot == trigger::slot_contents::nation) {
 				if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "railroad"))
-				context.compiled_trigger.push_back(uint16_t(
+					context.compiled_trigger.push_back(uint16_t(
 						trigger::can_build_in_province_railroad_yes_limit_this_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "naval_base"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_naval_base_yes_limit_this_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_naval_base_yes_limit_this_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "fort"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_fort_yes_limit_this_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_fort_yes_limit_this_nation | trigger::association_eq | trigger::no_payload));
 			} else if(context.from_slot == trigger::slot_contents::nation) {
 				if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "railroad"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_railroad_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_railroad_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "naval_base"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_naval_base_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_naval_base_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "fort"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_fort_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_fort_yes_limit_from_nation | trigger::association_eq | trigger::no_payload));
 			} else {
 				err.accumulated_errors += "can_build_in_province trigger used in an invalid context (" + err.file_name + ", line " +
 																std::to_string(line) + ")\n";
@@ -6834,24 +6818,18 @@ namespace parsers {
 		} else {
 			if(context.this_slot == trigger::slot_contents::nation) {
 				if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "railroad"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_railroad_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_railroad_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "naval_base"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_naval_base_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_naval_base_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "fort"))
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::can_build_in_province_fort_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_fort_no_limit_this_nation | trigger::association_eq | trigger::no_payload));
 			} else if(context.from_slot == trigger::slot_contents::nation) {
 				if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "railroad"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_railroad_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_railroad_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "naval_base"))
-				context.compiled_trigger.push_back(uint16_t(
-						trigger::can_build_in_province_naval_base_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_naval_base_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
 				else if(is_fixed_token_ci(value.building.data(), value.building.data() + value.building.length(), "fort"))
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::can_build_in_province_fort_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
+					context.compiled_trigger.push_back(uint16_t(trigger::can_build_in_province_fort_no_limit_from_nation | trigger::association_eq | trigger::no_payload));
 			} else {
 				err.accumulated_errors += "can_build_in_province trigger used in an invalid context (" + err.file_name + ", line " +
 																std::to_string(line) + ")\n";
@@ -6859,21 +6837,22 @@ namespace parsers {
 			}
 		}
 	}
-	void trigger_body::can_build_railway_in_capital(tr_can_build_railway_in_capital const& value, error_handler& err, int32_t line,
-		trigger_building_context& context) {
+	void trigger_body::can_build_railway_in_capital(tr_can_build_railway_in_capital const& value, error_handler& err, int32_t line, trigger_building_context& context) {
 		if(context.main_slot != trigger::slot_contents::nation) {
 			err.accumulated_errors += "can_build_railway_in_capital trigger used in an invalid context (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 			return;
 		} else if(value.in_whole_capital_state) {
-			if(value.limit_to_world_greatest_level)
+			if(value.limit_to_world_greatest_level) {
 				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_yes_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
-			else
+			} else {
 				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_yes_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+			}
 		} else {
-			if(value.limit_to_world_greatest_level)
+			if(value.limit_to_world_greatest_level) {
 				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_no_whole_state_yes_limit | trigger::association_eq | trigger::no_payload));
-			else
+			} else {
 				context.compiled_trigger.push_back(uint16_t(trigger::can_build_railway_in_capital_no_whole_state_no_limit | trigger::association_eq | trigger::no_payload));
+			}
 		}
 	}
 	void trigger_body::can_build_fort_in_capital(tr_can_build_fort_in_capital const& value, error_handler& err, int32_t line,

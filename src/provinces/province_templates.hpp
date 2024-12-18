@@ -45,4 +45,22 @@ namespace province {
 			}
 		}
 	}
+
+	/* Checks if we can build a province building in a given province, however with a limit
+		this is mainly used for can_build_in_province = { limit_to_max_world = yes/no } trigger */
+	template<typename vector_type, typename primary_type, typename this_type>
+	vector_type can_build_province_building_in_province_limit(sys::state& state, dcon::province_building_type_id pbt, primary_type prov, this_type n, bool limit, bool whole_state) {
+		auto const level = state.world.province_get_building_level(prov, pbt);
+		auto const max_level = state.world.nation_get_max_building_level(n, pbt);
+		if(pbt == state.economy_definitions.naval_base_building) {
+			auto const has_base = ve::apply([&state](dcon::state_instance_id i) {
+				return !(military::state_has_naval_base(state, i));
+			}, state.world.province_get_state_membership(prov));
+			return state.world.province_get_is_coast(prov) && (level < max_level) && (level != 0 || has_base);
+		} else if(pbt == state.economy_definitions.railroad_building) {
+			auto const pmod = state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::min_build_railroad);
+			return level + pmod < max_level;
+		}
+		return level < max_level;
+	}
 } // namespace province

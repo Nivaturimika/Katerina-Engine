@@ -90,13 +90,14 @@ namespace military {
 		return total > 0.f ? total / value : 0.f;
 	}
 
+	/* This will test the entire state instance to check if there is ANY naval base */
 	bool state_has_naval_base(sys::state const& state, dcon::state_instance_id si) {
 		auto owner = state.world.state_instance_get_nation_from_state_ownership(si);
 		auto def = state.world.state_instance_get_definition(si);
 		for(auto p : state.world.state_definition_get_abstract_state_membership(def)) {
 			if(p.get_province().get_nation_from_province_ownership() == owner) {
 				if(p.get_province().get_building_level(state.economy_definitions.naval_base_building) > 0)
-				return true;
+					return true;
 			}
 		}
 		return false;

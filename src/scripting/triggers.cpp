@@ -9,6 +9,7 @@
 #include "ve_scalar_extensions.hpp"
 #include "script_constants.hpp"
 #include "politics.hpp"
+#include "province_templates.hpp"
 
 namespace trigger {
 
@@ -4421,68 +4422,66 @@ namespace trigger {
 		return compare_to_true(tval[0], false);
 	}
 	TRIGGER_FUNCTION(tf_social_movement_strength) {
-		return compare_values(tval[0],
-			ve::apply(
-					[&ws](dcon::nation_id n) {
-						float max_str = 0.0f;
-						for(auto m : ws.world.nation_get_movement_within(n)) {
-							if(auto issue = m.get_movement().get_associated_issue_option(); issue) {
-								if(culture::issue_type(issue.get_parent_issue().get_issue_type()) == culture::issue_type::social
-								&& m.get_movement().get_pop_support() > max_str) {
-									max_str = m.get_movement().get_pop_support();
-								}
-							}
-						}
-						return max_str;
-					},
-					to_nation(primary_slot)) *
-					ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
+		auto const result = ve::apply([&ws](dcon::nation_id n) {
+			auto max_str = 0.0f;
+			for(auto m : ws.world.nation_get_movement_within(n)) {
+				if(auto issue = m.get_movement().get_associated_issue_option(); issue) {
+					if(culture::issue_type(issue.get_parent_issue().get_issue_type()) == culture::issue_type::social) {
+						max_str = std::max(max_str, m.get_movement().get_pop_support());
+					}
+				}
+			}
+			return max_str;
+		}, to_nation(primary_slot));
+		return compare_values(tval[0], result
+			* ws.defines.movement_support_uh_factor
+			/ ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
 			read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_political_movement_strength) {
-		return compare_values(tval[0],
-			ve::apply(
-					[&ws](dcon::nation_id n) {
-						float max_str = 0.0f;
-						for(auto m : ws.world.nation_get_movement_within(n)) {
-							if(auto issue = m.get_movement().get_associated_issue_option(); issue) {
-								if(culture::issue_type(issue.get_parent_issue().get_issue_type()) == culture::issue_type::political
-								&& m.get_movement().get_pop_support() > max_str) {
-									max_str = m.get_movement().get_pop_support();
-								}
-							}
-						}
-						return max_str;
-					},
-					to_nation(primary_slot)) *
-					ws.defines.movement_support_uh_factor / ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
+		auto const result = ve::apply([&ws](dcon::nation_id n) {
+			auto max_str = 0.0f;
+			for(auto m : ws.world.nation_get_movement_within(n)) {
+				if(auto issue = m.get_movement().get_associated_issue_option(); issue) {
+					if(culture::issue_type(issue.get_parent_issue().get_issue_type()) == culture::issue_type::political) {
+						max_str = std::max(max_str, m.get_movement().get_pop_support());
+					}
+				}
+			}
+			return max_str;
+		}, to_nation(primary_slot));
+		return compare_values(tval[0], result
+			* ws.defines.movement_support_uh_factor
+			/ ws.world.nation_get_non_colonial_population(to_nation(primary_slot)),
 			read_float_from_payload(tval + 1));
 	}
 	TRIGGER_FUNCTION(tf_can_build_factory_in_capital_state) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		// TODO: Is this implementation correct?
+		auto const ft = trigger::payload(tval[1]).fac_id;
+		auto const result = ve::apply([&ws, ft](dcon::nation_id n) {
+			auto const cap = ws.world.nation_get_capital(n);
+			auto const sid = ws.world.province_get_state_membership(cap);
+			return !economy_factory::state_contains_factory(ws, sid, ft);
+		}, to_nation(primary_slot));
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_social_movement) {
-		return compare_to_true(tval[0], ve::apply(
-			[&ws](dcon::pop_id p) {
-				auto m = fatten(ws.world, ws.world.pop_get_movement_from_pop_movement_membership(p));
-				return m && m.get_associated_issue_option() &&
-								culture::issue_type(
-										m.get_associated_issue_option().get_parent_issue().get_issue_type()) ==
-										culture::issue_type::social;
-			},
-			to_pop(primary_slot)));
+		auto const result = ve::apply([&ws](dcon::pop_id p) {
+			auto m = fatten(ws.world, ws.world.pop_get_movement_from_pop_movement_membership(p));
+			return m && m.get_associated_issue_option()
+				&& culture::issue_type(m.get_associated_issue_option().get_parent_issue().get_issue_type())
+					== culture::issue_type::social;
+		}, to_pop(primary_slot));
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_political_movement) {
-		return compare_to_true(tval[0], ve::apply(
-			[&ws](dcon::pop_id p) {
-				auto m = fatten(ws.world, ws.world.pop_get_movement_from_pop_movement_membership(p));
-				return m && m.get_associated_issue_option() &&
-								culture::issue_type(
-										m.get_associated_issue_option().get_parent_issue().get_issue_type()) ==
-										culture::issue_type::political;
-			},
-			to_pop(primary_slot)));
+		auto const result = ve::apply([&ws](dcon::pop_id p) {
+			auto m = fatten(ws.world, ws.world.pop_get_movement_from_pop_movement_membership(p));
+			return m && m.get_associated_issue_option()
+				&& culture::issue_type(m.get_associated_issue_option().get_parent_issue().get_issue_type())
+					== culture::issue_type::political;
+		}, to_pop(primary_slot));
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_political_movement_from_reb) {
 		// returns false because I'm not sure exactly what it is supposed to do (applies to the below as well)
@@ -5250,112 +5249,120 @@ namespace trigger {
 			payload(tval[1]).signed_value);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_railroad_no_limit_from_nation) {
-		return compare_to_true(tval[0],
-			ve::to_float(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.railroad_building)) +
-							ws.world.province_get_modifier_values(to_prov(primary_slot), sys::provincial_mod_offsets::min_build_railroad) <
-					ve::to_float(ws.world.nation_get_max_building_level(to_nation(from_slot),ws.economy_definitions.railroad_building)));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, to_prov(primary_slot), to_nation(from_slot), false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_railroad_yes_limit_from_nation) {
-		return compare_to_true(tval[0],
-			ve::to_float(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.railroad_building)) +
-							ws.world.province_get_modifier_values(to_prov(primary_slot), sys::provincial_mod_offsets::min_build_railroad) <
-					ve::to_float(ws.world.nation_get_max_building_level(to_nation(from_slot),ws.economy_definitions.railroad_building)));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, to_prov(primary_slot), to_nation(from_slot), true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_railroad_no_limit_this_nation) {
-		return compare_to_true(tval[0],
-			ve::to_float(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.railroad_building)) +
-							ws.world.province_get_modifier_values(to_prov(primary_slot), sys::provincial_mod_offsets::min_build_railroad) <
-					ve::to_float(ws.world.nation_get_max_building_level(to_nation(this_slot),ws.economy_definitions.railroad_building)));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, to_prov(primary_slot), to_nation(this_slot), false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_railroad_yes_limit_this_nation) {
-		return compare_to_true(tval[0],
-			ve::to_float(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.railroad_building)) +
-							ws.world.province_get_modifier_values(to_prov(primary_slot), sys::provincial_mod_offsets::min_build_railroad) <
-					ve::to_float(ws.world.nation_get_max_building_level(to_nation(this_slot),ws.economy_definitions.railroad_building)));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, to_prov(primary_slot), to_nation(this_slot), true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_fort_no_limit_from_nation) {
-		return compare_to_true(tval[0],
-			ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.fort_building) < ws.world.nation_get_max_building_level(to_nation(from_slot), ws.economy_definitions.fort_building));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, to_prov(primary_slot), to_nation(from_slot), false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_fort_yes_limit_from_nation) {
-		return compare_to_true(tval[0],
-			ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.fort_building) < ws.world.nation_get_max_building_level(to_nation(from_slot), ws.economy_definitions.fort_building));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, to_prov(primary_slot), to_nation(from_slot), true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_fort_no_limit_this_nation) {
-		return compare_to_true(tval[0],
-			ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.fort_building) < ws.world.nation_get_max_building_level(to_nation(this_slot), ws.economy_definitions.fort_building));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, to_prov(primary_slot), to_nation(this_slot), false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_fort_yes_limit_this_nation) {
-		return compare_to_true(tval[0],
-			ws.world.province_get_building_level(to_prov(primary_slot), ws.economy_definitions.fort_building) < ws.world.nation_get_max_building_level(to_nation(this_slot), ws.economy_definitions.fort_building));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, to_prov(primary_slot), to_nation(this_slot), true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_naval_base_no_limit_from_nation) {
-		auto result = ws.world.province_get_is_coast(to_prov(primary_slot)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) <
-										ws.world.nation_get_max_building_level(to_nation(from_slot),ws.economy_definitions.naval_base_building)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) != 0 ||
-										ve::apply([&ws](dcon::state_instance_id i) { return !(military::state_has_naval_base(ws, i)); },
-												ws.world.province_get_state_membership(to_prov(primary_slot))));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.naval_base_building, to_prov(primary_slot), to_nation(from_slot), false, true);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_naval_base_yes_limit_from_nation) {
-		auto result = ws.world.province_get_is_coast(to_prov(primary_slot)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) <
-										ws.world.nation_get_max_building_level(to_nation(from_slot),ws.economy_definitions.naval_base_building)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) != 0 ||
-										ve::apply([&ws](dcon::state_instance_id i) { return !(military::state_has_naval_base(ws, i)); },
-												ws.world.province_get_state_membership(to_prov(primary_slot))));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.naval_base_building, to_prov(primary_slot), to_nation(from_slot), true, true);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_naval_base_no_limit_this_nation) {
-		auto result = ws.world.province_get_is_coast(to_prov(primary_slot)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) <
-										ws.world.nation_get_max_building_level(to_nation(this_slot),ws.economy_definitions.naval_base_building)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) != 0 ||
-										ve::apply([&ws](dcon::state_instance_id i) { return !(military::state_has_naval_base(ws, i)); },
-												ws.world.province_get_state_membership(to_prov(primary_slot))));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.naval_base_building, to_prov(primary_slot), to_nation(this_slot), false, true);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_in_province_naval_base_yes_limit_this_nation) {
-		auto result = ws.world.province_get_is_coast(to_prov(primary_slot)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) <
-										ws.world.nation_get_max_building_level(to_nation(this_slot),ws.economy_definitions.naval_base_building)) &&
-								(ws.world.province_get_building_level(to_prov(primary_slot),ws.economy_definitions.naval_base_building) != 0 ||
-										ve::apply([&ws](dcon::state_instance_id i) { return !(military::state_has_naval_base(ws, i)); },
-												ws.world.province_get_state_membership(to_prov(primary_slot))));
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.naval_base_building, to_prov(primary_slot), to_nation(this_slot), true, true);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_railway_in_capital_yes_whole_state_yes_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.naval_base_building, cap, owner, true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_railway_in_capital_yes_whole_state_no_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, cap, owner, true, false);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_railway_in_capital_no_whole_state_yes_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, cap, owner, false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_railway_in_capital_no_whole_state_no_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.railroad_building, cap, owner, false, false);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_fort_in_capital_yes_whole_state_yes_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, cap, owner, true, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_fort_in_capital_yes_whole_state_no_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, cap, owner, true, false);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_fort_in_capital_no_whole_state_yes_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, cap, owner, false, true);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_can_build_fort_in_capital_no_whole_state_no_limit) {
-		// stub: virtually unused
-		return compare_to_true(tval[0], true);
+		auto const owner = to_nation(primary_slot);
+		auto const cap = ws.world.nation_get_capital(owner);
+		auto const result = province::can_build_province_building_in_province_limit<return_type>(ws,
+			ws.economy_definitions.fort_building, cap, owner, false, false);
+		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_work_available_nation) {
 		auto type = payload(tval[1]).popt_id;

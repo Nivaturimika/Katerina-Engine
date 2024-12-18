@@ -584,31 +584,22 @@ namespace command {
 		The factory building must be unlocked by the nation.
 		Factories cannot be built in a colonial state.
 		*/
-
 		if(state.world.nation_get_active_building(source, type) == false && !state.world.factory_type_get_is_available_from_start(type))
-		return false;
+			return false;
+
 		if(state.world.province_get_is_colonial(state.world.state_instance_get_capital(location)))
-		return false;
+			return false;
 
 		/* There can't be duplicate factories... */
 		if(!is_upgrade) {
-			// Check factories being built
-			bool has_dup = false;
-		economy_factory::for_each_new_factory(state, location, [&](economy_factory::new_factory const& nf) { has_dup = has_dup || nf.type == type; });
-			if(has_dup)
-			return false;
-
-			// Check actual factories
-			auto d = state.world.state_instance_get_definition(location);
-			for(auto p : state.world.state_definition_get_abstract_state_membership(d))
-			if(p.get_province().get_nation_from_province_ownership() == owner)
-				for(auto f : p.get_province().get_factory_location())
-					if(f.get_factory().get_building_type() == type)
-						return false;
+			if(economy_factory::state_contains_factory(state, location, type)) {
+				return false;
+			}
 		}
 
-		if(state.world.nation_get_is_civilized(source) == false)
-		return false;
+		if(state.world.nation_get_is_civilized(source) == false) {
+			return false;
+		}
 
 		if(owner != source) {
 			/*
@@ -617,38 +608,37 @@ namespace command {
 			The nation being invested in must be civilized.
 			*/
 			if(state.world.nation_get_is_great_power(source) == false || state.world.nation_get_is_great_power(owner) == true)
-			return false;
+				return false;
 			if(state.world.nation_get_is_civilized(owner) == false)
-			return false;
+				return false;
 
 			auto rules = state.world.nation_get_combined_issue_rules(owner);
 			if((rules & issue_rule::allow_foreign_investment) == 0)
-			return false;
+				return false;
 
 			if(military::are_at_war(state, source, owner))
-			return false;
+				return false;
 		} else {
 			/*
 			The nation must have the rule set to allow building / upgrading if this is a domestic target.
 			*/
-
 			auto rules = state.world.nation_get_combined_issue_rules(owner);
 			if(is_upgrade) {
 				if((rules & issue_rule::expand_factory) == 0)
-				return false;
+					return false;
 			} else {
 				if((rules & issue_rule::build_factory) == 0)
-				return false;
+					return false;
 			}
 		}
 
 		if(is_upgrade) {
 			// no double upgrade
 			for(auto p : state.world.state_instance_get_state_building_construction(location)) {
-				if(p.get_type() == type)
-				return false;
+				if(p.get_type() == type) {
+					return false;
+				}
 			}
-
 			// must already exist as a factory
 			// For upgrades: no upgrading past max level.
 			auto d = state.world.state_instance_get_definition(location);
@@ -665,10 +655,10 @@ namespace command {
 		} else {
 			// coastal factories must be built on coast
 			if(state.world.factory_type_get_is_coastal(type)) {
-				if(!province::state_is_coastal(state, location))
-				return false;
+				if(!province::state_is_coastal(state, location)) {
+					return false;
+				}
 			}
-
 			int32_t num_factories = economy_factory::state_factory_count(state, location);
 			return num_factories < int32_t(state.defines.factories_per_state);
 		}
