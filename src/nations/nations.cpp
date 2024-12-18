@@ -749,12 +749,12 @@ namespace nations {
 		the capital.
 		*/
 		for(auto p : state.world.nation_get_province_ownership(n)) {
-			auto nb_rank = state.world.province_get_building_level(p.get_province(), economy::province_building_type::naval_base);
+			auto nb_rank = state.world.province_get_building_level(p.get_province(), state.economy_definitions.naval_base_building);
 			if(nb_rank > 0) {
 				if(p.get_province().get_connected_region_id() == state.world.province_get_connected_region_id(state.world.nation_get_capital(n))
 				|| p.get_province().get_is_owner_core()) {
 					if(p.get_province().get_is_owner_core()) {
-						points += float(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::naval_base)].colonial_points[nb_rank - 1]);
+						points += float(state.world.province_building_type_get_colonial_points(state.economy_definitions.naval_base_building)[nb_rank - 1]);
 					} else {
 						points += state.defines.colonial_points_for_non_core_base;
 					}
@@ -799,8 +799,8 @@ namespace nations {
 		for(auto prov : state.world.nation_get_province_ownership(n)) {
 			if(prov.get_province().get_is_colonial()) {
 				points += state.defines.colonization_colony_province_maintainance;
-				points += state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure *
-				prov.get_province().get_building_level(economy::province_building_type::railroad) * state.defines.colonization_colony_railway_maintainance;
+				points += state.world.province_building_type_get_infrastructure(state.economy_definitions.railroad_building)
+					* prov.get_province().get_building_level(state.economy_definitions.railroad_building) * state.defines.colonization_colony_railway_maintainance;
 			}
 		}
 		return points;
@@ -1231,10 +1231,11 @@ namespace nations {
 		});
 		state.world.nation_set_has_gas_attack(n, state.world.nation_get_has_gas_attack(base));
 		state.world.nation_set_has_gas_defense(n, state.world.nation_get_has_gas_defense(base));
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
+		state.world.for_each_province_building_type([&](dcon::province_building_type_id t) {
 			state.world.nation_set_max_building_level(n, t, state.world.nation_get_max_building_level(base, t));
-		}
-	state.world.nation_set_election_ends(n, sys::date{0});
+		});
+
+		state.world.nation_set_election_ends(n, sys::date{0});
 		state.world.nation_set_education_spending(n, int8_t(100));
 		state.world.nation_set_military_spending(n, int8_t(100));
 		state.world.nation_set_administrative_spending(n, int8_t(100));

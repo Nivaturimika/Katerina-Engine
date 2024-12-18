@@ -3615,42 +3615,6 @@ namespace parsers {
 			return;
 		}
 	}
-	void effect_body::province_selector(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			if(value == 1) {
-				context.compiled_effect.push_back(uint16_t(effect::add_province_modifier_no_duration));
-				context.compiled_effect.push_back(trigger::payload(economy::get_province_selector_modifier(context.outer_context.state)).value);
-			} else if(value == -1) {
-				context.compiled_effect.push_back(uint16_t(effect::remove_province_modifier));
-				context.compiled_effect.push_back(trigger::payload(economy::get_province_selector_modifier(context.outer_context.state)).value);
-			} else {
-				err.accumulated_errors +=
-				"province_selector effect with invalid value " + std::to_string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			}
-		} else {
-			err.accumulated_errors +=
-			"province_selector effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
-	void effect_body::province_immigrator(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			if(value == 1) {
-				context.compiled_effect.push_back(uint16_t(effect::add_province_modifier_no_duration));
-				context.compiled_effect.push_back(trigger::payload(economy::get_province_immigrator_modifier(context.outer_context.state)).value);
-			} else if(value == -1) {
-				context.compiled_effect.push_back(uint16_t(effect::remove_province_modifier));
-				context.compiled_effect.push_back(trigger::payload(economy::get_province_immigrator_modifier(context.outer_context.state)).value);
-			} else {
-				err.accumulated_errors +=
-				"province_immigrator effect with invalid value " + std::to_string(value) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			}
-		} else {
-			err.accumulated_errors +=
-			"province_immigrator effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
 	void effect_body::money(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_effect.push_back(uint16_t(effect::treasury));

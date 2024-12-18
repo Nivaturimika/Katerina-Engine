@@ -1001,45 +1001,45 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
-			frame = 6 - state.world.province_get_building_level(p, economy::province_building_type::railroad);
+			frame = 6 - state.world.province_get_building_level(p, state.economy_definitions.railroad_building);
 		}
 	};
 	class map_pv_fort_dots : public image_element_base {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto p = retrieve<dcon::province_id>(state, parent);
-			frame = 6 - state.world.province_get_building_level(p, economy::province_building_type::fort);
+			frame = 6 - state.world.province_get_building_level(p, state.economy_definitions.fort_building);
 		}
 	};
 
 	class map_pv_bank : public image_element_base {
-		public:
+	public:
 		sys::date last_update;
 		char cached_level = 0;
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(last_update != state.ui_date) {
-				cached_level = '0' + state.world.province_get_building_level(retrieve<dcon::province_id>(state, parent), economy::province_building_type::bank);
+				cached_level = '0' + state.world.province_get_building_level(retrieve<dcon::province_id>(state, parent), state.economy_definitions.bank_building);
 				last_update = state.ui_date;
 			}
 			image_element_base::render(state, x, y);
-		ogl::color3f color{ 0.f, 0.f, 0.f };
+			ogl::color3f color{ 0.f, 0.f, 0.f };
 			//ogl::render_text(state, &cached_level, 1, ogl::color_modification::none, float(x + 16 + 1.0f), float(y + 1.0f), color, 1);
 		}
 	};
 
 	class map_pv_university : public image_element_base {
-		public:
+	public:
 		sys::date last_update;
 		char cached_level = 0;
 
 		void render(sys::state& state, int32_t x, int32_t y) noexcept override {
 			if(last_update != state.ui_date) {
-				cached_level = '0' + state.world.province_get_building_level(retrieve<dcon::province_id>(state, parent), economy::province_building_type::university);
+				cached_level = '0' + state.world.province_get_building_level(retrieve<dcon::province_id>(state, parent), state.economy_definitions.university_building);
 				last_update = state.ui_date;
 			}
 			image_element_base::render(state, x, y);
-		ogl::color3f color{ 0.f, 0.f, 0.f };
+			ogl::color3f color{ 0.f, 0.f, 0.f };
 			//ogl::render_text(state, &cached_level, 1, ogl::color_modification::none, float(x + 16 + 1.0f), float(y + 1.0f), color, 1);
 		}
 	};
@@ -1116,7 +1116,7 @@ namespace ui {
 			} else {
 				capital_icon->set_visible(state, false);
 			}
-			if(state.world.province_get_building_level(prov, economy::province_building_type::railroad) != 0) {
+			if(state.world.province_get_building_level(prov, state.economy_definitions.railroad_building) != 0) {
 				++rows;
 				rails_icon->set_visible(state, true);
 				rails_dots->set_visible(state, true);
@@ -1124,7 +1124,7 @@ namespace ui {
 				rails_icon->set_visible(state, false);
 				rails_dots->set_visible(state, false);
 			}
-			if(state.world.province_get_building_level(prov, economy::province_building_type::fort) != 0) {
+			if(state.world.province_get_building_level(prov, state.economy_definitions.fort_building) != 0) {
 				++rows;
 				fort_icon->set_visible(state, true);
 				fort_dots->set_visible(state, true);
@@ -1132,8 +1132,8 @@ namespace ui {
 				fort_icon->set_visible(state, false);
 				fort_dots->set_visible(state, false);
 			}
-			if((state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::university)].defined && state.world.province_get_building_level(prov, economy::province_building_type::university) != 0)
-			|| (state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::bank)].defined && state.world.province_get_building_level(prov, economy::province_building_type::bank) != 0)) {
+			if((state.economy_definitions.university_building && state.world.province_get_building_level(prov, state.economy_definitions.university_building) != 0)
+			|| (state.economy_definitions.bank_building && state.world.province_get_building_level(prov, state.economy_definitions.bank_building) != 0)) {
 				++rows;
 			} else {
 				bank_icon->set_visible(state, false);
@@ -1146,43 +1146,38 @@ namespace ui {
 				capital_icon->base_data.position.x = int16_t(-10);
 				top += 16;
 			}
-			if(state.world.province_get_building_level(prov, economy::province_building_type::railroad) != 0) {
+			if(state.world.province_get_building_level(prov, state.economy_definitions.railroad_building) != 0) {
 				rails_icon->base_data.position.y = int16_t(top );
 				rails_dots->base_data.position.y = int16_t(top);
-				int32_t total_width = 18 + 2 + 3 + 4 * state.world.province_get_building_level(prov, economy::province_building_type::railroad);
+				int32_t total_width = 18 + 2 + 3 + 4 * state.world.province_get_building_level(prov, state.economy_definitions.railroad_building);
 				rails_icon->base_data.position.x = int16_t(-total_width / 2);
 				rails_dots->base_data.position.x = int16_t(20 -total_width / 2);
 				top += 16;
 			}
-			if(state.world.province_get_building_level(prov, economy::province_building_type::fort) != 0) {
+			if(state.world.province_get_building_level(prov, state.economy_definitions.fort_building) != 0) {
 				fort_icon->base_data.position.y = int16_t(top);
 				fort_dots->base_data.position.y = int16_t(top);
-				int32_t total_width = 18 + 2 + 3 + 4 * state.world.province_get_building_level(prov, economy::province_building_type::fort);
+				int32_t total_width = 18 + 2 + 3 + 4 * state.world.province_get_building_level(prov, state.economy_definitions.fort_building);
 				fort_icon->base_data.position.x = int16_t(-total_width / 2);
 				fort_dots->base_data.position.x = int16_t(20 - total_width / 2);
 				top += 16;
 			}
-			if((state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::university)].defined && state.world.province_get_building_level(prov, economy::province_building_type::university) != 0)
-			|| (state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::bank)].defined && state.world.province_get_building_level(prov, economy::province_building_type::bank) != 0)) {
-
-
-				if((state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::university)].defined && state.world.province_get_building_level(prov, economy::province_building_type::university) != 0)
-				&& (state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::bank)].defined && state.world.province_get_building_level(prov, economy::province_building_type::bank) != 0)) {
-
+			if((state.economy_definitions.university_building && state.world.province_get_building_level(prov, state.economy_definitions.university_building) != 0)
+			|| (state.economy_definitions.bank_building && state.world.province_get_building_level(prov, state.economy_definitions.bank_building) != 0)) {
+				if((state.economy_definitions.university_building && state.world.province_get_building_level(prov, state.economy_definitions.university_building) != 0)
+				&& (state.economy_definitions.bank_building && state.world.province_get_building_level(prov, state.economy_definitions.bank_building) != 0)) {
 					unv_icon->base_data.position.y = int16_t(top);
 					unv_icon->base_data.position.x = int16_t(0);
 					bank_icon->base_data.position.y = int16_t(top);
 					bank_icon->base_data.position.x = int16_t(-32);
 					bank_icon->set_visible(state, true);
 					unv_icon->set_visible(state, true);
-				} else if(state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::university)].defined && state.world.province_get_building_level(prov, economy::province_building_type::university) != 0) {
-
+				} else if(state.economy_definitions.university_building && state.world.province_get_building_level(prov, state.economy_definitions.university_building) != 0) {
 					unv_icon->base_data.position.y = int16_t(top);
 					unv_icon->base_data.position.x = int16_t(-16);
 					bank_icon->set_visible(state, false);
 					unv_icon->set_visible(state, true);
-				} else if(state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::bank)].defined && state.world.province_get_building_level(prov, economy::province_building_type::bank) != 0) {
-
+				} else if(state.economy_definitions.bank_building && state.world.province_get_building_level(prov, state.economy_definitions.bank_building) != 0) {
 					bank_icon->base_data.position.y = int16_t(top);
 					bank_icon->base_data.position.x = int16_t(-16);
 					bank_icon->set_visible(state, true);

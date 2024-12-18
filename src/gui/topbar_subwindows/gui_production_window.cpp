@@ -83,13 +83,13 @@ namespace ui {
 			float atotal = 0.0f;
 			float ap_total = 0.0f;
 			province::for_each_province_in_state_instance(state, a, [&](dcon::province_id p) {
-				atotal += float(state.world.province_get_building_level(p, economy::province_building_type::railroad));
+				atotal += float(state.world.province_get_building_level(p, state.economy_definitions.railroad_building));
 				ap_total += 1.0f;
 			});
 			float btotal = 0.0f;
 			float bp_total = 0.0f;
 			province::for_each_province_in_state_instance(state, b, [&](dcon::province_id p) {
-				btotal += float(state.world.province_get_building_level(p, economy::province_building_type::railroad));
+				btotal += float(state.world.province_get_building_level(p, state.economy_definitions.railroad_building));
 				bp_total += 1.0f;
 			});
 			auto av = ap_total > 0.f ? atotal / ap_total : 0.f;

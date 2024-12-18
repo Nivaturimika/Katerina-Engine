@@ -3,6 +3,17 @@
 #include <iterator>
 #include "container_types.hpp"
 
+namespace economy {
+	std::string_view province_building_type_get_key(sys::state& state, dcon::province_building_type_id t) {
+		if(state.economy_definitions.fort_building == t) {
+			return "fort";
+		} else if(state.economy_definitions.naval_base_building == t) {
+			return "naval_base";
+		}
+		return "railroad";
+	}
+}
+
 namespace parsers {
 	void default_map_file::max_provinces(association_type, int32_t value, error_handler& err, int32_t line,
 		scenario_building_context& context) {
@@ -401,8 +412,8 @@ namespace parsers {
 	}
 
 	void province_history_file::any_value(std::string_view name, association_type, uint32_t value, error_handler& err, int32_t line, province_file_context& context) {
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-			if(name == economy::province_building_type_get_name(t)) {
+		for(const auto t : context.outer_context.state.world.in_province_building_type) {
+			if(name == economy::province_building_type_get_key(context.outer_context.state, t)) {
 				context.outer_context.state.world.province_set_building_level(context.id, t, uint8_t(value));
 				return;
 			}
@@ -517,7 +528,7 @@ namespace parsers {
 					return;
 				}
 				auto p = context.original_id_to_prov_id_map[parsers::parse_int(provid_text, 0, err)];
-			province_file_context province_context{ context, p };
+				province_file_context province_context{ context, p, std::vector<std::pair<sys::date, token_generator>>() };
 				if(!owner_text.empty()) {
 					f.owner(parsers::association_type::eq_default, parsers::parse_tag(owner_text, 0, err), err, 0, province_context);
 				}

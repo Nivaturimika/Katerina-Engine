@@ -17,58 +17,32 @@ namespace parsers {
 	}
 	void make_goods_group(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {
 		if(name == "military_goods") {
-		good_group_context new_context{sys::commodity_group::military_goods, context};
+			good_group_context new_context{sys::commodity_group::military_goods, context};
 			parse_goods_group(gen, err, new_context);
 		} else if(name == "raw_material_goods") {
-		good_group_context new_context{sys::commodity_group::raw_material_goods, context};
+			good_group_context new_context{sys::commodity_group::raw_material_goods, context};
 			parse_goods_group(gen, err, new_context);
 		} else if(name == "industrial_goods") {
-		good_group_context new_context{sys::commodity_group::industrial_goods, context};
+			good_group_context new_context{sys::commodity_group::industrial_goods, context};
 			parse_goods_group(gen, err, new_context);
 		} else if(name == "consumer_goods") {
-		good_group_context new_context{sys::commodity_group::consumer_goods, context};
+			good_group_context new_context{sys::commodity_group::consumer_goods, context};
 			parse_goods_group(gen, err, new_context);
 			// Non-vanilla
 		} else if(name == "industrial_and_consumer_goods") {
-		good_group_context new_context{ sys::commodity_group::industrial_and_consumer_goods, context };
+			good_group_context new_context{ sys::commodity_group::industrial_and_consumer_goods, context };
 			parse_goods_group(gen, err, new_context);
 		} else {
 			err.accumulated_errors += "Unknown goods category " + std::string(name) + " found in " + err.file_name + "\n";
-		good_group_context new_context{sys::commodity_group::military_goods, context};
+			good_group_context new_context{sys::commodity_group::military_goods, context};
 			parse_goods_group(gen, err, new_context);
 		}
 	}
 
-	void building_definition::type(association_type, std::string_view value, error_handler& err, int32_t line, scenario_building_context& context) {
-		if(is_fixed_token_ci(value.data(), value.data() + value.length(), "factory")) {
-			stored_type = economy::province_building_type::factory;
-		} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "province_selector")) {
-			// Not a building, all data for it is discarded!
-			stored_type = economy::province_building_type::province_selector;
-		} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "immigrator")
-		|| is_fixed_token_ci(value.data(), value.data() + value.length(), "immigrator_selector")
-		|| is_fixed_token_ci(value.data(), value.data() + value.length(), "province_immigrator")) {
-			// Not a building, all data for it is discarded!
-			stored_type = economy::province_building_type::province_immigrator;
-		} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "infrastructure")) {
-			stored_type = economy::province_building_type::railroad;
-		} else {
-			for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-				if(std::string(value) == economy::province_building_type_get_name(t)) {
-					stored_type = t;
-					return;
-				}
-			}
-			err.accumulated_errors +=
-			"Unknown building type " + std::string(value) + " in file " + err.file_name + " line " + std::to_string(line) + "\n";
-		}
-	}
-
-	void building_file::result(std::string_view name, building_definition&& res, error_handler& err, int32_t line,
-		scenario_building_context& context) {
+	void building_file::result(std::string_view name, building_definition&& res, error_handler& err, int32_t line, scenario_building_context& context) {
 		// no, this messes things up
 		// res.goods_cost.data.safe_get(dcon::commodity_id(0)) = float(res.cost);
-		if(res.stored_type == economy::province_building_type::factory) {
+		if(res.type == "factory") {
 			auto factory_id = context.state.world.create_factory_type();
 			context.map_of_factory_names.insert_or_assign(std::string(name), factory_id);
 
@@ -99,21 +73,12 @@ namespace parsers {
 			if(res.production_type.length() > 0) {
 				context.map_of_production_types.insert_or_assign(std::string(res.production_type), factory_id);
 			}
-		} else if(res.stored_type == economy::province_building_type::province_selector) {
-			// Not a building per se, rather we will do what the modders intended this to be!
-			context.state.economy_definitions.selector_modifier = context.state.world.create_modifier();
-		} else if(res.stored_type == economy::province_building_type::province_immigrator) {
-			// Not a building per se, rather we will do what the modders intended this to be!
-			context.state.economy_definitions.immigrator_modifier = context.state.world.create_modifier();
 		} else {
-			auto t = res.stored_type;
-
-			context.state.economy_definitions.building_definitions[int32_t(t)].defined = true; // Is defined now!
-
-			for(uint32_t i = 0; i < 8 && i < res.colonial_points.data.size(); ++i)
-			context.state.economy_definitions.building_definitions[int32_t(t)].colonial_points[i] = res.colonial_points.data[i];
-			context.state.economy_definitions.building_definitions[int32_t(t)].colonial_range = res.colonial_range;
-
+			std::array<uint8_t, 8> colonial_points;
+			for(uint32_t i = 0; i < 8 && i < res.colonial_points.data.size(); ++i) {
+				colonial_points[i] = res.colonial_points.data[i];
+			}
+			economy::commodity_set cost;
 			uint32_t added = 0;
 			context.state.world.for_each_commodity([&](dcon::commodity_id id) {
 				auto amount = res.goods_cost.data.safe_get(id);
@@ -121,26 +86,43 @@ namespace parsers {
 					if(added >= economy::commodity_set::set_size) {
 						err.accumulated_warnings += "Too many special building cost goods in " + std::string(name) + " (" + err.file_name + ")\n";
 					} else {
-						context.state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_type[added] = id;
-						context.state.economy_definitions.building_definitions[int32_t(t)].cost.commodity_amounts[added] = amount;
+						cost.commodity_type[added] = id;
+						cost.commodity_amounts[added] = amount;
 						++added;
 					}
 				}
 			});
-			context.state.economy_definitions.building_definitions[int32_t(t)].infrastructure = res.infrastructure;
-			context.state.economy_definitions.building_definitions[int32_t(t)].max_level = res.max_level;
-			context.state.economy_definitions.building_definitions[int32_t(t)].time = res.time;
-			context.state.economy_definitions.building_definitions[int32_t(t)].name = text::find_or_add_key(context.state, name, false);
+
+			auto id = context.state.world.create_province_building_type();
+			auto const name_k = text::find_or_add_key(context.state, name, false);
+			context.state.world.province_building_type_set_colonial_points(id, colonial_points);
+			context.state.world.province_building_type_set_colonial_range(id, res.colonial_range);
+			context.state.world.province_building_type_set_cost(id, cost);
+			context.state.world.province_building_type_set_infrastructure(id, res.infrastructure);
+			context.state.world.province_building_type_set_max_level(id, res.max_level);
+			context.state.world.province_building_type_set_time(id, res.time);
+			context.state.world.province_building_type_set_name(id, name_k);
 			if(res.next_to_add_p != 0) {
-				context.state.economy_definitions.building_definitions[int32_t(t)].province_modifier = context.state.world.create_modifier();
-				context.state.world.modifier_set_province_values(context.state.economy_definitions.building_definitions[int32_t(t)].province_modifier,
-					res.peek_province_mod());
-				context.state.world.modifier_set_national_values(context.state.economy_definitions.building_definitions[int32_t(t)].province_modifier,
-					res.peek_national_mod());
-				context.state.world.modifier_set_icon(context.state.economy_definitions.building_definitions[int32_t(t)].province_modifier,
-					uint8_t(res.icon_index));
-				context.state.world.modifier_set_name(context.state.economy_definitions.building_definitions[int32_t(t)].province_modifier,
-					context.state.economy_definitions.building_definitions[int32_t(t)].name);
+				auto const pmod = context.state.world.create_modifier();
+				context.state.world.modifier_set_province_values(pmod, res.peek_province_mod());
+				context.state.world.modifier_set_national_values(pmod, res.peek_national_mod());
+				context.state.world.modifier_set_icon(pmod, uint8_t(res.icon_index));
+				context.state.world.modifier_set_name(pmod, name_k);
+				context.state.world.province_building_type_set_province_modifier(id, pmod);
+			}
+
+			if(res.type == "fort") {
+				context.state.economy_definitions.fort_building = id;
+			} else if(res.type == "naval_base") {
+				context.state.economy_definitions.naval_base_building = id;
+			} else if(res.type == "infrastructure") {
+				context.state.economy_definitions.railroad_building = id;
+			} else if(res.type == "bank") {
+				context.state.economy_definitions.bank_building = id;
+			} else if(res.type == "university") {
+				context.state.economy_definitions.university_building = id;
+			} else {
+				err.accumulated_warnings += "Unsupported building type" + res.type + " (" + err.file_name + ")\n";
 			}
 		}
 	}

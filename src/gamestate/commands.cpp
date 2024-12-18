@@ -96,8 +96,6 @@ namespace command {
 	GS_COMMAND_LIST_ENTRY(toggle_hunt_rebels, army_movement) \
 	GS_COMMAND_LIST_ENTRY(toggle_unit_ai_control, army_movement) \
 	GS_COMMAND_LIST_ENTRY(toggle_mobilized_is_ai_controlled, no_data) \
-	GS_COMMAND_LIST_ENTRY(toggle_select_province, generic_location) \
-	GS_COMMAND_LIST_ENTRY(toggle_immigrator_province, generic_location) \
 	GS_COMMAND_LIST_ENTRY(release_subject, diplo_action) \
 	GS_COMMAND_LIST_ENTRY(even_split_army, army_movement) \
 	GS_COMMAND_LIST_ENTRY(even_split_navy, navy_movement) \
@@ -487,7 +485,7 @@ namespace command {
 		});
 	}
 
-	void begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id prov, economy::province_building_type type) {
+	void begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id prov, dcon::province_building_type_id type) {
 		payload p{};
 		p.type = command_type::begin_province_building_construction;
 		p.source = source;
@@ -495,50 +493,44 @@ namespace command {
 		p.data.start_province_building.type = type;
 		add_to_command_queue(state, p);
 	}
-	bool can_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, economy::province_building_type type) {
-
-		switch(type) {
-			case economy::province_building_type::railroad:
+	bool can_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, dcon::province_building_type_id type) {
+		if(type == state.economy_definitions.railroad_building) {
 			return province::can_build_railroads(state, p, source);
-			case economy::province_building_type::fort:
+		} else if(type == state.economy_definitions.fort_building) {
 			return province::can_build_fort(state, p, source);
-			case economy::province_building_type::naval_base:
+		} else if(type == state.economy_definitions.naval_base_building) {
 			return province::can_build_naval_base(state, p, source);
-			case economy::province_building_type::bank:
-			case economy::province_building_type::university:
-			case economy::province_building_type::urban_center:
-			case economy::province_building_type::farmland:
-			case economy::province_building_type::mine:
-			return province::can_build_province_building(state, p, source, type);
-			default:
-			return false;
 		}
+		return province::can_build_province_building(state, p, source, type);
 	}
-	void execute_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, economy::province_building_type type) {
-		if(type == economy::province_building_type::naval_base) {
+	void execute_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, dcon::province_building_type_id type) {
+		if(type == state.economy_definitions.naval_base_building) {
 			auto si = state.world.province_get_state_membership(p);
 			if(si) {
 				si.set_naval_base_is_taken(true);
 			}
 		}
 
-		if(type != economy::province_building_type::fort && type != economy::province_building_type::naval_base && source != state.world.province_get_nation_from_province_ownership(p)) {
-			float amount = 0.0f;
-			auto& base_cost = state.economy_definitions.building_definitions[int32_t(type)].cost;
-			for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
-				if(base_cost.commodity_type[j]) {
-					amount += base_cost.commodity_amounts[j] * state.world.commodity_get_cost(base_cost.commodity_type[j]); //base cost
-				} else {
-					break;
+		// foreign investment
+		if(source != state.world.province_get_nation_from_province_ownership(p)) {
+			if(type != state.economy_definitions.fort_building && type != state.economy_definitions.naval_base_building) {
+				auto amount = 0.0f;
+				auto const& base_cost = state.world.province_building_type_get_cost(type);
+				for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
+					if(base_cost.commodity_type[j]) {
+						amount += base_cost.commodity_amounts[j] * state.world.commodity_get_cost(base_cost.commodity_type[j]); //base cost
+					} else {
+						break;
+					}
 				}
+				nations::adjust_foreign_investment(state, source, state.world.province_get_nation_from_province_ownership(p), amount);
 			}
-			nations::adjust_foreign_investment(state, source, state.world.province_get_nation_from_province_ownership(p), amount);
 		}
 
 		auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(p, source));
-		new_rr.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(type)].time);
+		new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(type));
 		new_rr.set_is_pop_project(false);
-		new_rr.set_type(uint8_t(type));
+		new_rr.set_type(type);
 	}
 
 
@@ -745,7 +737,7 @@ namespace command {
 			auto overseas_allowed = state.military_definitions.unit_base_definitions[type].can_build_overseas;
 			auto level_req = state.military_definitions.unit_base_definitions[type].min_port_level;
 
-			if(state.world.province_get_building_level(location, economy::province_building_type::naval_base) < level_req)
+			if(state.world.province_get_building_level(location, state.economy_definitions.naval_base_building) < level_req)
 			return false;
 
 			if(!overseas_allowed && province::is_overseas(state, location))
@@ -3643,42 +3635,6 @@ namespace command {
 		state.world.nation_set_mobilized_is_ai_controlled(source, !state.world.nation_get_mobilized_is_ai_controlled(source));
 	}
 
-	void toggle_select_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-		payload p{};
-		p.type = command_type::toggle_select_province;
-		p.source = source;
-		p.data.generic_location.prov = prov;
-		add_to_command_queue(state, p);
-	}
-	bool can_toggle_select_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-		if(state.world.province_get_nation_from_province_control(prov) != source)
-		return false;
-		if(state.world.province_get_nation_from_province_ownership(prov) != source)
-		return false;
-		return true;
-	}
-	void execute_toggle_select_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-	sys::toggle_modifier_from_province(state, prov, state.economy_definitions.selector_modifier, sys::date{});
-	}
-
-	void toggle_immigrator_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-		payload p{};
-		p.type = command_type::toggle_immigrator_province;
-		p.source = source;
-		p.data.generic_location.prov = prov;
-		add_to_command_queue(state, p);
-	}
-	bool can_toggle_immigrator_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-		if(state.world.province_get_nation_from_province_control(prov) != source)
-		return false;
-		if(state.world.province_get_nation_from_province_ownership(prov) != source)
-		return false;
-		return true;
-	}
-	void execute_toggle_immigrator_province(sys::state& state, dcon::nation_id source, dcon::province_id prov) {
-	sys::toggle_modifier_from_province(state, prov, state.economy_definitions.immigrator_modifier, sys::date{});
-	}
-
 	void release_subject(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		payload p{};
 		p.type = command_type::release_subject;
@@ -3691,7 +3647,7 @@ namespace command {
 	}
 	void execute_release_subject(sys::state& state, dcon::nation_id source, dcon::nation_id target) {
 		if(!can_release_subject(state, source, target))
-		return;
+			return;
 		nations::release_vassal(state, state.world.nation_get_overlord_as_subject(target));
 	}
 
@@ -4919,12 +4875,6 @@ namespace command {
 		case command_type::toggle_hunt_rebels:
 			return true; //can_toggle_rebel_hunting(state, c.source, c.data.army_movement.a);
 
-		case command_type::toggle_select_province:
-			return can_toggle_select_province(state, c.source, c.data.generic_location.prov);
-
-		case command_type::toggle_immigrator_province:
-			return can_toggle_immigrator_province(state, c.source, c.data.generic_location.prov);
-
 		case command_type::state_transfer:
 			return can_state_transfer(state, c.source, c.data.state_transfer.target, c.data.state_transfer.state);
 
@@ -5319,12 +5269,6 @@ namespace command {
 			break;
 		case command_type::toggle_hunt_rebels:
 			execute_toggle_rebel_hunting(state, c.source, c.data.army_movement.a);
-			break;
-		case command_type::toggle_select_province:
-			execute_toggle_select_province(state, c.source, c.data.generic_location.prov);
-			break;
-		case command_type::toggle_immigrator_province:
-			execute_toggle_immigrator_province(state, c.source, c.data.generic_location.prov);
 			break;
 		case command_type::state_transfer:
 			execute_state_transfer(state, c.source, c.data.state_transfer.target, c.data.state_transfer.state);

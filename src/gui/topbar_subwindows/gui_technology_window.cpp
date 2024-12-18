@@ -283,14 +283,14 @@ namespace ui {
 			text::add_line(state, contents, "may_gas_defend", indent);
 		}
 
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
+		for(const auto t : state.world.in_province_building_type) {
 			auto increase_building = iid.get_increase_building(t);
 			if(increase_building) {
 				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, economy::province_building_type_get_name(t)), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, t.get_name(), text::text_color::white);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "tech_max_level"), text::text_color::white);
-			text::add_to_layout_box(state, contents, box, std::string_view{ ":" }, text::text_color::white);
+				text::add_to_layout_box(state, contents, box, std::string_view{ ":" }, text::text_color::white);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "+1"), text::text_color::green);
 				text::close_layout_box(contents, box);
@@ -400,11 +400,11 @@ namespace ui {
 			modifier_description(state, contents, mod_id);
 		}
 
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
+		for(const auto t : state.world.in_province_building_type) {
 			auto increase_building = tech_fat_id.get_increase_building(t);
 			if(increase_building) {
 				auto box = text::open_layout_box(contents, 0);
-				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, economy::province_building_type_get_name(t)), text::text_color::white);
+				text::add_to_layout_box(state, contents, box, t.get_name(), text::text_color::white);
 				text::add_space_to_layout_box(state, contents, box);
 				text::add_to_layout_box(state, contents, box, text::produce_simple_string(state, "tech_max_level"), text::text_color::white);
 				text::add_to_layout_box(state, contents, box, std::string_view{":"}, text::text_color::white);

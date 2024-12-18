@@ -4530,33 +4530,18 @@ namespace parsers {
 			}
 		} else if(context.main_slot == trigger::slot_contents::province) {
 			if(is_fixed_token_ci(value.data(), value.data() + value.length(), "fort")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_fort | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_fort | trigger::no_payload | association_to_bool_code(a)));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "railroad")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_railroad | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_railroad | trigger::no_payload | association_to_bool_code(a)));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "naval_base")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_naval_base | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_naval_base | trigger::no_payload | association_to_bool_code(a)));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "bank")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_bank | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_bank | trigger::no_payload | association_to_bool_code(a)));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "university")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_university | trigger::no_payload | association_to_bool_code(a)));
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_university | trigger::no_payload | association_to_bool_code(a)));
 			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "factory")) {
-				context.compiled_trigger.push_back(
-					uint16_t(trigger::has_building_factory_from_province | trigger::no_payload | association_to_bool_code(a)));
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "province_selector")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_province_modifier | association_to_bool_code(a)));
-				context.compiled_trigger.push_back(trigger::payload(economy::get_province_selector_modifier(context.outer_context.state)).value);
-			} else if(is_fixed_token_ci(value.data(), value.data() + value.length(), "immigrator")
-			|| is_fixed_token_ci(value.data(), value.data() + value.length(), "immigrator_selector")
-			|| is_fixed_token_ci(value.data(), value.data() + value.length(), "province_immigrator")) {
-				context.compiled_trigger.push_back(uint16_t(trigger::has_province_modifier | association_to_bool_code(a)));
-				context.compiled_trigger.push_back(trigger::payload(economy::get_province_immigrator_modifier(context.outer_context.state)).value);
-			} else if(auto it = context.outer_context.map_of_factory_names.find(std::string(value));
-							it != context.outer_context.map_of_factory_names.end()) {
+				context.compiled_trigger.push_back(uint16_t(trigger::has_building_factory_from_province | trigger::no_payload | association_to_bool_code(a)));
+			} else if(auto it = context.outer_context.map_of_factory_names.find(std::string(value)); it != context.outer_context.map_of_factory_names.end()) {
 				context.compiled_trigger.push_back(uint16_t(trigger::has_building_state_from_province | association_to_bool_code(a)));
 				context.compiled_trigger.push_back(trigger::payload(it->second).value);
 			} else {

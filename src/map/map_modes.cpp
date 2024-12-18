@@ -235,11 +235,11 @@ std::vector<uint32_t> infrastructure_map_from(sys::state& state) {
 	uint32_t province_size = state.world.province_size();
 	uint32_t texture_size = province_size + 256 - province_size % 256;
 	std::vector<uint32_t> prov_color(texture_size * 2);
-	int32_t max_rails_lvl = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].max_level;
+	int32_t max_rails_lvl = state.world.province_building_type_get_max_level(state.economy_definitions.railroad_building);
 	province::for_each_land_province(state, [&](dcon::province_id prov_id) {
 		auto nation = state.world.province_get_nation_from_province_ownership(prov_id);
-		int32_t current_rails_lvl = state.world.province_get_building_level(prov_id, economy::province_building_type::railroad);
-		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(state.local_player_nation, economy::province_building_type::railroad);
+		int32_t current_rails_lvl = state.world.province_get_building_level(prov_id, state.economy_definitions.railroad_building);
+		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(state.local_player_nation, state.economy_definitions.railroad_building);
 		bool party_allows_building_railroads =
 			(nation == state.local_player_nation && (state.world.nation_get_combined_issue_rules(nation) & issue_rule::build_railway) != 0) ||
 			(nation != state.local_player_nation && (state.world.nation_get_combined_issue_rules(nation) & issue_rule::allow_foreign_investment) != 0);
@@ -516,14 +516,14 @@ std::vector<uint32_t> naval_map_from(sys::state& state) {
 				color = 0x00FF00;
 				stripe_color = 0x005500;
 			} else if(province::can_build_naval_base(state, prov_id, state.local_player_nation)) {
-				if(state.world.province_get_building_level(prov_id, economy::province_building_type::naval_base) != 0) {
+				if(state.world.province_get_building_level(prov_id, state.economy_definitions.naval_base_building) != 0) {
 					color = 0x00FF00;
 					stripe_color = 0x00FF00;
 				} else {
 					color = sys::pack_color(50, 150, 200);
 					stripe_color = sys::pack_color(50, 150, 200);
 				}
-			} else if(state.world.province_get_building_level(prov_id, economy::province_building_type::naval_base) != 0) {
+			} else if(state.world.province_get_building_level(prov_id, state.economy_definitions.naval_base_building) != 0) {
 				color = 0x005500;
 				stripe_color = 0x005500;
 			} else { // no naval base, not build target
@@ -1431,11 +1431,11 @@ std::vector<uint32_t> fort_map_from(sys::state& state) {
 	uint32_t province_size = state.world.province_size();
 	uint32_t texture_size = province_size + 256 - province_size % 256;
 	std::vector<uint32_t> prov_color(texture_size * 2);
-	int32_t max_lvl = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::fort)].max_level;
+	int32_t max_lvl = state.world.province_building_type_get_max_level(state.economy_definitions.fort_building);
 	province::for_each_land_province(state, [&](dcon::province_id prov_id) {
 		auto nation = state.world.province_get_nation_from_province_ownership(prov_id);
-		int32_t current_lvl = state.world.province_get_building_level(prov_id, economy::province_building_type::fort);
-		int32_t max_local_lvl = state.world.nation_get_max_building_level(state.local_player_nation, economy::province_building_type::fort);
+		int32_t current_lvl = state.world.province_get_building_level(prov_id, state.economy_definitions.fort_building);
+		int32_t max_local_lvl = state.world.nation_get_max_building_level(state.local_player_nation, state.economy_definitions.fort_building);
 		uint32_t color = 0x222222;
 		uint32_t stripe_color = 0x222222;
 

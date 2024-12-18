@@ -95,18 +95,16 @@ namespace command {
 		even_split_army = 86,
 		even_split_navy = 87,
 		toggle_hunt_rebels = 88,
-		toggle_select_province = 89,
-		toggle_immigrator_province = 90,
-		state_transfer = 91,
-		release_subject = 92,
-		enable_debt = 93,
-		toggle_unit_ai_control = 95,
-		toggle_mobilized_is_ai_controlled = 96,
-		pbutton_script = 97,
-		nbutton_script = 98,
-		toggle_auto_create_generals = 99,
-		toggle_auto_assign_leaders = 100,
-		toggle_auto_assign_single_leader = 101,
+		state_transfer = 89,
+		release_subject = 90,
+		enable_debt = 91,
+		toggle_unit_ai_control = 92,
+		toggle_mobilized_is_ai_controlled = 93,
+		pbutton_script = 94,
+		nbutton_script = 95,
+		toggle_auto_create_generals = 96,
+		toggle_auto_assign_leaders = 97,
+		toggle_auto_assign_single_leader = 98,
 
 		// network
 		notify_player_ban = 106,
@@ -184,7 +182,7 @@ namespace command {
 
 	struct province_building_data {
 		dcon::province_id location;
-		economy::province_building_type type;
+		dcon::province_building_type_id type;
 	};
 
 	struct factory_building_data {
@@ -585,9 +583,9 @@ namespace command {
 	bool can_decrease_relations(sys::state& state, dcon::nation_id source, dcon::nation_id target);
 	void execute_decrease_relations(sys::state& state, dcon::nation_id source, dcon::nation_id target);
 
-	void begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, economy::province_building_type type);
-	bool can_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, economy::province_building_type type);
-	void execute_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, economy::province_building_type type);
+	void begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, dcon::province_building_type_id type);
+	bool can_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, dcon::province_building_type_id type);
+	void execute_begin_province_building_construction(sys::state& state, dcon::nation_id source, dcon::province_id p, dcon::province_building_type_id type);
 
 	void begin_factory_building_construction(sys::state& state, dcon::nation_id source, dcon::state_instance_id location, dcon::factory_type_id type, bool is_upgrade);
 	bool can_begin_factory_building_construction(sys::state& state, dcon::nation_id source, dcon::state_instance_id location, dcon::factory_type_id type, bool is_upgrade);
@@ -882,12 +880,6 @@ namespace command {
 	void send_crisis_peace_offer(sys::state& state, dcon::nation_id source);
 	bool can_send_crisis_peace_offer(sys::state& state, dcon::nation_id source);
 	void execute_send_crisis_peace_offer(sys::state& state, dcon::nation_id source);
-
-	void toggle_select_province(sys::state& state, dcon::nation_id source, dcon::province_id p);
-	bool can_toggle_select_province(sys::state& state, dcon::nation_id source, dcon::province_id p);
-
-	void toggle_immigrator_province(sys::state& state, dcon::nation_id source, dcon::province_id prov);
-	bool can_toggle_immigrator_province(sys::state& state, dcon::nation_id source, dcon::province_id prov);
 
 	void chat_message(sys::state& state, dcon::nation_id source, std::string_view body, dcon::nation_id target);
 	bool can_chat_message(sys::state& state, dcon::nation_id source, std::string_view body, dcon::nation_id target);

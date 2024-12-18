@@ -3703,24 +3703,6 @@ custom_tooltip = {
 - **Scopes**: Any
 - **Comments**: Forward whatever is in the current scope to be "bounced" to `THIS`, until the end of this scope
 
-### `province_immigrator = <n>`
-
-- **Version**: 0.1.0
-- **Scopes**: Province
-- **Comments**: Can only be `1` or `-1`. This is the "province selector" used in various mods.
-
-### `immigrator = <n>`
-
-- **Version**: 0.1.0
-- **Scopes**: Province
-- **Comments**: Can only be `1` or `-1`. This is the "province selector" used in various mods.
-
-### `immigrator_selector = <n>`
-
-- **Version**: 0.1.0
-- **Scopes**: Province
-- **Comments**: Can only be `1` or `-1`. This is the "province selector" used in various mods.
-
 ### `if = { ... }`
 
 - **Version**: 0.1.0

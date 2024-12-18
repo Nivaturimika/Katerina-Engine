@@ -4,6 +4,10 @@
 #include "fonts.hpp"
 #include "defines.hpp"
 
+namespace economy {
+	std::string_view province_building_type_get_key(sys::state& state, dcon::province_building_type_id t);
+}
+
 namespace parsers {
 	float parse_constant(std::string_view v, int32_t line, error_handler& err, scenario_building_context& context) {
 		if(false) { /* ... */ }
@@ -1564,8 +1568,7 @@ namespace parsers {
 		context.outer_context.state.world.technology_set_cost(context.id, value);
 	}
 
-	void technology_contents::area(association_type, std::string_view value, error_handler& err, int32_t line,
-		tech_context& context) {
+	void technology_contents::area(association_type, std::string_view value, error_handler& err, int32_t line, tech_context& context) {
 		if(auto it = context.outer_context.map_of_tech_folders.find(std::string(value));
 			it != context.outer_context.map_of_tech_folders.end()) {
 			context.outer_context.state.world.technology_set_folder_index(context.id, uint8_t(it->second));
@@ -1574,48 +1577,42 @@ namespace parsers {
 		}
 	}
 
-	void technology_contents::colonial_points(association_type, int32_t value, error_handler& err, int32_t line,
-		tech_context& context) {
+	void technology_contents::colonial_points(association_type, int32_t value, error_handler& err, int32_t line, tech_context& context) {
 		context.outer_context.state.world.technology_set_colonial_points(context.id, int16_t(value));
 	}
 
-	void technology_contents::activate_unit(association_type, std::string_view value, error_handler& err, int32_t line,
-		tech_context& context) {
+	void technology_contents::activate_unit(association_type, std::string_view value, error_handler& err, int32_t line, tech_context& context) {
 		if(auto it = context.outer_context.map_of_unit_types.find(std::string(value));
 			it != context.outer_context.map_of_unit_types.end()) {
 			context.outer_context.state.world.technology_set_activate_unit(context.id, it->second, true);
 		} else {
-			err.accumulated_errors +=
-				"Invalid unit type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid unit type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 
-	void technology_contents::activate_building(association_type, std::string_view value, error_handler& err, int32_t line,
-		tech_context& context) {
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-			if(std::string(value) == economy::province_building_type_get_name(t)) {
+	void technology_contents::activate_building(association_type, std::string_view value, error_handler& err, int32_t line, tech_context& context) {
+		for(const auto t : context.outer_context.state.world.in_province_building_type) {
+			if(std::string(value) == economy::province_building_type_get_key(context.outer_context.state, t)) {
 				context.outer_context.state.world.technology_set_increase_building(context.id, t, true);
 				return;
 			}
 		}
-
 		if(auto it = context.outer_context.map_of_factory_names.find(std::string(value));
-						it != context.outer_context.map_of_factory_names.end()) {
+			it != context.outer_context.map_of_factory_names.end()) {
 			context.outer_context.state.world.technology_set_activate_building(context.id, it->second, true);
 		} else {
-			err.accumulated_errors +=
-				"Invalid factory type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid factory type " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 
 	void technology_contents::any_value(std::string_view name, association_type, int32_t value, error_handler& err, int32_t line, tech_context& context) {
 		if(has_fixed_prefix_ci(name.data(), name.data() + name.length(), "max_")) {
-			for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-				if(std::string(name).substr(4) == economy::province_building_type_get_name(t)) {
+			for(const auto t : context.outer_context.state.world.in_province_building_type) {
+				if(std::string(name).substr(4) == economy::province_building_type_get_key(context.outer_context.state, t)) {
 					if(value == 1) {
 						context.outer_context.state.world.technology_set_increase_building(context.id, t, true);
 					} else {
-						err.accumulated_errors += "max_" + std::string(economy::province_building_type_get_name(t)) + " may only be 1 (" + err.file_name + " line " + std::to_string(line) + ")\n";
+						err.accumulated_errors += "max_" + std::string(economy::province_building_type_get_key(context.outer_context.state, t)) + " may only be 1 (" + err.file_name + " line " + std::to_string(line) + ")\n";
 					}
 					return;
 				}
@@ -1686,8 +1683,7 @@ namespace parsers {
 		}
 	}
 
-	void inv_effect::activate_unit(association_type, std::string_view value, error_handler& err, int32_t line,
-		invention_context& context) {
+	void inv_effect::activate_unit(association_type, std::string_view value, error_handler& err, int32_t line, invention_context& context) {
 		if(auto it = context.outer_context.map_of_unit_types.find(std::string(value));
 			it != context.outer_context.map_of_unit_types.end()) {
 			context.outer_context.state.world.invention_set_activate_unit(context.id, it->second, true);
@@ -1698,8 +1694,8 @@ namespace parsers {
 	}
 
 	void inv_effect::activate_building(association_type, std::string_view value, error_handler& err, int32_t line, invention_context& context) {
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-			if(std::string(value) == economy::province_building_type_get_name(t)) {
+		for(const auto t : context.outer_context.state.world.in_province_building_type) {
+			if(std::string(value) == economy::province_building_type_get_key(context.outer_context.state, t)) {
 				context.outer_context.state.world.invention_set_increase_building(context.id, t, true);
 				return;
 			}
@@ -1716,12 +1712,12 @@ namespace parsers {
 
 	void inv_effect::any_value(std::string_view name, association_type, int32_t value, error_handler& err, int32_t line, invention_context& context) {
 		if(has_fixed_prefix_ci(name.data(), name.data() + name.length(), "max_")) {
-			for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-				if(std::string(name).substr(4) == economy::province_building_type_get_name(t)) {
+			for(const auto t : context.outer_context.state.world.in_province_building_type) {
+				if(std::string(name).substr(4) == economy::province_building_type_get_key(context.outer_context.state, t)) {
 					if(value == 1) {
 						context.outer_context.state.world.invention_set_increase_building(context.id, t, true);
 					} else {
-						err.accumulated_errors += "max_" + std::string(economy::province_building_type_get_name(t)) + " may only be 1 (" + err.file_name + " line " + std::to_string(line) + ")\n";
+						err.accumulated_errors += "max_" + std::string(economy::province_building_type_get_key(context.outer_context.state, t)) + " may only be 1 (" + err.file_name + " line " + std::to_string(line) + ")\n";
 					}
 					return;
 				}
@@ -1748,8 +1744,7 @@ namespace parsers {
 		if(auto it = context.outer_context.map_of_crimes.find(std::string(value)); it != context.outer_context.map_of_crimes.end()) {
 			context.outer_context.state.world.invention_set_activate_crime(context.id, it->second.id, true);
 		} else {
-			err.accumulated_errors +=
-				"Invalid crime " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "Invalid crime " + std::string(value) + " (" + err.file_name + " line " + std::to_string(line) + ")\n";
 		}
 	}
 

@@ -440,376 +440,85 @@ namespace ui {
 		}
 	};
 
-	template<economy::province_building_type Value>
 	class province_building_icon : public image_element_base {
-		public:
+	public:
 		void on_update(sys::state& state) noexcept override {
-			auto prov_id = retrieve<dcon::province_id>(state, parent);
-			auto fat_id = dcon::fatten(state.world, prov_id);
-			frame = fat_id.get_building_level(Value);
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			frame = state.world.province_get_building_level(prov, type);
 		}
 	};
-	template<economy::province_building_type Value>
 	class province_building_expand_button : public button_element_base {
-		public:
+	public:
+		dcon::province_building_type_id content;
 		void on_update(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			disabled = !command::can_begin_province_building_construction(state, state.local_player_nation, content, Value);
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			disabled = !command::can_begin_province_building_construction(state, state.local_player_nation, prov, type);
 		}
-
 		void button_action(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			command::begin_province_building_construction(state, state.local_player_nation, content, Value);
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			command::begin_province_building_construction(state, state.local_player_nation, prov, type);
 		}
 		virtual void button_shift_action(sys::state& state) noexcept override {
-			if constexpr(Value == economy::province_building_type::naval_base) {
-				button_action(state);
-			} else {
-				auto pid = retrieve<dcon::province_id>(state, parent);
-				auto si = state.world.province_get_state_membership(pid);
-				if(si) {
-					province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-						if(command::can_begin_province_building_construction(state, state.local_player_nation, p, Value))
-						command::begin_province_building_construction(state, state.local_player_nation, p, Value);
-					});
-				}
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto pid = retrieve<dcon::province_id>(state, parent);
+			auto si = state.world.province_get_state_membership(pid);
+			if(si) {
+				province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
+					if(command::can_begin_province_building_construction(state, state.local_player_nation, p, type))
+						command::begin_province_building_construction(state, state.local_player_nation, p, type);
+				});
 			}
 		}
 		virtual void button_shift_right_action(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			auto within_nation = state.world.province_get_nation_from_province_ownership(content);
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			auto within_nation = state.world.province_get_nation_from_province_ownership(prov);
 			for(auto p : state.world.nation_get_province_ownership(within_nation)) {
-				if(command::can_begin_province_building_construction(state, state.local_player_nation, p.get_province(), Value))
-				command::begin_province_building_construction(state, state.local_player_nation, p.get_province(), Value);
+				if(command::can_begin_province_building_construction(state, state.local_player_nation, p.get_province(), type))
+					command::begin_province_building_construction(state, state.local_player_nation, p.get_province(), type);
 			}
 		}
-
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto id = retrieve<dcon::province_id>(state, parent);
-
-			if(state.world.province_get_nation_from_province_ownership(id) == state.local_player_nation) {
-				text::add_line_with_condition(state, contents, "fort_build_tt_1", state.world.province_get_nation_from_province_control(id) == state.local_player_nation);
-			}
-			text::add_line_with_condition(state, contents, "fort_build_tt_2", !military::province_is_under_siege(state, id));
-
-			int32_t current_lvl = state.world.province_get_building_level(id, Value);
-			int32_t max_local_lvl = state.world.nation_get_max_building_level(state.local_player_nation, Value);
-			if constexpr(Value == economy::province_building_type::fort) {
-				int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_fort));
-				text::add_line_with_condition(state, contents, "fort_build_tt_3", (max_local_lvl - current_lvl - min_build > 0), text::variable_type::x, int64_t(current_lvl), text::variable_type::n, int64_t(min_build), text::variable_type::y, int64_t(max_local_lvl));
-
-			} else if constexpr(Value == economy::province_building_type::naval_base) {
-				text::add_line_with_condition(state, contents, "nb_build_tt_1", state.world.province_get_is_coast(id));
-
-				int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_naval_base));
-
-				auto si = state.world.province_get_state_membership(id);
-				text::add_line_with_condition(state, contents, "nb_build_tt_2", current_lvl > 0 || !si.get_naval_base_is_taken());
-
-				text::add_line_with_condition(state, contents, "fort_build_tt_3", (max_local_lvl - current_lvl - min_build > 0), text::variable_type::x, int64_t(current_lvl), text::variable_type::n, int64_t(min_build), text::variable_type::y, int64_t(max_local_lvl));
-
-			} else {
-				auto rules = state.world.nation_get_combined_issue_rules(state.local_player_nation);
-				text::add_line_with_condition(state, contents, "rr_build_tt_1", (rules & issue_rule::build_railway) != 0);
-
-				int32_t min_build = 0;
-				if constexpr(Value == economy::province_building_type::railroad) {
-					min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_railroad));
-				} else if constexpr(Value == economy::province_building_type::bank) {
-					min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_bank));
-				} else if constexpr(Value == economy::province_building_type::university) {
-					min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_university));
-				}
-				text::add_line_with_condition(state, contents, "fort_build_tt_3", (max_local_lvl - current_lvl - min_build > 0), text::variable_type::x, int64_t(current_lvl), text::variable_type::n, int64_t(min_build), text::variable_type::y, int64_t(max_local_lvl));
-			}
-			modifier_description(state, contents, state.economy_definitions.building_definitions[uint8_t(Value)].province_modifier);
-			text::add_line(state, contents, "alice_province_building_build");
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
-	template<economy::province_building_type Value>
 	class province_building_progress : public progress_bar {
-		public:
+	public:
 		void on_create(sys::state& state) noexcept override {
 			progress_bar::on_create(state);
 			base_data.position.y -= 2;
 		}
 
 		void on_update(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			progress = economy::province_building_construction(state, content, Value).progress;
+			auto type = retrieve<dcon::province_building_type_id>(state, parent);
+			auto prov = retrieve<dcon::province_id>(state, parent);
+			progress = economy::province_building_construction(state, prov, type).progress;
 		}
 
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
 
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto prov = retrieve<dcon::province_id>(state, parent);
-
-			for(auto pb_con : state.world.province_get_province_building_construction(prov)) {
-				if(pb_con.get_type() == uint8_t(Value)) {
-					auto& goods = state.economy_definitions.building_definitions[int32_t(Value)].cost;
-					auto& cgoods = pb_con.get_purchased_goods();
-
-					float admin_eff = state.world.nation_get_administrative_efficiency(pb_con.get_nation());
-					float admin_cost_factor = pb_con.get_is_pop_project() ? 1.0f :  2.0f - admin_eff;
-
-					for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-						if(goods.commodity_type[i]) {
-							auto box = text::open_layout_box(contents, 0);
-							text::add_to_layout_box(state, contents, box, state.world.commodity_get_name(goods.commodity_type[i]));
-							text::add_to_layout_box(state, contents, box, std::string_view{ ": " });
-							text::add_to_layout_box(state, contents, box, text::fp_one_place{ cgoods.commodity_amounts[i] });
-							text::add_to_layout_box(state, contents, box, std::string_view{ " / " });
-							text::add_to_layout_box(state, contents, box, text::fp_one_place{ goods.commodity_amounts[i] * admin_cost_factor });
-							text::close_layout_box(contents, box);
-						}
-					}
-
-					return;
-				}
-			}
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
-	template<economy::province_building_type Value>
 	class province_building_window : public window_element_base {
 		button_element_base* expand_button = nullptr;
 		image_element_base* under_construction_icon = nullptr;
 		element_base* building_progress = nullptr;
 		element_base* expanding_text = nullptr;
-
 		std::string get_icon_name() noexcept {
-			switch(Value) {
-				case economy::province_building_type::fort:
-				return "build_icon0";
-				case economy::province_building_type::naval_base:
-				return "build_icon1";
-				case economy::province_building_type::railroad:
-				return "build_icon2";
-				case economy::province_building_type::bank:
-				case economy::province_building_type::urban_center:
-				return "build_icon3";
-				case economy::province_building_type::university:
-				case economy::province_building_type::farmland:
-				return "build_icon4";
-				case economy::province_building_type::mine:
-				return "build_icon5";
-				default:
-				return "build_icon0";
-			}
+			return "build_icon" + std::to_string(content.index());
 		}
-
-		bool is_being_built(sys::state& state, dcon::province_id id) noexcept {
-			for(auto pb : state.world.province_get_province_building_construction(id))
-			if(economy::province_building_type(pb.get_type()) == Value)
-				return true;
-			return false;
-		}
-
-		public:
-		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-			if(name == get_icon_name()) {
-				return make_element_by_type<province_building_icon<Value>>(state, id);
-			} else if(name == "underconstruction_icon") {
-				auto ptr = make_element_by_type<image_element_base>(state, id);
-				under_construction_icon = ptr.get();
-				return ptr;
-			} else if(name == "building_progress") {
-				auto ptr = make_element_by_type<province_building_progress<Value>>(state, id);
-				building_progress = ptr.get();
-				return ptr;
-			} else if(name == "expand_text") {
-				auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-				expanding_text = ptr.get();
-				return ptr;
-			} else if(name == "expand") {
-				auto ptr = make_element_by_type<province_building_expand_button<Value>>(state, id);
-				expand_button = ptr.get();
-				return ptr;
-			} else if(name == "description") {
-				auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-				ptr->set_text(state, text::produce_simple_string(state, economy::province_building_type_get_name(Value)));
-				return ptr;
-			} else if(name.substr(0, 10) == "build_icon") {
-				return make_element_by_type<invisible_element>(state, id);
-			} else {
-				return nullptr;
-			}
-		}
-
-		void on_update(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			expand_button->set_visible(state, !is_being_built(state, content));
-			under_construction_icon->set_visible(state, is_being_built(state, content));
-			building_progress->set_visible(state, is_being_built(state, content));
-			expanding_text->set_visible(state, is_being_built(state, content));
-		}
-	};
-
-	//
-	// Selector
-	//
-	class province_selector_button : public button_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto p = retrieve<dcon::province_id>(state, parent);
-			disabled = !command::can_toggle_select_province(state, state.local_player_nation, p);
-
-			bool found = false;
-			for(auto m : state.world.province_get_current_modifiers(p)) {
-				if(m.mod_id == state.economy_definitions.selector_modifier) {
-					found = true;
-					break;
-				}
-			}
-
-			if(found) {
-				set_button_text(state, text::produce_simple_string(state, "on"));
-			} else {
-				set_button_text(state, text::produce_simple_string(state, "off"));
-			}
-		}
-		void button_action(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			command::toggle_select_province(state, state.local_player_nation, content);
-		}
-		virtual void button_shift_action(sys::state& state) noexcept override {
-			auto pid = retrieve<dcon::province_id>(state, parent);
-			auto si = state.world.province_get_state_membership(pid);
-			if(si) {
-				province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-					command::toggle_select_province(state, state.local_player_nation, p);
-				});
-			}
-		}
-	};
-	class province_selector_image : public image_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto p = retrieve<dcon::province_id>(state, parent);
-			frame = 0;
-			for(auto m : state.world.province_get_current_modifiers(p)) {
-				if(m.mod_id == state.economy_definitions.selector_modifier) {
-					frame = 1;
-					break;
-				}
-			}
-		}
-	};
-	class province_selector_window : public window_element_base {
-		public:
-		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-			if(name == "underconstruction_icon"
-			|| name == "building_progress"
-			|| name == "expand_text") {
-				return make_element_by_type<invisible_element>(state, id);
-			} else if(name == "expand") {
-				return make_element_by_type<province_selector_button>(state, id);
-			} else if(name == "description") {
-				auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-				ptr->set_text(state, text::produce_simple_string(state, "province_selector"));
-				return ptr;
-			} else if(name.substr(0, 10) == "build_icon") {
-				int32_t value = name[10] - '0';
-				int32_t num_buildings = 0;
-				for(auto& def : state.economy_definitions.building_definitions) {
-					if(def.defined)
-					num_buildings++;
-				}
-				if(value == num_buildings) {
-					return make_element_by_type<province_selector_image>(state, id);
-				}
-				return make_element_by_type<invisible_element>(state, id);
-			} else {
-				return nullptr;
-			}
-		}
-	};
-
-	//
-	// Immigrator
-	//
-	class province_immigrator_button : public button_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto p = retrieve<dcon::province_id>(state, parent);
-			disabled = !command::can_toggle_immigrator_province(state, state.local_player_nation, p);
-
-			bool found = false;
-			for(auto m : state.world.province_get_current_modifiers(p)) {
-				if(m.mod_id == state.economy_definitions.immigrator_modifier) {
-					found = true;
-					break;
-				}
-			}
-
-			if(found) {
-				set_button_text(state, text::produce_simple_string(state, "on"));
-			} else {
-				set_button_text(state, text::produce_simple_string(state, "off"));
-			}
-		}
-		void button_action(sys::state& state) noexcept override {
-			auto content = retrieve<dcon::province_id>(state, parent);
-			command::toggle_immigrator_province(state, state.local_player_nation, content);
-		}
-		virtual void button_shift_action(sys::state& state) noexcept override {
-			auto pid = retrieve<dcon::province_id>(state, parent);
-			auto si = state.world.province_get_state_membership(pid);
-			if(si) {
-				province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-					command::toggle_immigrator_province(state, state.local_player_nation, p);
-				});
-			}
-		}
-	};
-	class province_immigrator_image : public image_element_base {
-		public:
-		void on_update(sys::state& state) noexcept override {
-			auto p = retrieve<dcon::province_id>(state, parent);
-			frame = 0;
-			for(auto m : state.world.province_get_current_modifiers(p)) {
-				if(m.mod_id == state.economy_definitions.immigrator_modifier) {
-					frame = 1;
-					break;
-				}
-			}
-		}
-	};
-	class province_immigrator_window : public window_element_base {
-		public:
-		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
-			if(name == "underconstruction_icon"
-			|| name == "building_progress"
-			|| name == "expand_text") {
-				return make_element_by_type<invisible_element>(state, id);
-			} else if(name == "expand") {
-				return make_element_by_type<province_immigrator_button>(state, id);
-			} else if(name == "description") {
-				auto ptr = make_element_by_type<simple_text_element_base>(state, id);
-				ptr->set_text(state, text::produce_simple_string(state, "province_immigrator"));
-				return ptr;
-			} else if(name.substr(0, 10) == "build_icon") {
-				int32_t value = name[10] - '0';
-				int32_t num_buildings = 0;
-				for(auto& def : state.economy_definitions.building_definitions) {
-					if(def.defined)
-					num_buildings++;
-				}
-				if(value == num_buildings + 1) {
-					return make_element_by_type<province_immigrator_image>(state, id);
-				}
-				return make_element_by_type<invisible_element>(state, id);
-			} else {
-				return nullptr;
-			}
-		}
+	public:
+		dcon::province_building_type_id content;
+		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override;
+		void on_update(sys::state& state) noexcept override;
 	};
 
 	class province_country_flag_button : public flag_button {
@@ -819,35 +528,13 @@ namespace ui {
 		}
 	};
 
-	template<economy::province_building_type Value>
-	class province_view_foreign_building_icon : public province_building_icon<Value> {
-		public:
+	class province_view_foreign_building_icon : public province_building_icon {
+	public:
+		dcon::province_building_type_id content;
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			auto box = text::open_layout_box(contents, 0);
-			switch(Value) {
-				case economy::province_building_type::railroad:
-				text::localised_format_box(state, contents, box, std::string_view("pv_railroad"));
-				break;
-				case economy::province_building_type::fort:
-				text::localised_format_box(state, contents, box, std::string_view("pv_fort"));
-				break;
-				case economy::province_building_type::naval_base:
-				text::localised_format_box(state, contents, box, std::string_view("pv_navalbase"));
-				break;
-				case economy::province_building_type::bank:
-				text::localised_format_box(state, contents, box, std::string_view("pv_bank"));
-				break;
-				case economy::province_building_type::university:
-				text::localised_format_box(state, contents, box, std::string_view("pv_university"));
-				break;
-				default:
-				break;
-			}
-			text::close_layout_box(contents, box);
-		}
+		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override;
 	};
 
 	class province_invest_factory_button : public button_element_base {
@@ -890,7 +577,7 @@ namespace ui {
 		public:
 		void on_update(sys::state& state) noexcept override {
 			auto prov = retrieve<dcon::province_id>(state, parent);
-			progress = economy::province_building_construction(state, prov, economy::province_building_type::railroad).progress;
+			progress = economy::province_building_construction(state, prov, state.economy_definitions.railroad_building).progress;
 		}
 	};
 
@@ -979,25 +666,23 @@ namespace ui {
 			} else if(name == "goods_type") {
 				return make_element_by_type<province_rgo>(state, id);
 			} else if(name == "build_icon_fort") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::fort>>(state, id);
+				auto ptr = make_element_by_type<province_view_foreign_building_icon>(state, id);
+				ptr->content = state.economy_definitions.fort_building;
+				return ptr;
 			} else if(name == "build_icon_navalbase") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::naval_base>>(state, id);
+				auto ptr = make_element_by_type<province_view_foreign_building_icon>(state, id);
+				ptr->content = state.economy_definitions.naval_base_building;
+				return ptr;
 			} else if(name == "build_icon_infra") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::railroad>>(state, id);
-			} else if(name == "build_icon_bank") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::bank>>(state, id);
-			} else if(name == "build_icon_university") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::university>>(state, id);
-			} else if(name == "build_icon_urban_center") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::urban_center>>(state, id);
-			} else if(name == "build_icon_farmland") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::farmland>>(state, id);
-			} else if(name == "build_icon_mine") {
-				return make_element_by_type<province_view_foreign_building_icon<economy::province_building_type::mine>>(state, id);
+				auto ptr = make_element_by_type<province_view_foreign_building_icon>(state, id);
+				ptr->content = state.economy_definitions.railroad_building;
+				return ptr;
 			} else if(name == "infra_progress_win") {
 				return make_element_by_type<rr_invest_inwdow>(state, id);
 			} else if(name == "invest_build_infra") {
-				return make_element_by_type<province_building_expand_button<economy::province_building_type::railroad>>(state, id);
+				auto ptr = make_element_by_type<province_building_expand_button>(state, id);
+				ptr->content = state.economy_definitions.railroad_building;
+				return ptr;
 			} else if(name == "invest_factory_button") {
 				return make_element_by_type<province_invest_factory_button>(state, id);
 			} else if(name == "sphere_targets") {
@@ -1628,7 +1313,7 @@ namespace ui {
 
 				if(!adjacent && coastal_target && state.world.nation_get_central_ports(state.local_player_nation) != 0) {
 					for(auto p : state.world.nation_get_province_ownership(state.local_player_nation)) {
-						if(auto nb_level = p.get_province().get_building_level(economy::province_building_type::naval_base); nb_level > 0 && p.get_province().get_nation_from_province_control() == state.local_player_nation) {
+						if(auto nb_level = p.get_province().get_building_level(state.economy_definitions.naval_base_building); nb_level > 0 && p.get_province().get_nation_from_province_control() == state.local_player_nation) {
 							if(province::direct_distance(state, p.get_province(), coastal_target) <= province::world_circumference * 0.075f * nb_level) {
 								reachable_by_sea = true;
 								break;

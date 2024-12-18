@@ -127,10 +127,10 @@ namespace ui {
 			text::add_line_with_condition(state, contents, "rule_build_railway_invest", (rules & issue_rule::build_railway_invest) != 0);
 			text::add_line_with_condition(state, contents, "rule_slavery_allowed", (rules & issue_rule::slavery_allowed) != 0);
 			text::add_line_with_condition(state, contents, "rule_build_railway", (rules & issue_rule::build_railway) != 0);
-			if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::bank)].defined) {
+			if(state.economy_definitions.bank_building) {
 				text::add_line_with_condition(state, contents, "rule_build_bank", (rules & issue_rule::build_bank) != 0);
 			}
-			if(state.economy_definitions.building_definitions[int32_t(economy::province_building_type::university)].defined) {
+			if(state.economy_definitions.university_building) {
 				text::add_line_with_condition(state, contents, "rule_build_university", (rules & issue_rule::build_university) != 0);
 			}
 		}

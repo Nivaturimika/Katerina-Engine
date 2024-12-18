@@ -230,7 +230,6 @@ namespace culture {
 }
 
 namespace economy {
-	enum class province_building_type : uint8_t { railroad, fort, naval_base, bank, university, mine, farmland, urban_center, last, factory, province_selector, province_immigrator };
 	constexpr inline int32_t max_building_types = 8;
 }
 

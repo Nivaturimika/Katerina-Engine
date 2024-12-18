@@ -271,7 +271,7 @@ building_definition
 	one_per_state        value    none              discard
 	advanced_factory     value    none              discard
 	capital              value    none              discard
-	type                 value    text              member_fn
+	type                 value    text              member
 	cost                 value    int               member
 	time                 value    int               member
 	naval_capacity       value    int               member

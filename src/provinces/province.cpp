@@ -288,11 +288,11 @@ namespace province {
 
 		for(auto si : state.world.in_state_instance) {
 			province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-				if(state.world.province_get_building_level(p, economy::province_building_type::naval_base) > 0) {
+				if(state.world.province_get_building_level(p, state.economy_definitions.naval_base_building) > 0) {
 					state.world.state_instance_set_naval_base_is_taken(si, true);
 				} else {
 					for(auto pc : state.world.province_get_province_building_construction(p)) {
-						if(pc.get_type() == uint8_t(economy::province_building_type::naval_base))
+						if(pc.get_type() == state.economy_definitions.naval_base_building)
 						state.world.state_instance_set_naval_base_is_taken(si, true);
 					}
 				}
@@ -304,23 +304,22 @@ namespace province {
 
 	bool has_railroads_being_built(sys::state& state, dcon::province_id id) {
 		for(auto pb : state.world.province_get_province_building_construction(id)) {
-			if(economy::province_building_type(pb.get_type()) == economy::province_building_type::railroad)
-			return true;
+			if(pb.get_type() == state.economy_definitions.railroad_building) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	bool generic_can_build_railroads(sys::state& state, dcon::province_id id, dcon::nation_id n) {
 		if(n != state.world.province_get_nation_from_province_control(id))
-		return false;
+			return false;
 		if(military::province_is_under_siege(state, id))
-		return false;
+			return false;
 
-		int32_t current_rails_lvl = state.world.province_get_building_level(id, economy::province_building_type::railroad);
-		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::railroad);
-		int32_t min_build_railroad =
-			int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_railroad));
-
+		int32_t current_rails_lvl = state.world.province_get_building_level(id, state.economy_definitions.railroad_building);
+		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(n, state.economy_definitions.railroad_building);
+		int32_t min_build_railroad = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_railroad));
 		return (max_local_rails_lvl - current_rails_lvl - min_build_railroad > 0) && !has_railroads_being_built(state, id);
 	}
 	bool can_build_railroads(sys::state& state, dcon::province_id id, dcon::nation_id n) {
@@ -346,20 +345,19 @@ namespace province {
 		} else {
 			auto rules = state.world.nation_get_combined_issue_rules(n);
 			if((rules & issue_rule::build_railway) == 0)
-			return false;
+				return false;
 		}
 
-		int32_t current_rails_lvl = state.world.province_get_building_level(id, economy::province_building_type::railroad);
-		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::railroad);
-		int32_t min_build_railroad =
-			int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_railroad));
-
+		int32_t current_rails_lvl = state.world.province_get_building_level(id, state.economy_definitions.railroad_building);
+		int32_t max_local_rails_lvl = state.world.nation_get_max_building_level(n, state.economy_definitions.railroad_building);
+		int32_t min_build_railroad = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_railroad));
 		return (max_local_rails_lvl - current_rails_lvl - min_build_railroad > 0) && !has_railroads_being_built(state, id);
 	}
 	bool has_fort_being_built(sys::state& state, dcon::province_id id) {
 		for(auto pb : state.world.province_get_province_building_construction(id)) {
-			if(economy::province_building_type(pb.get_type()) == economy::province_building_type::fort)
-			return true;
+			if(pb.get_type() == state.economy_definitions.fort_building) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -371,15 +369,15 @@ namespace province {
 		if(military::province_is_under_siege(state, id))
 		return false;
 
-		int32_t current_lvl = state.world.province_get_building_level(id, economy::province_building_type::fort);
-		int32_t max_local_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::fort);
+		int32_t current_lvl = state.world.province_get_building_level(id, state.economy_definitions.fort_building);
+		int32_t max_local_lvl = state.world.nation_get_max_building_level(n, state.economy_definitions.fort_building);
 		int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_fort));
 
 		return (max_local_lvl - current_lvl - min_build > 0) && !has_fort_being_built(state, id);
 	}
 	bool has_naval_base_being_built(sys::state& state, dcon::province_id id) {
 		for(auto pb : state.world.province_get_province_building_construction(id)) {
-			if(economy::province_building_type(pb.get_type()) == economy::province_building_type::naval_base)
+			if(pb.get_type() == state.economy_definitions.naval_base_building)
 				return true;
 		}
 		return false;
@@ -396,47 +394,48 @@ namespace province {
 
 		auto si = state.world.province_get_state_membership(id);
 
-		int32_t current_lvl = state.world.province_get_building_level(id, economy::province_building_type::naval_base);
-		int32_t max_local_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::naval_base);
+		int32_t current_lvl = state.world.province_get_building_level(id, state.economy_definitions.naval_base_building);
+		int32_t max_local_lvl = state.world.nation_get_max_building_level(n, state.economy_definitions.naval_base_building);
 		int32_t min_build = int32_t(state.world.province_get_modifier_values(id, sys::provincial_mod_offsets::min_build_naval_base));
 
-		return (max_local_lvl - current_lvl - min_build > 0) && (current_lvl > 0 || (!si.get_naval_base_is_taken()) && !has_naval_base_being_built(state, id));
+		return (max_local_lvl - current_lvl - min_build > 0) && (current_lvl > 0 || (!si.get_naval_base_is_taken() && !has_naval_base_being_built(state, id)));
 	}
 
-	bool has_province_building_being_built(sys::state& state, dcon::province_id id, economy::province_building_type t) {
+	bool has_province_building_being_built(sys::state& state, dcon::province_id id, dcon::province_building_type_id t) {
 		for(auto pb : state.world.province_get_province_building_construction(id)) {
-			if(economy::province_building_type(pb.get_type()) == t)
-			return true;
+			if(pb.get_type() == t) {
+				return true;
+			}
 		}
 		return false;
 	}
 
-	bool can_build_province_building(sys::state& state, dcon::province_id id, dcon::nation_id n, economy::province_building_type t) {
+	bool can_build_province_building(sys::state& state, dcon::province_id id, dcon::nation_id n, dcon::province_building_type_id t) {
 		auto owner = state.world.province_get_nation_from_province_ownership(id);
 
 		if(owner != state.world.province_get_nation_from_province_control(id))
-		return false;
+			return false;
 		if(military::province_is_under_siege(state, id))
-		return false;
+			return false;
 
 		if(owner != n) {
 			if(state.world.nation_get_is_great_power(n) == false || state.world.nation_get_is_great_power(owner) == true)
-			return false;
+				return false;
 			if(state.world.nation_get_is_civilized(owner) == false)
-			return false;
+				return false;
 
 			auto rules = state.world.nation_get_combined_issue_rules(owner);
 			if((rules & issue_rule::allow_foreign_investment) == 0)
-			return false;
+				return false;
 
 			if(military::are_at_war(state, n, owner))
-			return false;
+				return false;
 		} else {
 			auto rules = state.world.nation_get_combined_issue_rules(n);
-			if(t == economy::province_building_type::bank && (rules & issue_rule::build_bank) == 0)
-			return false;
-			if(t == economy::province_building_type::university && (rules & issue_rule::build_university) == 0)
-			return false;
+			if(t == state.economy_definitions.bank_building && (rules & issue_rule::build_bank) == 0)
+				return false;
+			if(t == state.economy_definitions.university_building && (rules & issue_rule::build_university) == 0)
+				return false;
 		}
 
 		int32_t current_lvl = state.world.province_get_building_level(id, t);
@@ -676,11 +675,11 @@ namespace province {
 		&& state.world.nation_get_is_civilized(new_owner) == true)
 		|| (!old_owner);
 		if(old_si) {
-			if(state.world.province_get_building_level(id, economy::province_building_type::naval_base) > 0) {
+			if(state.world.province_get_building_level(id, state.economy_definitions.naval_base_building) > 0) {
 				state.world.state_instance_set_naval_base_is_taken(old_si, false);
 			} else {
 				for(auto pc : state.world.province_get_province_building_construction(id)) {
-					if(pc.get_type() == uint8_t(economy::province_building_type::naval_base)) {
+					if(pc.get_type() == state.economy_definitions.naval_base_building) {
 						state.world.state_instance_set_naval_base_is_taken(old_si, false);
 					}
 				}
@@ -704,7 +703,7 @@ namespace province {
 				state.world.province_set_is_slave(id, false);
 				if(will_be_colonial)
 				state.world.nation_set_is_colonial_nation(new_owner, true);
-				if(state.world.province_get_building_level(id, economy::province_building_type::naval_base) > 0)
+				if(state.world.province_get_building_level(id, state.economy_definitions.naval_base_building) > 0)
 				state.world.state_instance_set_naval_base_is_taken(new_si, true);
 
 				state_is_new = true;
@@ -712,9 +711,9 @@ namespace province {
 				auto sc = state.world.state_instance_get_capital(new_si);
 				state.world.province_set_is_colonial(id, state.world.province_get_is_colonial(sc));
 				state.world.province_set_is_slave(id, state.world.province_get_is_slave(sc));
-				if(state.world.province_get_building_level(id, economy::province_building_type::naval_base) > 0) {
+				if(state.world.province_get_building_level(id, state.economy_definitions.naval_base_building) > 0) {
 					if(state.world.state_instance_get_naval_base_is_taken(new_si)) {
-						state.world.province_set_building_level(id, economy::province_building_type::naval_base, 0);
+						state.world.province_set_building_level(id, state.economy_definitions.naval_base_building, 0);
 					} else {
 						state.world.state_instance_set_naval_base_is_taken(new_si, true);
 					}
@@ -767,10 +766,10 @@ namespace province {
 			}
 			state.world.nation_get_owned_province_count(new_owner) += uint16_t(1);
 		} else {
-		state.world.province_set_state_membership(id, dcon::state_instance_id{});
-			for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
+			state.world.province_set_state_membership(id, dcon::state_instance_id{});
+			state.world.for_each_province_building_type([&](dcon::province_building_type_id t) {
 				state.world.province_set_building_level(id, t, uint8_t(0));
-			}
+			});
 
 			auto province_fac_range = state.world.province_get_factory_location(id);
 			while(province_fac_range.begin() != province_fac_range.end()) {
@@ -1202,7 +1201,7 @@ namespace province {
 
 		if(!adjacent && coastal_target  && state.world.nation_get_central_ports(n) != 0) {
 			for(auto p : state.world.nation_get_province_ownership(n)) {
-				if(auto nb_level = p.get_province().get_building_level(economy::province_building_type::naval_base); nb_level > 0 && p.get_province().get_nation_from_province_control() == n) {
+				if(auto nb_level = p.get_province().get_building_level(state.economy_definitions.naval_base_building); nb_level > 0 && p.get_province().get_nation_from_province_control() == n) {
 					auto dist = province::direct_distance(state, p.get_province(), coastal_target);
 					if(dist <= province::world_circumference *  0.04f * nb_level) {
 						reachable_by_sea = true;
@@ -1304,7 +1303,7 @@ namespace province {
 
 		if(!adjacent && coastal_target && state.world.nation_get_central_ports(n) != 0) {
 			for(auto p : state.world.nation_get_province_ownership(n)) {
-				if(auto nb_level = p.get_province().get_building_level(economy::province_building_type::naval_base); nb_level > 0 && p.get_province().get_nation_from_province_control() == n) {
+				if(auto nb_level = p.get_province().get_building_level(state.economy_definitions.naval_base_building); nb_level > 0 && p.get_province().get_nation_from_province_control() == n) {
 					auto dist = province::direct_distance(state, p.get_province(), coastal_target);
 					if(dist <= province::world_circumference * 0.04f * nb_level) {
 						reachable_by_sea = true;
@@ -2176,10 +2175,10 @@ namespace province {
 		@param t Type of building
 		@param v Amount to increase
 	*/
-	void change_building_level(sys::state& state, dcon::province_id p, economy::province_building_type t, int32_t v) {
-		auto owner = state.world.province_get_nation_from_province_ownership(p);
-		auto max_lvl = int32_t(state.world.nation_get_max_building_level(owner, t));
-		auto& building_level = state.world.province_get_building_level(p, economy::province_building_type::railroad);
+	void change_building_level(sys::state& state, dcon::province_id p, dcon::province_building_type_id t, int32_t v) {
+		auto const owner = state.world.province_get_nation_from_province_ownership(p);
+		auto const max_lvl = int32_t(state.world.nation_get_max_building_level(owner, t));
+		auto& building_level = state.world.province_get_building_level(p, state.economy_definitions.railroad_building);
 		building_level = uint8_t(std::clamp(building_level + uint8_t(v), 0, max_lvl));
 	}
 

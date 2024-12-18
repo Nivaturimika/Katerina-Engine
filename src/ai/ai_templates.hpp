@@ -13,7 +13,7 @@ namespace ai {
 		auto const total_soldiers = state.world.province_get_demographics(ids, sk);
 		auto const soldiers_w = (1.f / state.defines.pop_size_per_regiment);
 		auto const defense_mod = state.world.province_get_modifier_values(ids, sys::provincial_mod_offsets::defense);
-		auto const fort_level = state.world.province_get_building_level(ids, economy::province_building_type::fort);
+		auto const fort_level = state.world.province_get_building_level(ids, state.economy_definitions.fort_building);
 		auto const river_crossing = ve::apply([&](dcon::province_id p) {
 			int32_t count = 0;
 			for(auto padj : state.world.province_get_province_adjacency(p)) {

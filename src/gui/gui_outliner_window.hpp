@@ -412,10 +412,10 @@ namespace ui {
 				color = text::text_color::white;
 				set_text(state, full_str);
 			} else if(std::holds_alternative<dcon::province_building_construction_id>(content)) {
-				auto pbcid = std::get<dcon::province_building_construction_id>(content);
-				auto btid = state.world.province_building_construction_get_type(pbcid);
-				auto name = economy::province_building_type_get_name(economy::province_building_type(btid));
-				float progress = economy::province_building_construction(state, state.world.province_building_construction_get_province(pbcid), economy::province_building_type(btid)).progress;
+				auto const pbcid = std::get<dcon::province_building_construction_id>(content);
+				auto const btid = state.world.province_building_construction_get_type(pbcid);
+				auto const name = state.world.province_building_type_get_name(btid);
+				auto progress = economy::province_building_construction(state, state.world.province_building_construction_get_province(pbcid), btid).progress;
 				auto full_str = text::produce_simple_string(state, name) + " (" + text::format_percentage(progress, 0) + ")";
 				color = text::text_color::white;
 				set_text(state, full_str);

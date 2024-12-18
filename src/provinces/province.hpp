@@ -54,8 +54,8 @@ namespace province {
 	bool can_build_fort(sys::state& state, dcon::province_id id, dcon::nation_id n);
 	bool has_naval_base_being_built(sys::state& state, dcon::province_id id);
 	bool can_build_naval_base(sys::state& state, dcon::province_id id, dcon::nation_id n);
-	bool has_province_building_being_built(sys::state& state, dcon::province_id id, economy::province_building_type t);
-	bool can_build_province_building(sys::state& state, dcon::province_id id, dcon::nation_id n, economy::province_building_type t);
+	bool has_province_building_being_built(sys::state& state, dcon::province_id id, dcon::province_building_type_id t);
+	bool can_build_province_building(sys::state& state, dcon::province_id id, dcon::nation_id n, dcon::province_building_type_id t);
 	bool has_an_owner(sys::state& state, dcon::province_id id);
 	bool state_is_coastal(sys::state& state, dcon::state_instance_id s);
 	bool state_is_coastal_non_core_nb(sys::state& state, dcon::state_instance_id s);
@@ -135,7 +135,7 @@ namespace province {
 	void set_province_controller(sys::state& state, dcon::province_id p, dcon::nation_id n);
 	void set_province_controller(sys::state& state, dcon::province_id p, dcon::rebel_faction_id rf);
 
-	void change_building_level(sys::state& state, dcon::province_id p, economy::province_building_type t, int32_t v);
+	void change_building_level(sys::state& state, dcon::province_id p, dcon::province_building_type_id t, int32_t v);
 	void change_life_rating(sys::state& state, dcon::province_id p, int32_t amount);
 
 } // namespace province

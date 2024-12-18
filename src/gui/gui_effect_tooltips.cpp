@@ -9,6 +9,12 @@
 #include "text.hpp"
 #include "triggers.hpp"
 
+namespace economy {
+	std::string_view province_building_type_get_level_text(dcon::province_building_type_id p) {
+		return "aaaaaaaaaaaaaaaa";
+	}
+}
+
 namespace ui {
 
 	namespace effect_tooltip {
@@ -2943,7 +2949,7 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "change_state_controller", m);
 				text::close_layout_box(layout, box);
 			}
@@ -2953,14 +2959,14 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_prov(from_slot)), "from_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(from_slot)), "from_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "change_state_controller", m);
 				text::close_layout_box(layout, box);
 			}
 			return 0;
 		}
 		uint32_t ef_infrastructure(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::railroad;
+			auto type = ws.economy_definitions.railroad_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -2973,7 +2979,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_infrastructure_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::railroad;
+			auto type = ws.economy_definitions.railroad_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -2992,7 +2998,7 @@ namespace ui {
 				text::substitution_map m;
 				text::localised_format_box(ws, layout, box, "pop_savings", m);
 				text::add_space_to_layout_box(ws, layout, box);
-			display_value(text::fp_currency{ amount }, true, ws, layout, box);
+				display_value(text::fp_currency{ amount }, true, ws, layout, box);
 				text::close_layout_box(layout, box);
 			}
 			return 0;
@@ -3034,7 +3040,7 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_prov(this_slot)), "this_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_prov(this_slot)), "this_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
 				text::close_layout_box(layout, box);
 			}
@@ -3044,7 +3050,7 @@ namespace ui {
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-			add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
+				add_to_map(ws, m, convert_this(ws, trigger::to_nation(from_slot)), "from_nation", [](auto x) { return x; });
 				text::localised_format_box(ws, layout, box, "release_as_vassal", m);
 				text::close_layout_box(layout, box);
 			}
@@ -4175,7 +4181,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_fort_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::fort;
+			auto type = ws.economy_definitions.fort_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -4188,7 +4194,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_fort(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::fort;
+			auto type = ws.economy_definitions.fort_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -4201,7 +4207,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_naval_base(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::naval_base;
+			auto type =ws.economy_definitions.naval_base_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -4214,7 +4220,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_naval_base_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::naval_base;
+			auto type =ws.economy_definitions.naval_base_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -7162,7 +7168,7 @@ namespace ui {
 		}
 
 		uint32_t ef_bank_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::bank;
+			auto type = ws.economy_definitions.bank_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -7175,7 +7181,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_bank(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::bank;
+			auto type = ws.economy_definitions.bank_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -7188,7 +7194,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_university_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::university;
+			auto type = ws.economy_definitions.university_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);
@@ -7201,7 +7207,7 @@ namespace ui {
 			return 0;
 		}
 		uint32_t ef_university(EFFECT_DISPLAY_PARAMS) {
-			auto type = economy::province_building_type::university;
+			auto type = ws.economy_definitions.university_building;
 			auto amount = trigger::payload(tval[1]).signed_value;
 			{
 				auto box = text::open_layout_box(layout, indentation);

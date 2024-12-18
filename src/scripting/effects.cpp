@@ -2033,13 +2033,13 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_infrastructure(EFFECT_PARAMTERS) {
-		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::railroad, int32_t(trigger::payload(tval[1]).signed_value));
+		province::change_building_level(ws, trigger::to_prov(primary_slot),ws.economy_definitions.railroad_building, int32_t(trigger::payload(tval[1]).signed_value));
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
 	}
 	uint32_t ef_infrastructure_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			province::change_building_level(ws, p, economy::province_building_type::railroad, int32_t(trigger::payload(tval[1]).signed_value));
+			province::change_building_level(ws, p,ws.economy_definitions.railroad_building, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
@@ -2892,12 +2892,12 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_fort(EFFECT_PARAMTERS) {
-		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::fort, int32_t(trigger::payload(tval[1]).signed_value));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), ws.economy_definitions.fort_building, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_naval_base(EFFECT_PARAMTERS) {
-		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot), economy::province_building_type::naval_base);
-		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)), economy::province_building_type::naval_base))));
+		auto& building_level = ws.world.province_get_building_level(trigger::to_prov(primary_slot),ws.economy_definitions.naval_base_building);
+		building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)),ws.economy_definitions.naval_base_building))));
 		if(building_level > 0) {
 			auto si = ws.world.province_get_state_membership(trigger::to_prov(primary_slot));
 			ws.world.state_instance_set_naval_base_is_taken(si, true);
@@ -2905,24 +2905,24 @@ namespace effect {
 		return 0;
 	}
 	uint32_t ef_bank(EFFECT_PARAMTERS) {
-		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::bank, int32_t(trigger::payload(tval[1]).signed_value));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), ws.economy_definitions.bank_building, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_university(EFFECT_PARAMTERS) {
-		province::change_building_level(ws, trigger::to_prov(primary_slot), economy::province_building_type::university, int32_t(trigger::payload(tval[1]).signed_value));
+		province::change_building_level(ws, trigger::to_prov(primary_slot), ws.economy_definitions.university_building, int32_t(trigger::payload(tval[1]).signed_value));
 		return 0;
 	}
 	uint32_t ef_fort_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			province::change_building_level(ws, p, economy::province_building_type::fort, int32_t(trigger::payload(tval[1]).signed_value));
+			province::change_building_level(ws, p, ws.economy_definitions.fort_building, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
 	uint32_t ef_naval_base_state(EFFECT_PARAMTERS) {
 		uint32_t lvl = 0;
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			auto& building_level = ws.world.province_get_building_level(p, economy::province_building_type::naval_base);
-			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p), economy::province_building_type::naval_base))));
+			auto& building_level = ws.world.province_get_building_level(p,ws.economy_definitions.naval_base_building);
+			building_level = uint8_t(std::clamp(int32_t(building_level) + int32_t(trigger::payload(tval[1]).signed_value), 0, int32_t(ws.world.nation_get_max_building_level(ws.world.province_get_nation_from_province_ownership(p),ws.economy_definitions.naval_base_building))));
 			lvl = std::max<uint32_t>(lvl, building_level);
 		});
 		if(lvl > 0) {
@@ -2933,13 +2933,13 @@ namespace effect {
 	}
 	uint32_t ef_bank_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			province::change_building_level(ws, p, economy::province_building_type::bank, int32_t(trigger::payload(tval[1]).signed_value));
+			province::change_building_level(ws, p, ws.economy_definitions.bank_building, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
 	uint32_t ef_university_state(EFFECT_PARAMTERS) {
 		province::for_each_province_in_state_instance(ws, trigger::to_state(primary_slot), [&](dcon::province_id p) {
-			province::change_building_level(ws, p, economy::province_building_type::university, int32_t(trigger::payload(tval[1]).signed_value));
+			province::change_building_level(ws, p, ws.economy_definitions.university_building, int32_t(trigger::payload(tval[1]).signed_value));
 		});
 		return 0;
 	}
@@ -4230,7 +4230,7 @@ namespace effect {
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
 			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_railroad) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::railroad) += uint8_t(1);
+			ws.world.province_get_building_level(p,ws.economy_definitions.railroad_building) += uint8_t(1);
 		});
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
@@ -4240,7 +4240,7 @@ namespace effect {
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
 			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_railroad) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::railroad) += uint8_t(1);
+			ws.world.province_get_building_level(p,ws.economy_definitions.railroad_building) += uint8_t(1);
 		});
 		ws.railroad_built.store(true, std::memory_order::release);
 		return 0;
@@ -4249,7 +4249,7 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
 			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_railroad) <= 1.0f) {
-				ws.world.province_get_building_level(c, economy::province_building_type::railroad) += uint8_t(1);
+				ws.world.province_get_building_level(c,ws.economy_definitions.railroad_building) += uint8_t(1);
 				ws.railroad_built.store(true, std::memory_order::release);
 			}
 		}
@@ -4259,7 +4259,7 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
 			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_railroad) <= 1.0f) {
-				ws.world.province_get_building_level(c, economy::province_building_type::railroad) += uint8_t(1);
+				ws.world.province_get_building_level(c,ws.economy_definitions.railroad_building) += uint8_t(1);
 				ws.railroad_built.store(true, std::memory_order::release);
 			}
 		}
@@ -4269,27 +4269,27 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs,
-			[&](dcon::province_id p) { ws.world.province_get_building_level(p, economy::province_building_type::fort) += uint8_t(1); });
+			[&](dcon::province_id p) { ws.world.province_get_building_level(p, ws.economy_definitions.fort_building) += uint8_t(1); });
 		return 0;
 	}
 	uint32_t ef_build_fort_in_capital_yes_whole_state_no_limit(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs,
-			[&](dcon::province_id p) { ws.world.province_get_building_level(p, economy::province_building_type::fort) += uint8_t(1); });
+			[&](dcon::province_id p) { ws.world.province_get_building_level(p, ws.economy_definitions.fort_building) += uint8_t(1); });
 		return 0;
 	}
 	uint32_t ef_build_fort_in_capital_no_whole_state_yes_limit(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
-			ws.world.province_get_building_level(c, economy::province_building_type::fort) += uint8_t(1);
+			ws.world.province_get_building_level(c, ws.economy_definitions.fort_building) += uint8_t(1);
 		}
 		return 0;
 	}
 	uint32_t ef_build_fort_in_capital_no_whole_state_no_limit(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
-			ws.world.province_get_building_level(c, economy::province_building_type::fort) += uint8_t(1);
+			ws.world.province_get_building_level(c, ws.economy_definitions.fort_building) += uint8_t(1);
 		}
 		return 0;
 	}
@@ -4392,47 +4392,47 @@ namespace effect {
 	}
 	uint32_t ef_add_country_modifier_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_add_country_modifier(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
+			return ef_add_country_modifier(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_add_country_modifier_province_no_duration(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_add_country_modifier_no_duration(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
+			return ef_add_country_modifier_no_duration(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
+			return ef_relation(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province_this_nation(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation_this_nation(tval, ws, trigger::to_generic(owner), this_slot, 0, 0, 0, els);
+			return ef_relation_this_nation(tval, ws, trigger::to_generic(owner), this_slot, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province_this_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation_this_province(tval, ws, trigger::to_generic(owner), this_slot, 0, 0, 0, els);
+			return ef_relation_this_province(tval, ws, trigger::to_generic(owner), this_slot, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province_from_nation(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation_this_nation(tval, ws, trigger::to_generic(owner), from_slot, 0, 0, 0, els);
+			return ef_relation_this_nation(tval, ws, trigger::to_generic(owner), from_slot, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province_from_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation_this_province(tval, ws, trigger::to_generic(owner), from_slot, 0, 0, 0, els);
+			return ef_relation_this_province(tval, ws, trigger::to_generic(owner), from_slot, 0, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_relation_province_reb(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_relation_reb(tval, ws, trigger::to_generic(owner), 0, from_slot, 0, 0, els);
+			return ef_relation_reb(tval, ws, trigger::to_generic(owner), 0, from_slot, 0, 0, els);
 		return 0;
 	}
 	uint32_t ef_treasury_province(EFFECT_PARAMTERS) {
 		if(auto owner = ws.world.province_get_nation_from_province_ownership(trigger::to_prov(primary_slot)); owner)
-		return ef_treasury(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
+			return ef_treasury(tval, ws, trigger::to_generic(owner), 0, 0, 0, 0, els);
 		return 0;
 	}
 
@@ -4443,8 +4443,9 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
-			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_bank) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::bank) += uint8_t(1);
+			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_bank) <= 1.0f) {
+				ws.world.province_get_building_level(p, ws.economy_definitions.bank_building) += uint8_t(1);
+			}
 		});
 		return 0;
 	}
@@ -4452,24 +4453,27 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
-			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_bank) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::bank) += uint8_t(1);
+			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_bank) <= 1.0f) {
+				ws.world.province_get_building_level(p, ws.economy_definitions.bank_building) += uint8_t(1);
+			}
 		});
 		return 0;
 	}
 	uint32_t ef_build_bank_in_capital_no_whole_state_yes_limit(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
-			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_bank) <= 1.0f)
-			ws.world.province_get_building_level(c, economy::province_building_type::bank) += uint8_t(1);
+			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_bank) <= 1.0f) {
+				ws.world.province_get_building_level(c, ws.economy_definitions.bank_building) += uint8_t(1);
+			}
 		}
 		return 0;
 	}
 	uint32_t ef_build_bank_in_capital_no_whole_state_no_limit(EFFECT_PARAMTERS) {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
-			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_bank) <= 1.0f)
-			ws.world.province_get_building_level(c, economy::province_building_type::bank) += uint8_t(1);
+			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_bank) <= 1.0f) {
+				ws.world.province_get_building_level(c, ws.economy_definitions.bank_building) += uint8_t(1);
+			}
 		}
 		return 0;
 	}
@@ -4481,7 +4485,7 @@ namespace effect {
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
 			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_university) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::university) += uint8_t(1);
+			ws.world.province_get_building_level(p, ws.economy_definitions.university_building) += uint8_t(1);
 		});
 		return 0;
 	}
@@ -4490,7 +4494,7 @@ namespace effect {
 		auto cs = ws.world.province_get_state_membership(c);
 		province::for_each_province_in_state_instance(ws, cs, [&](dcon::province_id p) {
 			if(ws.world.province_get_modifier_values(p, sys::provincial_mod_offsets::min_build_university) <= 1.0f)
-			ws.world.province_get_building_level(p, economy::province_building_type::university) += uint8_t(1);
+			ws.world.province_get_building_level(p, ws.economy_definitions.university_building) += uint8_t(1);
 		});
 		return 0;
 	}
@@ -4498,7 +4502,7 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
 			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_university) <= 1.0f)
-			ws.world.province_get_building_level(c, economy::province_building_type::university) += uint8_t(1);
+			ws.world.province_get_building_level(c, ws.economy_definitions.university_building) += uint8_t(1);
 		}
 		return 0;
 	}
@@ -4506,7 +4510,7 @@ namespace effect {
 		auto c = ws.world.nation_get_capital(trigger::to_nation(primary_slot));
 		if(c) {
 			if(ws.world.province_get_modifier_values(c, sys::provincial_mod_offsets::min_build_university) <= 1.0f)
-			ws.world.province_get_building_level(c, economy::province_building_type::university) += uint8_t(1);
+				ws.world.province_get_building_level(c, ws.economy_definitions.university_building) += uint8_t(1);
 		}
 		return 0;
 	}

@@ -123,15 +123,14 @@ namespace ui {
 	void active_single_modifier_description(sys::state& state, text::layout_base& layout, dcon::modifier_id mid, int32_t indentation,
 		bool& header, dcon::provincial_modifier_value pmid, float scaled) {
 		if(scaled == 0.f)
-		return;
-		auto fat_id = dcon::fatten(state.world, mid);
+			return;
+		auto const fat_id = dcon::fatten(state.world, mid);
 		auto const& def = fat_id.get_province_values();
 		for(uint32_t i = 0; i < def.modifier_definition_size; ++i) {
 			if(!bool(def.offsets[i]))
-			break;
+				break;
 			if(def.offsets[i] != pmid)
-			continue;
-
+				continue;
 			if(!header) {
 				header = true;
 				auto box = text::open_layout_box(layout, 0);
@@ -140,46 +139,49 @@ namespace ui {
 				text::add_to_layout_box(state, layout, box, std::string_view(":"), text::text_color::yellow);
 				text::close_layout_box(layout, box);
 			}
-
 			auto data = province_modifier_names[pmid.index()];
 			auto box = text::open_layout_box(layout, indentation);
 			text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, fat_id.get_name()), text::text_color::white);
-		text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
+			text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
 			text::add_space_to_layout_box(state, layout, box);
 			auto value = def.values[i] * scaled;
-			auto color = data.positive_is_green ? (value >= 0.f ? text::text_color::green : text::text_color::red)
-																				: (value >= 0.f ? text::text_color::red : text::text_color::green);
+			auto color = data.positive_is_green ? (value >= 0.f ? text::text_color::green : text::text_color::red) : (value >= 0.f ? text::text_color::red : text::text_color::green);
 			text::add_to_layout_box(state, layout, box, format_modifier_value(state, value, data.type), color);
 			text::close_layout_box(layout, box);
 		}
 	}
 
 	template<typename T>
-	void acting_modifiers_description_province(sys::state& state, text::layout_base& layout, dcon::province_id p, int32_t identation,
-		bool& header, T nmid) {
-		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)])
-		active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)], identation, header, nmid);
-		for(auto mpr : state.world.province_get_current_modifiers(p))
-		active_single_modifier_description(state, layout, mpr.mod_id, identation, header, nmid);
-		if(auto m = state.world.province_get_terrain(p); m)
-		active_single_modifier_description(state, layout, m, identation, header, nmid);
-		if(auto m = state.world.province_get_climate(p); m)
-		active_single_modifier_description(state, layout, m, identation, header, nmid);
-		if(auto m = state.world.province_get_continent(p); m)
-		active_single_modifier_description(state, layout, m, identation, header, nmid);
-		if(auto c = state.world.province_get_crime(p); c) {
-			if(auto m = state.culture_definitions.crimes[c].modifier; m)
+	void acting_modifiers_description_province(sys::state& state, text::layout_base& layout, dcon::province_id p, int32_t identation, bool& header, T nmid) {
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)]) {
+			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)], identation, header, nmid);
+		}
+		for(auto mpr : state.world.province_get_current_modifiers(p)) {
+			active_single_modifier_description(state, layout, mpr.mod_id, identation, header, nmid);
+		}
+		if(auto m = state.world.province_get_terrain(p); m) {
 			active_single_modifier_description(state, layout, m, identation, header, nmid);
 		}
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-			if(state.economy_definitions.building_definitions[int32_t(t)].province_modifier) {
-				active_single_modifier_description(state, layout, state.economy_definitions.building_definitions[int32_t(t)].province_modifier, identation,
-					header, nmid, state.world.province_get_building_level(p, t));
+		if(auto m = state.world.province_get_climate(p); m) {
+			active_single_modifier_description(state, layout, m, identation, header, nmid);
+		}
+		if(auto m = state.world.province_get_continent(p); m) {
+			active_single_modifier_description(state, layout, m, identation, header, nmid);
+		}
+		if(auto c = state.world.province_get_crime(p); c) {
+			if(auto m = state.culture_definitions.crimes[c].modifier; m) {
+				active_single_modifier_description(state, layout, m, identation, header, nmid);
+			}
+		}
+		for(const auto t : state.world.in_province_building_type) {
+			if(auto pmod = state.world.province_building_type_get_province_modifier(t); pmod) {
+				active_single_modifier_description(state, layout, pmod, identation, header, nmid, state.world.province_get_building_level(p, t));
 			}
 		}
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)]) {
 			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)], identation, header, nmid,
-				state.world.province_get_building_level(p, economy::province_building_type::railroad) * state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure);
+				state.world.province_get_building_level(p, state.economy_definitions.railroad_building)
+				* state.world.province_building_type_get_infrastructure(state.economy_definitions.railroad_building));
 		}
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)]) {
 			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)], identation, header, nmid,

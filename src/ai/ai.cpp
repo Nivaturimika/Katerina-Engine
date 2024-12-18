@@ -1185,9 +1185,9 @@ namespace ai {
 						si.set_naval_base_is_taken(true);
 					}
 					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[0], n));
-					new_rr.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::naval_base)].time);
+					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.naval_base_building));
 					new_rr.set_is_pop_project(false);
-					new_rr.set_type(uint8_t(economy::province_building_type::naval_base));
+					new_rr.set_type(state.economy_definitions.naval_base_building);
 					max_projects -= 4;
 				}
 			}
@@ -1195,14 +1195,26 @@ namespace ai {
 			// try railroads
 			const struct {
 				bool buildable;
-				economy::province_building_type type;
+				dcon::province_building_type_id type;
 				dcon::provincial_modifier_value mod;
 			} econ_buildable[3] = {
-			{ (rules & issue_rule::build_railway) != 0, economy::province_building_type::railroad, sys::provincial_mod_offsets::min_build_railroad },
-			{ (rules & issue_rule::build_bank) != 0 && state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::bank)].defined, economy::province_building_type::bank, sys::provincial_mod_offsets::min_build_bank },
-			{ (rules & issue_rule::build_university) != 0 && state.economy_definitions.building_definitions[uint32_t(economy::province_building_type::university)].defined, economy::province_building_type::university, sys::provincial_mod_offsets::min_build_university }
+				{
+					(rules & issue_rule::build_railway) != 0,
+					state.economy_definitions.railroad_building,
+					sys::provincial_mod_offsets::min_build_railroad
+				},
+				{
+					(rules & issue_rule::build_bank) != 0 && state.economy_definitions.bank_building,
+					state.economy_definitions.bank_building,
+					sys::provincial_mod_offsets::min_build_bank
+				},
+				{
+					(rules & issue_rule::build_university) != 0 && state.economy_definitions.university_building,
+					state.economy_definitions.university_building,
+					sys::provincial_mod_offsets::min_build_university
+				}
 			};
-			for(auto i = 0; i < 3; i++) {
+			for(uint32_t i = 0; i < std::extent_v<decltype(econ_buildable)>; ++i) {
 				if(econ_buildable[i].buildable && max_projects > 0) {
 					project_provs.clear();
 					for(auto o : n.get_province_ownership()) {
@@ -1229,9 +1241,9 @@ namespace ai {
 					});
 					for(uint32_t j = 0; j < project_provs.size() && max_projects > 0; ++j) {
 						auto new_proj = fatten(state.world, state.world.force_create_province_building_construction(project_provs[j], n));
-						new_proj.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(econ_buildable[i].type)].time);
+						new_proj.set_remaining_construction_time(state.world.province_building_type_get_time(econ_buildable[i].type));
 						new_proj.set_is_pop_project(false);
-						new_proj.set_type(uint8_t(econ_buildable[i].type));
+						new_proj.set_type(econ_buildable[i].type);
 						--max_projects;
 					}
 				}
@@ -1244,24 +1256,17 @@ namespace ai {
 				for(auto o : n.get_province_ownership()) {
 					if(n != o.get_province().get_nation_from_province_control())
 						continue;
-
 					if(province::has_fort_being_built(state, o.get_province())) {
 						// if we are already building a fort, count it as a building choice to not let AI overspend money on forts
 						max_projects -= 2;
 					}
-
 					if(military::province_is_under_siege(state, o.get_province()))
 						continue;
 
-					int32_t current_lvl = state.world.province_get_building_level(o.get_province(), economy::province_building_type::fort);
-					int32_t max_local_lvl = state.world.nation_get_max_building_level(n, economy::province_building_type::fort);
-					int32_t min_build = int32_t(state.world.province_get_modifier_values(o.get_province(), sys::provincial_mod_offsets::min_build_fort));
-
-					if(max_local_lvl - current_lvl - min_build <= 0)
-						continue;
-
-					if(!province::has_fort_being_built(state, o.get_province())) {
-						project_provs.push_back(o.get_province().id);
+					if(province::can_build_fort(state, o.get_province(), n)) {
+						if(!province::has_fort_being_built(state, o.get_province())) {
+							project_provs.push_back(o.get_province().id);
+						}
 					}
 				}
 
@@ -1276,9 +1281,9 @@ namespace ai {
 
 				for(uint32_t i = 0; i < project_provs.size() && max_projects > 0; ++i) {
 					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[i], n));
-					new_rr.set_remaining_construction_time(state.economy_definitions.building_definitions[uint8_t(economy::province_building_type::fort)].time);
+					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.fort_building));
 					new_rr.set_is_pop_project(false);
-					new_rr.set_type(uint8_t(economy::province_building_type::fort));
+					new_rr.set_type(state.economy_definitions.fort_building);
 					max_projects -= 2;
 				}
 			}
@@ -3940,7 +3945,7 @@ namespace ai {
 
 						for(uint32_t j = 0; j < owned_ports.size() && (fleet_cap_in_transports + constructing_fleet_cap) * 3 < n.get_naval_supply_points(); ++j) {
 							if((overseas_allowed || !province::is_overseas(state, owned_ports[j]))
-							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
+							&& state.world.province_get_building_level(owned_ports[j], state.economy_definitions.naval_base_building) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
 								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_transport].build_time);
@@ -3955,7 +3960,7 @@ namespace ai {
 
 						for(uint32_t j = 0; j < owned_ports.size() && num_transports < 10; ++j) {
 							if((overseas_allowed || !province::is_overseas(state, owned_ports[j]))
-							&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
+							&& state.world.province_get_building_level(owned_ports[j], state.economy_definitions.naval_base_building) >= level_req) {
 								assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_transport));
 								auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
 								c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_transport].build_time);
@@ -3982,7 +3987,7 @@ namespace ai {
 
 					for(uint32_t j = 0; j < owned_ports.size() && supply_pts <= free_small_points; ++j) {
 						if((overseas_allowed || !province::is_overseas(state, owned_ports[j]))
-						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
+						&& state.world.province_get_building_level(owned_ports[j], state.economy_definitions.naval_base_building) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_light));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
 							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_light].build_time);
@@ -3998,7 +4003,7 @@ namespace ai {
 
 					for(uint32_t j = 0; j < owned_ports.size() && supply_pts <= free_big_points; ++j) {
 						if((overseas_allowed || !province::is_overseas(state, owned_ports[j]))
-						&& state.world.province_get_building_level(owned_ports[j], economy::province_building_type::naval_base) >= level_req) {
+						&& state.world.province_get_building_level(owned_ports[j], state.economy_definitions.naval_base_building) >= level_req) {
 							assert(command::can_start_naval_unit_construction(state, n, owned_ports[j], best_big));
 							auto c = fatten(state.world, state.world.try_create_province_naval_construction(owned_ports[j], n));
 							c.set_remaining_construction_time(state.military_definitions.unit_base_definitions[best_big].build_time);
@@ -4018,11 +4023,11 @@ namespace ai {
 		float current_distance = 1.0f;
 		for(auto p : state.world.nation_get_province_ownership(n)) {
 			if(p.get_province().get_is_coast() && p.get_province().get_nation_from_province_control() == n) {
-				if(p.get_province().get_building_level(economy::province_building_type::naval_base) > max_level) {
-					max_level = p.get_province().get_building_level(economy::province_building_type::naval_base);
+				if(p.get_province().get_building_level(state.economy_definitions.naval_base_building) > max_level) {
+					max_level = p.get_province().get_building_level(state.economy_definitions.naval_base_building);
 					result = p.get_province();
 					current_distance = province::sorting_distance(state, cap, p.get_province());
-				} else if(result && p.get_province().get_building_level(economy::province_building_type::naval_base) == max_level && province::sorting_distance(state, cap, p.get_province()) < current_distance) {
+				} else if(result && p.get_province().get_building_level(state.economy_definitions.naval_base_building) == max_level && province::sorting_distance(state, cap, p.get_province()) < current_distance) {
 					current_distance = province::sorting_distance(state, cap, p.get_province());
 					result = p.get_province();
 				}
@@ -4924,7 +4929,7 @@ namespace ai {
 			scale += def * (morale * org * 0.5f);
 		}
 		scale += state.world.province_get_modifier_values(state.world.army_get_location_from_army_location(a), sys::provincial_mod_offsets::defense);
-		scale += 1.0f + 0.1f * state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), economy::province_building_type::fort);
+		scale += 1.0f + 0.1f * state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), state.economy_definitions.fort_building);
 		// composition bonus
 		scale += state.world.nation_get_has_gas_defense(n) ? state.defines.gas_attack_modifier : 0.f;
 		auto const strength = std::max(0.75f, estimate_balanced_composition_factor(state, a));
@@ -5934,8 +5939,8 @@ namespace ai {
 					continue;
 				}
 				{ //spam railroads!
-					float amount = 0.0f;
-					auto& base_cost = state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].cost;
+					auto amount = 0.0f;
+					auto const& base_cost = state.world.province_building_type_get_cost(state.economy_definitions.railroad_building);
 					for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
 						if(base_cost.commodity_type[j]) {
 							amount += base_cost.commodity_amounts[j] * state.world.commodity_get_current_price(base_cost.commodity_type[j]);
@@ -5943,15 +5948,15 @@ namespace ai {
 							break;
 						}
 					}
-					int32_t max_rails_lvl = gprl.get_great_power().get_max_building_level(economy::province_building_type::railroad);
+					int32_t max_rails_lvl = gprl.get_great_power().get_max_building_level(state.economy_definitions.railroad_building);
 					for(const auto p : gprl.get_influence_target().get_province_ownership()) {
-						int32_t current_rails_lvl = p.get_province().get_building_level(economy::province_building_type::railroad);
+						int32_t current_rails_lvl = p.get_province().get_building_level(state.economy_definitions.railroad_building);
 						int32_t min_build_railroad = int32_t(p.get_province().get_modifier_values(sys::provincial_mod_offsets::min_build_railroad));
 						if((max_rails_lvl - current_rails_lvl - min_build_railroad > 0) && !province::has_railroads_being_built(state, p.get_province())) {
 							auto money = nations::get_treasury(state, gprl.get_great_power());
 							if(money >= amount * invest_safety_factor) {
-								if(command::can_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad)) {
-									command::execute_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), economy::province_building_type::railroad);
+								if(command::can_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), state.economy_definitions.railroad_building)) {
+									command::execute_begin_province_building_construction(state, gprl.get_great_power(), p.get_province(), state.economy_definitions.railroad_building);
 								}
 							}
 						}
@@ -5964,8 +5969,8 @@ namespace ai {
 					if(!state.world.factory_type_get_is_available_from_start(ft)
 					&& !state.world.nation_get_active_building(gprl.get_great_power(), ft))
 						continue;
-					float amount = 0.0f;
-					auto& base_cost = state.world.factory_type_get_construction_costs(ft);
+					auto amount = 0.0f;
+					auto const& base_cost = state.world.factory_type_get_construction_costs(ft);
 					for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
 						if(base_cost.commodity_type[j]) {
 							amount += base_cost.commodity_amounts[j] * state.world.commodity_get_current_price(base_cost.commodity_type[j]);

@@ -143,7 +143,7 @@ namespace ui {
 			return false;
 		};
 
-		auto nb_level = state.world.province_get_building_level(state.world.navy_get_location_from_navy_location(a), economy::province_building_type::naval_base);
+		auto nb_level = state.world.province_get_building_level(state.world.navy_get_location_from_navy_location(a), state.economy_definitions.naval_base_building);
 		if(state.world.navy_get_is_retreating(a)) {
 			return 2;
 		} else if(state.world.navy_get_battle_from_navy_battle_participation(a)) {

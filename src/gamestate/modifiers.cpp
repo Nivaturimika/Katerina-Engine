@@ -631,13 +631,15 @@ namespace sys {
 		}
 
 		concurrency::parallel_for(uint32_t(0), sys::provincial_mod_offsets::count, [&](uint32_t i) {
-		dcon::provincial_modifier_value mid{dcon::provincial_modifier_value::value_base_t(i)};
-			province::ve_for_each_land_province(state,
-				[&](auto ids) { state.world.province_set_modifier_values(ids, mid, ve::fp_vector{}); });
+			dcon::provincial_modifier_value mid{dcon::provincial_modifier_value::value_base_t(i)};
+			province::ve_for_each_land_province(state, [&](auto ids) {
+				state.world.province_set_modifier_values(ids, mid, ve::fp_vector{});
+			});
 		});
 
-		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)])
-		bulk_apply_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)]);
+		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)]) {
+			bulk_apply_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::land_province)]);
+		}
 
 		province::for_each_land_province(state, [&](dcon::province_id p) {
 			for(auto mpr : state.world.province_get_current_modifiers(p)) {
@@ -669,18 +671,18 @@ namespace sys {
 			}
 		});
 
-		for(auto t = economy::province_building_type::railroad; t != economy::province_building_type::last; t = economy::province_building_type(uint8_t(t) + 1)) {
-			if(state.economy_definitions.building_definitions[int32_t(t)].province_modifier) {
-				bulk_apply_scaled_modifier_to_provinces(state, state.economy_definitions.building_definitions[int32_t(t)].province_modifier,
-					[&](auto ids) { return ve::to_float(state.world.province_get_building_level(ids, t)); });
+		state.world.for_each_province_building_type([&](dcon::province_building_type_id t) {
+			if(auto pmod = state.world.province_building_type_get_province_modifier(t); pmod) {
+				bulk_apply_scaled_modifier_to_provinces(state, pmod, [&](auto ids) { return ve::to_float(state.world.province_get_building_level(ids, t)); });
 			}
-		}
+		});
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)]) {
 			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::infrastructure)], [&](auto ids) {
-				return ve::to_float(state.world.province_get_building_level(ids, economy::province_building_type::railroad)) *
-						 state.economy_definitions.building_definitions[int32_t(economy::province_building_type::railroad)].infrastructure;
+				return ve::to_float(state.world.province_get_building_level(ids, state.economy_definitions.railroad_building))
+					* state.world.province_building_type_get_infrastructure(state.economy_definitions.railroad_building);
 			});
 		}
+
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)]) {
 			bulk_apply_scaled_modifier_to_provinces(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::nationalism)], [&](auto ids) {
 				return ve::select(state.world.province_get_is_owner_core(ids), 0.0f, state.world.province_get_nationalism(ids));

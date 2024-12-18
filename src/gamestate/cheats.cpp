@@ -137,18 +137,16 @@ namespace command {
 		add_to_command_queue(state, p);
 	}
 	void execute_c_complete_constructions(sys::state& state, dcon::nation_id source) {
-	
 		for(uint32_t i = state.world.province_building_construction_size(); i-- > 0;) {
-		dcon::province_building_construction_id c{ dcon::province_building_construction_id::value_base_t(i) };
-
-			if(state.world.province_building_construction_get_nation(c) != source)
-			continue;
-
-			auto t = economy::province_building_type(state.world.province_building_construction_get_type(c));
-			auto const& base_cost = state.economy_definitions.building_definitions[int32_t(t)].cost;
-			auto& current_purchased = state.world.province_building_construction_get_purchased_goods(c);
-			for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j)
-			current_purchased.commodity_amounts[j] = base_cost.commodity_amounts[j] * 2.f;
+			dcon::province_building_construction_id c{ dcon::province_building_construction_id::value_base_t(i) };
+			if(state.world.province_building_construction_get_nation(c) == source) {
+				auto const t = state.world.province_building_construction_get_type(c);
+				auto const& base_cost = state.world.province_building_type_get_cost(t);
+				auto& current_purchased = state.world.province_building_construction_get_purchased_goods(c);
+				for(uint32_t j = 0; j < economy::commodity_set::set_size; ++j) {
+					current_purchased.commodity_amounts[j] = base_cost.commodity_amounts[j] * 2.f;
+				}
+			}
 		}
 	}
 

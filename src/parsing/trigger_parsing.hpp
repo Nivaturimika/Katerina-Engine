@@ -11,13 +11,7 @@
 #include "nations.hpp"
 #include "container_types.hpp"
 
-namespace economy {
-	dcon::modifier_id get_province_selector_modifier(sys::state& state);
-	dcon::modifier_id get_province_immigrator_modifier(sys::state& state);
-}
-
 namespace parsers {
-
 	struct trigger_building_context {
 		scenario_building_context& outer_context;
 		std::vector<uint16_t> compiled_trigger;

@@ -7,11 +7,6 @@
 #include "text.hpp"
 #include "triggers.hpp"
 
-namespace economy {
-	dcon::modifier_id get_province_selector_modifier(sys::state& state);
-	dcon::modifier_id get_province_immigrator_modifier(sys::state& state);
-}
-
 namespace parsers {
 
 	struct effect_building_context {
@@ -546,8 +541,6 @@ namespace parsers {
 		void naval_base(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void bank(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void university(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void province_selector(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
-		void province_immigrator(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void money(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context);
 		void leadership(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context);
 		void create_vassal(association_type t, std::string_view value, error_handler& err, int32_t line, effect_building_context& context);

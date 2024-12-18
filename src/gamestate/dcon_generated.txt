@@ -1398,7 +1398,7 @@ object {
 	}
 	property{
 		name{ building_level }
-		type{ array{economy::province_building_type}{uint8_t} }
+		type{ array{province_building_type_id}{uint8_t} }
 		tag{ save }
 	}
 	property{
@@ -3013,7 +3013,7 @@ object {
 	}
 	property {
 		name{ increase_building }
-		type{ array{economy::province_building_type}{bitfield} }
+		type{ array{province_building_type_id}{bitfield} }
 		tag{ scenario }
 	}
 	property{
@@ -3076,7 +3076,7 @@ object {
 	}
 	property {
 		name{ increase_building }
-		type{ array{economy::province_building_type}{bitfield} }
+		type{ array{province_building_type_id}{bitfield} }
 		tag{ scenario }
 	}
 	property{
@@ -3160,7 +3160,6 @@ object {
 		tag{ scenario }
 	}
 }
-
 
 object {
 	name{ nation }
@@ -3377,7 +3376,7 @@ object {
 	}
 	property {
 		name{ max_building_level }
-		type{ array{economy::province_building_type}{uint8_t} }
+		type{ array{province_building_type_id}{uint8_t} }
 		tag{ unsaved }
 	}
 	property {
@@ -4338,7 +4337,7 @@ relationship{
 	}
 	property{
 		name{ type }
-		type{ uint8_t }
+		type{ province_building_type_id }
 		tag{ save }
 	}
 	property{
@@ -5205,6 +5204,58 @@ object {
 		name{ hide_notification }
 		type{ bitfield }
 		tag{ save }
+	}
+}
+
+object {
+	name{ province_building_type }
+	storage_type{ contiguous }
+	size{ 126 }
+	tag{ scenario }
+	property{
+		name{ name }
+		type{ text_key }
+		tag{ scenario }
+	}
+	property{
+		name{ province_modifier }
+		type{ modifier_id }
+		tag{ scenario }
+	}
+	property{
+		name{ cost }
+		type{ economy::commodity_set }
+		tag{ scenario }
+	}
+	property{
+		name{ naval_capacity }
+		type{ uint8_t }
+		tag{ scenario }
+	}
+	property{
+		name{ colonial_points }
+		type{ std::array<uint8_t,8> }
+		tag{ scenario }
+	}
+	property{
+		name{ colonial_range }
+		type{ uint8_t }
+		tag{ scenario }
+	}
+	property{
+		name{ max_level }
+		type{ uint8_t }
+		tag{ scenario }
+	}
+	property{
+		name{ time }
+		type{ uint16_t }
+		tag{ scenario }
+	}
+	property{
+		name{ infrastructure }
+		type{ float }
+		tag{ scenario }
 	}
 }
 
