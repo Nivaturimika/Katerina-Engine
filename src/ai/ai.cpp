@@ -1032,16 +1032,6 @@ namespace ai {
 			auto treasury = n.get_stockpiles(economy::money);
 			int32_t max_projects = std::max(16, int32_t(n.get_owned_state_count()));
 
-			// Normal mode AI will not minmax the market
-			// The meta play is to gobble up everything so nobody can get supply
-			// Of course for casual gameplay this isn't desired
-			if(uint8_t(state.difficulty) <= uint8_t(sys::difficulty_level::normal)) {
-				max_projects = std::max(1, max_projects);
-				if(economy_factory::nation_is_constructing_factories(state, n)) {
-					continue;
-				}
-			}
-
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
 				// prepare a list of states

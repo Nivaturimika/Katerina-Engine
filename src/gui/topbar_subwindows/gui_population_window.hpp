@@ -21,6 +21,8 @@ namespace ui {
 	void describe_migration(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
 	void describe_colonial_migration(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
 	void describe_emigration(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
+	void describe_promotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
+	void describe_demotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
 	void describe_promotion_demotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
 	void describe_con(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
 	void describe_mil(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids);
@@ -1795,7 +1797,7 @@ namespace ui {
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			describe_promotion_demotion(state, contents, retrieve<dcon::pop_id>(state, parent));
+			describe_promotion(state, contents, retrieve<dcon::pop_id>(state, parent));
 		}
 	};
 	class pop_details_demotion_value : public simple_text_element_base {
@@ -1810,15 +1812,14 @@ namespace ui {
 		}
 
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
-			describe_promotion_demotion(state, contents, retrieve<dcon::pop_id>(state, parent));
+			describe_demotion(state, contents, retrieve<dcon::pop_id>(state, parent));
 		}
 	};
 	class pop_details_promotion_label : public simple_text_element_base {
-		public:
+	public:
 		tooltip_behavior has_tooltip(sys::state& state) noexcept override {
 			return tooltip_behavior::variable_tooltip;
 		}
-
 		void update_tooltip(sys::state& state, int32_t x, int32_t y, text::columnar_layout& contents) noexcept override {
 			describe_promotion_demotion(state, contents, retrieve<dcon::pop_id>(state, parent));
 		}

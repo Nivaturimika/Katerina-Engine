@@ -157,56 +157,51 @@ namespace ui {
 			trigger::to_generic(ids), 0);
 	}
 
+	struct promotion_or_demotion {
+		float pro;
+		float dem;
+	};
+	static promotion_or_demotion promotion_from_national_foci(sys::state& state, dcon::pop_type_id pt, dcon::national_focus_id nf) {
+		auto const promoted_type = state.world.national_focus_get_promotion_type(nf);
+		auto const promotion_bonus = state.world.national_focus_get_promotion_amount(nf);
+		if(promoted_type) {
+			auto const strata = state.world.pop_type_get_strata(pt);
+			if(state.world.pop_type_get_strata(promoted_type) >= strata) {
+				return promotion_or_demotion{ promotion_bonus, 0.f };
+			} else if(state.world.pop_type_get_strata(promoted_type) <= strata) {
+				return promotion_or_demotion{ 0.f, promotion_bonus };
+			}
+		}
+		return promotion_or_demotion{ 0.f, 0.f };
+	}
+
 	void describe_promotion_demotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
-
-		auto owner = nations::owner_of_pop(state, ids);
+		auto const owner = nations::owner_of_pop(state, ids);
 		auto promotion_chance = trigger::evaluate_additive_modifier(state, state.culture_definitions.promotion_chance,
-		trigger::to_generic(ids), trigger::to_generic(ids), 0);
+			trigger::to_generic(ids), trigger::to_generic(ids), 0);
 		auto demotion_chance = trigger::evaluate_additive_modifier(state, state.culture_definitions.demotion_chance,
-		trigger::to_generic(ids), trigger::to_generic(ids), 0);
+			trigger::to_generic(ids), trigger::to_generic(ids), 0);
 
-		auto loc = state.world.pop_get_province_from_pop_location(ids);
-		auto si = state.world.province_get_state_membership(loc);
-		auto nf = state.world.state_instance_get_owner_focus(si);
-		auto promoted_type = state.world.national_focus_get_promotion_type(nf);
-		auto promotion_bonus = state.world.national_focus_get_promotion_amount(nf);
-		auto ptype = state.world.pop_get_poptype(ids);
-		auto strata = state.world.pop_type_get_strata(ptype);
-
+		auto const loc = state.world.pop_get_province_from_pop_location(ids);
+		auto const si = state.world.province_get_state_membership(loc);
+		auto const nf = state.world.state_instance_get_owner_focus(si);
+		auto const promoted_type = state.world.national_focus_get_promotion_type(nf);
+		auto const promotion_bonus = state.world.national_focus_get_promotion_amount(nf);
+		auto const ptype = state.world.pop_get_poptype(ids);
+		auto const strata = state.world.pop_type_get_strata(ptype);
+		
 		text::add_line(state, contents, "pop_prom_1");
 		if(promoted_type) {
-			if(promoted_type == ptype) {
-				text::add_line(state, contents, "pop_prom_3");
-			} else if(state.world.pop_type_get_strata(promoted_type) >= strata) {
-				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ promotion_bonus });
+			if(state.world.pop_type_get_strata(promoted_type) >= strata) {
 				promotion_chance += promotion_bonus;
 			} else if(state.world.pop_type_get_strata(promoted_type) <= strata) {
 				demotion_chance += promotion_bonus;
 			}
 		}
-		additive_value_modifier_description(state, contents, state.culture_definitions.promotion_chance, trigger::to_generic(ids),
-			trigger::to_generic(ids), 0);
-
-		text::add_line_break_to_layout(state, contents);
-
-		text::add_line(state, contents, "pop_prom_4");
-		if(promoted_type) {
-			if(promoted_type == ptype) {
-
-			} else if(state.world.pop_type_get_strata(promoted_type) >= strata) {
-
-			} else if(state.world.pop_type_get_strata(promoted_type) <= strata) {
-				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ promotion_bonus });
-			}
-		}
-		additive_value_modifier_description(state, contents, state.culture_definitions.demotion_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0);
-		text::add_line_break_to_layout(state, contents);
-
 		if(promotion_chance <= 0.0f && demotion_chance <= 0.0f) {
 			text::add_line(state, contents, "pop_prom_7");
 			return;
 		}
-
 		bool promoting = promotion_chance >= demotion_chance;
 		if(promoting) {
 			text::add_line(state, contents, "pop_prom_5");
@@ -218,6 +213,43 @@ namespace ui {
 			text::add_line(state, contents, "pop_prom_9", text::variable_type::x, text::fp_three_places{ state.defines.promotion_scale },
 				text::variable_type::val, text::fp_two_places{ demotion_chance });
 		}
+	}
+
+	void describe_promotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
+		auto const owner = nations::owner_of_pop(state, ids);
+		auto loc = state.world.pop_get_province_from_pop_location(ids);
+		auto si = state.world.province_get_state_membership(loc);
+		auto ptype = state.world.pop_get_poptype(ids);
+		text::add_line(state, contents, "pop_prom_1");
+		if(auto nf = state.world.state_instance_get_owner_focus(si); nf) {
+			auto const pd = promotion_from_national_foci(state, ptype, nf);
+			if(pd.pro > 0.f) {
+				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ pd.pro });
+			} else {
+				text::add_line(state, contents, "pop_prom_3");
+			}
+		}
+		additive_value_modifier_description(state, contents, state.culture_definitions.promotion_chance, trigger::to_generic(ids),
+			trigger::to_generic(ids), 0);
+		text::add_line_break_to_layout(state, contents);
+	}
+
+	void describe_demotion(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {
+		auto const owner = nations::owner_of_pop(state, ids);
+		auto loc = state.world.pop_get_province_from_pop_location(ids);
+		auto si = state.world.province_get_state_membership(loc);
+		auto ptype = state.world.pop_get_poptype(ids);
+		text::add_line(state, contents, "pop_prom_4");
+		if(auto nf = state.world.state_instance_get_owner_focus(si); nf) {
+			auto const pd = promotion_from_national_foci(state, ptype, nf);
+			if(pd.dem > 0.f) {
+				text::add_line(state, contents, "pop_prom_2", text::variable_type::val, text::fp_two_places{ pd.dem });
+			} else {
+				text::add_line(state, contents, "pop_prom_3");
+			}
+		}
+		additive_value_modifier_description(state, contents, state.culture_definitions.demotion_chance, trigger::to_generic(ids), trigger::to_generic(ids), 0);
+		text::add_line_break_to_layout(state, contents);
 	}
 
 	void describe_con(sys::state& state, text::columnar_layout& contents, dcon::pop_id ids) {

@@ -353,3 +353,21 @@ The following is an example of the system:
 0.1.2.1
 0.1.2.2
 0.1.2
+
+### `filter` vs `mask`
+
+What's the difference? Well in simple terms, look at this SIMD code:
+
+```c++
+// Promotion -- national focus
+auto const mask_a = promoting && nf_ptype != dcon::pop_type_id{} && nf_strata >= strata
+	&& (is_state_capital || state.world.pop_type_get_state_capital_only(nf_ptype) == false);
+// Demotion -- national focus
+auto const mask_b = !promoting && nf_ptype != dcon::pop_type_id{} && nf_strata <= strata
+	&& (is_state_capital || state.world.pop_type_get_state_capital_only(nf_ptype) == false);
+// General passed filter
+auto const filter_a = owners != dcon::nation_id{} && promotion_chances > 0.f && demotion_chances > 0.f
+	&& base_amounts > 0.f;
+```
+
+A filter is to be given as a parameter to a `ve::apply` to be serially applied to a set of instructions as a form of a predicate. Whereas a mask is used within SIMD code to mask off elements without a `ve::apply`.
