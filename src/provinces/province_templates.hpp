@@ -59,7 +59,7 @@ namespace province {
 			return state.world.province_get_is_coast(prov) && (level < max_level) && (level != 0 || has_base);
 		} else if(pbt == state.economy_definitions.railroad_building) {
 			auto const pmod = state.world.province_get_modifier_values(prov, sys::provincial_mod_offsets::min_build_railroad);
-			return level + pmod < max_level;
+			return level + ve::to_int(pmod) < max_level;
 		}
 		return level < max_level;
 	}
