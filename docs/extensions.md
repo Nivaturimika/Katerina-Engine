@@ -858,10 +858,10 @@ AND = { exists = yes tag = PRU }
 
 Let's do some induction then (`T` if the trigger returned `True`, `F` if it returned `False`):
 ```
-NOT = { OR = { NOT = { F } NOT = { F } } -> NOT = { OR = { T T } } -> NOT = { T } -> F
-NOT = { OR = { NOT = { F } NOT = { T } } -> NOT = { OR = { T F } } -> NOT = { T } -> F
-NOT = { OR = { NOT = { T } NOT = { F } } -> NOT = { OR = { F T } } -> NOT = { T } -> F
-NOT = { OR = { NOT = { T } NOT = { T } } -> NOT = { OR = { F F } } -> NOT = { F } -> T
+NOT = { OR = { NOT = { F } NOT = { F } } } -> NOT = { OR = { T T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { F } NOT = { T } } } -> NOT = { OR = { T F } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { F } } } -> NOT = { OR = { F T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { T } } } -> NOT = { OR = { F F } } -> NOT = { F } -> T
 
 AND = { F F } -> F
 AND = { F T } -> F
