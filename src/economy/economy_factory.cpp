@@ -299,15 +299,14 @@ namespace economy_factory {
 		// when relative production is high, we want to reduce our speed
 		// for example, if relative production is 1.0, then we want to clamp our speed with ~0.01 or something small like this;
 		// and if relative production is ~0, then clamps are not needed
-		float relative_production_amount =
+		auto relative_production_amount =
 			state.world.factory_type_get_output_amount(ft)
 			/ (
 				state.world.commodity_get_total_production(factory_fat_id.get_building_type().get_output())
 				+ state.world.commodity_get_total_real_demand(factory_fat_id.get_building_type().get_output())
-				+ 10.f
 			);
 
-		auto const relative_modifier = (1.f / (relative_production_amount + 0.01f)) / 1000.f;
+		auto const relative_modifier = (1.f / (relative_production_amount + 0.001f)) / 100.f;
 		auto const effective_production_scale = 0.0f;
 		auto new_production_scale = 0.0f;
 		if(state.world.factory_get_subsidized(f)) {
@@ -330,6 +329,7 @@ namespace economy_factory {
 			+ (state.world.factory_get_priority_high(factory_id) ? 2 : 0);
 	}
 
+	/* Count built factories only */
 	int32_t state_built_factory_count(sys::state& state, dcon::state_instance_id sid) {
 		dcon::nation_id nation_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		int32_t number_of_factories = 0;
@@ -342,6 +342,7 @@ namespace economy_factory {
 		return number_of_factories;
 	}
 
+	/* Count of total factories the already built ones and the ones being built */
 	int32_t state_factory_count(sys::state& state, dcon::state_instance_id sid) {
 		dcon::nation_id nationd_id = state.world.state_instance_get_nation_from_state_ownership(sid);
 		int32_t number_of_factories = 0;
