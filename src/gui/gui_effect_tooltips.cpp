@@ -9,12 +9,6 @@
 #include "text.hpp"
 #include "triggers.hpp"
 
-namespace economy {
-	std::string_view province_building_type_get_level_text(dcon::province_building_type_id p) {
-		return "aaaaaaaaaaaaaaaa";
-	}
-}
-
 namespace ui {
 
 	namespace effect_tooltip {
@@ -2965,32 +2959,6 @@ namespace ui {
 			}
 			return 0;
 		}
-		uint32_t ef_infrastructure(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.railroad_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_infrastructure_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.railroad_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
 		uint32_t ef_money(EFFECT_DISPLAY_PARAMS) {
 			auto amount = trigger::read_float_from_payload(tval + 1);
 			{
@@ -4178,58 +4146,6 @@ namespace ui {
 			text::add_space_to_layout_box(ws, layout, box);
 			display_value(int64_t(trigger::payload(tval[1]).signed_value), false, ws, layout, box);
 			text::close_layout_box(layout, box);
-			return 0;
-		}
-		uint32_t ef_fort_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.fort_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_fort(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.fort_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_naval_base(EFFECT_DISPLAY_PARAMS) {
-			auto type =ws.economy_definitions.naval_base_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_naval_base_state(EFFECT_DISPLAY_PARAMS) {
-			auto type =ws.economy_definitions.naval_base_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
 			return 0;
 		}
 		uint32_t ef_trigger_revolt_nation(EFFECT_DISPLAY_PARAMS) {
@@ -7167,52 +7083,26 @@ namespace ui {
 			return 0;
 		}
 
-		uint32_t ef_bank_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.bank_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
+		uint32_t ef_building(EFFECT_DISPLAY_PARAMS) {
+			auto const pbt = trigger::payload(tval[1]).pbt_id;
+			auto const amount = int32_t(trigger::payload(tval[2]).signed_value);
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::localised_format_box(ws, layout, box, "building_level", m);
 				text::add_space_to_layout_box(ws, layout, box);
 				display_value(int64_t(amount), true, ws, layout, box);
 				text::close_layout_box(layout, box);
 			}
 			return 0;
 		}
-		uint32_t ef_bank(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.bank_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
+		uint32_t ef_building_state(EFFECT_DISPLAY_PARAMS) {
+			auto const pbt = trigger::payload(tval[1]).pbt_id;
+			auto const amount = int32_t(trigger::payload(tval[2]).signed_value);
 			{
 				auto box = text::open_layout_box(layout, indentation);
 				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_university_state(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.university_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
-				text::add_space_to_layout_box(ws, layout, box);
-				display_value(int64_t(amount), true, ws, layout, box);
-				text::close_layout_box(layout, box);
-			}
-			return 0;
-		}
-		uint32_t ef_university(EFFECT_DISPLAY_PARAMS) {
-			auto type = ws.economy_definitions.university_building;
-			auto amount = trigger::payload(tval[1]).signed_value;
-			{
-				auto box = text::open_layout_box(layout, indentation);
-				text::substitution_map m;
-				text::localised_format_box(ws, layout, box, economy::province_building_type_get_level_text(type), m);
+				text::localised_format_box(ws, layout, box, "building_level", m);
 				text::add_space_to_layout_box(ws, layout, box);
 				display_value(int64_t(amount), true, ws, layout, box);
 				text::close_layout_box(layout, box);
@@ -7448,6 +7338,18 @@ namespace ui {
 			text::close_layout_box(layout, box);
 			return 0;
 		}
+
+#define EFFECT_UNUSED(x) uint32_t ef_unused_##x(EFFECT_DISPLAY_PARAMS) { return 0; }
+	EFFECT_UNUSED(1)
+	EFFECT_UNUSED(2)
+	EFFECT_UNUSED(3)
+	EFFECT_UNUSED(4)
+	EFFECT_UNUSED(5)
+	EFFECT_UNUSED(6)
+	EFFECT_UNUSED(7)
+	EFFECT_UNUSED(8)
+	EFFECT_UNUSED(9)
+#undef EFFECT_UNUSED
 
 		inline constexpr uint32_t(*effect_functions[effect::first_invalid_code])(EFFECT_DISPLAY_PARAMS) = {
 			ef_none,

@@ -110,7 +110,6 @@ namespace parsers {
 				context.state.world.modifier_set_name(pmod, name_k);
 				context.state.world.province_building_type_set_province_modifier(id, pmod);
 			}
-
 			if(res.type == "fort") {
 				context.state.economy_definitions.fort_building = id;
 			} else if(res.type == "naval_base") {
@@ -124,6 +123,7 @@ namespace parsers {
 			} else {
 				err.accumulated_warnings += "Unsupported building type" + res.type + " (" + err.file_name + ")\n";
 			}
+			context.map_of_province_building_types.insert_or_assign(res.type, id);
 		}
 	}
 

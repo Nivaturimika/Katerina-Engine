@@ -117,7 +117,7 @@
 	EFFECT_BYTECODE_ELEMENT(0x0056, change_controller_this_province, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0057, change_controller_from_nation, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0058, change_controller_from_province, 0) \
-	EFFECT_BYTECODE_ELEMENT(0x0059, infrastructure, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x0059, unused_2, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x005A, money, 2) \
 	EFFECT_BYTECODE_ELEMENT(0x005B, leadership, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x005C, create_vassal, 1) \
@@ -200,8 +200,8 @@
 	EFFECT_BYTECODE_ELEMENT(0x00A9, consciousness, 2) \
 	EFFECT_BYTECODE_ELEMENT(0x00AA, militancy, 2) \
 	EFFECT_BYTECODE_ELEMENT(0x00AB, rgo_size, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x00AC, fort, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x00AD, naval_base, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x00AC, unused_7, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x00AD, unused_8, 1) \
 	EFFECT_BYTECODE_ELEMENT(0x00AE, trigger_revolt_nation, 4) \
 	EFFECT_BYTECODE_ELEMENT(0x00AF, trigger_revolt_state, 4) \
 	EFFECT_BYTECODE_ELEMENT(0x00B0, trigger_revolt_province, 4) \
@@ -388,9 +388,9 @@
 	EFFECT_BYTECODE_ELEMENT(0x0164, secede_province_state_from_nation, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0165, secede_province_state_from_province, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0166, secede_province_state_reb, 0) \
-	EFFECT_BYTECODE_ELEMENT(0x0167, infrastructure_state, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x0168, fort_state, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x0169, naval_base_state, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x0167, building, 2) \
+	EFFECT_BYTECODE_ELEMENT(0x0168, building_state, 2) \
+	EFFECT_BYTECODE_ELEMENT(0x0169, unused_9, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x016A, is_slave_province_yes, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x016B, is_slave_province_no, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x016C, change_controller_state, 1) \
@@ -434,10 +434,10 @@
 	EFFECT_BYTECODE_ELEMENT(0x0192, build_university_in_capital_yes_whole_state_no_limit, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0193, build_university_in_capital_no_whole_state_yes_limit, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0194, build_university_in_capital_no_whole_state_no_limit, 0) \
-	EFFECT_BYTECODE_ELEMENT(0x0195, bank, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x0196, bank_state, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x0197, university, 1) \
-	EFFECT_BYTECODE_ELEMENT(0x0198, university_state, 1) \
+	EFFECT_BYTECODE_ELEMENT(0x0195, unused_3, 0) \
+	EFFECT_BYTECODE_ELEMENT(0x0196, unused_4, 0) \
+	EFFECT_BYTECODE_ELEMENT(0x0197, unused_5, 0) \
+	EFFECT_BYTECODE_ELEMENT(0x0198, unused_6, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x0199, kill_leader, 2) \
 	EFFECT_BYTECODE_ELEMENT(0x019A, annex_to_null_nation, 0) \
 	EFFECT_BYTECODE_ELEMENT(0x019B, annex_to_null_province, 0) \

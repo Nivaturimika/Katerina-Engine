@@ -3589,32 +3589,6 @@ namespace parsers {
 			return;
 		}
 	}
-	void effect_body::bank(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::bank));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_effect.push_back(uint16_t(effect::bank_state));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else {
-			err.accumulated_errors +=
-			"bank effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
-	void effect_body::university(association_type t, int32_t value, error_handler& err, int32_t line, effect_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::province) {
-			context.compiled_effect.push_back(uint16_t(effect::university));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else if(context.main_slot == trigger::slot_contents::state) {
-			context.compiled_effect.push_back(uint16_t(effect::university_state));
-			context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
-		} else {
-			err.accumulated_errors +=
-			"university effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
-	}
 	void effect_body::money(association_type t, float value, error_handler& err, int32_t line, effect_building_context& context) {
 		if(context.main_slot == trigger::slot_contents::nation) {
 			context.compiled_effect.push_back(uint16_t(effect::treasury));
@@ -5160,6 +5134,19 @@ namespace parsers {
 				}
 			} else {
 				err.accumulated_errors += "named reform effect used with an invalid option name (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				return;
+			}
+		} else if(auto iti = context.outer_context.map_of_province_building_types.find(); iti != context.outer_context.map_of_province_building_types.end()) {
+			if(context.main_slot == trigger::slot_contents::province) {
+				context.compiled_effect.push_back(uint16_t(effect::building));
+				context.compiled_effect.push_back(trigger::payload(iti->second).pbt_id);
+				context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
+			} else if(context.main_slot == trigger::slot_contents::state) {
+				context.compiled_effect.push_back(uint16_t(effect::building_state));
+				context.compiled_effect.push_back(trigger::payload(iti->second).pbt_id);
+				context.compiled_effect.push_back(trigger::payload(int16_t(value)).value);
+			} else {
+				err.accumulated_errors += "named building effect used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
 		} else {

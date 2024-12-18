@@ -121,10 +121,9 @@ namespace trigger {
 	};
 	static_assert(sizeof(data_sizes) == first_scope_code);
 
-enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation = 4, rebel = 5 };
+	enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation = 4, rebel = 5 };
 
 	union payload {
-
 		uint16_t value;
 		int16_t signed_value;
 		bool boolean_value;
@@ -162,6 +161,7 @@ enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation =
 		dcon::stored_trigger_id str_id;
 		dcon::national_focus_id nf_id;
 		dcon::provincial_flag_id provf_id;
+		dcon::province_building_type_id pbt_id;
 
 		// variables::national_variable_tag nat_var;
 		// variables::national_flag_tag nat_flag;
@@ -169,9 +169,9 @@ enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation =
 		// events::event_tag event;
 		// trigger_tag trigger;
 
-	payload(payload const& i) noexcept : value(i.value) { }
-	payload(uint16_t i) : value(i) { }
-	payload(int16_t i) : signed_value(i) { }
+		payload(payload const& i) noexcept : value(i.value) { }
+		payload(uint16_t i) : value(i) { }
+		payload(int16_t i) : signed_value(i) { }
 		payload(bool i) {
 			memset(this, 0, sizeof(payload));
 			boolean_value = i;
@@ -312,8 +312,11 @@ enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation =
 			memset(this, 0, sizeof(payload));
 			str_id = i;
 		}
+		payload(dcon::province_building_type_id i) {
+			memset(this, 0, sizeof(payload));
+			pbt_id = i;
+		}
 	};
-
 	static_assert(sizeof(payload) == 2);
 
 	inline int32_t get_trigger_non_scope_payload_size(uint16_t const* data) {
@@ -324,16 +327,16 @@ enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation =
 		return data[1];
 	}
 	inline int32_t get_trigger_payload_size(uint16_t const* data) {
-		if((data[0] & trigger::code_mask) >= trigger::first_scope_code)
-		return get_trigger_scope_payload_size(data);
-		else
+		if((data[0] & trigger::code_mask) >= trigger::first_scope_code) {
+			return get_trigger_scope_payload_size(data);
+		}
 		return get_trigger_non_scope_payload_size(data);
 	}
 	inline int32_t trigger_scope_data_payload(uint16_t code) {
 		auto const masked_code = code & trigger::code_mask;
-		if((masked_code == trigger::x_provinces_in_variable_region) || (masked_code == trigger::x_provinces_in_variable_region_proper) || (masked_code == trigger::tag_scope) ||
-			(masked_code == trigger::integer_scope))
-		return 1;
+		if((masked_code == trigger::x_provinces_in_variable_region) || (masked_code == trigger::x_provinces_in_variable_region_proper) || (masked_code == trigger::tag_scope)
+		|| (masked_code == trigger::integer_scope))
+			return 1;
 		return 0;
 	}
 
@@ -341,10 +344,8 @@ enum class slot_contents { empty = 0, province = 1, state = 2, pop = 3, nation =
 	uint16_t* recurse_over_triggers(uint16_t* source, T const& f) {
 		f(source);
 		assert((source[0] & trigger::code_mask) < trigger::first_invalid_code || (source[0] & trigger::code_mask) == trigger::code_mask);
-
 		if((source[0] & trigger::code_mask) >= trigger::first_scope_code) {
 			auto const source_size = 1 + get_trigger_scope_payload_size(source);
-
 			auto sub_units_start = source + 2 + trigger_scope_data_payload(source[0]);
 			while(sub_units_start < source + source_size) {
 				sub_units_start = recurse_over_triggers(sub_units_start, f);
