@@ -937,7 +937,7 @@ namespace ai {
 		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
 			if(inputs.commodity_type[i]) {
 				// lacks input, do not build (early break)
-				if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.75f) {
+				if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.85f) {
 					return false;
 				}
 				continue; // -- it does not lack an input
@@ -997,9 +997,9 @@ namespace ai {
 				continue; //if our army is too small, ignore buildings:
 
 			auto treasury = n.get_stockpiles(economy::money);
-			//int32_t max_projects = std::max(1, int32_t(n.get_owned_state_count()));
+			int32_t max_projects = std::max(1, int32_t(n.get_owned_state_count()));
 			//auto const sc = state.world.nation_get_state_building_construction(n);
-			int32_t max_projects = 0;
+			//int32_t max_projects = 0;
 
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
@@ -1041,7 +1041,8 @@ namespace ai {
 								if(!f.get_factory().get_unprofitable()
 								&& f.get_factory().get_primary_employment() >= 0.9f
 								&& f.get_factory().get_production_scale() >= 0.9f
-								&& f.get_factory().get_level() < uint8_t(255)) {
+								&& f.get_factory().get_level() < uint8_t(255)
+								&& ai::get_is_desirable_factory_type(state, n, f.get_factory().get_building_type())) {
 									// test if factory is already upgrading
 									auto ug_in_progress = false;
 									for(auto c : state.world.state_instance_get_state_building_construction(si)) {
@@ -1082,12 +1083,14 @@ namespace ai {
 								auto t_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, ft, si)
 									+ economy_factory::sum_of_factory_triggered_input_modifiers(state, ft, si);
 								auto sat = state.world.nation_get_demand_satisfaction(n, ft.get_output());
-								if(sat < top_desired_value) {
+								if(sat * t_bonus < top_desired_value) {
 									top_desired_type = ft;
 									top_desired_value = sat * t_bonus;
 								}
 							}
 						}
+						if(!top_desired_type)
+							continue;
 
 						// check -- either unemployed factory workers or no factory workers
 						auto pw_num = state.world.state_instance_get_demographics(si, demographics::to_key(state, state.culture_definitions.primary_factory_worker));
