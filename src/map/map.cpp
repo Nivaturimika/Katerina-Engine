@@ -2088,12 +2088,11 @@ namespace map {
 			auto start_normal = glm::vec2(-prev_perpendicular.y, prev_perpendicular.x);
 			auto norm_pos = current_pos / glm::vec2(size_x, size_y);
 
-		buffer.emplace_back(norm_pos, +start_normal, glm::vec2{0,0}, glm::vec2(0.0f, 0.0f), progress > 0.0f ? 2.0f : 0.0f);
-		buffer.emplace_back(norm_pos, -start_normal, glm::vec2{ 0,0 }, glm::vec2(0.0f, 1.0f), progress > 0.0f ? 2.0f : 0.0f);
+			buffer.emplace_back(norm_pos, +start_normal, glm::vec2{0,0}, glm::vec2(0.0f, 0.0f), progress > 0.0f ? 2.0f : 0.0f);
+			buffer.emplace_back(norm_pos, -start_normal, glm::vec2{ 0,0 }, glm::vec2(0.0f, 1.0f), progress > 0.0f ? 2.0f : 0.0f);
 			for(auto i = ps; i-- > 0;) {
-			glm::vec2 next_perpendicular{ 0.0f, 0.0f };
+				glm::vec2 next_perpendicular{ 0.0f, 0.0f };
 				next_pos = put_in_local(duplicates::get_army_location(state, path[i]), current_pos, size_x);
-
 				if(i > 0) {
 					glm::vec2 next_next_pos = put_in_local(duplicates::get_army_location(state, path[i - 1]), next_pos, size_x);
 					glm::vec2 a_per = glm::normalize(next_pos - current_pos);
@@ -2102,7 +2101,7 @@ namespace map {
 					if(glm::length(temp) < 0.00001f) {
 						next_perpendicular = -a_per;
 					} else {
-					next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
+						next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
 						if(glm::dot(a_per, -next_perpendicular) < glm::dot(a_per, next_perpendicular)) {
 							next_perpendicular *= -1.0f;
 						}
@@ -2110,16 +2109,15 @@ namespace map {
 				} else {
 					next_perpendicular = glm::normalize(current_pos - next_pos);
 				}
-
 				add_bezier_to_buffer(buffer, current_pos, next_pos, prev_perpendicular, next_perpendicular, i == ps - 1 ? progress : 0.0f, i == 0, size_x, size_y, default_num_b_segments);
-
 				prev_perpendicular = -1.0f * next_perpendicular;
 				current_pos = duplicates::get_army_location(state, path[i]);
 			}
 		}
 	}
 
-	void create_railroad_connection(sys::state& state, std::vector<glm::vec2>& railroad, dcon::province_id p1, dcon::province_id p2) {
+	using railroad_node_list = std::vector<glm::vec2, dcon::cache_aligned_allocator<glm::vec2>>;
+	void create_railroad_connection(sys::state& state, railroad_node_list& railroad, dcon::province_id p1, dcon::province_id p2) {
 		auto const m1 = state.world.province_get_mid_point(p1);
 		auto const m2 = state.world.province_get_mid_point(p2);
 		railroad.emplace_back(m1);
@@ -2133,9 +2131,9 @@ namespace map {
 
 	bool get_provinces_part_of_rr_path(sys::state& state, std::vector<bool>& visited_adj, std::vector<bool>& visited_prov, std::vector<dcon::province_id>& provinces, dcon::province_id p) {
 		if(state.world.province_get_building_level(p, state.economy_definitions.railroad_building) == 0)
-		return false;
+			return false;
 		if(visited_prov[p.index()])
-		return false;
+			return false;
 		visited_prov[p.index()] = true;
 		provinces.push_back(p);
 
@@ -2144,14 +2142,14 @@ namespace map {
 			auto const pa = adj.get_connected_provinces(adj.get_connected_provinces(0) == p ? 1 : 0);
 			if(pa.get_building_level(state.economy_definitions.railroad_building) == 0
 			|| visited_prov[pa.id.index()])
-			continue;
+				continue;
 			// Do not display railroads if it's a strait OR an impassable land border!
 			if((adj.get_type() & province::border::impassible_bit) != 0
 			|| (adj.get_type() & province::border::non_adjacent_bit) != 0)
-			continue;
+				continue;
 			// Don't make earth-wide railroads
 			if(std::abs(state.world.province_get_mid_point(p).x - pa.get_mid_point().x) > state.map_state.map_data.size_x / 8.f)
-			continue;
+				continue;
 			valid_adj.push_back(adj.id);
 		}
 		pdqsort(valid_adj.begin(), valid_adj.end(), [&](auto const a, auto const b) -> bool {
@@ -2175,14 +2173,15 @@ namespace map {
 		std::vector<bool> visited_prov(state.world.province_size() + 1, false);
 		std::vector<bool> rr_ends(state.world.province_size() + 1, false);
 		std::vector<bool> visited_adj(state.world.province_adjacency_size() + 1, false);
-		std::vector<std::vector<glm::vec2>> railroads;
+		std::vector<railroad_node_list> railroads;
 		for(const auto p : state.world.in_province) {
 			std::vector<dcon::province_id> provinces;
 			if(get_provinces_part_of_rr_path(state, visited_adj, visited_prov, provinces, p)) {
 				if(provinces.size() > 1) {
-					std::vector<glm::vec2> railroad;
-					for(uint32_t i = 0; i < uint32_t(provinces.size() - 1); i++)
-					create_railroad_connection(state, railroad, provinces[i], provinces[i + 1]);
+					railroad_node_list railroad;
+					for(uint32_t i = 0; i < uint32_t(provinces.size() - 1); i++) {
+						create_railroad_connection(state, railroad, provinces[i], provinces[i + 1]);
+					}
 					railroad.emplace_back(state.world.province_get_mid_point(provinces.back()));
 					assert(!railroad.empty());
 					railroads.push_back(railroad);
@@ -2202,23 +2201,23 @@ namespace map {
 				std::vector<dcon::province_adjacency_id> valid_adj;
 				for(const auto adj : p1.get_province_adjacency_as_connected_provinces()) {
 					if(max_adj == 0)
-					break;
+						break;
 					auto p2 = adj.get_connected_provinces(adj.get_connected_provinces(0) == p1.id ? 1 : 0);
 					if(p2.get_building_level(state.economy_definitions.railroad_building) == 0)
-					continue;
+						continue;
 					// Do not display railroads if it's a strait OR an impassable land border!
 					if((adj.get_type() & province::border::impassible_bit) != 0
 					|| (adj.get_type() & province::border::non_adjacent_bit) != 0)
-					continue;
+						continue;
 					// Don't make earth-wide railroads
 					if(std::abs(p1.get_mid_point().x - p2.get_mid_point().x) > state.map_state.map_data.size_x / 8.f)
-					continue;
+						continue;
 					max_adj--;
 					if(visited_adj[adj.id.index()])
-					continue;
+						continue;
 					if(rr_ends[p1.id.index()] != rr_ends[p2.id.index()]
 					&& rr_ends[p1.id.index()] == false)
-					continue;
+						continue;
 					visited_adj[adj.id.index()] = true;
 					valid_adj.push_back(adj.id);
 				}
@@ -2231,7 +2230,7 @@ namespace map {
 					auto const adj = dcon::fatten(state.world, a);
 					auto const p2 = adj.get_connected_provinces(adj.get_connected_provinces(0) == p1.id ? 1 : 0);
 					//
-					std::vector<glm::vec2> railroad;
+					railroad_node_list railroad;
 					create_railroad_connection(state, railroad, p1.id, p2.id);
 					railroad.emplace_back(state.world.province_get_mid_point(p2.id));
 					assert(!railroad.empty());
@@ -2250,11 +2249,11 @@ namespace map {
 			glm::vec2 prev_perpendicular = glm::normalize(next_pos - current_pos);
 			auto start_normal = glm::vec2(-prev_perpendicular.y, prev_perpendicular.x);
 			auto norm_pos = current_pos / glm::vec2(size_x, size_y);
-		railroad_vertices.emplace_back(textured_line_vertex{ norm_pos, +start_normal, 0.0f, 0.f });//C
-		railroad_vertices.emplace_back(textured_line_vertex{ norm_pos, -start_normal, 1.0f, 0.f });//D
+			railroad_vertices.emplace_back(textured_line_vertex{ norm_pos, +start_normal, 0.0f, 0.f });//C
+			railroad_vertices.emplace_back(textured_line_vertex{ norm_pos, -start_normal, 1.0f, 0.f });//D
 			float distance = 0.0f;
 			for(auto i = railroad.size() - 1; i-- > 0;) {
-			glm::vec2 next_perpendicular{ 0.0f, 0.0f };
+				glm::vec2 next_perpendicular{ 0.0f, 0.0f };
 				next_pos = put_in_local(railroad[i], current_pos, float(size_x));
 				if(i > 0) {
 					glm::vec2 next_next_pos = put_in_local(railroad[i - 1], next_pos, float(size_x));
@@ -2264,9 +2263,10 @@ namespace map {
 					if(glm::length(temp) < 0.00001f) {
 						next_perpendicular = -a_per;
 					} else {
-					next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
-						if(glm::dot(a_per, -next_perpendicular) < glm::dot(a_per, next_perpendicular))
-						next_perpendicular *= -1.0f;
+						next_perpendicular = glm::normalize(glm::vec2{ -temp.y, temp.x });
+						if(glm::dot(a_per, -next_perpendicular) < glm::dot(a_per, next_perpendicular)) {
+							next_perpendicular *= -1.0f;
+						}
 					}
 				} else {
 					next_perpendicular = glm::normalize(current_pos - next_pos);
