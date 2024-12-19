@@ -1321,7 +1321,7 @@ namespace economy {
 					if(existing_constructions.begin() != existing_constructions.end())
 						continue; // already building
 
-					if(n.get_private_investment() * 0.05f < total_cost + total_cost_added)
+					if(n.get_private_investment() * 0.25f < total_cost + total_cost_added)
 						continue;
 
 					if((nation_rules & issue_rule::pop_build_factory) != 0
