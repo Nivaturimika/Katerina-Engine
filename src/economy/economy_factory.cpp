@@ -417,6 +417,7 @@ namespace economy_factory {
 	}
 
 	void prune_factories(sys::state& state) {
+		/*
 		for(auto state_instance_fat_id : state.world.in_state_instance) {
 			auto owner = state_instance_fat_id.get_nation_from_state_ownership();
 			auto combined_issue_rules = owner.get_combined_issue_rules();
@@ -448,8 +449,8 @@ namespace economy_factory {
 				}
 			}
 		}
+		*/
 	}
-
 
 	void set_factory_priority(sys::state& state, dcon::factory_id factory_id, int32_t priority) {
 		state.world.factory_set_priority_high(factory_id, priority >= 2);
