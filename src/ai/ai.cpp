@@ -939,22 +939,22 @@ namespace ai {
 			return false;
 
 		// does the nation need the outputs of this factory?
-		if(state.world.nation_get_demand_satisfaction(n, state.world.factory_type_get_output(ft)) > 0.9f)
-			return false; //early exit
-
-		auto& inputs = state.world.factory_type_get_inputs(ft);
-		for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-			if(inputs.commodity_type[i]) {
-				// lacks input, do not build (early break)
-				if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.25f) {
-					return false;
+		if(state.world.nation_get_demand_satisfaction(n, state.world.factory_type_get_output(ft)) < 0.95f) {
+			auto& inputs = state.world.factory_type_get_inputs(ft);
+			for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
+				if(inputs.commodity_type[i]) {
+					// lacks input, do not build (early break)
+					if(state.world.nation_get_demand_satisfaction(n, inputs.commodity_type[i]) < 0.95f) {
+						return false;
+					}
+					continue; // -- it does not lack an input
+				} else { // -- end of inputs
+					return true; // iff output not satisfied, build
 				}
-				continue; // -- it does not lack an input
-			} else { // -- end of inputs
-				return true; // iff output not satisfied, build
 			}
+			return true; // no inputs
 		}
-		return true; // no inputs
+		return false;
 	}
 
 	void get_desired_factory_types(sys::state& state, dcon::nation_id nid, std::vector<dcon::factory_type_id>& desired_types) {
@@ -1005,10 +1005,8 @@ namespace ai {
 			if(uint16_t(0.25f * n.get_recruitable_regiments()) > n.get_active_regiments())
 				continue; //if our army is too small, ignore buildings:
 
-			auto treasury = n.get_stockpiles(economy::money);
 			int32_t max_projects = std::max(5, int32_t(n.get_owned_state_count()));
-
-			auto rules = n.get_combined_issue_rules();
+			auto const rules = n.get_combined_issue_rules();
 			// prepare a list of states
 			static std::vector<dcon::state_instance_id, dcon::cache_aligned_allocator<dcon::state_instance_id>> ordered_states;
 			ai::get_ordered_economy_states(state, n, ordered_states);
@@ -1037,12 +1035,18 @@ namespace ai {
 					});
 				}
 			}
+
 			if((rules & issue_rule::build_factory) != 0
 			&& max_projects > 0) { // -- i.e. if building is possible
 				// limit to building only if there is less than these
 				for(auto si : ordered_states) {
 					if(max_projects <= 0)
 						break;
+					/* Don't build another construction while one is ongoing */
+					auto const sbc = state.world.state_instance_get_state_building_construction(si);
+					if(sbc.begin() != sbc.end())
+						continue;
+
 					dcon::factory_type_id top_desired_type{};
 					float top_desired_value = 0.f;
 					for(const auto ft : state.world.in_factory_type) {
@@ -1051,12 +1055,13 @@ namespace ai {
 						if(economy_factory::state_contains_factory(state, si, ft))
 							continue;
 						if(ai::get_is_desirable_factory_type(state, n, ft)) {
-							auto t_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, ft, si)
+							auto const t_bonus = economy_factory::sum_of_factory_triggered_modifiers(state, ft, si)
 								+ economy_factory::sum_of_factory_triggered_input_modifiers(state, ft, si);
-							auto sat = state.world.nation_get_demand_satisfaction(n, ft.get_output());
-							if(sat * t_bonus < top_desired_value) {
+							auto const sat = state.world.nation_get_demand_satisfaction(n, ft.get_output());
+							auto const value = sat * (1.f + t_bonus);
+							if(value > top_desired_value) {
 								top_desired_type = ft;
-								top_desired_value = sat * t_bonus;
+								top_desired_value = value;
 							}
 						}
 					}
@@ -1090,13 +1095,17 @@ namespace ai {
 					}
 				} // END for(auto si : ordered_states) {
 			} // END if((rules & issue_rule::build_factory) == 0)
-			// try to upgrade factories first:
-			// desired types filled: try to construct or upgrade
+
 			if((rules & issue_rule::expand_factory) != 0
 			&& max_projects > 0) { // can upgrade
 				for(auto si : ordered_states) {
 					if(max_projects <= 0)
 						break;
+					/* Don't build another construction while one is ongoing */
+					auto const sbc = state.world.state_instance_get_state_building_construction(si);
+					if(sbc.begin() != sbc.end())
+						continue;
+
 					auto const employable = state.world.state_instance_get_demographics(si, demographics::employable);
 					auto const employed = state.world.state_instance_get_demographics(si, demographics::employed);
 					province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
