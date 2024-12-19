@@ -4542,7 +4542,7 @@ namespace command {
 			}
 		}
 		ai::take_ai_decisions(state);
-		economy::daily_update(state);
+		//economy::daily_update(state);
 
 		game_scene::switch_scene(state, game_scene::scene_id::in_game_basic);
 		state.map_state.set_selected_province(dcon::province_id{});
