@@ -1207,7 +1207,10 @@ namespace ai {
 				}
 			}
 
-			// try forts
+			/* Try buildings forts, we will dissuade the AI from building them in colonial areas or areas
+			   under siege -- for obvious reasons. We will sort the best strategic provinces so we place
+			   for example, forts on Alsace-Lorraine, rather than on Toulouse. Building forts on strategic
+			   provinces is way more valuable than just spamming them mindlessly! */
 			if(max_projects > 0) {
 				project_provs.clear();
 				for(auto o : n.get_province_ownership()) {
@@ -1227,16 +1230,13 @@ namespace ai {
 						}
 					}
 				}
-
-				auto cap = n.get_capital();
 				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
-					auto a_dist = province::sorting_distance(state, a, cap);
-					auto b_dist = province::sorting_distance(state, b, cap);
-					if(a_dist != b_dist)
-						return a_dist < b_dist;
+					auto a_weight = ai::province_strategic_weight<float>(state, a);
+					auto b_weight = ai::province_strategic_weight<float>(state, b);
+					if(a_weight != b_weight)
+						return a_weight < b_weight;
 					return a.index() < b.index();
 				});
-
 				for(uint32_t i = 0; i < project_provs.size() && max_projects > 0; ++i) {
 					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[i], n));
 					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.fort_building));
