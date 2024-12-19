@@ -15,10 +15,10 @@
 #include "economy_templates.hpp"
 
 namespace economy {
-	constexpr inline float satisfaction_delay_factor = 0.1f;
-	constexpr inline float artisan_buff_factor = 1.25f;
-	constexpr inline float aristocrat_investment_ratio = 0.60f;
-	constexpr inline float capitalist_investment_ratio = 0.85f;
+	constexpr inline float satisfaction_delay_factor = 0.25f;
+	constexpr inline float artisan_buff_factor = 1.5f;
+	constexpr inline float aristocrat_investment_ratio = 0.50f;
+	constexpr inline float capitalist_investment_ratio = 0.75f;
 
 	template<typename vector_type, typename tag_type>
 	inline void register_demand(sys::state& state, tag_type n, dcon::commodity_id commodity_type, vector_type amount) {
@@ -502,8 +502,8 @@ namespace economy {
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
 					if(supply_cost.commodity_type[i]) {
 						state.world.nation_get_army_demand(owner, supply_cost.commodity_type[i]) +=
-						supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption
-						* o_sc_mod * admin_cost_factor;
+							supply_cost.commodity_amounts[i] * state.world.nation_get_unit_stats(owner, type).supply_consumption
+							* o_sc_mod * admin_cost_factor;
 					} else {
 						break;
 					}
@@ -565,8 +565,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
-								* construction_daily_demand_factor;
+							amount = current_purchased.commodity_amounts[i] * construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -593,8 +592,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
-								* construction_daily_demand_factor;
+							amount = current_purchased.commodity_amounts[i] * construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -615,8 +613,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * admin_cost_factor;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
-								* construction_daily_demand_factor;
+							amount = current_purchased.commodity_amounts[i] * construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -635,8 +632,7 @@ namespace economy {
 					if(base_cost.commodity_type[i]) {
 						auto amount = base_cost.commodity_amounts[i] * cost_mod;
 						if(current_purchased.commodity_amounts[i] < amount) {
-							amount = std::max(0.f, amount - current_purchased.commodity_amounts[i])
-								* construction_daily_demand_factor;
+							amount = current_purchased.commodity_amounts[i] * construction_daily_demand_factor;
 							register_construction_demand(state, owner, base_cost.commodity_type[i], amount);
 						}
 					} else {
@@ -984,53 +980,60 @@ namespace economy {
 			// a += f(x) > 0 ? 1 : 0
 			// a += ceil(f(x)), ceil(x) > 0 ? 1 : 0
 			// TODO: add operator+= for vector_fp
-			ve::fp_vector base_life(0.f);
-			ve::fp_vector base_everyday(0.f);
-			ve::fp_vector base_luxury(0.f);
-			ve::apply([&](dcon::commodity_id c) {
+			auto const base_life = ve::apply([&](dcon::commodity_id c) {
+				ve::fp_vector total(0.f);
 				state.world.execute_serial_over_pop_type([&](auto pids) {
-					base_life = base_life
-						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_life_needs(pids, c)));
-					base_everyday = base_everyday
-						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_everyday_needs(pids, c)));
-					base_luxury = base_luxury
-						+ ve::min(1.f, ve::ceil(state.world.pop_type_get_luxury_needs(pids, c)));
+					total = total + ve::min(1.f, ve::ceil(state.world.pop_type_get_life_needs(pids, c)));
 				});
+				return total.reduce();
+			}, ids);
+			auto const base_everyday = ve::apply([&](dcon::commodity_id c) {
+				ve::fp_vector total(0.f);
+				state.world.execute_serial_over_pop_type([&](auto pids) {
+					total = total + ve::min(1.f, ve::ceil(state.world.pop_type_get_everyday_needs(pids, c)));
+				});
+				return total.reduce();
+			}, ids);
+			auto const base_luxury = ve::apply([&](dcon::commodity_id c) {
+				ve::fp_vector total(0.f);
+				state.world.execute_serial_over_pop_type([&](auto pids) {
+					total = total + ve::min(1.f, ve::ceil(state.world.pop_type_get_luxury_needs(pids, c)));
+				});
+				return total.reduce();
 			}, ids);
 			//
 			const ve::fp_vector lf_factor(1.0f);
-			const ve::fp_vector ev_factor(2.0f);
+			const ve::fp_vector ev_factor(2.5f);
 			const ve::fp_vector lx_factor(4.5f);
 			//
 			// Ratio of "weighted" needs versus base weights (without weights)
-			auto ratio =
+			auto const ratio =
 				(base_life * lf_factor + base_everyday * ev_factor + base_luxury * lx_factor)
 				/ ve::max(base_life + base_everyday + base_luxury, 1.0f);
 			//
 			// Conditionally selected values for choosing limits (of supply and demand, respectively)
-			ve::fp_vector sel_a = ratio * ve::select(ratio < 2.0f, ve::fp_vector(0.125f), 0.4f);
-			ve::fp_vector sel_b = ve::select(ratio >= 2.5f, ve::fp_vector(1.0f), 0.0f);
+			auto const sel_a = ratio * ve::select(ratio < 2.0f, ve::fp_vector(0.125f), 0.4f);
+			auto const sel_b = ve::select(ratio >= 2.5f, ve::fp_vector(1.0f), 0.001f);
 			//
-			auto total_r_demand = state.world.commodity_get_total_real_demand(ids);
-			auto last_t_production = state.world.commodity_get_last_total_production(ids);
+			auto const last_t_demand = state.world.commodity_get_last_total_real_demand(ids);
+			auto const last_t_production = state.world.commodity_get_last_total_production(ids);
 			//
-			auto avg_sup = last_t_production * ve::max(1.0f - sel_a, 0.0f);
-			auto avg_dem = total_r_demand * ve::max(((5.5f - ratio) * 1.5f), 0.0f) * sel_b;
-			auto new_limit = ve::min(ve::max(avg_sup + avg_dem, 1.f) / ve::max(total_r_demand, 1.f), 1.f);
+			auto const avg_sup = last_t_production * ve::max(1.f - sel_a, 0.f);
+			auto const avg_dem = last_t_demand * ve::max(((5.f - ratio) * 1.f), 0.f) * sel_b;
+			auto const new_limits = ve::min(ve::max(avg_sup + avg_dem, 1.f) / ve::max(last_t_demand, 1.f), 1.f);
 			// Only write if filter was passed
 			ve::mask_vector is_pop_need = state.world.commodity_get_is_life_need(ids)
 				|| state.world.commodity_get_is_everyday_need(ids)
 				|| state.world.commodity_get_is_luxury_need(ids);
-			ve::apply([&](dcon::commodity_id c, bool passed_filter, float l) {
+			ve::apply([&](dcon::commodity_id c, bool passed_filter, float new_limit) {
 				if(passed_filter) {
-					state.world.commodity_get_total_real_demand(c) *= l;
-					ve::fp_vector local_l(l);
+					state.world.commodity_get_total_real_demand(c) *= new_limit;
 					state.world.execute_serial_over_nation([&](auto nids) {
-						state.world.nation_get_real_demand(nids, c) =
-							state.world.nation_get_real_demand(nids, c) * local_l;
+						auto const new_real_demand = state.world.nation_get_real_demand(nids, c) * new_limit;
+						state.world.nation_set_real_demand(nids, c, new_real_demand);
 					});
 				}
-			}, ids, is_pop_need, new_limit);
+			}, ids, is_pop_need, new_limits);
 		});
 	}
 
