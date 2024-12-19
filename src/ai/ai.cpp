@@ -997,9 +997,7 @@ namespace ai {
 				continue; //if our army is too small, ignore buildings:
 
 			auto treasury = n.get_stockpiles(economy::money);
-			int32_t max_projects = std::max(1, int32_t(n.get_owned_state_count()));
-			//auto const sc = state.world.nation_get_state_building_construction(n);
-			//int32_t max_projects = 0;
+			int32_t max_projects = std::max(8, int32_t(n.get_owned_state_count()));
 
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
@@ -1010,13 +1008,17 @@ namespace ai {
 				// subsidize key industries
 				if((rules & issue_rule::can_subsidise) != 0) {
 					for(auto si : ordered_states) {
+						auto const employable = state.world.state_instance_get_demographics(si, demographics::employable);
+						auto const employed = state.world.state_instance_get_demographics(si, demographics::employed);
+						auto const has_unemployed = (employable - employed) > 0.f;
 						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 							for(auto f : state.world.province_get_factory_location(p)) {
 								// subsidize factories that are not satisfying demand
 								auto const c = f.get_factory().get_building_type().get_output();
 								auto is_prio = false;
 								if(state.world.nation_get_demand_satisfaction(n, c) < 0.95f
-								|| c.get_total_real_demand() * 1.25f > c.get_total_production()) {
+								|| c.get_total_real_demand() * 1.25f > c.get_total_production()
+								|| has_unemployed) {
 									f.get_factory().set_subsidized(true);
 									is_prio = (c.get_total_real_demand() > c.get_total_production());
 								}
@@ -1036,11 +1038,13 @@ namespace ai {
 					for(auto si : ordered_states) {
 						if(max_projects <= 0)
 							break;
+						auto const employable = state.world.state_instance_get_demographics(si, demographics::employable);
+						auto const employed = state.world.state_instance_get_demographics(si, demographics::employed);
+						auto potential_employed = employed;
 						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 							for(auto f : state.world.province_get_factory_location(p)) {
-								if(!f.get_factory().get_unprofitable()
-								&& f.get_factory().get_primary_employment() >= 0.9f
-								&& f.get_factory().get_production_scale() >= 0.9f
+								if(f.get_factory().get_primary_employment() >= 0.75f
+								&& f.get_factory().get_production_scale() >= 0.75f
 								&& f.get_factory().get_level() < uint8_t(255)
 								&& ai::get_is_desirable_factory_type(state, n, f.get_factory().get_building_type())) {
 									// test if factory is already upgrading
@@ -1052,6 +1056,8 @@ namespace ai {
 										}
 									}
 									if(!ug_in_progress) {
+										potential_employed += f.get_factory().get_building_type().get_base_workforce();
+										//
 										auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
 										new_up.set_remaining_construction_time(f.get_factory().get_building_type().get_construction_time());
 										new_up.set_is_pop_project(false);
@@ -1071,7 +1077,6 @@ namespace ai {
 					for(auto si : ordered_states) {
 						if(max_projects <= 0)
 							break;
-
 						dcon::factory_type_id top_desired_type{};
 						float top_desired_value = 0.f;
 						for(const auto ft : state.world.in_factory_type) {
