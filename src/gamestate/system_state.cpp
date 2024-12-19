@@ -2692,7 +2692,6 @@ namespace sys {
 
 		world.nation_resize_domestic_market_pool(world.commodity_size());
 		world.nation_resize_real_demand(world.commodity_size());
-		world.nation_resize_intermediate_demand(world.commodity_size());
 		world.nation_resize_stockpile_targets(world.commodity_size());
 		world.nation_resize_drawing_on_stockpiles(world.commodity_size());
 		world.nation_resize_life_needs_costs(world.pop_type_size());
