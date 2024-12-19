@@ -112,19 +112,19 @@ namespace economy_factory {
 		return economy::commodity_set_effective_cost(state, n, state.world.factory_type_get_efficiency_inputs(ft));
 	}
 
-	float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n, float mobilization_impact) {
-		auto factory_fat_id = fatten(state.world, f);
-		auto factory_type_fat_id = factory_fat_id.get_building_type();
-		float throughput_multiplier = (state.world.nation_get_factory_goods_throughput(n, factory_type_fat_id.get_output()) + 1.0f);
-		float output_multiplier = state.world.nation_get_factory_goods_output(n, factory_type_fat_id.get_output())
-			+ 1.0f
-			+ factory_fat_id.get_secondary_employment()
+	float factory_full_production_quantity(sys::state const& state, dcon::factory_id fid, dcon::nation_id n, float mobilization_impact) {
+		auto const f = fatten(state.world, fid);
+		auto const ft = f.get_building_type();
+		auto const throughput_multiplier = (state.world.nation_get_factory_goods_throughput(n, ft.get_output()) + 1.0f);
+		auto const output_multiplier = 1.0f
+			+ state.world.nation_get_factory_goods_output(n, ft.get_output())
+			+ f.get_secondary_employment()
 			* (1.0f - state.economy_definitions.craftsmen_fraction)
 			* 1.5f
 			* 2.f; // additional multiplier to give advantage to "old industrial giants" which have a bunch of clerks already
-		float max_production_scale = factory_fat_id.get_primary_employment()
-			* factory_fat_id.get_level()
-			* std::max(0.0f, mobilization_impact);
+		auto const max_production_scale = f.get_primary_employment()
+			* f.get_level()
+			* std::max(0.0f, (mobilization_impact - state.world.nation_get_overseas_penalty(n)));
 		return throughput_multiplier * output_multiplier * max_production_scale;
 	}
 
@@ -617,10 +617,10 @@ namespace economy_factory {
 	
 	void update_single_factory_consumption(sys::state& state, dcon::factory_id factory_id, dcon::nation_id nation_id, dcon::province_id province_id, dcon::state_instance_id state_instance_id, float mobilization_impact, float expected_min_wage, bool occupied) {
 		auto factory_fat_id = fatten(state.world, factory_id);
-		auto factory_type_fat_id = factory_fat_id.get_building_type();
+		auto ft = factory_fat_id.get_building_type();
 
-		assert(factory_type_fat_id);
-		assert(factory_type_fat_id.get_output());
+		assert(ft);
+		assert(ft.get_output());
 		assert(nation_id);
 		assert(province_id);
 		assert(state_instance_id);
@@ -630,23 +630,23 @@ namespace economy_factory {
 		float current_workers = total_workers * max_production_scale;
 
 		//inputs
-		float input_total = factory_input_total_cost(state, nation_id, factory_type_fat_id);
-		float min_input_available = factory_min_input_available(state, nation_id, factory_type_fat_id);
-		float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, factory_type_fat_id);
-		float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, factory_type_fat_id);
+		float input_total = factory_input_total_cost(state, nation_id, ft);
+		float min_input_available = factory_min_input_available(state, nation_id, ft);
+		float efficiency_input_total = factory_efficiency_input_total_cost(state, nation_id, ft);
+		float min_efficiency_input_available = factory_min_efficiency_input_available(state, nation_id, ft);
 
 		//modifiers
 		float input_multiplier = std::max(0.f, factory_input_multiplier(state, factory_fat_id, nation_id, province_id, state_instance_id));
-		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, factory_type_fat_id, nation_id, province_id, state_instance_id) + factory_fat_id.get_triggered_modifiers());
+		float throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, nation_id, province_id, state_instance_id) + factory_fat_id.get_triggered_modifiers());
 		float output_multiplier = std::max(0.f, factory_output_multiplier(state, factory_fat_id, nation_id, province_id));
 
 		float total_production = total_employed_factory_production(state, factory_id, nation_id, state_instance_id, province_id);
 
 		//this value represents raw profit if 1 lvl of this factory is filled with workers
-		float profit = total_production * state.world.commodity_get_current_price(factory_type_fat_id.get_output());
+		float profit = total_production * state.world.commodity_get_current_price(ft.get_output());
 
 		//this value represents spendings if 1 lvl of this factory is filled with workers
-		float spendings = expected_min_wage * state.world.factory_type_get_base_workforce(factory_type_fat_id)
+		float spendings = expected_min_wage * state.world.factory_type_get_base_workforce(ft)
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
 			+ input_multiplier * efficiency_input_total * min_efficiency_input_available * min_input_available;
 
@@ -656,8 +656,8 @@ namespace economy_factory {
 
 		float effective_production_scale = update_factory_scale(state, factory_fat_id, max_production_scale, profit, desired_profit);
 
-		auto& inputs = factory_type_fat_id.get_inputs();
-		auto& efficiency_inputs = factory_type_fat_id.get_efficiency_inputs();
+		auto const& inputs = ft.get_inputs();
+		auto const& efficiency_inputs = ft.get_efficiency_inputs();
 
 		// register real demand : input_multiplier * throughput_multiplier * level * primary_employment
 		// also multiply by target production scale... otherwise too much excess demand is generated
@@ -725,11 +725,11 @@ namespace economy_factory {
 	}
 
 	economy::construction_status factory_upgrade(sys::state& state, dcon::factory_id f) {
-		auto in_province = state.world.factory_get_province_from_factory_location(f);
-		auto in_state = state.world.province_get_state_membership(in_province);
-		auto factory_type_fat_id = state.world.factory_get_building_type(f);
+		auto const in_province = state.world.factory_get_province_from_factory_location(f);
+		auto const in_state = state.world.province_get_state_membership(in_province);
+		auto const ft = state.world.factory_get_building_type(f);
 		for(auto c : state.world.state_instance_get_state_building_construction(in_state)) {
-			if(c.get_type() == factory_type_fat_id) {
+			if(c.get_type() == ft) {
 				float admin_eff = state.world.nation_get_administrative_efficiency(c.get_nation());
 				float build_cost_modifier = factory_build_cost_modifier(state, c.get_nation(), c.get_is_pop_project());
 				float total = c.get_type().get_construction_time();
