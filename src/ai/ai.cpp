@@ -4906,7 +4906,7 @@ namespace ai {
 		scale += 1.0f + 0.1f * state.world.province_get_building_level(state.world.army_get_location_from_army_location(a), state.economy_definitions.fort_building);
 		// composition bonus
 		scale += state.world.nation_get_has_gas_defense(n) ? state.defines.gas_attack_modifier : 0.f;
-		auto const strength = std::max(0.75f, estimate_balanced_composition_factor(state, a));
+		auto const strength = std::max(0.125f, estimate_balanced_composition_factor(state, a));
 		return std::max(0.1f, strength * scale);
 	}
 
@@ -4935,7 +4935,7 @@ namespace ai {
 		}
 		// composition bonus
 		scale += state.world.nation_get_has_gas_attack(n) ? state.defines.gas_attack_modifier : 0.f;
-		auto const strength = std::max(0.75f, estimate_balanced_composition_factor(state, a));
+		auto const strength = std::max(0.125f, estimate_balanced_composition_factor(state, a));
 		return std::max(0.1f, strength * scale);
 	}
 
