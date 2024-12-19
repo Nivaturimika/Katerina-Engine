@@ -996,7 +996,7 @@ namespace ai {
 				continue; //if our army is too small, ignore buildings:
 
 			auto treasury = n.get_stockpiles(economy::money);
-			int32_t max_projects = std::max(4, int32_t(n.get_owned_state_count()));
+			int32_t max_projects = int32_t(n.get_owned_state_count()) / 10;
 
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
@@ -1120,36 +1120,6 @@ namespace ai {
 			static std::vector<dcon::province_id> project_provs;
 			project_provs.clear();
 
-			// try naval bases
-			if(max_projects > 0) {
-				project_provs.clear();
-				for(auto o : n.get_province_ownership()) {
-					if(province::can_build_naval_base(state, o.get_province(), n)) {
-						project_provs.push_back(o.get_province().id);
-					}
-				}
-
-				auto cap = n.get_capital();
-				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
-					auto a_dist = province::sorting_distance(state, a, cap);
-					auto b_dist = province::sorting_distance(state, b, cap);
-					if(a_dist != b_dist)
-						return a_dist < b_dist;
-					return a.index() < b.index();
-				});
-				if(!project_provs.empty()) {
-					auto si = state.world.province_get_state_membership(project_provs[0]);
-					if(si) {
-						si.set_naval_base_is_taken(true);
-					}
-					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[0], n));
-					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.naval_base_building));
-					new_rr.set_is_pop_project(false);
-					new_rr.set_type(state.economy_definitions.naval_base_building);
-					max_projects -= 4;
-				}
-			}
-
 			// try railroads
 			const struct {
 				bool buildable;
@@ -1207,18 +1177,49 @@ namespace ai {
 				}
 			}
 
+			// try naval bases
+			if(max_projects > 0) {
+				project_provs.clear();
+				for(auto o : n.get_province_ownership()) {
+					if(province::can_build_naval_base(state, o.get_province(), n)) {
+						project_provs.push_back(o.get_province().id);
+					}
+				}
+
+				auto cap = n.get_capital();
+				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
+					auto a_dist = province::sorting_distance(state, a, cap);
+					auto b_dist = province::sorting_distance(state, b, cap);
+					if(a_dist != b_dist)
+						return a_dist < b_dist;
+					return a.index() < b.index();
+				});
+				if(!project_provs.empty()) {
+					auto si = state.world.province_get_state_membership(project_provs[0]);
+					if(si) {
+						si.set_naval_base_is_taken(true);
+					}
+					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(project_provs[0], n));
+					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.naval_base_building));
+					new_rr.set_is_pop_project(false);
+					new_rr.set_type(state.economy_definitions.naval_base_building);
+					--max_projects;
+				}
+			}
+
 			// try forts
 			if(max_projects > 0) {
 				project_provs.clear();
 				for(auto o : n.get_province_ownership()) {
 					if(n != o.get_province().get_nation_from_province_control())
 						continue;
-					if(province::has_fort_being_built(state, o.get_province())) {
-						// if we are already building a fort, count it as a building choice to not let AI overspend money on forts
-						max_projects -= 5;
-					}
-					if(military::province_is_under_siege(state, o.get_province())) {
+					// Here's logic to dissuade AI from building forts on useless places
+					if(military::province_is_under_siege(state, o.get_province()))
 						continue;
+					if(o.get_province().get_is_colonial())
+						continue;
+					if(province::has_fort_being_built(state, o.get_province())) {
+						max_projects -= 4;
 					}
 					if(province::can_build_fort(state, o.get_province(), n)) {
 						if(!province::has_fort_being_built(state, o.get_province())) {
