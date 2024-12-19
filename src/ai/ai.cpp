@@ -758,7 +758,7 @@ namespace ai {
 					} else {
 						auto const has_factories = economy_factory::state_built_factory_count(state, ordered_states[i]);
 						if(has_factories) {
-							auto nf = state.national_definitions.secondary_factory_worker_focus;
+							auto nf = state.national_definitions.primary_factory_worker_focus;
 							auto k = state.world.national_focus_get_limit(nf);
 							if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
 								// Keep balance between ratio of factory workers
