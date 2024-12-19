@@ -1243,7 +1243,8 @@ namespace economy {
 				total_cost += state.world.nation_get_private_construction_demand(n, c)
 					* state.world.commodity_get_current_price(c);
 				/* Dissuade capitalists from building resources that can't be attained */
-				if(state.world.nation_get_demand_satisfaction(n, c) < 0.95f) {
+				if(state.world.nation_get_private_construction_demand(n, c) > 0.f
+				&& state.world.nation_get_demand_satisfaction(n, c) < 0.95f) {
 					has_shortage = true;
 					break;
 				}
@@ -1305,10 +1306,24 @@ namespace economy {
 										}
 									}
 									if(!ug_in_progress) {
-										auto const new_p = f.get_factory().get_full_profit() / f.get_factory().get_level();
-										if(new_p > profit) {
-											profit = new_p;
-											selected_factory = f.get_factory();
+										bool shortage_of_build = false; // Shortage of build materials?
+										auto const& costs = f.get_factory().get_building_type().get_construction_costs();
+										for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
+											if(costs.commodity_type[i]) {
+												if(state.world.nation_get_demand_satisfaction(n, costs.commodity_type[i]) < 1.f) {
+													shortage_of_build = true;
+													break;
+												}
+											} else {
+												break;
+											}
+										}
+										if(!shortage_of_build) {
+											auto const new_p = f.get_factory().get_full_profit() / f.get_factory().get_level();
+											if(new_p > profit) {
+												profit = new_p;
+												selected_factory = f.get_factory();
+											}
 										}
 									}
 								}
@@ -1402,10 +1417,12 @@ namespace economy {
 							});
 						}
 					}
-					auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_prov, n));
-					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.railroad_building));
-					new_rr.set_is_pop_project(true);
-					new_rr.set_type(state.economy_definitions.railroad_building);
+					if(best_prov) {
+						auto new_rr = fatten(state.world, state.world.force_create_province_building_construction(best_prov, n));
+						new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.railroad_building));
+						new_rr.set_is_pop_project(true);
+						new_rr.set_type(state.economy_definitions.railroad_building);
+					}
 				}
 			}
 			//n.set_private_investment(0.0f);
@@ -2216,7 +2233,9 @@ namespace economy {
 				o_adjust = overseas_factor;
 			}
 		}
-		return (state.world.nation_get_army_demand(n, c) + state.world.nation_get_navy_demand(n, c) + state.world.nation_get_construction_demand(n, c) + o_adjust);
+		return (state.world.nation_get_army_demand(n, c)
+			+ state.world.nation_get_navy_demand(n, c)
+			+ state.world.nation_get_construction_demand(n, c) + o_adjust);
 	}
 
 	float nation_pop_consumption(sys::state& state, dcon::nation_id n, dcon::commodity_id c) {
@@ -2225,8 +2244,8 @@ namespace economy {
 		if(state.world.commodity_get_is_available_from_start(c) || (kf && state.world.nation_get_active_building(n, kf))) {
 			state.world.for_each_pop_type([&](dcon::pop_type_id pt) {
 				float needs = state.world.pop_type_get_life_needs(pt, c)
-				+ state.world.pop_type_get_everyday_needs(pt, c)
-				+ state.world.pop_type_get_luxury_needs(pt, c);
+					+ state.world.pop_type_get_everyday_needs(pt, c)
+					+ state.world.pop_type_get_luxury_needs(pt, c);
 				amount += needs * state.world.nation_get_demographics(n, demographics::to_key(state, pt));
 			});
 		}
