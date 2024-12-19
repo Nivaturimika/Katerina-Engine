@@ -1242,15 +1242,6 @@ namespace economy {
 				dcon::commodity_id c{ dcon::commodity_id::value_base_t(i) };
 				total_cost += state.world.nation_get_private_construction_demand(n, c)
 					* state.world.commodity_get_current_price(c);
-				/* Dissuade capitalists from building resources that can't be attained */
-				if(state.world.nation_get_private_construction_demand(n, c) > 0.f
-				&& state.world.nation_get_demand_satisfaction(n, c) < 0.95f) {
-					has_shortage = true;
-					break;
-				}
-			}
-			if(has_shortage) {
-				continue;
 			}
 
 			float total_cost_added = 0.f;
@@ -1306,24 +1297,10 @@ namespace economy {
 										}
 									}
 									if(!ug_in_progress) {
-										bool shortage_of_build = false; // Shortage of build materials?
-										auto const& costs = f.get_factory().get_building_type().get_construction_costs();
-										for(uint32_t i = 0; i < economy::commodity_set::set_size; ++i) {
-											if(costs.commodity_type[i]) {
-												if(state.world.nation_get_demand_satisfaction(n, costs.commodity_type[i]) < 1.f) {
-													shortage_of_build = true;
-													break;
-												}
-											} else {
-												break;
-											}
-										}
-										if(!shortage_of_build) {
-											auto const new_p = f.get_factory().get_full_profit() / f.get_factory().get_level();
-											if(new_p > profit) {
-												profit = new_p;
-												selected_factory = f.get_factory();
-											}
+										auto const new_p = f.get_factory().get_full_profit() / f.get_factory().get_level();
+										if(new_p > profit) {
+											profit = new_p;
+											selected_factory = f.get_factory();
 										}
 									}
 								}
