@@ -729,18 +729,25 @@ namespace ai {
 				}
 			}
 			pdqsort(ordered_states.begin(), ordered_states.end(), [&](auto a, auto b) {
-				auto apop = state.world.state_instance_get_demographics(a, demographics::total);
-				auto bpop = state.world.state_instance_get_demographics(b, demographics::total);
-				if(apop != bpop)
-					return apop > bpop;
+				auto const a_prov = state.world.state_instance_get_capital(a);
+				auto const b_prov = state.world.state_instance_get_capital(b);
+				auto const a_colonial = state.world.province_get_is_colonial(a_prov);
+				auto const b_colonial = state.world.province_get_is_colonial(b_prov);
+				if(a_colonial != b_colonial)
+					return a_colonial < b_colonial;
+				auto const a_pop = state.world.state_instance_get_demographics(a, demographics::total);
+				auto const b_pop = state.world.state_instance_get_demographics(b, demographics::total);
+				if(a_pop != b_pop)
+					return a_pop > b_pop;
 				return a.index() < b.index();
 			});
 			for(uint32_t i = 0; num_focuses_total > 0 && i < ordered_states.size(); ++i) {
-				auto prov = state.world.state_instance_get_capital(ordered_states[i]);
-				auto total = state.world.state_instance_get_demographics(ordered_states[i], demographics::total);
-				auto cfrac = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_key(state, state.culture_definitions.clergy)) / total;
+				auto const prov = state.world.state_instance_get_capital(ordered_states[i]);
+				auto const total = state.world.state_instance_get_demographics(ordered_states[i], demographics::total);
+				auto const cfrac = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_key(state, state.culture_definitions.clergy)) / total;
+				auto const is_colonial = state.world.province_get_is_colonial(prov);
 				if(cfrac >= base_opt) {
-					if(n.get_is_at_war()) {
+					if(n.get_is_at_war() || is_colonial) {
 						auto nf = state.national_definitions.soldier_focus;
 						auto k = state.world.national_focus_get_limit(nf);
 						if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
@@ -749,17 +756,8 @@ namespace ai {
 							--num_focuses_total;
 						}
 					} else {
-						auto pw_num = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_key(state, state.culture_definitions.primary_factory_worker));
-						auto pw_employed = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
-						auto sw_num = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_key(state, state.culture_definitions.secondary_factory_worker));
-						auto sw_employed = state.world.state_instance_get_demographics(ordered_states[i], demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
-						auto pw_frac = pw_num / (pw_num + sw_num);
-						auto sw_frac = sw_num / (pw_num + sw_num);
-						auto ideal_pwfrac = state.economy_definitions.craftsmen_fraction;
-						auto ideal_swfrac = (1.f - state.economy_definitions.craftsmen_fraction);
-						// Due to floating point comparison where 2.9999 != 3, we will round the number
-						// so that the ratio is NOT exact, but rather an aproximate
-						if(pw_employed >= pw_num && int8_t(pw_frac * 100.f) != int8_t(ideal_pwfrac * 100.f)) {
+						auto const has_factories = economy_factory::state_built_factory_count(state, ordered_states[i]);
+						if(has_factories) {
 							auto nf = state.national_definitions.secondary_factory_worker_focus;
 							auto k = state.world.national_focus_get_limit(nf);
 							if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
@@ -768,38 +766,6 @@ namespace ai {
 								assert(command::can_set_national_focus(state, n, ordered_states[i], nf));
 								state.world.state_instance_set_owner_focus(ordered_states[i], nf);
 								--num_focuses_total;
-							}
-						} else if(sw_employed >= sw_num && int8_t(sw_frac * 100.f) != int8_t(ideal_swfrac * 100.f)) {
-							auto nf = state.national_definitions.primary_factory_worker_focus;
-							auto k = state.world.national_focus_get_limit(nf);
-							if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
-								// Keep balance between ratio of factory workers
-								// we will only promote secondary workers if none are unemployed
-								assert(command::can_set_national_focus(state, n, ordered_states[i], nf));
-								state.world.state_instance_set_owner_focus(ordered_states[i], nf);
-								--num_focuses_total;
-							}
-						} else {
-							/* If we are a civilized nation, and we allow pops to operate on the economy
-							i.e Laissez faire, we WILL promote capitalists, since they will help to
-							build new factories for us */
-							auto rules = n.get_combined_issue_rules();
-							if(n.get_is_civilized() && (rules & (issue_rule::pop_build_factory | issue_rule::pop_build_factory_invest | issue_rule::pop_expand_factory | issue_rule::pop_expand_factory_invest | issue_rule::pop_open_factory | issue_rule::pop_open_factory_invest)) != 0) {
-								auto nf = state.national_definitions.capitalist_focus;
-								auto k = state.world.national_focus_get_limit(nf);
-								if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
-									assert(command::can_set_national_focus(state, n, ordered_states[i], nf));
-									state.world.state_instance_set_owner_focus(ordered_states[i], nf);
-									--num_focuses_total;
-								}
-							} else {
-								auto nf = state.national_definitions.aristocrat_focus;
-								auto k = state.world.national_focus_get_limit(nf);
-								if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
-									assert(command::can_set_national_focus(state, n, ordered_states[i], nf));
-									state.world.state_instance_set_owner_focus(ordered_states[i], nf);
-									--num_focuses_total;
-								}
 							}
 						}
 					}
@@ -1044,15 +1010,23 @@ namespace ai {
 						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
 							for(auto f : state.world.province_get_factory_location(p)) {
 								// subsidize factories that are not satisfying demand
-								auto c = f.get_factory().get_building_type().get_output();
-								if(state.world.nation_get_demand_satisfaction(n, c) < 1.f) {
+								auto const c = f.get_factory().get_building_type().get_output();
+								auto is_prio = false;
+								if(state.world.nation_get_demand_satisfaction(n, c) < 0.95f
+								|| c.get_total_real_demand() * 1.25f > c.get_total_production()) {
 									f.get_factory().set_subsidized(true);
+									is_prio = (c.get_total_real_demand() > c.get_total_production());
+								}
+								if((rules & issue_rule::factory_priority) != 0) {
+									f.get_factory().set_priority_low(is_prio);
+									f.get_factory().set_priority_high(is_prio);
 								}
 							}
 						});
 					}
 				}
 
+				constexpr int32_t max_parallel_state_constructions = 2;
 				// try to upgrade factories first:
 				// desired types filled: try to construct or upgrade
 				if((rules & issue_rule::expand_factory) != 0
@@ -1060,31 +1034,35 @@ namespace ai {
 					for(auto si : ordered_states) {
 						if(max_projects <= 0)
 							break;
-						province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-							for(auto f : state.world.province_get_factory_location(p)) {
-								if(!f.get_factory().get_unprofitable()
-								&& f.get_factory().get_primary_employment() >= 0.9f
-								&& f.get_factory().get_level() < uint8_t(255)) {
-									// test if factory is already upgrading
-									auto ug_in_progress = false;
-									for(auto c : state.world.state_instance_get_state_building_construction(si)) {
-										if(c.get_type() == f.get_factory().get_building_type()) {
-											ug_in_progress = true;
-											break;
+						auto const sc = state.world.nation_get_state_building_construction(n);
+						if(int32_t(sc.end() - sc.begin()) < max_parallel_state_constructions) {
+							province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
+								for(auto f : state.world.province_get_factory_location(p)) {
+									if(!f.get_factory().get_unprofitable()
+									&& f.get_factory().get_primary_employment() >= 0.9f
+									&& f.get_factory().get_production_scale() >= 0.9f
+									&& f.get_factory().get_level() < uint8_t(255)) {
+										// test if factory is already upgrading
+										auto ug_in_progress = false;
+										for(auto c : state.world.state_instance_get_state_building_construction(si)) {
+											if(c.get_type() == f.get_factory().get_building_type()) {
+												ug_in_progress = true;
+												break;
+											}
+										}
+										if(!ug_in_progress) {
+											auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
+											new_up.set_remaining_construction_time(f.get_factory().get_building_type().get_construction_time());
+											new_up.set_is_pop_project(false);
+											new_up.set_is_upgrade(true);
+											new_up.set_type(f.get_factory().get_building_type());
+											--max_projects;
+											return;
 										}
 									}
-									if(!ug_in_progress) {
-										auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-										new_up.set_remaining_construction_time(f.get_factory().get_building_type().get_construction_time());
-										new_up.set_is_pop_project(false);
-										new_up.set_is_upgrade(true);
-										new_up.set_type(f.get_factory().get_building_type());
-										--max_projects;
-										return;
-									}
 								}
-							}
-						});
+							});
+						}
 					}
 				}
 				if((rules & issue_rule::build_factory) != 0
@@ -1101,8 +1079,7 @@ namespace ai {
 						}
 					}
 					// limit to building only if there is less than these
-					constexpr int32_t max_parallel_state_constructions = 2;
-					auto sc = state.world.nation_get_state_building_construction(n);
+					auto const sc = state.world.nation_get_state_building_construction(n);
 					if(top_desired_type
 					&& int32_t(sc.end() - sc.begin()) < max_parallel_state_constructions) {
 						for(auto si : ordered_states) {
@@ -1114,40 +1091,19 @@ namespace ai {
 							pw_num += state.world.state_instance_get_demographics(si, demographics::to_key(state, state.culture_definitions.secondary_factory_worker));
 							auto pw_employed = state.world.state_instance_get_demographics(si, demographics::to_employment_key(state, state.culture_definitions.primary_factory_worker));
 							pw_employed += state.world.state_instance_get_demographics(si, demographics::to_employment_key(state, state.culture_definitions.secondary_factory_worker));
-
 							if(pw_employed >= float(pw_num) * 2.5f && pw_num > 0.0f)
 								continue; // no spare workers
 
-							if((state.world.factory_type_get_is_coastal(top_desired_type)
+							if(state.world.factory_type_get_is_coastal(top_desired_type)
 							&& !province::state_is_coastal(state, si))
-							|| has_province_construction(state, si, top_desired_type))
 								continue;
 
 							// check: if present, try to upgrade
-							bool is_present = false;
-							province::for_each_province_in_state_instance(state, si, [&](dcon::province_id p) {
-								for(auto fac : state.world.province_get_factory_location(p)) {
-									auto type = fac.get_factory().get_building_type();
-									if(top_desired_type == type
-									&& f.get_factory().get_primary_employment() >= 0.9f
-									&& fac.get_factory().get_level() < uint8_t(255)) {
-										bool under_cap = fac.get_factory().get_production_scale() < 0.9f || fac.get_factory().get_primary_employment() < 0.9f;
-										if(!under_cap && (rules & issue_rule::expand_factory) != 0) {
-											auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-											new_up.set_remaining_construction_time(type.get_construction_time());
-											new_up.set_is_pop_project(false);
-											new_up.set_is_upgrade(true);
-											new_up.set_type(type);
-											--max_projects;
-										}
-										is_present = true;
-										return;
-									}
-								}
-							});
+							bool is_present = economy_factory::state_contains_factory(state, si, top_desired_type);
 							// else -- try to build -- must have room
 							if(!is_present
-							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)) {
+							&& economy_factory::state_factory_count(state, si) < int32_t(state.defines.factories_per_state)
+							&& max_projects > 0) {
 								auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
 								new_up.set_remaining_construction_time(state.world.factory_type_get_construction_time(top_desired_type));
 								new_up.set_is_pop_project(false);
@@ -1254,17 +1210,16 @@ namespace ai {
 			// try forts
 			if(max_projects > 0) {
 				project_provs.clear();
-
 				for(auto o : n.get_province_ownership()) {
 					if(n != o.get_province().get_nation_from_province_control())
 						continue;
 					if(province::has_fort_being_built(state, o.get_province())) {
 						// if we are already building a fort, count it as a building choice to not let AI overspend money on forts
-						max_projects -= 2;
+						max_projects -= 5;
 					}
-					if(military::province_is_under_siege(state, o.get_province()))
+					if(military::province_is_under_siege(state, o.get_province())) {
 						continue;
-
+					}
 					if(province::can_build_fort(state, o.get_province(), n)) {
 						if(!province::has_fort_being_built(state, o.get_province())) {
 							project_provs.push_back(o.get_province().id);
