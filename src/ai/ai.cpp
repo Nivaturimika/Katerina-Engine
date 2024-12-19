@@ -967,8 +967,10 @@ namespace ai {
 		return false;
 	}
 
-	void get_ordered_economy_states(sys::state& state, dcon::nation_id n, std::vector<dcon::state_instance_id>& ordered_states) {
-		// prepare a list of states
+	/*	Obtain a list of economy-relevant states, do not use for military stuff! This basically calculates
+		the best states to invest in, w.r.t to the industrial points gained.
+		By game rules this means that the most populated states are the most valuable ones. */
+	void get_ordered_economy_states(sys::state& state, dcon::nation_id n, std::vector<dcon::state_instance_id, dcon::cache_aligned_allocator<dcon::state_instance_id>>& ordered_states) {
 		ordered_states.clear();
 		for(auto si : state.world.nation_get_state_ownership(n)) {
 			if(si.get_state().get_capital().get_is_colonial() == false) {
@@ -982,7 +984,6 @@ namespace ai {
 				return apop > bpop;
 			return a.index() < b.index();
 		});
-		return;
 	}
 
 	void update_ai_econ_construction(sys::state& state) {
@@ -996,12 +997,13 @@ namespace ai {
 				continue; //if our army is too small, ignore buildings:
 
 			auto treasury = n.get_stockpiles(economy::money);
-			int32_t max_projects = int32_t(n.get_owned_state_count()) / 10;
+			//int32_t max_projects = std::max(1, int32_t(n.get_owned_state_count()) / 15);
+			int32_t max_projects = 0;
 
 			auto rules = n.get_combined_issue_rules();
 			if((rules & issue_rule::expand_factory) != 0 || (rules & issue_rule::build_factory) != 0) {
 				// prepare a list of states
-				static std::vector<dcon::state_instance_id> ordered_states;
+				static std::vector<dcon::state_instance_id, dcon::cache_aligned_allocator<dcon::state_instance_id>> ordered_states;
 				ai::get_ordered_economy_states(state, n, ordered_states);
 
 				// subsidize key industries
@@ -1185,13 +1187,11 @@ namespace ai {
 						project_provs.push_back(o.get_province().id);
 					}
 				}
-
-				auto cap = n.get_capital();
 				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
-					auto a_dist = province::sorting_distance(state, a, cap);
-					auto b_dist = province::sorting_distance(state, b, cap);
-					if(a_dist != b_dist)
-						return a_dist < b_dist;
+					auto a_weight = ai::province_strategic_weight<float>(state, a);
+					auto b_weight = ai::province_strategic_weight<float>(state, b);
+					if(a_weight != b_weight)
+						return a_weight < b_weight;
 					return a.index() < b.index();
 				});
 				if(!project_provs.empty()) {
@@ -1222,12 +1222,10 @@ namespace ai {
 					if(o.get_province().get_is_colonial())
 						continue;
 					if(province::has_fort_being_built(state, o.get_province())) {
-						max_projects -= 4;
+						--max_projects;
 					}
 					if(province::can_build_fort(state, o.get_province(), n)) {
-						if(!province::has_fort_being_built(state, o.get_province())) {
-							project_provs.push_back(o.get_province().id);
-						}
+						project_provs.push_back(o.get_province().id);
 					}
 				}
 				pdqsort(project_provs.begin(), project_provs.end(), [&](dcon::province_id a, dcon::province_id b) {
@@ -1242,7 +1240,7 @@ namespace ai {
 					new_rr.set_remaining_construction_time(state.world.province_building_type_get_time(state.economy_definitions.fort_building));
 					new_rr.set_is_pop_project(false);
 					new_rr.set_type(state.economy_definitions.fort_building);
-					max_projects -= 2;
+					--max_projects;
 				}
 			}
 		}
