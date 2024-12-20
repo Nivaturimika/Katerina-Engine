@@ -90,6 +90,7 @@ list(APPEND ALICE_CORE_SOURCES_LIST
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_production_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_technology_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_budget_window.cpp"
+	"${PROJECT_SOURCE_DIR}/src/gui/topbar_subwindows/gui_trade_window.cpp"
 	"${PROJECT_SOURCE_DIR}/src/gui/unit_tooltip.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_modes.cpp"
 	"${PROJECT_SOURCE_DIR}/src/map/map_state.cpp"
