@@ -327,7 +327,7 @@ namespace ui {
 		text::add_line_break_to_layout(state, contents);
 		named_money_line("factory_stats_expenses", -spendings);
 		output_cost_line(type.get_output(), type.get_output_amount());
-		float desired_income = economy_factory::factory_desired_raw_profit(state, fac, spendings);
+		auto const desired_income = economy_factory::factory_desired_raw_profit(state, fac.get_building_type(), fac.get_level());
 		named_money_line("factory_stats_desired_income", desired_income);
 	}
 

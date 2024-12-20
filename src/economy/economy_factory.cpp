@@ -105,8 +105,11 @@ namespace economy_factory {
 		return (pop_project ? pop_factory_modifier : (2.0f - admin_efficiency)) * factory_modifier;
 	}
 
-	float factory_desired_raw_profit(sys::state& state, dcon::factory_id f, float spendings) {
-		return spendings * (1.2f + state.world.factory_get_secondary_employment(f) * state.world.factory_get_level(f) / 150.f);
+	float factory_desired_raw_profit(sys::state& state, dcon::factory_type_id ft, float level) {
+		auto const output = state.world.factory_type_get_output(ft);
+		auto const max_output = state.world.factory_type_get_output_amount(ft);
+		auto const output_price = state.world.commodity_get_current_price(output);
+		return (max_output * output_price * level);
 	}
 
 	float factory_efficiency_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft) {
@@ -291,29 +294,18 @@ namespace economy_factory {
 	}
 
 	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit) {
-		auto factory_fat_id = dcon::fatten(state.world, f);
-		auto ft = state.world.factory_get_building_type(f);
+		auto const factory_fat_id = dcon::fatten(state.world, f);
+		auto const ft = state.world.factory_get_building_type(f);
 
-		float total_workers = factory_max_employment(state, f);
-		float several_workers_scale = 10.f / total_workers;
-		// we don't want for factories to change "world balance" too much individually
-		// when relative production is high, we want to reduce our speed
-		// for example, if relative production is 1.0, then we want to clamp our speed with ~0.01 or something small like this;
-		// and if relative production is ~0, then clamps are not needed
-		auto relative_production_amount =
-			state.world.factory_type_get_output_amount(ft)
-			/ (
-				state.world.commodity_get_total_production(factory_fat_id.get_building_type().get_output())
-				+ state.world.commodity_get_total_real_demand(factory_fat_id.get_building_type().get_output())
-			);
-
-		auto const relative_modifier = (1.f / (relative_production_amount + 0.001f)) / 100.f;
+		auto const total_workers = factory_max_employment(state, f);
+		auto const several_workers_scale = 10.f / total_workers;
+		auto const relative_modifier = 1.f / 100.f;
 		auto new_production_scale = 0.0f;
 		if(state.world.factory_get_subsidized(f)) {
 			new_production_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + several_workers_scale * state.world.factory_get_level(f) * 10.f);
 		} else {
-			auto const over_profit_ratio = (raw_profit) / (desired_raw_profit + 0.0001f) - 1.f;
-			auto const under_profit_ratio = (desired_raw_profit) / (raw_profit + 0.0001f) - 1.f;
+			auto const over_profit_ratio = raw_profit / std::max(desired_raw_profit, 0.1f) - 1.f;
+			auto const under_profit_ratio = desired_raw_profit / std::max(raw_profit, 0.1f) - 1.f;
 			auto const speed_modifier = (over_profit_ratio - under_profit_ratio);
 			auto speed = production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
 			speed = std::clamp(speed, -relative_modifier, relative_modifier);
@@ -651,7 +643,7 @@ namespace economy_factory {
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
 			+ input_multiplier * efficiency_input_total * min_efficiency_input_available * min_input_available;
 
-		float desired_profit = factory_desired_raw_profit(state, factory_fat_id, spendings);
+		float desired_profit = factory_desired_raw_profit(state, ft, factory_fat_id.get_level());
 		float max_pure_profit = profit - spendings;
 		state.world.factory_set_unprofitable(factory_id, !(max_pure_profit > 0.0f));
 

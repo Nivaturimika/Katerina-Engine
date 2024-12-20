@@ -48,7 +48,7 @@ namespace economy_factory {
 	bool state_contains_factory(sys::state& state, dcon::state_instance_id sid, dcon::factory_type_id ft);
 
 	float factory_build_cost_modifier(sys::state& state, dcon::nation_id nation_id, bool pop_project);
-	float factory_desired_raw_profit(sys::state& state, dcon::factory_id f, float spendings);
+	float factory_desired_raw_profit(sys::state& state, dcon::factory_type_id f, float level);
 	float factory_efficiency_input_total_cost(sys::state& state, dcon::nation_id n, dcon::factory_type_id ft);
 	float factory_full_production_quantity(sys::state const& state, dcon::factory_id f, dcon::nation_id n, float mobilization_impact);
 
