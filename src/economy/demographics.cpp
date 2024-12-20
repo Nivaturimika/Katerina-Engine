@@ -1167,7 +1167,7 @@ namespace demographics {
 				&& (is_state_capital || state.world.pop_type_get_state_capital_only(nf_ptype) == false);
 			// === FILTERS ===
 			// General passed filter
-			auto const filter_a = owners != dcon::nation_id{} && promotion_chances > 0.f && demotion_chances > 0.f
+			auto const filter_a = owners != dcon::nation_id{} && (promotion_chances > 0.f || demotion_chances > 0.f)
 				&& base_amounts > 0.f;
 			// Promotion -- national focus early branch
 			auto const filter_b = ve::apply([&](dcon::pop_id p, dcon::pop_type_id pt, dcon::pop_type_id nf_pt, bool passed_filter) {
@@ -1189,10 +1189,10 @@ namespace demographics {
 				}
 				return false;
 			}, ids, ptype, nf_ptype, filter_a && mask_b);
-			// Prodemo -- Foci is set to pop type, can't promote out
-			auto const filter_d = (nf_ptype == ptype);
+			// Prodemo -- Foci is set to pop type, can't promote out if same pop type
+			auto const filter_d = (nf_ptype != ptype);
 			// Combined national focus early branch -- filter_b || filter_c
-			auto const p_result = ve::apply([&](dcon::pop_id p, bool promoting, bool passed_filter, bool nf_early_exit) {
+			auto const p_result = ve::apply([&](dcon::pop_id p, bool promoting, bool passed_filter, bool nf_early_exit) -> dcon::pop_type_id {
 				if(passed_filter) {
 					auto const loc = state.world.pop_get_province_from_pop_location(p);
 					auto const si = state.world.province_get_state_membership(loc);
@@ -1204,9 +1204,8 @@ namespace demographics {
 					auto const is_mine = state.world.commodity_get_is_mine(state.world.province_get_rgo(loc));
 					// National foci promotion
 					if(nf_early_exit) {
-						return (promoted_type == ptype)
-							? dcon::pop_type_id{}
-							: promoted_type; // early exit
+						assert(promoted_type == ptype);
+						return promoted_type; // early exit
 					}
 					// Natural promotion
 					tagged_vector<float, dcon::pop_type_id> weights(state.world.pop_type_size());
@@ -1251,7 +1250,7 @@ namespace demographics {
 					}
 				}
 				return dcon::pop_type_id{};
-			}, ids, is_promotions, filter_a, (filter_b || filter_c || filter_d));
+			}, ids, is_promotions, filter_a && filter_d, filter_b || filter_c);
 
 			pbuf.amounts.set(ids, ve::select(filter_a, new_sizes, 0.0f));
 			pbuf.types.set(ids, p_result);
