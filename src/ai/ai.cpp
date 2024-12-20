@@ -17,6 +17,10 @@
 #include "pdqsort.h"
 #include "ve.hpp"
 
+namespace command {
+	void execute_fabricate_cb(sys::state& state, dcon::nation_id source, dcon::nation_id target, dcon::cb_type_id type);
+}
+
 namespace ai {
 	/* Additional (counting allies) offensiv strenght of a country, except the country itself */
 	constexpr inline float additional_offensive_str_factor = 0.5f;
@@ -2188,7 +2192,8 @@ namespace ai {
 				break;
 			}
 		}
-		if(state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
+		if(!has_adj
+		&& state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
 			return false;
 		}
 		auto const ovr = state.world.nation_get_overlord_as_subject(target);
@@ -2206,6 +2211,8 @@ namespace ai {
 				if(n.get_infamy() > infamy_limit)
 					continue;
 				if(n.get_constructing_cb_type())
+					continue;
+				if(n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost)
 					continue;
 				/* Compile weights of most desirable nation */
 				struct nation_weight_pair {
@@ -2231,8 +2238,8 @@ namespace ai {
 						if(rvalue < 0.0f) {
 							auto const cb = pick_fabrication_type(state, n, t.n);
 							if(cb) {
-								n.set_constructing_cb_target(t.n);
-								n.set_constructing_cb_type(cb);
+								assert(command::can_fabricate_cb(state, n, t.n, cb));
+								command::execute_fabricate_cb(state, n, t.n, cb);
 							}
 							break;
 						}
