@@ -2679,14 +2679,13 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 
 	struct war_history_context {
 		scenario_building_context& outer_context;
-
 		std::vector<history_war_goal> wargoals;
 		std::vector<dcon::nation_id> attackers;
 		std::vector<dcon::nation_id> defenders;
 		std::string name;
 		bool great_war = false;
-
-	war_history_context(scenario_building_context& outer_context) : outer_context(outer_context) { }
+		sys::date start_date;
+		war_history_context(scenario_building_context& outer_context) : outer_context(outer_context) { }
 	};
 
 	struct war_block {
@@ -2698,8 +2697,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		void war_goal(history_war_goal const& value, error_handler& err, int32_t line, war_history_context& context) {
 			context.wargoals.push_back(value);
 		}
-
-	void finish(war_history_context&) { }
+		void finish(war_history_context&) { }
 	};
 
 	struct war_history_file {

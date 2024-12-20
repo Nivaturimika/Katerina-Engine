@@ -3483,30 +3483,32 @@ namespace parsers {
 	}
 
 	void enter_war_dated_block(std::string_view label, token_generator& gen, error_handler& err, war_history_context& context) {
-		auto ymd = parse_date(label, 0, err);
-		if(sys::date(ymd, context.outer_context.state.start_date) <= context.outer_context.state.current_date) {
+		auto const ymd = parse_date(label, 0, err);
+		auto const d = sys::date(ymd, context.outer_context.state.start_date);
+		if(d <= context.outer_context.state.current_date) {
+			if(context.start_date > d) {
+				context.start_date = d;
+			}
 			parse_war_block(gen, err, context);
 		} else {
 			gen.discard_group();
 		}
 	}
 
-	void war_history_file::name(association_type, std::string_view name, error_handler& err, int32_t line,
-		war_history_context& context) {
+	void war_history_file::name(association_type, std::string_view name, error_handler& err, int32_t line, war_history_context& context) {
 		context.name = std::string(name);
 	}
 
 	void war_history_file::finish(war_history_context& context) {
 		if(context.attackers.size() > 0 && context.defenders.size() > 0 && context.wargoals.size() > 0) {
 			auto new_war = fatten(context.outer_context.state.world, context.outer_context.state.world.create_war());
-			new_war.set_start_date(sys::date(0));
+			new_war.set_start_date(context.start_date);
 			new_war.set_primary_attacker(context.attackers[0]);
 			new_war.set_primary_defender(context.defenders[0]);
 			new_war.set_is_great(context.great_war);
 			new_war.set_original_target(context.defenders[0]);
 			// new_war.set_name(text::find_or_add_key(context.outer_context.state, context.name));
-
-		new_war.set_name(context.outer_context.state.lookup_key(std::string_view{ "agression_war_name" }));// misspelling is intentional; DO NOT CORRECT
+			new_war.set_name(context.outer_context.state.lookup_key(std::string_view{ "agression_war_name" }));// misspelling is intentional; DO NOT CORRECT
 
 			for(auto n : context.attackers) {
 				auto rel = context.outer_context.state.world.force_create_war_participant(new_war, n);
