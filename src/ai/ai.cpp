@@ -32,11 +32,11 @@ namespace ai {
 	constexpr inline float sphere_already_in_our_sphere_factor = 0.75f;
 	constexpr inline float sphere_primary_culture_factor = 100.f;
 	constexpr inline float sphere_culture_group_factor = 75.f;
-	constexpr inline float sphere_wargoal_factor = 1.75f;
+	constexpr inline float sphere_wargoal_factor = 50.f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
 	constexpr inline float sphere_unreachable_factor = 0.05f;
 	constexpr inline float sphere_uncivilized_factor = 10.f;
-	constexpr inline float sphere_on_another_continent = 0.1f;
+	constexpr inline float sphere_same_continent = 1.25f;
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
 
 	/* Aggression multiplier towards uncivilized nations */
@@ -598,7 +598,6 @@ namespace ai {
 							cg_leader_influencing = true;
 						}
 					}
-
 					/* The "cultural union leader" is already influencing this -- so don't bother them */
 					if(cg_leader_influencing) {
 						weight  *= sphere_avoid_distracting_cultural_leader;
@@ -630,15 +629,16 @@ namespace ai {
 							weight *= sphere_neighbor_factor;
 							is_reachable = true;
 						}
+						// In same continent
+						if(t.get_capital().get_continent() == state.world.province_get_continent(state.world.nation_get_capital(n.nation))) {
+							weight *= sphere_same_continent;
+						}
 						if(is_reachable) {
 							if(!t.get_is_civilized()) {
 								weight *= sphere_uncivilized_factor;
 							}
 						} else {
 							weight *= sphere_unreachable_factor;
-						}
-						if(t.get_capital().get_continent() != state.world.province_get_continent(state.world.nation_get_capital(n.nation))) {
-							weight *= sphere_on_another_continent;
 						}
 					}
 				}
