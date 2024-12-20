@@ -1651,13 +1651,12 @@ namespace ai {
 
 	void state_target_list(std::vector<dcon::state_instance_id>& result, sys::state& state, dcon::nation_id for_nation, dcon::nation_id within) {
 		result.clear();
-		for(auto si : state.world.nation_get_state_ownership(within)) {
+		for(auto const si : state.world.nation_get_state_ownership(within)) {
 			result.push_back(si.get_state().id);
 		}
 
-		auto distance_from = state.world.nation_get_capital(for_nation).id;
+		auto const distance_from = state.world.nation_get_capital(for_nation).id;
 		int32_t first = 0;
-
 		if(state.world.get_nation_adjacency_by_nation_adjacency_pair(for_nation, within)) {
 			int32_t last = int32_t(result.size());
 			while(first < last - 1) {
@@ -1673,14 +1672,6 @@ namespace ai {
 					--last;
 				}
 			}
-
-			pdqsort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
-				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
-				if(a_distance != b_distance)
-					return a_distance < b_distance;
-				return a.index() < b.index();
-			});
 		}
 		if(state.world.nation_get_total_ports(for_nation) > 0 && state.world.nation_get_total_ports(within) > 0) {
 			int32_t last = int32_t(result.size());
@@ -1697,23 +1688,14 @@ namespace ai {
 					--last;
 				}
 			}
-			pdqsort(result.begin(), result.begin() + first, [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
-				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
-				if(a_distance != b_distance)
-					return a_distance < b_distance;
-				return a.index() < b.index();
-			});
 		}
-		if(first < int32_t(result.size())) {
-			pdqsort(result.begin() + first, result.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
-				auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
-				auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
-				if(a_distance != b_distance)
-					return a_distance < b_distance;
-				return a.index() < b.index();
-			});
-		}
+		pdqsort(result.begin() + first, result.end(), [&](dcon::state_instance_id a, dcon::state_instance_id b) {
+			auto a_distance = province::sorting_distance(state, state.world.state_instance_get_capital(a), distance_from);
+			auto b_distance = province::sorting_distance(state, state.world.state_instance_get_capital(b), distance_from);
+			if(a_distance != b_distance)
+				return a_distance < b_distance;
+			return a.index() < b.index();
+		});
 	}
 
 	void update_crisis_leaders(sys::state& state) {
