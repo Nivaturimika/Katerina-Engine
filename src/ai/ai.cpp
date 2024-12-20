@@ -2845,7 +2845,7 @@ namespace ai {
 	float war_willingness_factor(int32_t war_duration, bool is_great_war) {
 		auto years = 1.f;
 		if(is_great_war) {
-			years = 8.f;
+			years = 4.f;
 		}
 		return (float(war_duration) - 365.f * years) * 25.f / (365.f * years);
 	}
