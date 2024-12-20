@@ -798,10 +798,8 @@ namespace ai {
 						auto const employable = state.world.state_instance_get_demographics(ordered_states[i], demographics::employable);
 						auto const employed = state.world.state_instance_get_demographics(ordered_states[i], demographics::employed);
 						auto const emp_ratio = employed > 0.f ? (employed / employable) : 0.f;
-						if(has_factories) {
-							auto nf = (emp_ratio <= 0.95f)
-								? state.national_definitions.primary_factory_worker_focus
-								: state.national_definitions.capitalist_focus;
+						if(has_factories && emp_ratio <= 0.95f) {
+							auto nf = state.national_definitions.primary_factory_worker_focus;
 							auto k = state.world.national_focus_get_limit(nf);
 							if(!k || trigger::evaluate(state, k, trigger::to_generic(prov), trigger::to_generic(n), -1)) {
 								// Keep balance between ratio of factory workers
@@ -1328,25 +1326,20 @@ namespace ai {
 			&& !investments[n.get_rank() - 1]
 			&& col.get_state().get_colonization_stage() <= uint8_t(2)
 			&& state.crisis_colony != col.get_state()
-			&& (!state.crisis_war || n.get_is_at_war() == false)
-			 ) {
-
+			&& (!state.crisis_war || n.get_is_at_war() == false)) {
 				auto crange = col.get_state().get_colonization();
 				if(crange.end() - crange.begin() > 1) {
 					if(col.get_last_investment() + int32_t(state.defines.colonization_days_between_investment) <= state.current_date) {
-
 						if(free_points[n.get_rank() - 1] < 0) {
 							free_points[n.get_rank() - 1] = nations::free_colonial_points(state, n);
 						}
-
 						int32_t cost = 0;;
 						if(col.get_state().get_colonization_stage() == 1) {
 							cost = int32_t(state.defines.colonization_interest_cost);
 						} else if(col.get_level() <= 4) {
 							cost = int32_t(state.defines.colonization_influence_cost);
 						} else {
-							cost =
-								int32_t(state.defines.colonization_extra_guard_cost * (col.get_level() - 4) + state.defines.colonization_influence_cost);
+							cost = int32_t(state.defines.colonization_extra_guard_cost * (col.get_level() - 4) + state.defines.colonization_influence_cost);
 						}
 						if(free_points[n.get_rank() - 1] >= cost) {
 							investments[n.get_rank() - 1] = col.get_state().id;
@@ -1356,8 +1349,9 @@ namespace ai {
 			}
 		}
 		for(uint32_t i = 0; i < investments.size(); ++i) {
-			if(investments[i])
+			if(investments[i]) {
 				province::increase_colonial_investment(state, state.nations_by_rank[i], investments[i]);
+			}
 		}
 	}
 
