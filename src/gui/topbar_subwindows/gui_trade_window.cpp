@@ -587,6 +587,7 @@ namespace ui {
 		window_element_base::on_create(state);
 	}
 	void trade_commodity_group_window::on_update(sys::state& state) noexcept {
+		entries_element.clear();
 		state.world.for_each_commodity([&](dcon::commodity_id id) {			
 			if(state.world.commodity_get_commodity_group(id) != content) {
 				return;
