@@ -382,6 +382,7 @@ namespace sys {
 		ptr_in = memcpy_deserialize(ptr_in, state.start_date);
 		ptr_in = memcpy_deserialize(ptr_in, state.end_date);
 		ptr_in = deserialize(ptr_in, state.flag_type_names);
+		ptr_in = deserialize(ptr_in, state.commodity_group_names);
 		ptr_in = deserialize(ptr_in, state.trigger_data);
 		ptr_in = deserialize(ptr_in, state.trigger_data_indices);
 		ptr_in = deserialize(ptr_in, state.effect_data);
@@ -529,6 +530,7 @@ namespace sys {
 		ptr_in = memcpy_serialize(ptr_in, state.start_date);
 		ptr_in = memcpy_serialize(ptr_in, state.end_date);
 		ptr_in = serialize(ptr_in, state.flag_type_names);
+		ptr_in = serialize(ptr_in, state.commodity_group_names);
 		ptr_in = serialize(ptr_in, state.trigger_data);
 		ptr_in = serialize(ptr_in, state.trigger_data_indices);
 		ptr_in = serialize(ptr_in, state.effect_data);
@@ -670,6 +672,7 @@ namespace sys {
 		sz += sizeof(state.start_date);
 		sz += sizeof(state.end_date);
 		sz += serialize_size(state.flag_type_names);
+		sz += serialize_size(state.commodity_group_names);
 		sz += serialize_size(state.trigger_data);
 		sz += serialize_size(state.trigger_data_indices);
 		sz += serialize_size(state.effect_data);

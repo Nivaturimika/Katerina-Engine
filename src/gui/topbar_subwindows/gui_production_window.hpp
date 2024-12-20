@@ -1231,25 +1231,11 @@ namespace ui {
 	class production_goods_category_name : public window_element_base {
 		simple_text_element_base* goods_cat_name = nullptr;
 
-		std::string_view get_commodity_group_name(sys::commodity_group g) {
-			switch(g) {
-				case sys::commodity_group::military_goods:
-				return "military_goods";
-				case sys::commodity_group::raw_material_goods:
-				return "raw_material_goods";
-				case sys::commodity_group::industrial_goods:
-				return "industrial_goods";
-				case sys::commodity_group::consumer_goods:
-				return "consumer_goods";
-				// Non-vanilla
-				case sys::commodity_group::industrial_and_consumer_goods:
-				return "industrial_and_consumer_goods";
-				default:
-				return "???";
-			}
+		std::string_view get_commodity_group_name(sys::state& state, dcon::commodity_group_id g) {
+			return state.to_string_view(state.commodity_group_names[g]);
 		}
 
-		public:
+	public:
 		std::unique_ptr<element_base> make_child(sys::state& state, std::string_view name, dcon::gui_def_id id) noexcept override {
 			if(name == "cat_name") {
 				auto ptr = make_element_by_type<simple_text_element_base>(state, id);
@@ -1261,9 +1247,9 @@ namespace ui {
 		}
 
 		message_result set(sys::state& state, Cyto::Any& payload) noexcept override {
-			if(payload.holds_type<sys::commodity_group>()) {
-				auto group = any_cast<sys::commodity_group>(payload);
-				goods_cat_name->set_text(state, text::produce_simple_string(state, get_commodity_group_name(group)));
+			if(payload.holds_type<dcon::commodity_group_id>()) {
+				auto group = any_cast<dcon::commodity_group_id>(payload);
+				goods_cat_name->set_text(state, text::produce_simple_string(state, get_commodity_group_name(state, group)));
 				return message_result::consumed;
 			}
 			return message_result::unseen;
@@ -1459,7 +1445,7 @@ namespace ui {
 		element_base* project_window = nullptr;
 		production_foreign_investment_window* foreign_invest_win = nullptr;
 
-		sys::commodity_group curr_commodity_group{};
+		dcon::commodity_group_id curr_commodity_group{};
 		dcon::state_instance_id focus_state{};
 		dcon::nation_id foreign_nation{};
 		xy_pair base_commodity_offset{33, 50};
@@ -1494,12 +1480,13 @@ namespace ui {
 			// All filters enabled by default
 			commodity_filters.resize(state.world.commodity_size(), true);
 
-			for(curr_commodity_group = sys::commodity_group::military_goods; curr_commodity_group != sys::commodity_group::count;
-				curr_commodity_group = static_cast<sys::commodity_group>(uint8_t(curr_commodity_group) + 1)) {
+			for(uint32_t i = 0; i < state.commodity_group_names.size(); ++i) {
+				curr_commodity_group = dcon::commodity_group_id(dcon::commodity_group_id::value_base_t(i));
 
 				bool is_empty = true;
 				for(auto id : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money) {
+					if(state.world.commodity_get_commodity_group(id) != curr_commodity_group
+					|| id == economy::money) {
 						continue;
 					}
 					is_empty = false;
@@ -1525,7 +1512,8 @@ namespace ui {
 				int16_t cell_height = 0;
 				// Place infoboxes for each of the goods...
 				for(auto id : state.world.in_commodity) {
-					if(sys::commodity_group(state.world.commodity_get_commodity_group(id)) != curr_commodity_group || !bool(id) || id == economy::money) {
+					if(state.world.commodity_get_commodity_group(id) != curr_commodity_group
+					|| id == economy::money) {
 						continue;
 					}
 					auto info_ptr = make_element_by_type<production_good_info>(state, "production_info");
@@ -1549,7 +1537,6 @@ namespace ui {
 					commodity_offset.y += cell_height;
 				}
 			}
-
 			{
 				auto ptr = make_element_by_type<national_focus_window>(state, "state_focus_window");
 				nf_win = ptr.get();
@@ -1558,7 +1545,6 @@ namespace ui {
 					add_child_to_front(std::move(ptr));
 				}
 			}
-
 			auto win = make_element_by_type<factory_build_window>(state, "build_factory");
 			if(win.get()) {
 				build_win = static_cast<factory_build_window*>(win.get());
@@ -1571,7 +1557,6 @@ namespace ui {
 				project_window->set_visible(state, false);
 				add_child_to_front(std::move(win2));
 			}
-
 			show_output_commodity = std::unique_ptr<bool[]>(new bool[state.world.commodity_size()]);
 			set_visible(state, false);
 		}

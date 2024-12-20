@@ -8,33 +8,24 @@ namespace parsers {
 		dcon::commodity_id new_id = context.outer_context.state.world.create_commodity();
 		auto name_id = text::find_or_add_key(context.outer_context.state, name, false);
 		context.outer_context.state.world.commodity_set_name(new_id, name_id);
-		context.outer_context.state.world.commodity_set_commodity_group(new_id, uint8_t(context.group));
+		context.outer_context.state.world.commodity_set_commodity_group(new_id, context.group);
 		context.outer_context.state.world.commodity_set_is_available_from_start(new_id, true);
 
 		context.outer_context.map_of_commodity_names.insert_or_assign(std::string(name), new_id);
-	good_context new_context{new_id, context.outer_context};
+		good_context new_context{new_id, context.outer_context};
 		parse_good(gen, err, new_context);
 	}
 	void make_goods_group(std::string_view name, token_generator& gen, error_handler& err, scenario_building_context& context) {
-		if(name == "military_goods") {
-			good_group_context new_context{sys::commodity_group::military_goods, context};
-			parse_goods_group(gen, err, new_context);
-		} else if(name == "raw_material_goods") {
-			good_group_context new_context{sys::commodity_group::raw_material_goods, context};
-			parse_goods_group(gen, err, new_context);
-		} else if(name == "industrial_goods") {
-			good_group_context new_context{sys::commodity_group::industrial_goods, context};
-			parse_goods_group(gen, err, new_context);
-		} else if(name == "consumer_goods") {
-			good_group_context new_context{sys::commodity_group::consumer_goods, context};
-			parse_goods_group(gen, err, new_context);
-			// Non-vanilla
-		} else if(name == "industrial_and_consumer_goods") {
-			good_group_context new_context{ sys::commodity_group::industrial_and_consumer_goods, context };
+		if(auto it = context.map_of_commodity_group_names.find(std::string(name)); it != context.map_of_commodity_group_names.end()) {
+			good_group_context new_context{ it->second, context };
 			parse_goods_group(gen, err, new_context);
 		} else {
-			err.accumulated_errors += "Unknown goods category " + std::string(name) + " found in " + err.file_name + "\n";
-			good_group_context new_context{sys::commodity_group::military_goods, context};
+			auto const id = dcon::commodity_group_id(uint8_t(context.state.commodity_group_names.size()));
+			auto const name_k = context.state.add_key_win1252(name);
+			context.state.commodity_group_names.push_back(name_k);
+			context.map_of_commodity_group_names.insert_or_assign(std::string(name), id);
+			// parse
+			good_group_context new_context{ id, context };
 			parse_goods_group(gen, err, new_context);
 		}
 	}

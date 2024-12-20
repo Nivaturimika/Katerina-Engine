@@ -432,6 +432,7 @@ namespace parsers {
 		ankerl::unordered_dense::map<std::string, dcon::provincial_flag_id> map_of_provincial_flags;
 		ankerl::unordered_dense::map<std::string, dcon::flag_type_id> map_of_flag_types;
 		ankerl::unordered_dense::map<std::string, dcon::province_building_type_id> map_of_province_building_types;
+		ankerl::unordered_dense::map<std::string, dcon::commodity_group_id> map_of_commodity_group_names;
 
 		tagged_vector<province_data, dcon::province_id> prov_id_to_original_id_map;
 		std::vector<dcon::province_id> original_id_to_prov_id_map;
@@ -560,7 +561,7 @@ namespace parsers {
 	};
 
 	struct good_group_context {
-		sys::commodity_group group = sys::commodity_group::consumer_goods;
+		dcon::commodity_group_id group;
 		scenario_building_context& outer_context;
 	};
 	struct good_context {

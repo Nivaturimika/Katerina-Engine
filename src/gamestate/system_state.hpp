@@ -551,6 +551,7 @@ namespace sys {
 
 		ui::definitions ui_defs; // definitions for graphics and ui
 		tagged_vector<dcon::text_key, dcon::flag_type_id> flag_type_names; // List of unique flag types
+		tagged_vector<dcon::text_key, dcon::commodity_group_id> commodity_group_names; // List of unique commodity groups
 
 		//
 		// persistent user settings

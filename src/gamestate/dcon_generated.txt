@@ -27,6 +27,7 @@ make_index{provincial_modifier_value}{uint8_t}
 make_index{national_modifier_value}{uint8_t}
 make_index{provincial_flag_id}{uint16_t}
 make_index{flag_type_id}{uint8_t}
+make_index{commodity_group_id}{uint8_t}
 
 object{
 	name{ national_identity }
@@ -337,7 +338,7 @@ object {
 	}
 	property{
 		name{ commodity_group }
-		type{ uint8_t }
+		type{ commodity_group_id }
 		tag{ scenario }
 	}
 	property{
