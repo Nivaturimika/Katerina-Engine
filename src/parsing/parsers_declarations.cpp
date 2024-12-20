@@ -3485,10 +3485,10 @@ namespace parsers {
 	void enter_war_dated_block(std::string_view label, token_generator& gen, error_handler& err, war_history_context& context) {
 		auto const ymd = parse_date(label, 0, err);
 		auto const d = sys::date(ymd, context.outer_context.state.start_date);
+		if(!context.start_date || context.start_date > d) {
+			context.start_date = d;
+		}
 		if(d <= context.outer_context.state.current_date) {
-			if(context.start_date > d) {
-				context.start_date = d;
-			}
 			parse_war_block(gen, err, context);
 		} else {
 			gen.discard_group();
