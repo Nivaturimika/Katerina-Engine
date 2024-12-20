@@ -7,7 +7,7 @@ In terms of compatibility, the data produced by the Data Container library is fa
 ### Save Location
 
 Windows: 
-> my documents / project alice / saves
+> `My documents/Katerina Engine/saves`
 
 ### How to manually serialize information found outside the data container
 
