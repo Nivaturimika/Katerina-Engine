@@ -2782,8 +2782,12 @@ namespace ai {
 		return false;
 	}
 
-	float war_willingness_factor(int32_t war_duration) {
-		return float(war_duration - 365) * 25.f / 365.0f;
+	float war_willingness_factor(int32_t war_duration, bool is_great_war) {
+		if(is_great_war) {
+			// "Force me 50% of war score or no deal bitch"
+			return 50.f;
+		}
+		return float(war_duration - 365) * 25.f / 365.f;
 	}
 
 	bool would_surrender_evaluate(sys::state& state, dcon::nation_id n, dcon::war_id w) {
@@ -2859,7 +2863,7 @@ namespace ai {
 						if(w.get_primary_defender().get_is_player_controlled() == false) {
 							auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 							if(war_duration >= 365) {
-								float willingness_factor = war_willingness_factor(war_duration);
+								float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 								if(defender_surrender || (overall_score > (total_po_cost - willingness_factor) && (-overall_score / 2 + total_po_cost - willingness_factor) < 0)) {
 									send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(total_po_cost), false);
 									continue;
@@ -2885,7 +2889,7 @@ namespace ai {
 						if(w.get_primary_attacker().get_is_player_controlled() == false) {
 							auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 							if(war_duration >= 365) {
-								float willingness_factor = war_willingness_factor(war_duration);
+								float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 								if(attacker_surrender  || (-overall_score > (total_po_cost - willingness_factor) && (overall_score / 2 + total_po_cost - willingness_factor) < 0)) {
 									send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(total_po_cost), false);
 									continue;
@@ -2906,14 +2910,14 @@ namespace ai {
 	}
 
 	bool will_accept_peace_offer_value(sys::state& state,
-	dcon::nation_id n, dcon::nation_id from,
-	dcon::nation_id prime_attacker, dcon::nation_id prime_defender,
-	float primary_warscore, float scoreagainst_me,
-	bool offer_from_attacker, bool concession,
-	int32_t overall_po_value, int32_t my_po_target,
-	int32_t target_personal_po_value, int32_t potential_peace_score_against,
-	int32_t my_side_against_target, int32_t my_side_peace_cost,
-	int32_t war_duration, bool contains_sq) {
+		dcon::nation_id n, dcon::nation_id from,
+		dcon::nation_id prime_attacker, dcon::nation_id prime_defender,
+		float primary_warscore, float scoreagainst_me,
+		bool offer_from_attacker, bool concession,
+		int32_t overall_po_value, int32_t my_po_target,
+		int32_t target_personal_po_value, int32_t potential_peace_score_against,
+		int32_t my_side_against_target, int32_t my_side_peace_cost,
+		int32_t war_duration, bool contains_sq) {
 		bool is_attacking = !offer_from_attacker;
 
 		auto overall_score = primary_warscore;
@@ -2938,7 +2942,8 @@ namespace ai {
 			if(war_duration < 365) {
 				return false;
 			}
-			float willingness_factor = war_willingness_factor(war_duration);
+			// TODO: eval for gw and crisis wars
+			float willingness_factor = war_willingness_factor(war_duration, false);
 			if(overall_score >= 0) {
 				if(concession && ((overall_score * 2 - overall_po_value - willingness_factor) < 0))
 				return true;
@@ -3045,7 +3050,7 @@ namespace ai {
 			if(war_duration < 365) {
 				return false;
 			}
-			float willingness_factor = war_willingness_factor(war_duration);
+			float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 			if(overall_score >= 0) {
 				if(concession && ((overall_score * 2 - overall_po_value - willingness_factor) < 0))
 				return true;
