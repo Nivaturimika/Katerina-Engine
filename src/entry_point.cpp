@@ -404,6 +404,7 @@ int process_command_line(std::vector<native_string>& argv) {
 		}
 	} else {
 		std::thread update_thread([&]() { game_state.game_loop(); });
+		window::set_borderless_full_screen(game_state, game_state.user_settings.prefer_fullscreen);
 		// entire game runs during this line
 		window::initialize_window(game_state);
 		game_state.quit_signaled.store(true, std::memory_order_release);
