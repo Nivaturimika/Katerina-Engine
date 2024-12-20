@@ -32,7 +32,7 @@ namespace ai {
 	constexpr inline float sphere_already_in_our_sphere_factor = 0.75f;
 	constexpr inline float sphere_primary_culture_factor = 100.f;
 	constexpr inline float sphere_culture_group_factor = 75.f;
-	constexpr inline float sphere_wargoal_factor = 1.5f;
+	constexpr inline float sphere_wargoal_factor = 1.75f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
 	constexpr inline float sphere_unreachable_factor = 0.05f;
 	constexpr inline float sphere_uncivilized_factor = 10.f;
@@ -66,7 +66,7 @@ namespace ai {
 	}
 
 	float estimate_total_value(sys::state& state, dcon::nation_id n, dcon::nation_id target) {
-		float v = 1.f;
+		auto v = 1.f;
 		for(const auto pc : state.world.nation_get_province_ownership(target)) {
 			auto is_accepted = nations::nation_accepts_culture(state, n, pc.get_province().get_dominant_culture());
 			v *= 2.5f;
@@ -201,7 +201,6 @@ namespace ai {
 				auto const threatened = defensive_str < safety_factor * rival_str;
 				state.world.nation_set_ai_is_threatened(n, threatened);
 				state.world.nation_set_ai_rival(n, rival_n);
-				//state.world.nation_set_ai_rival(n, rival_n);
 			}
 		}
 	}
@@ -516,6 +515,22 @@ namespace ai {
 		});
 	}
 
+	/* Tests if a nation is a potential candidate to go to war with, taking into account if it is in a sphere
+		@param n Nation (spherelord)
+		@param t Target to test for
+		@return If the target is viable to go to war with */
+	bool can_war_with_target_in_sphere(sys::state& state, dcon::nation_id n, dcon::nation_id t) {
+		if((state.world.nation_get_infamy(n) + state.defines.removefromsphere_infamy_cost) >= state.defines.badboy_limit) {
+			return false; //do not go over infamy limit
+		}
+		if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n); rel) {
+			return state.world.nation_get_in_sphere_of(t) == n
+				&& state.defines.removefromsphere_influence_cost <= state.world.gp_relationship_get_influence(rel)
+				&& military::can_use_cb_against(state, n, t);
+		}
+		return false;
+	}
+
 	void update_influence_priorities(sys::state& state) {
 		struct weighted_nation {
 			dcon::nation_id id;
@@ -570,7 +585,7 @@ namespace ai {
 				auto const t_cg = t.get_primary_culture().get_group_from_culture_group_membership();
 				if(t.get_in_sphere_of() == n.nation) {
 					weight *= sphere_already_in_our_sphere_factor;
-					if(military::can_use_cb_against(state, n.nation, t) && t.get_in_sphere_of()) {
+					if(ai::can_war_with_target_in_sphere(state, n.nation, t)) {
 						//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
 						weight *= sphere_wargoal_factor;
 					}
@@ -658,22 +673,6 @@ namespace ai {
 		}
 	}
 
-	/* Tests if a nation is a potential candidate to go to war with, taking into account if it is in a sphere
-		@param n Nation (spherelord)
-		@param t Target to test for
-		@return If the target is viable to go to war with */
-	bool can_war_with_target_in_sphere(sys::state& state, dcon::nation_id n, dcon::nation_id t) {
-		if((state.world.nation_get_infamy(n) + state.defines.removefromsphere_infamy_cost) >= state.defines.badboy_limit) {
-			return false; //do not go over infamy limit
-		}
-		if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n); rel) {
-			return state.world.nation_get_in_sphere_of(t) == n
-				&& state.defines.removefromsphere_influence_cost <= state.world.gp_relationship_get_influence(rel)
-				&& military::can_use_cb_against(state, n, t);
-		}
-		return false;
-	}
-
 	void perform_influence_actions(sys::state& state) {
 		for(auto gprl : state.world.in_gp_relationship) {
 			if(gprl.get_great_power().get_is_player_controlled()) {
@@ -705,10 +704,9 @@ namespace ai {
 					continue; // already in sphere
 				}
 				//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
-				if(military::can_use_cb_against(state, gprl.get_great_power(), gprl.get_influence_target())
+				if(ai::can_war_with_target_in_sphere(state, gprl.get_great_power(), gprl.get_influence_target())
 				&& state.defines.removefromsphere_influence_cost <= gprl.get_influence()
-				&& current_sphere && current_sphere == gprl.get_great_power() && clevel == nations::influence::level_friendly
-				&& (state.world.nation_get_infamy(gprl.get_great_power()) + state.defines.removefromsphere_infamy_cost) < state.defines.badboy_limit) {
+				&& current_sphere == gprl.get_great_power()) {
 					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
 					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
 				} else if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
@@ -1075,16 +1073,18 @@ namespace ai {
 						for(auto f : state.world.province_get_factory_location(p)) {
 							// subsidize factories that are not satisfying demand
 							auto const c = f.get_factory().get_building_type().get_output();
-							auto is_prio = false;
-							if(state.world.nation_get_demand_satisfaction(n, c) < 0.95f
-							|| c.get_total_real_demand() * 1.25f > c.get_total_production()
-							|| has_unemployed) {
+							auto is_low_prio = false;
+							auto is_high_prio = false;
+							if(has_unemployed
+							|| state.world.nation_get_demand_satisfaction(n, c) < 0.95f
+							|| c.get_total_real_demand() * 1.25f > c.get_total_production()) {
 								f.get_factory().set_subsidized(true);
-								is_prio = (c.get_total_real_demand() > c.get_total_production());
+								is_low_prio = (c.get_total_real_demand() * 0.5f > c.get_total_production());
+								is_high_prio = (c.get_total_real_demand() * 0.25f > c.get_total_production());
 							}
 							if((rules & issue_rule::factory_priority) != 0) {
-								f.get_factory().set_priority_low(is_prio);
-								f.get_factory().set_priority_high(is_prio);
+								f.get_factory().set_priority_low(is_low_prio);
+								f.get_factory().set_priority_high(is_high_prio);
 							}
 						}
 					});
