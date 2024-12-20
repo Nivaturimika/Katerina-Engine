@@ -602,33 +602,39 @@ namespace parsers {
 	}
 
 	void poptype_file::life_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
-		context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-			if(cid.index() < value.data.ssize()) {
+		for(const auto cid : context.outer_context.state.world.in_commodity) {
+			if(cid.id.index() < value.data.ssize()) {
 				auto v = value.data[cid];
 				v *= (1.f / 200000.f) * context.outer_context.state.defines.base_goods_demand;
 				context.outer_context.state.world.pop_type_set_life_needs(context.id, cid, v);
+			} else {
+				break;
 			}
-		});
+		}
 	}
 
 	void poptype_file::everyday_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
-		context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-			if(cid.index() < value.data.ssize()) {
+		for(const auto cid : context.outer_context.state.world.in_commodity) {
+			if(cid.id.index() < value.data.ssize()) {
 				auto v = value.data[cid];
 				v *= (1.f / 200000.f) * context.outer_context.state.defines.base_goods_demand;
 				context.outer_context.state.world.pop_type_set_everyday_needs(context.id, cid, v);
+			} else {
+				break;
 			}
-		});
+		}
 	}
 
 	void poptype_file::luxury_needs(commodity_array const& value, error_handler& err, int32_t line, poptype_context& context) {
-		context.outer_context.state.world.for_each_commodity([&](dcon::commodity_id cid) {
-			if(cid.index() < value.data.ssize()) {
+		for(const auto cid : context.outer_context.state.world.in_commodity) {
+			if(cid.id.index() < value.data.ssize()) {
 				auto v = value.data[cid];
 				v *= (1.f / 200000.f) * context.outer_context.state.defines.base_goods_demand;
 				context.outer_context.state.world.pop_type_set_luxury_needs(context.id, cid, v);
+			} else {
+				break;
 			}
-		});
+		}
 	}
 
 	void poptype_file::life_needs_income(income const& value, error_handler& err, int32_t line, poptype_context& context) {

@@ -2362,7 +2362,9 @@ namespace trigger {
 	}
 	TRIGGER_FUNCTION(tf_has_building_factory_from_province) {
 		auto const state = ws.world.province_get_state_membership(to_prov(primary_slot));
-		auto const result = ve::apply([&ws](dcon::state_instance_id s) { return economy_factory::has_factory(ws, s); }, state);
+		auto const result = ve::apply([&ws](dcon::state_instance_id s) {
+			return economy_factory::has_factory(ws, s);
+		}, state);
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_empty) {
@@ -2376,15 +2378,15 @@ namespace trigger {
 	}
 	TRIGGER_FUNCTION(tf_has_country_modifier) {
 		auto const mod = trigger::payload(tval[1]).mod_id;
-		auto result = ve::apply([&ws, mod](dcon::nation_id n) {
+		auto const result = ve::apply([&ws, mod](dcon::nation_id n) {
 			return nations::has_country_modifier(ws, n, mod);
 		}, to_nation(primary_slot));
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_country_modifier_province) {
-		auto owner = ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot));
+		auto const owner = ws.world.province_get_nation_from_province_ownership(to_prov(primary_slot));
 		auto const mod = trigger::payload(tval[1]).mod_id;
-		auto result = ve::apply([&ws, mod](dcon::nation_id n) {
+		auto const result = ve::apply([&ws, mod](dcon::nation_id n) {
 			return nations::has_country_modifier(ws, n, mod);
 		}, owner);
 		return compare_to_true(tval[0], result);
@@ -2394,8 +2396,9 @@ namespace trigger {
 		auto result = ve::apply(
 			[&ws, mod](dcon::province_id n) {
 				for(auto m : ws.world.province_get_current_modifiers(n)) {
-					if(m.mod_id == mod)
+					if(m.mod_id == mod) {
 						return true;
+					}
 				}
 				return false;
 			},
@@ -3654,11 +3657,12 @@ namespace trigger {
 		return compare_to_true(tval[0], result);
 	}
 	TRIGGER_FUNCTION(tf_has_factories_nation) {
-		auto result = ve::apply([&ws](dcon::nation_id n) {
-			for(auto s : ws.world.nation_get_state_ownership(n)) {
-				auto b = economy_factory::has_factory(ws, s.get_state());
-				if(b)
+		auto const result = ve::apply([&ws](dcon::nation_id n) {
+			for(auto const s : ws.world.nation_get_state_ownership(n)) {
+				auto const b = economy_factory::has_factory(ws, s.get_state());
+				if(b) {
 					return true;
+				}
 			}
 			return false;
 		}, to_nation(primary_slot));
