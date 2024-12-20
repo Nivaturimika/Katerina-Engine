@@ -553,8 +553,9 @@ namespace ai {
 					}
 				}
 				auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n.nation);
-				if(!nations::can_accumulate_influence_with(state, n.nation, t, rel))
+				if(!nations::can_accumulate_influence_with(state, n.nation, t, rel)) {
 					continue;
+				}
 				auto weight = 1.f;
 				for(auto const c : state.world.in_commodity) {
 					if(auto const d = state.world.nation_get_real_demand(n.nation, c); d > 0.1f) {
@@ -574,9 +575,17 @@ namespace ai {
 						weight *= sphere_wargoal_factor;
 					}
 				} else {
+					auto const our_rank = state.world.nation_get_rank(n.nation);
+					bool cg_leader_influencing = false;
+					for(const auto gp : t.get_gp_relationship_as_influence_target()) {
+						if(gp.get_great_power().get_primary_culture().get_group_from_culture_group_membership() == cg
+						&& gp.get_great_power().get_rank() < our_rank) {
+							cg_leader_influencing = true;
+						}
+					}
+
 					/* The "cultural union leader" is already influencing this -- so don't bother them */
-					if(cg == t.get_in_sphere_of().get_primary_culture().get_group_from_culture_group_membership()
-					&& t.get_in_sphere_of().get_rank() < state.world.nation_get_rank(n.nation)) {
+					if(cg_leader_influencing) {
 						weight  *= sphere_avoid_distracting_cultural_leader;
 					} else {
 						//Prioritize primary culture before culture groups; should ensure Prussia spheres all of the NGF first before trying to contest Austria
