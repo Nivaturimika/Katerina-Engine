@@ -2176,10 +2176,10 @@ namespace command {
 	}
 	bool can_fabricate_cb(sys::state& state, dcon::nation_id source, dcon::nation_id target, dcon::cb_type_id type) {
 		if(source == target)
-		return false;
+			return false;
 
 		if(state.world.nation_get_constructing_cb_type(source))
-		return false;
+			return false;
 
 		/*
 		Can't fabricate on someone you are at war with. Can't fabricate on anyone except your overlord if you are a vassal. Requires
@@ -2191,16 +2191,16 @@ namespace command {
 			return false;
 
 		if(state.world.nation_get_in_sphere_of(target) == source)
-		return false;
+			return false;
 
-		if(state.world.nation_get_is_player_controlled(source) && state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
-		return false;
+		if(state.world.nation_get_diplomatic_points(source) < state.defines.make_cb_diplomatic_cost)
+			return false;
 
 		if(military::are_at_war(state, target, source))
-		return false;
+			return false;
 
 		if(military::has_truce_with(state, source, target))
-		return false;
+			return false;
 
 		/*
 		must be able to fabricate cb

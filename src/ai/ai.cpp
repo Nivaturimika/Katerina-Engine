@@ -23,10 +23,10 @@ namespace command {
 
 namespace ai {
 	/* Additional (counting allies) offensiv strenght of a country, except the country itself */
-	constexpr inline float additional_offensive_str_factor = 0.5f;
-	constexpr inline float puppet_str_factor = 0.5f;
+	constexpr inline float additional_offensive_str_factor = 0.75f;
+	constexpr inline float puppet_str_factor = 0.75f;
 	constexpr inline float safety_factor = 0.75f;
-	constexpr inline float ally_overestimate = 2.f;
+	constexpr inline float ally_overestimate = 1.5f;
 
 	/* Sphere weights */
 	constexpr inline float sphere_already_in_our_sphere_factor = 0.75f;
@@ -40,10 +40,10 @@ namespace ai {
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 15.5f;
-	constexpr inline float aggression_towards_at_war = 5.5f;
-	constexpr inline float aggression_towards_rival = 2.5f;
-	constexpr inline float aggression_towards_adjacent = 1.5f;
+	constexpr inline float aggression_towards_unciv = 15.f;
+	constexpr inline float aggression_towards_at_war = 5.f;
+	constexpr inline float aggression_towards_rival = 10.f;
+	constexpr inline float aggression_towards_adjacent = 5.f;
 	constexpr inline float aggression_factor = 1.f / 10.f;
 
 	float average_army_strength(sys::state& state, dcon::army_id a) {
@@ -128,9 +128,10 @@ namespace ai {
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
-		auto const their_str = estimate_strength(state, target);
+		auto const their_str = estimate_defensive_strength(state, target);
 		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
+			weight = our_str - (their_str * 0.1f);
 			weight *= aggression_towards_unciv;
 		}
 		if(state.world.nation_get_is_at_war(target)) {
@@ -2129,7 +2130,7 @@ namespace ai {
 		best nation to go war with for the AI, it's only a basic game rule check)
 		@param n Nation that wants to go to war
 		@param real_target The real target of the declaration (i.e the overlord)
-		@param other The "involved" target of the declaration (i.e a puppet), can be empty */
+		@param other The "involved" target of the declaration (i.e a puppet) */
 	bool can_go_war_with(sys::state& state, dcon::nation_id n, dcon::nation_id real_target, dcon::nation_id other) {
 		if(real_target == n || other == n)
 			return false;
@@ -2160,12 +2161,8 @@ namespace ai {
 	}
 
 	bool valid_construction_target(sys::state& state, dcon::nation_id from, dcon::nation_id target) {
-		if(state.world.nation_get_military_score(from) == 0)
-			return false; // not in a position to do wars
 		// Copied from commands.cpp:can_fabricate_cb()
 		if(from == target)
-			return false;
-		if(state.world.nation_get_constructing_cb_type(from))
 			return false;
 		auto ol = state.world.nation_get_overlord_as_subject(from);
 		if(state.world.overlord_get_ruler(ol) && state.world.overlord_get_ruler(ol) != target)
@@ -2198,52 +2195,47 @@ namespace ai {
 		}
 		auto const ovr = state.world.nation_get_overlord_as_subject(target);
 		auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
-		return ai::can_go_war_with(state, from, real_target, target);
+		if(real_target) {
+			return ai::can_go_war_with(state, from, real_target, target);
+		}
+		return ai::can_go_war_with(state, from, target, target);
 	}
 
 	void update_cb_fabrication(sys::state& state) {
 		for(auto n : state.world.in_nation) {
 			if(!n.get_is_player_controlled() && n.get_owned_province_count() > 0) {
-				if(n.get_is_at_war())
+				if(n.get_is_at_war()
+				|| n.get_constructing_cb_type()
+				|| n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost
+				|| n.get_military_score() == 0)
 					continue;
 				// Uncivilized nations are more aggressive to westernize faster
 				float infamy_limit = state.world.nation_get_is_civilized(n) ? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
 				if(n.get_infamy() > infamy_limit)
 					continue;
-				if(n.get_constructing_cb_type())
-					continue;
-				if(n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost)
-					continue;
 				/* Compile weights of most desirable nation */
-				struct nation_weight_pair {
-					float weight;
-					dcon::nation_id n;
-				};
-				static std::vector<nation_weight_pair> targets;
-				targets.clear();
 				auto const base_strength = estimate_strength(state, n);
-				auto total = 0.f;
+				
+				dcon::nation_id best_target{};
+				dcon::cb_type_id best_cb{};
+				auto best_weight = 0.f;
 				for(auto i : state.world.in_nation) {
 					if(ai::valid_construction_target(state, n, i)) {
 						auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
-						total += weight;
-						targets.push_back(nation_weight_pair{ weight, i.id });
+						if(weight > best_weight) {
+							auto const cb = pick_fabrication_type(state, n, i);
+							if(cb) {
+								best_cb = cb;
+								best_weight = weight;
+								best_target = i;
+							}
+						}
 					}
 				}
 				/* Go over all of them and find best suited from randomly generated seed */
-				if(!targets.empty() && total > 0.f) {
-					auto rvalue = rng::get_random_float(state, uint32_t(n.id.index()));
-					for(auto const t : targets) {
-						rvalue -= t.weight / total;
-						if(rvalue < 0.0f) {
-							auto const cb = pick_fabrication_type(state, n, t.n);
-							if(cb) {
-								assert(command::can_fabricate_cb(state, n, t.n, cb));
-								command::execute_fabricate_cb(state, n, t.n, cb);
-							}
-							break;
-						}
-					}
+				if(best_target && best_cb) {
+					assert(command::can_fabricate_cb(state, n, best_target, best_cb));
+					command::execute_fabricate_cb(state, n, best_target, best_cb);
 				}
 			}
 		}
@@ -4468,7 +4460,8 @@ namespace ai {
 			if(n_controller == n) {
 				// own province
 				auto lb = other.get_land_battle_location();
-				if(lb.begin() != lb.end()) {
+				if(lb.begin() != lb.end()
+				|| other.get_siege_progress() > 0.f) {
 					cls = province_class::hostile_border;
 					break;
 				}
