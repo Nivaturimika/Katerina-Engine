@@ -957,8 +957,8 @@ namespace ai {
 								target = pid;
 								max_support = support;
 							}
-						} else {
-							/* Select what the people want */
+						} else if(!gov.get_has_elections()) {
+							/* Select what the people want -- ONLY IF WE ARE NOT DEMOCRATIC */
 							if(support > max_support) {
 								target = pid;
 								max_support = support;
@@ -4460,9 +4460,12 @@ namespace ai {
 			if(n_controller == n) {
 				// own province
 				auto lb = other.get_land_battle_location();
-				if(lb.begin() != lb.end()
-				|| other.get_siege_progress() > 0.f) {
+				if(lb.begin() != lb.end() || other.get_siege_progress() > 0.f) {
 					cls = province_class::hostile_border;
+					break;
+				}
+				if(other == state.world.nation_get_capital(n)) {
+					cls = province_class::border;
 					break;
 				}
 			} else if(other.get_rebel_faction_from_province_rebel_control()) {
@@ -4988,8 +4991,19 @@ namespace ai {
 		return std::max(0.1f, strength * scale);
 	}
 
+	float estimate_friendly_offensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by) {
+		auto total = 0.f;
+		for(auto ar : state.world.province_get_army_location(target)) {
+			auto other_nation = ar.get_army().get_controller_from_army_control();
+			if(other_nation == by || military::are_allied_in_war(state, other_nation, by)) {
+				total += estimate_army_offensive_strength(state, ar.get_army());
+			}
+		}
+		return total;
+	}
+
 	float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by) {
-		float total = 0.f;
+		auto total = 0.f;
 		for(auto ar : state.world.province_get_army_location(target)) {
 			auto other_nation = ar.get_army().get_controller_from_army_control();
 			if(!other_nation || military::are_at_war(state, other_nation, by)) {
@@ -5014,7 +5028,7 @@ namespace ai {
 			|| ar.get_army().get_navy_from_army_transport()
 			|| ar.get_army().get_black_flag()
 			|| ar.get_army().get_arrival_time()
-			|| activity != army_activity::on_guard
+			|| army_activity(ar.get_army().get_ai_activity()) != army_activity::on_guard
 			|| !army_ready_for_battle(state, n, ar.get_army())) {
 				continue;
 			}
@@ -5109,7 +5123,9 @@ namespace ai {
 				continue; // target has been removed as too close by some earlier iteration
 			}
 			if(potential_targets[i].strength_estimate == 0.0f) {
-				potential_targets[i].strength_estimate = estimate_enemy_defensive_force(state, potential_targets[i].location, n);
+				auto const friend_str = estimate_friendly_offensive_force(state, potential_targets[i].location, n);
+				auto const enemy_str = estimate_enemy_defensive_force(state, potential_targets[i].location, n);
+				potential_targets[i].strength_estimate = enemy_str - friend_str;
 				potential_targets[i].strength_estimate = std::max(0.001f, potential_targets[i].strength_estimate);
 			}
 
@@ -5935,9 +5951,11 @@ namespace ai {
 
 	float estimate_rebel_strength(sys::state& state, dcon::province_id p) {
 		float v = 0.f;
-		for(auto ar : state.world.province_get_army_location(p))
-		if(ar.get_army().get_controller_from_army_rebel_control())
-		v += estimate_army_defensive_strength(state, ar.get_army());
+		for(auto ar : state.world.province_get_army_location(p)) {
+			if(ar.get_army().get_controller_from_army_rebel_control()) {
+				v += estimate_army_defensive_strength(state, ar.get_army());
+			}
+		}
 		return v;
 	}
 
