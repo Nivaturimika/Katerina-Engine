@@ -36,7 +36,7 @@ namespace ai {
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 10.5f;
+	constexpr inline float aggression_towards_unciv = 15.5f;
 	constexpr inline float aggression_towards_at_war = 5.5f;
 	constexpr inline float aggression_towards_rival = 2.5f;
 	constexpr inline float aggression_towards_adjacent = 1.5f;
@@ -124,9 +124,9 @@ namespace ai {
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
-		auto const their_str = estimate_defensive_strength(state, target);
+		auto const their_str = estimate_strength(state, target);
 		auto weight = our_str - their_str;
-		if(state.world.nation_get_is_civilized(n) && !state.world.nation_get_is_civilized(target)) {
+		if(!state.world.nation_get_is_civilized(target)) {
 			weight *= aggression_towards_unciv;
 		}
 		if(state.world.nation_get_is_at_war(target)) {
@@ -2177,26 +2177,19 @@ namespace ai {
 		if(sl && sl == state.world.nation_get_in_sphere_of(from))
 			return false;
 		// Attacking people from other regions only if we have naval superiority
-		if(state.world.province_get_continent(state.world.nation_get_capital(from)) != state.world.province_get_continent(state.world.nation_get_capital(target))) {
-			// We must achieve naval superiority to even invade them
-			if(state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
-				return false;
+		bool has_adj = false;
+		for(const auto adj : state.world.nation_get_nation_adjacency(target)) {
+			auto const n = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
+			if(n == from) {
+				has_adj = true;
+				break;
+			} else if(auto ovr = n.get_overlord_as_subject(); ovr && ovr.get_ruler() == from) {
+				has_adj = true;
+				break;
 			}
-		} else {
-			bool has_adj = false;
-			for(const auto adj : state.world.nation_get_nation_adjacency(target)) {
-				auto const n = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
-				if(n == from) {
-					has_adj = true;
-					break;
-				} else if(auto ovr = n.get_overlord_as_subject(); ovr && ovr.get_ruler() == from) {
-					has_adj = true;
-					break;
-				}
-			}
-			if(!has_adj) {
-				return false;
-			}
+		}
+		if(state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
+			return false;
 		}
 		auto const ovr = state.world.nation_get_overlord_as_subject(target);
 		auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
