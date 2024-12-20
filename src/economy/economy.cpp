@@ -309,6 +309,9 @@ namespace economy {
 			fn.set_rich_tax(int8_t(50));
 
 			fn.set_spending_level(1.0f);
+			fn.set_effective_construction_spending(1.f);
+			fn.set_effective_land_spending(1.f);
+			fn.set_effective_naval_spending(1.f);
 
 			state.world.for_each_commodity([&](dcon::commodity_id c) {
 				state.world.nation_set_demand_satisfaction(n, c, 1.0f);
