@@ -1,4 +1,5 @@
 #include "gui_trade_window.hpp"
+#include "gui_element_templates.hpp"
 
 namespace ui {
 	void commodity_stockpile_indicator::on_update(sys::state& state) noexcept {
@@ -584,8 +585,10 @@ namespace ui {
 
 	void trade_commodity_group_window::on_create(sys::state& state) noexcept {
 		window_element_base::on_create(state);
+	}
+	void trade_commodity_group_window::on_update(sys::state& state) noexcept {
 		state.world.for_each_commodity([&](dcon::commodity_id id) {			
-			if(dcon::commodity_group_id(state.world.commodity_get_commodity_group(id)) != content) {
+			if(state.world.commodity_get_commodity_group(id) != content) {
 				return;
 			}
 			auto ptr = make_element_by_type<trade_commodity_entry>(state, state.ui_state.defs_by_name.find(state.lookup_key("goods_entry"))->second.definition);
@@ -593,8 +596,7 @@ namespace ui {
 			entries_element.push_back(ptr.get());
 			add_child_to_front(std::move(ptr));
 		});
-	}
-	void trade_commodity_group_window::on_update(sys::state& state) noexcept {
+
 		xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("goods_entry_offset"))->second.definition].position;
 		xy_pair offset{ 0, 0 };
 		for(const auto& e : entries_element) {
