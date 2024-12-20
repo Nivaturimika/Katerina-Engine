@@ -35,6 +35,13 @@ namespace ai {
 	constexpr inline float sphere_on_another_continent = 0.1f;
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
 
+	/* Aggression multiplier towards uncivilized nations */
+	constexpr inline float aggression_towards_unciv = 10.5f;
+	constexpr inline float aggression_towards_at_war = 5.5f;
+	constexpr inline float aggression_towards_rival = 2.5f;
+	constexpr inline float aggression_towards_adjacent = 1.5f;
+	constexpr inline float aggression_factor = 1.f / 10.f;
+
 	float average_army_strength(sys::state& state, dcon::army_id a) {
 		float total = 0.f;
 		float value = 0.f;
@@ -88,7 +95,7 @@ namespace ai {
 	}
 
 	float estimate_defensive_strength(sys::state& state, dcon::nation_id n) {
-		float value = estimate_strength(state, n);
+		auto value = estimate_strength(state, n);
 		for(auto dr : state.world.nation_get_diplomatic_relation(n)) {
 			if(dr.get_are_allied()) {
 				auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
@@ -114,6 +121,32 @@ namespace ai {
 		}
 		return value * additional_offensive_str_factor;
 	}
+
+	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
+		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
+		auto const their_str = estimate_defensive_strength(state, target);
+		auto weight = our_str - their_str;
+		if(state.world.nation_get_is_civilized(n) && !state.world.nation_get_is_civilized(target)) {
+			weight *= aggression_towards_unciv;
+		}
+		if(state.world.nation_get_is_at_war(target)) {
+			weight *= aggression_towards_at_war;
+		}
+		if(state.world.nation_get_ai_rival(n) == target) {
+			weight *= aggression_towards_rival;
+		}
+		auto const adj = state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target);
+		if(adj) {
+			weight *= aggression_towards_adjacent;
+		}
+		auto const total_pop = state.world.nation_get_demographics(target, demographics::total);
+		auto const pop_weight = (1.f / 100000.f); // each 100k
+		return weight + total_pop * pop_weight;
+	}
+
+	//
+	// UPDATE FUNCTIONS
+	//
 
 	void update_ai_general_status(sys::state& state) {
 		for(auto n : state.world.in_nation) {
@@ -2072,7 +2105,7 @@ namespace ai {
 			if((bits & (military::cb_flag::po_demand_state | military::cb_flag::po_annex)) == 0)
 				continue;
 			// Uncivilized nations are more aggressive to westernize faster
-			float infamy_limit = state.world.nation_get_is_civilized(from) ? state.defines.badboy_limit / 2.f : state.defines.badboy_limit;
+			float infamy_limit = state.world.nation_get_is_civilized(from) ? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
 			if(state.world.nation_get_infamy(from) + military::cb_infamy(state, c) > infamy_limit)
 				continue;
 			if(!military::cb_conditions_satisfied(state, from, target, c))
@@ -2082,19 +2115,49 @@ namespace ai {
 				continue;
 			possibilities.push_back(c);
 		}
-
 		if(!possibilities.empty()) {
 			return possibilities[rng::reduce(uint32_t(rng::get_random(state, uint32_t((from.index() << 3) ^ target.index()))), uint32_t(possibilities.size()))];
-		} else {
-			return dcon::cb_type_id{};
 		}
+		return dcon::cb_type_id{};
+	}
+
+	/*	Tests if a nation (via game rules) can go to war with another given nation (this is not criteria for selecting the
+		best nation to go war with for the AI, it's only a basic game rule check)
+		@param n Nation that wants to go to war
+		@param real_target The real target of the declaration (i.e the overlord)
+		@param other The "involved" target of the declaration (i.e a puppet), can be empty */
+	bool can_go_war_with(sys::state& state, dcon::nation_id n, dcon::nation_id real_target, dcon::nation_id other) {
+		if(real_target == n || other == n)
+			return false;
+		if(state.world.nation_get_owned_province_count(real_target) == 0
+		|| state.world.nation_get_owned_province_count(other) == 0)
+			return false;
+		if(state.world.nation_get_in_sphere_of(real_target) == n
+		|| state.world.nation_get_in_sphere_of(other) == n)
+			return false;
+		/* Declaring on sphere members is a no no */
+		if(state.world.nation_get_in_sphere_of(n)
+		&& state.world.nation_get_in_sphere_of(n) == state.world.nation_get_in_sphere_of(real_target))
+			return false;
+		if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
+			return false;
+		if(military::are_allied_in_war(state, n, other) || military::are_allied_in_war(state, n, real_target))
+			return false;
+		if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
+			return false;
+		for(auto const pc : state.world.nation_get_province_ownership(real_target)) {
+			for(auto const al : pc.get_province().get_army_location()) {
+				if(al.get_army().get_controller_from_army_control() == n) {
+					return false;
+				}
+			}
+		}
+		return military::can_use_cb_against(state, n, other);
 	}
 
 	bool valid_construction_target(sys::state& state, dcon::nation_id from, dcon::nation_id target) {
-		// OPMs wont justify because why would they
-		if(state.world.nation_get_owned_province_count(from) <= 2) {
-			return false;
-		}
+		if(state.world.nation_get_military_score(from) == 0)
+			return false; // not in a position to do wars
 		// Copied from commands.cpp:can_fabricate_cb()
 		if(from == target)
 			return false;
@@ -2135,13 +2198,9 @@ namespace ai {
 				return false;
 			}
 		}
-		// Its easy to defeat a nation at war
-		auto const from_str = estimate_strength(state, from);
-		auto const target_str = estimate_strength(state, target);
-		if(state.world.nation_get_is_at_war(target)) {
-			return from_str >= std::max(0.001f, target_str * 0.25f);
-		}
-		return from_str >= std::max(0.001f, target_str * 0.75f);
+		auto const ovr = state.world.nation_get_overlord_as_subject(target);
+		auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
+		return ai::can_go_war_with(state, from, real_target, target);
 	}
 
 	void update_cb_fabrication(sys::state& state) {
@@ -2155,33 +2214,34 @@ namespace ai {
 					continue;
 				if(n.get_constructing_cb_type())
 					continue;
-				auto ol = n.get_overlord_as_subject().get_ruler().id;
-				if(n.get_ai_rival()
-				&& n.get_ai_rival().get_in_sphere_of() != n
-				&& (!ol || ol == n.get_ai_rival())
-				&& !military::are_at_war(state, n, n.get_ai_rival())
-				&& !military::can_use_cb_against(state, n, n.get_ai_rival())
-				&& !military::has_truce_with(state, n, n.get_ai_rival())) {
-					if(auto cb = pick_fabrication_type(state, n, n.get_ai_rival()); cb) {
-						n.set_constructing_cb_target(n.get_ai_rival());
-						n.set_constructing_cb_type(cb);
+				/* Compile weights of most desirable nation */
+				struct nation_weight_pair {
+					float weight;
+					dcon::nation_id n;
+				};
+				static std::vector<nation_weight_pair> targets;
+				targets.clear();
+				auto const base_strength = estimate_strength(state, n);
+				auto total = 0.f;
+				for(auto i : state.world.in_nation) {
+					if(ai::valid_construction_target(state, n, i)) {
+						auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
+						total += weight;
+						targets.push_back(nation_weight_pair{ weight, i.id });
 					}
-				} else {
-					static std::vector<dcon::nation_id> possible_targets;
-					possible_targets.clear();
-					for(auto i : state.world.in_nation) {
-						if(valid_construction_target(state, n, i)
-						&& !military::has_truce_with(state, n, i)) {
-							possible_targets.push_back(i.id);
-							if(!i.get_is_civilized())
-								possible_targets.push_back(i.id); //twice the chance!
-						}
-					}
-					if(!possible_targets.empty()) {
-						auto t = possible_targets[rng::reduce(uint32_t(rng::get_random(state, uint32_t(n.id.index())) >> 2), uint32_t(possible_targets.size()))];
-						if(auto cb = pick_fabrication_type(state, n, t); cb) {
-							n.set_constructing_cb_target(t);
-							n.set_constructing_cb_type(cb);
+				}
+				/* Go over all of them and find best suited from randomly generated seed */
+				if(!targets.empty() && total > 0.f) {
+					auto rvalue = rng::get_random_float(state, uint32_t(n.id.index()));
+					for(auto const t : targets) {
+						rvalue -= t.weight / total;
+						if(rvalue < 0.0f) {
+							auto const cb = pick_fabrication_type(state, n, t.n);
+							if(cb) {
+								n.set_constructing_cb_target(t.n);
+								n.set_constructing_cb_type(cb);
+							}
+							break;
 						}
 					}
 				}
@@ -2783,11 +2843,11 @@ namespace ai {
 	}
 
 	float war_willingness_factor(int32_t war_duration, bool is_great_war) {
+		auto years = 1.f;
 		if(is_great_war) {
-			// "Force me 75% of war score or no deal bitch"
-			return -75.f;
+			years = 8.f;
 		}
-		return float(war_duration - 365) * 25.f / 365.f;
+		return (float(war_duration) - 365.f * years) * 25.f / (365.f * years);
 	}
 
 	bool would_surrender_evaluate(sys::state& state, dcon::nation_id n, dcon::war_id w) {
@@ -3111,53 +3171,23 @@ namespace ai {
 
 		auto real_target = state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(target));
 		if(!real_target)
-		real_target = target;
+			real_target = target;
 
 		if(self_sup <= state.world.nation_get_used_naval_supply_points(real_target))
-		return false;
+			return false;
 
 		if(self_sup <= state.world.nation_get_in_sphere_of(real_target).get_used_naval_supply_points())
-		return false;
+			return false;
 
 		for(auto a : state.world.nation_get_diplomatic_relation(real_target)) {
 			if(!a.get_are_allied())
-			continue;
+				continue;
 			auto other = a.get_related_nations(0) != real_target ? a.get_related_nations(0) : a.get_related_nations(1);
 			if(self_sup <= other.get_used_naval_supply_points())
-			return false;
+				return false;
 		}
 
 		return true;
-	}
-
-	/*	Tests if a nation (via game rules) can go to war with another given nation (this is not criteria for selecting the
-		best nation to go war with for the AI, it's only a basic game rule check)
-		@param n Nation that wants to go to war
-		@param real_target The real target of the declaration (i.e the overlord)
-		@param other The "involved" target of the declaration (i.e a puppet), can be empty */
-	bool can_go_war_with(sys::state& state, dcon::nation_id n, dcon::nation_id real_target, dcon::nation_id other) {
-		if(real_target == n || other == n)
-			return false;
-		if(state.world.nation_get_owned_province_count(real_target) == 0
-		|| state.world.nation_get_owned_province_count(other) == 0)
-			return false;
-		if(state.world.nation_get_in_sphere_of(real_target) == n
-		|| state.world.nation_get_in_sphere_of(other) == n)
-			return false;
-		if(nations::are_allied(state, n, real_target) || nations::are_allied(state, n, other))
-			return false;
-		if(military::are_allied_in_war(state, n, other) || military::are_allied_in_war(state, n, real_target))
-			return false;
-		if(military::has_truce_with(state, n, other) || military::has_truce_with(state, n, real_target))
-			return false;
-		for(auto const pc : state.world.nation_get_province_ownership(real_target)) {
-			for(auto const al : pc.get_province().get_army_location()) {
-				if(al.get_army().get_controller_from_army_control() == n) {
-					return false;
-				}
-			}
-		}
-		return military::can_use_cb_against(state, n, other);
 	}
 
 	/* Whetever or not this declaration of war would be geopolitically/strategically viable */
@@ -3186,37 +3216,44 @@ namespace ai {
 		return true;
 	}
 
+	bool can_make_war_decs(sys::state& state, dcon::nation_id n) {
+		if(state.world.nation_get_is_player_controlled(n)
+		|| state.world.nation_get_owned_province_count(n) == 0)
+			return false;
+		if(state.world.nation_get_is_at_war(n)
+		|| state.world.nation_get_military_score(n) == 0
+		|| state.world.nation_get_diplomatic_points(n) < state.defines.declarewar_diplomatic_cost)
+			return false;
+		if(auto ol = state.world.nation_get_overlord_as_subject(n); state.world.overlord_get_ruler(ol))
+			return false;
+		return true;
+	}
+
 	void make_war_decs(sys::state& state) {
 		auto targets = ve::vectorizable_buffer<dcon::nation_id, dcon::nation_id>(state.world.nation_size());
 		concurrency::parallel_for(uint32_t(0), state.world.nation_size(), [&](uint32_t i) {
 			dcon::nation_id n{ dcon::nation_id::value_base_t(i) };
-			if(state.world.nation_get_owned_province_count(n) == 0
-			|| state.world.nation_get_is_at_war(n)
-			|| state.world.nation_get_is_player_controlled(n)
-			|| state.world.nation_get_military_score(n) == 0
-			|| state.world.nation_get_diplomatic_points(n) < state.defines.declarewar_diplomatic_cost)
+			if(!ai::can_make_war_decs(state, n))
 				return;
-			if(auto ol = state.world.nation_get_overlord_as_subject(n); state.world.overlord_get_ruler(ol))
-				return;
-			auto base_strength = estimate_strength(state, n);
-			auto best_difference = 2.0f;
+			auto const base_strength = estimate_strength(state, n);
+			auto best_difference = base_strength;
 			//Great powers should look for non-neighbor nations to use their existing wargoals on; helpful for forcing unification/repay debts wars to happen
 			if(nations::is_great_power(state, n)) {
 				for(auto target : state.world.in_nation) {
-					auto real_target = target.get_overlord_as_subject().get_ruler() ? target.get_overlord_as_subject().get_ruler() : target;
+					auto const real_target = target.get_overlord_as_subject().get_ruler() ? target.get_overlord_as_subject().get_ruler() : target;
 					if(!ai::can_go_war_with(state, n, real_target, target))
 						continue;
 					// If it neighbors one of our spheres and we can pathfind to each other's capitals, we don't need naval supremacy to reach this nation
 					// Generally here to help Prussia realize it doesn't need a navy to attack Denmark
 					for(auto adj : state.world.nation_get_nation_adjacency(target)) {
-						auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
-						auto neighbor = other;
+						auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
+						auto const neighbor = other;
 						if(neighbor.get_in_sphere_of() == n) {
 							auto path = province::make_safe_land_path(state, state.world.nation_get_capital(n), state.world.nation_get_capital(neighbor), n);
 							if(path.empty()) {
 								continue;
 							}
-							auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
+							auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 							if(str_difference > best_difference) {
 								best_difference = str_difference;
 								targets.set(n, target.id);
@@ -3224,9 +3261,11 @@ namespace ai {
 							}
 						}
 					}
-					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target) && !ai::naval_supremacy(state, n, target))
+					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target)
+					&& !ai::naval_supremacy(state, n, target)) {
 						continue;
-					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
+					}
+					auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
 						targets.set(n, target.id);
@@ -3234,13 +3273,14 @@ namespace ai {
 				}
 			}
 			for(auto adj : state.world.nation_get_nation_adjacency(n)) {
-				auto other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
-				auto real_target = other.get_overlord_as_subject().get_ruler() ? other.get_overlord_as_subject().get_ruler() : other;
+				auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
+				auto const real_target = other.get_overlord_as_subject().get_ruler() ? other.get_overlord_as_subject().get_ruler() : other;
 				if(!ai::can_go_war_with(state, n, real_target, other))
 					continue;
-				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other)
+				&& !ai::naval_supremacy(state, n, other))
 					continue;
-				auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
+				auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 				if(str_difference > best_difference) {
 					best_difference = str_difference;
 					targets.set(n, other.id);
@@ -3249,17 +3289,17 @@ namespace ai {
 			if(state.world.nation_get_central_ports(n) > 0) {
 				// try some random coastal nations
 				for(uint32_t j = 0; j < 6; ++j) {
-					auto rvalue = rng::get_random(state, uint32_t((n.index() << 3) + j));
-					auto reduced_value = rng::reduce(uint32_t(rvalue), state.world.nation_size());
+					auto const rvalue = rng::get_random(state, uint32_t((n.index() << 3) + j));
+					auto const reduced_value = rng::reduce(uint32_t(rvalue), state.world.nation_size());
 					dcon::nation_id other{ dcon::nation_id::value_base_t(reduced_value) };
-					auto real_target = fatten(state.world, other).get_overlord_as_subject().get_ruler() ? fatten(state.world, other).get_overlord_as_subject().get_ruler() : fatten(state.world, other);
+					auto const real_target = fatten(state.world, other).get_overlord_as_subject().get_ruler() ? fatten(state.world, other).get_overlord_as_subject().get_ruler() : fatten(state.world, other);
 					if(!ai::can_go_war_with(state, n, real_target, other))
 						continue;
 					if(state.world.nation_get_central_ports(other) == 0 || state.world.nation_get_central_ports(real_target) == 0)
 						continue;
 					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
 						continue;
-					auto str_difference = base_strength + estimate_additional_offensive_strength(state, n, real_target) - estimate_defensive_strength(state, real_target);
+					auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
 						targets.set(n, other);
@@ -3283,7 +3323,8 @@ namespace ai {
 			}
 		}
 
-		for(auto n : state.world.in_nation) {
+		/* Mobilize nations */
+		for(auto const n : state.world.in_nation) {
 			if(!n.get_is_player_controlled() && n.get_owned_province_count() > 0) {
 				bool will_mob = false;
 				if(n.get_ai_is_threatened()) { //threatened -- someone can use cb against us
