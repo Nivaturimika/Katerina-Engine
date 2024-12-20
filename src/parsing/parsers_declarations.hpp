@@ -2684,7 +2684,7 @@ enum class production_type_enum { none = 0, factory, rgo, artisan };
 		std::vector<dcon::nation_id> defenders;
 		std::string name;
 		bool great_war = false;
-		sys::date start_date;
+		sys::date start_date = sys::date{0};
 		war_history_context(scenario_building_context& outer_context) : outer_context(outer_context) { }
 	};
 

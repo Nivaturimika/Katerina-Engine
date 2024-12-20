@@ -2784,8 +2784,8 @@ namespace ai {
 
 	float war_willingness_factor(int32_t war_duration, bool is_great_war) {
 		if(is_great_war) {
-			// "Force me 50% of war score or no deal bitch"
-			return 50.f;
+			// "Force me 75% of war score or no deal bitch"
+			return -75.f;
 		}
 		return float(war_duration - 365) * 25.f / 365.f;
 	}
@@ -3023,7 +3023,7 @@ namespace ai {
 			overall_po_value = -overall_po_value;
 		}
 		if(overall_po_value < -100)
-		return false;
+			return false;
 
 		int32_t potential_peace_score_against = 0;
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
@@ -3042,28 +3042,28 @@ namespace ai {
 
 		if((prime_attacker == n || prime_defender == n) && (prime_attacker == from || prime_defender == from)) {
 			if(overall_score <= -50 && overall_score <= overall_po_value * 2)
-			return true;
+				return true;
 
 			auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 			if(concession && (is_attacking ? military::attacker_peace_cost(state, w) : military::defender_peace_cost(state, w)) <= overall_po_value)
-			return true; // offer contains everything
+				return true; // offer contains everything
 			if(war_duration < 365) {
 				return false;
 			}
 			float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 			if(overall_score >= 0) {
 				if(concession && ((overall_score * 2 - overall_po_value - willingness_factor) < 0))
-				return true;
+					return true;
 			} else {
 				if((overall_score - willingness_factor) <= overall_po_value && (overall_score / 2 - overall_po_value - willingness_factor) < 0)
-				return true;
+					return true;
 			}
 
 		} else if((prime_attacker == n || prime_defender == n) && concession) {
 			auto scoreagainst_me = military::directed_warscore(state, w, from, n);
 
 			if(scoreagainst_me > 50)
-			return true;
+				return true;
 
 			int32_t my_side_against_target = 0;
 			for(auto wg : state.world.war_get_wargoals_attached(w)) {
@@ -3076,33 +3076,33 @@ namespace ai {
 
 			if(overall_score < 0.0f) { // we are losing
 				if(my_side_against_target - scoreagainst_me <= overall_po_value + personal_score_saved)
-				return true;
+					return true;
 			} else {
 				if(my_side_against_target <= overall_po_value)
-				return true;
+					return true;
 			}
 
 		} else {
 			if(contains_sq)
-			return false;
+				return false;
 
 			auto scoreagainst_me = military::directed_warscore(state, w, from, n);
 			if(scoreagainst_me > 50 && scoreagainst_me > -overall_po_value * 2)
-			return true;
+				return true;
 
 			if(overall_score < 0.0f) { // we are losing
 				if(personal_score_saved > 0 && scoreagainst_me + personal_score_saved - my_po_target >= -overall_po_value)
-				return true;
+					return true;
 
 			} else { // we are winning
 				if(my_po_target > 0 && my_po_target >= overall_po_value)
-				return true;
+					return true;
 			}
 		}
 
 		//will accept anything
 		if(has_cores_occupied(state, n))
-		return true;
+			return true;
 		return false;
 	}
 
