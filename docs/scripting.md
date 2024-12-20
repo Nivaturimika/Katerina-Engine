@@ -14,7 +14,7 @@ Effects that take a single parameter.
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: `add_core = FROM` can be buggy
 
 ### `remove_core = <THIS/FROM/TAG>`
 
@@ -1215,8 +1215,8 @@ capital_scope = {
 ```
 
 - **Version**: Base
-- **Scopes**: Country
-- **Comment**: N/A
+- **Scopes**: Country, Province
+- **Comment**: Scopes into the capital of a nation
 
 ### `THIS = { ... }`
 
@@ -1228,7 +1228,7 @@ THIS = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Scopes into `THIS`, it skips the effects (but evaluates the triggers) if the tag doesn't exist
 
 ### `FROM = { ... }`
 
@@ -1240,7 +1240,7 @@ FROM = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Scopes into `FROM`, it skips the effects (but evaluates the triggers) if the tag doesn't exist
 
 ### `sea_zone = { ... }`
 
@@ -1264,7 +1264,7 @@ cultural_union = {
 
 - **Version**: Base
 - **Scopes**: Country
-- **Comment**: N/A
+- **Comment**: Scopes into the cultural union of the primary culture of the country in scope, for example `GER` for germanic culturs (defined in `common/cultures.txt`)
 
 ### `overlord = { ... }`
 
@@ -1276,7 +1276,7 @@ overlord = {
 
 - **Version**: Base
 - **Scopes**: Country
-- **Comment**: N/A
+- **Comment**: Scopes into overlord of the current subject country, if no such country exists it's skipped
 
 ### `sphere_owner = { ... }`
 
@@ -1288,7 +1288,7 @@ sphere_owner = {
 
 - **Version**: Base
 - **Scopes**: Country
-- **Comment**: N/A
+- **Comment**: Scopes into the sphere owner of the given country
 
 ### `independence = { ... }`
 
@@ -1299,8 +1299,8 @@ independence = {
 ```
 
 - **Version**: Base
-- **Scopes**: Country
-- **Comment**: N/A
+- **Scopes**: Rebel
+- **Comment**: Scopes into the independence tag of the rebel in scope (for example `ROM` for Romanian Pan-Nationalists)
 
 ### `flashpoint_tag_scope = { ... }`
 
@@ -1312,7 +1312,7 @@ flashpoint_tag_scope = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: The tag using a flashpoint focus on a given state (see `common/national_focus.txt`)
 
 ### `crisis_state_scope = { ... }`
 
@@ -1324,7 +1324,7 @@ crisis_state_scope = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: The state the crisis is taking in (can be uncolonized, for colonial crisis)
 
 ### `state_scope = { ... }`
 
@@ -1336,7 +1336,7 @@ state_scope = {
 
 - **Version**: Base
 - **Scopes**: Province, Pop
-- **Comment**: N/A
+- **Comment**: Scopes into the state of a province, or pop
 
 ### `random = { ... }`
 
@@ -1350,7 +1350,7 @@ random = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Seed is per-event and per-decision
+- **Comment**: Seed is per-event and per-decision, chance is a weight relative to 100 (50 = 50%)
 
 ### `random_list = { ... }`
 
@@ -1364,7 +1364,7 @@ random = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Seed is per-event and per-decision
+- **Comment**: Seed is per-event and per-decision, chance is weighted accross the sum of all weights (n1 + n2 + n3 + ...), then they are normalized to 0-1 (for example, n1 = 5, n2 = 5, means 10 total weight, divide 5 by 10, you get 0.5). So n1 = 50%, and n3 = 50% (the 50% is because 0.5 * 100 = 50%). Basically basic probabilistic math, not much needed to explain here.
 
 ### `clear_news_scopes = { ... }`
 
@@ -1377,7 +1377,27 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Will clear news scopes of the given type
+- **Comment**: Will clear news scopes of the given type, the types can be:
+ - `peace_offer_accept`
+ - `game_event`
+ - `province_change_controller`
+ - `province_change_owner`
+ - `construction_complete`
+ - `research_complete`
+ - `battle_over`
+ - `rebel_break_country`
+ - `new_party`
+ - `war_declared`
+ - `crisis_started`
+ - `crisis_backer`
+ - `crisis_side_joined`
+ - `crisis_resolved`
+ - `decision`
+ - `goods_price_change`
+ - `ai_afraid_of`
+ - `ai_likes_very_much`
+ - `fake`
+ - `invention`
 
 ### `[TAG] = { ... }`
 
@@ -1389,7 +1409,18 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Can also scope into non-existing tags, or even `REB`. Use with caution, because upon scoping into a province scope, the tag scope is bugged out., for example the following code is broken:
+```
+BRZ = {
+	100 = { reduce_pop = 1.1 }
+	set_country_flag = test
+}
+```
+The tag scope will only work until you scope into something else, so instead do:
+```
+100 = { reduce_pop = 1.1 }
+BRZ = { set_country_flag = test }
+```
 
 ### `[region name] = { ... }`
 
@@ -1413,7 +1444,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Finnicky, use with caution as multiple effects inside can crash the game
 
 ## Broken effects
 
@@ -1429,6 +1460,12 @@ clear_news_scopes = {
 - **Scopes**: Any
 - **Comment**: Only shows a tooltip, no known in-game effect
 
+### `disable_fow = <THIS/FROM/TAG>`
+
+- **Version**: Base
+- **Scopes**: Any
+- **Comment**: Only shows a tooltip, no known in-game effect
+
 # Scripting (triggers)
 
 ## Simple triggers
@@ -1437,7 +1474,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Total amount of sunk ships
 
 ### `ai = <yes/no>`
 
@@ -1460,8 +1497,8 @@ clear_news_scopes = {
 ### `owns = <province id>`
 
 - **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
+- **Scopes**: Country
+- **Comment**: Whetever the given province is owned by the country at scope
 
 ### `port = <yes/no>`
 
@@ -1473,7 +1510,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Rank higher than n (higher means the number is lower, "rank = 16" means higher than 16, and rank 15 is > 16). It's better to think of ranks in the game as negative natural numbers, rather than positive ones.
 
 ### `type = <pop type>`
 
@@ -1491,7 +1528,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Year greater or equal than `<n>`
 
 ### `empty = <yes/no>`
 
@@ -1521,13 +1558,13 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Factor `<n>` is % of infamy relative to the infamy limit
+- **Comment**: Factor `<n>` is % of infamy relative to the infamy limit, 0.1 = 10%, 1 = 100%
 
 ### `exists = <THIS/FROM/TAG/yes/no>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: It's faster to do `exists = TAG` than to do `TAG = { exists = yes }` due to the extra indirection
 
 ### `region = <region name>`
 
@@ -1538,14 +1575,14 @@ clear_news_scopes = {
 ### `strata = <poor/middle/rich>`
 
 - **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
+- **Scopes**: Pop
+- **Comment**: Checks if the pop is in the given strata
 
 ### `capital = <province id>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Equivalent to `<province id> = { is_capital = yes }`
 
 ### `culture = <culture>`
 
@@ -1569,7 +1606,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Is blockaded? Related to gunboat diplomacy, adjacent provinces to blockaded sea regions are marked as blockaded, see the `blockade` static modifier in `common/static_modifiers.txt`
 
 ### `controls = <province id>`
 
@@ -1581,13 +1618,13 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Has election ongoing?
 
 ### `is_slave = <yes/no>`
 
 - **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
+- **Scopes**: State, Province
+- **Comment**: Is a slave state/province?
 
 ### `literacy = <n>`
 
@@ -1755,7 +1792,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Case sensitive
+- **Comment**: Case sensitive, must be the matching name of a leader, for example `has_leader = "Paul Hinderburg"`
 
 ### `in_default = <THIS/FROM/TAG/yes/no>`
 
@@ -2061,13 +2098,13 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: Only checks for country units, rebels are ignored.
+- **Comment**: Only checks for country units, rebels are ignored. `unit_in_battle = no` is equivalent to `unit_in_battle = yes`, use a `NOT = {}` instead
 
 ### `unit_has_leader = <yes/no>`
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: `unit_has_leader = no` is equivalent to `unit_has_leader = yes`, use a `NOT = {}` instead
 
 ### `war_exhaustion = <n>`
 
@@ -2091,7 +2128,7 @@ clear_news_scopes = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Localisation is broken with the TAG variant
 
 ### `has_global_flag = <flag>`
 
@@ -3090,7 +3127,7 @@ AND = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Most scopes listed are an implicit `AND`, unless otherwise stated, Faster performance wise if the triggers within are false often
 
 ### `OR = { ... }`
 
@@ -3102,7 +3139,7 @@ OR = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Faster performance wise if the triggers within are true often
 
 ### `NOT = { ... }`
 
@@ -3114,7 +3151,7 @@ NOT = {
 
 - **Version**: Base
 - **Scopes**: Any
-- **Comment**: N/A
+- **Comment**: Negates triggers within, see below for scripting logical statments
 
 ### `any_neighbor_province = { ... }`
 
@@ -3425,20 +3462,8 @@ state_scope = {
 ```
 
 - **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
-
-### `state_scope = { ... }`
-
-```
-state_scope = {
-	...
-}
-```
-
-- **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
+- **Scopes**: Province, Pop
+- **Comment**: Scopes into the state instance of the given province and POP
 
 ### `any_substate = { ... }`
 
@@ -3475,3 +3500,179 @@ any_substate = {
 # Extensions
 
 See here [scripting_extensions.md](scripting_extensions.md) and [extensions.md](extensions.md)
+
+# Logic scripting tutorial
+
+Suppose the following trigger:
+
+```
+any_core = {
+	owned_by = XXX
+}
+```
+
+This returns false when there is no core that is owned by XXX.
+
+```
+all_core = {
+	owned_by = XXX
+}
+```
+
+This returns false when there is also no core that is owned by XXX.
+
+The `NOT = { all_core = { ... } }` can be read as "No core satisfies P" (where P is the predicament).
+
+The `all_core = { NOT = { ... } }` can be read as "In all cores, none satisfied P" (where P is the predicament).
+
+## Scope overview and optimizations
+
+To optimize we must first know our systems, hence, let's start with the basics:
+
+What's the similarity between `AND` and `OR`?
+
+`AND = { ... }` encapsulates all members and asks "All of the conditions within, satisfy all their predicaments?" - in plain English: "Does all the triggers inside the AND evaluate to `True`?"
+
+Whereas `OR = { ... }` asks "All of the conditions within, there is atleast one who satisfy their predicaments" - or "Atleast one trigger inside evaluates to `True`".
+
+If you look closely, you may notice a relationship between the negative versions of the scopes:
+
+| Statment | Some `F`/`T` | All `F` | All `T`
+|---|---|---|---|
+| `AND = { ... }` | `F` | `F` | `T` |
+| `OR = { ... }` | `T` | `F` | `T` |
+| `NOT = { AND = { ... } }` | `T` | `T` | `F` |
+| `NOT = { OR = { ... } }` | `F` | `T` | `F` |
+
+It's important to realize the properties of All `F`/`T` are applied to everry case, including the case with a single element (as some of one, is all - can you take "some" of one? No!).
+
+For the case of no elements however, none of the properties apply, and an implicit `T` is given (as opposed to iterative scopes such as `any_core`/`all_core` - who give a `F` when there are no elements).
+
+Let's now insert a predicate `P`, assume `P = { exists = yes tag = PRU }` for example, so wehn we say `AND = { P }`. It's interpreted as `AND = { exists = yes tag = PRU }`
+
+With that said, let's now begin using this imaginary predicate to uncover the relationships and convergences of logical statments:
+
+## Double negation (`NOT NOT`)
+
+First off, `NOT = { P }` is the same as `NOT = { NOT = { P } }`, double negation cancels out.
+
+## Logical scopes
+
+Now let's use the table above and insert a `NOT = { P }` in the `...` part of the scopes:
+
+| Statment | Some `F`/`T` | All `F` | All `T`
+|---|---|---|---|
+| `AND = { NOT = { P } }` | `F` | `F` | `T` |
+| `OR = { NOT = { P } }` | `T` | `F` | `T` |
+| `NOT = { AND = { NOT = { P } } }` | `T` | `T` | `F` |
+| `NOT = { OR = { NOT = { P } } }` | `F` | `T` | `F` |
+
+Huh? This is still true, but we might have forgotten that we're asking the final predicament results, rather than the internal composition.
+
+| Statment | P is `F` | P is `T`
+|---|---|---|
+| `AND = { P }` | `F` | `T` |
+| `OR = { P }` | `F` | `T` |
+| `NOT = { AND = { P }` | `T` | `F` |
+| `NOT = { OR = { P }` | `T` | `F` |
+
+As discussed above, properties of All `T`/`F` converge with a single element. Let's add another predicate, call it `P1` and `P2`.
+
+We'll denote `P1` and `P2` with a slash, first is `P1`, second is `P2`.
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+
+With careful observation, we can observe that double negating the results gives us back the original. This once again proves that double negation in our system will cancel itself out.
+
+When the predicaments are inverted, denoted with `!P1` and `!P2`:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+Remember, the header row is "inverted" too (and denotes the result of `P1` and `P2`), this then gets "inverted".
+
+The complete table looks as follows:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+We can notice a few similar cases:
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `AND = { P1 P2 }` | `F` | `F` | `F` | `T` |
+| `NOT = { OR = { !P1 !P2 } }` | `F` | `F` | `F` | `T` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `OR = { P1 P2 }` | `F` | `T` | `T` | `T` |
+| `NOT = { AND = { !P1 !P2 } }` | `F` | `T` | `T` | `T` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `NOT = { AND = { P1 P2 } }` | `T` | `T` | `T` | `F` |
+| `OR = { !P1 !P2 }` | `T` | `T` | `T` | `F` |
+
+| Statment | `F`/`F` | `F`/`T` | `T`/`F` | `T`/`T` |
+|---|---|---|---|---|
+| `NOT = { OR = { P1 P2 } }` | `T` | `F` | `F` | `F` |
+| `AND = { !P1 !P2 }` | `T` | `F` | `F` | `F` |
+
+We have that `AND = { P1 P2 }` is the same as `NOT = { OR = { !P1 !P2 } }`, let's see if that's true:
+
+## Verifying
+
+Assume `P1 = { exists = yes }` and `P2 = { tag = PRU }`, hence, let's construct the `OR` logical scope:
+
+```
+NOT = {
+	OR = {
+		NOT = { exists = yes }
+		NOT = { tag = PRU }
+	}
+}
+```
+
+And for the `AND` scope:
+
+```
+AND = { exists = yes tag = PRU }
+```
+
+Let's do some induction then (`T` if the trigger returned `True`, `F` if it returned `False`):
+```
+NOT = { OR = { NOT = { F } NOT = { F } } } -> NOT = { OR = { T T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { F } NOT = { T } } } -> NOT = { OR = { T F } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { F } } } -> NOT = { OR = { F T } } -> NOT = { T } -> F
+NOT = { OR = { NOT = { T } NOT = { T } } } -> NOT = { OR = { F F } } -> NOT = { F } -> T
+
+AND = { F F } -> F
+AND = { F T } -> F
+AND = { T F } -> F
+AND = { T T } -> T
+```
+
+Shocker! We were right, those are logically equivalent scopes!
+
+## Notes
+
+- State instance refers to an instance of a state, for example a "state definition" would be ENG_1, a state instance would be the English part of ENG_1, and another instance would be the Russian part of ENG_1 (if the state is split between the two).
+- Five scopes exist: Country, State, Province, Pop and Rebels. The rebels scope acts like the country one, for most of the scripting triggers and effects. The tag for rebels is REB.
+- Scripting `exists = no` is faster than doing `NOT = { exists = yes }`, except for triggers that can't take negation (such as `unit_has_leader`)
