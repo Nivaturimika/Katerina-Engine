@@ -16,7 +16,8 @@ namespace economy_factory {
 	constexpr inline float production_scale_delta = 0.1f;
 
 	bool factory_is_profitable(sys::state const& state, dcon::factory_id factory_id) {
-		return state.world.factory_get_unprofitable(factory_id) == false || state.world.factory_get_subsidized(factory_id);
+		return !state.world.factory_get_unprofitable(factory_id)
+			|| state.world.factory_get_subsidized(factory_id);
 	}
 
 	bool has_factory(sys::state const& state, dcon::state_instance_id state_instance_id) {

@@ -911,10 +911,20 @@ namespace ai {
 					&& politics::political_party_is_active(state, n, pid)
 					&& (gov.get_ideologies_allowed() & ::culture::to_bits(state.world.political_party_get_ideology(pid))) != 0) {
 						auto support = estimate_pop_party_support(state, n, pid);
-						if(support > max_support
-						&& ai::political_party_is_state_economy(state, pid)) {
-							target = pid;
-							max_support = support;
+
+						if(state.world.nation_get_industrial_score(n) < 15) {
+							/* Speedrun being able to build factories (get the economy jumpstarted) */
+							if(support > max_support
+							&& ai::political_party_is_state_economy(state, pid)) {
+								target = pid;
+								max_support = support;
+							}
+						} else {
+							/* Select what the people want */
+							if(support > max_support) {
+								target = pid;
+								max_support = support;
+							}
 						}
 					}
 				}
