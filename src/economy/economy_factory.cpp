@@ -146,6 +146,7 @@ namespace economy_factory {
 	financially stable we adjust its workforce towards the effective max employment with a speed of 0.15,
 	otherwise we adjust it towards zero with a speed of 0.15.
 	*/
+	constexpr inline float employment_shift_speed = 0.15f;
 	float factory_max_employment(sys::state const& state, dcon::factory_id f) {
 		auto const p = state.world.factory_get_province_from_factory_location(f);
 		auto const si = state.world.province_get_state_membership(p);
@@ -514,8 +515,6 @@ namespace economy_factory {
 				}
 				return a.index() < b.index();
 			});
-
-			auto const employment_shift_speed = 0.05f;
 
 			// Remaining employed for pool
 			auto emp_pw_workers = primary_pool;
