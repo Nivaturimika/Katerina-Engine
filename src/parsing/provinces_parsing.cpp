@@ -15,12 +15,10 @@ namespace economy {
 }
 
 namespace parsers {
-	void default_map_file::max_provinces(association_type, int32_t value, error_handler& err, int32_t line,
-		scenario_building_context& context) {
+	void default_map_file::max_provinces(association_type, int32_t value, error_handler& err, int32_t line, scenario_building_context& context) {
 		context.state.world.province_resize(int32_t(value - 1));
 		context.original_id_to_prov_id_map.resize(value);
 		context.prov_id_to_original_id_map.resize(value - 1);
-
 		for(int32_t i = 1; i < value; ++i) {
 			context.prov_id_to_original_id_map[dcon::province_id(dcon::province_id::value_base_t(i - 1))].id = i;
 		}
@@ -33,6 +31,7 @@ namespace parsers {
 			dcon::province_id id = dcon::province_id(dcon::province_id::value_base_t(i));
 			auto old_id = context.prov_id_to_original_id_map[id].id;
 			context.original_id_to_prov_id_map[old_id] = id;
+			context.state.world.province_set_legacy_id(id, old_id);
 
 			auto name = std::string("PROV") + std::to_string(old_id);
 			auto name_id = text::find_or_add_key(context.state, name, false);

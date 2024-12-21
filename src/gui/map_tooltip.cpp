@@ -65,7 +65,7 @@ namespace ui {
 			text::localised_format_box(state, contents, box, "province_id", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, prov.index());
+			text::add_to_layout_box(state, contents, box, int32_t(state.world.province_get_legacy_id(prov)));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, nations::int_to_tag(owner.get_identity_from_identity_holder().get_identifying_int()));
 			text::add_space_to_layout_box(state, contents, box);
