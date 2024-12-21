@@ -294,7 +294,7 @@ namespace economy_factory {
 		} else {
 			/* If not subsidized, we will go up if profits are up, otherwise we need to cut on expenses */
 			auto speed = several_workers_scale
-				* ((desired_raw_profit > raw_profit) ? 1.f : -1.f);
+				* ((desired_raw_profit - raw_profit > 0.f) ? 1.f : -1.f);
 			speed = std::clamp(speed, -relative_modifier, relative_modifier);
 			new_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
 		}
@@ -573,7 +573,10 @@ namespace economy_factory {
 		});
 	}
 
-	/*	Obtains the total production from a factory (assuming it is fully employed) */
+	/*	Obtains the total production from a factory (assuming it is fully employed)
+	- A factory *produces* efficiency-adjusted-consumption-scale x output-multiplier x throughput-multiplier x level x
+	production quantity amount of its output good, which gets added to domestic supply
+	*/
 	float total_employed_factory_production(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::state_instance_id sid, dcon::province_id p) {
 		auto const ft = state.world.factory_get_building_type(f);
 		// Inputs
@@ -615,12 +618,8 @@ namespace economy_factory {
 
 		auto const total_production = total_employed_factory_production(state, f, n, si, p);
 
-		auto const last_demand = state.world.commodity_get_last_total_real_demand(ft.get_output());
-		auto const last_production = state.world.commodity_get_last_total_production(ft.get_output());
-		//this value represent the percentage that is actually sold
-		auto const selling_percentage = std::min(1.0f, std::max(last_demand, 1.0f) / std::max(last_production, 1.0f));
 		//this value represents raw profit if 1 lvl of this factory is filled with workers
-		auto const max_income = total_production * state.world.commodity_get_current_price(ft.get_output()) * selling_percentage;
+		auto const max_income = total_production * state.world.commodity_get_current_price(ft.get_output());
 		//this value represents spendings if 1 lvl of this factory is filled with workers
 		auto const max_expenses = expected_min_wage * state.world.factory_type_get_base_workforce(ft)
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
