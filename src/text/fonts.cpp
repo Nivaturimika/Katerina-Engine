@@ -502,9 +502,9 @@ namespace text {
 	}
 
 	float font::base_glyph_width(char32_t ch_in) {
-		if(auto it = glyph_positions.find(ch_in); it != glyph_positions.end())
-		return it->second.x_advance;
-
+		if(auto it = glyph_positions.find(ch_in); it != glyph_positions.end()) {
+			return it->second.x_advance;
+		}
 		make_glyph(ch_in);
 		return glyph_positions[ch_in].x_advance;
 	}
@@ -925,10 +925,10 @@ namespace text {
 	}
 
 	float font::text_extent(sys::state& state, stored_glyphs const& txt, uint32_t starting_offset, uint32_t count, int32_t size) {
-		float x_total = 0.0f;
+		auto x_total = 0.0f;
 		for(uint32_t i = starting_offset; i < starting_offset + count; i++) {
 			hb_codepoint_t glyphid = txt.glyph_info[i].codepoint;
-			float x_advance = float(txt.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
+			auto const x_advance = float(txt.glyph_info[i].x_advance) / (float((1 << 6) * text::magnification_factor));
 			x_total += x_advance * size / 64.f;
 		}
 		return x_total;

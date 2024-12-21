@@ -2572,9 +2572,12 @@ namespace map {
 					if(i != glyph_count - 1) {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
+
+					auto const y_remaining = (1.f - (float(bm_char.height) / font_size));
+
 					x_offset = float(bm_char.x_offset);
-					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
-					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
+					y_offset = float(bm_char.y_offset) - y_remaining * font_size;
+					glyph_positions = glm::vec2(x_offset / font_size, -y_offset / font_size);
 				} else {
 					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
 					auto const& gso = f.glyph_positions[glyphid];
@@ -2591,8 +2594,8 @@ namespace map {
 				glm::vec2 shader_direction = glm::normalize(glm::vec2(e.ratio.x, dpoly_fn(x) * e.ratio.y));
 				auto p0 = glm::vec2(x, poly_fn(x)) * e.ratio + e.basis;
 				p0 /= glm::vec2(size_x, size_y); // Rescale the coordinate to 0-1
-				p0 -= (1.5f - 2.f * glyph_positions.y) * curr_normal_dir * real_text_size;
-				p0 += (1.0f + 2.f * glyph_positions.x) * curr_dir * real_text_size;
+				p0 -= (1.f - 2.f * glyph_positions.y) * curr_normal_dir * real_text_size;
+				p0 += (1.f + 2.f * glyph_positions.x) * curr_dir * real_text_size;
 				//
 				if(state.user_settings.use_classic_fonts) {
 					auto const& bm_char = bm_font.chars[uint8_t(e.original_text[i])];
@@ -2600,14 +2603,14 @@ namespace map {
 					float ty = float(bm_char.y) / float(bm_font.width); /* y offset */
 					float sx = float(bm_char.width) / float(bm_font.width); /* x width */
 					float sy = float(bm_char.height) / float(bm_font.width); /* y height */
-					float rx = float(bm_char.width) / font_size;
-					float ry = float(bm_char.height) / font_size;
-					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, -ry), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					float rx = (float(bm_char.width) / font_size) * 2.f;
+					float ry = (float(bm_char.height) / font_size) * 2.f;
+					province_text_line_vertices.emplace_back(p0, glm::vec2(0.f, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(0.f, 0.f), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, 0.f), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, 0.f), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
 					province_text_line_vertices.emplace_back(p0, glm::vec2(rx, ry), shader_direction, glm::vec2(tx + sx, ty), real_text_size);
-					province_text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
+					province_text_line_vertices.emplace_back(p0, glm::vec2(0.f, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
 					province_text_line_texture_per_quad.emplace_back(bm_font.ftexid);
 				} else {
 					auto const& gso = f.glyph_positions[e.text.glyph_info[i].codepoint];
@@ -2623,7 +2626,9 @@ namespace map {
 					province_text_line_texture_per_quad.emplace_back(f.textures[gso.texture_slot >> 6]);
 				}
 				//
-				float glyph_advance = x_advance * text_size / 64.f;
+				float glyph_advance = (state.user_settings.use_classic_fonts)
+					? x_advance * text_size / font_size
+					: x_advance * text_size / 64.f;
 				for(float glyph_length = 0.f; ; x += x_step) {
 					auto added_distance = 2.f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
 					if(glyph_length + added_distance >= glyph_advance) {

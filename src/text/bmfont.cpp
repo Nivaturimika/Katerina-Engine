@@ -139,7 +139,7 @@ namespace text {
 	}
 
 	float bm_font::get_string_width(sys::state& state, char const* string, uint32_t count) const {
-		float total = 0.f;
+		auto total = 0.f;
 		for(uint32_t i = 0; i < count; ++i) {
 			auto ch = uint8_t(string[i]);
 			if(i != 0 && i < count - 1 && ch == 0xC3 && uint8_t(string[i + 1]) == 0xA3) {
