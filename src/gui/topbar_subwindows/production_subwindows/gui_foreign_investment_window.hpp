@@ -2,7 +2,6 @@
 
 #include "gui_production_window.hpp"
 #include "gui_production_enum.hpp"
-#include "gui_factory_buttons_window.hpp"
 
 namespace ui {
 
