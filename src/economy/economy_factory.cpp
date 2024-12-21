@@ -280,26 +280,29 @@ namespace economy_factory {
 	}
 
 	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit) {
-		auto const factory_fat_id = dcon::fatten(state.world, f);
-		auto const ft = state.world.factory_get_building_type(f);
+		auto fat_id = dcon::fatten(state.world, f);
+		auto ft = state.world.factory_get_building_type(f);
 
 		auto const total_workers = factory_max_employment(state, f);
 		auto const several_workers_scale = 10.f / total_workers;
-		auto const relative_modifier = 0.001f;
-		auto new_scale = 0.0f;
+		auto const total_activity = state.world.commodity_get_total_production(fat_id.get_building_type().get_output())
+			+ state.world.commodity_get_total_real_demand(fat_id.get_building_type().get_output()) + 10.f;
+		auto const relative_production_amount = state.world.factory_type_get_output_amount(ft) / total_activity;
+		auto const relative_modifier = (1.f / std::max(0.01f, relative_production_amount)) / 1000.f;
+		auto const effective_production_scale = 0.0f;
+		auto new_production_scale = 0.0f;
 		if(state.world.factory_get_subsidized(f)) {
-			/* Will only go upwards if subsidzed */
-			auto const speed = several_workers_scale * state.world.factory_get_level(f);
-			new_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + speed);
+			new_production_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + several_workers_scale * state.world.factory_get_level(f) * 10.f);
 		} else {
-			/* If not subsidized, we will go up if profits are up, otherwise we need to cut on expenses */
-			auto speed = several_workers_scale
-				* ((desired_raw_profit - raw_profit > 0.f) ? 1.f : -1.f);
+			auto const over_profit_ratio = raw_profit / std::max(desired_raw_profit, 0001f) - 1.f;
+			auto const under_profit_ratio = desired_raw_profit / std::max(raw_profit, 0.0001f) - 1.f;
+			auto const speed_modifier = (over_profit_ratio - under_profit_ratio);
+			auto speed = economy_factory::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
 			speed = std::clamp(speed, -relative_modifier, relative_modifier);
-			new_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
+			new_production_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
 		}
-		state.world.factory_set_production_scale(f, new_scale);
-		return std::min(new_scale * state.world.factory_get_level(f), max_production_scale);
+		state.world.factory_set_production_scale(f, new_production_scale);
+		return std::min(new_production_scale * state.world.factory_get_level(f), max_production_scale);
 	}
 
 	/* Obtains the priority of a factory, can be 0 (none), 1 (low), 2 (mid) or 3 (high) */
