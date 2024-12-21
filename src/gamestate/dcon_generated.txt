@@ -1607,6 +1607,11 @@ object {
 		type{ glm::vec2 }
 		tag{ scenario }
 	}
+	property{
+		name{ legacy_id }
+		type{ uint16_t }
+		tag{ scenario }
+	}
 }
 
 relationship{
