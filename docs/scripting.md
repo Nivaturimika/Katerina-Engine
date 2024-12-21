@@ -230,7 +230,6 @@
 		- [total_pops = <n>](#total_pops--n)
 		- [truce_with = <THIS/FROM/TAG>](#truce_with--thisfromtag)
 		- [casus_belli = <THIS/FROM/TAG>](#casus_belli--thisfromtag)
-		- [add_casus_belli = <THIS/FROM/TAG>](#add_casus_belli--thisfromtag)
 		- [is_colonial = <yes/no>](#is_colonial--yesno)
 		- [is_disarmed = <yes/no>](#is_disarmed--yesno)
 		- [is_overseas = <yes/no>](#is_overseas--yesno)
@@ -409,7 +408,6 @@
 		- [tags_match = { ... }](#tags_match----)
 		- [values_match = { ... }](#values_match----)
 		- [strings_match = { ... }](#strings_match----)
-		- [dates_match = { ... }](#dates_match----)
 		- [dates_match = { ... }](#dates_match----)
 		- [tags_contains = { ... }](#tags_contains----)
 		- [values_contains = { ... }](#values_contains----)
@@ -2313,13 +2311,7 @@ BRZ = { set_country_flag = test }
 
 - **Version**: Base
 - **Scopes**: Country
-- **Comment**: Gives the `<target>` country a casus belli against the country in scope
-
-### `add_casus_belli = <THIS/FROM/TAG>`
-
-- **Version**: Base
-- **Scopes**: Country
-- **Comment**: Gives the country in scope a casus belli against another
+- **Comment**: Is fabricating casus belli against a given nation?
 
 ### `is_colonial = <yes/no>`
 
@@ -3500,16 +3492,6 @@ values_match = { <n> <m> <o> <p> }
 
 ```
 strings_match = { <n> <m> <o> <p> }
-```
-
-- **Version**: Base
-- **Scopes**: Any
-- **Comment**: N/A
-
-### `dates_match = { ... }`
-
-```
-dates_match = { <n> <m> <o> <p> }
 ```
 
 - **Version**: Base
