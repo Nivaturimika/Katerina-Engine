@@ -1925,11 +1925,7 @@ namespace economy {
 				float total_profit = 0.f;
 				province::for_each_province_in_state_instance(state, si.get_state(), [&](dcon::province_id p) {
 					for(auto f : state.world.province_get_factory_location(p)) {
-						auto output_commodity = f.get_factory().get_building_type().get_output();
-						auto last_demand = state.world.commodity_get_last_total_real_demand(output_commodity);
-						auto last_production = state.world.commodity_get_last_total_production(output_commodity);
-						auto selling_percentage = std::min(1.0f, std::max(last_demand, 1.0f) / std::max(last_production, 1.0f));
-						total_profit += std::max(0.f, f.get_factory().get_full_profit()*selling_percentage);
+						total_profit += std::max(0.f, f.get_factory().get_full_profit());
 					}
 					{
 						// FARMER / LABORER

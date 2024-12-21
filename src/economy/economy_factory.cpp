@@ -614,9 +614,13 @@ namespace economy_factory {
 		auto const output_multiplier = std::max(0.f, factory_output_multiplier(state, f, n, p));
 
 		auto const total_production = total_employed_factory_production(state, f, n, si, p);
-		
+
+		auto const last_demand = state.world.commodity_get_last_total_real_demand(ft.get_output());
+		auto const last_production = state.world.commodity_get_last_total_production(ft.get_output());
+		//this value represent the percentage that is actually sold
+		auto const selling_percentage = std::min(1.0f, std::max(last_demand, 1.0f) / std::max(last_production, 1.0f));
 		//this value represents raw profit if 1 lvl of this factory is filled with workers
-		auto const max_income = total_production * state.world.commodity_get_current_price(ft.get_output());
+		auto const max_income = total_production * state.world.commodity_get_current_price(ft.get_output()) * selling_percentage;
 		//this value represents spendings if 1 lvl of this factory is filled with workers
 		auto const max_expenses = expected_min_wage * state.world.factory_type_get_base_workforce(ft)
 			+ input_multiplier * throughput_multiplier * input_total * min_input_available
