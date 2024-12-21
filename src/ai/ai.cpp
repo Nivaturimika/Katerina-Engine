@@ -29,13 +29,13 @@ namespace ai {
 	constexpr inline float ally_overestimate = 1.5f;
 
 	/* Sphere weights */
-	constexpr inline float sphere_already_in_our_sphere_factor = 0.75f;
+	constexpr inline float sphere_already_in_our_sphere_factor = 0.5f;
 	constexpr inline float sphere_primary_culture_factor = 100.f;
 	constexpr inline float sphere_culture_group_factor = 75.f;
-	constexpr inline float sphere_wargoal_factor = 50.f;
+	constexpr inline float sphere_wargoal_factor = 100.f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
-	constexpr inline float sphere_unreachable_factor = 0.05f;
-	constexpr inline float sphere_uncivilized_factor = 10.f;
+	constexpr inline float sphere_unreachable_factor = 0.25f;
+	constexpr inline float sphere_uncivilized_factor = 1.f;
 	constexpr inline float sphere_same_continent = 1.25f;
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
 
@@ -557,8 +557,7 @@ namespace ai {
 			targets.clear();
 			for(auto t : state.world.in_nation) {
 				if(t.get_is_great_power()
-				|| t.get_owned_province_count() == 0
-				|| t.get_in_sphere_of() == n.nation)
+				|| t.get_owned_province_count() == 0)
 					continue;
 				// Avoid sphereing big states like china
 				if(t.get_demographics(demographics::total) > state.defines.large_population_limit) {
@@ -575,7 +574,7 @@ namespace ai {
 				for(auto const c : state.world.in_commodity) {
 					if(auto const d = state.world.nation_get_real_demand(n.nation, c); d > 0.1f) {
 						auto const cweight = std::min(1.0f, t.get_domestic_market_pool(c) / d) * (1.0f - state.world.nation_get_demand_satisfaction(n.nation, c));
-						weight += std::max(1.f, cweight) * 0.75f;
+						weight += std::max(1.f, cweight);
 					}
 				}
 				//We probably don't want to fight a forever lasting sphere war, let's find some other uncontested nations
@@ -584,10 +583,11 @@ namespace ai {
 				auto const t_pc = t.get_primary_culture();
 				auto const t_cg = t.get_primary_culture().get_group_from_culture_group_membership();
 				if(t.get_in_sphere_of() == n.nation) {
-					weight *= sphere_already_in_our_sphere_factor;
 					if(ai::can_war_with_target_in_sphere(state, n.nation, t)) {
 						//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
 						weight *= sphere_wargoal_factor;
+					} else {
+						weight *= sphere_already_in_our_sphere_factor;
 					}
 				} else {
 					auto const our_rank = state.world.nation_get_rank(n.nation);
@@ -629,11 +629,11 @@ namespace ai {
 							weight *= sphere_neighbor_factor;
 							is_reachable = true;
 						}
-						// In same continent
-						if(t.get_capital().get_continent() == state.world.province_get_continent(state.world.nation_get_capital(n.nation))) {
-							weight *= sphere_same_continent;
-						}
 						if(is_reachable) {
+							// In same continent
+							if(t.get_capital().get_continent() == state.world.province_get_continent(state.world.nation_get_capital(n.nation))) {
+								weight *= sphere_same_continent;
+							}
 							if(!t.get_is_civilized()) {
 								weight *= sphere_uncivilized_factor;
 							}
