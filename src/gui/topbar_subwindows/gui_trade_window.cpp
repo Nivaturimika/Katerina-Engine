@@ -587,16 +587,17 @@ namespace ui {
 		window_element_base::on_create(state);
 	}
 	void trade_commodity_group_window::on_update(sys::state& state) noexcept {
-		entries_element.clear();
-		state.world.for_each_commodity([&](dcon::commodity_id id) {			
-			if(state.world.commodity_get_commodity_group(id) != content) {
-				return;
-			}
-			auto ptr = make_element_by_type<trade_commodity_entry>(state, state.ui_state.defs_by_name.find(state.lookup_key("goods_entry"))->second.definition);
-			ptr->commodity_id = id;
-			entries_element.push_back(ptr.get());
-			add_child_to_front(std::move(ptr));
-		});
+		if(entries_element.empty()) {
+			state.world.for_each_commodity([&](dcon::commodity_id id) {			
+				if(state.world.commodity_get_commodity_group(id) != content) {
+					return;
+				}
+				auto ptr = make_element_by_type<trade_commodity_entry>(state, state.ui_state.defs_by_name.find(state.lookup_key("goods_entry"))->second.definition);
+				ptr->commodity_id = id;
+				entries_element.push_back(ptr.get());
+				add_child_to_front(std::move(ptr));
+			});
+		}
 
 		xy_pair cell_size = state.ui_defs.gui[state.ui_state.defs_by_name.find(state.lookup_key("goods_entry_offset"))->second.definition].position;
 		xy_pair offset{ 0, 0 };
