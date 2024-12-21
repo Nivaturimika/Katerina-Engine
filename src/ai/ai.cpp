@@ -40,10 +40,10 @@ namespace ai {
 	constexpr inline float sphere_wargoal_factor = 0.f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 15.f;
-	constexpr inline float aggression_towards_at_war = 5.f;
-	constexpr inline float aggression_towards_rival = 10.f;
-	constexpr inline float aggression_towards_adjacent = 5.f;
+	constexpr inline float aggression_towards_unciv = 2.5f;
+	constexpr inline float aggression_towards_at_war = 2.f;
+	constexpr inline float aggression_towards_rival = 2.5f;
+	constexpr inline float aggression_towards_adjacent = 1.5f;
 	constexpr inline float aggression_factor = 1.f / 10.f;
 
 	float average_army_strength(sys::state& state, dcon::army_id a) {
@@ -86,7 +86,7 @@ namespace ai {
 		for(const auto t : state.world.in_technology) {
 			if(state.world.nation_get_active_technologies(n, t)
 			&& state.culture_definitions.tech_folders[t.get_folder_index()].category == culture::tech_category::army_techs) {
-				tech_factor += 1.f;
+				tech_factor += 0.1f;
 			}
 		}
 		return state.world.nation_get_military_score(n) * tech_factor;
@@ -99,9 +99,9 @@ namespace ai {
 		if(auto ovr = state.world.nation_get_overlord_as_subject(n); ovr && state.world.overlord_get_ruler(ovr)) {
 			return estimate_strength(state, state.world.overlord_get_ruler(ovr));
 		}
-		auto value = state.world.nation_get_military_score(n);
+		auto value = ai::estimate_strength_self(state, n);
 		for(auto subj : state.world.nation_get_overlord_as_ruler(n)) {
-			value += subj.get_subject().get_military_score();
+			value += ai::estimate_strength_self(state, subj.get_subject());
 		}
 		return value;
 	}
@@ -116,11 +116,7 @@ namespace ai {
 				auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
 				if(other.get_overlord_as_subject().get_ruler() != n) {
 					auto const ally_str = estimate_strength(state, other);
-					if(other.get_capital().get_continent() == continent) {
-						value += ally_str;
-					} else {
-						value += ally_str * 0.25f;
-					}
+					value += ally_str;
 				}
 			}
 		}
@@ -145,7 +141,7 @@ namespace ai {
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
-		auto const their_str = estimate_defensive_strength(state, target)
+		auto const their_str = estimate_strength(state, target)
 			- (nations::are_allied(state, target, n) ? base_strength : 0.f);
 		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
@@ -163,7 +159,7 @@ namespace ai {
 			weight *= aggression_towards_adjacent;
 		}
 		auto const total_pop = state.world.nation_get_demographics(target, demographics::total);
-		auto const pop_weight = (1.f / 10000.f); // each 10k
+		auto const pop_weight = (1.f / 100000.f); // each 100k
 		return weight + total_pop * pop_weight;
 	}
 
@@ -298,14 +294,15 @@ namespace ai {
 				if(ll == sys::date{} || ll + 365 >= state.current_date) {
 					auto greatest_neighbor = 0.0f;
 					auto const in_sphere_of = state.world.nation_get_in_sphere_of(n);
-					for(auto b : state.world.nation_get_nation_adjacency_as_connected_nations(n)) {
-						auto other = b.get_connected_nations(0) != n ? b.get_connected_nations(0) : b.get_connected_nations(1);
+					for(auto const b : state.world.nation_get_nation_adjacency_as_connected_nations(n)) {
+						auto const other = b.get_connected_nations(0) != n ? b.get_connected_nations(0) : b.get_connected_nations(1);
+						auto const in_same_sphere = in_sphere_of == n
+							|| (in_sphere_of && in_sphere_of == other.get_in_sphere_of());
 						if(!nations::are_allied(state, n, other)
-						&& (!in_sphere_of || in_sphere_of != n || in_sphere_of != other.get_in_sphere_of())) {
+						&& !in_same_sphere) {
 							greatest_neighbor = std::max(greatest_neighbor, estimate_strength(state, other));
 						}
 					}
-					auto const safety_margin = defensive_str - safety_factor * greatest_neighbor;
 					static std::vector<dcon::nation_id, dcon::cache_aligned_allocator<dcon::nation_id>> prune_targets;
 					prune_targets.clear();
 					for(auto dr : n.get_diplomatic_relation()) {
@@ -317,24 +314,23 @@ namespace ai {
 							}
 						}
 					}
-					if(prune_targets.size() > 0) {
-						pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-							auto const a_cores = nations::has_core_in_nation(state, n.get_identity_from_identity_holder(), a);
-							auto const b_cores = nations::has_core_in_nation(state, n.get_identity_from_identity_holder(), a);
-							if(a_cores != b_cores)
-								return a_cores > b_cores;
-							auto const a_str = estimate_strength(state, a);
-							auto const b_str = estimate_strength(state, b);
-							if(a_str != b_str)
-								return a_str > b_str;
-							return a.index() > b.index();
-						});
-						auto const weakest_str = estimate_strength(state, prune_targets[0]);
-						if(weakest_str < safety_margin
-						|| state.world.nation_get_infamy(prune_targets[0]) >= state.defines.badboy_limit) {
-							assert(command::can_cancel_alliance(state, n, prune_targets[0]));
-							command::execute_cancel_alliance(state, n, prune_targets[0]);
+					pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
+						auto const a_str = estimate_strength(state, a);
+						auto const b_str = estimate_strength(state, b);
+						if(a_str != b_str)
+							return a_str > b_str;
+						return a.index() > b.index();
+					});
+
+					auto safety_margin = defensive_str - safety_factor * greatest_neighbor;
+					for(auto const t : prune_targets) {
+						auto const weakest_str = estimate_strength(state, t);
+						if(weakest_str >= safety_margin) {
+							break;
 						}
+						safety_margin -= weakest_str;
+						assert(command::can_cancel_alliance(state, n, t));
+						command::execute_cancel_alliance(state, n, t);
 					}
 				}
 			}
@@ -2144,7 +2140,7 @@ namespace ai {
 		if(state.world.nation_get_in_sphere_of(real_target) == n
 		|| state.world.nation_get_in_sphere_of(other) == n)
 			return false;
-		/* Declaring on sphere members is a no no */
+		/* Declaring on nations in the same sphere is a big no no */
 		if(state.world.nation_get_in_sphere_of(n)
 		&& state.world.nation_get_in_sphere_of(n) == state.world.nation_get_in_sphere_of(real_target))
 			return false;
@@ -2204,40 +2200,41 @@ namespace ai {
 
 	void update_cb_fabrication(sys::state& state) {
 		for(auto n : state.world.in_nation) {
-			if(!n.get_is_player_controlled() && n.get_owned_province_count() > 0) {
-				if(n.get_is_at_war()
-				|| n.get_constructing_cb_type()
-				|| n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost
-				|| n.get_military_score() == 0)
-					continue;
-				// Uncivilized nations are more aggressive to westernize faster
-				float infamy_limit = state.world.nation_get_is_civilized(n) ? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
-				if(n.get_infamy() > infamy_limit)
-					continue;
-				/* Compile weights of most desirable nation */
-				auto const base_strength = estimate_strength(state, n);
-				
-				dcon::nation_id best_target{};
-				dcon::cb_type_id best_cb{};
-				auto best_weight = 0.f;
-				for(auto i : state.world.in_nation) {
-					if(ai::valid_construction_target(state, n, i)) {
-						auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
-						if(weight > best_weight) {
-							auto const cb = pick_fabrication_type(state, n, i);
-							if(cb) {
-								best_cb = cb;
-								best_weight = weight;
-								best_target = i;
-							}
+			if(n.get_is_player_controlled()
+			|| n.get_owned_province_count() == 0
+			|| n.get_is_at_war()
+			|| n.get_constructing_cb_type()
+			|| n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost
+			|| n.get_military_score() == 0)
+				continue;
+			// Uncivilized nations are more aggressive to westernize faster
+			auto const infamy_limit = (state.world.nation_get_is_civilized(n) ? 0.75f : 1.f)
+				* state.defines.badboy_limit;
+			if(n.get_infamy() >= infamy_limit)
+				continue;
+			/* Compile weights of most desirable nation */
+			auto const base_strength = estimate_strength(state, n);
+			
+			dcon::nation_id best_target{};
+			dcon::cb_type_id best_cb{};
+			auto best_weight = 0.f;
+			for(auto i : state.world.in_nation) {
+				if(ai::valid_construction_target(state, n, i)) {
+					auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
+					if(weight > best_weight) {
+						auto const cb = pick_fabrication_type(state, n, i);
+						if(cb) {
+							best_cb = cb;
+							best_weight = weight;
+							best_target = i;
 						}
 					}
 				}
-				/* Go over all of them and find best suited from randomly generated seed */
-				if(best_target && best_cb) {
-					assert(command::can_fabricate_cb(state, n, best_target, best_cb));
-					command::execute_fabricate_cb(state, n, best_target, best_cb);
-				}
+			}
+			/* Go over all of them and find best suited from randomly generated seed */
+			if(best_target && best_cb) {
+				assert(command::can_fabricate_cb(state, n, best_target, best_cb));
+				command::execute_fabricate_cb(state, n, best_target, best_cb);
 			}
 		}
 	}
@@ -3189,7 +3186,7 @@ namespace ai {
 		if(uint8_t(state.difficulty) <= uint8_t(sys::difficulty_level::normal)) {
 			auto rel = state.world.get_diplomatic_relation_by_diplomatic_pair(n, target);
 			if(state.world.diplomatic_relation_get_value(rel) < state.defines.make_cb_relation_limit) {
-				// Fine
+				return true;
 			} else {
 				/* Decrease relations until at an amount where we can declare war */
 				for(uint32_t i = 0; i < 5; ++i) {
@@ -3205,6 +3202,7 @@ namespace ai {
 					}
 				}
 			}
+			return false;
 		}
 		return true;
 	}
@@ -3229,7 +3227,7 @@ namespace ai {
 			if(!ai::can_make_war_decs(state, n))
 				return;
 			auto const base_strength = estimate_strength(state, n);
-			auto best_difference = base_strength;
+			auto best_difference = 2.f;
 			//Great powers should look for non-neighbor nations to use their existing wargoals on; helpful for forcing unification/repay debts wars to happen
 			if(nations::is_great_power(state, n)) {
 				for(auto target : state.world.in_nation) {
@@ -3238,64 +3236,66 @@ namespace ai {
 						continue;
 					// If it neighbors one of our spheres and we can pathfind to each other's capitals, we don't need naval supremacy to reach this nation
 					// Generally here to help Prussia realize it doesn't need a navy to attack Denmark
+					auto reachable = false;
 					for(auto adj : state.world.nation_get_nation_adjacency(target)) {
 						auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
-						auto const neighbor = other;
-						if(neighbor.get_in_sphere_of() == n) {
-							auto path = province::make_safe_land_path(state, state.world.nation_get_capital(n), state.world.nation_get_capital(neighbor), n);
+						if(other == n) {
+							reachable = true;
+							break;
+						} else if(other.get_in_sphere_of() == n) {
+							auto path = province::make_safe_land_path(state, state.world.nation_get_capital(n), state.world.nation_get_capital(other), n);
 							if(path.empty()) {
 								continue;
 							}
-							auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
-							if(str_difference > best_difference) {
-								best_difference = str_difference;
-								targets.set(n, target.id);
-								break;
-							}
+							reachable = true;
+							break;
 						}
 					}
-					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target)
-					&& !ai::naval_supremacy(state, n, target)) {
+					if(!reachable && !ai::naval_supremacy(state, n, target)) {
 						continue;
 					}
-					auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
-					if(str_difference > best_difference) {
-						best_difference = str_difference;
-						targets.set(n, target.id);
+					if(reachable) {
+						auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
+						if(str_difference > best_difference) {
+							best_difference = str_difference;
+							targets.set(n, target.id);
+						}
 					}
 				}
-			}
-			for(auto adj : state.world.nation_get_nation_adjacency(n)) {
-				auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
-				auto const real_target = other.get_overlord_as_subject().get_ruler() ? other.get_overlord_as_subject().get_ruler() : other;
-				if(!ai::can_go_war_with(state, n, real_target, other))
-					continue;
-				if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other)
-				&& !ai::naval_supremacy(state, n, other))
-					continue;
-				auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
-				if(str_difference > best_difference) {
-					best_difference = str_difference;
-					targets.set(n, other.id);
-				}
-			}
-			if(state.world.nation_get_central_ports(n) > 0) {
 				// try some random coastal nations
-				for(uint32_t j = 0; j < 6; ++j) {
-					auto const rvalue = rng::get_random(state, uint32_t((n.index() << 3) + j));
-					auto const reduced_value = rng::reduce(uint32_t(rvalue), state.world.nation_size());
-					dcon::nation_id other{ dcon::nation_id::value_base_t(reduced_value) };
-					auto const real_target = fatten(state.world, other).get_overlord_as_subject().get_ruler() ? fatten(state.world, other).get_overlord_as_subject().get_ruler() : fatten(state.world, other);
+				if(state.world.nation_get_central_ports(n) > 0) {
+					for(uint32_t j = 0; j < 6; ++j) {
+						auto const rvalue = rng::get_random(state, uint32_t((n.index() << 3) + j));
+						auto const reduced_value = rng::reduce(uint32_t(rvalue), state.world.nation_size());
+						dcon::nation_id other{ dcon::nation_id::value_base_t(reduced_value) };
+						auto const real_target = fatten(state.world, other).get_overlord_as_subject().get_ruler() ? fatten(state.world, other).get_overlord_as_subject().get_ruler() : fatten(state.world, other);
+						if(!ai::can_go_war_with(state, n, real_target, other))
+							continue;
+						if(state.world.nation_get_central_ports(other) == 0 || state.world.nation_get_central_ports(real_target) == 0)
+							continue;
+						if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+							continue;
+						auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
+						if(str_difference > best_difference) {
+							best_difference = str_difference;
+							targets.set(n, other);
+						}
+					}
+				}
+			} else {
+				/* Other nations will just look for adjacent ones */
+				for(auto adj : state.world.nation_get_nation_adjacency(n)) {
+					auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
+					auto const real_target = other.get_overlord_as_subject().get_ruler() ? other.get_overlord_as_subject().get_ruler() : other;
 					if(!ai::can_go_war_with(state, n, real_target, other))
 						continue;
-					if(state.world.nation_get_central_ports(other) == 0 || state.world.nation_get_central_ports(real_target) == 0)
-						continue;
-					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other) && !ai::naval_supremacy(state, n, other))
+					if(!state.world.get_nation_adjacency_by_nation_adjacency_pair(n, other)
+					&& !ai::naval_supremacy(state, n, other))
 						continue;
 					auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 					if(str_difference > best_difference) {
 						best_difference = str_difference;
-						targets.set(n, other);
+						targets.set(n, other.id);
 					}
 				}
 			}

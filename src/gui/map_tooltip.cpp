@@ -13,6 +13,9 @@ namespace ai {
 	float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by);
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength);
 	float estimate_defensive_strength(sys::state& state, dcon::nation_id n);
+	dcon::cb_type_id pick_fabrication_type(sys::state& state, dcon::nation_id from, dcon::nation_id target);
+	bool can_go_war_with(sys::state& state, dcon::nation_id n, dcon::nation_id real_target, dcon::nation_id other);
+	bool valid_construction_target(sys::state& state, dcon::nation_id from, dcon::nation_id target);
 }
 
 namespace ui {
@@ -55,22 +58,17 @@ namespace ui {
 		auto box = text::open_layout_box(contents);
 
 		if(state.cheat_data.show_province_id_tooltip) {
+			auto const n = state.local_player_nation;
+
+			auto const base_strength = ai::estimate_strength(state, n);
 			text::localised_format_box(state, contents, box, "province_id", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, prov.index());
-			text::add_line_break_to_layout_box(state, contents, box);
-
-			text::localised_format_box(state, contents, box, "nation_tag", text::substitution_map{});
-			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, nations::int_to_tag(owner.get_identity_from_identity_holder().get_identifying_int()));
-			text::add_line_break_to_layout_box(state, contents, box);
-
-			text::localised_format_box(state, contents, box, "province_sorting_distance", text::substitution_map{});
-			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ province::sorting_distance(state, state.map_state.selected_province, prov) });
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ province::sorting_distance(state, state.map_state.selected_province, prov) }, text::text_color::light_grey);
 			text::add_line_break_to_layout_box(state, contents, box);
 
 			text::localised_format_box(state, contents, box, "ai_assigned_rival", text::substitution_map{});
@@ -79,41 +77,57 @@ namespace ui {
 			text::add_to_layout_box(state, contents, box, state.world.nation_get_ai_rival(owner));
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			text::localised_format_box(state, contents, box, "ai_estimated_strength", text::substitution_map{});
+			dcon::nation_id best_target{};
+			dcon::cb_type_id best_cb{};
+			auto best_weight = 0.f;
+			for(auto i : state.world.in_nation) {
+				if(ai::valid_construction_target(state, n, i)) {
+					auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
+					if(weight > best_weight) {
+						auto const cb = ai::pick_fabrication_type(state, n, i);
+						if(cb) {
+							best_cb = cb;
+							best_weight = weight;
+							best_target = i;
+						}
+					}
+				}
+			}
+			text::localised_format_box(state, contents, box, "ai_fabrication_sim", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_strength(state, owner) });
+			text::add_to_layout_box(state, contents, box, best_target, text::text_color::red);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, state.world.cb_type_get_name(best_cb), text::text_color::green);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ best_weight }, text::text_color::light_grey);
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			text::localised_format_box(state, contents, box, "ai_province_supply_usage", text::substitution_map{});
+			text::localised_format_box(state, contents, box, "ai_strength_weights", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_supply_usage(state, owner, prov) });
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_strength(state, owner) }, text::text_color::green);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_enemy_defensive_force(state, prov, n) }, text::text_color::red);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_defensive_strength(state, owner) }, text::text_color::yellow);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::war_weight_potential_target(state, n, owner, base_strength) }, text::text_color::gold);
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			text::localised_format_box(state, contents, box, "ai_province_strategic_weight", text::substitution_map{});
+			text::localised_format_box(state, contents, box, "ai_province_weights", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_strategic_weight<float>(state, prov) });
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_supply_usage(state, owner, prov) }, text::text_color::red);
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::province_strategic_weight<float>(state, prov) }, text::text_color::green);
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			text::localised_format_box(state, contents, box, "ai_estimated_enemy_defensive_force", text::substitution_map{});
+			auto const cbt = ai::pick_fabrication_type(state, n, owner);
+			text::localised_format_box(state, contents, box, "ai_pick_fabrication_type", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_enemy_defensive_force(state, prov, state.local_player_nation) });
-			text::add_line_break_to_layout_box(state, contents, box);
-
-			auto const base_strength = ai::estimate_strength(state, state.local_player_nation);
-			text::localised_format_box(state, contents, box, "ai_war_weight", text::substitution_map{});
-			text::add_to_layout_box(state, contents, box, std::string_view(":"));
-			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::war_weight_potential_target(state, state.local_player_nation, owner, base_strength) });
-			text::add_line_break_to_layout_box(state, contents, box);
-
-			text::localised_format_box(state, contents, box, "ai_estimate_defensive_strength", text::substitution_map{});
-			text::add_to_layout_box(state, contents, box, std::string_view(":"));
-			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_defensive_strength(state, owner) });
+			text::add_to_layout_box(state, contents, box, state.world.cb_type_get_name(cbt));
 			text::add_line_break_to_layout_box(state, contents, box);
 		}
 
@@ -128,6 +142,12 @@ namespace ui {
 			text::add_to_layout_box(state, contents, box, fat.get_name());
 		}
 		text::close_layout_box(contents, box);
+
+		if(state.cheat_data.show_province_id_tooltip) {
+			text::add_line_with_condition(state, contents, "ai_valid_construction_target", ai::valid_construction_target(state, state.local_player_nation, owner));
+			text::add_line_with_condition(state, contents, "ai_can_go_war_with", ai::can_go_war_with(state, state.local_player_nation, owner, owner));
+			text::add_line_with_condition(state, contents, "ai_use_cb_against", military::can_use_cb_against(state, state.local_player_nation, owner));
+		}
 
 		if(state.selected_armies.size() > 0) {
 			text::add_line(state, contents, "alice_supply_limit_desc", text::variable_type::x, text::int_wholenum{ military::supply_limit_in_province(state, state.local_player_nation, fat) });

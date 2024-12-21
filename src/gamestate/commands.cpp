@@ -1564,8 +1564,7 @@ namespace command {
 		define:REMOVEFROMSPHERE_RELATION_ON_ACCEPT points. The removed nation then becomes friendly with its former sphere leader.
 		*/
 		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, source);
-
-	state.world.nation_set_in_sphere_of(influence_target, dcon::nation_id{});
+		state.world.nation_set_in_sphere_of(influence_target, dcon::nation_id{});
 
 		auto orel = state.world.get_gp_relationship_by_gp_influence_pair(influence_target, affected_gp);
 		auto& l = state.world.gp_relationship_get_status(orel);
