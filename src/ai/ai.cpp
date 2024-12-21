@@ -2232,7 +2232,7 @@ namespace ai {
 				continue;
 			/* Aggression base, in the base game its 5, so a 5% chance per each evaluation */
 			auto chance = rng::get_random_float(state, uint32_t(n.id.index()));
-			if(chance * 100.f <= state.defines.aggression_base)
+			if(chance * 100.f >= state.defines.aggression_base)
 				continue;
 			/* Compile weights of most desirable nation */
 			auto const base_strength = estimate_strength(state, n);
