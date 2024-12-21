@@ -214,14 +214,12 @@ namespace ui {
 		}
 	}
 
-	void active_modifiers_description(sys::state& state, text::layout_base& layout, dcon::province_id p, int32_t identation,
-		dcon::provincial_modifier_value nmid, bool have_header) {
+	void active_modifiers_description(sys::state& state, text::layout_base& layout, dcon::province_id p, int32_t identation, dcon::provincial_modifier_value nmid, bool have_header) {
 		bool header = !have_header;
 		acting_modifiers_description_province(state, layout, p, identation, header, nmid);
 	}
 
-	void active_modifiers_description(sys::state& state, text::layout_base& layout, dcon::nation_id n, int32_t identation,
-		dcon::national_modifier_value nmid, bool have_header) {
+	void active_modifiers_description(sys::state& state, text::layout_base& layout, dcon::nation_id n, int32_t identation, dcon::national_modifier_value nmid, bool have_header) {
 		bool header = !have_header;
 		if(auto ts = state.world.nation_get_tech_school(n); ts)
 		active_single_modifier_description(state, layout, ts, identation, header, nmid);

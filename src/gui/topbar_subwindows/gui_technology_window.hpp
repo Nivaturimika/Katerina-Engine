@@ -56,21 +56,6 @@ namespace ui {
 			case culture::tech_category::navy:
 				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::navy_tech_research_bonus, true);
 				break;
-			case culture::tech_category::military_theory:
-				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::military_theory_tech_research_bonus, true);
-				break;
-			case culture::tech_category::population:
-				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::population_tech_research_bonus, true);
-				break;
-			case culture::tech_category::diplomacy:
-				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::diplomacy_tech_research_bonus, true);
-				break;
-			case culture::tech_category::flavor:
-				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::flavor_tech_research_bonus, true);
-				break;
-			case culture::tech_category::theory:
-				active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
-				break;
 			// TODO: economic, society, naval, production, first_century, second_century, third_century
 			case culture::tech_category::unknown:
 				break;
@@ -582,21 +567,6 @@ namespace ui {
 				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::industry_tech_research_bonus, true);
 				break;
 				//non vanilla
-			case culture::tech_category::military_theory:
-				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::military_theory_tech_research_bonus, true);
-				break;
-			case culture::tech_category::population:
-				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::population_tech_research_bonus, true);
-				break;
-			case culture::tech_category::diplomacy:
-				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::diplomacy_tech_research_bonus, true);
-				break;
-			case culture::tech_category::flavor:
-				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::flavor_tech_research_bonus, true);
-				break;
-			case culture::tech_category::theory:
-				ui::active_modifiers_description(state, contents, state.local_player_nation, 0, sys::national_mod_offsets::theory_tech_research_bonus, true);
-				break;
 			// TODO: economic, society, naval, production, first_century, second_century, third_century
 			default:
 				break;

@@ -882,12 +882,6 @@ namespace parsers {
 			naval_unit_start_experience(type, v, err, line, context);
 		}
 
-		MOD_NAT_FUNCTION(military_theory_tech_research_bonus)
-		MOD_NAT_FUNCTION(diplomacy_tech_research_bonus)
-		MOD_NAT_FUNCTION(population_tech_research_bonus)
-		MOD_NAT_FUNCTION(flavor_tech_research_bonus)
-		MOD_NAT_FUNCTION(theory_tech_research_bonus)
-
 		template<typename T>
 		void finish(T& context) { }
 
