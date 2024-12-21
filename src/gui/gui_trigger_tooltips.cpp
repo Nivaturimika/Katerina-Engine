@@ -3080,33 +3080,33 @@ namespace ui {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 			if(from_slot != -1)
-			text::add_to_layout_box(ws, layout, box, trigger::to_nation(from_slot));
+				text::add_to_layout_box(ws, layout, box, trigger::to_nation(from_slot));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "from_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "from_nation"));
 			text::add_space_to_layout_box(ws, layout, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), int64_t(tval[1]), ws, layout, box);
+			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_country_units_in_state_this_nation(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 			if(this_slot != -1)
-			text::add_to_layout_box(ws, layout, box, trigger::to_nation(this_slot));
+				text::add_to_layout_box(ws, layout, box, trigger::to_nation(this_slot));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::add_space_to_layout_box(ws, layout, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), int64_t(tval[1]), ws, layout, box);
+			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_country_units_in_state_this_province(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 			if(this_slot != -1)
-			text::add_to_layout_box(ws, layout, box, ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)));
+				text::add_to_layout_box(ws, layout, box, ws.world.province_get_nation_from_province_ownership(trigger::to_prov(this_slot)));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::add_space_to_layout_box(ws, layout, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), int64_t(tval[1]), ws, layout, box);
+			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_country_units_in_state_this_state(TRIGGER_DISPLAY_PARAMS) {
@@ -3116,20 +3116,20 @@ namespace ui {
 			text::add_to_layout_box(ws, layout, box,
 				ws.world.state_instance_get_nation_from_state_ownership(trigger::to_state(this_slot)));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::add_space_to_layout_box(ws, layout, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), int64_t(tval[1]), ws, layout, box);
+			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_country_units_in_state_this_pop(TRIGGER_DISPLAY_PARAMS) {
 			auto box = text::open_layout_box(layout, indentation);
 			make_condition(tval, ws, layout, primary_slot, this_slot, from_slot, indentation, show_condition, box);
 			if(this_slot != -1)
-			text::add_to_layout_box(ws, layout, box, nations::owner_of_pop(ws, trigger::to_pop(this_slot)));
+				text::add_to_layout_box(ws, layout, box, nations::owner_of_pop(ws, trigger::to_pop(this_slot)));
 			else
-			text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
+				text::add_to_layout_box(ws, layout, box, text::produce_simple_string(ws, "this_nation"));
 			text::add_space_to_layout_box(ws, layout, box);
-			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), int64_t(tval[1]), ws, layout, box);
+			display_with_has_comparison(tval[0], text::produce_simple_string(ws, "units_in_the_state"), ws, layout, box);
 			text::close_layout_box(layout, box);
 		}
 		void tf_country_units_in_state_tag(TRIGGER_DISPLAY_PARAMS) {

@@ -4881,17 +4881,13 @@ namespace parsers {
 		if(context.main_slot == trigger::slot_contents::state) {
 			if(is_this(value)) {
 				if(context.this_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::country_units_in_state_this_nation | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_this_nation | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::state)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::country_units_in_state_this_state | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_this_state | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::province)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::country_units_in_state_this_province | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_this_province | trigger::no_payload | association_to_bool_code(a)));
 				else if(context.this_slot == trigger::slot_contents::pop)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::country_units_in_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
+					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_this_pop | trigger::no_payload | association_to_bool_code(a)));
 				else {
 					err.accumulated_errors += "country_units_in_state = this trigger used in an incorrect scope type " +
 					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
@@ -4899,10 +4895,9 @@ namespace parsers {
 					return;
 				}
 			} else if(is_from(value)) {
-				if(context.from_slot == trigger::slot_contents::nation)
-				context.compiled_trigger.push_back(
-						uint16_t(trigger::country_units_in_state_from | trigger::no_payload | association_to_bool_code(a)));
-				else {
+				if(context.from_slot == trigger::slot_contents::nation) {
+					context.compiled_trigger.push_back(uint16_t(trigger::country_units_in_state_from | trigger::no_payload | association_to_bool_code(a)));
+				} else {
 					err.accumulated_errors += "country_units_in_state = from trigger used in an incorrect scope type " +
 					slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
 					std::to_string(line) + ")\n";
