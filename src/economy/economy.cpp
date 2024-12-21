@@ -1656,7 +1656,8 @@ namespace economy {
 				state.world.nation_set_domestic_market_pool(nids, c, 0.0f);
 			});
 			// per good decay would be nice...
-			auto const world_pool = state.world.commodity_get_global_market_pool(c);
+			auto const decay = 0.75f;
+			auto const world_pool = state.world.commodity_get_global_market_pool(c) * decay;
 			state.world.commodity_set_global_market_pool(c, world_pool + sum.reduce());
 		});
 
