@@ -40,10 +40,11 @@ namespace ai {
 	constexpr inline float sphere_wargoal_factor = 0.f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 2.5f;
-	constexpr inline float aggression_towards_at_war = 2.f;
-	constexpr inline float aggression_towards_rival = 2.5f;
-	constexpr inline float aggression_towards_adjacent = 1.5f;
+	constexpr inline float aggression_towards_unciv = 10.f;
+	constexpr inline float aggression_towards_at_war = 1.1f;
+	constexpr inline float aggression_towards_rival = 10.f;
+	constexpr inline float aggression_towards_adjacent = 1.25f;
+	constexpr inline float aggression_towards_culture_group = 0.5f;
 	constexpr inline float aggression_factor = 1.f / 10.f;
 
 	float average_army_strength(sys::state& state, dcon::army_id a) {
@@ -141,7 +142,7 @@ namespace ai {
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
-		auto const their_str = estimate_strength(state, target)
+		auto const their_str = estimate_defensive_strength(state, target)
 			- (nations::are_allied(state, target, n) ? base_strength : 0.f);
 		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
@@ -154,6 +155,14 @@ namespace ai {
 		if(state.world.nation_get_ai_rival(n) == target) {
 			weight *= aggression_towards_rival;
 		}
+		auto const pc = state.world.nation_get_primary_culture(n);
+		auto const cg = pc.get_group_from_culture_group_membership();
+		auto const t_pc = state.world.nation_get_primary_culture(target);
+		auto const t_cg = t_pc.get_group_from_culture_group_membership();
+		if(cg == t_cg) {
+			weight *= aggression_towards_culture_group;
+		}
+
 		auto const adj = state.world.get_nation_adjacency_by_nation_adjacency_pair(n, target);
 		if(adj) {
 			weight *= aggression_towards_adjacent;
@@ -2180,11 +2189,11 @@ namespace ai {
 		// Attacking people from other regions only if we have naval superiority
 		bool has_adj = false;
 		for(const auto adj : state.world.nation_get_nation_adjacency(target)) {
-			auto const n = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
-			if(n == from) {
+			auto const other = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
+			if(other == from) {
 				has_adj = true;
 				break;
-			} else if(auto ovr = n.get_overlord_as_subject(); ovr && ovr.get_ruler() == from) {
+			} else if(auto ovr = other.get_overlord_as_subject(); ovr && ovr.get_ruler() == from) {
 				has_adj = true;
 				break;
 			}
@@ -2193,9 +2202,9 @@ namespace ai {
 		&& state.world.nation_get_capital_ship_score(from) < std::max(1.f, 1.25f * state.world.nation_get_capital_ship_score(target))) {
 			return false;
 		}
-		auto const ovr = state.world.nation_get_overlord_as_subject(target);
-		auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
-		return ai::can_go_war_with(state, from, real_target, target);
+		//auto const ovr = state.world.nation_get_overlord_as_subject(target);
+		//auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
+		return true;
 	}
 
 	void update_cb_fabrication(sys::state& state) {
@@ -3157,26 +3166,23 @@ namespace ai {
 	}
 
 	bool naval_supremacy(sys::state& state, dcon::nation_id n, dcon::nation_id target) {
-		auto self_sup = state.world.nation_get_used_naval_supply_points(n);
-
-		auto real_target = state.world.overlord_get_ruler(state.world.nation_get_overlord_as_subject(target));
+		auto const self_sup = state.world.nation_get_used_naval_supply_points(n);
+		auto const ovr = state.world.nation_get_overlord_as_subject(target);
+		auto real_target = state.world.overlord_get_ruler(ovr);
 		if(!real_target)
 			real_target = target;
-
 		if(self_sup <= state.world.nation_get_used_naval_supply_points(real_target))
 			return false;
-
 		if(self_sup <= state.world.nation_get_in_sphere_of(real_target).get_used_naval_supply_points())
 			return false;
 
 		for(auto a : state.world.nation_get_diplomatic_relation(real_target)) {
-			if(!a.get_are_allied())
-				continue;
-			auto other = a.get_related_nations(0) != real_target ? a.get_related_nations(0) : a.get_related_nations(1);
-			if(self_sup <= other.get_used_naval_supply_points())
-				return false;
+			if(a.get_are_allied()) {
+				auto const other = a.get_related_nations(0) != real_target ? a.get_related_nations(0) : a.get_related_nations(1);
+				if(self_sup <= other.get_used_naval_supply_points())
+					return false;
+			}
 		}
-
 		return true;
 	}
 
@@ -3231,14 +3237,15 @@ namespace ai {
 			//Great powers should look for non-neighbor nations to use their existing wargoals on; helpful for forcing unification/repay debts wars to happen
 			if(nations::is_great_power(state, n)) {
 				for(auto target : state.world.in_nation) {
-					auto const real_target = target.get_overlord_as_subject().get_ruler() ? target.get_overlord_as_subject().get_ruler() : target;
+					auto const real_target = target.get_overlord_as_subject().get_ruler()
+						? target.get_overlord_as_subject().get_ruler() : target;
 					if(!ai::can_go_war_with(state, n, real_target, target))
 						continue;
 					// If it neighbors one of our spheres and we can pathfind to each other's capitals, we don't need naval supremacy to reach this nation
 					// Generally here to help Prussia realize it doesn't need a navy to attack Denmark
 					auto reachable = false;
 					for(auto adj : state.world.nation_get_nation_adjacency(target)) {
-						auto const other = adj.get_connected_nations(0) != n ? adj.get_connected_nations(0) : adj.get_connected_nations(1);
+						auto const other = adj.get_connected_nations(adj.get_connected_nations(0) == target ? 1 : 0);
 						if(other == n) {
 							reachable = true;
 							break;
@@ -3251,9 +3258,7 @@ namespace ai {
 							break;
 						}
 					}
-					if(!reachable && !ai::naval_supremacy(state, n, target)) {
-						continue;
-					}
+					reachable = reachable || ai::naval_supremacy(state, n, target); // Needs navy in this case
 					if(reachable) {
 						auto const str_difference = ai::war_weight_potential_target(state, n, real_target, base_strength);
 						if(str_difference > best_difference) {
