@@ -139,15 +139,15 @@ namespace sys {
 	void bulk_apply_scaled_modifier_to_nations(sys::state& state, dcon::modifier_id m, F const& scale_functor) {
 		auto& nat_values = state.world.modifier_get_national_values(m);
 		for(uint32_t i = 0; i < sys::national_modifier_definition::modifier_definition_size; ++i) {
-			if(!(nat_values.offsets[i]))
-			break; // no more modifier values attached
-
-			state.world.execute_serial_over_nation(
-				[&, fixed_offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto nation_indices) {
-					auto scaling_factor = scale_functor(nation_indices);
-					auto old_mod_value = state.world.nation_get_modifier_values(nation_indices, fixed_offset);
-					state.world.nation_set_modifier_values(nation_indices, fixed_offset, old_mod_value + scaling_factor * modifier_amount);
+			if(nat_values.offsets[i]) {
+				state.world.execute_serial_over_nation([&, offset = nat_values.offsets[i], modifier_amount = nat_values.values[i]](auto ids) {
+					auto const scaling_factor = scale_functor(ids);
+					auto const old_mod_value = state.world.nation_get_modifier_values(ids, offset);
+					state.world.nation_set_modifier_values(ids, offset, old_mod_value + scaling_factor * modifier_amount);
 				});
+			} else {
+				break; // no more modifier values attached
+			}
 		}
 	}
 
@@ -381,25 +381,23 @@ namespace sys {
 				return ve::select(c > 0.0f, bc / c, 0.0f);
 			});
 		}
-		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
-			bulk_apply_scaled_modifier_to_nations(state, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)], [&](auto ids) {
-				return ve::apply(
-					[&](dcon::nation_id nid) {
-						auto n = fatten(state.world, nid);
-						auto cap_continent = n.get_capital().get_continent();
-						float total = 0.0f;
-						float occupied = 0.0f;
-						for(auto owned : n.get_province_ownership()) {
-							if(owned.get_province().get_continent() == cap_continent) {
-								total += 1.0f;
-								if(auto c = owned.get_province().get_nation_from_province_control().id; c && c != n.id) {
-									occupied += 1.0f;
-								}
+		if(auto m = state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]; m) {
+			bulk_apply_scaled_modifier_to_nations(state, m, [&](auto ids) {
+				return ve::apply([&](dcon::nation_id nid) {
+					auto const n = fatten(state.world, nid);
+					auto const cap_continent = n.get_capital().get_continent();
+					float total = 0.0f;
+					float occupied = 0.0f;
+					for(auto const po : n.get_province_ownership()) {
+						if(po.get_province().get_continent() == cap_continent) {
+							total += 1.0f;
+							if(auto c = po.get_province().get_nation_from_province_control().id; c && c != n.id) {
+								occupied += 1.0f;
 							}
 						}
-						return total > 0.f ? occupied / total : 0.f;
-					},
-					ids);
+					}
+					return total > 0.f ? occupied / total : 0.f;
+				}, ids);
 			});
 		}
 		for(auto n : state.world.in_nation) {
@@ -551,21 +549,20 @@ namespace sys {
 
 			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)], c > 0.0f ? bc / c : 0.0f);
 		}
-		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
-			auto nid = fatten(state.world, n);
-			auto cap_continent = nid.get_capital().get_continent();
+		if(auto m = state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]; m) {
+			auto const nid = fatten(state.world, n);
+			auto const cap_continent = nid.get_capital().get_continent();
 			float total = 0.0f;
 			float occupied = 0.0f;
-			for(auto owned : nid.get_province_ownership()) {
-				if(owned.get_province().get_continent() == cap_continent) {
+			for(auto const po : nid.get_province_ownership()) {
+				if(po.get_province().get_continent() == cap_continent) {
 					total += 1.0f;
-					if(auto c = owned.get_province().get_nation_from_province_control().id; c && c != n) {
+					if(auto c = po.get_province().get_nation_from_province_control().id; c && c != n) {
 						occupied += 1.0f;
 					}
 				}
 			}
-
-			apply_scaled_modifier_values_to_nation(state, n, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)],
+			apply_scaled_modifier_values_to_nation(state, n, m,
 				total > 0.0f ? occupied / total : 0.0f);
 		}
 

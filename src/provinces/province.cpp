@@ -201,7 +201,7 @@ namespace province {
 		}
 
 		for(int32_t i = 0; i < state.province_definitions.first_sea_province.index(); ++i) {
-		dcon::province_id pid{dcon::province_id::value_base_t(i)};
+			dcon::province_id pid{dcon::province_id::value_base_t(i)};
 			auto owner = state.world.province_get_nation_from_province_ownership(pid);
 			if(owner) {
 				bool reb_controlled = bool(state.world.province_get_rebel_faction_from_province_rebel_control(pid));
@@ -219,7 +219,6 @@ namespace province {
 				}
 				if(!is_overseas(state, pid)) {
 					state.world.nation_get_central_province_count(owner) += uint16_t(1);
-
 					if(military::province_is_blockaded(state, pid)) {
 						state.world.nation_get_central_blockaded(owner) += uint16_t(1);
 					}
@@ -251,7 +250,7 @@ namespace province {
 
 	void update_cached_values(sys::state& state) {
 		if(!state.national_cached_values_out_of_date)
-		return;
+			return;
 
 		state.national_cached_values_out_of_date = false;
 		restore_cached_values(state);

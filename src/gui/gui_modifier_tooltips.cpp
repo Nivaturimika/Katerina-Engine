@@ -27,27 +27,27 @@ namespace ui {
 	};
 
 	static const modifier_display_info province_modifier_names[sys::provincial_mod_offsets::count] = {
-		#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
-	modifier_display_info{green_is_negative, display_type, locale_name},
+#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name) \
+		modifier_display_info{green_is_negative, display_type, locale_name},
 		MOD_PROV_LIST
-		#undef MOD_LIST_ELEMENT
+#undef MOD_LIST_ELEMENT
 	};
 	static const modifier_display_info national_modifier_names[sys::national_mod_offsets::count] = {
-		#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name)                                                \
-	modifier_display_info{green_is_negative, display_type, locale_name},
+#define MOD_LIST_ELEMENT(num, name, green_is_negative, display_type, locale_name) \
+		modifier_display_info{green_is_negative, display_type, locale_name},
 		MOD_NAT_LIST
-		#undef MOD_LIST_ELEMENT
+#undef MOD_LIST_ELEMENT
 	};
 
 	std::string format_modifier_value(sys::state& state, float value, modifier_display_type type) {
 		switch(type) {
-			case modifier_display_type::integer:
+		case modifier_display_type::integer:
 			return (value >= 0.f ? "+" : "") + text::prettify(int64_t(value));
-			case modifier_display_type::percent:
+		case modifier_display_type::percent:
 			return (value >= 0.f ? "+" : "") + text::format_percentage(value, 1);
-			case modifier_display_type::fp_two_places:
+		case modifier_display_type::fp_two_places:
 			return(value >= 0.f ? "+" : "") + text::format_float(value, 2);
-			case modifier_display_type::fp_three_places:
+		case modifier_display_type::fp_three_places:
 			return (value >= 0.f ? "+" : "") + text::format_float(value, 3);
 		}
 		return "x%";
@@ -59,14 +59,15 @@ namespace ui {
 		auto const& prov_def = fat_id.get_province_values();
 		for(uint32_t i = 0; i < prov_def.modifier_definition_size; ++i) {
 			if(!bool(prov_def.offsets[i]))
-			break;
+				break;
 			auto data = province_modifier_names[prov_def.offsets[i].index()];
 			auto box = text::open_layout_box(layout, indentation);
 			text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, data.name), text::text_color::white);
-		text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
+			text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
 			text::add_space_to_layout_box(state, layout, box);
-			auto color = data.positive_is_green ? (prov_def.values[i] >= 0.f ? text::text_color::green : text::text_color::red)
-																				: (prov_def.values[i] >= 0.f ? text::text_color::red : text::text_color::green);
+			auto color = data.positive_is_green
+				? (prov_def.values[i] >= 0.f ? text::text_color::green : text::text_color::red)
+				: (prov_def.values[i] >= 0.f ? text::text_color::red : text::text_color::green);
 			text::add_to_layout_box(state, layout, box, format_modifier_value(state, prov_def.values[i], data.type), color);
 			text::close_layout_box(layout, box);
 		}
@@ -74,54 +75,52 @@ namespace ui {
 		auto const& nat_def = fat_id.get_national_values();
 		for(uint32_t i = 0; i < nat_def.modifier_definition_size; ++i) {
 			if(!bool(nat_def.offsets[i]))
-			break;
+				break;
 			auto data = national_modifier_names[nat_def.offsets[i].index()];
 			auto box = text::open_layout_box(layout, indentation);
 			text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, data.name), text::text_color::white);
-		text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
+			text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
 			text::add_space_to_layout_box(state, layout, box);
-			auto color = data.positive_is_green ? (nat_def.values[i] >= 0.f ? text::text_color::green : text::text_color::red)
-																				: (nat_def.values[i] >= 0.f ? text::text_color::red : text::text_color::green);
+			auto color = data.positive_is_green
+				? (nat_def.values[i] >= 0.f ? text::text_color::green : text::text_color::red)
+				: (nat_def.values[i] >= 0.f ? text::text_color::red : text::text_color::green);
 			text::add_to_layout_box(state, layout, box, format_modifier_value(state, nat_def.values[i], data.type), color);
 			text::close_layout_box(layout, box);
 		}
 	}
 
-	void active_single_modifier_description(sys::state& state, text::layout_base& layout, dcon::modifier_id mid, int32_t indentation,
-		bool& header, dcon::national_modifier_value nmid, float scaled) {
+	void active_single_modifier_description(sys::state& state, text::layout_base& layout, dcon::modifier_id mid, int32_t indentation, bool& header, dcon::national_modifier_value nmid, float scaled) {
 		if(scaled == 0.f)
-		return;
+			return;
 		auto fat_id = dcon::fatten(state.world, mid);
 		auto const& def = fat_id.get_national_values();
 		for(uint32_t i = 0; i < def.modifier_definition_size; ++i) {
 			if(!bool(def.offsets[i]))
-			break;
+				break;
 			if(def.offsets[i] != nmid)
-			continue;
+				continue;
 
 			if(!header) {
 				header = true;
 				auto box = text::open_layout_box(layout, 0);
-				text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, national_modifier_names[nmid.index()].name),
-					text::text_color::yellow);
+				text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, national_modifier_names[nmid.index()].name), text::text_color::yellow);
 				text::add_to_layout_box(state, layout, box, std::string_view(":"), text::text_color::yellow);
 				text::close_layout_box(layout, box);
 			}
-
 			auto data = national_modifier_names[nmid.index()];
 			auto box = text::open_layout_box(layout, indentation);
 			text::add_to_layout_box(state, layout, box, text::produce_simple_string(state, fat_id.get_name()), text::text_color::white);
-		text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
+			text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
 			text::add_space_to_layout_box(state, layout, box);
 			auto value = def.values[i] * scaled;
-			auto color = data.positive_is_green ? (value >= 0.f ? text::text_color::green : text::text_color::red)
-																				: (value >= 0.f ? text::text_color::red : text::text_color::green);
+			auto color = data.positive_is_green
+				? (value >= 0.f ? text::text_color::green : text::text_color::red)
+				: (value >= 0.f ? text::text_color::red : text::text_color::green);
 			text::add_to_layout_box(state, layout, box, format_modifier_value(state, value, data.type), color);
 			text::close_layout_box(layout, box);
 		}
 	}
-	void active_single_modifier_description(sys::state& state, text::layout_base& layout, dcon::modifier_id mid, int32_t indentation,
-		bool& header, dcon::provincial_modifier_value pmid, float scaled) {
+	void active_single_modifier_description(sys::state& state, text::layout_base& layout, dcon::modifier_id mid, int32_t indentation, bool& header, dcon::provincial_modifier_value pmid, float scaled) {
 		if(scaled == 0.f)
 			return;
 		auto const fat_id = dcon::fatten(state.world, mid);
@@ -145,7 +144,9 @@ namespace ui {
 			text::add_to_layout_box(state, layout, box, std::string_view{":"}, text::text_color::white);
 			text::add_space_to_layout_box(state, layout, box);
 			auto value = def.values[i] * scaled;
-			auto color = data.positive_is_green ? (value >= 0.f ? text::text_color::green : text::text_color::red) : (value >= 0.f ? text::text_color::red : text::text_color::green);
+			auto color = data.positive_is_green
+				? (value >= 0.f ? text::text_color::green : text::text_color::red)
+				: (value >= 0.f ? text::text_color::red : text::text_color::green);
 			text::add_to_layout_box(state, layout, box, format_modifier_value(state, value, data.type), color);
 			text::close_layout_box(layout, box);
 		}
@@ -254,13 +255,14 @@ namespace ui {
 			});
 		}
 
-		auto in_wars = state.world.nation_get_war_participant(n);
-		if(in_wars.begin() != in_wars.end()) {
-			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)])
-			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)], identation, header, nmid);
+		if(state.world.nation_get_is_at_war(n)) {
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)]) {
+				active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::war)], identation, header, nmid);
+			}
 		} else {
-			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)])
-			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)], identation, header, nmid);
+			if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)]) {
+				active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::peace)], identation, header, nmid);
+			}
 		}
 
 		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::badboy)]) {
@@ -286,20 +288,20 @@ namespace ui {
 			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_blockaded)], identation, header, nmid,
 				c > 0.0f ? bc / c : 0.0f);
 		}
-		if(state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]) {
-			auto nid = fatten(state.world, n);
-			auto cap_continent = nid.get_capital().get_continent();
+		if(auto m = state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)]; m) {
+			auto const nid = fatten(state.world, n);
+			auto const cap_continent = nid.get_capital().get_continent();
 			float total = 0.0f;
 			float occupied = 0.0f;
-			for(auto owned : nid.get_province_ownership()) {
-				if(owned.get_province().get_continent() == cap_continent) {
+			for(auto const po : nid.get_province_ownership()) {
+				if(po.get_province().get_continent() == cap_continent) {
 					total += 1.0f;
-					if(auto c = owned.get_province().get_nation_from_province_control().id; c && c != n) {
+					if(auto c = po.get_province().get_nation_from_province_control().id; c && c != n) {
 						occupied += 1.0f;
 					}
 				}
 			}
-			active_single_modifier_description(state, layout, state.national_definitions.static_modifiers[uint8_t(nations::static_modifier::total_occupation)], identation, header, nmid,
+			active_single_modifier_description(state, layout, m, identation, header, nmid,
 				total > 0.0f ? occupied / total : 0.0f);
 		}
 
@@ -339,16 +341,16 @@ namespace ui {
 
 		for(auto tm : state.national_definitions.triggered_modifiers) {
 			if(tm.trigger_condition && tm.linked_modifier) {
-				auto trigger_condition_satisfied =
-					trigger::evaluate(state, tm.trigger_condition, trigger::to_generic(n), trigger::to_generic(n), 0);
-				if(trigger_condition_satisfied)
-				active_single_modifier_description(state, layout, tm.linked_modifier, identation, header, nmid);
+				auto const trigger_condition_satisfied = trigger::evaluate(state, tm.trigger_condition, trigger::to_generic(n), trigger::to_generic(n), 0);
+				if(trigger_condition_satisfied) {
+					active_single_modifier_description(state, layout, tm.linked_modifier, identation, header, nmid);
+				}
 			}
 		}
 
 		// Provinces of this nation
-		for(auto pc : state.world.nation_get_province_ownership_as_nation(n)) {
-			auto p = pc.get_province().id;
+		for(auto const pc : state.world.nation_get_province_ownership_as_nation(n)) {
+			auto const p = pc.get_province().id;
 			acting_modifiers_description_province<dcon::national_modifier_value>(state, layout, p, identation, header, nmid);
 		}
 	}
