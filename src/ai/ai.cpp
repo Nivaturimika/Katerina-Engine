@@ -141,10 +141,13 @@ namespace ai {
 	}
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
+		auto const aggression_factor = state.defines.aggression_base * 0.15f;
+		
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
 		auto const their_str = estimate_defensive_strength(state, target)
 			- (nations::are_allied(state, target, n) ? base_strength : 0.f);
-		auto weight = our_str - their_str;
+		
+		auto weight = (our_str * aggression_factor) - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
 			weight = our_str - (their_str * 0.25f);
 			weight *= aggression_towards_unciv;
@@ -2825,30 +2828,30 @@ namespace ai {
 		}
 	}
 
-	bool has_cores_occupied(sys::state& state, dcon::nation_id n) {
-		if(bool(state.defines.alice_surrender_on_cores_lost)) {
-			auto i = state.world.nation_get_identity_from_identity_holder(n);
-			auto cores = state.world.national_identity_get_core(i);
-			bool has_owned_cores = false;
-			for(auto c : cores) {
-				if(c.get_province().get_nation_from_province_ownership() == n) {
-					has_owned_cores = true;
-				} if(c.get_province().get_nation_from_province_control() == n) {
-					return false;
-				}
+	/* Checks that all the cores are occupied by someone else */
+	bool has_all_cores_occupied(sys::state& state, dcon::nation_id n) {
+		auto i = state.world.nation_get_identity_from_identity_holder(n);
+		bool has_owned_cores = false; /* Do we own any of our cores? */
+		for(auto const c : state.world.national_identity_get_core(i)) {
+			if(c.get_province().get_nation_from_province_control() == n) {
+				return false;
 			}
-			auto pc = state.world.nation_get_province_control(n); //no cores or some cores are occupied but some are not
-			return has_owned_cores || pc.begin() == pc.end(); //controls anything?
+			has_owned_cores = has_owned_cores || (c.get_province().get_nation_from_province_ownership() == n);
 		}
-		return false;
+		/* Must be controlling atleast 1 province, or have owned cores */
+		auto pc = state.world.nation_get_province_control(n);
+		return has_owned_cores || (pc.begin() != pc.end());
 	}
 
 	float war_willingness_factor(int32_t war_duration, bool is_great_war) {
-		auto years = 1.f;
-		if(is_great_war) {
-			years = 4.f;
-		}
-		return (float(war_duration) - 365.f * years) * 25.f / (365.f * years);
+		auto const years = is_great_war ? 4.f : 1.f;
+		auto const value = 365.f * years - float(war_duration);
+		return value / (365.f * years);
+	}
+	float war_harshness_factor(int32_t war_duration, bool is_great_war) {
+		auto const years = is_great_war ? 1.f : 0.5f;
+		auto const value = 365.f * years - float(war_duration);
+		return 1.f + std::max(0.f, value / (365.f * years));
 	}
 
 	bool would_surrender_evaluate(sys::state& state, dcon::nation_id n, dcon::war_id w) {
@@ -2882,7 +2885,7 @@ namespace ai {
 				ai::add_ai_cbs_to_war<true>(state, from, w);
 			}
 
-			score_max = std::min(score_max, 100);
+			assert(score_max >= 0);
 			int32_t current_value = 0;
 			for(auto wg : state.world.war_get_wargoals_attached(w)) {
 				if(current_value < score_max) {
@@ -2912,21 +2915,22 @@ namespace ai {
 				if(military::get_role(state, w, w.get_primary_defender()) != military::war_role::defender)
 					continue;
 
-				auto overall_score = military::primary_warscore(state, w);
+				auto const war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
+				auto const willingness_factor = ai::war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
+				auto const harshness_factor = ai::war_harshness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
+				auto const overall_score = military::primary_warscore(state, w);
 				if(overall_score >= 0) { // attacker winning
-					bool defender_surrender = has_cores_occupied(state, w.get_primary_defender());
-					auto total_po_cost = attacker_peace_cost_plus_potential(state, w.get_primary_attacker(), w);
+					bool const defender_surrender = has_all_cores_occupied(state, w.get_primary_defender());
+					auto const total_po_cost = attacker_peace_cost_plus_potential(state, w.get_primary_attacker(), w);
 					if(w.get_primary_attacker().get_is_player_controlled() == false) { // attacker makes offer
 						if(defender_surrender || (overall_score >= 100 || (overall_score >= 50 && overall_score >= total_po_cost * 2))) {
-							send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(overall_score), false);
+							send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(overall_score * harshness_factor), false);
 							continue;
 						}
 						if(w.get_primary_defender().get_is_player_controlled() == false) {
-							auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 							if(war_duration >= 365) {
-								float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 								if(defender_surrender || (overall_score > (total_po_cost - willingness_factor) && (-overall_score / 2 + total_po_cost - willingness_factor) < 0)) {
-									send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(total_po_cost), false);
+									send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(total_po_cost * harshness_factor), false);
 									continue;
 								}
 							}
@@ -2934,25 +2938,23 @@ namespace ai {
 					} else if(w.get_primary_defender().get_is_player_controlled() == false) { // defender may surrender
 						if(defender_surrender || (overall_score >= 100 || (overall_score >= 50 && overall_score >= total_po_cost * 2))) {
 							if(would_surrender_evaluate(state, w.get_primary_defender(), w)) {
-								send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(overall_score), true);
+								send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(overall_score * harshness_factor), true);
 								continue;
 							}
 						}
 					}
 				} else {
-					bool attacker_surrender = has_cores_occupied(state, w.get_primary_attacker());
-					auto total_po_cost = defender_peace_cost_plus_potential(state, w.get_primary_defender(), w);
+					bool const attacker_surrender = has_all_cores_occupied(state, w.get_primary_attacker());
+					auto const total_po_cost = defender_peace_cost_plus_potential(state, w.get_primary_defender(), w);
 					if(w.get_primary_defender().get_is_player_controlled() == false) { // defender makes offer
 						if(attacker_surrender || (overall_score <= -100 || (overall_score <= -50 && overall_score <= -total_po_cost * 2))) {
-							send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(-overall_score), false);
+							send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(-overall_score * harshness_factor), false);
 							continue;
 						}
 						if(w.get_primary_attacker().get_is_player_controlled() == false) {
-							auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 							if(war_duration >= 365) {
-								float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 								if(attacker_surrender  || (-overall_score > (total_po_cost - willingness_factor) && (overall_score / 2 + total_po_cost - willingness_factor) < 0)) {
-									send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(total_po_cost), false);
+									send_offer_up_to(w.get_primary_defender(), w.get_primary_attacker(), w, false, int32_t(total_po_cost * harshness_factor), false);
 									continue;
 								}
 							}
@@ -2960,7 +2962,7 @@ namespace ai {
 					} else if(w.get_primary_attacker().get_is_player_controlled() == false) { // attacker may surrender
 						if(attacker_surrender || (overall_score <= -100 || (overall_score <= -50 && overall_score <= -total_po_cost * 2))) {
 							if(would_surrender_evaluate(state, w.get_primary_attacker(), w)) {
-								send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(-overall_score), true);
+								send_offer_up_to(w.get_primary_attacker(), w.get_primary_defender(), w, true, int32_t(-overall_score * harshness_factor), true);
 								continue;
 							}
 						}
@@ -2990,60 +2992,54 @@ namespace ai {
 			overall_po_value = -overall_po_value;
 		}
 		if(overall_po_value < -100)
-		return false;
+			return false;
 
-		auto personal_score_saved = target_personal_po_value - potential_peace_score_against;
-
+		auto const personal_score_saved = target_personal_po_value - potential_peace_score_against;
+		// TODO: eval for gw and crisis wars
+		auto const willingness_factor = ai::war_willingness_factor(war_duration, false);
+		auto const harshness_factor = ai::war_harshness_factor(war_duration, false);
 		if((prime_attacker == n || prime_defender == n) && (prime_attacker == from || prime_defender == from)) {
 			if(overall_score <= -50 && overall_score <= overall_po_value * 2)
-			return true;
-
+				return true;
 			if(concession && my_side_peace_cost <= overall_po_value)
-			return true; // offer contains everything
+				return true; // offer contains everything
 			if(war_duration < 365) {
 				return false;
 			}
-			// TODO: eval for gw and crisis wars
-			float willingness_factor = war_willingness_factor(war_duration, false);
 			if(overall_score >= 0) {
 				if(concession && ((overall_score * 2 - overall_po_value - willingness_factor) < 0))
-				return true;
+					return true;
 			} else {
 				if((overall_score - willingness_factor) <= overall_po_value && (overall_score / 2 - overall_po_value - willingness_factor) < 0)
-				return true;
+					return true;
 			}
-
 		} else if((prime_attacker == n || prime_defender == n) && concession) {
 			if(scoreagainst_me > 50)
-			return true;
-
+				return true;
 			if(overall_score < 0.0f) { // we are losing
 				if(my_side_against_target - scoreagainst_me <= overall_po_value + personal_score_saved)
-				return true;
+					return true;
 			} else {
 				if(my_side_against_target <= overall_po_value)
-				return true;
+					return true;
 			}
-
 		} else {
 			if(contains_sq)
-			return false;
-
+				return false;
 			if(scoreagainst_me > 50 && scoreagainst_me > -overall_po_value * 2)
-			return true;
+				return true;
 
 			if(overall_score < 0.0f) { // we are losing
 				if(personal_score_saved > 0 && scoreagainst_me + personal_score_saved - my_po_target >= -overall_po_value)
-				return true;
-
+					return true;
 			} else { // we are winning
 				if(my_po_target > 0 && my_po_target >= overall_po_value)
-				return true;
+					return true;
 			}
 		}
 
 		//will accept anything
-		if(has_cores_occupied(state, n)) {
+		if(has_all_cores_occupied(state, n)) {
 			return true;
 		}
 		return false;
@@ -3057,14 +3053,18 @@ namespace ai {
 		bool contains_sq = false;
 
 		auto overall_score = military::primary_warscore(state, w);
-		if(!is_attacking)
-		overall_score = -overall_score;
+		if(!is_attacking) {
+			overall_score = -overall_score;
+		}
 
 		auto concession = state.world.peace_offer_get_is_concession(p);
-
 		if(concession && overall_score <= -50.0f) {
 			return true;
 		}
+
+		auto const war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
+		auto const willingness_factor = ai::war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
+		auto const harshness_factor = ai::war_harshness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 
 		int32_t overall_po_value = 0;
 		int32_t personal_po_value = 0;
@@ -3072,10 +3072,9 @@ namespace ai {
 		for(auto wg : state.world.peace_offer_get_peace_offer_item(p)) {
 			auto wg_value = military::peace_cost(state, w, wg.get_wargoal().get_type(), wg.get_wargoal().get_added_by(), wg.get_wargoal().get_target_nation(), wg.get_wargoal().get_secondary_nation(), wg.get_wargoal().get_associated_state(), wg.get_wargoal().get_associated_tag());
 			overall_po_value += wg_value;
-
-			if((wg.get_wargoal().get_type().get_type_bits() & military::cb_flag::po_status_quo) != 0)
-			contains_sq = true;
-
+			if((wg.get_wargoal().get_type().get_type_bits() & military::cb_flag::po_status_quo) != 0) {
+				contains_sq = true;
+			}
 			if(wg.get_wargoal().get_target_nation() == n) {
 				personal_po_value += wg_value;
 			}
@@ -3083,35 +3082,31 @@ namespace ai {
 		if(!concession) {
 			overall_po_value = -overall_po_value;
 		}
-		if(overall_po_value < -100)
+		if(overall_po_value < -100) {
 			return false;
+		}
 
 		int32_t potential_peace_score_against = 0;
 		for(auto wg : state.world.war_get_wargoals_attached(w)) {
 			if(wg.get_wargoal().get_target_nation() == n || wg.get_wargoal().get_added_by() == n) {
 				auto wg_value = military::peace_cost(state, w, wg.get_wargoal().get_type(), wg.get_wargoal().get_added_by(), n, wg.get_wargoal().get_secondary_nation(), wg.get_wargoal().get_associated_state(), wg.get_wargoal().get_associated_tag());
-
 				if(wg.get_wargoal().get_target_nation() == n && (wg.get_wargoal().get_added_by() == from || from == prime_attacker || from == prime_defender)) {
-					potential_peace_score_against += wg_value;
+					potential_peace_score_against += wg_value * (1.f / harshness_factor);
 				}
 				if(wg.get_wargoal().get_added_by() == n && (wg.get_wargoal().get_target_nation() == from || from == prime_attacker || from == prime_defender)) {
-					my_po_target += wg_value;
+					my_po_target += wg_value * (1.f / harshness_factor);
 				}
 			}
 		}
 		auto personal_score_saved = personal_po_value - potential_peace_score_against;
-
 		if((prime_attacker == n || prime_defender == n) && (prime_attacker == from || prime_defender == from)) {
 			if(overall_score <= -50 && overall_score <= overall_po_value * 2)
 				return true;
-
-			auto war_duration = state.current_date.value - state.world.war_get_start_date(w).value;
 			if(concession && (is_attacking ? military::attacker_peace_cost(state, w) : military::defender_peace_cost(state, w)) <= overall_po_value)
 				return true; // offer contains everything
 			if(war_duration < 365) {
 				return false;
 			}
-			float willingness_factor = war_willingness_factor(war_duration, state.world.war_get_is_great(w) || state.world.war_get_is_crisis_war(w));
 			if(overall_score >= 0) {
 				if(concession && ((overall_score * 2 - overall_po_value - willingness_factor) < 0))
 					return true;
@@ -3129,41 +3124,44 @@ namespace ai {
 			int32_t my_side_against_target = 0;
 			for(auto wg : state.world.war_get_wargoals_attached(w)) {
 				if(wg.get_wargoal().get_target_nation() == from) {
-					auto wg_value = military::peace_cost(state, w, wg.get_wargoal().get_type(), wg.get_wargoal().get_added_by(), n, wg.get_wargoal().get_secondary_nation(), wg.get_wargoal().get_associated_state(), wg.get_wargoal().get_associated_tag());
-
-					my_side_against_target += wg_value;
+					auto const wg_value = military::peace_cost(state, w, wg.get_wargoal().get_type(), wg.get_wargoal().get_added_by(), n, wg.get_wargoal().get_secondary_nation(), wg.get_wargoal().get_associated_state(), wg.get_wargoal().get_associated_tag());
+					my_side_against_target += wg_value * (1.f / harshness_factor);
 				}
 			}
 
 			if(overall_score < 0.0f) { // we are losing
-				if(my_side_against_target - scoreagainst_me <= overall_po_value + personal_score_saved)
+				if(my_side_against_target - scoreagainst_me <= overall_po_value + personal_score_saved) {
 					return true;
+				}
 			} else {
-				if(my_side_against_target <= overall_po_value)
+				if(my_side_against_target <= overall_po_value) {
 					return true;
+				}
 			}
 
 		} else {
-			if(contains_sq)
+			if(contains_sq) {
 				return false;
-
+			}
 			auto scoreagainst_me = military::directed_warscore(state, w, from, n);
-			if(scoreagainst_me > 50 && scoreagainst_me > -overall_po_value * 2)
+			if(scoreagainst_me > 50 && scoreagainst_me > -overall_po_value * 2) {
 				return true;
-
+			}
 			if(overall_score < 0.0f) { // we are losing
-				if(personal_score_saved > 0 && scoreagainst_me + personal_score_saved - my_po_target >= -overall_po_value)
+				if(personal_score_saved > 0 && scoreagainst_me + personal_score_saved - my_po_target >= -overall_po_value) {
 					return true;
-
+				}
 			} else { // we are winning
-				if(my_po_target > 0 && my_po_target >= overall_po_value)
+				if(my_po_target > 0 && my_po_target >= overall_po_value) {
 					return true;
+				}
 			}
 		}
 
 		//will accept anything
-		if(has_cores_occupied(state, n))
+		if(has_all_cores_occupied(state, n)) {
 			return true;
+		}
 		return false;
 	}
 

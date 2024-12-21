@@ -388,7 +388,7 @@ KatEngine adds a handful of new defines:
 - `alice_unciv_civ_forbid_war`: Forbids AI civilized nations from aiding AI uncivilized ones except via scripted events
 - `alice_ideology_base_change_rate`: Base change rate for ideology for pops.
 - `alice_nurture_religion_assimilation`: Whetever religion assimilation should also convert pops or not (0 = yes, 1 = no).
-- `alice_surrender_on_cores_lost`: Force AI to surrender when they have lost their cores, or if they have no cores, all of their land.
+- `alice_surrender_on_cores_lost`: Does nothing, AI always surrenders when all their cores are taken
 - `alice_artificial_gp_limitant`: Limit the number of GP allies the AI can have.
 - `alice_rename_dont_use_localisation`: Keys specified on `change_region_name` or `change_province_name` will be treated as CSV keys, otherwise they will define in-line.
 - `alice_spherelings_only_ally_sphere`: Spherelings will only ally their spherelord.
