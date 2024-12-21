@@ -16,7 +16,11 @@
 #include "math_fns.hpp"
 
 namespace text {
+	// TODO: put in header
+	uint8_t utf16_to_win1250(char16_t ch);
+}
 
+namespace text {
 	constexpr uint16_t pack_font_handle(uint32_t font_index, bool black, uint32_t size) {
 		return uint16_t(uint32_t((font_index - 1) << 7) | uint32_t(black ? (1 << 6) : 0) | uint32_t(size & 0x3F));
 	}
@@ -615,7 +619,7 @@ namespace text {
 		if(only_raw_codepoints && type != font_selection::map_font) {
 			for(uint32_t i = 0; i < uint32_t(source.size()); i++) {
 				text::stored_glyph glyph;
-				glyph.codepoint = source[i];
+				glyph.codepoint = text::utf16_to_win1250(source[i]);
 				glyph.cluster = i;
 				txt.glyph_info.push_back(glyph);
 			}
@@ -697,7 +701,7 @@ namespace text {
 		if(only_raw_codepoints && type != font_selection::map_font) {
 			for(uint32_t i = 0; i < uint32_t(source.size()); i++) {
 				text::stored_glyph glyph;
-				glyph.codepoint = source[i];
+				glyph.codepoint = text::utf16_to_win1250(source[i]);
 				glyph.cluster = i;
 				txt.glyph_info.push_back(glyph);
 			}
@@ -749,7 +753,7 @@ namespace text {
 	void font::remake_cache(stored_glyphs& txt, std::string const& s) {
 		txt.glyph_info.clear();
 		if(s.length() == 0)
-		return;
+			return;
 
 		if(only_raw_codepoints) {
 			for(uint32_t i = 0; i < uint32_t(s.size());) {
