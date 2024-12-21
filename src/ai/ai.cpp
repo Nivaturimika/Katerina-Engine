@@ -148,7 +148,7 @@ namespace ai {
 		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
 			weight = our_str - (their_str * 0.25f);
-			weight *= aggression_towards_unciv;
+			weight *= state.defines.aggression_unciv_bonus;
 		}
 		if(state.world.nation_get_is_at_war(target)) {
 			weight *= aggression_towards_at_war;
