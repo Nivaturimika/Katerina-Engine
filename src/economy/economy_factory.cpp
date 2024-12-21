@@ -138,9 +138,31 @@ namespace economy_factory {
 		return economy::commodity_set_effective_cost(state, n, state.world.factory_type_get_inputs(ft));
 	}
 
+	/*
+	- Open factories have their employment adjusted. A factory that is being subsidized, or has spending less than its
+	income, or has sufficient cash reserves (100?) is considered to be financially stable. The effective
+	max employment in a factory is its level x its base workforce x the fraction of the state that is not
+	occupied (i.e. fraction-of-state-controlled x level gives us its effective level). If the factory is
+	financially stable we adjust its workforce towards the effective max employment with a speed of 0.15,
+	otherwise we adjust it towards zero with a speed of 0.15.
+	*/
 	float factory_max_employment(sys::state const& state, dcon::factory_id f) {
-		auto ft = state.world.factory_get_building_type(f);
-		return state.world.factory_type_get_base_workforce(ft) * float(state.world.factory_get_level(f));
+		auto const p = state.world.factory_get_province_from_factory_location(f);
+		auto const si = state.world.province_get_state_membership(p);
+		auto const owner = state.world.province_get_nation_from_province_ownership(p);
+		auto total = 0.f;
+		auto controlled = 0.f;
+		province::for_each_province_in_state_instance(state, si, [&](dcon::province_id other) {
+			total += 1.f;
+			if(state.world.province_get_nation_from_province_control(other) == owner) {
+				controlled += 1.f;
+			}
+		});
+		auto const controlled_frac = total > 0.f ? controlled / total : 0.f;
+		auto const ft = state.world.factory_get_building_type(f);
+		return state.world.factory_type_get_base_workforce(ft)
+			* float(state.world.factory_get_level(f))
+			* controlled_frac;
 	}
 
 	float factory_max_production_scale(sys::state& state, dcon::factory_id f, float mobilization_impact, bool occupied) {
@@ -159,8 +181,8 @@ namespace economy_factory {
 	}
 
 	float factory_output_multiplier(sys::state& state, dcon::factory_id f, dcon::nation_id n, dcon::province_id p) {
-		auto fac_type = state.world.factory_get_building_type(f);
-		return state.world.nation_get_factory_goods_output(n, fac_type.get_output())
+		auto const ft = state.world.factory_get_building_type(f);
+		return state.world.nation_get_factory_goods_output(n, ft.get_output())
 			+ state.world.province_get_modifier_values(p, sys::provincial_mod_offsets::local_factory_output)
 			+ state.world.nation_get_modifier_values(n, sys::national_mod_offsets::factory_output)
 			+ state.world.factory_get_secondary_employment(f)
@@ -282,13 +304,8 @@ namespace economy_factory {
 	float update_factory_scale(sys::state& state, dcon::factory_id f, float max_production_scale, float raw_profit, float desired_raw_profit) {
 		auto fat_id = dcon::fatten(state.world, f);
 		auto ft = state.world.factory_get_building_type(f);
-
 		auto const total_workers = factory_max_employment(state, f);
-		auto const several_workers_scale = 10.f / total_workers;
-		auto const total_activity = state.world.commodity_get_total_production(fat_id.get_building_type().get_output())
-			+ state.world.commodity_get_total_real_demand(fat_id.get_building_type().get_output()) + 10.f;
-		auto const relative_production_amount = state.world.factory_type_get_output_amount(ft) / total_activity;
-		auto const relative_modifier = (1.f / std::max(0.01f, relative_production_amount)) / 1000.f;
+		auto const several_workers_scale = state.defines.employment_hire_lowest / total_workers;
 		auto const effective_production_scale = 0.0f;
 		auto new_production_scale = 0.0f;
 		if(state.world.factory_get_subsidized(f)) {
@@ -297,8 +314,9 @@ namespace economy_factory {
 			auto const over_profit_ratio = raw_profit / std::max(desired_raw_profit, 0.0001f) - 1.f;
 			auto const under_profit_ratio = desired_raw_profit / std::max(raw_profit, 0.0001f) - 1.f;
 			auto const speed_modifier = (over_profit_ratio - under_profit_ratio);
-			auto speed = economy_factory::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
-			speed = std::clamp(speed, -relative_modifier, relative_modifier);
+			auto speed = economy_factory::production_scale_delta * speed_modifier + several_workers_scale
+				* ((raw_profit > desired_raw_profit) ? 1.f : -1.f);
+			speed = std::clamp(speed, -0.01f, 0.01f);
 			new_production_scale = std::clamp(state.world.factory_get_production_scale(f) + speed, 0.f, 1.f);
 		}
 		state.world.factory_set_production_scale(f, new_production_scale);

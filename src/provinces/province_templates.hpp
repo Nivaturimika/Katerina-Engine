@@ -36,10 +36,10 @@ namespace province {
 	}
 
 	template<typename F>
-	void for_each_province_in_state_instance(sys::state& state, dcon::state_instance_id s, F const& func) {
-		auto d = state.world.state_instance_get_definition(s);
-		auto o = state.world.state_instance_get_nation_from_state_ownership(s);
-		for(auto p : state.world.state_definition_get_abstract_state_membership(d)) {
+	void for_each_province_in_state_instance(sys::state const& state, dcon::state_instance_id s, F const& func) {
+		auto const d = state.world.state_instance_get_definition(s);
+		auto const o = state.world.state_instance_get_nation_from_state_ownership(s);
+		for(auto const p : state.world.state_definition_get_abstract_state_membership(d)) {
 			if(p.get_province().get_nation_from_province_ownership() == o) {
 				func(p.get_province().id);
 			}
