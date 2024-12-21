@@ -294,7 +294,7 @@ namespace economy_factory {
 		if(state.world.factory_get_subsidized(f)) {
 			new_production_scale = std::min(1.0f, state.world.factory_get_production_scale(f) + several_workers_scale * state.world.factory_get_level(f) * 10.f);
 		} else {
-			auto const over_profit_ratio = raw_profit / std::max(desired_raw_profit, 0001f) - 1.f;
+			auto const over_profit_ratio = raw_profit / std::max(desired_raw_profit, 0.0001f) - 1.f;
 			auto const under_profit_ratio = desired_raw_profit / std::max(raw_profit, 0.0001f) - 1.f;
 			auto const speed_modifier = (over_profit_ratio - under_profit_ratio);
 			auto speed = economy_factory::production_scale_delta * speed_modifier + several_workers_scale * ((raw_profit - desired_raw_profit > 0.f) ? 1.f : -1.f);
