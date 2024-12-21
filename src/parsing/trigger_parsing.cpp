@@ -2851,19 +2851,16 @@ namespace parsers {
 		}
 	}
 	void trigger_body::capital(association_type a, int32_t value, error_handler& err, int32_t line, trigger_building_context& context) {
-		if(context.main_slot == trigger::slot_contents::nation) {
-			context.compiled_trigger.push_back(uint16_t(trigger::capital | association_to_bool_code(a)));
-		} else {
-			err.accumulated_errors += "capital trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) +
-															"(" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			return;
-		}
 		if(0 <= value && size_t(value) < context.outer_context.original_id_to_prov_id_map.size()) {
+			if(context.main_slot == trigger::slot_contents::nation) {
+				context.compiled_trigger.push_back(uint16_t(trigger::capital | association_to_bool_code(a)));
+			} else {
+				err.accumulated_errors += "capital trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + "(" + err.file_name + ", line " + std::to_string(line) + ")\n";
+				return;
+			}
 			context.compiled_trigger.push_back(trigger::payload(context.outer_context.original_id_to_prov_id_map[value]).value);
 		} else {
-			err.accumulated_errors +=
-				"capital trigger given an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
-			context.compiled_trigger.push_back(trigger::payload(dcon::province_id()).value);
+			err.accumulated_errors += "capital trigger given an invalid province id (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 		}
 	}
 	void trigger_body::tech_school(association_type a, std::string_view value, error_handler& err, int32_t line,
@@ -2873,16 +2870,13 @@ namespace parsers {
 			if(context.main_slot == trigger::slot_contents::nation) {
 				context.compiled_trigger.push_back(uint16_t(trigger::tech_school | association_to_bool_code(a)));
 			} else {
-				err.accumulated_errors += "tech_school trigger used in an incorrect scope type " +
-																slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " +
-																std::to_string(line) + ")\n";
+				err.accumulated_errors += "tech_school trigger used in an incorrect scope type " + slot_contents_to_string(context.main_slot) + " (" + err.file_name + ", line " + std::to_string(line) + ")\n";
 				return;
 			}
-
 			context.compiled_trigger.push_back(trigger::payload(it->second).value);
 		} else {
-			err.accumulated_errors +=
-				"tech_school trigger supplied with an invalid school \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			err.accumulated_errors += "tech_school trigger supplied with an invalid school \"" + std::string(value) + "\" (" + err.file_name + ", line " + std::to_string(line) + ")\n";
+			context.compiled_trigger.push_back(uint16_t(trigger::always | trigger::no_payload | trigger::association_ne));
 		}
 	}
 	void trigger_body::primary_culture(association_type a, std::string_view value, error_handler& err, int32_t line, trigger_building_context& context) {

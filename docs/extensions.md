@@ -633,53 +633,6 @@ army = { #or navy
 
 Is valid syntax.
 
-## Compatibility default `always = no` for dynamic triggers
-
-Triggers for tags, cultures, governments, ideologies, pop types, satates, inventions, culture groups, or technologies that don't exist have the same behaviour of `always = no`. For example if a trigger `culture = FROMpashtun` was found, then it was a) likely a typo, but b) the game tries to find the `FROMpashtun` culture, finds none, returns false. For performance reasons we already know the result beforehand so we can just materialize it into a `always = no`.
-
-List of triggers that get materialized into `always = no` when invalid:
-
-- `has_pop_culture`
-- `cultural_group`
-- `culture`
-- `primary_culture`
-- `accepted_culture`
-- `pop_majority_culture`
-- `have_core_in`
-- `culturan_union_of`
-- `is_core`
-- `owned_by`
-- `tag`
-- `casus_belli`
-- `exists`
-- `military_access`
-- `stronger_army_than`
-- `neighbour`
-- `country_units_in_state`
-- `units_in_province`
-- `war_with`
-- `in_sphere`
-- `controlled_by`
-- `truce_with`
-- `is_sphere_leader_of`
-- `constructing_cb`
-- `vassal_of`
-- `substate_of`
-- `is_our_vassal`
-- `this_culture_union`
-- `alliance_with`
-- `in_default`
-- `industrial_score`
-- `military_score`
-- `is_possible_vassal`
-- `diplomatic_influence`
-- `relation`
-
-Note that the following have special behaviour:
-
-- `has_province_modifier`: Behaves as `always = no`
-- `has_country_modifier`: Behaves as `always = yes`
-
 ## Defines as constants
 
 You can use a literal named constant (fancy way of saying you can use defines instead of a fixed number).
