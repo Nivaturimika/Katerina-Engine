@@ -2412,9 +2412,10 @@ namespace map {
 					if(i != glyph_count - 1) {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
+					auto const y_remaining = (1.f - (float(bm_char.height) / font_size));
 					x_offset = float(bm_char.x_offset);
-					y_offset = float(bm_char.y_offset) - float(bm_font.line_height);
-					glyph_positions = glm::vec2(x_offset / 64.f, -y_offset / 64.f);
+					y_offset = float(bm_char.y_offset) - y_remaining * font_size;
+					glyph_positions = glm::vec2(x_offset / font_size, -y_offset / font_size);
 				} else {
 					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
 					auto const& gso = f.glyph_positions[glyphid];
@@ -2466,7 +2467,9 @@ namespace map {
 					text_line_texture_per_quad.emplace_back(f.textures[gso.texture_slot >> 6]);
 				}
 				//
-				float glyph_advance = x_advance * text_size / 64.f;
+				auto const glyph_advance = (state.user_settings.use_classic_fonts)
+					? x_advance * text_size / font_size
+					: x_advance * text_size / 64.f;
 				for(float glyph_length = 0.f; ; x += x_step) {
 					auto added_distance = 2.f * glm::length(glm::vec2(x_step * e.ratio.x, (poly_fn(x) - poly_fn(x + x_step)) * e.ratio.y));
 					if(glyph_length + added_distance >= glyph_advance + letter_spacing_map) {
@@ -2572,9 +2575,7 @@ namespace map {
 					if(i != glyph_count - 1) {
 						x_advance += bm_font.get_kerning_pair(ch, e.original_text[i + 1]);
 					}
-
 					auto const y_remaining = (1.f - (float(bm_char.height) / font_size));
-
 					x_offset = float(bm_char.x_offset);
 					y_offset = float(bm_char.y_offset) - y_remaining * font_size;
 					glyph_positions = glm::vec2(x_offset / font_size, -y_offset / font_size);
@@ -2626,7 +2627,7 @@ namespace map {
 					province_text_line_texture_per_quad.emplace_back(f.textures[gso.texture_slot >> 6]);
 				}
 				//
-				float glyph_advance = (state.user_settings.use_classic_fonts)
+				auto const glyph_advance = (state.user_settings.use_classic_fonts)
 					? x_advance * text_size / font_size
 					: x_advance * text_size / 64.f;
 				for(float glyph_length = 0.f; ; x += x_step) {
