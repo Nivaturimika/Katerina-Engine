@@ -11,6 +11,8 @@ namespace ai {
 	float estimate_strength(sys::state& state, dcon::nation_id n);
 	float province_supply_usage(sys::state& state, dcon::nation_id n, dcon::province_id p);
 	float estimate_enemy_defensive_force(sys::state& state, dcon::province_id target, dcon::nation_id by);
+	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength);
+	float estimate_defensive_strength(sys::state& state, dcon::nation_id n);
 }
 
 namespace ui {
@@ -99,6 +101,19 @@ namespace ui {
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));
 			text::add_space_to_layout_box(state, contents, box);
 			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_enemy_defensive_force(state, prov, state.local_player_nation) });
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			auto const base_strength = ai::estimate_strength(state, state.local_player_nation);
+			text::localised_format_box(state, contents, box, "ai_war_weight", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::war_weight_potential_target(state, state.local_player_nation, owner, base_strength) });
+			text::add_line_break_to_layout_box(state, contents, box);
+
+			text::localised_format_box(state, contents, box, "ai_estimate_defensive_strength", text::substitution_map{});
+			text::add_to_layout_box(state, contents, box, std::string_view(":"));
+			text::add_space_to_layout_box(state, contents, box);
+			text::add_to_layout_box(state, contents, box, text::fp_four_places{ ai::estimate_defensive_strength(state, owner) });
 			text::add_line_break_to_layout_box(state, contents, box);
 		}
 

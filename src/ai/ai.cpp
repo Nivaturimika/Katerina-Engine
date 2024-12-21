@@ -145,10 +145,11 @@ namespace ai {
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
-		auto const their_str = estimate_defensive_strength(state, target);
+		auto const their_str = estimate_defensive_strength(state, target)
+			- (nations::are_allied(state, target, n) ? base_strength : 0.f);
 		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
-			weight = our_str - (their_str * 0.1f);
+			weight = our_str - (their_str * 0.25f);
 			weight *= aggression_towards_unciv;
 		}
 		if(state.world.nation_get_is_at_war(target)) {
@@ -162,7 +163,7 @@ namespace ai {
 			weight *= aggression_towards_adjacent;
 		}
 		auto const total_pop = state.world.nation_get_demographics(target, demographics::total);
-		auto const pop_weight = (1.f / 100000.f); // each 100k
+		auto const pop_weight = (1.f / 10000.f); // each 10k
 		return weight + total_pop * pop_weight;
 	}
 
@@ -2198,10 +2199,7 @@ namespace ai {
 		}
 		auto const ovr = state.world.nation_get_overlord_as_subject(target);
 		auto const real_target = state.world.overlord_get_ruler(ovr) ? state.world.overlord_get_ruler(ovr) : target;
-		if(real_target) {
-			return ai::can_go_war_with(state, from, real_target, target);
-		}
-		return ai::can_go_war_with(state, from, target, target);
+		return ai::can_go_war_with(state, from, real_target, target);
 	}
 
 	void update_cb_fabrication(sys::state& state) {
@@ -3194,7 +3192,7 @@ namespace ai {
 				// Fine
 			} else {
 				/* Decrease relations until at an amount where we can declare war */
-				for(uint32_t i = 0; i < 8; ++i) {
+				for(uint32_t i = 0; i < 5; ++i) {
 					if(state.world.nation_get_diplomatic_points(n) >= state.defines.decreaserelation_diplomatic_cost) {
 						assert(command::can_decrease_relations(state, n, target));
 						command::execute_decrease_relations(state, n, target);
