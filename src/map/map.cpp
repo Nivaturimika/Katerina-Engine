@@ -2443,14 +2443,14 @@ namespace map {
 					float ty = float(bm_char.y) / float(bm_font.width); /* y offset */
 					float sx = float(bm_char.width) / float(bm_font.width); /* x width */
 					float sy = float(bm_char.height) / float(bm_font.width); /* y height */
-					float rx = float(bm_char.width) / font_size;
-					float ry = float(bm_char.height) / font_size;
-					text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
-					text_line_vertices.emplace_back(p0, glm::vec2(-rx, -ry), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
-					text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
-					text_line_vertices.emplace_back(p0, glm::vec2(rx, -ry), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					float rx = (float(bm_char.width) / font_size) * 2.f;
+					float ry = (float(bm_char.height) / font_size) * 2.f;
+					text_line_vertices.emplace_back(p0, glm::vec2(0.f, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
+					text_line_vertices.emplace_back(p0, glm::vec2(0.f, 0.f), shader_direction, glm::vec2(tx, ty + sy), real_text_size);
+					text_line_vertices.emplace_back(p0, glm::vec2(rx, 0.f), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
+					text_line_vertices.emplace_back(p0, glm::vec2(rx, 0.f), shader_direction, glm::vec2(tx + sx, ty + sy), real_text_size);
 					text_line_vertices.emplace_back(p0, glm::vec2(rx, ry), shader_direction, glm::vec2(tx + sx, ty), real_text_size);
-					text_line_vertices.emplace_back(p0, glm::vec2(-rx, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
+					text_line_vertices.emplace_back(p0, glm::vec2(0.f, ry), shader_direction, glm::vec2(tx, ty), real_text_size);
 					text_line_texture_per_quad.emplace_back(bm_font.ftexid);
 				} else {
 					hb_codepoint_t glyphid = e.text.glyph_info[i].codepoint;
