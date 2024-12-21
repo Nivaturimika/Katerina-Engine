@@ -369,10 +369,10 @@ KatEngine adds a handful of new defines:
 - `alice_needs_scaling_factor`: Scale factor multiplier for all needs
 - `alice_base_rgo_employment_bonus`: Additional rgo size of the main rgo.
 - `alice_base_rgo_efficiency_bonus`: Additional rgo efficiency of the main rgo.
-- `alice_factory_per_level_employment`: Employment per factory level.
-- `alice_domestic_investment_multiplier`: Multiplier of domestic investment.
-- `alice_rgo_boost`: Boost given to RGOs (for example, 1.2 produces 120% more)
-- `alice_inputs_base_factor_artisans`: Artisan input base factor + modifiers.
+- `alice_factory_per_level_employment`: Unused.
+- `alice_domestic_investment_multiplier`: Unused.
+- `alice_rgo_boost`: Unused.
+- `alice_inputs_base_factor_artisans`: Unused.
 - `alice_output_base_factor_artisans`: See above.
 - `alice_inputs_base_factor`: See above, for factories.
 - `alice_rgo_overhire_multiplier`: Overhire multiplier for RGOs.

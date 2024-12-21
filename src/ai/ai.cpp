@@ -34,18 +34,17 @@ namespace ai {
 	constexpr inline float sphere_culture_group_factor = 75.f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
 	constexpr inline float sphere_unreachable_factor = 0.25f;
-	constexpr inline float sphere_uncivilized_factor = 1.f;
+	constexpr inline float sphere_uncivilized_factor = 1.05f;
 	constexpr inline float sphere_same_continent = 1.25f;
 	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.f;
 	constexpr inline float sphere_wargoal_factor = 0.f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 7.5f;
+	constexpr inline float aggression_towards_unciv = 4.5f;
 	constexpr inline float aggression_towards_at_war = 1.1f;
 	constexpr inline float aggression_towards_rival = 5.f;
-	constexpr inline float aggression_towards_adjacent = 1.1f;
+	constexpr inline float aggression_towards_adjacent = 4.5f;
 	constexpr inline float aggression_towards_culture_group = 0.25f;
-	constexpr inline float aggression_factor = 1.f / 10.f;
 
 	float average_army_strength(sys::state& state, dcon::army_id a) {
 		float total = 0.f;
@@ -2853,7 +2852,7 @@ namespace ai {
 	float war_harshness_factor(int32_t war_duration, bool is_great_war) {
 		auto const years = is_great_war ? 1.f : 0.5f;
 		auto const value = 365.f * years - float(war_duration);
-		return 1.f + std::max(0.f, value / (365.f * years));
+		return 1.f + std::max(0.f, value / (365.f * years)) * 5.f;
 	}
 
 	bool would_surrender_evaluate(sys::state& state, dcon::nation_id n, dcon::war_id w) {
@@ -2888,6 +2887,7 @@ namespace ai {
 			}
 
 			assert(score_max >= 0);
+			score_max = std::min(score_max, 100);
 			int32_t current_value = 0;
 			for(auto wg : state.world.war_get_wargoals_attached(w)) {
 				if(current_value < score_max) {
