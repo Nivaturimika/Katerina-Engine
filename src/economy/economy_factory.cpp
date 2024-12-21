@@ -120,22 +120,6 @@ namespace economy_factory {
 		return economy::commodity_set_effective_cost(state, n, state.world.factory_type_get_efficiency_inputs(ft));
 	}
 
-	float factory_full_production_quantity(sys::state const& state, dcon::factory_id fid, dcon::nation_id n, float mobilization_impact) {
-		auto const f = fatten(state.world, fid);
-		auto const ft = f.get_building_type();
-		auto const throughput_multiplier = (state.world.nation_get_factory_goods_throughput(n, ft.get_output()) + 1.0f);
-		auto const output_multiplier = 1.0f
-			+ state.world.nation_get_factory_goods_output(n, ft.get_output())
-			+ f.get_secondary_employment()
-			* (1.0f - state.economy_definitions.craftsmen_fraction)
-			* 1.5f
-			* 2.f; // additional multiplier to give advantage to "old industrial giants" which have a bunch of clerks already
-		auto const max_production_scale = f.get_primary_employment()
-			* f.get_level()
-			* std::max(0.0f, (mobilization_impact - state.world.nation_get_overseas_penalty(n)));
-		return throughput_multiplier * output_multiplier * max_production_scale;
-	}
-
 	/* - Then, for input/output/throughput we sum up national and provincial modifiers to general factory
 		input/output/throughput are added, plus technology modifiers to its specific output commodity, add
 		one to the sum, and then multiply the input/output/throughput modifier from the workforce by it. */
@@ -599,6 +583,7 @@ namespace economy_factory {
 		auto const throughput_multiplier = std::max(0.f, factory_throughput_multiplier(state, ft, n, p, sid) + state.world.factory_get_triggered_modifiers(f));
 		auto const output_multiplier = std::max(0.f, factory_output_multiplier(state, f, n, p));
 		return state.world.factory_type_get_output_amount(ft)
+			* float(state.world.factory_get_level(f))
 			* (0.75f + 0.25f * min_efficiency_input_available)
 			* throughput_multiplier
 			* output_multiplier
