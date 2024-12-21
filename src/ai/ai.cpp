@@ -2651,6 +2651,11 @@ namespace ai {
 		if((is_attacker && military::attackers_have_status_quo_wargoal(state, w))
 		|| (!is_attacker && military::defenders_have_status_quo_wargoal(state, w)))
 			return;
+		/* Must be independent to add wargoals */
+		auto const ovr = state.world.nation_get_overlord_as_subject(n);
+		if(state.world.overlord_get_ruler(ovr))
+			return;
+
 		auto role = military::get_role(state, w, n);
 		bool added = false;
 		bool is_gw = state.world.war_get_is_great(w);
