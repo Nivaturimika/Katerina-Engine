@@ -2112,15 +2112,22 @@ namespace ai {
 		static std::vector<dcon::cb_type_id> possibilities;
 		possibilities.clear();
 
+		/* Wanted PO bits */
+		auto po_bits = (military::cb_flag::po_demand_state | military::cb_flag::po_annex);
+		if(nations::is_great_power(state, target) && nations::is_great_power(state, from)) {
+			po_bits |= military::cb_flag::po_disarmament;
+		}
+
 		for(auto c : state.world.in_cb_type) {
 			auto bits = state.world.cb_type_get_type_bits(c);
 			if((bits & (military::cb_flag::always | military::cb_flag::is_not_constructing_cb)) != 0)
 				continue;
-			if((bits & (military::cb_flag::po_demand_state | military::cb_flag::po_annex)) == 0)
+			if((bits & po_bits) == 0)
 				continue;
 			// Uncivilized nations are more aggressive to westernize faster
-			float infamy_limit = state.world.nation_get_is_civilized(from) ? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
-			if(state.world.nation_get_infamy(from) + military::cb_infamy(state, c) > infamy_limit)
+			auto const infamy_limit = state.world.nation_get_is_civilized(from)
+				? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
+			if(state.world.nation_get_infamy(from) + military::cb_infamy(state, c) >= infamy_limit)
 				continue;
 			if(!military::cb_conditions_satisfied(state, from, target, c))
 				continue;
@@ -2216,9 +2223,10 @@ namespace ai {
 			|| n.get_diplomatic_points() < state.defines.make_cb_diplomatic_cost
 			|| n.get_military_score() == 0)
 				continue;
-			// Uncivilized nations are more aggressive to westernize faster
-			auto const infamy_limit = (state.world.nation_get_is_civilized(n) ? 0.75f : 1.f)
-				* state.defines.badboy_limit;
+			if(auto ll = n.get_last_war_loss(); ll && state.current_date <= (ll + 365 * 5))
+				continue;
+			auto const infamy_limit = state.world.nation_get_is_civilized(n)
+				? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
 			if(n.get_infamy() >= infamy_limit)
 				continue;
 			/* Compile weights of most desirable nation */
@@ -2231,7 +2239,7 @@ namespace ai {
 				if(ai::valid_construction_target(state, n, i)) {
 					auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
 					if(weight > best_weight) {
-						auto const cb = pick_fabrication_type(state, n, i);
+						auto const cb = ai::pick_fabrication_type(state, n, i);
 						if(cb) {
 							best_cb = cb;
 							best_weight = weight;
@@ -3220,6 +3228,8 @@ namespace ai {
 		if(state.world.nation_get_is_at_war(n)
 		|| state.world.nation_get_military_score(n) == 0
 		|| state.world.nation_get_diplomatic_points(n) < state.defines.declarewar_diplomatic_cost)
+			return false;
+		if(auto ll = state.world.nation_get_last_war_loss(n); ll && state.current_date <= (ll + 365 * 5))
 			return false;
 		if(auto ol = state.world.nation_get_overlord_as_subject(n); state.world.overlord_get_ruler(ol))
 			return false;
