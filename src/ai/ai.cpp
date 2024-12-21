@@ -32,7 +32,7 @@ namespace ai {
 	constexpr inline float sphere_already_in_our_sphere_factor = 0.5f;
 	constexpr inline float sphere_primary_culture_factor = 100.f;
 	constexpr inline float sphere_culture_group_factor = 75.f;
-	constexpr inline float sphere_wargoal_factor = 100.f;
+	constexpr inline float sphere_wargoal_factor = 50.f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
 	constexpr inline float sphere_unreachable_factor = 0.25f;
 	constexpr inline float sphere_uncivilized_factor = 1.f;
@@ -519,14 +519,13 @@ namespace ai {
 		@param n Nation (spherelord)
 		@param t Target to test for
 		@return If the target is viable to go to war with */
-	bool can_war_with_target_in_sphere(sys::state& state, dcon::nation_id n, dcon::nation_id t) {
+	bool target_in_sphere_potential_war_target(sys::state& state, dcon::nation_id n, dcon::nation_id t) {
 		if((state.world.nation_get_infamy(n) + state.defines.removefromsphere_infamy_cost) >= state.defines.badboy_limit) {
 			return false; //do not go over infamy limit
 		}
 		if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n); rel) {
-			return state.world.nation_get_in_sphere_of(t) == n
-				&& state.defines.removefromsphere_influence_cost <= state.world.gp_relationship_get_influence(rel)
-				&& military::can_use_cb_against(state, n, t);
+			assert(state.world.nation_get_in_sphere_of(t) == n);
+			return military::can_use_cb_against(state, n, t);
 		}
 		return false;
 	}
@@ -552,6 +551,8 @@ namespace ai {
 		for(auto& n : state.great_nations) {
 			if(state.world.nation_get_is_player_controlled(n.nation))
 				continue;
+
+			auto const base_strength = estimate_strength(state, n.nation);
 
 			static std::vector<weighted_nation, dcon::cache_aligned_allocator<weighted_nation>> targets;
 			targets.clear();
@@ -583,7 +584,8 @@ namespace ai {
 				auto const t_pc = t.get_primary_culture();
 				auto const t_cg = t.get_primary_culture().get_group_from_culture_group_membership();
 				if(t.get_in_sphere_of() == n.nation) {
-					if(ai::can_war_with_target_in_sphere(state, n.nation, t)) {
+					if(ai::target_in_sphere_potential_war_target(state, n.nation, t)
+					&& ai::war_weight_potential_target(state, n.nation, t, base_strength) > 0.f) {
 						//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
 						weight *= sphere_wargoal_factor;
 					} else {
@@ -704,9 +706,9 @@ namespace ai {
 					continue; // already in sphere
 				}
 				//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
-				if(ai::can_war_with_target_in_sphere(state, gprl.get_great_power(), gprl.get_influence_target())
-				&& state.defines.removefromsphere_influence_cost <= gprl.get_influence()
-				&& current_sphere == gprl.get_great_power()) {
+				if(state.defines.removefromsphere_influence_cost <= gprl.get_influence()
+				&& current_sphere == gprl.get_great_power()
+				&& ai::target_in_sphere_potential_war_target(state, gprl.get_great_power(), gprl.get_influence_target())) {
 					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
 					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
 				} else if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
