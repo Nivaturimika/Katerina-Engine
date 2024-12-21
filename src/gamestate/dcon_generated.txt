@@ -558,6 +558,11 @@ object {
 		type{ value_modifier_key }
 		tag{ scenario }
 	}
+	property{
+		name{ max_level }
+		type{ uint8_t }
+		tag{ scenario }
+	}
 }
 
 object {

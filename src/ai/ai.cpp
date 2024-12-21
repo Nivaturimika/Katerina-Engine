@@ -1191,23 +1191,24 @@ namespace ai {
 						for(auto f : state.world.province_get_factory_location(p)) {
 							if(max_projects <= 0)
 								break;
+							auto const ft = f.get_factory().get_building_type();
 							if(f.get_factory().get_primary_employment() >= 0.75f
-							&& f.get_factory().get_level() < uint8_t(255)
-							&& ai::is_factory_type_active(state, n, f.get_factory().get_building_type())) {
+							&& f.get_factory().get_level() <= ft.get_max_level()
+							&& ai::is_factory_type_active(state, n, ft)) {
 								// test if factory is already upgrading
 								auto ug_in_progress = false;
 								for(auto c : state.world.state_instance_get_state_building_construction(si)) {
-									if(c.get_type() == f.get_factory().get_building_type()) {
+									if(c.get_type() == ft) {
 										ug_in_progress = true;
 										break;
 									}
 								}
 								if(!ug_in_progress) {
 									auto new_up = fatten(state.world, state.world.force_create_state_building_construction(si, n));
-									new_up.set_remaining_construction_time(f.get_factory().get_building_type().get_construction_time());
+									new_up.set_remaining_construction_time(ft.get_construction_time());
 									new_up.set_is_pop_project(false);
 									new_up.set_is_upgrade(true);
-									new_up.set_type(f.get_factory().get_building_type());
+									new_up.set_type(ft);
 									--max_projects;
 								}
 							}

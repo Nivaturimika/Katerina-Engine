@@ -43,6 +43,7 @@ namespace parsers {
 			context.state.world.factory_type_set_description(factory_id, desc_id);
 			context.state.world.factory_type_set_construction_time(factory_id, int16_t(res.time));
 			context.state.world.factory_type_set_is_available_from_start(factory_id, res.default_enabled);
+			context.state.world.factory_type_set_max_level(factory_id, res.max_level);
 			/*for(uint32_t i = context.state.world.commodity_size(); i-- > 0; ) {
 				dcon::commodity_id cid = dcon::commodity_id(dcon::commodity_id::value_base_t(i));
 				context.state.world.factory_type_set_construction_costs(factory_id, cid, res.goods_cost.data[cid]);

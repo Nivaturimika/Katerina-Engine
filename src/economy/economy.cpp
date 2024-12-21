@@ -1339,7 +1339,7 @@ namespace economy {
 							for(auto f : fl_range) {
 								if((f.get_factory().get_production_scale() >= 0.85f
 								|| f.get_factory().get_primary_employment() >= 0.85f)
-								&& f.get_factory().get_level() < uint8_t(255)) {
+								&& f.get_factory().get_level() <= f.get_factory().get_building_type().get_max_level()) {
 									auto type = f.get_factory().get_building_type();
 									auto ug_in_progress = false;
 									for(auto c : state.world.state_instance_get_state_building_construction(s)) {
