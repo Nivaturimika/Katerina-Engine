@@ -1006,7 +1006,9 @@ namespace ui {
 		} else if(name == "budget_funds") {
 			return make_element_by_type<topbar_treasury_text>(state, id);
 		} else if(name == "topbar_tech_progress") {
-			return make_element_by_type<nation_technology_research_progress>(state, id);
+			auto ptr = make_element_by_type<nation_technology_research_progress>(state, id);
+			ptr->base_data.position.y -= 1;
+			return ptr;
 		} else if(name == "tech_current_research") {
 			return make_element_by_type<nation_current_research_text>(state, id);
 		} else if(name == "topbar_researchpoints_value") {
