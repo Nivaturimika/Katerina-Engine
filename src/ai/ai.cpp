@@ -141,13 +141,11 @@ namespace ai {
 	}
 
 	float war_weight_potential_target(sys::state& state, dcon::nation_id n, dcon::nation_id target, float base_strength) {
-		auto const aggression_factor = state.defines.aggression_base * 0.15f;
-		
 		auto const our_str = base_strength + estimate_additional_offensive_strength(state, n, target);
 		auto const their_str = estimate_defensive_strength(state, target)
 			- (nations::are_allied(state, target, n) ? base_strength : 0.f);
 		
-		auto weight = (our_str * aggression_factor) - their_str;
+		auto weight = our_str - their_str;
 		if(!state.world.nation_get_is_civilized(target)) {
 			weight = our_str - (their_str * 0.25f);
 			weight *= aggression_towards_unciv;
@@ -2231,6 +2229,10 @@ namespace ai {
 			auto const infamy_limit = state.world.nation_get_is_civilized(n)
 				? state.defines.badboy_limit * 0.5f : state.defines.badboy_limit;
 			if(n.get_infamy() >= infamy_limit)
+				continue;
+			/* Aggression base, in the base game its 5, so a 5% chance per each evaluation */
+			auto chance = rng::get_random_float(state, uint32_t(n.id.index()));
+			if(chance * 100.f <= state.defines.aggression_base)
 				continue;
 			/* Compile weights of most desirable nation */
 			auto const base_strength = estimate_strength(state, n);
