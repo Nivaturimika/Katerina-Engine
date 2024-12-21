@@ -2850,9 +2850,9 @@ namespace ai {
 		return value / (365.f * years);
 	}
 	float war_harshness_factor(int32_t war_duration, bool is_great_war) {
-		auto const years = is_great_war ? 1.f : 0.5f;
-		auto const value = 365.f * years - float(war_duration);
-		return 1.f + std::max(0.f, value / (365.f * years)) * 5.f;
+		auto const years = is_great_war ? 8.f : 2.f;
+		auto const value = float(war_duration) - 365.f * years;
+		return 1.f + std::max(0.f, value / (365.f * years)) * 4.f;
 	}
 
 	bool would_surrender_evaluate(sys::state& state, dcon::nation_id n, dcon::war_id w) {
