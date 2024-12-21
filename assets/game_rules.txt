@@ -146,6 +146,7 @@ action = {
 		FROM = { is_greater_power = yes }
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+		diplomatic_influence = { who = THIS value > defines:DISCREDIT_INFLUENCE_COST }
 	}
 	effect = {
 		relation = { who = THIS value = defines:DISCREDIT_RELATION_ON_ACCEPT }
@@ -163,6 +164,7 @@ action = {
 		FROM = { is_greater_power = yes }
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+		diplomatic_influence = { who = THIS value > defines:EXPELADVISORS_INFLUENCE_COST }
 	}
 	effect = {
 		relation = { who = THIS value = defines:EXPELADVISORS_RELATION_ON_ACCEPT }
@@ -180,6 +182,7 @@ action = {
 		FROM = { is_greater_power = yes }
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+		diplomatic_influence = { who = THIS value > defines:BANEMBASSY_INFLUENCE_COST }
 	}
 	effect = {
 		relation = { who = THIS value = defines:BANEMBASSY_RELATION_ON_ACCEPT }
@@ -195,8 +198,8 @@ action = {
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
 		NOT = { is_sphere_leader_of = THIS }
-		diplomatic_influence = { who = THIS value > defines:INCREASEOPINION_INFLUENCE_COST }
 		NOT = { is_banned_from = THIS }
+		diplomatic_influence = { who = THIS value > defines:INCREASEOPINION_INFLUENCE_COST }
 	}
 	effect = {
 		relation = { who = THIS value = defines:INCREASEOPINION_RELATION_ON_ACCEPT }
@@ -214,6 +217,7 @@ action = {
 		FROM = { is_greater_power = yes }
 		THIS = { is_greater_power = no }
 		NOT = { war_with = THIS }
+		diplomatic_influence = { who = THIS value > defines:DECREASEOPINION_INFLUENCE_COST }
 	}
 	effect = {
 		relation = { who = THIS value = defines:DECREASEOPINION_RELATION_ON_ACCEPT }

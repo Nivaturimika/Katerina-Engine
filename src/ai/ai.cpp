@@ -584,13 +584,7 @@ namespace ai {
 				auto const t_pc = t.get_primary_culture();
 				auto const t_cg = t.get_primary_culture().get_group_from_culture_group_membership();
 				if(t.get_in_sphere_of() == n.nation) {
-					if(ai::target_in_sphere_potential_war_target(state, n.nation, t)
-					&& ai::war_weight_potential_target(state, n.nation, t, base_strength) > 0.f) {
-						//Focus on gaining influence against nations we have active wargoals against so we can remove their protector, even if it's us
-						weight *= sphere_wargoal_factor;
-					} else {
-						weight *= sphere_already_in_our_sphere_factor;
-					}
+					weight *= sphere_already_in_our_sphere_factor;
 				} else {
 					auto const our_rank = state.world.nation_get_rank(n.nation);
 					bool cg_leader_influencing = false;
@@ -706,8 +700,7 @@ namespace ai {
 					continue; // already in sphere
 				}
 				//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
-				if(state.defines.removefromsphere_influence_cost <= gprl.get_influence()
-				&& current_sphere == gprl.get_great_power()
+				if(current_sphere == gprl.get_great_power()
 				&& ai::target_in_sphere_potential_war_target(state, gprl.get_great_power(), gprl.get_influence_target())) {
 					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
 					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
