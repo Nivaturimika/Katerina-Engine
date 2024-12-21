@@ -6,6 +6,7 @@
 #include "pdqsort.h"
 #include "ai.hpp"
 #include "ai_templates.hpp"
+#include "prng.hpp"
 
 namespace ai {
 	float estimate_strength(sys::state& state, dcon::nation_id n);
@@ -77,31 +78,28 @@ namespace ui {
 			text::add_to_layout_box(state, contents, box, state.world.nation_get_ai_rival(owner));
 			text::add_line_break_to_layout_box(state, contents, box);
 
-			dcon::nation_id best_target{};
-			dcon::cb_type_id best_cb{};
-			auto best_weight = 0.f;
+			static std::vector<dcon::nation_id> possible_targets;
+			possible_targets.clear();
 			for(auto i : state.world.in_nation) {
 				if(ai::valid_construction_target(state, n, i)) {
 					auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
-					if(weight > best_weight) {
-						auto const cb = ai::pick_fabrication_type(state, n, i);
-						if(cb) {
-							best_cb = cb;
-							best_weight = weight;
-							best_target = i;
-						}
+					if(weight > 0.f) {
+						possible_targets.push_back(i.id); 
 					}
 				}
 			}
-			text::localised_format_box(state, contents, box, "ai_fabrication_sim", text::substitution_map{});
-			text::add_to_layout_box(state, contents, box, std::string_view(":"));
-			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, best_target, text::text_color::red);
-			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, state.world.cb_type_get_name(best_cb), text::text_color::green);
-			text::add_space_to_layout_box(state, contents, box);
-			text::add_to_layout_box(state, contents, box, text::fp_four_places{ best_weight }, text::text_color::light_grey);
-			text::add_line_break_to_layout_box(state, contents, box);
+			if(!possible_targets.empty()) {
+				auto t = possible_targets[rng::reduce(uint32_t(rng::get_random(state, uint32_t(n.index())) >> 2), uint32_t(possible_targets.size()))];
+				if(auto cb = ai::pick_fabrication_type(state, n, t); cb) {
+					text::localised_format_box(state, contents, box, "ai_fabrication_sim", text::substitution_map{});
+					text::add_to_layout_box(state, contents, box, std::string_view(":"));
+					text::add_space_to_layout_box(state, contents, box);
+					text::add_to_layout_box(state, contents, box, possible_targets[0], text::text_color::red);
+					text::add_space_to_layout_box(state, contents, box);
+					text::add_to_layout_box(state, contents, box, state.world.cb_type_get_name(cb), text::text_color::green);
+					text::add_line_break_to_layout_box(state, contents, box);		
+				}
+			}
 
 			text::localised_format_box(state, contents, box, "ai_strength_weights", text::substitution_map{});
 			text::add_to_layout_box(state, contents, box, std::string_view(":"));

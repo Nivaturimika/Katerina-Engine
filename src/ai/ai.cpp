@@ -40,11 +40,11 @@ namespace ai {
 	constexpr inline float sphere_wargoal_factor = 0.f;
 
 	/* Aggression multiplier towards uncivilized nations */
-	constexpr inline float aggression_towards_unciv = 10.f;
+	constexpr inline float aggression_towards_unciv = 7.5f;
 	constexpr inline float aggression_towards_at_war = 1.1f;
-	constexpr inline float aggression_towards_rival = 10.f;
-	constexpr inline float aggression_towards_adjacent = 1.25f;
-	constexpr inline float aggression_towards_culture_group = 0.5f;
+	constexpr inline float aggression_towards_rival = 5.f;
+	constexpr inline float aggression_towards_adjacent = 1.1f;
+	constexpr inline float aggression_towards_culture_group = 0.25f;
 	constexpr inline float aggression_factor = 1.f / 10.f;
 
 	float average_army_strength(sys::state& state, dcon::army_id a) {
@@ -399,7 +399,7 @@ namespace ai {
 			return false;
 
 		// Has not surpassed infamy limit
-		if(state.world.nation_get_infamy(target) >= state.defines.badboy_limit * 0.75f)
+		if(state.world.nation_get_infamy(target) >= state.defines.badboy_limit)
 			return false;
 
 		// Won't ally our rivals
@@ -2126,7 +2126,7 @@ namespace ai {
 				continue;
 			// Uncivilized nations are more aggressive to westernize faster
 			auto const infamy_limit = state.world.nation_get_is_civilized(from)
-				? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
+				? state.defines.badboy_limit * 0.5f : state.defines.badboy_limit;
 			if(state.world.nation_get_infamy(from) + military::cb_infamy(state, c) >= infamy_limit)
 				continue;
 			if(!military::cb_conditions_satisfied(state, from, target, c))
@@ -2226,32 +2226,27 @@ namespace ai {
 			if(auto ll = n.get_last_war_loss(); ll && state.current_date <= (ll + 365 * 5))
 				continue;
 			auto const infamy_limit = state.world.nation_get_is_civilized(n)
-				? state.defines.badboy_limit * 0.75f : state.defines.badboy_limit;
+				? state.defines.badboy_limit * 0.5f : state.defines.badboy_limit;
 			if(n.get_infamy() >= infamy_limit)
 				continue;
 			/* Compile weights of most desirable nation */
 			auto const base_strength = estimate_strength(state, n);
-			
-			dcon::nation_id best_target{};
-			dcon::cb_type_id best_cb{};
-			auto best_weight = 0.f;
+			static std::vector<dcon::nation_id> possible_targets;
+			possible_targets.clear();
 			for(auto i : state.world.in_nation) {
 				if(ai::valid_construction_target(state, n, i)) {
 					auto const weight = ai::war_weight_potential_target(state, n, i, base_strength);
-					if(weight > best_weight) {
-						auto const cb = ai::pick_fabrication_type(state, n, i);
-						if(cb) {
-							best_cb = cb;
-							best_weight = weight;
-							best_target = i;
-						}
+					if(weight > 0.f) {
+						possible_targets.push_back(i.id); 
 					}
 				}
 			}
-			/* Go over all of them and find best suited from randomly generated seed */
-			if(best_target && best_cb) {
-				assert(command::can_fabricate_cb(state, n, best_target, best_cb));
-				command::execute_fabricate_cb(state, n, best_target, best_cb);
+			if(!possible_targets.empty()) {
+				auto t = possible_targets[rng::reduce(uint32_t(rng::get_random(state, uint32_t(n.id.index())) >> 2), uint32_t(possible_targets.size()))];
+				if(auto cb = ai::pick_fabrication_type(state, n, t); cb) {
+					n.set_constructing_cb_target(t);
+					n.set_constructing_cb_type(cb);
+				}
 			}
 		}
 	}
@@ -2695,11 +2690,10 @@ namespace ai {
 				continue;
 			if((bits & (military::cb_flag::po_demand_state | military::cb_flag::po_annex)) == 0)
 				continue;
-			if(military::cb_infamy(state, c) * state.defines.gw_justify_cb_badboy_impact > free_infamy)
+			if(military::cb_infamy(state, c) * state.defines.gw_justify_cb_badboy_impact >= free_infamy)
 				continue;
 			if(!military::cb_conditions_satisfied(state, from, target, c))
 				continue;
-
 			possibilities.push_back(c);
 		}
 
