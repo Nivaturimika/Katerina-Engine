@@ -397,7 +397,7 @@ namespace sys {
 								}
 							}
 						}
-						return total > 0.f ? 100.0f * occupied / total : 0.f;
+						return total > 0.f ? * occupied / total : 0.f;
 					},
 					ids);
 			});
