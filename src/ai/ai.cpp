@@ -32,12 +32,12 @@ namespace ai {
 	constexpr inline float sphere_already_in_our_sphere_factor = 0.5f;
 	constexpr inline float sphere_primary_culture_factor = 100.f;
 	constexpr inline float sphere_culture_group_factor = 75.f;
-	constexpr inline float sphere_wargoal_factor = 50.f;
 	constexpr inline float sphere_neighbor_factor = 1.5f;
 	constexpr inline float sphere_unreachable_factor = 0.25f;
 	constexpr inline float sphere_uncivilized_factor = 1.f;
 	constexpr inline float sphere_same_continent = 1.25f;
-	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.1f;
+	constexpr inline float sphere_avoid_distracting_cultural_leader = 0.f;
+	constexpr inline float sphere_wargoal_factor = 0.f;
 
 	/* Aggression multiplier towards uncivilized nations */
 	constexpr inline float aggression_towards_unciv = 15.f;
@@ -79,9 +79,17 @@ namespace ai {
 		return v;
 	}
 
-	/* Return self strength, without counting overlords OR puppets */
+	/*	Return self strength, without counting overlords OR puppets
+		The evaluated strength is military-score x total-army-techs */
 	float estimate_strength_self(sys::state& state, dcon::nation_id n) {
-		return state.world.nation_get_military_score(n);
+		auto tech_factor = 1.f;
+		for(const auto t : state.world.in_technology) {
+			if(state.world.nation_get_active_technologies(n, t)
+			&& state.culture_definitions.tech_folders[t.get_folder_index()].category == culture::tech_category::army_techs) {
+				tech_factor += 1.f;
+			}
+		}
+		return state.world.nation_get_military_score(n) * tech_factor;
 	}
 
 	/*	Estimates the strenght of a given nation - puppets count their overlord in the final calculation
@@ -99,12 +107,20 @@ namespace ai {
 	}
 
 	float estimate_defensive_strength(sys::state& state, dcon::nation_id n) {
+		auto const cap = state.world.nation_get_capital(n);
+		auto const continent = state.world.province_get_continent(cap);
+
 		auto value = estimate_strength(state, n);
 		for(auto dr : state.world.nation_get_diplomatic_relation(n)) {
 			if(dr.get_are_allied()) {
 				auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
 				if(other.get_overlord_as_subject().get_ruler() != n) {
-					value += estimate_strength(state, other);
+					auto const ally_str = estimate_strength(state, other);
+					if(other.get_capital().get_continent() == continent) {
+						value += ally_str;
+					} else {
+						value += ally_str * 0.25f;
+					}
 				}
 			}
 		}
@@ -119,7 +135,8 @@ namespace ai {
 				if(other.get_overlord_as_subject().get_ruler() != n
 				&& !military::has_truce_with(state, other, target)
 				&& military::can_use_cb_against(state, other, target)) {
-					value += estimate_strength(state, other);
+					auto const ally_str = estimate_strength(state, other);
+					value += ally_str;
 				}
 			}
 		}
@@ -282,7 +299,8 @@ namespace ai {
 					auto const in_sphere_of = state.world.nation_get_in_sphere_of(n);
 					for(auto b : state.world.nation_get_nation_adjacency_as_connected_nations(n)) {
 						auto other = b.get_connected_nations(0) != n ? b.get_connected_nations(0) : b.get_connected_nations(1);
-						if(!nations::are_allied(state, n, other) && (!in_sphere_of || in_sphere_of != other.get_in_sphere_of())) {
+						if(!nations::are_allied(state, n, other)
+						&& (!in_sphere_of || in_sphere_of != n || in_sphere_of != other.get_in_sphere_of())) {
 							greatest_neighbor = std::max(greatest_neighbor, estimate_strength(state, other));
 						}
 					}
@@ -293,26 +311,28 @@ namespace ai {
 						if(dr.get_are_allied()) {
 							auto other = dr.get_related_nations(0) != n ? dr.get_related_nations(0) : dr.get_related_nations(1);
 							if(n.get_in_sphere_of() != other
-							&& other.get_in_sphere_of() != n
-							&& !military::are_allied_in_war(state, n, other)) {
+							&& other.get_in_sphere_of() != n) {
 								prune_targets.push_back(other);
 							}
 						}
 					}
 					if(prune_targets.size() > 0) {
 						pdqsort(prune_targets.begin(), prune_targets.end(), [&](dcon::nation_id a, dcon::nation_id b) {
-							auto a_str = estimate_strength(state, a);
-							auto b_str = estimate_strength(state, b);
+							auto const a_cores = nations::has_core_in_nation(state, n.get_identity_from_identity_holder(), a);
+							auto const b_cores = nations::has_core_in_nation(state, n.get_identity_from_identity_holder(), a);
+							if(a_cores != b_cores)
+								return a_cores > b_cores;
+							auto const a_str = estimate_strength(state, a);
+							auto const b_str = estimate_strength(state, b);
 							if(a_str != b_str)
 								return a_str > b_str;
 							return a.index() > b.index();
 						});
 						auto const weakest_str = estimate_strength(state, prune_targets[0]);
-						if(weakest_str * 1.25 < safety_margin
+						if(weakest_str < safety_margin
 						|| state.world.nation_get_infamy(prune_targets[0]) >= state.defines.badboy_limit) {
 							assert(command::can_cancel_alliance(state, n, prune_targets[0]));
 							command::execute_cancel_alliance(state, n, prune_targets[0]);
-							break;
 						}
 					}
 				}
@@ -523,11 +543,9 @@ namespace ai {
 		if((state.world.nation_get_infamy(n) + state.defines.removefromsphere_infamy_cost) >= state.defines.badboy_limit) {
 			return false; //do not go over infamy limit
 		}
-		if(auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n); rel) {
-			assert(state.world.nation_get_in_sphere_of(t) == n);
-			return military::can_use_cb_against(state, n, t);
-		}
-		return false;
+		auto rel = state.world.get_gp_relationship_by_gp_influence_pair(t, n);
+		assert(state.world.nation_get_in_sphere_of(t) == n);
+		return rel && military::can_use_cb_against(state, n, t);
 	}
 
 	void update_influence_priorities(sys::state& state) {
@@ -551,8 +569,6 @@ namespace ai {
 		for(auto& n : state.great_nations) {
 			if(state.world.nation_get_is_player_controlled(n.nation))
 				continue;
-
-			auto const base_strength = estimate_strength(state, n.nation);
 
 			static std::vector<weighted_nation, dcon::cache_aligned_allocator<weighted_nation>> targets;
 			targets.clear();
@@ -637,8 +653,13 @@ namespace ai {
 							weight *= sphere_unreachable_factor;
 						}
 					}
+					if(military::can_use_cb_against(state, n.nation, t)) {
+						weight *= sphere_wargoal_factor;
+					}
 				}
-				targets.push_back(weighted_nation{ t.id, weight });
+				if(weight > 0.f) {
+					targets.push_back(weighted_nation{ t.id, weight });
+				}
 			}
 
 			pdqsort(targets.begin(), targets.end(), [](weighted_nation const& a, weighted_nation const& b) {
@@ -684,6 +705,13 @@ namespace ai {
 				auto current_sphere = gprl.get_influence_target().get_in_sphere_of();
 				auto clevel = (nations::influence::level_mask & gprl.get_status());
 				if(clevel == nations::influence::level_in_sphere) {
+					//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
+					if(current_sphere == gprl.get_great_power()
+					&& ai::target_in_sphere_potential_war_target(state, gprl.get_great_power(), gprl.get_influence_target())) {
+						assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_great_power()));
+						command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_great_power());
+						continue; // already in sphere, but now removed :)
+					}
 					// annoy the shit out of other gps that are messing with our spheres
 					// so prussia wants to fucking murder austria
 					for(auto other_gprl : gprl.get_influence_target().get_gp_relationship_as_influence_target()) {
@@ -699,12 +727,7 @@ namespace ai {
 					}
 					continue; // already in sphere
 				}
-				//De-sphere countries we have wargoals against, desphering countries need to check for going over infamy
-				if(current_sphere == gprl.get_great_power()
-				&& ai::target_in_sphere_potential_war_target(state, gprl.get_great_power(), gprl.get_influence_target())) {
-					assert(command::can_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of()));
-					command::execute_remove_from_sphere(state, gprl.get_great_power(), gprl.get_influence_target(), gprl.get_influence_target().get_in_sphere_of());
-				} else if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
+				if(state.defines.increaseopinion_influence_cost <= gprl.get_influence() && clevel != nations::influence::level_friendly) {
 					assert(command::can_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target()));
 					command::execute_increase_opinion(state, gprl.get_great_power(), gprl.get_influence_target());
 				} else if(state.defines.removefromsphere_influence_cost <= gprl.get_influence() && current_sphere && current_sphere != gprl.get_great_power() && clevel == nations::influence::level_friendly) { // condition taken care of by check above
