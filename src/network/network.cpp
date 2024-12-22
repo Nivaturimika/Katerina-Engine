@@ -498,7 +498,7 @@ namespace network {
 							std::string msg = "Could not find a scenario with a matching checksum!\n"
 								"Just ask the host for their scenario file and it should work.\n"
 								"Host should give you the scenario from:\n"
-								"'My Documents\\Katerina Engine\\scenarios\\<Most recent scenario>'"
+								"'My Documents\\Kat's PA Engine\\scenarios\\<Most recent scenario>'"
 								"And you place it on that same directory as well.\n";
 							window::emit_error_message(msg.c_str(), true);
 						}

@@ -40,7 +40,7 @@ static void minidump_generate(HANDLE hProcess) {
 	wchar_t* local_path_out = nullptr;
 	std::wstring base_path;
 	if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-		base_path = std::wstring(local_path_out) + L"\\Katerina Engine";
+		base_path = std::wstring(local_path_out) + L"\\Kat's PA Engine";
 	}
 	CoTaskMemFree(local_path_out);
 	if(!base_path.empty()) {

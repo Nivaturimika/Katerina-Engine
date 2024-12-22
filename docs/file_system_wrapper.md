@@ -66,10 +66,10 @@ This represents an open file that has its contents loaded into memory (on Window
 
 There are currently three special directory functions, which are mainly intended to locate the right place to save various kinds of information.
 
-- `directory get_or_create_save_game_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Katerina Engine\saved games`. This is where we will be saving games.
-- `directory get_or_create_scenario_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Katerina Engine\scenarios`. This is where we will be storing the scenarios we create by bundling the data from a particular collection of mods and base files together.
-- `directory get_or_create_oos_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Katerina Engine\oos`. This is where we will be adding OOS dumps.
-- `directory get_or_create_settings_directory()` -- On Windows this opens (creating if necessary) a folder in the user's local application settings directory named `Katerina Engine`. We will store global program settings here. **Do not** write large files to this directory. In particular, **do not** write logs here. If we need a place for logs, I will create a new special directory function for them.
+- `directory get_or_create_save_game_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Kat's PA Engine\saved games`. This is where we will be saving games.
+- `directory get_or_create_scenario_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Kat's PA Engine\scenarios`. This is where we will be storing the scenarios we create by bundling the data from a particular collection of mods and base files together.
+- `directory get_or_create_oos_directory()` -- On Windows this opens (creating if necessary) a folder in the user's documents folder named `Kat's PA Engine\oos`. This is where we will be adding OOS dumps.
+- `directory get_or_create_settings_directory()` -- On Windows this opens (creating if necessary) a folder in the user's local application settings directory named `Kat's PA Engine`. We will store global program settings here. **Do not** write large files to this directory. In particular, **do not** write logs here. If we need a place for logs, I will create a new special directory function for them.
 
 ### Encoding conversion functions
 

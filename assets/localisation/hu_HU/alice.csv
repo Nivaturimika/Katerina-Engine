@@ -106,7 +106,7 @@ add_cb_reversed_months;$text$ $name$ casus belli-t kap a $date$-ig hatályos nem
 add_cb_reversed_no_months;$text$ $name$ casus belli-t kap a nemzet ellen
 remove_cb_reversed;Elveszít minden $name$ casus bellist a $text$ ellen
 remove_cb;$text$ elveszít minden $name$ casus bellist a nemzettel szemben
-set_national_variable_to;Állítsa be a $text$ nemzeti változót $value$ értékre
+set_national_variable_to;Ýllítsa be a $text$ nemzeti változót $value$ értékre
 event_fires;A(z) $text$ esemény aktiválódik
 event_fires_in_days;A $text$ esemény $value$ napon belül aktiválódik
 railroad_in_capital;?G+1?! vasúti szint a fővárosban
@@ -697,13 +697,13 @@ military_score_explain_2;Toborozható ezredek: $x$
 military_score_explain_3;Aktív ezredek: $x$
 military_score_explain_4;Lefegyverzett? ($x$ büntetési tényező)
 military_score_explain_5;Ellátási fogyasztás módosító: $x$
-military_score_explain_6;Átlagos földegység pontszám: $x $
+military_score_explain_6;Ýtlagos földegység pontszám: $x $
 military_score_explain_7;Vezetők száma összesen: $x$
 industry_score_explain_2;A következő külföldi befektetések is összeadódnak ($x$ súlytényező):
 industry_score_explain_3;$y$ $x$-ban
 war_goal_1;Hozzáadta: $x$
 war_goal_2;Célzás: $x$
-war_goal_3;Államhoz: $x$
+war_goal_3;Ýllamhoz: $x$
 war_goal_4;Másodlagos nemzet: $x$
 war_goal_5;Háborús pontszám: $x$
 war_goal_6;Ha elfoglaljuk ?Y$x$?! a tartományok közül ?Y$y$?! ketyegő háborús pontszám (a megszállt tartományok hányadához viszonyítva)
@@ -736,14 +736,14 @@ dec_op_explain_3;A célpont véleménye rólad jobb, mint ellenséges
 dec_op_explain_4;A célpont véleményét egy nagyhatalomról nem lehet ellenségesnél rosszabbá tenni
 iaction_explain_5;Nagy hatalom vagy
 iaction_explain_6;A cél nem nagy hatalom
-state_transfer_di;Állami átadás
-state_transfer_button;Állami átadás
+state_transfer_di;Ýllami átadás
+state_transfer_button;Ýllami átadás
 state_transfer_offer;$actor$ felajánlja, hogy megadja nekünk a következő állapotokat:
 state_transfer_desc;Egy állam tulajdonjogát egy másik nemzetre ruházza át, ami hasznos lehet a játék keretein kívüli tárgyalásokhoz
 state_transfer_explain_1;A célnemzet egy játékos
 state_transfer_explain_2;Jelenleg nincs válság
 state_transfer_explain_3;Nem vagyunk alanyok
-state_transfer_explain_4;Ők nem alanyok
+state_transfer_explain_4;ŝk nem alanyok
 state_transfer_explain_5;Békében vagyunk
 state_transfer_explain_6;Több mint 1 államunk van
 cancel_ally_explain_1;Önmagaddal kötött szövetséget nem mondhatsz fel
@@ -893,7 +893,7 @@ retreat_from_battle_1;Legalább $x$ nap telt el a csata kezdete óta
 retreat_from_battle_2;Te vagy a vezető támadó vagy védő
 province_select;Kiválasztja a tartományt
 province_deselect;Megszünteti a tartomány kijelölését
-province_selector_on;TOVÁBB
+province_selector_on;TOVÝBB
 province_selector_off;KI
 province_selector;Választó
 province_immigrator;Bevándorló
@@ -918,7 +918,7 @@ chat_player_oos;$playername$ OOS-t kapott!
 save_progress;A folyamat mentése $érték$
 alice_play_pending_client;$playername$ még nincs kész
 alice_stockpile_button_0_0;"A nemzeti készletek az Ön szokásos gazdasági-üzleti tevékenységeinek fűszereként funkcionálnak, ahol az emberek azt látják, hogy a ""Ggreen"" W vonalak felfelé, a ""Rred"" W vonalak pedig lefelé haladnak, a szokásos módon én nem vagyok vonaldiagram, így többnyire észrevétlen marad :)"
-alice_stockpile_button_1_0;Ha 10-szer kattintasz, semmit nem kapsz cserébe, csak bízz bennem, ne kattints rám... ?ROR MÁS?W
+alice_stockpile_button_1_0;Ha 10-szer kattintasz, semmit nem kapsz cserébe, csak bízz bennem, ne kattints rám... ?ROR MÝS?W
 alice_stockpile_button_1_1;Értem, nos, most nem mondok semmit, mert tudom, hogy addig fogsz kattintgatni, amíg nem mondok egy „Másképpen” párbeszédet, és ez egyszerűen unalmas.
 alice_stockpile_button_1_2;Rendben, nem tudlak abbahagyni, talán így lesz?
 alice_stockpile_button_2_0;Én egy lélektelen gomb vagyok, lépj tovább
@@ -949,7 +949,7 @@ disarmed_pop;lefegyverzett nemzet tagja
 cancel_fac_construction;Törölje a gyár építését
 cancel_fac_upgrade;Törölje a gyári frissítést
 open_and_sub;Támogatás és a gyár újranyitása
-o_set_national_flag;Állítsa be a $text$ nemzeti zászlót a tulajdonos számára
+o_set_national_flag;Ýllítsa be a $text$ nemzeti zászlót a tulajdonos számára
 o_add_modifier_until;A tartomány tulajdonosa $text$-t kap $date$-ig
 o_add_modifier;A tartomány tulajdonosa $text$-t kap
 o_relations_with;A tartomány és a $text$ kapcsolat tulajdonosa
@@ -1066,7 +1066,7 @@ alice_budget_scaled_15;Háborús támogatások: ?R$érték$
 alice_budget_scaled_16;Diplomáciai érdek: ?G$érték$
 alice_budget_scaled_17;Aranytermelés: ?G$érték$
 alice_budget_scaled_net;Nettó bevétel: ?Y$value$
-alice_budget_setting_percent;Állítsa be: $perc$.
+alice_budget_setting_percent;Ýllítsa be: $perc$.
 alice_spending_land_construction;Teleképítés $név$-ban: ?R$költség$?W
 alice_spending_naval_construction;Haditengerészeti építés $név$-ban: ?R$költség$?W
 alice_spending_building_construction;Épületépítés $name$-ban: ?R$költség$?W
@@ -1109,7 +1109,7 @@ alice_factory_worker_1;Alkalmazott: ?G$x$?W
 alice_factory_worker_2;Munkanélküli: ?R$x$?W
 alice_rgo_unemployment_country_alert;A következő államokban vannak munkanélküli RGO-k:
 pop_promote_info_on_sel_2;$val$ várható változás a $who$-ban a $where$-ban a következő hónapban.
-alice_readme;?GÜdvözlünk a Katerina Engine-ben!?W\nA Katerina Engine a kedvenc viktoriánus kori videojátékod emulációja (nem szimulátora!), más szóval néhány mechanikát módosítunk, hogy az újabb játékosok számára könnyebben érthető legyen. a világ dinamikusabbá és szórakoztatóbbá tétele, a régi hibák kijavítása (például válságok esetén) és új életminőségi funkciók bevezetése.\n?GÚj funkciók!?W\n?YGlobe?W: ?Sokan szeretik?W, ?Rhated? W egyesek, kapcsolják ki, ha zavar!\n?YTech queue:?W SHIFT-Kattintson a jobb gombbal, hogy technológiákat adjon a tech sorhoz! (Jobb kattintás a sorból való kilépéshez)\n?YHazai befektetés:?W Ahelyett, hogy egyedi projektekre fektetne be, tegye meg egy lépésben\n?YTeljesítmény:?W A másodpercenkénti ketyegés (nem FPS) legalább x10-szer gyorsabb\n? YLinter:?W Lefedettségi hibákat és figyelmeztetéseket kaphat a modjaiban, könnyen elkaphatja a hibákat és az elírási hibákat\n?YMakróépítő:?W Építhet különböző összetételű egységeket makrókészítőnkkel\n?Y11 új térképmódjai:?W Vallás, erőd, foglalkoztatás, stb\n?YBuild az egész országban:?W SHIFT Kattintson a jobb gombbal az egész országban való építkezéshez!\n?GControls:?W\n?YTAB?W: Csevegőablak megnyitása\n?YESC?W: Nyissa meg a főmenüt és beállítások menü\n?YTilde (`)?W vagy ?YTilde (~)?W: Nyissa meg a konzolt\n?Élvezzétek a játékot! =^w^=?W
+alice_readme;?GÜdvözlünk a Kat's PA Engine-ben!?W\nA Kat's PA Engine a kedvenc viktoriánus kori videojátékod emulációja (nem szimulátora!), más szóval néhány mechanikát módosítunk, hogy az újabb játékosok számára könnyebben érthető legyen. a világ dinamikusabbá és szórakoztatóbbá tétele, a régi hibák kijavítása (például válságok esetén) és új életminőségi funkciók bevezetése.\n?GÚj funkciók!?W\n?YGlobe?W: ?Sokan szeretik?W, ?Rhated? W egyesek, kapcsolják ki, ha zavar!\n?YTech queue:?W SHIFT-Kattintson a jobb gombbal, hogy technológiákat adjon a tech sorhoz! (Jobb kattintás a sorból való kilépéshez)\n?YHazai befektetés:?W Ahelyett, hogy egyedi projektekre fektetne be, tegye meg egy lépésben\n?YTeljesítmény:?W A másodpercenkénti ketyegés (nem FPS) legalább x10-szer gyorsabb\n? YLinter:?W Lefedettségi hibákat és figyelmeztetéseket kaphat a modjaiban, könnyen elkaphatja a hibákat és az elírási hibákat\n?YMakróépítő:?W Építhet különböző összetételű egységeket makrókészítőnkkel\n?Y11 új térképmódjai:?W Vallás, erőd, foglalkoztatás, stb\n?YBuild az egész országban:?W SHIFT Kattintson a jobb gombbal az egész országban való építkezéshez!\n?GControls:?W\n?YTAB?W: Csevegőablak megnyitása\n?YESC?W: Nyissa meg a főmenüt és beállítások menü\n?YTilde (`)?W vagy ?YTilde (~)?W: Nyissa meg a konzolt\n?Élvezzétek a játékot! =^w^=?W
 alice_nf_controls;?Ybal gombbal?W kijelöléséhez vagy cseréjéhez\n?Yjobb gombbal?W eltávolításához
 unit_controls_tooltip_1;?YBal kattintás?W kijelölés (minden más kijelölésének törlése)\n?YSHIFT-Bal kattintás?W hozzáadás a kijelöléshez
 unit_controls_tooltip_2;?Y jobb gombbal kattintson egy tartományra? R részleges visszavonulás (? Kerékpározás/forgás? W) tartományba
@@ -1120,7 +1120,7 @@ mobilize;Mobilizálni
 cb_creation_detail_none;Kérjük, válasszon egy casus bellit, hogy elkezdhesse a gyártást $country$ ellenében.
 cb_creation_detail;Készíthetünk casus bellit $ország$ ellen ?Y$type$?W indoklással. Ez a folyamat nagyjából ?Y$napot$?W eltarthat, és a felfedezésből eredő lehetséges költségek ?R$badboy$?W hírhedtséget okoznak nekünk.
 alice_mob_controls;?Yjobb gombbal?W az újramobilizáláshoz
-alice_mw_create_1;Általános hozzáadása
+alice_mw_create_1;Ýltalános hozzáadása
 alice_mw_create_2;Add hozzá admirálist
 alice_mw_create_lpb;?YVezetői pont?
 alice_mw_create_lp;?R$x$?W ?Yleadership pont?W kell hozzá

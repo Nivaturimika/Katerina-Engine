@@ -564,7 +564,7 @@ namespace simple_fs {
 		wchar_t* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {
@@ -577,7 +577,7 @@ namespace simple_fs {
 		wchar_t* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {
@@ -592,7 +592,7 @@ namespace simple_fs {
 		native_char* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {
@@ -607,7 +607,7 @@ namespace simple_fs {
 		native_char* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {
@@ -622,7 +622,7 @@ namespace simple_fs {
 		native_char* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {
@@ -637,7 +637,7 @@ namespace simple_fs {
 		native_char* local_path_out = nullptr;
 		native_string base_path;
 		if(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &local_path_out) == S_OK) {
-			base_path = native_string(local_path_out) + NATIVE("\\Katerina Engine");
+			base_path = native_string(local_path_out) + NATIVE("\\Kat's PA Engine");
 		}
 		CoTaskMemFree(local_path_out);
 		if(base_path.length() > 0) {

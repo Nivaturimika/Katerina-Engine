@@ -281,7 +281,7 @@ namespace window {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		//glfwWindowHint(GLFW_SAMPLES, state.user_settings.antialias_level);
 		// Create window with graphics context
-		auto* window = glfwCreateWindow(params.size_x, params.size_y, "Katerina Engine", NULL, NULL);
+		auto* window = glfwCreateWindow(params.size_x, params.size_y, "Kat's PA Engine", NULL, NULL);
 		if(window == NULL) {
 			emit_error_message("Failed to create window\n", true);
 		}

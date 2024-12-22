@@ -1,6 +1,6 @@
 ## Identified issues
 
-Some issues are solved by Katerina Engine already, some aren't, feel free to add your bitter experiences below for consideration post-1.0:
+Some issues are solved by Kat's PA Engine already, some aren't, feel free to add your bitter experiences below for consideration post-1.0:
 
 - No first-hand support for dynamic localisation (without using change_region_name)
 - Trade window only supports N number of goods before it overflows
@@ -37,7 +37,7 @@ This list may or may not be out of date, it's wise to check the mods yourself fo
 
 (The links provided are the exact versions being tested).
 
-# Katerina Engine Community modding Suggestions
+# Kat's PA Engine Community modding Suggestions
 
 **General Prompt give to each modder for referance**
 Been asking for suggestion that modders might have wanted for Vic2 moddability since there is another OpenV2 attempt, idk if it will work but I want to help them where I can

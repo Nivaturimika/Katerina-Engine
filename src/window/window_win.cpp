@@ -374,7 +374,7 @@ namespace window {
 			? (WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
 			: WS_VISIBLE | WS_BORDER | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Katerina Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(NULL), &game_state);
+		game_state.win_ptr->hwnd = CreateWindowExW(0, L"project_alice_class", L"Kat's PA Engine", win32Style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, GetModuleHandleW(NULL), &game_state);
 		if(!game_state.win_ptr->hwnd)
 			return;
 
@@ -521,8 +521,8 @@ namespace window {
 	}
 
 	void emit_error_message(std::string const& content, bool fatal) {
-		static const char* msg1 = "Katerina Engine has encountered a fatal error";
-		static const char* msg2 = "Katerina Engine has encountered the following problems";
+		static const char* msg1 = "Kat's PA Engine has encountered a fatal error";
+		static const char* msg2 = "Kat's PA Engine has encountered the following problems";
 		MessageBoxA(nullptr, content.c_str(), fatal ? msg1 : msg2, MB_OK | (fatal ? MB_ICONERROR : MB_ICONWARNING));
 		if(fatal) {
 			std::exit(EXIT_FAILURE);

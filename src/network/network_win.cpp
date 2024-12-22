@@ -31,7 +31,7 @@ namespace network {
 		IStaticPortMapping* opened_port = nullptr;
 
 		BSTR proto = SysAllocString(L"TCP");
-		BSTR desc = SysAllocString(L"Katerina Engine Host");
+		BSTR desc = SysAllocString(L"Kat's PA Engine Host");
 		auto tmpwstr = text::utf8_to_native(fl_address);
 		BSTR local_host = SysAllocString(tmpwstr.c_str());
 		VARIANT_BOOL enabled = VARIANT_TRUE;

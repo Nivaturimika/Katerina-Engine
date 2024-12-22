@@ -193,14 +193,14 @@ namespace launcher {
 	//chinese
 	static std::string_view zh_localised_strings[uint8_t(string_index::count)] = {
 		"创建方案",
-		"重新创建方案",
+		"針新创建方案",
 		"工作中……",
 		"IP 地址",
-		"密码",
+		"密砝",
 		"昵称",
-		"单人游戏",
-		"多人游戏",
-		"开始游戏",
+		"坕人游戝",
+		"多人游戝",
+		"开始游戝",
 		"主机",
 		"加入",
 		"模组列表"
@@ -216,9 +216,9 @@ namespace launcher {
 		"لاعب واحد",
 		"متعددة اللاعبين",
 		"بدء اللعبة",
-		"يستضيف",
+		"يستضيٝ",
 		"ينضم",
-		"قائمة وزارة الدفاع",
+		"قائمة وزارة الدٝاع",
 	};
 	//norwegian
 	static std::string_view no_localised_strings[uint8_t(string_index::count)] = {
@@ -252,18 +252,18 @@ namespace launcher {
 	};
 	//russian
 	static std::string_view ru_localised_strings[uint8_t(string_index::count)] = {
-		"Создать сценарий",
-		"Воссоздать сценарий",
+		"Создать ѝценарий",
+		"Воѝѝоздать ѝценарий",
 		"Работающий",
-		"айпи адрес",
+		"айпи адреѝ",
 		"Пароль",
-		"Псевдоним",
+		"Пѝевдоним",
 		"Один игрок",
 		"Мультиплеер",
 		"Начать игру",
-		"Хозяин",
-		"Присоединиться",
-		"Список модов",
+		"Хозѝин",
+		"Приѝоединитьѝѝ",
+		"Спиѝок модов",
 	};
 	//polish
 	static std::string_view pl_localised_strings[uint8_t(string_index::count)] = {
@@ -282,18 +282,18 @@ namespace launcher {
 	};
 	//bulgarian
 	static std::string_view bg_localised_strings[uint8_t(string_index::count)] = {
-		"Създайте сценарий",
-		"Пресъздайте сценарий",
+		"Създайте ѝценарий",
+		"Преѝъздайте ѝценарий",
 		"Работи",
-		"IP адрес",
+		"IP адреѝ",
 		"Парола",
-		"Псевдоним",
+		"Пѝевдоним",
 		"Един играч",
 		"Мултиплейър",
 		"Започни игра",
 		"Домакин",
-		"Присъединяване",
-		"Мод списък",
+		"Приѝъединѝване",
+		"Мод ѝпиѝък",
 	};
 	//catalan
 	static std::string_view ca_localised_strings[uint8_t(string_index::count)] = {
@@ -318,9 +318,9 @@ namespace launcher {
 		"IP adresa",
 		"Heslo",
 		"Přezdívka",
-		"Pro jednoho hráče",
-		"Pro více hráčů",
-		"Začít hru",
+		"Pro jednoho hráĝe",
+		"Pro více hráĝů",
+		"Zaĝít hru",
 		"Hostitel",
 		"Připojit",
 		"Seznam modů"
@@ -342,14 +342,14 @@ namespace launcher {
 	};
 	//greek
 	static std::string_view el_localised_strings[uint8_t(string_index::count)] = {
-		"Δημιουργία σεναρίου",
-		"Αναδημιουργήστε το σενάριο",
-		"Εργαζόμενος",
-		"Διεύθυνση IP",
-		"Κωδικός πρόσβασης",
-		"Παρατσούκλι",
+		"Δημιουϝγία σεναϝίου",
+		"Αναδημιουϝγήστε το σενάϝιο",
+		"Εϝγαζόμενος",
+		"Διεϝθυνση IP",
+		"Κωδικός πϝόσβασης",
+		"Παϝατσοϝκλι",
 		"Μονος παιχτης",
-		"Λειτουργία για πολλούς παίκτες",
+		"Λειτουϝγία για πολλοϝς παίκτες",
 		"Ξεκίνα το παιχνίδι",
 		"Πλήθος",
 		"Συμμετοχή",
@@ -375,7 +375,7 @@ namespace launcher {
 		"צור תרחיש",
 		"ליצור מחדש תרחיש",
 		"עובד",
-		"כתובת פרוטוקול אינטרנט",
+		"כתובת פרוטוקול םינטרנט",
 		"סיסמה",
 		"כינוי",
 		"שחקן יחיד",
@@ -432,15 +432,15 @@ namespace launcher {
 	};
 	//latvian
 	static std::string_view lv_localised_strings[uint8_t(string_index::count)] = {
-		"Izveidojiet scenāriju",
-		"Atkārtoti izveidojiet scenāriju",
-		"Strādā",
+		"Izveidojiet scenĝriju",
+		"Atkĝrtoti izveidojiet scenĝriju",
+		"Strĝdĝ",
 		"IP adrese",
 		"Parole",
-		"Segvārds",
-		"Viens spēlētājs",
-		"Vairāku spēlētāju spēle",
-		"Sākt spēli",
+		"Segvĝrds",
+		"Viens spēlētĝjs",
+		"Vairĝku spēlētĝju spēle",
+		"Sĝkt spēli",
 		"Uzņēmēja",
 		"Pievienojieties",
 		"Modu saraksts"
@@ -462,16 +462,16 @@ namespace launcher {
 	};
 	//hindi
 	static std::string_view hi_localised_strings[uint8_t(string_index::count)] = {
-		"परिदृश्य बनाएँ",
-		"परिदृश्य फिर से बनाएँ",
-		"कार्य कर रहा है",
+		"परिदृशढ़य बनाझझ",
+		"परिदृशढ़य फिर से बनाझझ",
+		"कारढ़य कर रहा है",
 		"आईपी पता",
-		"पासवर्ड",
+		"पासवरढ़ड",
 		"उपनाम",
-		"एकल खिलाड़ी",
-		"मल्टीप्लेयर",
-		"खेल शुरू करें",
-		"होस्ट",
+		"झकल खिलाड़ी",
+		"मलढ़टीपढ़लेयर",
+		"खेल शढ़रू करें",
+		"होसढ़ट",
 		"जॉइन करें",
 		"मॉड सूची"
 	};
@@ -479,12 +479,12 @@ namespace launcher {
 	static std::string_view vi_localised_strings[uint8_t(string_index::count)] = {
 		"Tạo kịch bản",
 		"Kịch bản tái tạo",
-		"Đang làm việc",
-		"Địa chỉ IP",
+		"ĝang làm việc",
+		"ĝịa chỉ IP",
 		"Mật khẩu",
 		"Tên nick",
 		"Người chơi đơn",
-		"Nhiều người chơi",
+		"Nhiờu người chơi",
 		"Bắt đầu trò chơi",
 		"Chủ nhà",
 		"Tham gia",
@@ -492,33 +492,33 @@ namespace launcher {
 	};
 	//armenian
 	static std::string_view hy_localised_strings[uint8_t(string_index::count)] = {
-		"Ստեղծեք սցենար",
-		"Վերստեղծեք սցենարը",
+		"՝տեղծեք ս֝ենար",
+		"Վերստեղծեք ս֝ենարը",
 		"Աշխատանքային",
-		"IP հասցե",
+		"IP հաս֝ե",
 		"Գաղտնաբառ",
 		"Մականուն",
-		"Միայնակ խաղացող",
+		"Միայնակ խաղա֝ող",
 		"Բազմապատկիչ",
-		"Սկսել խաղը",
+		"՝կսել խաղը",
 		"Հյուրընկալող",
 		"Միանալ",
-		"Mod ուցակ"
+		"Mod ու֝ակ"
 	};
 	//ukrainian
 	static std::string_view uk_localised_strings[uint8_t(string_index::count)] = {
-		"Створити сценарій",
-		"Сценарій огляду",
+		"Створити ѝценарій",
+		"Сценарій оглѝду",
 		"Працює",
-		"IP - адреса",
+		"IP - адреѝа",
 		"Пароль",
 		"Прізвище",
 		"Один гравець",
 		"Мультиплеєр",
 		"Почніть гру",
-		"Господар",
+		"Гоѝподар",
 		"З'єднувати",
-		"Список мод"
+		"Спиѝок мод"
 	};
 	static std::string_view* localised_strings = &en_localised_strings[0];
 
@@ -1342,7 +1342,7 @@ static GLfloat global_square_left_flipped_data[16] = { 0.0f, 0.0f, 1.0f, 1.0f, 0
 
 		launcher::ogl::render_textured_rect(launcher::ogl::color_modification::none, 0, 0, int32_t(base_width), int32_t(base_height), bg_tex.get_texture_handle(), ui::rotation::upright, false);
 
-		launcher::ogl::render_new_text("Katerina Engine", launcher::ogl::color_modification::none, 83, 5, 26, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
+		launcher::ogl::render_new_text("Kat's PA Engine", launcher::ogl::color_modification::none, 83, 5, 26, launcher::ogl::color3f{ 255.0f / 255.0f, 230.0f / 255.0f, 153.0f / 255.0f }, fonts[1]);
 
 		// bottom right corner
 		std::string version_text = "v" + std::to_string(sys::scenario_file_version);
@@ -1993,7 +1993,7 @@ int WINAPI wWinMain(
 	launcher::m_hwnd = CreateWindowEx(
 		0,
 		L"alice_launcher_class",
-		L"Launch Katerina Engine",
+		L"Launch Kat's PA Engine",
 		WS_VISIBLE | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

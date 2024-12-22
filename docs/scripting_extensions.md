@@ -301,7 +301,7 @@ custom_tooltip = {
 
 - **Version**: 0.1.0
 - **Scopes**: Any
-- **Comments**: True if playing on Katerina Engine, False if not
+- **Comments**: True if playing on Kat's PA Engine, False if not
 
 ### `all_war_countries = { ... }`
 
