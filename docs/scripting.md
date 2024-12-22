@@ -457,6 +457,7 @@
 	- [Verifying](#verifying)
 	- [Notes](#notes)
 	- [Invalid trigger behaviour](#invalid-trigger-behaviour)
+	- [Order for variably named triggers](#order-for-variably-named-triggers)
 
 <!-- /TOC -->
 
@@ -4168,3 +4169,16 @@ Note that the following have special behaviour:
 
 - `has_province_modifier`: Behaves as `always = no`
 - `has_country_modifier`: Behaves as `always = yes`
+
+## Order for variably named triggers
+
+Triggers which depend on the name of an object (such as `artisans = 99`), have to be parsed in the following order (first match, break from the "matcher"). So if an invention is named `aaa` and a issue is named `aaa` the issue comes first.
+
+- issue options
+- issues
+- reforms
+- technologies
+- inventions
+- ideologies
+- pop types
+- commodities
