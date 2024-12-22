@@ -1,6 +1,6 @@
 # Kat's PA Engine
 
-Kat's PA Engine is a continuation / rewrite of the Project Alice codebase (an open source "retro clone" of Victoria 2). But more geared towards a purist audience. If you do prefer a "different" flavour of Victoria 2, feel free to checkout [Project Alice](https://github.com/schombert/Project-Alice/) too!
+Kat's PA Engine is a fork of the Project Alice codebase (an open source "retro clone" of Victoria 2). But more geared towards a purist audience. If you do prefer a "different" flavour of Victoria 2, feel free to checkout [Project Alice](https://github.com/schombert/Project-Alice/) too!
 
 Join us on [discord](https://discord.gg/3WNyk7SWvf).
 
