@@ -416,6 +416,14 @@ namespace map {
 		for(const auto& v1 : shaders) { // 3 dimensional array
 			for(const auto program : v1) {
 				if(program) {
+					GLuint p_shaders[32];
+					GLsizei p_count = 0;
+					glGetAttachedShaders(program, 100, &p_count, p_shaders);
+					while(p_count --> 0) {
+						glDetachShader(program, p_shaders[p_count]);
+						glDeleteShader(p_shaders[p_count]);
+					}
+
 					glDeleteProgram(program);
 				}
 			}

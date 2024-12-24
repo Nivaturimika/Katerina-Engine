@@ -269,16 +269,25 @@ namespace ogl {
 		glDeleteShader(lib_f_shader);
 		return program;
 	error_exit:
-		if(v_shader)
-			glDeleteShader(v_shader);
-		if(f_shader)
-			glDeleteShader(f_shader);
-		if(lib_v_shader)
-			glDeleteShader(lib_v_shader);
-		if(lib_f_shader)
-			glDeleteShader(lib_f_shader);
-		if(program)
+		if(program) {
 			glDeleteProgram(program);
+		}
+		if(v_shader) {
+			glDetachShader(program, v_shader);
+			glDeleteShader(v_shader);
+		}
+		if(f_shader) {
+			glDetachShader(program, f_shader);
+			glDeleteShader(f_shader);
+		}
+		if(lib_v_shader) {
+			glDetachShader(program, lib_v_shader);
+			glDeleteShader(lib_v_shader);
+		}
+		if(lib_f_shader) {
+			glDetachShader(program, lib_f_shader);
+			glDeleteShader(lib_f_shader);
+		}
 		return 0;
 	}
 
@@ -455,8 +464,9 @@ namespace ogl {
 
 		reports::write_debug("Deinitializing MSAA\n");
 		state.open_gl.msaa_enabled = false;
-		if(state.open_gl.msaa_shader_program)
+		if(state.open_gl.msaa_shader_program) {
 			glDeleteProgram(state.open_gl.msaa_shader_program);
+		}
 		if(state.open_gl.msaa_texture)
 			glDeleteTextures(1, &state.open_gl.msaa_texture);
 		if(state.open_gl.msaa_interbuffer)

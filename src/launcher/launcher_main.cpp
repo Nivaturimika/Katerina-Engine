@@ -1028,7 +1028,6 @@ namespace launcher {
 
 		glDeleteShader(v_shader);
 		glDeleteShader(f_shader);
-
 		return return_value;
 	}
 
