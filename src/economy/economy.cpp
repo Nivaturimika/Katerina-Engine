@@ -1117,8 +1117,8 @@ namespace economy {
 				continue;
 			// Province land constructions
 			auto plcr = state.world.nation_get_province_land_construction(n);
-			if(plcr.begin() != plcr.end()) {
-				auto c = *(plcr.begin());
+			for(auto c : plcr) {
+				//auto c = *(plcr.begin());
 				auto const& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 				auto& current_purchased = c.get_purchased_goods();
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
@@ -1137,8 +1137,8 @@ namespace economy {
 			}
 			// Province naval constructions
 			auto pncr = p.get_province().get_province_naval_construction();
-			if(pncr.begin() != pncr.end()) {
-				auto c = *(pncr.begin());
+			for(auto c : pncr) {
+				//auto c = *(pncr.begin());
 				auto const& base_cost = state.military_definitions.unit_base_definitions[c.get_type()].build_cost;
 				auto& current_purchased = c.get_purchased_goods();
 				for(uint32_t i = 0; i < commodity_set::set_size; ++i) {
